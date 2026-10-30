@@ -40,8 +40,7 @@ import {
   SpriteMaterial,
   Vector2,
   Vector3,
-  WebGLRenderer
-} from "three"
+  WebGLRenderer, Matrix4, Ray } from "three"
 import type { Material, Texture } from "three"
 import { ExposureAccumulation } from "./ExposureAccumulation.js"
 import {
@@ -6342,13 +6341,25 @@ export class SceneRenderer {
    * hover tooltip says. The ballast, a rail, a mast or a wire hit, the line is the one whose centre line is nearest (see RailwaySystem.lineAt);
    * the ground in front of it (the side of a cutting, a hill) hides it, as it hides a star.
    */
+  /** How high over the ground a ray may still meet a railway line: its masts and contact wires, with room to spare. */
+  private static readonly RAILWAY_PICK_ABOVE_M = 15
+
   pickRailwayAt(ndcX: number, ndcY: number): { line: RailwayLine, distanceM: number, contactM?: number } | undefined {
     const system = this.railwaySystem
     if (!system || system.count === 0) return undefined
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const ray = this.raycaster.ray
+    // Only a ray that may meet a line is tried against its triangles (see RailwaySystem.mayMeet).
+    system.group.updateMatrixWorld()
+    const localRay = new Ray().copy(ray).applyMatrix4(new Matrix4().copy(system.group.matrixWorld).invert())
+    const toWorld = system.group.matrixWorld
+    const groundAt = (x: number, z: number) => {
+      const world = new Vector3(x, 0, z).applyMatrix4(toWorld)
+      return this.groundYUnder(world.x, world.z) - toWorld.elements[13]
+    }
+    if (!system.mayMeet(localRay.origin, localRay.direction, groundAt, SceneRenderer.RAILWAY_PICK_ABOVE_M)) return undefined
     const hit = SceneRenderer.firstSolid(this.raycaster.intersectObject(system.group, true))
     if (!hit) return undefined
-    const ray = this.raycaster.ray
     if (this.terrainMesh && this.groundBlocks(ray.origin, ray.direction, hit.distance - SceneRenderer.RAILWAY_GROUND_MARGIN_M, UFO_OCCLUSION_MIN_DISTANCE_M)) return undefined
     const local = system.group.worldToLocal(hit.point.clone())
     const line = system.lineAt(local.x, local.z)

@@ -722,6 +722,44 @@ export class SceneElement extends HTMLElement {
     return undefined
   }
 
+  /** The light last found where a ghost's light is, by the cell of the picture it is in, and when: see lightOfGhost. */
+  private readonly ghostLights = new Map<string, { light: ScenePick | null, atMs: number }>()
+  /** How long a light found for a ghost is kept: a still pointer over a playing scene asks again several times a second. */
+  private static readonly GHOST_LIGHT_KEPT_MS = 1000
+
+  /**
+   * The light at a point where a ghost's light is: the picture is brightest there, which a lamp's small head, or a light seen as its glare,
+   * may only nearly cover. A shining lamp of the decor close to it first, which is cheap to find and what most ghosts are of; else what the
+   * pointer would find there or a few pixels round (the Moon, a body), each such look costing milliseconds, so few of them; else a lamp of
+   * the decor further off, too far to be hit at all; a star last, the pointer being generous with stars and a lamp's head small. Kept a
+   * moment for the same cell of the picture: looking up to 81 points round it at every hover cost 26 ms, a frozen frame or two.
+   */
+  private lightOfGhost(ndcX: number, ndcY: number): ScenePick | null {
+    const canvas = this.ufoElement.canvasElement
+    const step = { x: 8 / Math.max(1, canvas.clientWidth), y: 8 / Math.max(1, canvas.clientHeight) }
+    const key = `${Math.round(ndcX / step.x)}:${Math.round(ndcY / step.y)}`
+    const now = performance.now()
+    const kept = this.ghostLights.get(key)
+    if (kept && now - kept.atMs < SceneElement.GHOST_LIGHT_KEPT_MS) return kept.light
+    let light: ScenePick | undefined = this.shiningDecorNear(ndcX, ndcY, 2 * Math.max(step.x, step.y))
+    let star: ScenePick | undefined
+    if (!light) {
+      for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+        const found = this.pickAt(ndcX + dx * step.x, ndcY + dy * step.y, false)
+        if (found?.kind === "star") star ??= found
+        else if (found) {
+          light = found
+          break
+        }
+      }
+    }
+    light ??= this.shiningDecorNear(ndcX, ndcY, 6 * Math.max(step.x, step.y))
+    light ??= star
+    if (this.ghostLights.size > 256) this.ghostLights.clear()
+    this.ghostLights.set(key, { light: light ?? null, atMs: now })
+    return light ?? null
+  }
+
   /**
    * The ghost of the lens under a point of the picture (see SceneRenderer.pickGhostAt), named by what it is (a ghost, a halo, a double) and
    * by the light that makes it, as the pointer would name that light; with Alt why it is there and where, against its light.
@@ -730,27 +768,7 @@ export class SceneElement extends HTMLElement {
     const hit = this.sceneRenderer.pickGhostAt(ndcX, ndcY)
     if (!hit) return undefined
     const texts = this.naming.names?.ghostTooltip ?? GHOST_TOOLTIP
-    // The light is where the picture is brightest, which a lamp's small head, or a light seen as its glare, may only nearly cover: looked for
-    // a few pixels round it too.
-    const canvas = this.ufoElement.canvasElement
-    const step = { x: 8 / Math.max(1, canvas.clientWidth), y: 8 / Math.max(1, canvas.clientHeight) }
-    // Nearest first, out to some 30 pixels; a star only when nothing else is there, the pointer being generous with stars and a lamp's
-    // head small.
-    const offsets: [number, number][] = []
-    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) offsets.push([dx, dy])
-    offsets.sort((a, b) => Math.hypot(...a) - Math.hypot(...b))
-    let light: ScenePick | undefined, star: ScenePick | undefined
-    for (const [dx, dy] of offsets) {
-      const found = this.pickAt(hit.source.x + dx * step.x, hit.source.y + dy * step.y, false)
-      if (found?.kind === "star") star ??= found
-      else if (found) {
-        light = found
-        break
-      }
-    }
-    // A light of the decor too far to be hit at all: the nearest of those that shine whose outline on the screen is within reach.
-    light ??= this.shiningDecorNear(hit.source.x, hit.source.y, 6 * Math.max(step.x, step.y))
-    light ??= star
+    const light = this.lightOfGhost(hit.source.x, hit.source.y) ?? undefined
     // A star's label carries its magnitude and height: its name is what comes before them.
     const lightName = (light?.kind === "star" ? light.name.split(" — ")[0] : light?.name) ?? texts.unnamed
     const ghost = hit.ghost

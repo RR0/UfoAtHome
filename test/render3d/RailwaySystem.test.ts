@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { Mesh } from "three"
+import { Mesh, Raycaster, Vector3 } from "three"
 import { RailwaySystem } from "../../src/render3d/RailwaySystem.js"
 import { localMetersToGeo } from "../../src/render3d/terrain/GeoProjection.js"
 import type { RailwayLine } from "../../src/render3d/terrain/RailwayProvider.js"
@@ -148,5 +148,27 @@ describe("RailwaySystem", () => {
     system.set([line({}, [5000, 0], [5100, 0])], ORIGIN.lat, ORIGIN.lng, () => 0, 900)
     expect(system.count).toBe(0)
     expect(system.group.children).toHaveLength(0)
+  })
+  it("tells a ray that cannot meet a line from one that may, and never misses one the triangles are met by", () => {
+    const system = new RailwaySystem()
+    system.set([line({ electrification: "overhead" }, [-100, 0], [100, 0])], ORIGIN.lat, ORIGIN.lng, () => 0)
+    const eye = new Vector3(0, 1.6, 50)
+    const flat = () => 0
+    // Down at the line, up over it into the sky, and away from it.
+    expect(system.mayMeet(eye, new Vector3(0, -0.03, -1).normalize(), flat, 15)).toBe(true)
+    expect(system.mayMeet(eye, new Vector3(0, 0.5, -1).normalize(), flat, 15)).toBe(false)
+    expect(system.mayMeet(eye, new Vector3(0, -0.03, 1).normalize(), flat, 15)).toBe(false)
+    // Whatever the triangles are met by, it may meet.
+    const raycaster = new Raycaster()
+    let met = 0
+    for (let i = 0; i < 400; i++) {
+      // Aimed between the ballast and the contact wire fifty metres off, across and along the line.
+      const direction = new Vector3(Math.sin(i * 2.399) * 1.2, -0.04 + 0.14 * Math.abs(Math.sin(i * 0.731)), -1).normalize()
+      raycaster.set(eye, direction)
+      if (raycaster.intersectObject(system.group, true).length === 0) continue
+      met++
+      expect(system.mayMeet(eye, direction, flat, 15)).toBe(true)
+    }
+    expect(met).toBeGreaterThan(10)
   })
 })

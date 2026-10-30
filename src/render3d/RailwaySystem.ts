@@ -275,6 +275,37 @@ export class RailwaySystem {
     return best?.line
   }
 
+  /**
+   * Whether a ray, in the group's own frame, may meet a line at all: its trace on the ground passing within reach of a line's centre, and
+   * the ray there no higher over the ground than `aboveM` (what a line, its masts and wires stand to). What spares a pointer far from any
+   * line, or in the sky over one, from being tried against every triangle of them (some 165 000 near a crossroads of the Beauce, 7 ms a
+   * hover). `groundAt` is the ground's height under a point of that frame.
+   */
+  mayMeet(origin: { x: number, y: number, z: number }, direction: { x: number, y: number, z: number }, groundAt: (x: number, z: number) => number, aboveM: number): boolean {
+    const flat = Math.hypot(direction.x, direction.z)
+    // Straight down or up: the trace is a point, whatever is under it.
+    if (flat < 1e-6) return this.lineAt(origin.x, origin.z) !== undefined
+    const ux = direction.x / flat, uz = direction.z / flat
+    const reach = RailwaySystem.LINE_REACH_M
+    for (const { centre } of this.laid) {
+      for (let i = 0; i < centre.length - 1; i++) {
+        const a = centre[i], b = centre[i + 1]
+        // The point of the segment nearest the trace, and how far along the trace that is (on the ground, metres).
+        for (const along of [0, 0.5, 1]) {
+          const px = a.x + (b.x - a.x) * along, pz = a.z + (b.z - a.z) * along
+          const s = (px - origin.x) * ux + (pz - origin.z) * uz
+          if (s < 0) continue
+          const off = Math.abs((px - origin.x) * uz - (pz - origin.z) * ux)
+          const half = Math.hypot(b.x - a.x, b.z - a.z) / 2
+          if (off > reach + half) continue
+          const height = origin.y + direction.y * (s / flat)
+          if (height <= groundAt(px, pz) + aboveM) return true
+        }
+      }
+    }
+    return false
+  }
+
   /** The height of a line's contact wire over the rail, metres: undefined for a line that has none (see catenary). */
   contactHeightM(line: RailwayLine): number | undefined {
     if (line.electrification !== "overhead" || line.kind === "subway" || line.kind === "funicular") return undefined
