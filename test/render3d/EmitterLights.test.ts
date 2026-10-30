@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest"
-import { readdirSync } from "node:fs"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { DirectionalLight, Group, PointLight, Vector3 } from "three"
 import { EmitterLights } from "../../src/render3d/EmitterLights.js"
 
-const render3d = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "render3d")
+/** Every file of the renderer, by name, without loading any (see Vite's import.meta.glob). */
+const render3d = Object.keys(import.meta.glob("../../src/render3d/*.ts")).map(file => file.split("/").pop()!)
 
 describe("EmitterLights", () => {
   it("knows, for every system that draws, how its light reaches the scene", () => {
     // What gives out light lights what is round it, whatever it is: a system that draws something and says nothing of its light is how a
     // lantern let go from a terrace came to leave the terrace dark. A new system fails here until it says.
-    const systems = readdirSync(render3d).filter(file => /(System|Effect|Field)\.ts$/.test(file)).map(file => file.replace(/\.ts$/, ""))
+    const systems = render3d.filter(file => /(System|Effect|Field)\.ts$/.test(file)).map(file => file.replace(/\.ts$/, ""))
     const unsaid = systems.filter(system => !(system in EmitterLights.SYSTEMS))
     expect(unsaid).toEqual([])
     const gone = Object.keys(EmitterLights.SYSTEMS).filter(system => !systems.includes(system))
