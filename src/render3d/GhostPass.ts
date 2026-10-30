@@ -344,9 +344,20 @@ export class GhostPass {
               float radius = max(uBlur[i] + abs(k) * uBrightRadius, 1.5 / uSize.y);
               // Faded at the picture's edge as every light's ghosts are (see below).
               float brightFade = max(2.0 * uBlur[i] * uSize.y / abs(k), 2.0) / uSize.y;
-              float inside = smoothstep(radius, 0.8 * radius, length(away));
+              // A ghost of the glass is the image of the aperture, so the polygon of its blades when there are any — as shaped draws it,
+              // turned the same way. This disc is most of what a sun's ghost is: drawn round, it left every ghost round through a lens
+              // whose six blades put six spikes on the same Sun. Its light is spread over the polygon's area rather than the circle's.
+              float reach = length(away);
+              float area = 1.0;
+              if (uKind[i] < 0.5 && uBlades >= 3.0) {
+                float sector = 6.28318531 / uBlades;
+                float theta = atan(away.y, away.x) - (k < 0.0 ? 3.14159265 : 0.0);
+                reach *= cos(mod(theta - uBladeAngle, sector) - sector * 0.5) / cos(sector * 0.5);
+                area = 0.5 * uBlades * sin(sector) / 3.14159265;
+              }
+              float inside = smoothstep(radius, 0.8 * radius, reach);
               sum += GhostPass_edgeFade(uBright, brightFade, uSize) * uTint[i] * uShare[i] * uBrightFlux * inside
-                / (3.14159265 * 0.81 * radius * radius);
+                / (3.14159265 * 0.81 * area * radius * radius);
             }
             // Where in the picture the light that lands here as this ghost came from.
             vec2 from = 0.5 + (vUv - 0.5 - uOffset[i]) / k;
