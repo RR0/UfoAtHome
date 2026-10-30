@@ -125,7 +125,7 @@ describe("CloudField.iceAlphaAt", () => {
     // stripes combed through a sky that is, in a photo, one continuous milky sheet. Walk across the
     // fibres (along z on the deck's plane) and count, for every clear point, whether the sky is
     // still clear a fibre's width (25 units) to either side. 67% of them were lanes; what is left
-    // is the ragged edge of the broad gaps, frayed by the fibres on purpose (ICE_FRAY).
+    // is the ragged edge of the broad gaps (ICE_FRAY).
     const height = 1273
     let clear = 0
     let lanes = 0
@@ -144,7 +144,7 @@ describe("CloudField.iceAlphaAt", () => {
       }
     }
     expect(clear).toBeGreaterThan(100)
-    expect(lanes / clear).toBeLessThan(0.25)
+    expect(lanes / clear).toBeLessThan(0.1)
   })
 
 })
