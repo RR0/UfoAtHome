@@ -4695,7 +4695,10 @@ export class SceneRenderer {
         // Drawn as light, then finished with the lens's ghosts over it (see GhostPass).
         this.exposureSubjectBounds = []
         this.renderOnce(ghosts.frame)
-        ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture())
+        // A pose is shown from its film (see presentExposure), started just below: developing this single instant as well was shown for no
+        // frame, and left the picture a pick reads back holding it rather than what is shown, an instant without the pose's light, where
+        // the ghost a still pointer named was not found and its name went out at every frame of a playing pose.
+        if (!this.developingExposure) ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture())
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
         this.renderOnce()
@@ -5625,6 +5628,14 @@ export class SceneRenderer {
    * The ghost of the lens under a point of the picture, and where the light that makes it is (see GhostPass.pickAt) — what a reader pointing
    * at a red disc in the sky is pointing at, and what it is the ghost of. None for an eye, or where no ghost shows.
    */
+  /**
+   * Whether the ghosts of the picture can be read back now round a point (see GhostPass.holdsPictureAt): when not, what a pick says of them
+   * there is not known.
+   */
+  ghostsReadableAt(ndcX: number, ndcY: number): boolean {
+    return this.ghostPass?.holdsPictureAt(this.renderer, ndcX, ndcY) ?? false
+  }
+
   pickGhostAt(ndcX: number, ndcY: number): GhostHit | undefined {
     if (!this.ghostPass || !this.ghostOptics.ghosts.length) return undefined
     return this.ghostPass.pickAt(this.renderer, ndcX, ndcY, this.ghostOptics, EYE_UNIFORMS.uMediumExposure.value)

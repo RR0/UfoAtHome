@@ -49,6 +49,13 @@ export class GhostPass {
   /** What a ghost has to show on the screen to be pointed at, in the medium's response (0 black, 1 white): faint, but seen. */
   private static readonly VISIBLE_RESPONSE = 0.03
 
+  /**
+   * Whether a picture has been developed since its storage was last made (see resize): what a pick reads back. While a scene plays, the
+   * picture's resolution follows what the device can draw (see AdaptiveResolution), and in the moment between a resize and the next picture
+   * a pick read an empty picture and found no ghost, which put out the one the pointer was naming.
+   */
+  readable = false
+
   /** Where a single picture is drawn before its ghosts are laid over it: its light and its overlays, unfinished. */
   readonly frame: UnfinishedFrame
   /** The picture's light, with its mipmaps: what the ghosts are read from. At half the picture's size: the sharpest ghost is several pixels
@@ -405,6 +412,7 @@ export class GhostPass {
    */
   develop(renderer: WebGLRenderer, source: UnfinishedFrame, optics: LensOptics, gain = 1, bright?: BrightSource): void {
     const previous = renderer.getRenderTarget()
+    this.readable = true
     this.copyMaterial.uniforms.uSource.value = source.scene.texture
     this.copyMaterial.uniforms.uGain.value = gain
     this.draw(renderer, this.copyMaterial, this.mips)
@@ -479,6 +487,17 @@ export class GhostPass {
   }
 
   /**
+   * Whether the picture a pick reads back holds a picture at all round a point, in normalised device coordinates: anything but black. A
+   * night sky is never black to the last bit; a picture not developed yet is. While a pose plays it is made again at every frame, and read
+   * between two of those it was black, and every ghost under the pointer was taken to have gone.
+   */
+  holdsPictureAt(renderer: WebGLRenderer, ndcX: number, ndcY: number): boolean {
+    if (!this.readable) return false
+    const window = this.window(renderer, Math.round((ndcX + 1) / 2 * this.mips.width), Math.round((ndcY + 1) / 2 * this.mips.height), 4)
+    return window !== undefined && window.mean > 0
+  }
+
+  /**
    * How much of the glass a drop covers at a point of the picture, in normalised device coordinates, 0 to 1: read back from the last picture
    * developed, where the layer of the ghosts keeps it (see develop). On a hover only.
    */
@@ -540,6 +559,8 @@ export class GhostPass {
 
   resize(width: number, height: number): void {
     const w = Math.max(1, width), h = Math.max(1, height)
+    // Its storage made again at another size holds nothing until the next picture is developed into it (see readable).
+    if (this.mips.width !== Math.ceil(w / 2) || this.mips.height !== Math.ceil(h / 2)) this.readable = false
     this.frame.scene.setSize(w, h)
     this.frame.overlay.setSize(w, h)
     this.mips.setSize(Math.ceil(w / 2), Math.ceil(h / 2))

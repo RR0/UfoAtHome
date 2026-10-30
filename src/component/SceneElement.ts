@@ -521,6 +521,7 @@ export class SceneElement extends HTMLElement {
    * steps aside (hides its own tooltip) rather than duplicating that lookup. */
   private readonly handlePointerMove = (event: PointerEvent) => {
     this.lastHover = { clientX: event.clientX, clientY: event.clientY, altKey: event.altKey }
+    this.ghostMissedSinceMs = undefined
     // At once, then at most once more per frame shown, for where the pointer last was: a mouse reports several moves a frame, and what is
     // under it may be read back from the picture, which waits for the picture being drawn to be done.
     // Alt pressed or let go asks something else of the same point (see detail): that is answered at once.
@@ -536,6 +537,32 @@ export class SceneElement extends HTMLElement {
       if (this.hoverPending && this.lastHover) this.hoverAt(this.lastHover)
       this.hoverPending = false
     })
+  }
+
+  /** Since when the picture, read, has not shown the ghost under the still pointer while playing, if it has not (see ghostStillUnder). */
+  private ghostMissedSinceMs?: number
+  /** How long a ghost named under a still pointer is kept while playing though it is not found there: see ghostStillUnder. */
+  private static readonly GHOST_KEPT_MS = 600
+
+  /**
+   * Whether what is under a still pointer over a playing scene is to be asked again: yes when a ghost is found there, or when none has been
+   * for a while. While a long pose plays, the picture its ghosts are read from is made again at each frame, a few instants at a time, and at
+   * another size when the device lags (see AdaptiveResolution): a ghost that has not moved is now and then not found in it for a few tenths
+   * of a second, and its name went out the moment the pointer stood on it. A ghost that has truly gone is let go after GHOST_KEPT_MS.
+   */
+  private ghostStillUnder(event: { clientX: number, clientY: number }, now: number): boolean {
+    const rect = this.ufoElement.canvasElement.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return true
+    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    const ndcY = 1 - ((event.clientY - rect.top) / rect.height) * 2
+    // Read between two pictures, nothing is known: neither found nor gone.
+    if (!this.sceneRenderer.ghostsReadableAt(ndcX, ndcY)) return false
+    if (this.sceneRenderer.pickGhostAt(ndcX, ndcY)) {
+      this.ghostMissedSinceMs = undefined
+      return true
+    }
+    this.ghostMissedSinceMs ??= now
+    return now - this.ghostMissedSinceMs > SceneElement.GHOST_KEPT_MS
   }
 
   /** The frame the next hover waits for, if one does, and whether the pointer moved meanwhile (see handlePointerMove). */
@@ -568,6 +595,9 @@ export class SceneElement extends HTMLElement {
     }
     const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1
     const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1)
+    // A ghost named while the picture is being made again (see SceneRenderer.ghostsReadableAt) stays named: nothing is known of it until
+    // the picture is there, and it used to go out the moment the pointer stood on it.
+    if (!this.ghostPath.hasAttribute("hidden") && !this.sceneRenderer.ghostsReadableAt(ndcX, ndcY)) return
     // With Alt, what the pointer is on includes the drops on the glass: a wet glass would otherwise answer for everything behind it.
     const pick = this.pickAt(ndcX, ndcY, true, event.altKey)
     if (pick) this.showHoverTooltip(event, event.altKey && pick.detail ? pick.detail() : pick.name)
@@ -1047,7 +1077,7 @@ export class SceneElement extends HTMLElement {
       const now = performance.now()
       if (this.lastHover && !this.ghostPath.hasAttribute("hidden") && now - this.lastPlayingHoverMs >= SceneElement.PLAYING_HOVER_MS) {
         this.lastPlayingHoverMs = now
-        this.hoverAt(this.lastHover)
+        if (this.ghostStillUnder(this.lastHover, now)) this.hoverAt(this.lastHover)
       }
     }
     // What the player laid over the picture from a body was measured before the body moved.
