@@ -27,6 +27,11 @@ export interface ScatteredSkyState {
    */
   readonly umbra?: { readonly share: readonly number[]; readonly tint: readonly [number, number, number] }
   readonly moon: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number; readonly phaseAngleDeg: number }
+  /**
+   * The brightest source in the sky that is neither the Sun nor the Moon, when there is one bright enough to light the air: a bolide, a
+   * re-entry. Its magnitude is above the air, as theirs are.
+   */
+  readonly flare?: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
 }
 
 /** The colours the rest of the scene takes from the sky: its ambient light, and the air's — all of it
@@ -63,7 +68,13 @@ export interface SkyAmbient {
  * Rhijn's factor for a layer ninety kilometres up) and dimmed by the air in front of it. And a fourth
  * when the recording states one: the towns' lamps scattered back by the low air (see
  * NightSkyBrightness.artificialNanolamberts), which unlike the airglow is also the AIR's light, and so
- * part of the airlight laid over the distance. What an eye
+ * part of the airlight laid over the distance. And a fifth when something far and bright is in the sky
+ * (ScatteredSkyState.flare): its own sky, the same scattering again laid out round it. The Chelyabinsk
+ * superbolide, brighter than the Sun at 30 km up, turned a sunrise sky to day for the seconds it burned,
+ * and every dashcam filmed the sky lighting up, not only the ground. Tens of kilometres up, it is above
+ * almost all the air that scatters its light, so it lights that air as a source at infinity does; that
+ * its light is a meteor's and not the Sun's spectrum is not modelled (the tables fold in the Sun's).
+ * What an eye
  * adapted to that sky makes of the sum is EyeAdaptation's business, done here per pixel.
  *
  * The eye's adaptation is set by the sky itself: the log-average luminance of the upper hemisphere,
@@ -121,6 +132,9 @@ export class ScatteredSky {
         uMoonAzimuth: { value: new Vector2(0, -1) },
         uMoonScale: { value: 0 },
         uSunScale: { value: 1 },
+        uFlareView: { value: this.tables.flareViewTexture },
+        uFlareAzimuth: { value: new Vector2(0, -1) },
+        uFlareScale: { value: 0 },
         uUmbraGlow: { value: 0 },
         uUmbraExcess: { value: new Array<number>(ScatteredSky.UMBRA_AZIMUTHS).fill(0) },
         uUmbraTint: { value: new Vector3(0, 1, 0) },
@@ -151,6 +165,9 @@ export class ScatteredSky {
         uniform vec2 uMoonAzimuth;
         uniform float uMoonScale;
         uniform float uSunScale;
+        uniform sampler2D uFlareView;
+        uniform vec2 uFlareAzimuth;
+        uniform float uFlareScale;
         uniform float uUmbraGlow;
         uniform float uUmbraExcess[${ScatteredSky.UMBRA_AZIMUTHS}];
         uniform vec3 uUmbraTint;
@@ -211,6 +228,7 @@ export class ScatteredSky {
         void main() {
           vec3 dir = normalize(vDirection);
           vec4 light = uSunScale * fetchView(uSunView, viewUv(dir, uSunAzimuth)) + uMoonScale * fetchView(uMoonView, viewUv(dir, uMoonAzimuth));
+          if (uFlareScale > 0.0) light += uFlareScale * fetchView(uFlareView, viewUv(dir, uFlareAzimuth));
           if (dir.y > 0.0 && uUmbraGlow > 0.0) {
             // The day sky's own horizon, at a quarter of the way round from the Sun, as the glow's measure: the
             // light that comes from lit air beyond the Moon's shadow, a hundred kilometres off.
@@ -332,29 +350,57 @@ export class ScatteredSky {
       uniforms.uUmbraRefUv.value.set(reference.u, reference.v)
     }
     uniforms.uObserverRadius.value = AtmosphereProfile.GROUND_RADIUS_M + Math.max(state.altitudeM, 2)
+    const flare = state.flare
+    const flareScale = flare ? ScatteredSky.flareScaleOf(flare.magnitude) : 0
+    uniforms.uFlareScale.value = flareScale
+    if (flare) uniforms.uFlareAzimuth.value.copy(ScatteredSky.azimuthVector(flare.azimuthDeg))
     const redrawn = key !== this.drawnKey
+    // Its own view, drawn again only when it has climbed or sunk enough to light the air differently: a bolide crosses tens of degrees
+    // in seconds, and its brightness and azimuth alone are uniforms.
+    const flareRedrawn = flare !== undefined && (redrawn || this.drawnFlareAltitude === undefined
+      || Math.abs(flare.altitudeDeg - this.drawnFlareAltitude) > ScatteredSky.FLARE_REDRAW_DEG)
+    if (flareRedrawn) {
+      this.tables.renderFlareView(state.altitudeM, flare.altitudeDeg)
+      this.drawnFlareAltitude = flare.altitudeDeg
+      if (!redrawn) void this.readBack()
+    }
+    if (!flare) this.drawnFlareAltitude = undefined
     if (redrawn) {
       this.tables.renderSkyViews(state.altitudeM, state.sun.altitudeDeg, state.moon.altitudeDeg)
       const first = !this.hasViews
       this.hasViews = true
       this.drawnKey = key
-      if (first && !this.ambientColours) this.adaptFromViews(this.tables.readSkyViewNow("sun"), this.tables.readSkyViewNow("moon"), state)
+      if (first && !this.ambientColours) {
+        this.adaptFromViews(this.tables.readSkyViewNow("sun"), this.tables.readSkyViewNow("moon"), state, flare ? this.tables.readSkyViewNow("flare") : undefined)
+      }
       // And the asynchronous read after it in every case: it is the one that cannot come back empty,
       // and it is cheap to have the first frame's adaptation confirmed a frame later.
       void this.readBack()
     }
     // A Sun that has dimmed or come back without moving (an eclipse) changes no key above, and the
     // views it is drawn from are the same: only what the eye makes of them is stale.
-    if (sunScale !== this.drawnSunScale || glow !== this.drawnGlow) {
+    if (sunScale !== this.drawnSunScale || glow !== this.drawnGlow || flareScale !== this.drawnFlareScale) {
       this.drawnSunScale = sunScale
       this.drawnGlow = glow
-      if (this.views && !redrawn) this.adaptFromViews(this.views.sun, this.views.moon, state)
+      this.drawnFlareScale = flareScale
+      // A flare whose view was just drawn again is adapted to when that view is read back.
+      if (this.views && !redrawn && !flareRedrawn) this.adaptFromViews(this.views.sun, this.views.moon, state, this.views.flare)
     }
     this.onChange()
   }
 
   private drawnSunScale = 1
   private drawnGlow = 0
+  private drawnFlareScale = 0
+  /** The altitude the flare's view was last drawn for, degrees; undefined when there is no flare. */
+  private drawnFlareAltitude?: number
+  /** How far a flare climbs or sinks, degrees, before its view is drawn again: its sky changes little over a degree. */
+  static readonly FLARE_REDRAW_DEG = 1
+
+  /** A flare's sky, as a share of the Sun's for the same height: how much fainter or brighter it is, above the air. */
+  static flareScaleOf(magnitude: number): number {
+    return 10 ** (-0.4 * (magnitude - ScatteredSky.SUN_MAGNITUDE))
+  }
   /** The day sky's own zenith under this Sun, cd/m², once the views are known: what an absolute floor is a share of. */
   private dayZenithY?: number
 
@@ -405,9 +451,11 @@ export class ScatteredSky {
     this.reading = true
     let failed = false
     try {
-      const [sun, moon] = await Promise.all([this.tables.readSkyView("sun"), this.tables.readSkyView("moon")])
+      const withFlare = this.state?.flare !== undefined
+      const [sun, moon, flare] = await Promise.all([this.tables.readSkyView("sun"), this.tables.readSkyView("moon"),
+        withFlare ? this.tables.readSkyView("flare") : Promise.resolve(undefined)])
       const state = this.state
-      if (state) this.adaptFromViews(sun, moon, state)
+      if (state) this.adaptFromViews(sun, moon, state, state.flare ? flare : undefined)
     } catch {
       // The context was lost under the read: a card scrolled out of a page of many skies gives its
       // context back (see SceneRenderer.releaseContext) while the read it had asked for is still on
@@ -439,7 +487,7 @@ export class ScatteredSky {
     const factor = luminance / this.clearAdaptation
     if (Math.abs(Math.log(factor / this.surroundingsFactor)) < 0.05) return false
     this.surroundingsFactor = factor
-    if (this.views && this.state) this.adaptFromViews(this.views.sun, this.views.moon, this.state)
+    if (this.views && this.state) this.adaptFromViews(this.views.sun, this.views.moon, this.state, this.views.flare)
     else this.applyAdaptation(this.clearAdaptation * factor)
     return true
   }
@@ -453,11 +501,12 @@ export class ScatteredSky {
   private surroundingsFactor = 1
   /** What the clear sky alone would adapt an eye to, cd/m². */
   private clearAdaptation = 0
-  private views?: { sun: Float32Array, moon: Float32Array }
+  private views?: { sun: Float32Array, moon: Float32Array, flare?: Float32Array }
 
-  private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState): void {
-    this.views = { sun, moon }
+  private adaptFromViews(sun: Float32Array, moon: Float32Array, state: ScatteredSkyState, flareView?: Float32Array): void {
+    this.views = { sun, moon, flare: flareView }
     const moonScale = 10 ** (-0.4 * (state.moon.magnitude - ScatteredSky.SUN_MAGNITUDE))
+    const flare = flareView && state.flare ? { view: flareView, scale: ScatteredSky.flareScaleOf(state.flare.magnitude), azimuthDeg: state.flare.azimuthDeg } : undefined
     // What the zenith of this Sun's day sky is: what an absolute floor at totality is a share of.
     const zenith = AtmosphereTables.skyViewUv(state.altitudeM, 0, 0)
     this.dayZenithY = ScatteredSky.bilinear(sun, zenith.u, zenith.v)[1]
@@ -476,6 +525,8 @@ export class ScatteredSky {
       const moonUv = AtmosphereTables.skyViewUv(state.altitudeM, zenith, ScatteredSky.azimuthBetween(azimuthDeg, state.moon.azimuthDeg))
       const s = ScatteredSky.bilinear(sun, sunUv.u, sunUv.v)
       const m = ScatteredSky.bilinear(moon, moonUv.u, moonUv.v)
+      const flareUv = flare && AtmosphereTables.skyViewUv(state.altitudeM, zenith, ScatteredSky.azimuthBetween(azimuthDeg, flare.azimuthDeg))
+      const f = flare && flareUv ? ScatteredSky.bilinear(flare.view, flareUv.u, flareUv.v) : undefined
       const glow = withAirglow && altitudeDeg > 0 ? ScatteredSky.airglowFactor(altitudeDeg) : 0
       const towns = altitudeDeg > 0 ? NightSkyBrightness.artificialShape(altitudeDeg) : 0
       // The ring of lit air beyond the Moon's shadow, at totality: the day sky's horizon, three thousandths of it, the colour of a long path of air.
@@ -483,7 +534,8 @@ export class ScatteredSky {
         ? ScatteredSky.excessAt(umbra.excess, azimuthDeg) * Math.exp(-altitudeDeg / ScatteredSky.UMBRA_GLOW_SCALE_DEG)
         : 0
       const fromUmbra = (c: number): number => !umbraReference || !umbra ? 0 : umbraGlow * (c < 3 ? umbraReference[1] * umbra.tint[c] : umbraReference[3])
-      return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns + fromUmbra(c)) as [number, number, number, number]
+      const fromFlare = (c: number): number => flare && f ? flare.scale * f[c] : 0
+      return [0, 1, 2, 3].map(c => sunScale * s[c] + moonScale * m[c] + airglow[c] * glow + artificial[c] * towns + fromUmbra(c) + fromFlare(c)) as [number, number, number, number]
     }
     // The eye adapts to the upper hemisphere, weighted by solid angle, in log.
     let logSum = 0

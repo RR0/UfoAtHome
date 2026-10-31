@@ -4102,7 +4102,8 @@ export class SceneRenderer {
         azimuthDeg: astronomy.moon.azimuthDeg,
         magnitude: astronomy.moon.magnitude,
         phaseAngleDeg: NightSkyBrightness.phaseAngleOf(astronomy.moon.phase.illuminatedFraction)
-      }
+      },
+      flare: this.skyFlare
     }
   }
 
@@ -4169,6 +4170,7 @@ export class SceneRenderer {
       (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
     // Its heads light the ground, as the Moon does, through the air and the cloud between.
     this.emitterLights.set("reentries", [], views.map(view => this.farEmitterOf(view.head, view.magnitude)).filter(emitter => emitter !== undefined))
+    this.refreshSkyFlare()
     // And dazzle the eye as a star or the Moon does (see Veil): a superbolide brighter than the Sun was a few dots without it.
     const glared = new Set<string>()
     for (const view of views) {
@@ -4591,6 +4593,7 @@ export class SceneRenderer {
     this.meteorSystem.update(t)
     // A bright one lights the ground, as the Moon does, for the second it lasts.
     this.emitterLights.set("meteors", [], this.meteorSystem.heads.map(head => this.farEmitterOf(head, head.magnitude)).filter(emitter => emitter !== undefined))
+    this.refreshSkyFlare()
   }
 
   /** What something far up gives the observer's ground (see EmitterLights): its direction, and its light through the air and the cloud,
@@ -4600,7 +4603,22 @@ export class SceneRenderer {
     const scale = Math.max(this.relativeScale, 1e-30)
     const arriving = this.arrivingIlluminance(position, magnitude, this.cloudTransmission(position))
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, 1)
-    return { direction: new Vector3(x, y, z), lux: [arriving[0] / scale, arriving[1] / scale, arriving[2] / scale] }
+    return {
+      direction: new Vector3(x, y, z),
+      lux: [arriving[0] / scale, arriving[1] / scale, arriving[2] / scale],
+      sky: { altitudeDeg: position.altitudeDeg, azimuthDeg: position.azimuthDeg, magnitude }
+    }
+  }
+
+  /** The far emitter the sky is lit with now, if any (see EmitterLights.brightestInSky). */
+  private skyFlare?: FarEmitter["sky"]
+
+  /** Lights the sky with the brightest far emitter, when it has changed: a bolide turning the morning to day (see ScatteredSky). */
+  private refreshSkyFlare(): void {
+    const flare = this.emitterLights.brightestInSky
+    if (flare === this.skyFlare || (!flare && !this.skyFlare)) return
+    this.skyFlare = flare
+    if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
   }
 
   /**

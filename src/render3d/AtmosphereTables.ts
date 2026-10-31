@@ -45,6 +45,9 @@ import { VisibleSpectrum } from "../engine/atmosphere/Spectrum.js"
  * by hand — float textures have no guaranteed filtering. A device without float render targets gets
  * no tables at all, and the scene keeps its old gradient (see `supported`).
  */
+/** The sources a sky view is drawn for: the Sun, the Moon, and a third, far and bright (see renderFlareView). */
+export type SkyViewSource = "sun" | "moon" | "flare"
+
 interface SharedTables {
   /** Four attachments of half floats, as their raw sixteen bits. */
   readonly transmittance: Uint16Array[]
@@ -78,6 +81,7 @@ export class AtmosphereTables {
   private readonly multiple: WebGLRenderTarget
   private readonly sunView: WebGLRenderTarget
   private readonly moonView: WebGLRenderTarget
+  private readonly flareView: WebGLRenderTarget
   private readonly scene = new Scene()
   private readonly camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
   private readonly quad: Mesh
@@ -132,6 +136,7 @@ export class AtmosphereTables {
       })
     this.sunView = view()
     this.moonView = view()
+    this.flareView = view()
     const uniforms = AtmosphereTables.mediumUniforms()
     const tables = (this.tableUniforms = {
       uT0: { value: this.transmittance.textures[0] },
@@ -177,6 +182,11 @@ export class AtmosphereTables {
    * by how much fainter the Moon is. */
   get moonViewTexture(): Texture {
     return this.moonView.texture
+  }
+
+  /** The same again for a third source, far and bright, that is neither (a bolide, see renderFlareView). */
+  get flareViewTexture(): Texture {
+    return this.flareView.texture
   }
 
   /** Whether both air-only tables are complete and the sky views can be drawn from them. */
@@ -338,6 +348,20 @@ export class AtmosphereTables {
   }
 
   /**
+   * Redraws the third view, for a source at `altitudeDeg` that is neither the Sun nor the Moon: a bolide tens of kilometres up is above
+   * almost all the air that scatters its light, as they are, and lights the sky as a source at infinity would (see ScatteredSky).
+   */
+  renderFlareView(altitudeM: number, altitudeDeg: number): void {
+    if (!this.ready) return
+    const previousTarget = this.renderer.getRenderTarget()
+    const uniforms = this.skyViewMaterial.uniforms
+    uniforms.uObserverRadius.value = AtmosphereProfile.GROUND_RADIUS_M + Math.max(altitudeM, 2)
+    uniforms.uSourceMu.value = Math.sin((altitudeDeg * Math.PI) / 180)
+    this.draw(this.skyViewMaterial, this.flareView)
+    this.renderer.setRenderTarget(previousTarget)
+  }
+
+  /**
    * Where in a sky view a line of sight lives: `zenithAngleRad` from straight up, `azimuthRad` round
    * from the source's own azimuth (0 to π). The inverse of the layout SKY_VIEW_FRAGMENT draws, and the
    * twin of the lookup the sky dome's shader does.
@@ -373,8 +397,8 @@ export class AtmosphereTables {
    * its sky can be shown adapted — the asynchronous read took three hundred milliseconds to come back
    * there, most of the wait for the first frame.
    */
-  readSkyViewNow(source: "sun" | "moon"): Float32Array {
-    const target = source === "sun" ? this.sunView : this.moonView
+  readSkyViewNow(source: SkyViewSource): Float32Array {
+    const target = this.viewOf(source)
     const buffer = new Float32Array(target.width * target.height * 4)
     // An asynchronous read-back (the tables being shared, above) can leave its pixel-pack buffer bound,
     // and a synchronous read then fails with nothing but a console warning, handing back zeros: the
@@ -385,8 +409,8 @@ export class AtmosphereTables {
     return buffer
   }
 
-  async readSkyView(source: "sun" | "moon"): Promise<Float32Array> {
-    const target = source === "sun" ? this.sunView : this.moonView
+  async readSkyView(source: SkyViewSource): Promise<Float32Array> {
+    const target = this.viewOf(source)
     const buffer = new Float32Array(target.width * target.height * 4)
     await this.renderer.readRenderTargetPixelsAsync(target, 0, 0, target.width, target.height, buffer)
     return buffer
@@ -399,10 +423,15 @@ export class AtmosphereTables {
     this.multiple.dispose()
     this.sunView.dispose()
     this.moonView.dispose()
+    this.flareView.dispose()
     this.transmittanceMaterial.dispose()
     this.multipleMaterial.dispose()
     this.skyViewMaterial.dispose()
     this.quad.geometry.dispose()
+  }
+
+  private viewOf(source: SkyViewSource): WebGLRenderTarget {
+    return source === "sun" ? this.sunView : source === "moon" ? this.moonView : this.flareView
   }
 
   private draw(material: RawShaderMaterial, target: WebGLRenderTarget): void {

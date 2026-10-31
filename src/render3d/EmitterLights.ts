@@ -22,6 +22,8 @@ export interface FarEmitter {
   readonly direction: Vector3
   /** The illuminance it gives at the observer, lux, per channel, through the air already. */
   readonly lux: readonly [number, number, number]
+  /** Where it is in the sky and its magnitude above the air: what the sky is lit with (see ScatteredSkyState.flare). */
+  readonly sky: { readonly altitudeDeg: number; readonly azimuthDeg: number; readonly magnitude: number }
 }
 
 /** The box a far light's shadow is drawn in, as the Sun's is: half its side and half its depth, metres, the bias, and the map's side. */
@@ -47,6 +49,8 @@ export interface FarShadow {
  *
  * The pools are a fixed number of lights, built once, the first time anything glows, and never taken out of the scene again but put out:
  * three.js compiles every material for the number of lights, and a light that came and went would recompile the scene each time.
+ *
+ * The brightest far emitter also lights the sky (see brightestInSky and ScatteredSky): the air scatters its light as it does the Sun's.
  *
  * The brightest far emitter casts a shadow, as the Sun does: a far light is a directional one, so its shadow is the scene drawn once more,
  * not six times as a point light's is — and a bolide brighter than the Sun swings every shadow round as it crosses the sky (Chelyabinsk). Its
@@ -152,6 +156,21 @@ export class EmitterLights {
         light.intensity = luminance * perLux
       })
     }
+  }
+
+  /**
+   * How bright, magnitude above the air, a far emitter has to be to light the sky: past it, its sky is fainter than a moonless night's
+   * own glow, and drawing it again as it moves would cost a frame something for nothing to see.
+   */
+  static readonly SKY_LIGHTING_MAGNITUDE = -8
+
+  /** The brightest far emitter, as the sky sees it, if it is bright enough to light it (see SKY_LIGHTING_MAGNITUDE). */
+  get brightestInSky(): FarEmitter["sky"] | undefined {
+    let brightest: FarEmitter["sky"] | undefined
+    for (const emitter of [...this.farBy.values()].flat()) {
+      if (emitter.sky.magnitude < (brightest?.magnitude ?? EmitterLights.SKY_LIGHTING_MAGNITUDE)) brightest = emitter.sky
+    }
+    return brightest
   }
 
   /** The lights, for what has to leave them out (none until something glowed). */

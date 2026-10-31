@@ -50,11 +50,23 @@ describe("EmitterLights", () => {
   it("lights the ground from far emitters as the Moon does, from their direction, with their illuminance", () => {
     const scene = new Group()
     const lights = new EmitterLights(scene, () => 2)
-    lights.set("meteors", [], [{ direction: new Vector3(0, 1, 0), lux: [0.01, 0.01, 0.01] }])
+    lights.set("meteors", [], [{ direction: new Vector3(0, 1, 0), lux: [0.01, 0.01, 0.01], sky: { altitudeDeg: 90, azimuthDeg: 0, magnitude: -12 } }])
     lights.cast(new Vector3())
     const directional = lights.all.filter((light): light is DirectionalLight => light instanceof DirectionalLight)
     expect(directional).toHaveLength(EmitterLights.FAR)
     expect(directional[0].intensity).toBeCloseTo(0.02, 9)
     expect(directional[0].position.y).toBeGreaterThan(0)
+  })
+
+  it("lights the sky with the brightest far emitter, when it is bright enough to", () => {
+    const lights = new EmitterLights(new Group(), () => 1)
+    const far = (magnitude: number) => ({ direction: new Vector3(0, 1, 0), lux: [1, 1, 1] as const, sky: { altitudeDeg: 40, azimuthDeg: 220, magnitude } })
+    lights.set("meteors", [], [far(-3)])
+    // A shower's meteor lights nothing of the sky an eye could see.
+    expect(lights.brightestInSky).toBeUndefined()
+    lights.set("reentries", [], [far(-20), far(-29)])
+    expect(lights.brightestInSky?.magnitude).toBe(-29)
+    lights.set("reentries", [])
+    expect(lights.brightestInSky).toBeUndefined()
   })
 })
