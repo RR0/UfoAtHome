@@ -9,6 +9,8 @@ import {
   ZeroFactor,
   BackSide,
   Box3,
+  Frustum,
+  Sphere,
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
@@ -41,6 +43,7 @@ import {
   SpriteMaterial,
   Vector2,
   Vector3,
+  Vector4,
   WebGLRenderer, Matrix4, Ray } from "three"
 import type { Material, Texture } from "three"
 import { ExposureAccumulation } from "./ExposureAccumulation.js"
@@ -5604,28 +5607,112 @@ export class SceneRenderer {
 
   private renderPhenomenaPass(camera: PerspectiveCamera): void {
     if (!this.phenomena.any) return
+    // Drawn only through the part of the picture the phenomena cover, by a camera that sees no more than it: the decor is drawn again here for
+    // its depth alone, and through the whole picture that was the whole decor a second time, for a shape of a few pixels (Maffliers' thousand
+    // trees: 32 ms of the card's 70 at a Retina ratio). What is outside that narrow view is culled before it is drawn.
+    camera.updateMatrixWorld()
+    const box = this.phenomena.screenBox(camera)
+    if (box && (box.x0 > 1 || box.x1 < -1 || box.y0 > 1 || box.y1 < -1)) return
+    const narrowed = box ? this.narrowTo(camera, box) : undefined
+    if (narrowed) camera = narrowed.camera
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
     this.renderer.clearDepth()
+    // Only what may stand in front of a phenomenon: in the narrow view, and nearer than the furthest of them. The trees behind a shape over a
+    // wood hide nothing of it, and a decor drawn for nothing is not free: a second drawing into the eye's picture, after the first, cost 30 ms
+    // there (Maffliers), whatever it drew.
+    const frustum = this.phenomenaFrustum.setFromProjectionMatrix(this.phenomenaViewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse))
+    const furthestM = this.phenomena.furthestM
+    let occluders = 0
     for (const object of this.decorObjects) {
       const group = this.decorGroups.get(object.id)
+      if (!group) continue
       // A crop row is a filler laid down by the score, not a thing anybody placed (see DecorKind's
       // "crop"), and decorDistancesAt leaves it out of every crossing for the same reason: a row
       // that hid the feet of Masse's craft would be the generator deciding what he saw.
-      if (group) SceneRenderer.markDecorDepth(group, object.kind !== "crop")
+      const occludes = object.kind !== "crop" && this.mayHide(group, camera, frustum, furthestM)
+      SceneRenderer.markDecorDepth(group, occludes)
+      if (occludes) occluders++
     }
-    camera.layers.set(DECOR_DEPTH_LAYER)
-    this.scene.overrideMaterial = this.decorDepthMaterial
-    this.renderer.render(this.scene, camera)
-    this.scene.overrideMaterial = null
+    if (occluders > 0) {
+      camera.layers.set(DECOR_DEPTH_LAYER)
+      this.scene.overrideMaterial = this.decorDepthMaterial
+      this.renderer.render(this.scene, camera)
+      this.scene.overrideMaterial = null
+    }
     camera.layers.set(PHENOMENON_LAYER)
     this.renderer.render(this.scene, camera)
     camera.layers.set(0)
     this.renderer.autoClear = autoClear
     this.renderer.shadowMap.autoUpdate = shadows
+    narrowed?.restore()
   }
+
+  private readonly phenomenaFrustum = new Frustum()
+  private readonly phenomenaViewProjection = new Matrix4()
+  private readonly occluderSphere = new Sphere()
+  /** Each decor group's bounds in its own frame, and how many objects it held when they were taken: a model arrives after its group. */
+  private readonly localBounds = new WeakMap<Object3D, { sphere: Sphere, objects: number }>()
+
+  /** Whether a decor group may stand in front of a phenomenon: within the frustum, and some of it nearer than `furthestM`. */
+  private mayHide(group: Object3D, camera: PerspectiveCamera, frustum: Frustum, furthestM: number): boolean {
+    let objects = 0
+    group.traverse(() => objects++)
+    let bounds = this.localBounds.get(group)
+    if (!bounds || bounds.objects !== objects) {
+      group.updateMatrixWorld(true)
+      const box = new Box3().setFromObject(group)
+      if (box.isEmpty()) return false
+      const sphere = box.getBoundingSphere(new Sphere()).applyMatrix4(new Matrix4().copy(group.matrixWorld).invert())
+      bounds = { sphere, objects }
+      this.localBounds.set(group, bounds)
+    }
+    const sphere = this.occluderSphere.copy(bounds.sphere).applyMatrix4(group.matrixWorld)
+    if (sphere.center.distanceTo(camera.position) - sphere.radius > furthestM) return false
+    return frustum.intersectsSphere(sphere)
+  }
+
+  /**
+   * A camera that sees only a box of the picture `camera` draws (normalized device coordinates) and a few pixels round it, drawing into that
+   * part of whatever is being drawn to (a target's viewport in its pixels, or the canvas's in CSS pixels). Returns it, and what puts the
+   * viewport back.
+   */
+  private narrowTo(camera: PerspectiveCamera, box: { x0: number, y0: number, x1: number, y1: number }): { camera: PerspectiveCamera, restore: () => void } {
+    const target = this.renderer.getRenderTarget()
+    const size = target ? new Vector2(target.width, target.height) : this.renderer.getSize(new Vector2())
+    const margin = SceneRenderer.PHENOMENA_VIEW_MARGIN_PX * (target ? this.renderer.getPixelRatio() : 1)
+    const x0 = Math.max(0, Math.floor(((Math.max(-1, box.x0) + 1) / 2) * size.x - margin))
+    const y0 = Math.max(0, Math.floor(((Math.max(-1, box.y0) + 1) / 2) * size.y - margin))
+    const x1 = Math.min(size.x, Math.ceil(((Math.min(1, box.x1) + 1) / 2) * size.x + margin))
+    const y1 = Math.min(size.y, Math.ceil(((Math.min(1, box.y1) + 1) / 2) * size.y + margin))
+    const narrow = this.narrowCamera.copy(camera)
+    // A view offset is counted from the top left, a viewport from the bottom left.
+    narrow.setViewOffset(size.x, size.y, x0, size.y - y1, x1 - x0, y1 - y0)
+    narrow.updateMatrixWorld()
+    if (target) {
+      const viewport = target.viewport.clone()
+      const scissor = target.scissor.clone()
+      const test = target.scissorTest
+      target.viewport.set(x0, y0, x1 - x0, y1 - y0)
+      target.scissor.set(x0, y0, x1 - x0, y1 - y0)
+      target.scissorTest = true
+      return { camera: narrow, restore: () => { target.viewport.copy(viewport); target.scissor.copy(scissor); target.scissorTest = test } }
+    }
+    const viewport = this.renderer.getViewport(new Vector4())
+    const scissor = this.renderer.getScissor(new Vector4())
+    const test = this.renderer.getScissorTest()
+    this.renderer.setViewport(x0, y0, x1 - x0, y1 - y0)
+    this.renderer.setScissor(x0, y0, x1 - x0, y1 - y0)
+    this.renderer.setScissorTest(true)
+    return { camera: narrow, restore: () => { this.renderer.setViewport(viewport); this.renderer.setScissor(scissor); this.renderer.setScissorTest(test) } }
+  }
+
+  private readonly narrowCamera = new PerspectiveCamera()
+
+  /** How far round the phenomena their pass draws, CSS pixels: their halos and blur are inside their planes, this is only slack. */
+  private static readonly PHENOMENA_VIEW_MARGIN_PX = 4
 
   /** Writes nothing but depth — see renderPhenomenaPass. */
   private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false })

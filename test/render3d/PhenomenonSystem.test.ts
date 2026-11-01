@@ -103,6 +103,25 @@ describe("PhenomenonSystem", () => {
     expect(meshes(scene)).toHaveLength(0)
   })
 
+  it("says the part of the picture its phenomena cover, which is all their pass draws through", () => {
+    const scene = new Scene()
+    const system = new PhenomenonSystem(scene)
+    const cam = camera()
+    cam.matrixWorldInverse.copy(cam.matrixWorld).invert()
+    // A 20 px oval at the centre of a 640 px frame: a box round the centre, a few hundredths of the picture across.
+    system.set([{ sourceId: "a", shape: oval({ x: 310, y: 170 }), distanceM: 42, renderOrder: 0, hidden: false }], frame())
+    system.place(cam, pinhole(cam), screenPoint(cam))
+    const box = system.screenBox(cam)!
+    expect(box.x0).toBeLessThan(0)
+    expect(box.x1).toBeGreaterThan(0)
+    expect(box.x1 - box.x0).toBeLessThan(0.3)
+    expect(box.y1 - box.y0).toBeLessThan(0.5)
+    // Nothing standing: an empty box, and their pass draws nothing.
+    system.clear()
+    const empty = system.screenBox(cam)!
+    expect(empty.x0).toBeGreaterThan(empty.x1)
+  })
+
   it("places a plane along the ray through the shape's centre, at its distance, facing the camera", () => {
     const scene = new Scene()
     const system = new PhenomenonSystem(scene)

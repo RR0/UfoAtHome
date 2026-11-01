@@ -1,6 +1,6 @@
 import { cloudTransmissionShader } from "./VolumetricClouds.js"
 import type { VolumetricCloudLayer } from "./VolumetricClouds.js"
-import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3 } from "three"
+import { CanvasTexture, LinearFilter, Matrix4, Mesh, MeshBasicMaterial, PlaneGeometry, SRGBColorSpace, Vector3, Vector4 } from "three"
 import type { Camera, Scene } from "three"
 import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
@@ -317,6 +317,33 @@ export class PhenomenonSystem {
     for (const mesh of this.meshes.values()) if (mesh.visible) return true
     return false
   }
+
+  /**
+   * The part of the picture the standing phenomena cover through `camera`, in its normalized device coordinates (−1 to 1), or undefined when
+   * that cannot be told: a vertex beside or behind the eye, where a projection says nothing. An empty box (x0 > x1) when none is in sight.
+   */
+  screenBox(camera: Camera): { x0: number, y0: number, x1: number, y1: number } | undefined {
+    const box = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
+    const viewProjection = this.viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    const clip = this.clip
+    for (const mesh of this.meshes.values()) {
+      if (!mesh.visible) continue
+      mesh.updateMatrixWorld()
+      const positions = mesh.geometry.attributes.position
+      for (let index = 0; index < positions.count; index++) {
+        clip.set(positions.getX(index), positions.getY(index), positions.getZ(index), 1).applyMatrix4(mesh.matrixWorld).applyMatrix4(viewProjection)
+        if (clip.w <= 1e-6) return undefined
+        box.x0 = Math.min(box.x0, clip.x / clip.w)
+        box.x1 = Math.max(box.x1, clip.x / clip.w)
+        box.y0 = Math.min(box.y0, clip.y / clip.w)
+        box.y1 = Math.max(box.y1, clip.y / clip.w)
+      }
+    }
+    return box
+  }
+
+  private readonly clip = new Vector4()
+  private readonly viewProjection = new Matrix4()
 
   /** How far the furthest plane stands, metres — for the camera's far plane. */
   get furthestM(): number {
