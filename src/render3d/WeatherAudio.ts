@@ -220,6 +220,18 @@ export class WeatherAudio {
     void this.playOneShot(THUNDER_URL, 0.9)
   }
 
+  /**
+   * The bang of a fireball's detonation reaching the observer (see ReentrySighting.detonationsOf): the thunder's clap played an octave and
+   * more lower, a shock wave being a single deep blow rather than a crackling roll, at `loudness` (0 to 1).
+   */
+  playDetonation(loudness: number): void {
+    if (!this.context || this.paused) return
+    void this.playOneShot(THUNDER_URL, Math.min(1, Math.max(0, loudness)), WeatherAudio.DETONATION_RATE)
+  }
+
+  /** How much slower than the thunder's clap a detonation is played: lower, and longer. */
+  private static readonly DETONATION_RATE = 0.45
+
   /** Stops every active source and closes the AudioContext — called from SceneElement's own
    * disconnectedCallback, alongside stopTwinkle(). Bumping both tokens first discards any loop-
    * start still in flight, so a late-resolving fetch/decode can't start a new source into an
@@ -271,13 +283,14 @@ export class WeatherAudio {
     }
   }
 
-  private async playOneShot(url: string, volume: number): Promise<void> {
+  private async playOneShot(url: string, volume: number, rate = 1): Promise<void> {
     const context = this.context
     if (!context) return
     try {
       const buffer = await this.getBuffer(url)
       const source = context.createBufferSource()
       source.buffer = buffer
+      source.playbackRate.value = rate
       const gain = context.createGain()
       gain.gain.value = volume
       source.connect(gain).connect(this.output(context))

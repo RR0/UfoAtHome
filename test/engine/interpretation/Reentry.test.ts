@@ -2,7 +2,8 @@ import { describe, expect, test } from "vitest"
 import { ReentrySighting } from "../../../src/engine/interpretation/Reentry.js"
 import type { ReentryJson } from "../../../src/engine/interpretation/Reentry.js"
 
-/** Due east along the equator, 1 degree (111 km) every 15 s, at a constant 80 km. */
+/** Due east along the equator, 1 degree (111 km) every 15 s, at a constant 80 km. Its pieces shed nothing unless they say (the geometry
+ * is what most of these tests are about; see the tests of the shedding for what a piece does when it says nothing). */
 const reentry = (fragments: ReentryJson["fragments"]): ReentryJson => ({
   id: "test",
   track: [
@@ -10,7 +11,7 @@ const reentry = (fragments: ReentryJson["fragments"]): ReentryJson => ({
     { t: 15000, lat: 0, lng: 1, altitudeKm: 80 },
     { t: 30000, lat: 0, lng: 2, altitudeKm: 80 }
   ],
-  fragments
+  fragments: fragments.map(fragment => ({ sheds: [], ...fragment }))
 })
 
 describe("ReentrySighting", () => {
@@ -59,6 +60,37 @@ describe("ReentrySighting", () => {
     const again = ReentrySighting.piecesOf(reentry([{ id: "a", absoluteMagnitude: -3, sheds: [{ perS: 2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6 }] }]))
     expect(again[10].fromT).toBe(shed.fromT)
     expect(again[10].lagMsAt(later)).toBe(shed.lagMsAt(later))
+  })
+
+  test("a piece that says nothing of its break-up crumbles, and bursts at each flare of its light curve", () => {
+    const quiet = { ...reentry([]), fragments: [{ id: "a", absoluteMagnitude: -3 }] }
+    expect(ReentrySighting.shedsOf(quiet.fragments[0])).toEqual([ReentrySighting.DEFAULT_CRUMBLING])
+    expect(ReentrySighting.piecesOf(quiet).length).toBeGreaterThan(30)
+    const flaring = { absoluteMagnitude: -3, lightCurve: [{ t: 0, absoluteMagnitude: -3 }, { t: 10000, absoluteMagnitude: -6 }, { t: 20000, absoluteMagnitude: -3 }] }
+    const bursts = ReentrySighting.shedsOf(flaring).slice(1)
+    expect(bursts).toHaveLength(1)
+    expect(bursts[0].fromT).toBeLessThan(10000)
+    expect(bursts[0].untilT).toBeGreaterThan(10000)
+    // Saying none is saying none.
+    expect(ReentrySighting.shedsOf({ ...flaring, sheds: [] })).toEqual([])
+  })
+
+  test("a bright flare low enough is heard as a detonation, after the time sound takes to cover the distance", () => {
+    const low: ReentryJson = {
+      id: "fireball",
+      track: [{ t: 0, lat: 0, lng: 0, altitudeKm: 40 }, { t: 20000, lat: 0, lng: 0.5, altitudeKm: 20 }],
+      fragments: [{ absoluteMagnitude: -10, sheds: [], untilT: 15000,
+        lightCurve: [{ t: 0, absoluteMagnitude: -10 }, { t: 10000, absoluteMagnitude: -25 }, { t: 15000, absoluteMagnitude: -8 }] }]
+    }
+    const observer = { lat: 0, lng: 0.25, heightM: 0 }
+    const [bang] = ReentrySighting.detonationsOf([low], observer)
+    expect(bang.flashT).toBe(10000)
+    // 30 km up at its flare, nearly overhead: some 30 km at 0.31 km/s, a minute and a half.
+    expect(bang.t - bang.flashT).toBeCloseTo((bang.distanceKm / ReentrySighting.SOUND_KM_S) * 1000, 3)
+    expect(bang.distanceKm).toBeLessThan(31)
+    // The same flare 70 km up is not heard.
+    const high = { ...low, track: low.track.map(keyframe => ({ ...keyframe, altitudeKm: 70 })) }
+    expect(ReentrySighting.detonationsOf([high], observer)).toEqual([])
   })
 
   test("only a re-entry bright enough to bleach an eye is followed for its afterimage", () => {

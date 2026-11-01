@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Color, Group, Mesh, Points, type MeshBasicMaterial, type PointsMaterial } from "three"
+import { BufferAttribute, BufferGeometry, Color, Group, Mesh, Points, Vector3, type MeshBasicMaterial, type PointsMaterial } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
 import type { ReentryFragmentView, SkyPoint } from "../engine/interpretation/Reentry.js"
@@ -47,6 +47,8 @@ export class ReentrySystem {
   private readonly positions: Float32Array
   private readonly colors: Float32Array
   private shown = 0
+  /** The pieces drawn, each with the direction of its head and the magnitude it was drawn at: what a pointer names (see nearest). */
+  private drawn: { direction: Vector3, view: ReentryFragmentView, magnitude: number }[] = []
 
   constructor() {
     this.object.name = "reentries"
@@ -71,6 +73,26 @@ export class ReentrySystem {
     this.object.add(this.trains)
   }
 
+  /** The drawn piece nearest a direction, within `thresholdCos` of it, the brightest when several are as near: what a pointer is on. */
+  nearest(aim: Vector3, thresholdCos: number): { view: ReentryFragmentView, magnitude: number } | undefined {
+    let best: { view: ReentryFragmentView, magnitude: number } | undefined
+    let bestCos = thresholdCos
+    for (const candidate of this.drawn) {
+      const cos = candidate.direction.dot(aim)
+      if (cos > bestCos || (best && cos === bestCos && candidate.magnitude < best.magnitude)) {
+        bestCos = cos
+        best = candidate
+      }
+    }
+    return best
+  }
+
+  /** The unit direction of a point of the observer's sky, in the scene's axes (see horizontalToCartesian). */
+  private static directionOf(point: HorizontalPosition): Vector3 {
+    const { x, y, z } = horizontalToCartesian(point.altitudeDeg, point.azimuthDeg, 1)
+    return new Vector3(x, y, z)
+  }
+
   /** How many pieces are drawn — read by tests and by whatever has to know one is showing. */
   get count(): number {
     return this.shown
@@ -86,12 +108,14 @@ export class ReentrySystem {
     let vertex = 0
     let shown = 0
     const tint = new Color()
+    this.drawn = []
     for (const view of views) {
       const through = transmission(view.head)
       if (through <= 0) continue
       const magnitude = view.magnitude - 2.5 * Math.log10(through)
       if (magnitude > magnitudeLimit) continue
       shown++
+      this.drawn.push({ direction: ReentrySystem.directionOf(view.head), view, magnitude })
       tint.set(view.color)
       const brightness = magnitudeToBrightness(magnitude, magnitudeLimit)
       const { x, y, z } = horizontalToCartesian(view.head.altitudeDeg, view.head.azimuthDeg, ReentrySystem.RADIUS)

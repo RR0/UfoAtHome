@@ -105,6 +105,11 @@ export interface SceneNames {
   /** A satellite's hover tooltip: {name}, {mag}, {height}. */
   readonly satelliteTooltip: string
   /**
+   * A piece of a re-entry or of a fireball pointed at: {name} (what the recording calls it, or `reentryName`), {mag}, {height} and
+   * {distance} in km; and the same for one of the fragments it shed.
+   */
+  readonly reentryTooltip?: { name: string, piece: string, fragment: string }
+  /**
    * What is said of a rocket's plume pointed at: its name when the launch gives none, and with Alt {name}, {part} (which of what the stage
    * let go it is), {distance} from the eye and {height} in km.
    */

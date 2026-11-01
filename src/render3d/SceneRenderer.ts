@@ -4261,6 +4261,15 @@ export class SceneRenderer {
     return best && !this.groundHides(ndcX, ndcY) ? best : undefined
   }
 
+  /** The drawn piece of a re-entry or a fireball under a screen point, the same angular nearest-neighbour as pickSatelliteAt. */
+  pickReentryAt(ndcX: number, ndcY: number): { view: ReentryFragmentView, magnitude: number } | undefined {
+    if (!this.reentrySystem?.count) return undefined
+    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
+    const thresholdCos = Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180)
+    const piece = this.reentrySystem.nearest(this.raycaster.ray.direction, thresholdCos)
+    return piece && this.groundHides(ndcX, ndcY) ? undefined : piece
+  }
+
   /** The drawn satellite under a screen point, the same angular nearest-neighbour as pickStarAt. */
   pickSatelliteAt(ndcX: number, ndcY: number): SceneSatellite | undefined {
     if (!this.satelliteField?.count) return undefined

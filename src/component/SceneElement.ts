@@ -96,7 +96,7 @@ import { SkyLantern } from "../engine/interpretation/SkyLantern.js"
 import { GlassWetting, LensGhosts } from "../engine/instrument/LensGhost.js"
 import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
-import type { ReentryJson } from "../engine/interpretation/Reentry.js"
+import type { GeoPoint, ReentryDetonation, ReentryJson } from "../engine/interpretation/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
@@ -166,6 +166,7 @@ const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
 
 /** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
+const REENTRY_TOOLTIP = { name: "Re-entry", piece: "{name} — mag {mag}, {height} km up, {distance} km away", fragment: "{name}, a fragment — mag {mag}, {height} km up, {distance} km away" }
 
 /** What is said of a rocket's plume pointed at: see SceneNames.plumeTooltip. */
 const GHOST_TOOLTIP: GhostTooltipTexts = {
@@ -324,7 +325,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "reentry" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -727,6 +728,9 @@ export class SceneElement extends HTMLElement {
           .replace("{height}", Math.round(satellite.heightKm).toLocaleString())
       }
     }
+    // A burning piece of a re-entry or a fireball, or one of the fragments it shed: what the recording calls it, how bright, how high, how far.
+    const reentry = this.reentryPickAt(ndcX, ndcY)
+    if (reentry) return reentry
     // A ring, an arc or a sundog of the ice display: where the traced display has light, named for what made it.
     const optics = this.sceneRenderer.pickOpticsAt(ndcX, ndcY)
     if (optics) {
@@ -1015,6 +1019,57 @@ export class SceneElement extends HTMLElement {
     this.ghostPath.toggleAttribute("hidden", true)
     this.sceneRenderer.setCompassHovered(false)
   }
+
+  /**
+   * The detonations of the fireballs and re-entries of the recording, heard as playback reaches them (see ReentrySighting.detonationsOf):
+   * worked out again only when the re-entries or the observer's place change, and like thunder, only on an ordinary frame while playing:
+   * a seek does not set one off.
+   */
+  private hearDetonations(reentries: readonly ReentryJson[], t: number, observer: GeoPoint, withinPose: boolean): void {
+    const key = `${observer.lat.toFixed(4)},${observer.lng.toFixed(4)}`
+    // The list is made again every frame; the re-entries in it are the recording's own objects, the same while it is not edited.
+    const known = this.detonationsFor
+    if (!known || key !== known.key || reentries.length !== known.reentries.length || reentries.some((reentry, i) => reentry !== known.reentries[i])) {
+      this.detonationsFor = { reentries: [...reentries], key, detonations: reentries.length ? ReentrySighting.detonationsOf(reentries, observer) : [] }
+    }
+    const detonations = this.detonationsFor!.detonations
+    if (withinPose) return
+    const previous = this.lastDetonationT
+    this.lastDetonationT = t
+    if (previous === undefined || t < previous || t - previous > SceneElement.DETONATION_JUMP_MS || this.ufoElement.playbackState !== "playing") return
+    for (const detonation of detonations) {
+      if (detonation.t > previous && detonation.t <= t) this.weatherAudio.playDetonation(detonation.loudness)
+    }
+  }
+
+  /** What is said of the piece of a re-entry under a point of the picture (see pickAt). */
+  private reentryPickAt(ndcX: number, ndcY: number): ScenePick | undefined {
+    const picked = this.sceneRenderer.pickReentryAt(ndcX, ndcY)
+    if (!picked) return undefined
+    const texts = this.naming.names?.reentryTooltip ?? REENTRY_TOOLTIP
+    const reentry = this.detonationsFor?.reentries.find(candidate => candidate.id === picked.view.reentryId)
+    const name = (reentry?.title ? this.said.read(reentry.title) : "") || reentry?.object?.name || texts.name
+    const head = picked.view.head
+    // Its height above the ground under it, through the Earth's curvature: a piece 500 km off at 5° is some 60 km up, not 40.
+    const earthKm = 6371
+    const heightKm = Math.sqrt(earthKm ** 2 + head.distanceKm ** 2 + 2 * earthKm * head.distanceKm * Math.sin((head.altitudeDeg * Math.PI) / 180)) - earthKm
+    // A fragment shed by a piece is named after the re-entry it belongs to (see ReentrySighting.shedPieces, which numbers it under its piece).
+    const shed = picked.view.fragmentId.includes(".")
+    return {
+      kind: "reentry",
+      name: (shed ? texts.fragment : texts.piece)
+        .replace("{name}", name)
+        .replace("{mag}", picked.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
+        .replace("{height}", Math.round(heightKm).toLocaleString())
+        .replace("{distance}", Math.round(head.distanceKm).toLocaleString())
+    }
+  }
+
+  /** The detonations last worked out, and what from (see hearDetonations). */
+  private detonationsFor?: { reentries: readonly ReentryJson[], key: string, detonations: ReentryDetonation[] }
+  private lastDetonationT?: number
+  /** Longer than this between two frames is a seek, not playback: nothing it skipped over is heard. */
+  private static readonly DETONATION_JUMP_MS = 2000
 
   /** A flash has just started on screen: its thunder follows after the time sound takes to cover
    * the distance it struck at (see LightningSchedule.thunderDelayMs). Applied here, where both the
@@ -2100,6 +2155,7 @@ export class SceneElement extends HTMLElement {
     // And what they were at any earlier instant, for the eye's afterimages to be replayed after a jump (see SceneRenderer.setRetinaHistory):
     // of those bright enough to leave one only. Placing the forty pieces of a break-up at every step of a replay cost a tenth of a second at
     // every seek, for a re-entry that cannot dazzle anybody.
+    this.hearDetonations(burning, t, { lat, lng, heightM: observer.elevationM }, instant !== undefined)
     const dazzling = burning.filter(reentry => ReentrySighting.mayDazzle(reentry))
     this.sceneRenderer.setRetinaHistory(dazzling.length === 0 ? undefined : at => {
       const then = resolveObserverPoseAt(sighting, at)

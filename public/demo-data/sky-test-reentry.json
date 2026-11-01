@@ -15,6 +15,65 @@
     "es": "Un cielo de prueba para una reentrada: el lanzador de Zond 4 cayendo sobre el este de Estados Unidos el 3 de marzo de 1968 hacia las 21:45 hora del Este, visto desde Owensboro (Kentucky), uno de los lugares desde donde se informó. No es el relato de un observador: es la reentrada tal como la establecen las fuentes. Cientos de personas la vieron; William Hartmann estudió 78 informes para la comisión Condon y encontró una «formación», un cigarro con ventanas iluminadas, una nave que pasaba baja y en silencio. La trayectoria sigue la inclinación de la órbita a través de los lugares de observación; su horario, su altura y el brillo de los fragmentos se suponen, cada uno con su razón en el archivo.",
     "it": "Un cielo di prova per un rientro atmosferico: il lanciatore di Zond 4 che ricade sugli Stati Uniti orientali il 3 marzo 1968 verso le 21:45 ora dell'Est, visto da Owensboro (Kentucky), uno dei luoghi da cui fu segnalato. Non è il resoconto di un osservatore: è il rientro come lo stabiliscono le fonti. Centinaia di persone lo videro; William Hartmann studiò 78 segnalazioni per la commissione Condon e vi trovò una «formazione», un sigaro con finestre illuminate, un velivolo che passava basso e in silenzio. La traiettoria segue l'inclinazione dell'orbita attraverso i luoghi di osservazione; orario, altezza e luminosità dei pezzi sono supposti, ciascuno con la sua ragione nel file."
   },
+  "sources": [
+    {
+      "type": "book",
+      "title": "Scientific Study of Unidentified Flying Objects",
+      "authors": [
+        "William K. Hartmann"
+      ],
+      "publication": {
+        "publisher": "University of Colorado, for the US Air Force",
+        "time": "1968"
+      },
+      "index": "section VI, chapter 2"
+    },
+    {
+      "title": "Visually Observed Natural Re-entries of Earth Satellites",
+      "authors": [
+        "Ted Molczan"
+      ],
+      "publication": {
+        "time": "2025"
+      }
+    },
+    {
+      "type": "article",
+      "title": "A review of airborne observations for space debris re-entry break-up and dispersion measurements",
+      "authors": [
+        "Fabian Zander",
+        "Stefan Löhle"
+      ],
+      "url": "https://doi.org/10.1007/s12567-025-00608-9",
+      "publication": {
+        "publisher": "CEAS Space Journal",
+        "time": "2025-03-26"
+      },
+      "index": "vol. 17, pp. 1019-1030"
+    },
+    {
+      "type": "article",
+      "title": "Did I see a meteor or a reentry?",
+      "authors": [
+        "Center for Orbital and Reentry Debris Studies"
+      ],
+      "url": "https://aerospace.org/article/what-does-reentry-look-like",
+      "publication": {
+        "publisher": "The Aerospace Corporation"
+      }
+    },
+    {
+      "title": "ATV-1 reentry",
+      "authors": [
+        "ESA",
+        "NASA"
+      ],
+      "url": "https://www.youtube.com/watch?v=OhBw5yaR_SU",
+      "publication": {
+        "time": "2008-09-29"
+      }
+    }
+  ],
   "time": {
     "year": 1968,
     "month": 3,
@@ -553,32 +612,6 @@
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 1.5,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                },
-                {
-                  "fromT": 108500,
-                  "untilT": 111000,
-                  "perS": 14,
-                  "lifeS": 3.5,
-                  "magnitudeDrop": 3.5,
-                  "dropBack": 0.5,
-                  "spreadKmS": 1.5,
-                  "sinkKmS": 0.9,
-                  "trainS": 2
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each releasing hundreds of fragments with a flare of light (Hayabusa's bus: over 800 at about 68 km, some 1800 at 56.7 km; main break-ups near 78 km for the Cygnus vehicles; Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). Here one event as the stage reaches about 70 km over West Virginia: assumed. Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
-            },
             "lightCurve": {
               "value": [
                 {
@@ -595,7 +628,7 @@
                 }
               ],
               "basis": "assumed",
-              "rationale": "The flare of a break-up event (Borovicka on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)): assumed, a magnitude and a half brighter for a few seconds."
+              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each with a flare of light and hundreds of fragments (Borovicka and Watanabe on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)); the burst of pieces follows from the flare (see ReentrySighting.flareBursts). One event as the stage reaches about 70 km over West Virginia, a magnitude and a half brighter: assumed."
             }
           },
           {
@@ -621,32 +654,6 @@
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 1.2,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                },
-                {
-                  "fromT": 109500,
-                  "untilT": 112000,
-                  "perS": 14,
-                  "lifeS": 3.5,
-                  "magnitudeDrop": 3.5,
-                  "dropBack": 0.5,
-                  "spreadKmS": 1.5,
-                  "sinkKmS": 0.9,
-                  "trainS": 2
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each releasing hundreds of fragments with a flare of light (Hayabusa's bus: over 800 at about 68 km, some 1800 at 56.7 km; main break-ups near 78 km for the Cygnus vehicles; Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). Here one event as the stage reaches about 70 km over West Virginia: assumed. Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
-            },
             "lightCurve": {
               "value": [
                 {
@@ -663,7 +670,7 @@
                 }
               ],
               "basis": "assumed",
-              "rationale": "The flare of a break-up event (Borovicka on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)): assumed, a magnitude and a half brighter for a few seconds."
+              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each with a flare of light and hundreds of fragments (Borovicka and Watanabe on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)); the burst of pieces follows from the flare (see ReentrySighting.flareBursts). One event as the stage reaches about 70 km over West Virginia, a magnitude and a half brighter: assumed."
             }
           },
           {
@@ -689,32 +696,6 @@
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
             },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 1.0,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                },
-                {
-                  "fromT": 110500,
-                  "untilT": 113000,
-                  "perS": 14,
-                  "lifeS": 3.5,
-                  "magnitudeDrop": 3.5,
-                  "dropBack": 0.5,
-                  "spreadKmS": 1.5,
-                  "sinkKmS": 0.9,
-                  "trainS": 2
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each releasing hundreds of fragments with a flare of light (Hayabusa's bus: over 800 at about 68 km, some 1800 at 56.7 km; main break-ups near 78 km for the Cygnus vehicles; Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). Here one event as the stage reaches about 70 km over West Virginia: assumed. Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
-            },
             "lightCurve": {
               "value": [
                 {
@@ -731,7 +712,7 @@
                 }
               ],
               "basis": "assumed",
-              "rationale": "The flare of a break-up event (Borovicka on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)): assumed, a magnitude and a half brighter for a few seconds."
+              "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each with a flare of light and hundreds of fragments (Borovicka and Watanabe on Hayabusa, in Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)); the burst of pieces follows from the flare (see ReentrySighting.flareBursts). One event as the stage reaches about 70 km over West Virginia, a magnitude and a half brighter: assumed."
             }
           },
           {
@@ -761,21 +742,6 @@
               "value": 2.5,
               "basis": "assumed",
               "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
-            },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 0.8,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
             }
           },
           {
@@ -805,21 +771,6 @@
               "value": 2.5,
               "basis": "assumed",
               "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
-            },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 0.6,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
             }
           },
           {
@@ -849,21 +800,6 @@
               "value": 2.0,
               "basis": "assumed",
               "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
-            },
-            "sheds": {
-              "value": [
-                {
-                  "perS": 0.5,
-                  "lifeS": 4,
-                  "magnitudeDrop": 3,
-                  "dropBack": 0.3,
-                  "spreadKmS": 1.0,
-                  "sinkKmS": 0.6,
-                  "trainS": 2.5
-                }
-              ],
-              "basis": "assumed",
-              "rationale": "Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, dropping back and spreading, far more of them small than large (a power law: Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)). How many and how fast for this one: assumed."
             }
           }
         ]

@@ -92,12 +92,15 @@ export interface ReentryFragment {
   /** Its colour, as a CSS hex colour. A fire-orange when absent. */
   color?: string
   /** How long a stretch of its own past path still glows behind it, seconds: the tail observers
-   * describe. 1.5 when absent. */
+   * describe. 4 when absent (see ReentrySighting.DEFAULT_TRAIN_S). */
   trainS?: number
   /**
    * The smaller pieces it sheds as it breaks up, each of which burns, brakes and drifts away on its own (see ReentrySheds): a slow
    * crumbling over its flight, and the bursts of its break-up events, a few seconds each, when hundreds come off at once (Hayabusa's bus:
    * over 800 at about 68 km, some 1800 at 56.7 km seven seconds later; Zander & Löhle, CEAS Space Journal 2025).
+   *
+   * Absent, every piece comes apart as a burning piece does (see ReentrySighting.DEFAULT_CRUMBLING and flareBursts): a slow crumbling,
+   * and a burst at each flare of its light curve, a flare being a fragmentation. An empty list is a piece that sheds nothing.
    */
   sheds?: ReentrySheds[]
 }
@@ -163,6 +166,18 @@ export interface ReentryPiece {
   trainMs: number
 }
 
+/** A detonation of a re-entry, heard (see ReentrySighting.detonationsOf). */
+export interface ReentryDetonation {
+  reentryId: string
+  /** When it was seen, ms of the recording. */
+  flashT: number
+  /** When it is heard, ms. */
+  t: number
+  distanceKm: number
+  /** How loud, 0 to 1. */
+  loudness: number
+}
+
 /** One piece of a re-entry as an observer sees it at one instant. */
 export interface ReentryFragmentView {
   reentryId: string
@@ -192,7 +207,49 @@ export class ReentrySighting {
   /** The distance an absolute magnitude is stated at, km. */
   static readonly STANDARD_DISTANCE_KM = 100
   static readonly DEFAULT_COLOR = "#ffb347"
-  static readonly DEFAULT_TRAIN_S = 1.5
+  /**
+   * The streak behind a piece when its recording states none, seconds of its path: several, as the photographs of re-entries show (ATV-1,
+   * Jules Verne, 2008; the Falcon 9 stage over Washington, 2021) and as the Aerospace Corporation describes one: "a bright central body
+   * followed by a long, dazzling tail" (CORDS, Did I see a meteor or a reentry?).
+   */
+  static readonly DEFAULT_TRAIN_S = 4
+
+  /**
+   * How a burning piece crumbles when its recording says nothing of it: what every recorded break-up shows behind its heads, small pieces
+   * with streaks of their own, falling back and spreading, "a tight cluster of bright points all moving in the same direction at similar
+   * speeds, and all leaving streaks behind them" (Aerospace Corporation, CORDS), far more of them faint than bright (a power law of sizes,
+   * Watanabe on Hayabusa, in Zander & Löhle 2025).
+   */
+  static readonly DEFAULT_CRUMBLING: ReentrySheds = { perS: 1.2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6, trainS: 2.5 }
+
+  /**
+   * The burst of a break-up event, at a flare of a piece's light curve when its recording says nothing of its shedding: some thirty pieces in
+   * two and a half seconds round the peak, each fainter than the flare by more than they do when crumbling, braked and scattered harder.
+   * Hundreds come off a spacecraft at once (Hayabusa, in Zander & Löhle 2025); those an eye picks out are the brightest of them.
+   */
+  static readonly DEFAULT_BURST: ReentrySheds = { perS: 12, lifeS: 3.5, magnitudeDrop: 3.5, dropBack: 0.5, spreadKmS: 1.5, sinkKmS: 0.9, trainS: 2 }
+
+  /** How much brighter than its neighbours a point of a light curve must be to be a flare, magnitudes. */
+  static readonly FLARE_MAGNITUDES = 0.5
+
+  /** What a fragment sheds: what it states, or how a burning piece comes apart (see ReentryFragment.sheds). */
+  static shedsOf(fragment: ReentryFragment): ReentrySheds[] {
+    if (fragment.sheds) return fragment.sheds
+    return [ReentrySighting.DEFAULT_CRUMBLING, ...ReentrySighting.flareBursts(fragment)]
+  }
+
+  /** A burst (see DEFAULT_BURST) round each flare of a fragment's light curve: a point brighter than both its neighbours by FLARE_MAGNITUDES. */
+  static flareBursts(fragment: ReentryFragment): ReentrySheds[] {
+    const curve = fragment.lightCurve ?? []
+    const bursts: ReentrySheds[] = []
+    for (let i = 1; i < curve.length - 1; i++) {
+      const point = curve[i]
+      if (curve[i - 1].absoluteMagnitude - point.absoluteMagnitude < ReentrySighting.FLARE_MAGNITUDES) continue
+      if (curve[i + 1].absoluteMagnitude - point.absoluteMagnitude < ReentrySighting.FLARE_MAGNITUDES) continue
+      bursts.push({ ...ReentrySighting.DEFAULT_BURST, fromT: point.t - 1000, untilT: point.t + 1500 })
+    }
+    return bursts
+  }
   /** How long a piece takes to brighten when it appears and to go out when it ends, ms: a burning
    * piece flares and dies over a moment, not between two frames. A quarter of its life when that is
    * shorter. */
@@ -229,6 +286,52 @@ export class ReentrySighting {
       return brightest + nearest <= ReentrySighting.DAZZLING_MAGNITUDE
     })
   }
+
+  /**
+   * The detonations of a re-entry an observer hears, and when: each flare of a piece's light curve (a fragmentation, the energy of a part
+   * of it given up at once) and each bright piece's end, low enough for its shock to reach the ground as a bang, arriving the time sound
+   * takes to cover the distance after the flash. Chelyabinsk's break-up at 30 km was heard in the city about two and a half minutes after
+   * it was seen, and broke windows; a re-entering stage at 70 km and hundreds of kilometres is not heard at all.
+   */
+  static detonationsOf(reentries: readonly ReentryJson[], observer: GeoPoint): ReentryDetonation[] {
+    const detonations: ReentryDetonation[] = []
+    for (const reentry of reentries) {
+      reentry.fragments.forEach((fragment, index) => {
+        const piece = ReentrySighting.piecesOf(reentry).find(candidate => candidate.id === (fragment.id ?? String(index)))
+        if (!piece) return
+        const flashes = (fragment.lightCurve ?? [])
+          .filter((point, i, curve) => (i === 0 || curve[i - 1].absoluteMagnitude >= point.absoluteMagnitude)
+            && (i === curve.length - 1 || curve[i + 1].absoluteMagnitude > point.absoluteMagnitude))
+          .map(point => ({ t: point.t, magnitude: point.absoluteMagnitude }))
+        // A piece that ends bright ends in a burst: it does not fade, it goes.
+        flashes.push({ t: piece.untilT, magnitude: piece.magnitudeAt(piece.untilT) })
+        for (const flash of flashes) {
+          if (flash.magnitude > ReentrySighting.DETONATING_MAGNITUDE || flash.t < piece.fromT || flash.t > piece.untilT) continue
+          const at = ReentrySighting.pieceAt(reentry, piece, flash.t)
+          if (!at || at.heightM > ReentrySighting.AUDIBLE_BELOW_KM * 1000) continue
+          if (detonations.some(other => other.flashT === flash.t && other.reentryId === reentry.id)) continue
+          const distanceKm = ReentrySighting.seenFrom(observer, at).distanceKm
+          detonations.push({
+            reentryId: reentry.id,
+            flashT: flash.t,
+            t: flash.t + (distanceKm / ReentrySighting.SOUND_KM_S) * 1000,
+            distanceKm,
+            // Louder for a brighter flash and a nearer one: a tenth for every five magnitudes under the threshold short of full, halved
+            // with every doubling of the distance past 30 km.
+            loudness: Math.min(1, (0.3 + (ReentrySighting.DETONATING_MAGNITUDE - flash.magnitude) / 15) * Math.min(1, 30 / distanceKm))
+          })
+        }
+      })
+    }
+    return detonations.sort((a, b) => a.t - b.t)
+  }
+
+  /** The faintest flare that is a detonation heard on the ground: a fireball brighter than the full Moon many times over. */
+  static readonly DETONATING_MAGNITUDE = -12
+  /** Above this, km, a shock is too weak in air too thin to reach the ground as a bang. */
+  static readonly AUDIBLE_BELOW_KM = 50
+  /** The speed of sound along the way down, km/s: about 295 m/s in the stratosphere, 340 near the ground. */
+  static readonly SOUND_KM_S = 0.31
 
   /** The faintest a point may be and still leave an afterimage: see mayDazzle. */
   static readonly DAZZLING_MAGNITUDE = -11
@@ -301,7 +404,7 @@ export class ReentrySighting {
         trainMs: (fragment.trainS ?? ReentrySighting.DEFAULT_TRAIN_S) * 1000
       }
       pieces.push(piece)
-      ;(fragment.sheds ?? []).forEach((sheds, phase) => pieces.push(...ReentrySighting.shedPieces(piece, sheds, phase)))
+      ReentrySighting.shedsOf(fragment).forEach((sheds, phase) => pieces.push(...ReentrySighting.shedPieces(piece, sheds, phase)))
     })
     ReentrySighting.pieces.set(reentry, pieces)
     return pieces
@@ -351,9 +454,9 @@ export class ReentrySighting {
     return pieces
   }
 
-  /** How late a shed piece may burn: a little past its parent, which goes out first when it slows down, not its fragments with it. */
+  /** How late a shed piece may burn: no later than the piece it came from, whose end is where the recording says the burning stopped. */
   private static endOf(parent: ReentryPiece): number {
-    return parent.untilT + 4000
+    return parent.untilT
   }
 
   /** A number in [0, 1) from a string, the same every time (FNV-1a). */
