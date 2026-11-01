@@ -43,7 +43,6 @@ import {
   SpriteMaterial,
   Vector2,
   Vector3,
-  Vector4,
   WebGLRenderer, Matrix4, Ray } from "three"
 import type { Material, Texture } from "three"
 import { ExposureAccumulation } from "./ExposureAccumulation.js"
@@ -5607,23 +5606,20 @@ export class SceneRenderer {
 
   private renderPhenomenaPass(camera: PerspectiveCamera): void {
     if (!this.phenomena.any) return
-    // Drawn only through the part of the picture the phenomena cover, by a camera that sees no more than it: the decor is drawn again here for
-    // its depth alone, and through the whole picture that was the whole decor a second time, for a shape of a few pixels (Maffliers' thousand
-    // trees: 32 ms of the card's 70 at a Retina ratio). What is outside that narrow view is culled before it is drawn.
     camera.updateMatrixWorld()
     const box = this.phenomena.screenBox(camera)
     if (box && (box.x0 > 1 || box.x1 < -1 || box.y0 > 1 || box.y1 < -1)) return
-    const narrowed = box ? this.narrowTo(camera, box) : undefined
-    if (narrowed) camera = narrowed.camera
     const autoClear = this.renderer.autoClear
     const shadows = this.renderer.shadowMap.autoUpdate
     this.renderer.autoClear = false
     this.renderer.shadowMap.autoUpdate = false
     this.renderer.clearDepth()
-    // Only what may stand in front of a phenomenon: in the narrow view, and nearer than the furthest of them. The trees behind a shape over a
-    // wood hide nothing of it, and a decor drawn for nothing is not free: a second drawing into the eye's picture, after the first, cost 30 ms
-    // there (Maffliers), whatever it drew.
-    const frustum = this.phenomenaFrustum.setFromProjectionMatrix(this.phenomenaViewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse))
+    // Only what may stand in front of a phenomenon: within the part of the picture they cover, and nearer than the furthest of them. The trees
+    // behind a shape over a wood hide nothing of it, and a decor drawn for nothing is not free: a second drawing into the eye's picture, after
+    // the first, cost 30 ms there (Maffliers' thousand trees), whatever it drew. Only chosen through that narrow view: drawn through the
+    // camera itself, or the phenomena would be drawn through it too, blown up to the whole picture.
+    const view = box ? this.narrowTo(camera, box) : camera
+    const frustum = this.phenomenaFrustum.setFromProjectionMatrix(this.phenomenaViewProjection.multiplyMatrices(view.projectionMatrix, view.matrixWorldInverse))
     const furthestM = this.phenomena.furthestM
     let occluders = 0
     for (const object of this.decorObjects) {
@@ -5647,7 +5643,6 @@ export class SceneRenderer {
     camera.layers.set(0)
     this.renderer.autoClear = autoClear
     this.renderer.shadowMap.autoUpdate = shadows
-    narrowed?.restore()
   }
 
   private readonly phenomenaFrustum = new Frustum()
@@ -5674,44 +5669,24 @@ export class SceneRenderer {
     return frustum.intersectsSphere(sphere)
   }
 
-  /**
-   * A camera that sees only a box of the picture `camera` draws (normalized device coordinates) and a few pixels round it, drawing into that
-   * part of whatever is being drawn to (a target's viewport in its pixels, or the canvas's in CSS pixels). Returns it, and what puts the
-   * viewport back.
-   */
-  private narrowTo(camera: PerspectiveCamera, box: { x0: number, y0: number, x1: number, y1: number }): { camera: PerspectiveCamera, restore: () => void } {
-    const target = this.renderer.getRenderTarget()
-    const size = target ? new Vector2(target.width, target.height) : this.renderer.getSize(new Vector2())
-    const margin = SceneRenderer.PHENOMENA_VIEW_MARGIN_PX * (target ? this.renderer.getPixelRatio() : 1)
+  /** A camera that sees only a box of the picture `camera` draws (normalized device coordinates) and a few pixels round it: what may hide a phenomenon is chosen through it (see renderPhenomenaPass). */
+  private narrowTo(camera: PerspectiveCamera, box: { x0: number, y0: number, x1: number, y1: number }): PerspectiveCamera {
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    const margin = SceneRenderer.PHENOMENA_VIEW_MARGIN_PX * this.renderer.getPixelRatio()
     const x0 = Math.max(0, Math.floor(((Math.max(-1, box.x0) + 1) / 2) * size.x - margin))
     const y0 = Math.max(0, Math.floor(((Math.max(-1, box.y0) + 1) / 2) * size.y - margin))
     const x1 = Math.min(size.x, Math.ceil(((Math.min(1, box.x1) + 1) / 2) * size.x + margin))
     const y1 = Math.min(size.y, Math.ceil(((Math.min(1, box.y1) + 1) / 2) * size.y + margin))
     const narrow = this.narrowCamera.copy(camera)
-    // A view offset is counted from the top left, a viewport from the bottom left.
-    narrow.setViewOffset(size.x, size.y, x0, size.y - y1, x1 - x0, y1 - y0)
+    // A view offset is counted from the top left.
+    narrow.setViewOffset(size.x, size.y, x0, size.y - y1, Math.max(1, x1 - x0), Math.max(1, y1 - y0))
     narrow.updateMatrixWorld()
-    if (target) {
-      const viewport = target.viewport.clone()
-      const scissor = target.scissor.clone()
-      const test = target.scissorTest
-      target.viewport.set(x0, y0, x1 - x0, y1 - y0)
-      target.scissor.set(x0, y0, x1 - x0, y1 - y0)
-      target.scissorTest = true
-      return { camera: narrow, restore: () => { target.viewport.copy(viewport); target.scissor.copy(scissor); target.scissorTest = test } }
-    }
-    const viewport = this.renderer.getViewport(new Vector4())
-    const scissor = this.renderer.getScissor(new Vector4())
-    const test = this.renderer.getScissorTest()
-    this.renderer.setViewport(x0, y0, x1 - x0, y1 - y0)
-    this.renderer.setScissor(x0, y0, x1 - x0, y1 - y0)
-    this.renderer.setScissorTest(true)
-    return { camera: narrow, restore: () => { this.renderer.setViewport(viewport); this.renderer.setScissor(scissor); this.renderer.setScissorTest(test) } }
+    return narrow
   }
 
   private readonly narrowCamera = new PerspectiveCamera()
 
-  /** How far round the phenomena their pass draws, CSS pixels: their halos and blur are inside their planes, this is only slack. */
+  /** How far round the phenomena what may hide them is looked for, CSS pixels: their halos and blur are inside their planes, this is only slack. */
   private static readonly PHENOMENA_VIEW_MARGIN_PX = 4
 
   /** Writes nothing but depth — see renderPhenomenaPass. */
