@@ -165,15 +165,29 @@ def main():
     ]
     for fragment in fragments[:2]:
         fragment["untilT"] = assumed(last_t, end)
-    # What every photograph of a re-entry shows behind its few heads and Hartmann's "glittering tails" describe: a cloud of small pieces
-    # breaking off, each with its own streak, dropping back and drifting into a narrow fan (see ReentrySheds). Rates and sizes assumed.
-    breakup = ("Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show "
-               "each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. "
-               "How many, how bright and how fast are not given for this one: assumed.")
+    # What every recorded break-up shows behind its few heads, and Hartmann's "glittering tails": small pieces coming off all along, and in
+    # the bursts of break-up events, each with its streak, dropping back and spreading (see ReentrySheds). Rates and sizes assumed.
+    zl = "Zander & Löhle, A review of airborne observations for space debris re-entry break-up and dispersion, CEAS Space Journal 17 (2025)"
+    crumble_why = ("Hartmann: 'glittering tails'. Every recorded break-up trails its heads with small burning fragments, each with its streak, "
+                   "dropping back and spreading, far more of them small than large (a power law: " + zl + "). How many and how fast for this one: assumed.")
+    burst_why = ("Hartmann: 'observers near the end of the trajectory saw more'. A break-up comes apart in events of a few seconds, each releasing "
+                 "hundreds of fragments with a flare of light (Hayabusa's bus: over 800 at about 68 km, some 1800 at 56.7 km; main break-ups "
+                 "near 78 km for the Cygnus vehicles; " + zl + "). Here one event as the stage reaches about 70 km over West Virginia: assumed.")
+    flare_why = "The flare of a break-up event (Borovicka on Hayabusa, in " + zl + "): assumed, a magnitude and a half brighter for a few seconds."
     trains = "A streak of several seconds of path behind each piece, as the photographs show: assumed."
-    for fragment, per_s in zip(fragments, (3.2, 2.6, 2.0, 1.6, 1.2, 1.0)):
-        fragment["trainS"] = assumed(round(fragment["trainS"]["value"] if isinstance(fragment["trainS"], dict) else fragment["trainS"], 1) * 2.5, trains)
-        fragment["sheds"] = assumed({"perS": per_s, "lifeS": 5, "magnitudeDrop": 2.5, "dropBack": 0.3, "spreadKmS": 1.0, "sinkKmS": 0.6, "trainS": 2.5}, breakup)
+    crumble = {"a": 1.5, "b": 1.2, "c": 1.0, "d": 0.8, "e": 0.6, "f": 0.5}
+    for index, fragment in enumerate(fragments):
+        train = fragment["trainS"]["value"] if isinstance(fragment["trainS"], dict) else fragment["trainS"]
+        fragment["trainS"] = assumed(round(train * 2.5, 2), trains)
+        sheds = [{"perS": crumble[fragment["id"]], "lifeS": 4, "magnitudeDrop": 3, "dropBack": 0.3, "spreadKmS": 1.0, "sinkKmS": 0.6, "trainS": 2.5}]
+        if fragment["id"] in "abc":
+            start = late_from - 2000 + index * 1000
+            sheds.append({"fromT": start, "untilT": start + 2500, "perS": 14, "lifeS": 3.5, "magnitudeDrop": 3.5, "dropBack": 0.5,
+                          "spreadKmS": 1.5, "sinkKmS": 0.9, "trainS": 2})
+            base = fragment["absoluteMagnitude"]["value"]
+            fragment["lightCurve"] = assumed([{"t": start - 500, "absoluteMagnitude": base}, {"t": start + 800, "absoluteMagnitude": round(base - 1.5, 2)},
+                                              {"t": start + 4500, "absoluteMagnitude": base}], flare_why)
+        fragment["sheds"] = assumed(sheds, burst_why + " " + crumble_why if fragment["id"] in "abc" else crumble_why)
     reentry = {
         "id": "zond-iv",
         "title": {"en": "Re-entry of a piece of Zond 4's launcher", "fr": "Rentrée d'une pièce du lanceur de Zond 4",

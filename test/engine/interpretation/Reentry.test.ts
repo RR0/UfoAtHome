@@ -34,7 +34,7 @@ describe("ReentrySighting", () => {
   })
 
   test("a piece sheds smaller ones that break off where it is, then drop back, sink and go out, the same at every replay", () => {
-    const shedding = reentry([{ id: "a", absoluteMagnitude: -3, sheds: { perS: 2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6 } }])
+    const shedding = reentry([{ id: "a", absoluteMagnitude: -3, sheds: [{ perS: 2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6 }] }])
     const pieces = ReentrySighting.piecesOf(shedding)
     // Thirty seconds at two a second, and the piece itself.
     expect(pieces).toHaveLength(61)
@@ -47,7 +47,7 @@ describe("ReentrySighting", () => {
     expect(atBreak.lat).toBeCloseTo(parentAtBreak.lat, 6)
     expect(atBreak.lng).toBeCloseTo(parentAtBreak.lng, 6)
     expect(atBreak.heightM).toBeCloseTo(parentAtBreak.heightM, 3)
-    expect(shed.magnitudeAt(shed.fromT)).toBeGreaterThan(parent.magnitudeAt(shed.fromT) + 1.5)
+    expect(shed.magnitudeAt(shed.fromT)).toBeGreaterThanOrEqual(parent.magnitudeAt(shed.fromT) + 1.5)
     // Later: behind it along the path (west of it, as the track runs east), and lower.
     const later = shed.fromT + 2000
     const shedLater = ReentrySighting.pieceAt(shedding, shed, later)!
@@ -56,7 +56,7 @@ describe("ReentrySighting", () => {
     expect(shedLater.heightM).toBeLessThan(parentLater.heightM)
     // Gone after its life, and the same pieces again from the same statement.
     expect(shed.untilT - shed.fromT).toBeLessThanOrEqual(4 * 1.6 * 1000)
-    const again = ReentrySighting.piecesOf(reentry([{ id: "a", absoluteMagnitude: -3, sheds: { perS: 2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6 } }]))
+    const again = ReentrySighting.piecesOf(reentry([{ id: "a", absoluteMagnitude: -3, sheds: [{ perS: 2, lifeS: 4, magnitudeDrop: 3, dropBack: 0.3, spreadKmS: 1, sinkKmS: 0.6 }] }]))
     expect(again[10].fromT).toBe(shed.fromT)
     expect(again[10].lagMsAt(later)).toBe(shed.lagMsAt(later))
   })

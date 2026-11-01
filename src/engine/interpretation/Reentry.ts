@@ -94,8 +94,12 @@ export interface ReentryFragment {
   /** How long a stretch of its own past path still glows behind it, seconds: the tail observers
    * describe. 1.5 when absent. */
   trainS?: number
-  /** The smaller pieces it sheds as it breaks up, each of which burns, brakes and drifts away on its own (see ReentrySheds). */
-  sheds?: ReentrySheds
+  /**
+   * The smaller pieces it sheds as it breaks up, each of which burns, brakes and drifts away on its own (see ReentrySheds): a slow
+   * crumbling over its flight, and the bursts of its break-up events, a few seconds each, when hundreds come off at once (Hayabusa's bus:
+   * over 800 at about 68 km, some 1800 at 56.7 km seven seconds later; Zander & Löhle, CEAS Space Journal 2025).
+   */
+  sheds?: ReentrySheds[]
 }
 
 /**
@@ -112,7 +116,8 @@ export interface ReentrySheds {
   perS: number
   /** How long a shed piece burns, seconds, on average: between 0.4 and 1.6 times this. */
   lifeS: number
-  /** How much fainter than its piece a shed one is, magnitudes, on average: between 0.6 and 1.4 times this. */
+  /** How much fainter than its piece a shed one is, magnitudes, on average: half of it at least, and the rest spread as a falling
+   * exponential, so that the faint ones are many and the bright few, as the sizes of a break-up's fragments are (a power law). */
   magnitudeDrop: number
   /** How fast a shed piece falls behind, seconds of lag gained per second of its life squared (half its deceleration against its
    * piece's, in time along the path), on average: between 0.5 and 1.5 times this. */
@@ -296,7 +301,7 @@ export class ReentrySighting {
         trainMs: (fragment.trainS ?? ReentrySighting.DEFAULT_TRAIN_S) * 1000
       }
       pieces.push(piece)
-      if (fragment.sheds) pieces.push(...ReentrySighting.shedPieces(piece, fragment.sheds))
+      ;(fragment.sheds ?? []).forEach((sheds, phase) => pieces.push(...ReentrySighting.shedPieces(piece, sheds, phase)))
     })
     ReentrySighting.pieces.set(reentry, pieces)
     return pieces
@@ -309,7 +314,7 @@ export class ReentrySighting {
    * fainter, dropping back along the path as the air brakes it harder, and drifting off it to one side. Drawn from a hash of the parent and
    * the piece's rank, so a replay sheds the same ones.
    */
-  static shedPieces(parent: ReentryPiece, sheds: ReentrySheds): ReentryPiece[] {
+  static shedPieces(parent: ReentryPiece, sheds: ReentrySheds, phase = 0): ReentryPiece[] {
     const fromT = sheds.fromT ?? parent.fromT
     const untilT = Math.min(sheds.untilT ?? parent.untilT, parent.untilT)
     if (!(sheds.perS > 0) || untilT <= fromT) return []
@@ -319,10 +324,11 @@ export class ReentrySighting {
     const trainMs = sheds.trainS !== undefined ? sheds.trainS * 1000 : parent.trainMs * (2 / 3)
     const pieces: ReentryPiece[] = []
     for (let rank = 0; rank < count; rank++) {
-      const random = (salt: number) => ReentrySighting.hash(`${parent.id}/${rank}/${salt}`)
+      const random = (salt: number) => ReentrySighting.hash(`${parent.id}/${phase}/${rank}/${salt}`)
       const breakT = fromT + ((rank + random(1)) / sheds.perS) * 1000
       const lifeMs = sheds.lifeS * (0.4 + 1.2 * random(2)) * 1000
-      const drop = sheds.magnitudeDrop * (0.6 + 0.8 * random(3))
+      // Half the stated drop at least, then exponentially fainter: a mean of the drop stated, a long tail of faint ones.
+      const drop = sheds.magnitudeDrop * (0.5 - 0.5 * Math.log(1 - 0.999 * random(3)))
       const dropBack = sheds.dropBack * (0.5 + random(4))
       const drift = spread * (2 * random(5) - 1)
       const sinking = sink * (0.5 + random(6))
@@ -331,7 +337,7 @@ export class ReentrySighting {
       const belowAtBreak = parent.belowKmAt(breakT)
       const sinceS = (at: number) => Math.max(0, at - breakT) / 1000
       pieces.push({
-        id: `${parent.id}.${rank}`,
+        id: `${parent.id}.${phase}.${rank}`,
         fromT: breakT,
         untilT: Math.min(breakT + lifeMs, ReentrySighting.endOf(parent)),
         lagMsAt: at => lagAtBreak + 500 * dropBack * sinceS(at) ** 2,
