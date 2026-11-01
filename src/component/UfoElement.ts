@@ -789,7 +789,10 @@ export class UfoElement extends HTMLElement {
       this.observerMapView.reset()
       this.observerMapViewChanged()
     })
-    this.seekInput.addEventListener("input", () => this.player.seek(this.snapSeekToMark(Number(this.seekInput.value))))
+    this.seekInput.addEventListener("input", () => {
+      this.player.seek(this.snapSeekToMark(Number(this.seekInput.value)))
+      this.announceReveal()
+    })
     this.seekInput.addEventListener("pointerdown", event => {
       this.suspendForScrub()
       this.seekSnapArmed = true
@@ -1169,9 +1172,19 @@ export class UfoElement extends HTMLElement {
 
   /** Tells a composing element the reader asked to play — whether it starts now or when its loader goes (see playRequested). */
   private announcePlayRequest(): void {
+    this.announceReveal()
+    this.dispatchEvent(new CustomEvent("playrequest"))
+  }
+
+  /**
+   * Tells a composing element the reader asked to see the recording, by playing it or by moving through it on the timeline: what covers
+   * it until then (see SceneElement's poster) goes. Moved through before it was ever played, the scene was drawn at each instant under a
+   * cover that stayed, and Chelyabinsk's bolide could not be seen by scrubbing.
+   */
+  private announceReveal(): void {
     this.started = true
     this.updateStartState()
-    this.dispatchEvent(new CustomEvent("playrequest"))
+    this.dispatchEvent(new CustomEvent("revealrequest"))
   }
 
   /** Whether a composing element has the clock held behind its loader — see holdClock. */
