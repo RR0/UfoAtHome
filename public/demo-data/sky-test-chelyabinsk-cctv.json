@@ -23,11 +23,11 @@
     "day": 15,
     "hour": 9,
     "minute": 20,
-    "second": 15
+    "second": 23
   },
   "utcOffsetHours": 6,
-  "durationSeconds": 30,
-  "summaryTime": 16.8,
+  "durationSeconds": 25,
+  "summaryTime": 8.8,
   "place": [
     {
       "lat": 55.1597,
@@ -82,7 +82,7 @@
         }
       },
       {
-        "t": 30000,
+        "t": 25000,
         "pose": {
           "lat": 55.1597,
           "lng": 61.4026,
@@ -725,7 +725,7 @@
         },
         "track": [
           {
-            "t": 6000,
+            "t": -2000,
             "lat": {
               "value": 54.5152,
               "basis": "stated",
@@ -743,7 +743,7 @@
             }
           },
           {
-            "t": 18300,
+            "t": 10300,
             "lat": {
               "value": 54.92,
               "basis": "derived",
@@ -761,7 +761,7 @@
             }
           },
           {
-            "t": 23000,
+            "t": 15000,
             "lat": {
               "value": 55.02,
               "basis": "derived",
@@ -789,7 +789,7 @@
             },
             "lightCurve": [
               {
-                "t": 6000,
+                "t": -2000,
                 "absoluteMagnitude": {
                   "value": -3,
                   "basis": "assumed",
@@ -797,7 +797,7 @@
                 }
               },
               {
-                "t": 9000,
+                "t": 1000,
                 "absoluteMagnitude": {
                   "value": -8,
                   "basis": "assumed",
@@ -805,7 +805,7 @@
                 }
               },
               {
-                "t": 12000,
+                "t": 4000,
                 "absoluteMagnitude": {
                   "value": -13,
                   "basis": "assumed",
@@ -813,7 +813,7 @@
                 }
               },
               {
-                "t": 14000,
+                "t": 6000,
                 "absoluteMagnitude": {
                   "value": -17,
                   "basis": "assumed",
@@ -821,7 +821,7 @@
                 }
               },
               {
-                "t": 15500,
+                "t": 7500,
                 "absoluteMagnitude": {
                   "value": -21,
                   "basis": "assumed",
@@ -829,7 +829,7 @@
                 }
               },
               {
-                "t": 17000,
+                "t": 9000,
                 "absoluteMagnitude": {
                   "value": -24.5,
                   "basis": "assumed",
@@ -837,7 +837,7 @@
                 }
               },
               {
-                "t": 18300,
+                "t": 10300,
                 "absoluteMagnitude": {
                   "value": -27.5,
                   "basis": "stated",
@@ -845,7 +845,7 @@
                 }
               },
               {
-                "t": 19000,
+                "t": 11000,
                 "absoluteMagnitude": {
                   "value": -25,
                   "basis": "assumed",
@@ -853,7 +853,7 @@
                 }
               },
               {
-                "t": 20000,
+                "t": 12000,
                 "absoluteMagnitude": {
                   "value": -20,
                   "basis": "assumed",
@@ -861,7 +861,7 @@
                 }
               },
               {
-                "t": 21500,
+                "t": 13500,
                 "absoluteMagnitude": {
                   "value": -14,
                   "basis": "assumed",
@@ -869,7 +869,7 @@
                 }
               },
               {
-                "t": 23000,
+                "t": 15000,
                 "absoluteMagnitude": {
                   "value": -8,
                   "basis": "assumed",
@@ -896,12 +896,12 @@
               "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
             },
             "fromT": {
-              "value": 17500,
+              "value": 9500,
               "basis": "assumed",
               "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
             },
             "untilT": {
-              "value": 23000,
+              "value": 15000,
               "basis": "stated",
               "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
             },
@@ -929,12 +929,12 @@
               "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
             },
             "fromT": {
-              "value": 17500,
+              "value": 9500,
               "basis": "assumed",
               "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
             },
             "untilT": {
-              "value": 23000,
+              "value": 15000,
               "basis": "stated",
               "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
             },
