@@ -63,6 +63,16 @@ export class GhostPass {
   private readonly mips: WebGLRenderTarget
   /** The ghosts alone, at that same half size. */
   private readonly ghostLayer: WebGLRenderTarget
+  /**
+   * The picture's light blurred to the halo the drops on a glass scatter round each light (see HALO_LEVEL), by weights that depend on the
+   * distance alone and fade out to nothing on a circle. A light thousands of times the white of the picture is white wherever any of its halo
+   * reaches, so the halo takes the shape of what the blur reaches: read from a level of the mipmaps, that was the square of a texel; blurred
+   * across then down, the square that two cut Gaussians reach. Round now, whatever the light.
+   */
+  private readonly halo: WebGLRenderTarget
+  private readonly haloMaterial: ShaderMaterial
+  /** The level of the mipmaps the drops' halo is blurred at: a texel of eight of the picture's pixels each way, which a halo of tens of them spans several of. */
+  private static readonly HALO_LEVEL = 2
   private readonly quadScene = new Scene()
   private readonly quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1)
   private readonly quad: Mesh
@@ -81,6 +91,8 @@ export class GhostPass {
     const half = size(Math.ceil(width / 2), Math.ceil(height / 2))
     this.mips = new WebGLRenderTarget(...half, { type: HalfFloatType, generateMipmaps: true, minFilter: LinearMipmapLinearFilter, magFilter: LinearFilter })
     this.ghostLayer = new WebGLRenderTarget(...half, { type: HalfFloatType })
+    const halo = GhostPass.haloSize(half[0], half[1])
+    this.halo = new WebGLRenderTarget(halo[0], halo[1], { type: HalfFloatType, minFilter: LinearFilter, magFilter: LinearFilter })
     const vertexShader = `
       varying vec2 vUv;
       void main() {
@@ -105,9 +117,40 @@ export class GhostPass {
       depthWrite: false
     })
     const n = GhostPass.MAX_GHOSTS
+    // Taps a sigma apart on a grid (each read through the texels' own filtering), out to three sigmas: a Gaussian, brought down to nothing
+    // between two and three sigmas so that it ends on a circle rather than on the grid's square.
+    this.haloMaterial = new ShaderMaterial({
+      uniforms: { uSource: { value: null }, uLod: { value: 0 }, uStep: { value: new Vector2() } },
+      vertexShader,
+      fragmentShader: `
+        precision highp float;
+        uniform sampler2D uSource;
+        uniform float uLod;
+        uniform vec2 uStep;
+        varying vec2 vUv;
+        void main() {
+          vec3 sum = vec3(0.0);
+          float weights = 0.0;
+          for (int y = -3; y <= 3; y++) {
+            for (int x = -3; x <= 3; x++) {
+              float r2 = float(x * x + y * y);
+              if (r2 > 9.0) continue;
+              float weight = exp(-r2 / 2.0) * (1.0 - smoothstep(4.0, 9.0, r2));
+              sum += weight * textureLod(uSource, vUv + vec2(float(x), float(y)) * uStep, uLod).rgb;
+              weights += weight;
+            }
+          }
+          gl_FragColor = vec4(sum / weights, 1.0);
+        }
+      `,
+      blending: NoBlending,
+      depthTest: false,
+      depthWrite: false
+    })
     this.ghostMaterial = new ShaderMaterial({
       uniforms: {
         uMips: { value: this.mips.texture },
+        uHalo: { value: this.halo.texture },
         uSize: { value: new Vector2(1, 1) },
         uCount: { value: 0 },
         uScale: { value: new Array<number>(n).fill(1) },
@@ -131,6 +174,7 @@ export class GhostPass {
       fragmentShader: `
         precision highp float;
         uniform sampler2D uMips;
+        uniform sampler2D uHalo;
         uniform vec2 uSize;
         uniform int uCount;
         uniform float uScale[${n}];
@@ -298,6 +342,9 @@ export class GhostPass {
 
         // The wet glass at this point of the picture: how much a drop covers it, and the offset (in the picture's own coordinates) by which
         // the drop there refracts.
+        // Whether the point drops() last looked at is a fine droplet rather than a drop: see through, in main.
+        float fineDroplet = 0.0;
+
         vec4 drops(vec2 uv) {
           float aspect = uSize.x / uSize.y;
           vec2 q = vec2(uv.x * aspect, uv.y);
@@ -322,7 +369,10 @@ export class GhostPass {
             vec2 centre = fineCell + 0.5 + (vec2(hash(fineCell + 5.1), hash(fineCell + 6.2)) - 0.5) * 0.6;
             float away = distance(q * 90.0, centre);
             float fine = smoothstep(0.35, 0.25, away) * (1.0 - wiped);
-            if (fine > cover) return vec4(fine * 0.6, (q * 90.0 - centre) / 90.0 / vec2(aspect, 1.0), 0.4 + 0.6 * smoothstep(0.35, 0.1, away));
+            if (fine > cover) {
+              fineDroplet = 1.0;
+              return vec4(fine * 0.6, (q * 90.0 - centre) / 90.0 / vec2(aspect, 1.0), 0.4 + 0.6 * smoothstep(0.35, 0.1, away));
+            }
           }
           return vec4(cover, pull / max(total, 1e-3) / size / vec2(aspect, 1.0), shade);
         }
@@ -379,9 +429,11 @@ export class GhostPass {
             // rather than ending in a hard rectangle of the picture's own edges (a lit road cut by the frame). The same for every light.
             float fade = max(2.0 * radiusPx, 2.0) / uSize.y;
             float vignette = GhostPass_edgeFade(from, fade, uSize);
-            vec3 light = uKind[i] < 0.5 ? shaped(from, radiusPx, k < 0.0 ? 3.14159265 : 0.0) : blurred(from, radiusPx);
+            vec3 light = uKind[i] < 0.5 ? shaped(from, radiusPx, k < 0.0 ? 3.14159265 : 0.0) : uKind[i] > 1.5 ? texture2D(uHalo, from).rgb : blurred(from, radiusPx);
             // A drop's halo is where the drops are, and as much brighter there as they leave the rest of the glass clear.
-            float through = uKind[i] > 1.5 ? drop.x / 0.3 : 1.0;
+            // Not through the fine droplets: a few pixels each, and drawn at half the picture's size, a light thousands
+            // of times the white of the picture made every one round a streetlight a white square, whatever share of its halo it was given.
+            float through = uKind[i] > 1.5 ? (1.0 - fineDroplet) * drop.x / 0.3 : 1.0;
             sum += vignette * through * uTint[i] * uShare[i] * light / (k * k);
           }
           gl_FragColor = vec4(sum, drop.x);
@@ -451,6 +503,8 @@ export class GhostPass {
       ;(uniforms.uOffset.value as Vector2[])[i].set(ghost.offset?.[0] ?? 0, ghost.offset?.[1] ?? 0)
       ;(uniforms.uTint.value as Vector3[])[i].set(...(ghost.tint ?? [1, 1, 1]))
     }
+    const drops = optics.ghosts.slice(0, count).find(ghost => ghost.cause === "drops")
+    if (drops) this.blurHalo(renderer, drops.blur)
     uniforms.uBlades.value = optics.blades
     uniforms.uBladeAngle.value = optics.bladeAngleRad
     uniforms.uDrops.value = optics.drops
@@ -579,6 +633,23 @@ export class GhostPass {
     return t * t * (3 - 2 * t)
   }
 
+  /** Blurs the picture's light to the halo of the drops, of this defocus (a share of the picture's height): a sigma of half its radius. */
+  private blurHalo(renderer: WebGLRenderer, blur: number): void {
+    const target = this.halo
+    const sigma = Math.max(0.5, (blur * target.height) / 2)
+    const uniforms = this.haloMaterial.uniforms
+    uniforms.uSource.value = this.mips.texture
+    uniforms.uLod.value = GhostPass.HALO_LEVEL
+    ;(uniforms.uStep.value as Vector2).set(sigma / target.width, sigma / target.height)
+    this.draw(renderer, this.haloMaterial, target)
+  }
+
+  /** The size of the drops' halo, from the half picture's: its level of the mipmaps (see HALO_LEVEL). */
+  private static haloSize(width: number, height: number): [number, number] {
+    const scale = 2 ** GhostPass.HALO_LEVEL
+    return [Math.max(1, Math.floor(width / scale)), Math.max(1, Math.floor(height / scale))]
+  }
+
   resize(width: number, height: number): void {
     const w = Math.max(1, width), h = Math.max(1, height)
     // Its storage made again at another size holds nothing until the next picture is developed into it (see readable).
@@ -587,6 +658,8 @@ export class GhostPass {
     this.frame.overlay.setSize(w, h)
     this.mips.setSize(Math.ceil(w / 2), Math.ceil(h / 2))
     this.ghostLayer.setSize(Math.ceil(w / 2), Math.ceil(h / 2))
+    const halo = GhostPass.haloSize(Math.ceil(w / 2), Math.ceil(h / 2))
+    this.halo.setSize(halo[0], halo[1])
   }
 
   dispose(): void {
@@ -594,6 +667,8 @@ export class GhostPass {
     this.frame.overlay.dispose()
     this.mips.dispose()
     this.ghostLayer.dispose()
+    this.halo.dispose()
+    this.haloMaterial.dispose()
     this.copyMaterial.dispose()
     this.ghostMaterial.dispose()
     this.developMaterial.dispose()
