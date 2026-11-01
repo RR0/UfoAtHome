@@ -66,9 +66,9 @@ export class BuildingMaterials {
       // A colour a survey already gave (somebody wrote it down) is not repainted from a typical one: the openings are still those of its kind.
       const facade: DecorFacade = { ...building.facade, color: building.facade?.color ?? BuildingMaterials.wallColor(building) }
       if (style === "church") facade.openings = "lancet"
-      else if (style === "monument" || style === "works") facade.plain = true
+      else if (style === "monument" || style === "works") facade.openings = "plain"
       else if (style === "old" || style === "grand") facade.openings = "tall"
-      if (building.closedAtNight && !facade.plain) facade.closedAtNight = true
+      if (building.closedAtNight && facade.openings !== "plain") facade.closedAtNight = true
       const storeyM = BuildingMaterials.storeyOf(building)
       if (storeyM !== undefined && style !== "church" && style !== "monument") facade.storeyM = storeyM
       const roof = style === "old" && building.roof?.color === undefined ? { shape: "flat" as const, riseM: 0, ...building.roof, color: BuildingMaterials.OLD_ROOF } : building.roof

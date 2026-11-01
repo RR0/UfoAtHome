@@ -441,17 +441,22 @@ export interface DecorRoof {
   material?: "stone"
 }
 
-/** What the walls of a building look like: their colour, and whether windows and a door are drawn on them. */
+/** The kinds of facade, besides a house's (see DecorFacade.openings). */
+export type DecorFacadeKind = "tall" | "lancet" | "plain" | "none"
+
+/** What the walls of a building look like: their colour, and the kind of facade they are (see DecorFacade.openings). */
 export interface DecorFacade {
   /** The colour of the wall, "#rrggbb": plaster, stone, brick. The roof has its own (see DecorRoof). Absent is a pale plaster. */
   color?: string
-  /** A plain wall, with no windows and no door. Absent is false: a wall nobody lived behind is the unusual one. */
+  /** @deprecated The first way of saying `openings: "plain"`, still read as it. */
   plain?: boolean
   /**
-   * How the walls are opened. Absent is a house's or a block of flats': a window every three metres of every floor, a door. "tall": an older building's,
-   * a tall French window with its railing in each bay. "lancet": a church's, a tall narrow bay every six metres in walls without a door. `plain` wins over it.
+   * The kind of facade, which is how its walls are opened. Absent is a house's or a block of flats': a window every three metres of every
+   * floor, a door. "tall": an older building's, a tall French window with its railing in each bay. "lancet": a church's, a tall narrow bay
+   * every six metres in walls without a door. "plain": a bare wall, no window and no door (a warehouse, a shed, a monument). "none": no
+   * facade drawn at all, the plain box of the built-in shape, whatever the building's height (see DecorSystem.facadeOf).
    */
-  openings?: "tall" | "lancet"
+  openings?: DecorFacadeKind
   /** The height of a storey, metres, where it is known (the floors a survey states, or those of an old building): absent is three. Ignored for "lancet". */
   storeyM?: number
   /**

@@ -9,21 +9,22 @@ const keys = (kind: DecorKind, extra: object = {}) => DecorParameterSets.of({ ki
 
 describe("DecorParameterSets", () => {
   test("a building has floors, the floor occupied, its walls, its roof, and a window on each of its four sides", () => {
-    expect(keys("building")).toEqual(["floors", "occupiedFloor", "facade.color", "facade.plain", "facade.openings", "roof.shape", "roof.riseM", "roof.ridge", "roof.color",
+    expect(keys("building")).toEqual(["floors", "occupiedFloor", "facade.color", "facade.openings", "roof.shape", "roof.riseM", "roof.ridge", "roof.color",
       "windows.front", "windows.behind", "windows.left", "windows.right"])
   })
 
-  test("the rise of a roof is asked of a pitched one only, the side of its ridge of a gable only, and plain walls of any building", () => {
+  test("the rise of a roof is asked of a pitched one only, the side of its ridge of a gable only, and the kind of facade of any building", () => {
     const set = DecorParameterSets.of({ kind: "building" })!
     const shown = (key: string, element: object): boolean => set.parameters.find(spec => spec.key === key)!.visibleWhen?.(element as never) ?? true
     expect(shown("roof.riseM", {})).toBe(false)
     expect(shown("roof.riseM", { roof: { shape: "hip" } })).toBe(true)
     expect(shown("roof.ridge", { roof: { shape: "hip" } })).toBe(false)
     expect(shown("roof.ridge", { roof: { shape: "gable" } })).toBe(true)
-    // A building that states no facade has a house's walls from a storey high (see DecorSystem.facadeOf): plain walls and the kind of
-    // openings are asked of every building, which is how a warehouse written by hand says it has none.
-    expect(shown("facade.plain", {})).toBe(true)
+    // A building that states no facade has a house's walls from a storey high (see DecorSystem.facadeOf): its kind is asked of every building,
+    // a bare wall or none among them, which is how a warehouse written by hand says it has no windows.
     expect(shown("facade.openings", {})).toBe(true)
+    const kinds = (set.parameters.find(spec => spec.key === "facade.openings") as { choices: { value: string }[] }).choices.map(choice => choice.value)
+    expect(kinds).toEqual(["tall", "lancet", "plain", "none"])
   })
 
   test("a building drawn as a model has neither the walls nor the roof of the built-in shape", () => {

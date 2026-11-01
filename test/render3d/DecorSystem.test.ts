@@ -755,3 +755,19 @@ describe("DecorSystem.facadeOf", () => {
     expect(DecorSystem.facadeOf({ ...building(10), kind: "tree" } as DecorObject)).toBeUndefined()
   })
 })
+
+describe("DecorSystem facade kinds", () => {
+  const building = (facade?: DecorObject["facade"]): DecorObject =>
+    ({ id: "b", kind: "building", eastM: 0, northM: 0, sizeM: { widthM: 12, lengthM: 8, heightM: 11 }, ...(facade ? { facade } : {}) }) as DecorObject
+
+  it("draws no facade for \"none\", whatever the height: the plain box", () => {
+    expect(DecorSystem.facadeOf(building({ openings: "none" }))).toBeUndefined()
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ openings: "none" }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+  })
+
+  it("draws a bare wall for \"plain\", and still for the flag it used to be", () => {
+    expect(DecorSystem.isBare({ openings: "plain" })).toBe(true)
+    expect(DecorSystem.isBare({ plain: true })).toBe(true)
+    expect(DecorSystem.isBare({})).toBe(false)
+  })
+})

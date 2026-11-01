@@ -89,35 +89,31 @@ export class DecorParameterSets {
     ]
   }
 
-  /** The walls of a building: their colour, and whether windows and a door are drawn on them. Drawn only where all three sizes are stated (see DecorFacade). */
+  /** The walls of a building: their colour, and the kind of facade they are. Drawn only where all three sizes are stated (see DecorFacade). */
   private static walls(): ParameterSpec[] {
     const group: SaidText = { en: "Walls", fr: "Murs", es: "Muros", it: "Muri" }
     return [
       {
         type: "colour", key: "facade.color", group, fallback: "#d3cab8",
         label: { en: "Wall colour", fr: "Couleur des murs", es: "Color de los muros", it: "Colore dei muri" },
-        hint: { en: "The colour of the walls, drawn with windows and a door where the width, the length and the height of the building are all stated. Empty: a pale plaster, and the walls of a house wherever they are a storey high (lower, a shed's plain walls).",
-          fr: "La couleur des murs, dessinés avec fenêtres et porte là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées. Vide : un enduit pâle, et les murs d'une maison dès qu'ils ont la hauteur d'un étage (plus bas, les murs nus d'un abri).",
-          es: "El color de los muros, dibujados con ventanas y puerta donde el ancho, el largo y el alto del edificio están todos enunciados. Vacío: un enlucido pálido, y los muros de una casa en cuanto tienen la altura de una planta (más bajos, los muros lisos de un cobertizo).",
-          it: "Il colore dei muri, disegnati con finestre e porta dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate. Vuoto: un intonaco chiaro, e i muri di una casa non appena hanno l'altezza di un piano (più bassi, i muri lisci di un capanno)." }
-      },
-      {
-        type: "boolean", key: "facade.plain", group,
-        label: { en: "Plain walls", fr: "Murs nus", es: "Muros lisos", it: "Muri lisci" },
-        hint: { en: "No windows and no door on the walls: a warehouse, a shed, a building nobody lives in.", fr: "Ni fenêtres ni porte sur les murs : un entrepôt, un hangar, un bâtiment où personne n'habite.",
-          es: "Ni ventanas ni puerta en los muros: un almacén, un cobertizo, un edificio donde nadie vive.", it: "Né finestre né porta sui muri: un magazzino, un capannone, un edificio dove nessuno abita." }
+        hint: { en: "The colour of the walls, drawn with the facade of their kind where the width, the length and the height of the building are all stated. Empty: a pale plaster.",
+          fr: "La couleur des murs, dessinés avec la façade de leur type là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées. Vide : un enduit pâle.",
+          es: "El color de los muros, dibujados con la fachada de su tipo donde el ancho, el largo y el alto del edificio están todos enunciados. Vacío: un enlucido pálido.",
+          it: "Il colore dei muri, disegnati con la facciata del loro tipo dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate. Vuoto: un intonaco chiaro." }
       },
       {
         type: "choice", key: "facade.openings", group,
-        label: { en: "Openings", fr: "Ouvertures", es: "Vanos", it: "Aperture" },
+        label: { en: "Facade", fr: "Type de façade", es: "Tipo de fachada", it: "Tipo di facciata" },
         empty: { en: "A house's", fr: "D'une maison", es: "De una casa", it: "Di una casa" },
-        hint: { en: "A window every three metres of every floor and a door, the tall windows of an old building, or the tall narrow bays of a church.",
-          fr: "Une fenêtre tous les trois mètres de chaque étage et une porte, les hautes fenêtres d'un immeuble ancien, ou les hautes baies étroites d'une église.",
-          es: "Una ventana cada tres metros de cada planta y una puerta, las ventanas altas de un edificio antiguo, o los vanos altos y estrechos de una iglesia.",
-          it: "Una finestra ogni tre metri di ogni piano e una porta, le finestre alte di un edificio antico, o le alte aperture strette di una chiesa." },
+        hint: { en: "A house's: a window every three metres of every floor and a door, from a storey high (lower, a shed's bare wall). The tall windows of an old building, the tall narrow bays of a church, a bare wall (a warehouse, a shed, a monument), or none: the plain box.",
+          fr: "D'une maison : une fenêtre tous les trois mètres de chaque étage et une porte, dès la hauteur d'un étage (plus bas, le mur nu d'un abri). Les hautes fenêtres d'un immeuble ancien, les hautes baies étroites d'une église, un mur nu (un entrepôt, un hangar, un monument), ou aucune : la simple boîte.",
+          es: "De una casa: una ventana cada tres metros de cada planta y una puerta, desde la altura de una planta (más bajo, el muro liso de un cobertizo). Las ventanas altas de un edificio antiguo, los vanos altos y estrechos de una iglesia, un muro liso (un almacén, un cobertizo, un monumento), o ninguna: la caja lisa.",
+          it: "Di una casa: una finestra ogni tre metri di ogni piano e una porta, dall'altezza di un piano (più basso, il muro liscio di un capanno). Le finestre alte di un edificio antico, le alte aperture strette di una chiesa, un muro liscio (un magazzino, un capannone, un monumento), o nessuna: la semplice scatola." },
         choices: [
           { value: "tall", label: { en: "Old building", fr: "Immeuble ancien", es: "Edificio antiguo", it: "Edificio antico" } },
-          { value: "lancet", label: { en: "Church", fr: "Église", es: "Iglesia", it: "Chiesa" } }
+          { value: "lancet", label: { en: "Church", fr: "Église", es: "Iglesia", it: "Chiesa" } },
+          { value: "plain", label: { en: "Bare wall", fr: "Mur nu", es: "Muro liso", it: "Muro liscio" } },
+          { value: "none", label: { en: "None", fr: "Aucune", es: "Ninguna", it: "Nessuna" } }
         ]
       }
     ]

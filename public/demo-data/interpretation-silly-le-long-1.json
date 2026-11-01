@@ -6884,7 +6884,7 @@
    },
    "facade": {
     "color": "#e5dbc7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -6910,7 +6910,7 @@
    },
    "facade": {
     "color": "#c8bfae",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -6936,7 +6936,7 @@
    },
    "facade": {
     "color": "#cac2b0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -6962,7 +6962,7 @@
    },
    "facade": {
     "color": "#c2baa9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -6988,7 +6988,7 @@
    },
    "facade": {
     "color": "#ccc3b2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7014,7 +7014,7 @@
    },
    "facade": {
     "color": "#d7cebc",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7040,7 +7040,7 @@
    },
    "facade": {
     "color": "#d5ccba",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7066,7 +7066,7 @@
    },
    "facade": {
     "color": "#dcd3c0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7092,7 +7092,7 @@
    },
    "facade": {
     "color": "#eae0cc",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7118,7 +7118,7 @@
    },
    "facade": {
     "color": "#d9d0bd",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7144,7 +7144,7 @@
    },
    "facade": {
     "color": "#c7beae",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7170,7 +7170,7 @@
    },
    "facade": {
     "color": "#e6dcc9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7196,7 +7196,7 @@
    },
    "facade": {
     "color": "#e2d9c5",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7222,7 +7222,7 @@
    },
    "facade": {
     "color": "#dbd1bf",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7248,7 +7248,7 @@
    },
    "facade": {
     "color": "#c0b8a7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7274,7 +7274,7 @@
    },
    "facade": {
     "color": "#dfd5c2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7300,7 +7300,7 @@
    },
    "facade": {
     "color": "#ece2ce",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7326,7 +7326,7 @@
    },
    "facade": {
     "color": "#bbb3a3",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7352,7 +7352,7 @@
    },
    "facade": {
     "color": "#d7cebb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7378,7 +7378,7 @@
    },
    "facade": {
     "color": "#d5ccba",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7404,7 +7404,7 @@
    },
    "facade": {
     "color": "#d0c7b6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7430,7 +7430,7 @@
    },
    "facade": {
     "color": "#e4dac7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7456,7 +7456,7 @@
    },
    "facade": {
     "color": "#d6cdbb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7482,7 +7482,7 @@
    },
    "facade": {
     "color": "#dbd1bf",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7508,7 +7508,7 @@
    },
    "facade": {
     "color": "#ebe1cd",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7529,7 +7529,7 @@
    "floors": 1,
    "facade": {
     "color": "#ccc3b2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7555,7 +7555,7 @@
    },
    "facade": {
     "color": "#dad0be",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7576,7 +7576,7 @@
    "floors": 1,
    "facade": {
     "color": "#e3d9c6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7597,7 +7597,7 @@
    "floors": 1,
    "facade": {
     "color": "#c9c0af",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7623,7 +7623,7 @@
    },
    "facade": {
     "color": "#d5ccba",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7644,7 +7644,7 @@
    "floors": 1,
    "facade": {
     "color": "#d1c8b6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7670,7 +7670,7 @@
    },
    "facade": {
     "color": "#e9dfcb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7691,7 +7691,7 @@
    "floors": 1,
    "facade": {
     "color": "#bbb3a3",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7712,7 +7712,7 @@
    "floors": 1,
    "facade": {
     "color": "#e7ddc9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7733,7 +7733,7 @@
    "floors": 1,
    "facade": {
     "color": "#beb6a6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7754,7 +7754,7 @@
    "floors": 1,
    "facade": {
     "color": "#d9d0bd",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7775,7 +7775,7 @@
    "floors": 4,
    "facade": {
     "color": "#dad1be",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7796,7 +7796,7 @@
    "floors": 4,
    "facade": {
     "color": "#dcd2c0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7822,7 +7822,7 @@
    },
    "facade": {
     "color": "#c9c1b0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7848,7 +7848,7 @@
    },
    "facade": {
     "color": "#d2c9b7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7874,7 +7874,7 @@
    },
    "facade": {
     "color": "#c1b8a8",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7900,7 +7900,7 @@
    },
    "facade": {
     "color": "#cec5b4",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7921,7 +7921,7 @@
    "floors": 4,
    "facade": {
     "color": "#beb6a6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7942,7 +7942,7 @@
    "floors": 4,
    "facade": {
     "color": "#c1b9a9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7968,7 +7968,7 @@
    },
    "facade": {
     "color": "#d6cdbb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -7994,7 +7994,7 @@
    },
    "facade": {
     "color": "#dad1be",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -8020,7 +8020,7 @@
    },
    "facade": {
     "color": "#d9d0bd",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -8046,7 +8046,7 @@
    },
    "facade": {
     "color": "#bab2a3",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -8072,7 +8072,7 @@
    },
    "facade": {
     "color": "#beb6a6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -8098,7 +8098,7 @@
    },
    "facade": {
     "color": "#e0d6c3",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -8124,7 +8124,7 @@
    },
    "facade": {
     "color": "#c0b7a7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9240,7 +9240,7 @@
    },
    "facade": {
     "color": "#e1d7c4",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9789,7 +9789,7 @@
    },
    "facade": {
     "color": "#bfb5a3",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9820,7 +9820,7 @@
    },
    "facade": {
     "color": "#d2c9b7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9851,7 +9851,7 @@
    },
    "facade": {
     "color": "#c2baa9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9882,7 +9882,7 @@
    },
    "facade": {
     "color": "#d7cdbb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9913,7 +9913,7 @@
    },
    "facade": {
     "color": "#ece2ce",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9944,7 +9944,7 @@
    },
    "facade": {
     "color": "#cfc6b5",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -9975,7 +9975,7 @@
    },
    "facade": {
     "color": "#c6bead",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10006,7 +10006,7 @@
    },
    "facade": {
     "color": "#cbc2b1",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10037,7 +10037,7 @@
    },
    "facade": {
     "color": "#c0b8a7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10068,7 +10068,7 @@
    },
    "facade": {
     "color": "#c4bcab",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10099,7 +10099,7 @@
    },
    "facade": {
     "color": "#e9dfcb",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10130,7 +10130,7 @@
    },
    "facade": {
     "color": "#bcb4a4",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10161,7 +10161,7 @@
    },
    "facade": {
     "color": "#c4bcab",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10192,7 +10192,7 @@
    },
    "facade": {
     "color": "#bdb5a5",
-    "plain": true,
+    "openings": "plain",
     "storeyM": 4
    },
    "origin": "ign-lidar-topo",
@@ -10219,7 +10219,7 @@
    "floors": 1,
    "facade": {
     "color": "#d9d0bd",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10250,7 +10250,7 @@
    },
    "facade": {
     "color": "#c3bbaa",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10281,7 +10281,7 @@
    },
    "facade": {
     "color": "#d1c8b6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10312,7 +10312,7 @@
    },
    "facade": {
     "color": "#cfc6b4",
-    "plain": true,
+    "openings": "plain",
     "storeyM": 2.9
    },
    "origin": "ign-lidar-topo",
@@ -10404,7 +10404,7 @@
    },
    "facade": {
     "color": "#ddd4c1",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10465,7 +10465,7 @@
    },
    "facade": {
     "color": "#c2baa9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10496,7 +10496,7 @@
    },
    "facade": {
     "color": "#eae0cc",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10522,7 +10522,7 @@
    },
    "facade": {
     "color": "#d2c9b7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10548,7 +10548,7 @@
    },
    "facade": {
     "color": "#c3bbaa",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10574,7 +10574,7 @@
    },
    "facade": {
     "color": "#d0c8b6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10600,7 +10600,7 @@
    },
    "facade": {
     "color": "#bab2a2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10626,7 +10626,7 @@
    },
    "facade": {
     "color": "#c0b7a7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10677,7 +10677,7 @@
    },
    "facade": {
     "color": "#d6cdba",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10703,7 +10703,7 @@
    },
    "facade": {
     "color": "#e3d9c6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10729,7 +10729,7 @@
    },
    "facade": {
     "color": "#e8deca",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10755,7 +10755,7 @@
    },
    "facade": {
     "color": "#d7cebc",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10776,7 +10776,7 @@
    "floors": 6,
    "facade": {
     "color": "#bdb5a5",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10797,7 +10797,7 @@
    "floors": 6,
    "facade": {
     "color": "#d4cbb9",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10818,7 +10818,7 @@
    "floors": 6,
    "facade": {
     "color": "#e6dcc8",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10839,7 +10839,7 @@
    "floors": 6,
    "facade": {
     "color": "#cdc4b2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10865,7 +10865,7 @@
    },
    "facade": {
     "color": "#cac1b0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10886,7 +10886,7 @@
    "floors": 6,
    "facade": {
     "color": "#dfd5c2",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10907,7 +10907,7 @@
    "floors": 6,
    "facade": {
     "color": "#e3d9c6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10928,7 +10928,7 @@
    "floors": 6,
    "facade": {
     "color": "#dad1be",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10949,7 +10949,7 @@
    "floors": 6,
    "facade": {
     "color": "#cac1b0",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10970,7 +10970,7 @@
    "floors": 6,
    "facade": {
     "color": "#d1c8b6",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -10991,7 +10991,7 @@
    "floors": 6,
    "facade": {
     "color": "#e4dac7",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"
@@ -11012,7 +11012,7 @@
    "floors": 6,
    "facade": {
     "color": "#c7bfae",
-    "plain": true
+    "openings": "plain"
    },
    "origin": "ign-lidar-topo",
    "surveyedOn": "2026-03-20"

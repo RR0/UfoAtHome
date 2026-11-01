@@ -46,8 +46,8 @@ describe("BuildingMaterials", () => {
   })
 
   it("draws the walls of works with no windows, and a house's with them", () => {
-    expect(BuildingMaterials.fit([{ ...HOUSE, style: "works" }])[0].facade!.plain).toBe(true)
-    expect(BuildingMaterials.fit([HOUSE])[0].facade!.plain).toBeUndefined()
+    expect(BuildingMaterials.fit([{ ...HOUSE, style: "works" }])[0].facade!.openings).toBe("plain")
+    expect(BuildingMaterials.fit([HOUSE])[0].facade!.openings).toBeUndefined()
   })
 
   it("colours a roof by its material where there is no photograph, and the photograph's colour wins where there is one", () => {

@@ -1171,16 +1171,24 @@ export class DecorSystem {
    * walls are at least a storey high. A building that states none was a plain box, and a street of them, a block of flats at dawn, a row of
    * houses, had not a window between them (Chelyabinsk, Braine-le-Comte). Lower than a storey it is a shed, a hut, a pump's shelter, which has
    * no house's windows, and stays a plain wall. What is known of a building's use is stated in its facade, and so wins: a surveyed warehouse
-   * states plain walls, a shop windows dark at night (see BuildingStyles), and a building written by hand says so with its own (`plain`).
+   * states a bare wall, a shop windows dark at night (see BuildingStyles), and a building written by hand states its own kind ("plain", or
+   * "none" for no facade at all).
    */
   static facadeOf(object: DecorObject): DecorFacade | undefined {
     if (object.kind !== "building") return undefined
+    // "none" is the author's: the plain box, whatever its height.
+    if (object.facade?.openings === "none") return undefined
     if (object.facade) return object.facade
     const heightM = object.sizeM?.heightM
     if (heightM === undefined) return undefined
     // The walls as tall as they are, not held to a storey as wallHeightOf holds them for drawing.
     const wallsM = heightM - (object.roof ? RoofGeometry.normalised(object.roof).riseM : 0)
     return wallsM >= BUILDING_FLOOR_HEIGHT ? DecorSystem.HOUSE_FACADE : undefined
+  }
+
+  /** Whether a facade is a bare wall, no window and no door: "plain", or the first way of saying it. */
+  static isBare(facade: DecorFacade): boolean {
+    return facade.openings === "plain" || facade.plain === true
   }
 
   /** The facade of a building that states none and is at least a storey high: see facadeOf. */
@@ -1191,7 +1199,8 @@ export class DecorSystem {
     const group = new Group()
     const size = DecorSystem.sizeOf(object)
     const facade = DecorSystem.facadeOf(object)!
-    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain, object.eastM * 7.31 + object.northM * 3.17, facade.openings, facade.storeyM)
+    const kind = facade.openings === "tall" || facade.openings === "lancet" ? facade.openings : undefined
+    const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !DecorSystem.isBare(facade), object.eastM * 7.31 + object.northM * 3.17, kind, facade.storeyM)
     if (facade.closedAtNight) {
       // A window is lit where its rank is under the share of those lit: ranks stretched over a wider span light a smaller share of them, the same rule.
       const ranks = geometry.getAttribute("litRank")

@@ -254,7 +254,12 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
     },
     json.id,
     json.weather,
-    json.decor ?? [],
+    // A bare wall used to be a flag beside the kind of openings: read as the kind it now is, and written back so.
+    (json.decor ?? []).map(object => {
+      if (!object.facade?.plain) return object
+      const { plain: _plain, ...facade } = object.facade
+      return { ...object, facade: { ...facade, openings: "plain" as const } }
+    }),
     json.weatherSource,
     json.instrument,
     // A shutter speed used to be written on every pose, back when it could vary along the timeline.
