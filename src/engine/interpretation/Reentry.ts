@@ -122,8 +122,11 @@ export interface ReentrySheds {
   /** How much fainter than its piece a shed one is, magnitudes, on average: half of it at least, and the rest spread as a falling
    * exponential, so that the faint ones are many and the bright few, as the sizes of a break-up's fragments are (a power law). */
   magnitudeDrop: number
-  /** How fast a shed piece falls behind, seconds of lag gained per second of its life squared (half its deceleration against its
-   * piece's, in time along the path), on average: between 0.5 and 1.5 times this. */
+  /**
+   * How hard a shed piece is braked, on average (between 0.5 and 1.5 times this): its speed along the path falls off as e^(−2·dropBack·s)
+   * of its piece's, s seconds after it broke off, so that it falls behind by dropBack·s² seconds at first, and never more than it has
+   * flown: braked, a fragment slows down to nothing, it does not turn back.
+   */
   dropBack: number
   /** How fast it drifts off the path sideways, km a second, at most: either side, anything up to this. 0.3 when absent. */
   spreadKmS?: number
@@ -443,7 +446,7 @@ export class ReentrySighting {
         id: `${parent.id}.${phase}.${rank}`,
         fromT: breakT,
         untilT: Math.min(breakT + lifeMs, ReentrySighting.endOf(parent)),
-        lagMsAt: at => lagAtBreak + 500 * dropBack * sinceS(at) ** 2,
+        lagMsAt: at => lagAtBreak + 1000 * ReentrySighting.lagOfBraking(2 * dropBack, sinceS(at)),
         acrossKmAt: at => acrossAtBreak + drift * sinceS(at),
         belowKmAt: at => belowAtBreak + sinking * sinceS(at),
         magnitudeAt: at => parent.magnitudeAt(Math.min(at, parent.untilT)) + drop,
@@ -452,6 +455,16 @@ export class ReentrySighting {
       })
     }
     return pieces
+  }
+
+  /**
+   * How far behind, seconds along the path, a piece braked at `rate` per second falls in `s` seconds: its speed is e^(−rate·s) of its parent's,
+   * so the lag grows as s − (1 − e^(−rate·s))/rate, as rate·s²/2 at first and never faster than the time itself. A lag growing as the square
+   * of the time, as it first did, outgrew the time within seconds, and the fragments of Chelyabinsk flew back along its path.
+   */
+  static lagOfBraking(rate: number, s: number): number {
+    if (rate <= 0 || s <= 0) return 0
+    return s - (1 - Math.exp(-rate * s)) / rate
   }
 
   /** How late a shed piece may burn: no later than the piece it came from, whose end is where the recording says the burning stopped. */

@@ -62,6 +62,23 @@ describe("ReentrySighting", () => {
     expect(again[10].lagMsAt(later)).toBe(shed.lagMsAt(later))
   })
 
+  test("a shed piece slows down to nothing and never flies back along the path", () => {
+    // Its lag grows at first as the square of the time, then never faster than the time itself.
+    expect(ReentrySighting.lagOfBraking(1, 0.1)).toBeCloseTo(0.1 ** 2 / 2, 3)
+    let previous = 0
+    for (let s = 0.5; s <= 20; s += 0.5) {
+      const lag = ReentrySighting.lagOfBraking(1, s)
+      expect(lag - previous).toBeLessThanOrEqual(0.5 + 1e-9)
+      previous = lag
+    }
+    // On the path: always ahead of where it was half a second before, in the direction of travel (east here).
+    const shedding = reentry([{ id: "a", absoluteMagnitude: -3, sheds: [{ perS: 1, lifeS: 10, magnitudeDrop: 3, dropBack: 0.5 }] }])
+    const shed = ReentrySighting.piecesOf(shedding)[3]
+    for (let t = shed.fromT + 500; t < shed.untilT; t += 500) {
+      expect(ReentrySighting.pieceAt(shedding, shed, t)!.lng).toBeGreaterThanOrEqual(ReentrySighting.pieceAt(shedding, shed, t - 500)!.lng - 1e-9)
+    }
+  })
+
   test("a piece that says nothing of its break-up crumbles, and bursts at each flare of its light curve", () => {
     const quiet = { ...reentry([]), fragments: [{ id: "a", absoluteMagnitude: -3 }] }
     expect(ReentrySighting.shedsOf(quiet.fragments[0])).toEqual([ReentrySighting.DEFAULT_CRUMBLING])
