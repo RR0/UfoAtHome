@@ -156,7 +156,7 @@ export const sceneNames_it: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sotto l'orizzontale",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, a {height} km di quota",
-  afterimageTooltip: { name: "Immagine residua, nell'occhio", detail: "{name}: dove è caduta l'immagine di una luce più brillante del Sole, il pigmento della retina è sbiadito, e ciò che vi si vede appare più scuro. Resta nello stesso punto del campo visivo ovunque si volga lo sguardo, e impiega minuti a svanire." },
+  afterimageTooltip: { name: "Immagine residua, nell'occhio", detail: "{name}: dove è caduta l'immagine di una luce più brillante del Sole, il pigmento della retina è sbiadito: per qualche secondo continua a brillare, bianca e poi colorata, poi ciò che vi si vede appare più scuro. Resta nello stesso punto del campo visivo ovunque si volga lo sguardo, e impiega minuti a svanire." },
   plumeTooltip: { name: "Scia di razzo", detail: "{name} — {part}, a {distance}, a {height} km di quota", ascent: "scarico dell'ascesa", burn: "scarico di un'accensione", vent: "propellenti scaricati" },
   ghostTooltip: {
     ghost: "Riflesso: {name}", halo: "Alone: {name}", double: "Doppio: {name}", unnamed: "una luce",

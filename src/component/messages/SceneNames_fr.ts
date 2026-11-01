@@ -163,7 +163,7 @@ export const sceneNames_fr: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° sous l'horizontale",
   decorTooltip: "{name} — {size}, à {distance}",
   satelliteTooltip: "{name} — satellite, mag {mag}, à {height} km d'altitude",
-  afterimageTooltip: { name: "Image rémanente, dans l'œil", detail: "{name} : là où est tombée l'image d'une lumière plus brillante que le Soleil, le pigment de la rétine est décoloré, et ce qu'on y voit paraît plus sombre. Elle reste à la même place dans le champ de vision, où que se tourne le regard, et met des minutes à s'effacer." },
+  afterimageTooltip: { name: "Image rémanente, dans l'œil", detail: "{name} : là où est tombée l'image d'une lumière plus brillante que le Soleil, le pigment de la rétine est décoloré : quelques secondes elle luit encore, blanche puis colorée, puis ce qu'on y voit paraît plus sombre. Elle reste à la même place dans le champ de vision, où que se tourne le regard, et met des minutes à s'effacer." },
   plumeTooltip: { name: "Panache de fusée", detail: "{name} — {part}, à {distance}, à {height} km d'altitude", ascent: "échappement de la montée", burn: "échappement d'un allumage", vent: "ergols vidangés" },
   ghostTooltip: {
     ghost: "Reflet : {name}", halo: "Halo : {name}", double: "Double : {name}", unnamed: "une lumière",

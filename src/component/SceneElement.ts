@@ -183,7 +183,7 @@ const GHOST_TOOLTIP: GhostTooltipTexts = {
 /** What is said of the eye's afterimage pointed at: see SceneNames.afterimageTooltip. */
 const AFTERIMAGE_TOOLTIP = {
   name: "Afterimage, in the eye",
-  detail: "{name}: where the image of a light brighter than the Sun fell, the retina's pigment is bleached, and what is seen there looks darker. It stays where it is in the field of view whichever way the eye turns, and takes minutes to fade."
+  detail: "{name}: where the image of a light brighter than the Sun fell, the retina's pigment is bleached: for a few seconds it goes on glowing, white then coloured, and then what is seen there looks darker. It stays where it is in the field of view whichever way the eye turns, and takes minutes to fade."
 }
 const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
 

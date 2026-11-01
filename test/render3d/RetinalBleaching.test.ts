@@ -45,4 +45,22 @@ describe("RetinalBleaching", () => {
     const along = Array.from({ length: 41 }, (_, i) => left[row + 40 + i])
     expect(Math.max(...along)).toBeLessThan(0.9)
   })
+
+  it("glows where the light was for the first seconds, white then coloured, before it is only dark", () => {
+    const retina = new RetinalBleaching()
+    const glow = () => (retina as unknown as { glow: Float32Array }).glow[45 * RetinalBleaching.WIDTH + 80]
+    retina.advance(0, [], FIELD)
+    for (let t = 20; t <= 300; t += 20) retina.advance(t, [{ ndcX: 0, ndcY: 0, lux: 8.5e5 }], FIELD)
+    // Bright at once: brighter than what the eye is adapted to.
+    expect(glow()).toBeGreaterThan(1)
+    for (let t = 400; t <= 1300; t += 100) retina.advance(t, [], FIELD)
+    const atOne = glow()
+    for (let t = 1400; t <= 5300; t += 100) retina.advance(t, [], FIELD)
+    // A few hundredths of it left at five seconds, the dark one still there.
+    expect(glow()).toBeLessThan(0.1 * atOne)
+    expect(retina.any).toBe(true)
+    expect(RetinalBleaching.flightAt(0)).toEqual([1, 1, 1])
+    const indigo = RetinalBleaching.flightAt(1.4)
+    expect(indigo[2]).toBeGreaterThan(indigo[0])
+  })
 })

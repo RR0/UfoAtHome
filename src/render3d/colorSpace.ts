@@ -184,13 +184,17 @@ ${SRGB_ENCODE_GLSL}
 ${EYE_RESPONSE_GLSL}
 /** Whether anything is laid over the picture at all: see EYE_UNIFORMS. */
 uniform float uHasOverlay;
-/** The eye's afterimages (see RetinalBleaching): the share of pigment left at each place of the picture, when uRetinaOn says any is
- * bleached; and the picture's size in pixels, which places them. An eye's only. */
+/** The eye's afterimages (see RetinalBleaching): the share of pigment left at each place of the picture (red), which the light is
+ * multiplied by, and the positive afterimage's light (green, blue, alpha), added to it, when uRetinaOn says there is any;
+ * and the picture's size in pixels, which places them. An eye's only. */
 uniform sampler2D uRetina;
 uniform float uRetinaOn;
 uniform vec2 uRetinaViewport;
 vec3 finish(vec3 relative, vec4 overlay, float lamp) {
-  if (uRetinaOn > 0.5 && uMedium < 0.5) relative *= texture2D(uRetina, gl_FragCoord.xy / uRetinaViewport).r;
+  if (uRetinaOn > 0.5 && uMedium < 0.5) {
+    vec4 retina = texture2D(uRetina, gl_FragCoord.xy / uRetinaViewport);
+    relative = relative * retina.r + retina.gba;
+  }
   return encodeSrgb(respond(relative, lamp) * (1.0 - overlay.a) + overlay.rgb);
 }
 vec3 finish(vec3 relative, vec4 overlay) {
