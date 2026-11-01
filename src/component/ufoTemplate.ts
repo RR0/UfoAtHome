@@ -6,6 +6,18 @@ export const html = `
          screen's own resolution, drawn in the picture's coordinates, since the picture's own is 360 pixels high and stretched
          to the screen, which blurred every line of it (see UfoElement.paintChrome). Inert to the pointer. -->
     <canvas id="chrome" class="chrome" aria-hidden="true"></canvas>
+    <!-- Where the observer stood and which way they faced, on real ground — see ObserverMapRenderer.
+         In a corner of the frame, not of the stage: a stage wider than the frame left it half out beside the picture. Its toggle stands in the playback bar, and it is inert to the pointer: the canvas beneath it is the
+         recording, and clicking it plays. -->
+    <div id="observer-map-panel" class="observer-map-panel" hidden>
+      <canvas id="observer-map-canvas" width="240" height="240"></canvas>
+      <!-- Wheel and drag do the same on the canvas; these are for whoever has neither. -->
+      <div class="map-zoom">
+        <button id="map-zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+        <button id="map-zoom-out" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+        <button id="map-fit" type="button" title="Back to the whole path" aria-label="Back to the whole path" hidden>⤢</button>
+      </div>
+    </div>
   </div>
   <div id="tooltip" class="tooltip" hidden></div>
   <!-- For a recording with several pictures, the button above opens this list instead of toggling
@@ -51,18 +63,6 @@ export const html = `
     <div id="issues-panel" class="issues-panel" hidden>
       <p id="issues-title"></p>
       <ul id="issues-list"></ul>
-    </div>
-  </div>
-  <!-- Where the observer stood and which way they faced, on real ground — see ObserverMapRenderer.
-       Its toggle stands in the playback bar, and it is inert to the pointer: the canvas beneath it is the
-       recording, and clicking it plays. -->
-  <div id="observer-map-panel" class="observer-map-panel" hidden>
-    <canvas id="observer-map-canvas" width="240" height="240"></canvas>
-    <!-- Wheel and drag do the same on the canvas; these are for whoever has neither. -->
-    <div class="map-zoom">
-      <button id="map-zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
-      <button id="map-zoom-out" type="button" title="Zoom out" aria-label="Zoom out">−</button>
-      <button id="map-fit" type="button" title="Back to the whole path" aria-label="Back to the whole path" hidden>⤢</button>
     </div>
   </div>
   <!-- The account's own sentence and the controls, stacked from the bottom edge up. One box rather
@@ -598,9 +598,11 @@ canvas[data-cursor="rotate"] {
 /* The same hold takes the controls too: behind the loader there is nothing to play, pause or seek (the
    clock is held), and on a phone, where they are always shown, they covered its "this is a
    simulation". They come with the first frame. visibility, not display: the fit that folds the buttons
-   measures them. */
+   measures them. The map of where the observer stood too: the cover picture is laid over the frame alone, and a map in a corner of a stage wider
+   than the frame stood half under it and half out beside it (McMinnville's, the lens ghosts'). */
 .stage.controls-held .toolbar,
-.stage.controls-held .corner-buttons {
+.stage.controls-held .corner-buttons,
+.stage.controls-held .observer-map-panel {
   visibility: hidden;
 }
 .milestone-caption b {

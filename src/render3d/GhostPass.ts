@@ -152,14 +152,22 @@ export class GhostPass {
         uniform vec3 uBrightFlux;
         varying vec2 vUv;
 
-        // The picture blurred to a disc of this radius, pixels, round this point: the level whose texels are as large as the disc, read at
-        // its middle and at four points of its rim, so that a halo is round rather than the square of a texel.
+        // The picture blurred to a disc of this radius, pixels, round this point: taps spread evenly over the disc, each read at the level
+        // that fills the gap between them. It was the level whose texels are as large as the disc, read at five points: a streetlight is
+        // many times the white of the picture, and even the edge of such a texel stayed over white, so that the halo of a lamp in the drops
+        // on a window was a white square, and many lamps a heap of them.
         vec3 blurred(vec2 at, float radiusPx) {
-          float lod = log2(max(1.0, radiusPx * 1.77));
-          vec2 rim = 0.5 * radiusPx / uSize;
-          return 0.4 * textureLod(uMips, at, lod).rgb
-            + 0.15 * (textureLod(uMips, at + vec2(rim.x, 0.0), lod).rgb + textureLod(uMips, at - vec2(rim.x, 0.0), lod).rgb
-                    + textureLod(uMips, at + vec2(0.0, rim.y), lod).rgb + textureLod(uMips, at - vec2(0.0, rim.y), lod).rgb);
+          float lod = log2(max(1.0, radiusPx * 0.25));
+          // Turned by another angle at every pixel (interleaved gradient noise): a light that bright saturates wherever any tap reaches it, so
+          // the halo takes the shape of what the taps read, and a pattern turned the same everywhere drew it as the squares of their texels.
+          float turn = 6.28318531 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+          vec3 sum = vec3(0.0);
+          for (int j = 0; j < ${GhostPass.TAPS}; j++) {
+            float r = sqrt((float(j) + 0.5) / ${GhostPass.TAPS}.0);
+            float theta = float(j) * 2.39996323 + turn;
+            sum += textureLod(uMips, at + vec2(cos(theta), sin(theta)) * r * radiusPx / uSize, lod).rgb;
+          }
+          return sum / ${GhostPass.TAPS}.0;
         }
 
         // The picture seen through the aperture's out-of-focus image, of this radius: taps spread evenly over a disc, pulled in to the
@@ -332,7 +340,9 @@ export class GhostPass {
           vec4 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec4(0.0);
           // What a drop shows of the scene: what is on the other side of it, upside down and out of focus, instead of what is behind it
           // (the finish takes the scene away where the alpha says a drop covers it).
-          if (drop.x > 0.0) sum += drop.x * drop.w * textureLod(uMips, vUv - drop.yz * 4.0, 2.0).rgb;
+          // Out of focus, as a disc of taps: read from one texel of a level eight times smaller, as it was, a streetlight many times the white
+          // of the picture filled that texel's square with white in every drop it was seen through, and a wet window was a heap of white squares.
+          if (drop.x > 0.0) sum += drop.x * drop.w * blurred(vUv - drop.yz * 4.0, 6.0);
           for (int i = 0; i < ${n}; i++) {
             if (i >= uCount) break;
             float k = uScale[i];
