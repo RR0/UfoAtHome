@@ -13,17 +13,17 @@ describe("DecorParameterSets", () => {
       "windows.front", "windows.behind", "windows.left", "windows.right"])
   })
 
-  test("the rise of a roof is asked of a pitched one only, and the side of its ridge of a gable only", () => {
+  test("the rise of a roof is asked of a pitched one only, the side of its ridge of a gable only, and plain walls of any building", () => {
     const set = DecorParameterSets.of({ kind: "building" })!
     const shown = (key: string, element: object): boolean => set.parameters.find(spec => spec.key === key)!.visibleWhen?.(element as never) ?? true
     expect(shown("roof.riseM", {})).toBe(false)
     expect(shown("roof.riseM", { roof: { shape: "hip" } })).toBe(true)
     expect(shown("roof.ridge", { roof: { shape: "hip" } })).toBe(false)
     expect(shown("roof.ridge", { roof: { shape: "gable" } })).toBe(true)
-    expect(shown("facade.plain", {})).toBe(false)
-    expect(shown("facade.plain", { facade: { color: "#ffffff" } })).toBe(true)
-    expect(shown("facade.openings", {})).toBe(false)
-    expect(shown("facade.openings", { facade: { color: "#ffffff" } })).toBe(true)
+    // A building that states no facade has a house's walls from a storey high (see DecorSystem.facadeOf): plain walls and the kind of
+    // openings are asked of every building, which is how a warehouse written by hand says it has none.
+    expect(shown("facade.plain", {})).toBe(true)
+    expect(shown("facade.openings", {})).toBe(true)
   })
 
   test("a building drawn as a model has neither the walls nor the roof of the built-in shape", () => {

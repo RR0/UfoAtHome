@@ -4,7 +4,7 @@ import type { Material, Object3D } from "three"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import { LightRigs } from "../engine/model/LightRig.js"
-import type { DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize, StreetLampSpec } from "../engine/model/Decor.js"
+import type { DecorFacade, DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize, StreetLampSpec } from "../engine/model/Decor.js"
 import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
@@ -1162,15 +1162,35 @@ export class DecorSystem {
 
   /** Whether the walls of this building are drawn from its facade (see DecorFacade) at the size it states, never stretched: a stated size, no observer inside. */
   private static hasFacade(object: DecorObject): boolean {
-    return object.kind === "building" && object.facade !== undefined && !object.observerSide
+    return object.kind === "building" && DecorSystem.facadeOf(object) !== undefined && !object.observerSide
       && object.sizeM?.widthM !== undefined && object.sizeM.lengthM !== undefined && object.sizeM.heightM !== undefined
   }
+
+  /**
+   * The facade a building is drawn with: the one it states, or else a house's (a window every three metres of every floor, a door) where its
+   * walls are at least a storey high. A building that states none was a plain box, and a street of them, a block of flats at dawn, a row of
+   * houses, had not a window between them (Chelyabinsk, Braine-le-Comte). Lower than a storey it is a shed, a hut, a pump's shelter, which has
+   * no house's windows, and stays a plain wall. What is known of a building's use is stated in its facade, and so wins: a surveyed warehouse
+   * states plain walls, a shop windows dark at night (see BuildingStyles), and a building written by hand says so with its own (`plain`).
+   */
+  static facadeOf(object: DecorObject): DecorFacade | undefined {
+    if (object.kind !== "building") return undefined
+    if (object.facade) return object.facade
+    const heightM = object.sizeM?.heightM
+    if (heightM === undefined) return undefined
+    // The walls as tall as they are, not held to a storey as wallHeightOf holds them for drawing.
+    const wallsM = heightM - (object.roof ? RoofGeometry.normalised(object.roof).riseM : 0)
+    return wallsM >= BUILDING_FLOOR_HEIGHT ? DecorSystem.HOUSE_FACADE : undefined
+  }
+
+  /** The facade of a building that states none and is at least a storey high: see facadeOf. */
+  private static readonly HOUSE_FACADE: DecorFacade = {}
 
   /** The walls of a building with a facade: one mesh at its real size, whose colour is the wall's and whose picture is the windows and the door. */
   private static buildFacade(object: DecorObject): Group {
     const group = new Group()
     const size = DecorSystem.sizeOf(object)
-    const facade = object.facade!
+    const facade = DecorSystem.facadeOf(object)!
     const geometry = FacadeGeometry.build(size.widthM, size.lengthM, DecorSystem.wallHeightOf(object, size.heightM), !facade.plain, object.eastM * 7.31 + object.northM * 3.17, facade.openings, facade.storeyM)
     if (facade.closedAtNight) {
       // A window is lit where its rank is under the share of those lit: ranks stretched over a wider span light a smaller share of them, the same rule.

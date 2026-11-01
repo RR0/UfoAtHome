@@ -682,8 +682,10 @@ describe("DecorSystem building facades", () => {
     expect((wall.material as MeshLambertMaterial).color.getHexString()).toBe(new Color("#a65f48").getHexString())
   })
 
-  it("keeps the box for a building with no facade, with no stated size, or with an observer inside", () => {
-    expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+  it("keeps the box for a building lower than a storey with no facade, with no stated size, or with an observer inside", () => {
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: { ...sized, heightM: 2.2 } }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
+    // A storey high and more, it has a house's walls though it states no facade (see facadeOf).
+    expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized }), false)).children[0] as Mesh).geometry).not.toBeInstanceOf(BoxGeometry)
     expect((DecorSystem.bodyOf(DecorSystem.build(building({ facade: { color: "#ffffff" } }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
     expect((DecorSystem.bodyOf(DecorSystem.build(building({ sizeM: sized, facade: { color: "#ffffff" }, observerSide: "front" }), false)).children[0] as Mesh).geometry).toBeInstanceOf(BoxGeometry)
   })
@@ -734,5 +736,22 @@ describe("DecorSystem building facades", () => {
     expect(shader.uniforms.uLitShare.value).toBe(0)
     expect(shader.fragmentShader).toContain("step(vLitRank, uLitShare)")
     expect(shader.vertexShader).toContain("vLitRank = litRank")
+  })
+})
+
+describe("DecorSystem.facadeOf", () => {
+  const building = (heightM: number, extra: Partial<DecorObject> = {}): DecorObject =>
+    ({ id: "b", kind: "building", eastM: 0, northM: 0, sizeM: { widthM: 10, lengthM: 9, heightM }, ...extra }) as DecorObject
+
+  it("gives a building that states no facade a house's, from a storey high", () => {
+    // A row of houses of Braine-le-Comte, a block of flats: windows, where they were plain boxes.
+    expect(DecorSystem.facadeOf(building(10))).toEqual({})
+    // A shed, a hut, a pump's shelter: no house's windows.
+    expect(DecorSystem.facadeOf(building(2.2))).toBeUndefined()
+  })
+
+  it("keeps the facade a building states, plain walls included", () => {
+    expect(DecorSystem.facadeOf(building(10, { facade: { plain: true } }))).toEqual({ plain: true })
+    expect(DecorSystem.facadeOf({ ...building(10), kind: "tree" } as DecorObject)).toBeUndefined()
   })
 })

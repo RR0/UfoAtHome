@@ -96,16 +96,16 @@ export class DecorParameterSets {
       {
         type: "colour", key: "facade.color", group, fallback: "#d3cab8",
         label: { en: "Wall colour", fr: "Couleur des murs", es: "Color de los muros", it: "Colore dei muri" },
-        hint: { en: "The colour of the walls, which draws them with windows and a door (where the width, the length and the height of the building are all stated). Empty: the walls of the plain box.",
-          fr: "La couleur des murs, qui les fait dessiner avec fenêtres et porte (là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées). Vide : les murs de la simple boîte.",
-          es: "El color de los muros, que los hace dibujar con ventanas y puerta (donde el ancho, el largo y el alto del edificio están todos enunciados). Vacío: los muros de la caja lisa.",
-          it: "Il colore dei muri, che li fa disegnare con finestre e porta (dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate). Vuoto: i muri della semplice scatola." }
+        hint: { en: "The colour of the walls, drawn with windows and a door where the width, the length and the height of the building are all stated. Empty: a pale plaster, and the walls of a house wherever they are a storey high (lower, a shed's plain walls).",
+          fr: "La couleur des murs, dessinés avec fenêtres et porte là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées. Vide : un enduit pâle, et les murs d'une maison dès qu'ils ont la hauteur d'un étage (plus bas, les murs nus d'un abri).",
+          es: "El color de los muros, dibujados con ventanas y puerta donde el ancho, el largo y el alto del edificio están todos enunciados. Vacío: un enlucido pálido, y los muros de una casa en cuanto tienen la altura de una planta (más bajos, los muros lisos de un cobertizo).",
+          it: "Il colore dei muri, disegnati con finestre e porta dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate. Vuoto: un intonaco chiaro, e i muri di una casa non appena hanno l'altezza di un piano (più bassi, i muri lisci di un capanno)." }
       },
       {
         type: "boolean", key: "facade.plain", group,
         label: { en: "Plain walls", fr: "Murs nus", es: "Muros lisos", it: "Muri lisci" },
-        hint: { en: "No windows and no door on the walls.", fr: "Ni fenêtres ni porte sur les murs.", es: "Ni ventanas ni puerta en los muros.", it: "Né finestre né porta sui muri." },
-        visibleWhen: element => (element as { facade?: unknown }).facade !== undefined
+        hint: { en: "No windows and no door on the walls: a warehouse, a shed, a building nobody lives in.", fr: "Ni fenêtres ni porte sur les murs : un entrepôt, un hangar, un bâtiment où personne n'habite.",
+          es: "Ni ventanas ni puerta en los muros: un almacén, un cobertizo, un edificio donde nadie vive.", it: "Né finestre né porta sui muri: un magazzino, un capannone, un edificio dove nessuno abita." }
       },
       {
         type: "choice", key: "facade.openings", group,
@@ -118,8 +118,7 @@ export class DecorParameterSets {
         choices: [
           { value: "tall", label: { en: "Old building", fr: "Immeuble ancien", es: "Edificio antiguo", it: "Edificio antico" } },
           { value: "lancet", label: { en: "Church", fr: "Église", es: "Iglesia", it: "Chiesa" } }
-        ],
-        visibleWhen: element => (element as { facade?: unknown }).facade !== undefined
+        ]
       }
     ]
   }
