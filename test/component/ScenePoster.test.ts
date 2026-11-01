@@ -25,6 +25,15 @@ describe("ScenePoster", () => {
     expect(image.src).toBe("https://rr0.org/time/1/9/6/5/cover.jpg")
   })
 
+  it("shows the project's server its own copy of a published cover, the one just taken", () => {
+    const { poster, image } = make()
+    poster.show("https://ufoathome.org/demo-data/share/socorro.jpg", "https://ufoathome.org/demo-data/observer-socorro.json")
+    expect(location.hostname).toBe("localhost")
+    expect(image.src).toBe(`${location.origin}/demo-data/share/socorro.jpg`)
+    expect(ScenePoster.isDevelopmentHost("ufoathome.org")).toBe(false)
+    expect(ScenePoster.isDevelopmentHost("rr0.localhost")).toBe(true)
+  })
+
   it("does not announce a change when a picture replaces another", () => {
     const { poster, changes } = make()
     poster.show("a.jpg", "https://example.test/x.json")

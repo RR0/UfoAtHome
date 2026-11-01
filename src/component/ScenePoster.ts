@@ -61,9 +61,21 @@ export class ScenePoster {
     if (typeof image !== "string" || image.trim() === "") return undefined
     try {
       const url = new URL(image.trim(), base ?? location.href)
-      return url.protocol === "https:" || url.protocol === "http:" ? url.href : undefined
+      if (url.protocol !== "https:" && url.protocol !== "http:") return undefined
+      // A cover is written with the address it is published at (see scripts/share-cards/ShareCards.ts), but the project's own server, while
+      // it is worked on, serves the one just taken: shown the published one, a cover photographed again looked as if nothing had changed.
+      if (url.origin === ScenePoster.PUBLISHED_ORIGIN && ScenePoster.isDevelopmentHost(location.hostname)) return location.origin + url.pathname
+      return url.href
     } catch {
       return undefined
     }
+  }
+
+  /** Where the covers of the project's own recordings are published. */
+  private static readonly PUBLISHED_ORIGIN = "https://ufoathome.org"
+
+  /** Whether a page is served by a server of the machine it is shown on: a project being worked on. */
+  static isDevelopmentHost(hostname: string): boolean {
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname.endsWith(".localhost")
   }
 }
