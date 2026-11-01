@@ -63,4 +63,37 @@ describe("RetinalBleaching", () => {
     const indigo = RetinalBleaching.flightAt(1.4)
     expect(indigo[2]).toBeGreaterThan(indigo[0])
   })
+
+  it("brings a jump in the recording to the retina the recording made, rather than a fresh one", () => {
+    // A light that crosses the picture between 1 and 2 s, brighter than the Sun.
+    const sourcesAt = (t: number) => t >= 1000 && t <= 2000 ? [{ ndcX: -0.5 + (t - 1000) / 1000, ndcY: 0, lux: 8.5e5 }] : []
+    const played = new RetinalBleaching()
+    played.advance(0, [], FIELD)
+    for (let t = 100; t <= 60000; t += 100) played.advance(t, sourcesAt(t), FIELD)
+    const replayed = new RetinalBleaching()
+    replayed.replay(0, 60000, sourcesAt, FIELD)
+    const left = (retina: RetinalBleaching) => (retina as unknown as { left: Float32Array }).left
+    const a = left(played), b = left(replayed)
+    let worst = 0
+    for (let i = 0; i < a.length; i++) worst = Math.max(worst, Math.abs(a[i] - b[i]))
+    expect(worst).toBeLessThan(0.01)
+    expect(replayed.any).toBe(true)
+    expect(replayed.atMs).toBe(60000)
+  })
+
+  it("starts a later replay from the retina it kept nearest before, with the same result", () => {
+    const sourcesAt = (t: number) => t >= 1000 && t <= 2000 ? [{ ndcX: -0.5 + (t - 1000) / 1000, ndcY: 0, lux: 8.5e5 }] : []
+    const history = {}
+    const kept = new RetinalBleaching()
+    kept.replay(0, 60000, sourcesAt, FIELD, history)
+    kept.replay(0, 42300, sourcesAt, FIELD, history)
+    const fresh = new RetinalBleaching()
+    fresh.replay(0, 42300, sourcesAt, FIELD)
+    const left = (retina: RetinalBleaching) => (retina as unknown as { left: Float32Array }).left
+    const a = left(kept), b = left(fresh)
+    let worst = 0
+    for (let i = 0; i < a.length; i++) worst = Math.max(worst, Math.abs(a[i] - b[i]))
+    expect(worst).toBeLessThan(1e-4)
+    expect((kept as unknown as { snapshots: Map<number, unknown> }).snapshots.has(40000)).toBe(true)
+  })
 })

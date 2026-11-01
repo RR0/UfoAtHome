@@ -626,6 +626,14 @@
         "widthM": 55,
         "lengthM": 14,
         "heightM": 16
+      },
+      "facade": {
+        "value": {
+          "color": "#cfc8b8",
+          "storeyM": 3.2
+        },
+        "basis": "assumed",
+        "rationale": "Supposed: the pale panel walls of the five-storey blocks of flats built across Chelyabinsk in the 1960s, a window to every bay of every floor; no survey of these buildings is used."
       }
     },
     {
@@ -654,6 +662,14 @@
         "widthM": 55,
         "lengthM": 14,
         "heightM": 16
+      },
+      "facade": {
+        "value": {
+          "color": "#cfc8b8",
+          "storeyM": 3.2
+        },
+        "basis": "assumed",
+        "rationale": "Supposed: the pale panel walls of the five-storey blocks of flats built across Chelyabinsk in the 1960s, a window to every bay of every floor; no survey of these buildings is used."
       }
     },
     {
@@ -682,6 +698,14 @@
         "widthM": 55,
         "lengthM": 14,
         "heightM": 16
+      },
+      "facade": {
+        "value": {
+          "color": "#cfc8b8",
+          "storeyM": 3.2
+        },
+        "basis": "assumed",
+        "rationale": "Supposed: the pale panel walls of the five-storey blocks of flats built across Chelyabinsk in the 1960s, a window to every bay of every floor; no survey of these buildings is used."
       }
     },
     {
@@ -710,6 +734,14 @@
         "widthM": 55,
         "lengthM": 14,
         "heightM": 16
+      },
+      "facade": {
+        "value": {
+          "color": "#cfc8b8",
+          "storeyM": 3.2
+        },
+        "basis": "assumed",
+        "rationale": "Supposed: the pale panel walls of the five-storey blocks of flats built across Chelyabinsk in the 1960s, a window to every bay of every floor; no survey of these buildings is used."
       }
     }
   ],

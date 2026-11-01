@@ -99,6 +99,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setInstrumentGain(): void {}
     setLightPollution(): void {}
     setRecordingTime(): void {}
+    setRetinaHistory(): void {}
     setMedium(): void {}
     setLensGhosts(): void {}
     pickGhostAt(): undefined { return undefined }

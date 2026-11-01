@@ -31,6 +31,7 @@ import {
   PerspectiveCamera,
   PointLight,
   Points,
+  Euler,
   Quaternion,
   Raycaster,
   Scene,
@@ -5173,11 +5174,21 @@ export class SceneRenderer {
       if (!point || Math.abs(point.ndcX) > 1.2 || Math.abs(point.ndcY) > 1.2) continue
       sources.push({ ndcX: point.ndcX, ndcY: point.ndcY, lux: Photometry.luminanceOf(emitter.lux) })
     }
-    if (!this.retina && sources.length === 0) return
-    this.retina ??= new RetinalBleaching()
     const size = this.renderer.getDrawingBufferSize(this.retinaSize)
     const aspect = size.x / Math.max(size.y, 1)
-    this.retina.advance(this.recordingTimeMs, sources, { width: this.camera.fov * aspect, height: this.camera.fov })
+    const field = { width: this.camera.fov * aspect, height: this.camera.fov }
+    const last = this.retina?.atMs
+    const jumped = last === undefined || this.recordingTimeMs < last || this.recordingTimeMs - last > RetinalBleaching.JUMP_MS
+    // A jump in the recording (a seek, either way, or a scene opened part way through) is brought to as the recording made it, when the
+    // scene can say what it was (see setRetinaHistory): its past, replayed.
+    if (jumped && this.retinaHistory && this.recordingTimeMs > 0) {
+      this.retina ??= new RetinalBleaching()
+      this.retina.replay(0, this.recordingTimeMs, at => this.historicBleachingAt(at, aspect), field, this.retinaHistoryOf)
+    } else {
+      if (!this.retina && sources.length === 0) return
+      this.retina ??= new RetinalBleaching()
+      this.retina.advance(this.recordingTimeMs, sources, field)
+    }
     if (!this.retina.any) return
     EYE_UNIFORMS.uRetina.value = this.retina.texture
     EYE_UNIFORMS.uRetinaOn.value = 1
@@ -5185,6 +5196,45 @@ export class SceneRenderer {
   }
 
   private readonly retinaSize = new Vector2()
+
+  /** What the recording held at any of its instants, for the eye's afterimages to be replayed after a jump (see setRetinaHistory). */
+  private retinaHistory?: (atMs: number) => { views: readonly ReentryFragmentView[], pose?: { headingDeg?: number, pitchDeg: number, rollDeg?: number, fovDeg?: number } }
+
+  /**
+   * How the scene can tell what bleached the eye before the instant on show: the re-entries at any instant of the recording, and the
+   * observer's pose then (where they looked, so where on the retina it fell). The meteors of a shower are left out, never bright enough
+   * to bleach anything (see EmitterLights.SKY_LIGHTING_MAGNITUDE); a look turned by hand, which the recording does not hold, too.
+   */
+  setRetinaHistory(history: typeof this.retinaHistory, of?: unknown): void {
+    this.retinaHistory = history
+    this.retinaHistoryOf = of
+  }
+
+  /** The recording `retinaHistory` tells the past of: the retinas a replay kept are forgotten when it changes. */
+  private retinaHistoryOf?: unknown
+
+  /** What bleached the eye at a past instant of the recording, where it fell on the picture as the observer then looked. */
+  private historicBleachingAt(atMs: number, aspect: number): BleachingSource[] {
+    const past = this.retinaHistory?.(atMs)
+    if (!past || past.views.length === 0) return []
+    const pose = past.pose
+    const orientation = this.historicQuaternion.setFromEuler(this.historicEuler.set(
+      (pose?.pitchDeg ?? 0) * DEG_TO_RAD, -(pose?.headingDeg ?? 0) * DEG_TO_RAD, (pose?.rollDeg ?? 0) * DEG_TO_RAD, "YXZ")).invert()
+    const fovDeg = pose?.fovDeg ?? this.camera.fov
+    const sources: BleachingSource[] = []
+    for (const view of past.views) {
+      const emitter = this.farEmitterOf(view.head, view.magnitude)
+      if (!emitter) continue
+      const point = this.screenPointIn(this.historicDirection.copy(emitter.direction).applyQuaternion(orientation), fovDeg, aspect)
+      if (!point || Math.abs(point.ndcX) > 1.2 || Math.abs(point.ndcY) > 1.2) continue
+      sources.push({ ndcX: point.ndcX, ndcY: point.ndcY, lux: Photometry.luminanceOf(emitter.lux) })
+    }
+    return sources
+  }
+
+  private readonly historicQuaternion = new Quaternion()
+  private readonly historicEuler = new Euler()
+  private readonly historicDirection = new Vector3()
 
   /** Whether the eye's afterimage (see RetinalBleaching) darkens a point of the picture enough to be seen: a tenth or more of the pigment
    * gone. Never through a camera, which has none. */
@@ -5942,11 +5992,16 @@ export class SceneRenderer {
     const aspect = size.x / Math.max(size.y, 1)
     // An eye's picture can hold what is beside and even behind the axis, once its field is wide
     // enough to be drawn through the cube; only a pinhole's cannot.
+    return this.screenPointIn(local, this.camera.fov, aspect)
+  }
+
+  /** Where a direction in the camera's own frame lands on the picture, for a vertical field of `fovDeg` (see screenPointOf). */
+  private screenPointIn(local: Vector3, fovDeg: number, aspect: number): { ndcX: number; ndcY: number } | undefined {
     if (this.projectionKind === "equidistant" && this.equidistantPass) {
-      return EquidistantProjectionPass.ndcFor(local, this.camera.fov, aspect)
+      return EquidistantProjectionPass.ndcFor(local, fovDeg, aspect)
     }
     if (local.z >= 0) return undefined
-    const tanHalf = Math.tan((this.camera.fov / 2) * DEG_TO_RAD)
+    const tanHalf = Math.tan((fovDeg / 2) * DEG_TO_RAD)
     return { ndcX: local.x / -local.z / (aspect * tanHalf), ndcY: local.y / -local.z / tanHalf }
   }
 

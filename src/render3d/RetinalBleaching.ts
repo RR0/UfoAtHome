@@ -214,6 +214,104 @@ export class RetinalBleaching {
     return this.left[row * RetinalBleaching.WIDTH + column]
   }
 
+  /** The recording's instant the retina was last brought to, ms; undefined before the first. */
+  get atMs(): number | undefined {
+    return this.lastMs
+  }
+
+  /**
+   * The retina at `toMs` as the recording made it from `fromMs`, its sources at each instant given by `sourcesAt`: what a jump in the
+   * recording (a seek, either way) is brought to, rather than a fresh retina — going back over the bolide and forward again left no trace
+   * of it. Followed in steps of REPLAY_STEP_MS while something bleaches, and in one exact step over the stretches where nothing does (the
+   * pigment's regeneration and the glow's fading are solved exactly over any time, see bleach): a few hundred steps for a few minutes,
+   * a tenth of a second. So the retina is kept every SNAPSHOT_MS of what was replayed, and a later jump starts from the nearest kept
+   * before it: dragging the timeline back and forth costs a few steps a position, not the whole past each time. What was kept is the past
+   * of one recording, `history`: another one forgets it.
+   */
+  replay(fromMs: number, toMs: number, sourcesOf: (atMs: number) => readonly BleachingSource[], fieldDeg: { width: number, height: number }, history?: unknown): void {
+    // Each instant asked once: the same instant is looked at as the end of a stride and as the start of the next.
+    const asked = new Map<number, readonly BleachingSource[]>()
+    const sourcesAt = (time: number) => {
+      let sources = asked.get(time)
+      if (!sources) asked.set(time, sources = sourcesOf(time))
+      return sources
+    }
+    if (history !== this.snapshotsOf) {
+      this.snapshots.clear()
+      this.snapshotsOf = history
+    }
+    let start = fromMs
+    for (const at of this.snapshots.keys()) if (at <= toMs && at > start) start = at
+    if (start > fromMs) this.restore(start)
+    else this.reset()
+    this.previous = undefined
+    this.lastMs = start
+    let at = start
+    let resting = 0
+    // Every SNAPSHOT_MS, and every second while something bleaches: a jump in those few seconds would otherwise replay them step by step.
+    const keep = (time: number) => {
+      const every = time % RetinalBleaching.REPLAY_STRIDE_MS === 0 && sourcesAt(time).length > 0 ? RetinalBleaching.REPLAY_STRIDE_MS : RetinalBleaching.SNAPSHOT_MS
+      if (time % every !== 0 || this.snapshots.has(time)) return
+      if (resting > 0) this.rest(resting)
+      resting = 0
+      this.snapshots.set(time, { left: this.left.slice(), glow: this.glow.slice(), age: this.age.slice(), bleached: this.bleached })
+    }
+    while (at < toMs) {
+      keep(at)
+      // Through what bleaches nothing in strides, its regeneration put off to one step when something does again, or at the end.
+      // On whole strides and whole steps of the recording, so that the instants a retina is kept at are reached.
+      const stride = Math.min(toMs, (Math.floor(at / RetinalBleaching.REPLAY_STRIDE_MS) + 1) * RetinalBleaching.REPLAY_STRIDE_MS)
+      if (sourcesAt(stride).length === 0 && sourcesAt(at).length === 0) {
+        resting += stride - at
+        at = stride
+        continue
+      }
+      if (resting > 0) this.rest(resting)
+      resting = 0
+      const next = Math.min(toMs, (Math.floor(at / RetinalBleaching.REPLAY_STEP_MS) + 1) * RetinalBleaching.REPLAY_STEP_MS)
+      this.lastMs = at
+      this.advance(next, sourcesAt(next), fieldDeg)
+      at = next
+    }
+    if (resting > 0) this.rest(resting)
+    this.lastMs = toMs
+  }
+
+  /** How often a replay keeps the retina it reached, ms of the recording: see replay. */
+  static readonly SNAPSHOT_MS = 5000
+  private readonly snapshots = new Map<number, { left: Float32Array, glow: Float32Array, age: Float32Array, bleached: boolean }>()
+  /** The recording the kept retinas are the past of. */
+  private snapshotsOf?: unknown
+
+  /** The retina kept at `atMs` (see replay), written back to the texture too. */
+  private restore(atMs: number): void {
+    const kept = this.snapshots.get(atMs)!
+    this.left.set(kept.left)
+    this.glow.set(kept.glow)
+    this.age.set(kept.age)
+    this.bleached = kept.bleached
+    for (let index = 0; index < this.left.length; index++) {
+      const at = index * 4
+      const colour = RetinalBleaching.flightAt(this.age[index])
+      this.bytes[at] = DataUtils.toHalfFloat(this.left[index])
+      for (let c = 0; c < 3; c++) this.bytes[at + 1 + c] = DataUtils.toHalfFloat(this.glow[index] * colour[c])
+    }
+    this.texture.needsUpdate = true
+  }
+
+  /** The step a replay follows a bleaching source in, ms: as often as a picture played a few times a second. */
+  static readonly REPLAY_STEP_MS = 100
+  /** The stride a replay crosses what bleaches nothing in, ms: a bolide is never seen for less. */
+  static readonly REPLAY_STRIDE_MS = 1000
+
+  /** `ms` of the recording with nothing bleaching: the pigment regenerates and the glow fades, exactly. */
+  private rest(ms: number): void {
+    this.previous = undefined
+    if (!this.bleached) return
+    this.bleach([], ms / 1000, { width: 1, height: 1 })
+    this.texture.needsUpdate = true
+  }
+
   /** A fresh retina, nothing bleached: a jump in the recording has no past to remember. */
   private reset(): boolean {
     if (!this.bleached) return false
