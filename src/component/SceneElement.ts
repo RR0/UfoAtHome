@@ -180,6 +180,11 @@ const GHOST_TOOLTIP: GhostTooltipTexts = {
   drop: { lens: "Drop on the lens", filter: "Drop on the filter", window: "Drop on the window", windscreen: "Drop on the windscreen" },
   dropDetail: "{name}. Like a small lens, it shows upside down and blurred what is on the other side of it, rather than what is behind it."
 }
+/** What is said of the eye's afterimage pointed at: see SceneNames.afterimageTooltip. */
+const AFTERIMAGE_TOOLTIP = {
+  name: "Afterimage, in the eye",
+  detail: "{name}: where the image of a light brighter than the Sun fell, the retina's pigment is bleached, and what is seen there looks darker. It stays where it is in the field of view whichever way the eye turns, and takes minutes to fade."
+}
 const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
@@ -319,7 +324,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -680,6 +685,11 @@ export class SceneElement extends HTMLElement {
     // A ghost of the lens, laid over whatever is behind it: a disc in the sky where nothing is, named after the light that makes it.
     const ghost = ghosts ? this.ghostPick(ndcX, ndcY) : undefined
     if (ghost) return ghost
+    // The eye's afterimage, in the eye and not in the world: over whatever is behind it, as a ghost is over the picture.
+    if (this.sceneRenderer.pickAfterimageAt(ndcX, ndcY)) {
+      const texts = this.naming.names?.afterimageTooltip ?? AFTERIMAGE_TOOLTIP
+      return { kind: "afterimage", name: texts.name, detail: () => texts.detail.replace("{name}", texts.name) }
+    }
     const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {

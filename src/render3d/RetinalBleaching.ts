@@ -140,6 +140,13 @@ export class RetinalBleaching {
     this.bleached = bleached
   }
 
+  /** The share of pigment left where a point of the picture falls (-1 to 1 across and up): 1 where nothing is bleached. */
+  leftAt(ndcX: number, ndcY: number): number {
+    const column = Math.min(RetinalBleaching.WIDTH - 1, Math.max(0, Math.floor((ndcX + 1) / 2 * RetinalBleaching.WIDTH)))
+    const row = Math.min(RetinalBleaching.HEIGHT - 1, Math.max(0, Math.floor((ndcY + 1) / 2 * RetinalBleaching.HEIGHT)))
+    return this.left[row * RetinalBleaching.WIDTH + column]
+  }
+
   /** A fresh retina, nothing bleached: a jump in the recording has no past to remember. */
   private reset(): boolean {
     if (!this.bleached) return false

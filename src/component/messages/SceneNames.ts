@@ -108,6 +108,8 @@ export interface SceneNames {
    * What is said of a rocket's plume pointed at: its name when the launch gives none, and with Alt {name}, {part} (which of what the stage
    * let go it is), {distance} from the eye and {height} in km.
    */
+  /** What is said of the eye's afterimage pointed at: its name, and with Alt what it is ({name}). */
+  readonly afterimageTooltip: { readonly name: string; readonly detail: string }
   readonly plumeTooltip: { readonly name: string; readonly detail: string; readonly ascent: string; readonly burn: string; readonly vent: string }
   /** What is said of a ghost of the lens pointed at: see GhostTooltipTexts. */
   readonly ghostTooltip: GhostTooltipTexts

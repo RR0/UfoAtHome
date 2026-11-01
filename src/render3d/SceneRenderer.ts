@@ -66,6 +66,7 @@ import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { FrameMeter } from "./FrameMeter.js"
+import { CutoutCoverage } from "./CutoutCoverage.js"
 import { RetinalBleaching, type BleachingSource } from "./RetinalBleaching.js"
 import { EmitterLights, type FarEmitter } from "./EmitterLights.js"
 import { PhoneDevelopment } from "../engine/instrument/PhoneDevelopment.js"
@@ -1434,6 +1435,8 @@ export class SceneRenderer {
     canvas: HTMLCanvasElement,
     terrainProviders: TerrainProviders = defaultTerrainProviders()
   ) {
+    // Before any material is compiled: the leaves of a tree stay as covered afar as up close.
+    CutoutCoverage.install()
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
     // The display's own ratio at most, and less while the frames are late — see AdaptiveResolution.
     this.resolution = new AdaptiveResolution(Math.min(window.devicePixelRatio || 1, 2), this.renderer.getContext())
@@ -5182,6 +5185,15 @@ export class SceneRenderer {
   }
 
   private readonly retinaSize = new Vector2()
+
+  /** Whether the eye's afterimage (see RetinalBleaching) darkens a point of the picture enough to be seen: a tenth or more of the pigment
+   * gone. Never through a camera, which has none. */
+  pickAfterimageAt(ndcX: number, ndcY: number): boolean {
+    return !this.medium && this.retina !== undefined && this.retina.any && this.retina.leftAt(ndcX, ndcY) < SceneRenderer.AFTERIMAGE_SEEN_BELOW
+  }
+
+  /** The share of pigment left under which an afterimage is named on the picture: see pickAfterimageAt. */
+  private static readonly AFTERIMAGE_SEEN_BELOW = 0.9
 
   /** The recording's own instant on show, ms (see setRecordingTime). */
   private recordingTimeMs = 0
