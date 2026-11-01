@@ -1966,6 +1966,7 @@ export class SceneElement extends HTMLElement {
    * enough that the sky itself moved across it (see updateAstronomy). */
   private applySceneAt(t: number, instant?: { sky: boolean; stepMs: number }): void {
     const sighting = this.ufoElement.sighting
+    if (!instant) this.sceneRenderer.setRecordingTime(t)
     // Resolved here (not left to the sightingData setter's one-time call, or an explicit nudge on
     // edit) since weather is now itself keyframed over time — see Sighting.resolveWeatherAt. Cheap
     // even every tick: setWeather/SceneRenderer.setWeather both dedupe on actual field values, not

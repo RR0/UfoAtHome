@@ -1,0 +1,962 @@
+{
+  "version": 1,
+  "id": "sky-test-chelyabinsk-cctv",
+  "image": "https://ufoathome.org/demo-data/share/sky-test-chelyabinsk.jpg",
+  "tags": [
+    "fireball",
+    "bolide",
+    "superbolide",
+    "Chelyabinsk",
+    "historical",
+    "shadows",
+    "cctv"
+  ],
+  "description": {
+    "fr": "Le même superbolide, filmé par une caméra de surveillance fixée à quatre mètres et tournée vers la rue, comme celles qui ont enregistré les ombres tournant dans les cours. Elle ne voit presque pas le ciel : c'est la rue qui s'illumine, ses ombres qui tournent, et l'image qui brûle puis se rattrape à mesure que son exposition suit la lumière. La caméra est un type, pas un modèle : capteur CCD de 1/3 de pouce, objectif de 3,6 mm, exposition qui suit en une demi-seconde, le réglage par défaut de ces caméras. La traînée verticale qu'un CCD dessine sous une lumière trop forte n'est pas rendue.",
+    "en": "The same superbolide, filmed by a security camera fixed four metres up and facing the street, like those that recorded the shadows swinging round the yards. It hardly sees the sky: it is the street that lights up, its shadows that swing round, and the picture that burns and catches up as its exposure follows the light. The camera is a type, not a model: a 1/3-inch CCD, a 3.6 mm lens, an exposure that follows in half a second, these cameras' default setting. The vertical streak a CCD draws under a light too strong for it is not rendered.",
+    "es": "El mismo superbólido, grabado por una cámara de vigilancia fijada a cuatro metros y orientada a la calle, como las que registraron las sombras girando en los patios. Apenas ve el cielo: es la calle la que se ilumina, sus sombras las que giran, y la imagen la que se quema y se recupera a medida que su exposición sigue a la luz. La cámara es un tipo, no un modelo: CCD de 1/3 de pulgada, objetivo de 3,6 mm, exposición que sigue en medio segundo, el ajuste por defecto de estas cámaras. La franja vertical que un CCD dibuja bajo una luz demasiado fuerte no se representa.",
+    "it": "Lo stesso superbolide, ripreso da una telecamera di sorveglianza fissata a quattro metri e rivolta verso la strada, come quelle che registrarono le ombre che giravano nei cortili. Il cielo quasi non lo vede: è la strada che si illumina, le sue ombre che girano, e l'immagine che brucia e si riprende man mano che la sua esposizione segue la luce. La telecamera è un tipo, non un modello: CCD da 1/3 di pollice, obiettivo da 3,6 mm, esposizione che segue in mezzo secondo, l'impostazione predefinita di queste telecamere. La striscia verticale che un CCD disegna sotto una luce troppo forte non è resa."
+  },
+  "time": {
+    "year": 2013,
+    "month": 2,
+    "day": 15,
+    "hour": 9,
+    "minute": 20,
+    "second": 15
+  },
+  "utcOffsetHours": 6,
+  "durationSeconds": 30,
+  "summaryTime": 16.8,
+  "place": [
+    {
+      "lat": 55.1597,
+      "lng": 61.4026,
+      "name": "Chelyabinsk, Lenin Avenue"
+    }
+  ],
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "stated",
+            "rationale": "A clear morning sky in every video."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 2000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 0,
+          "windSpeed": 0,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 55.1597,
+          "lng": 61.4026,
+          "elevationM": 3,
+          "headingDeg": 200,
+          "pitchDeg": -12,
+          "fovDeg": 53
+        }
+      },
+      {
+        "t": 30000,
+        "pose": {
+          "lat": 55.1597,
+          "lng": 61.4026,
+          "elevationM": 3,
+          "headingDeg": 200,
+          "pitchDeg": -12,
+          "fovDeg": 53
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [
+    {
+      "id": "lamp-s0",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -75,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n0",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -63,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s1",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -50,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n1",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -38,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s2",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -25,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n2",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s3",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 0,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n3",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 12,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s4",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 25,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n4",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 37,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s5",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 50,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n5",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 62,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "lamp-s6",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 75,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "lit": false
+    },
+    {
+      "id": "lamp-n6",
+      "kind": "streetlight",
+      "title": {
+        "en": "Street lamp",
+        "fr": "Lampadaire",
+        "es": "Farola",
+        "it": "Lampione"
+      },
+      "eastM": {
+        "value": 87,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 13,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 180,
+      "lit": false
+    },
+    {
+      "id": "tree-0",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": -52,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -19,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "tree-1",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": -18,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -20,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "tree-2",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": 20,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -19,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "tree-3",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": 55,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -20,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "tree-4",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": -35,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 19,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "tree-5",
+      "kind": "tree",
+      "title": {
+        "en": "Tree",
+        "fr": "Arbre",
+        "es": "Árbol",
+        "it": "Albero"
+      },
+      "eastM": {
+        "value": 40,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 20,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "sizeM": {
+        "widthM": 5,
+        "lengthM": 5,
+        "heightM": 9
+      }
+    },
+    {
+      "id": "car-1",
+      "kind": "vehicle",
+      "title": {
+        "en": "Car",
+        "fr": "Voiture",
+        "es": "Coche",
+        "it": "Auto"
+      },
+      "eastM": {
+        "value": -14,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -4,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 270,
+      "lit": false
+    },
+    {
+      "id": "car-2",
+      "kind": "vehicle",
+      "title": {
+        "en": "Car",
+        "fr": "Voiture",
+        "es": "Coche",
+        "it": "Auto"
+      },
+      "eastM": {
+        "value": 22,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": 4,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 90,
+      "lit": false
+    },
+    {
+      "id": "block-0",
+      "kind": "building",
+      "title": {
+        "en": "Block of flats",
+        "fr": "Immeuble",
+        "es": "Bloque de pisos",
+        "it": "Condominio"
+      },
+      "eastM": {
+        "value": -110,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -85,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "floors": 5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55,
+        "lengthM": 14,
+        "heightM": 16
+      }
+    },
+    {
+      "id": "block-1",
+      "kind": "building",
+      "title": {
+        "en": "Block of flats",
+        "fr": "Immeuble",
+        "es": "Bloque de pisos",
+        "it": "Condominio"
+      },
+      "eastM": {
+        "value": -40,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -85,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "floors": 5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55,
+        "lengthM": 14,
+        "heightM": 16
+      }
+    },
+    {
+      "id": "block-2",
+      "kind": "building",
+      "title": {
+        "en": "Block of flats",
+        "fr": "Immeuble",
+        "es": "Bloque de pisos",
+        "it": "Condominio"
+      },
+      "eastM": {
+        "value": 30,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -85,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "floors": 5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55,
+        "lengthM": 14,
+        "heightM": 16
+      }
+    },
+    {
+      "id": "block-3",
+      "kind": "building",
+      "title": {
+        "en": "Block of flats",
+        "fr": "Immeuble",
+        "es": "Bloque de pisos",
+        "it": "Condominio"
+      },
+      "eastM": {
+        "value": 100,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "northM": {
+        "value": -85,
+        "basis": "assumed",
+        "rationale": "Supposed street furniture of Lenin Avenue by Revolution Square, placed to show what the bolide's light did: no survey of the place is used."
+      },
+      "headingDeg": 0,
+      "floors": 5,
+      "lit": false,
+      "sizeM": {
+        "widthM": 55,
+        "lengthM": 14,
+        "heightM": 16
+      }
+    }
+  ],
+  "skyEvents": {
+    "reentries": [
+      {
+        "id": "chelyabinsk",
+        "title": {
+          "en": "Chelyabinsk superbolide",
+          "fr": "Superbolide de Tcheliabinsk",
+          "es": "Superbólido de Cheliábinsk",
+          "it": "Superbolide di Čeljabinsk"
+        },
+        "track": [
+          {
+            "t": 6000,
+            "lat": {
+              "value": 54.5152,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "lng": {
+              "value": 64.0008,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "altitudeKm": {
+              "value": 95.1,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            }
+          },
+          {
+            "t": 18300,
+            "lat": {
+              "value": 54.92,
+              "basis": "derived",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "lng": {
+              "value": 61.05,
+              "basis": "derived",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "altitudeKm": {
+              "value": 30,
+              "basis": "derived",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            }
+          },
+          {
+            "t": 23000,
+            "lat": {
+              "value": 55.02,
+              "basis": "derived",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "lng": {
+              "value": 60.27,
+              "basis": "derived",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "altitudeKm": {
+              "value": 12.6,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            }
+          }
+        ],
+        "fragments": [
+          {
+            "id": "main",
+            "absoluteMagnitude": {
+              "value": -27.5,
+              "basis": "stated",
+              "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+            },
+            "lightCurve": [
+              {
+                "t": 6000,
+                "absoluteMagnitude": {
+                  "value": -3,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 9000,
+                "absoluteMagnitude": {
+                  "value": -8,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 12000,
+                "absoluteMagnitude": {
+                  "value": -13,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 14000,
+                "absoluteMagnitude": {
+                  "value": -17,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 15500,
+                "absoluteMagnitude": {
+                  "value": -21,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 17000,
+                "absoluteMagnitude": {
+                  "value": -24.5,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 18300,
+                "absoluteMagnitude": {
+                  "value": -27.5,
+                  "basis": "stated",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 19000,
+                "absoluteMagnitude": {
+                  "value": -25,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 20000,
+                "absoluteMagnitude": {
+                  "value": -20,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 21500,
+                "absoluteMagnitude": {
+                  "value": -14,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              },
+              {
+                "t": 23000,
+                "absoluteMagnitude": {
+                  "value": -8,
+                  "basis": "assumed",
+                  "rationale": "Peak absolute magnitude about -27 to -28 at 29.7 km (Brown, preliminary report; Borovička et al. 2013, break-up between 45 and 30 km). The shape of the curve between is assumed: a steep brightening as it plunged into denser air, the flare of the break-up, and a fast fall-off below."
+                }
+              }
+            ],
+            "color": {
+              "value": "#fff4e2",
+              "basis": "stated",
+              "rationale": "Every video shows it white, brighter than the Sun at its peak."
+            },
+            "trainS": {
+              "value": 3,
+              "basis": "assumed",
+              "rationale": "A bright glowing wake behind the head, as videos show; the dust trail that stayed for minutes, lit by the Sun, is not drawn."
+            }
+          },
+          {
+            "id": "piece-1",
+            "lagS": {
+              "value": 0.4,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "fromT": {
+              "value": 17500,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "untilT": {
+              "value": 23000,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "absoluteMagnitude": {
+              "value": -15,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "color": {
+              "value": "#ffd9a0",
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "trainS": {
+              "value": 1.5,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            }
+          },
+          {
+            "id": "piece-2",
+            "lagS": {
+              "value": 0.9,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "fromT": {
+              "value": 17500,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "untilT": {
+              "value": 23000,
+              "basis": "stated",
+              "rationale": "Borovička et al. 2013 (Nature 503, 235) and Golubaev et al. 2015: observed from 95.1 km over 54°30'55\" N 64°00'03\" E, azimuth of travel 283.4°, slope 18.5°, 19.03 km/s; the points down the path are derived from these along a straight line (the Earth's curve over 250 km ignored)."
+            },
+            "absoluteMagnitude": {
+              "value": -13,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "color": {
+              "value": "#ffd9a0",
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            },
+            "trainS": {
+              "value": 1.5,
+              "basis": "assumed",
+              "rationale": "After the break-up between 45 and 30 km, pieces carried on along the same path, the largest reaching Lake Chebarkul (Borovička et al. 2013). Their spacing and brightness here are assumed."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "instrument": "cctv"
+}

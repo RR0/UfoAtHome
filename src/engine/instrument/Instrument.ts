@@ -117,6 +117,12 @@ export interface RecordingMedium {
   /** How such a device reads the light it is exposed by (see MeteringMode): "average" when absent. A recording states its own when it
    * knows it (Sighting.metering). */
   metering?: MeteringMode
+  /**
+   * How fast such a device's exposure follows what its meter reads: the time it takes to go about two thirds of the way, ms, on the
+   * recording's own clock. What a sudden light looks like through it: a frame that burns out white when a bolide flares, and darkens
+   * back as the exposure catches up (Chelyabinsk's dashcams). 300 ms when absent, a phone's settling (ASSUMED).
+   */
+  exposureFollowMs?: number
   /** How the device develops what its sensor records: "computational" for a phone's default processing, which underexposes to keep the
    * highlights and lifts the rest back (see PhoneDevelopment); a raw sensor's straight line when absent. */
   development?: "computational"
@@ -140,7 +146,7 @@ export interface VisualAid {
 }
 
 /** The kinds of thing an observation can be made through, in the order a picker lists them. */
-export type InstrumentCategory = "eye" | "camera" | "dslr" | "phone" | "binoculars" | "telescope"
+export type InstrumentCategory = "eye" | "camera" | "dslr" | "phone" | "video" | "binoculars" | "telescope"
 
 export interface Instrument {
   /** What kind of thing it is — how a picker groups it. */
@@ -449,6 +455,51 @@ export const INSTRUMENTS: Instrument[] = [
     detailUm: 1.4,
     medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 3200, metering: "highlights", development: "computational" }
   },
+  {
+    // A car's dashboard camera of the 2010s, the kind nearly every Chelyabinsk video of 15 February 2013 was filmed with. No model is
+    // stated in those films, so this is the TYPE, built from its commonest parts (ASSUMED): a 1/2.7-inch sensor of 1920 x 1080 pixels of
+    // 3 µm (5.76 x 3.24 mm), the class of OmniVision's OV2710, behind a fixed fisheye of 3.2 mm, which is the "120 degrees" these were
+    // sold on (118 across the diagonal, 103 across, 58 up and down). A fisheye, not a rectilinear lens: the bent horizon of every one of
+    // those films is its r = f·θ.
+    id: "dashcam",
+    category: "video",
+    name: "Dashcam",
+    projection: "equidistant",
+    frame: { widthMm: 5.76, heightMm: 3.24, focalLengthMm: 3.2 },
+    // A fixed, round opening (no blades, so no star), and video: the shutter can be no slower than a frame of 30 a second, and goes as
+    // short as the sensor's electronics allow.
+    fNumber: 2,
+    exposureSeconds: 1 / 30,
+    exposureRangeSeconds: { min: 1 / 10000, max: 1 / 30 },
+    years: { from: 2008 },
+    apertureBlades: undefined,
+    detailUm: 3,
+    // Its own exposure, from the mean of the whole frame (no holding back of the highlights, no computational development: what its
+    // sensor records, straight), up to a gain of about ISO 1600 (ASSUMED). Its exposure follows in about half a second (ASSUMED: no
+    // figure is published for these; the films show the frame burning white as the bolide flares and darkening back within a second or so).
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 1600, metering: "average", exposureFollowMs: 500 }
+  },
+  {
+    // A fixed security camera of the CCTV kind that filmed Chelyabinsk's squares and yards: a 1/3-inch CCD (4.8 x 3.6 mm) behind the 3.6 mm
+    // board lens most of them were fitted with (ASSUMED, the commonest), so 67 degrees across and 53 up and down. The smear a CCD draws
+    // up and down from a light too bright for it is not drawn.
+    id: "cctv",
+    category: "video",
+    name: "Security camera",
+    projection: "rectilinear",
+    frame: { widthMm: 4.8, heightMm: 3.6, focalLengthMm: 3.6 },
+    fNumber: 2,
+    // A field of a PAL frame, 1/50 s, at most; its electronic shutter goes far shorter.
+    exposureSeconds: 1 / 50,
+    exposureRangeSeconds: { min: 1 / 100000, max: 1 / 50 },
+    years: { from: 1990 },
+    apertureBlades: undefined,
+    // An analogue picture of about 600 lines over the 3.6 mm of its sensor's height: some 6 µm.
+    detailUm: 6,
+    // Its electronic shutter and gain set its exposure from the whole frame. Half a second to follow: the default of such a camera's
+    // "exposure response" setting, which its installer can slow to fifteen (a security camera's manual, ASSUMED typical).
+    medium: { kind: "sensor", iso: 100, autoExposure: true, maxIso: 1600, metering: "average", exposureFollowMs: 500 }
+  },
   // Sensors from Stellarium's Oculars catalogue (see DigitalSlrs): the digital bodies a recent
   // photograph is most likely to have been made with.
   ...DigitalSlrs.instruments(),
@@ -497,7 +548,16 @@ export class Instruments {
   static fieldOfViewDeg(instrument: Instrument): number {
     const frame = instrument.frame
     if (!frame) return instrument.visualAid?.trueFieldDeg ?? Instruments.UNAIDED_FIELD_DEG
-    return (2 * Math.atan(frame.heightMm / (2 * frame.focalLengthMm)) * 180) / Math.PI
+    return Instruments.fieldOf(instrument.projection, frame.heightMm, frame.focalLengthMm)
+  }
+
+  /**
+   * The angle a height of image takes in behind a lens of that focal length, degrees: `2·atan(h/2f)` through a rectilinear lens, and
+   * `h/f` radians through an equidistant one (a fisheye, `r = f·θ`), whose wide field is the reason a dashcam has one.
+   */
+  private static fieldOf(projection: ProjectionKind, heightMm: number, focalLengthMm: number): number {
+    const radians = projection === "equidistant" ? heightMm / focalLengthMm : 2 * Math.atan(heightMm / (2 * focalLengthMm))
+    return (radians * 180) / Math.PI
   }
 
   /** How wide its picture is against its height. */
@@ -528,7 +588,7 @@ export class Instruments {
    * claims rather than silently correcting it.
    */
   /** The picker's groups, in order, each with the instruments of that kind. */
-  static readonly CATEGORIES: readonly InstrumentCategory[] = ["eye", "camera", "dslr", "phone", "binoculars", "telescope"]
+  static readonly CATEGORIES: readonly InstrumentCategory[] = ["eye", "camera", "dslr", "phone", "video", "binoculars", "telescope"]
 
   /** Why an instrument is not on offer in that year, or undefined when it is (or the year is not
    * known). Kept apart from availableAt so a picker can say WHY, not merely hide. */
@@ -558,7 +618,7 @@ export class Instruments {
   static fieldOfViewDegAt(instrument: Instrument, focalLengthMm: number): number | undefined {
     const frame = instrument.frame
     if (!frame || focalLengthMm <= 0) return undefined
-    return (2 * Math.atan(frame.heightMm / (2 * focalLengthMm)) * 180) / Math.PI
+    return Instruments.fieldOf(instrument.projection, frame.heightMm, focalLengthMm)
   }
 
   /**
@@ -572,6 +632,7 @@ export class Instruments {
   static focalLengthMmFor(instrument: Instrument, fieldOfViewDeg: number): number | undefined {
     const frame = instrument.frame
     if (!frame || fieldOfViewDeg <= 0 || fieldOfViewDeg >= 180) return undefined
+    if (instrument.projection === "equidistant") return frame.heightMm / ((fieldOfViewDeg * Math.PI) / 180)
     return frame.heightMm / (2 * Math.tan((fieldOfViewDeg * Math.PI) / 360))
   }
 

@@ -543,8 +543,9 @@ export class SightingElement extends HTMLElement {
     // Never the URL: a recording that names nobody is listed by its place in the list, which at
     // least says what it is. `/demo-data/sky-test-halos.json` as a observer's name said nothing
     // and looked like a fault.
+    // A recording that names nobody (a dashcam, a security camera) is told by what the case calls it, when it calls it anything.
     const names = entries.map((entry, index) => this.observerDisplayName(this.plain(entry).observer)
-      ?? this.messages.unnamedObserver.replace("{n}", String(index + 1)))
+      ?? this.caseTitleOf(entry) ?? this.messages.unnamedObserver.replace("{n}", String(index + 1)))
     for (const [index, entry] of entries.entries()) {
       const option = document.createElement("option")
       option.value = entry.src
@@ -750,7 +751,8 @@ export class SightingElement extends HTMLElement {
     }
     add(this.shareScope, CASE_SCOPE, this.messages.shareScopeCase)
     for (const entry of this.entries) {
-      const name = this.observerDisplayName(this.plain(entry).observer) ?? this.messages.unnamedObserver.replace("{n}", String(this.entries.indexOf(entry) + 1))
+      const name = this.observerDisplayName(this.plain(entry).observer) ?? this.caseTitleOf(entry)
+        ?? this.messages.unnamedObserver.replace("{n}", String(this.entries.indexOf(entry) + 1))
       add(this.shareScope, entry.src, name)
       add(this.shareOpens, entry.src, name)
     }

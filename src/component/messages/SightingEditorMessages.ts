@@ -645,6 +645,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   instrumentCategoryCamera: string
   instrumentCategoryDslr: string
   instrumentCategoryPhone: string
+  instrumentCategoryVideo: string
   instrumentCategoryBinoculars: string
   instrumentCategoryTelescope: string
   /** Why a choice is greyed: {year} is the observation's, {from}/{to} the device's own dates. */

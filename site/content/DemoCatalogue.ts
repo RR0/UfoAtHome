@@ -488,12 +488,14 @@ export class DemoCatalogue {
         {
           id: "chelyabinsk",
           src: "/demo-data/sky-test-chelyabinsk.json",
+          // The case, for the player: the same instant seen by an eye, a dashcam and a security camera, to switch between.
+          playSrc: "/demo-data/case-chelyabinsk.json",
           title: { en: "The Chelyabinsk superbolide", fr: "Le superbolide de Tcheliabinsk", es: "El superbólido de Cheliábinsk", it: "Il superbolide di Čeljabinsk" },
           blurb: {
-            en: "15 February 2013, 9:20: brighter than the Sun along its published path, it lights the city from where it is, and every shadow swings round as it crosses the sky. Nothing placed to light it.",
-            fr: "15 février 2013, 9 h 20 : plus brillant que le Soleil sur sa trajectoire publiée, il éclaire la ville depuis là où il est, et chaque ombre tourne à mesure qu'il traverse le ciel. Rien n'est posé pour l'éclairer.",
-            es: "15 de febrero de 2013, 9:20: más brillante que el Sol en su trayectoria publicada, ilumina la ciudad desde donde está, y cada sombra gira mientras cruza el cielo. Nada se coloca para iluminarlo.",
-            it: "15 febbraio 2013, 9:20: più brillante del Sole lungo la traiettoria pubblicata, illumina la città da dove si trova, e ogni ombra ruota mentre attraversa il cielo. Nulla è posto per illuminarlo."
+            en: "15 February 2013, 9:20: brighter than the Sun along its published path, it lights the city from where it is, and every shadow swings round as it crosses the sky. Nothing placed to light it. Seen by the eye, a dashcam and a security camera. Open it full size to switch.",
+            fr: "15 février 2013, 9 h 20 : plus brillant que le Soleil sur sa trajectoire publiée, il éclaire la ville depuis là où il est, et chaque ombre tourne à mesure qu'il traverse le ciel. Rien n'est posé pour l'éclairer. Vu par l'œil, une caméra de tableau de bord et une caméra de surveillance. Ouvrez-le en grand pour passer de l'un à l'autre.",
+            es: "15 de febrero de 2013, 9:20: más brillante que el Sol en su trayectoria publicada, ilumina la ciudad desde donde está, y cada sombra gira mientras cruza el cielo. Nada se coloca para iluminarlo. Visto por el ojo, una cámara de salpicadero y una cámara de vigilancia. Ábrelo a tamaño completo para pasar de uno a otro.",
+            it: "15 febbraio 2013, 9:20: più brillante del Sole lungo la traiettoria pubblicata, illumina la città da dove si trova, e ogni ombra ruota mentre attraversa il cielo. Nulla è posto per illuminarlo. Visto dall'occhio, da una dashcam e da una telecamera di sorveglianza. Aprilo a schermo intero per passare dall'uno all'altro."
           }
         },
         {

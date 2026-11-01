@@ -7811,6 +7811,7 @@ export class SightingEditorElement extends HTMLElement {
       camera: this.messages.instrumentCategoryCamera,
       dslr: this.messages.instrumentCategoryDslr,
       phone: this.messages.instrumentCategoryPhone,
+      video: this.messages.instrumentCategoryVideo,
       binoculars: this.messages.instrumentCategoryBinoculars,
       telescope: this.messages.instrumentCategoryTelescope
     }

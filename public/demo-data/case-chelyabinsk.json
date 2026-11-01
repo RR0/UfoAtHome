@@ -1,0 +1,49 @@
+{
+ "id": "Chelyabinsk",
+ "title": "Tcheliabinsk",
+ "summary": {
+  "fr": "15 février 2013, 9 h 20. Le superbolide de Tcheliabinsk, plus brillant que le Soleil, vu à l'œil nu, par une caméra de tableau de bord et par une caméra de surveillance, au même endroit et au même instant.",
+  "en": "15 February 2013, 9:20. The Chelyabinsk superbolide, brighter than the Sun, seen by the naked eye, by a dashcam and by a security camera, from the same spot at the same instant.",
+  "es": "15 de febrero de 2013, 9:20. El superbólido de Cheliábinsk, más brillante que el Sol, visto a simple vista, por una cámara de salpicadero y por una cámara de vigilancia, desde el mismo lugar y en el mismo instante.",
+  "it": "15 febbraio 2013, 9:20. Il superbolide di Čeljabinsk, più brillante del Sole, visto a occhio nudo, da una dashcam e da una telecamera di sorveglianza, dallo stesso punto nello stesso istante."
+ },
+ "time": "2013-02-15 09:20",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2013-02-15 09:20",
+   "title": {
+    "fr": "À l'œil nu",
+    "en": "Naked eye",
+    "es": "A simple vista",
+    "it": "A occhio nudo"
+   },
+   "url": "sky-test-chelyabinsk.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2013-02-15 09:20",
+   "title": {
+    "fr": "Caméra de tableau de bord",
+    "en": "Dashcam",
+    "es": "Cámara de salpicadero",
+    "it": "Dashcam"
+   },
+   "url": "sky-test-chelyabinsk-dashcam.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "time": "2013-02-15 09:20",
+   "title": {
+    "fr": "Caméra de surveillance",
+    "en": "Security camera",
+    "es": "Cámara de vigilancia",
+    "it": "Telecamera di sorveglianza"
+   },
+   "url": "sky-test-chelyabinsk-cctv.json"
+  }
+ ]
+}

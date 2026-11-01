@@ -124,6 +124,8 @@ export const sceneNames_it: SceneNames = {
     "slr-35mm-zoom": "Reflex 35 mm, zoom 70-210 mm",
     "phone-landscape": "Telefono, in orizzontale",
     "phone-portrait": "Telefono, in verticale",
+    dashcam: "Dashcam",
+    cctv: "Telecamera di sorveglianza",
     ...DigitalSlrs.names(),
     ...VisualAids.names()
   },

@@ -66,6 +66,7 @@ import { PointSources } from "./PointSources.js"
 import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { FrameMeter } from "./FrameMeter.js"
+import { RetinalBleaching, type BleachingSource } from "./RetinalBleaching.js"
 import { EmitterLights, type FarEmitter } from "./EmitterLights.js"
 import { PhoneDevelopment } from "../engine/instrument/PhoneDevelopment.js"
 import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
@@ -3481,7 +3482,7 @@ export class SceneRenderer {
 
   /** What the picture is recorded on and how it was exposed — see setMedium. */
   private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, metering: MeteringMode, exposureSeconds: number, fNumber: number,
-    development?: RecordingMedium["development"] }
+    development?: RecordingMedium["development"], exposureFollowMs?: number }
 
   /**
    * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
@@ -3494,7 +3495,8 @@ export class SceneRenderer {
     const next = medium && exposureSeconds !== undefined && exposureSeconds > 0 && fNumber !== undefined && fNumber > 0
       ? {
         kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true && iso === undefined, maxIso: medium.maxIso,
-        metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber, development: medium.development
+        metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber, development: medium.development,
+        exposureFollowMs: medium.exposureFollowMs
       }
       : undefined
     if (JSON.stringify(next) === JSON.stringify(this.medium)) return
@@ -5023,10 +5025,11 @@ export class SceneRenderer {
       ...([this.meteorSystem?.object, this.reentrySystem?.object] as (Object3D | undefined)[]).filter((object): object is Object3D => object !== undefined)]
     const scale = this.relativeScale
     const version = this.sceneVersion
+    const atMs = this.recordingTimeMs
     // Behind the loader nothing is on screen to spare the GPU for: the eye's probe is taken as soon
     // as the scene has changed, rather than a quarter of a second later.
     const waiting = this.reflections.refresh(this.renderer, this.scene, this.camera.position, this.bodySystem.reflectors,
-      screenOnly, [...this.decorGroups.values(), ...(this.waterSystem ? [this.waterSystem.group] : []), ...(this.railwaySystem ? [this.railwaySystem.group] : [])], version, eyeHidden, photograph => this.measureSurroundings(photograph, scale, version),
+      screenOnly, [...this.decorGroups.values(), ...(this.waterSystem ? [this.waterSystem.group] : []), ...(this.railwaySystem ? [this.railwaySystem.group] : [])], version, eyeHidden, photograph => this.measureSurroundings(photograph, scale, version, atMs),
       holding ? 0 : Reflections.REFRESH_MS)
     if (waiting === undefined || this.reflectionTimer) return
     this.reflectionTimer = setTimeout(() => {
@@ -5062,12 +5065,12 @@ export class SceneRenderer {
   /** The share of the eye's field below the horizon when it looks at it: see adaptingLuminance. */
   static readonly GROUND_ADAPTATION_SHARE = 0.5
 
-  private measureSurroundings(photograph: Texture, scale: number, version: number): void {
+  private measureSurroundings(photograph: Texture, scale: number, version: number, atMs: number): void {
     const astronomy = this.lastAstronomy
     if (!astronomy) return
     this.probeIrradiance ??= new ProbeIrradiance()
     // The same photograph is what a device setting its own exposure meters, over its frame (see meterFrame).
-    this.framePhotograph = { texture: photograph, scale }
+    this.framePhotograph = { texture: photograph, scale, atMs }
     const sources = [astronomy.sun, astronomy.moon]
       .filter(body => body.altitudeDeg > -2)
       .map(body => horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1))
@@ -5122,29 +5125,77 @@ export class SceneRenderer {
     this.frameMeter ??= new FrameMeter()
     const sun = this.lastAstronomy?.sun
     const source = sun && sun.altitudeDeg > -2 ? horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1) : undefined
+    const followMs = this.medium.exposureFollowMs ?? SceneRenderer.EXPOSURE_FOLLOW_MS
     this.frameMeter.measure(this.renderer, photograph.texture, this.camera, source, light => {
       const read = { mean: light.mean / photograph.scale, brightest: light.brightest / photograph.scale }
       const before = this.frameLight
-      const now = performance.now()
-      // Followed as a device's exposure follows its meter, not jumped to: by a share of the way in the ratio for the time since the last
-      // reading (see EXPOSURE_FOLLOW_MS), so that one reading off by a few zones does not flash the picture.
-      const share = before ? 1 - Math.exp(-(now - before.atMs) / SceneRenderer.EXPOSURE_FOLLOW_MS) : 1
+      const at = photograph.atMs
+      // Followed as a device's exposure follows its meter, not jumped to: by a share of the way in the ratio for the recording's time since
+      // the last reading (see RecordingMedium.exposureFollowMs). A bolide flaring burns the frame white until the exposure catches up, and
+      // a paused instant shows the exposure the device had then, not the one it would reach later. A jump (a seek, a new scene) has no
+      // history: the exposure is the reading's, and stays its own until the photograph of the new instant has come in.
+      const elapsed = before ? at - before.atMs : Infinity
+      const jumped = elapsed < 0 || elapsed > SceneRenderer.EXPOSURE_JUMP_MS
+      const share = jumped || (elapsed === 0 && before?.jumped) ? 1 : 1 - Math.exp(-elapsed / followMs)
       const toward = (from: number, to: number) => from > 0 && to > 0 ? from * (to / from) ** share : to
-      const next = { mean: toward(before?.mean ?? 0, read.mean), brightest: toward(before?.brightest ?? 0, read.brightest), atMs: now }
+      const next = {
+        mean: toward(before?.mean ?? 0, read.mean), brightest: toward(before?.brightest ?? 0, read.brightest), atMs: at,
+        jumped: jumped || (elapsed === 0 && (before?.jumped ?? false))
+      }
       this.frameLight = next
       const moved = (a: number, b: number) => Math.abs(a - b) > 0.01 * Math.max(a, b)
       if (!before || moved(before.mean, next.mean) || moved(before.brightest, next.brightest)) this.render()
     })
   }
 
-  /** How fast a device's exposure follows its meter: the time to go about two thirds of the way, ms. ASSUMED, a phone's settling. */
+  /** How fast a device's exposure follows its meter when its medium does not say (see RecordingMedium.exposureFollowMs): the time to go
+   * about two thirds of the way, ms. ASSUMED, a phone's settling. */
   private static readonly EXPOSURE_FOLLOW_MS = 300
+  /** Past this much of the recording between two readings, or back in it, the instant is another's (a seek): no exposure to follow from. */
+  private static readonly EXPOSURE_JUMP_MS = 2000
+
+  /** The eye's afterimages (see RetinalBleaching): none until something bright enough has been seen. */
+  private retina?: RetinalBleaching
+
+  /**
+   * Brings the eye's afterimages to the instant on show, and hands them to the finish (see EYE_UNIFORMS, shared by every scene of the
+   * page, so set by each). A medium has no retina: a camera records the bolide, it is not dazzled by it.
+   */
+  private bleachRetina(): void {
+    EYE_UNIFORMS.uRetinaOn.value = 0
+    if (this.medium) return
+    const sources: BleachingSource[] = []
+    for (const emitter of this.emitterLights.farEmitters) {
+      const point = this.screenPointOf(emitter.direction)
+      if (!point || Math.abs(point.ndcX) > 1.2 || Math.abs(point.ndcY) > 1.2) continue
+      sources.push({ ndcX: point.ndcX, ndcY: point.ndcY, lux: Photometry.luminanceOf(emitter.lux) })
+    }
+    if (!this.retina && sources.length === 0) return
+    this.retina ??= new RetinalBleaching()
+    const size = this.renderer.getDrawingBufferSize(this.retinaSize)
+    const aspect = size.x / Math.max(size.y, 1)
+    this.retina.advance(this.recordingTimeMs, sources, { width: this.camera.fov * aspect, height: this.camera.fov })
+    if (!this.retina.any) return
+    EYE_UNIFORMS.uRetina.value = this.retina.texture
+    EYE_UNIFORMS.uRetinaOn.value = 1
+    EYE_UNIFORMS.uRetinaViewport.value.copy(size)
+  }
+
+  private readonly retinaSize = new Vector2()
+
+  /** The recording's own instant on show, ms (see setRecordingTime). */
+  private recordingTimeMs = 0
+
+  /** The recording's instant now on show, ms: the clock a device's exposure follows on, and the eye's afterimages fade on. */
+  setRecordingTime(ms: number): void {
+    this.recordingTimeMs = ms
+  }
 
   private frameMeter?: FrameMeter
   /** The latest photograph of the surroundings, and the relative scale it was taken at (see measureSurroundings). */
-  private framePhotograph?: { texture: Texture, scale: number }
+  private framePhotograph?: { texture: Texture, scale: number, atMs: number }
   /** What a device setting its own exposure last read of its frame, cd/m² (see meterFrame). */
-  private frameLight?: { mean: number, brightest: number, atMs: number }
+  private frameLight?: { mean: number, brightest: number, atMs: number, jumped: boolean }
   /**
    * The lamps of the decor (a streetlamp's head, a car's headlamps, a declared light): kept out of the eye's probe, as the stars are. Each
    * is a speck in it, under a pixel of its 128, which the rasteriser hit or missed as the eye moved by a few centimetres, and with it its
@@ -5269,6 +5320,7 @@ export class SceneRenderer {
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
     this.meterFrame()
     this.applyMedium()
+    this.bleachRetina()
     const overlaid = !!this.references?.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
     const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined
@@ -6575,6 +6627,7 @@ export class SceneRenderer {
     if (this.skyMesh && this.skyGradientMaterial) this.skyMesh.material = this.skyGradientMaterial
     this.scatteredSky?.dispose()
     this.scatteredSky = undefined
+    this.retina?.dispose()
     this.disposeMesh(this.skyMesh)
     this.disposeMesh(this.groundMesh)
     this.disposeMesh(this.terrainMesh)

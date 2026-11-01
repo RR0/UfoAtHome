@@ -292,6 +292,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   instrumentCategoryCamera: "Cámaras",
   instrumentCategoryDslr: "Réflex digitales",
   instrumentCategoryPhone: "Teléfonos",
+  instrumentCategoryVideo: "Cámaras de vídeo",
   instrumentCategoryBinoculars: "Prismáticos",
   instrumentCategoryTelescope: "Telescopios",
   instrumentNotYetOnSale: "Aún no existía en {year} (a la venta desde {from})",

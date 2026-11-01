@@ -128,4 +128,22 @@ describe("binoculars and telescopes (Stellarium catalogue)", () => {
     expect(binoculars).toBeLessThan(4.5)
     expect(LimitingMagnitude.gainOverEye(Instruments.byId("telescope-celestron-c8"))).toBeCloseTo(7.3, 0)
   })
+
+  it("takes a dashcam's field through its fisheye, h/f, and a security camera's through its rectilinear lens", () => {
+    // Through r = f·θ the 3.24 mm of a dashcam's sensor behind 3.2 mm is 58 degrees up and down; the rectilinear 2·atan(h/2f) would say 54.
+    const dashcam = Instruments.byId("dashcam")
+    expect(Instruments.fieldOfViewDeg(dashcam)).toBeCloseTo(58.0, 1)
+    expect(Instruments.focalLengthMmFor(dashcam, Instruments.fieldOfViewDeg(dashcam))).toBeCloseTo(3.2, 9)
+    expect(Instruments.fieldOfViewDeg(Instruments.byId("cctv"))).toBeCloseTo(53.1, 1)
+  })
+
+  it("gives the video cameras an exposure that follows the light late, and no star", () => {
+    for (const id of ["dashcam", "cctv"]) {
+      const camera = Instruments.byId(id)
+      expect(camera.category).toBe("video")
+      expect(camera.medium?.autoExposure).toBe(true)
+      expect(camera.medium?.exposureFollowMs).toBe(500)
+      expect(Instruments.starPointsOf(camera)).toBe(0)
+    }
+  })
 })

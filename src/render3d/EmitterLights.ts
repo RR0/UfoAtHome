@@ -164,6 +164,11 @@ export class EmitterLights {
    */
   static readonly SKY_LIGHTING_MAGNITUDE = -8
 
+  /** Every far emitter now stated, whatever its source. */
+  get farEmitters(): readonly FarEmitter[] {
+    return [...this.farBy.values()].flat()
+  }
+
   /** The brightest far emitter, as the sky sees it, if it is bright enough to light it (see SKY_LIGHTING_MAGNITUDE). */
   get brightestInSky(): FarEmitter["sky"] | undefined {
     let brightest: FarEmitter["sky"] | undefined

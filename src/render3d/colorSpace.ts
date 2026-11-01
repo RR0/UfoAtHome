@@ -1,5 +1,5 @@
-import { AddEquation, CustomBlending, Matrix3, OneFactor, SrcAlphaFactor, ZeroFactor } from "three"
-import type { Material } from "three"
+import { AddEquation, CustomBlending, Matrix3, OneFactor, SrcAlphaFactor, Vector2, ZeroFactor } from "three"
+import type { Material, Texture } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 
@@ -168,7 +168,8 @@ vec3 respond(vec3 relative) {
 export const EYE_UNIFORMS = {
   uRodShare: { value: 0 }, uRelativeScale: { value: 1 }, uHasOverlay: { value: 1 },
   uMedium: { value: 0 }, uMediumExposure: { value: 1 }, uPhoneStrength: { value: 0 },
-  uColorVision: { value: new Matrix3() }, uContrast: { value: 1 }
+  uColorVision: { value: new Matrix3() }, uContrast: { value: 1 },
+  uRetina: { value: null as Texture | null }, uRetinaOn: { value: 0 }, uRetinaViewport: { value: new Vector2(1, 1) }
 }
 
 /**
@@ -183,7 +184,13 @@ ${SRGB_ENCODE_GLSL}
 ${EYE_RESPONSE_GLSL}
 /** Whether anything is laid over the picture at all: see EYE_UNIFORMS. */
 uniform float uHasOverlay;
+/** The eye's afterimages (see RetinalBleaching): the share of pigment left at each place of the picture, when uRetinaOn says any is
+ * bleached; and the picture's size in pixels, which places them. An eye's only. */
+uniform sampler2D uRetina;
+uniform float uRetinaOn;
+uniform vec2 uRetinaViewport;
 vec3 finish(vec3 relative, vec4 overlay, float lamp) {
+  if (uRetinaOn > 0.5 && uMedium < 0.5) relative *= texture2D(uRetina, gl_FragCoord.xy / uRetinaViewport).r;
   return encodeSrgb(respond(relative, lamp) * (1.0 - overlay.a) + overlay.rgb);
 }
 vec3 finish(vec3 relative, vec4 overlay) {
