@@ -211,6 +211,23 @@ export class ReentrySighting {
     return { lat, lng, heightM: (from.altitudeKm + (to.altitudeKm - from.altitudeKm) * f) * 1000 }
   }
 
+  /**
+   * Whether any piece of `reentry` can be bright enough, at its nearest, to leave an afterimage in an eye: brighter than magnitude −11, a
+   * little under the full Moon, which is where a point's light on the retina starts to bleach it at all (see RetinalBleaching.FAINTEST_CD_M2).
+   * Seen no nearer than its lowest height. Zond IV's pieces, at −3, cannot; Chelyabinsk, at −27, can.
+   */
+  static mayDazzle(reentry: ReentryJson): boolean {
+    const lowestKm = Math.max(1, Math.min(...reentry.track.map(keyframe => keyframe.altitudeKm)))
+    const nearest = 5 * Math.log10(lowestKm / ReentrySighting.STANDARD_DISTANCE_KM)
+    return reentry.fragments.some(fragment => {
+      const brightest = Math.min(fragment.absoluteMagnitude, ...(fragment.lightCurve ?? []).map(point => point.absoluteMagnitude))
+      return brightest + nearest <= ReentrySighting.DAZZLING_MAGNITUDE
+    })
+  }
+
+  /** The faintest a point may be and still leave an afterimage: see mayDazzle. */
+  static readonly DAZZLING_MAGNITUDE = -11
+
   /** A piece's absolute magnitude at `t`: from its light curve when it has one (see ReentryFragment.lightCurve), its one magnitude otherwise. */
   static absoluteMagnitudeAt(fragment: ReentryFragment, t: number): number {
     const curve = fragment.lightCurve

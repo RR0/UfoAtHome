@@ -2097,11 +2097,14 @@ export class SceneElement extends HTMLElement {
     const sky = sighting.skyEvents
     const burning = [...(sky?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
     this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
-    // And what they were at any earlier instant, for the eye's afterimages to be replayed after a jump (see SceneRenderer.setRetinaHistory).
-    this.sceneRenderer.setRetinaHistory(burning.length === 0 ? undefined : at => {
+    // And what they were at any earlier instant, for the eye's afterimages to be replayed after a jump (see SceneRenderer.setRetinaHistory):
+    // of those bright enough to leave one only. Placing the forty pieces of a break-up at every step of a replay cost a tenth of a second at
+    // every seek, for a re-entry that cannot dazzle anybody.
+    const dazzling = burning.filter(reentry => ReentrySighting.mayDazzle(reentry))
+    this.sceneRenderer.setRetinaHistory(dazzling.length === 0 ? undefined : at => {
       const then = resolveObserverPoseAt(sighting, at)
       const place = { lat: then?.lat ?? lat, lng: then?.lng ?? lng, heightM: then?.elevationM ?? observer.elevationM }
-      return { views: ReentrySighting.viewsAt(burning, at, place), pose: then }
+      return { views: ReentrySighting.viewsAt(dazzling, at, place), pose: then }
     }, sighting)
     // The beams: placed and lit by the renderer, which knows where its scene stands and what its air is.
     this.sceneRenderer.setBeams(sky?.beams ?? SceneElement.NO_BEAMS)

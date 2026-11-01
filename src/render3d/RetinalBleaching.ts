@@ -112,7 +112,7 @@ export class RetinalBleaching {
     // A point's illuminance spread as a Gaussian of that width: its luminance at the middle, cd/m².
     const spots = sources.map(source => ({
       x: source.ndcX * fieldDeg.width / 2, y: source.ndcY * fieldDeg.height / 2, peak: source.lux / (2 * Math.PI * sigmaRad * sigmaRad)
-    }))
+    })).filter(spot => spot.peak >= RetinalBleaching.FAINTEST_CD_M2)
     // A jump has no past: a fresh retina, from where the sources are now.
     if (elapsedMs < 0 || elapsedMs > RetinalBleaching.JUMP_MS) {
       this.previous = spots
@@ -138,6 +138,13 @@ export class RetinalBleaching {
     return true
   }
 
+  /**
+   * The faintest light worth following, cd/m² at the middle of its image: it would take a ten-thousandth of the pigment at its balance
+   * against the regeneration (Q/τ·10⁻⁴). The pieces a re-entry sheds give a hundredth of a cd/m² and bleach nothing, and followed over the
+   * whole retina at every step of a replay, forty of them froze the timeline for seconds at every seek.
+   */
+  static readonly FAINTEST_CD_M2 = (RetinalBleaching.BLEACHING_CD_M2_S / RetinalBleaching.REGENERATION_S) * 1e-4
+
   /** The most steps a sweep is followed in between two instants: past it, the trail is dotted again, which is a jump in all but name. */
   private static readonly MAX_STEPS = 64
   /** Where the sources stood at the last instant, degrees on the picture. */
@@ -149,17 +156,27 @@ export class RetinalBleaching {
     const height = RetinalBleaching.HEIGHT
     const sigma = RetinalBleaching.SPREAD_DEG
     const regeneration = 1 / RetinalBleaching.REGENERATION_S
+    // Each spot's light laid on the cells within five spreads of it only, not looked for from every cell.
+    const light = this.light.fill(0)
+    for (const spot of spots) {
+      const column0 = Math.max(0, Math.floor(((spot.x - 5 * sigma) / fieldDeg.width + 0.5) * width))
+      const column1 = Math.min(width - 1, Math.ceil(((spot.x + 5 * sigma) / fieldDeg.width + 0.5) * width))
+      const row0 = Math.max(0, Math.floor(((spot.y - 5 * sigma) / fieldDeg.height + 0.5) * height))
+      const row1 = Math.min(height - 1, Math.ceil(((spot.y + 5 * sigma) / fieldDeg.height + 0.5) * height))
+      for (let row = row0; row <= row1; row++) {
+        const y = ((row + 0.5) / height * 2 - 1) * fieldDeg.height / 2
+        for (let column = column0; column <= column1; column++) {
+          const x = ((column + 0.5) / width * 2 - 1) * fieldDeg.width / 2
+          const d2 = (x - spot.x) ** 2 + (y - spot.y) ** 2
+          if (d2 < 25 * sigma * sigma) light[row * width + column] += spot.peak * Math.exp(-d2 / (2 * sigma * sigma))
+        }
+      }
+    }
     let bleached = false
     for (let row = 0; row < height; row++) {
-      const y = ((row + 0.5) / height * 2 - 1) * fieldDeg.height / 2
       for (let column = 0; column < width; column++) {
-        const x = ((column + 0.5) / width * 2 - 1) * fieldDeg.width / 2
-        let luminance = 0
-        for (const spot of spots) {
-          const d2 = (x - spot.x) ** 2 + (y - spot.y) ** 2
-          if (d2 < 25 * sigma * sigma) luminance += spot.peak * Math.exp(-d2 / (2 * sigma * sigma))
-        }
         const index = row * width + column
+        const luminance = light[index]
         const before = this.left[index]
         const glowBefore = this.glow[index]
         if (luminance === 0 && before >= 0.9995 && glowBefore < RetinalBleaching.GLOW_SEEN) continue
@@ -183,6 +200,9 @@ export class RetinalBleaching {
     }
     this.bleached = bleached
   }
+
+  /** The light each cell gets during a step, cd/m² (see bleach). */
+  private readonly light = new Float32Array(RetinalBleaching.WIDTH * RetinalBleaching.HEIGHT)
 
   /** Under this much relative light the glow is gone. */
   private static readonly GLOW_SEEN = 0.002

@@ -61,6 +61,11 @@ describe("ReentrySighting", () => {
     expect(again[10].lagMsAt(later)).toBe(shed.lagMsAt(later))
   })
 
+  test("only a re-entry bright enough to bleach an eye is followed for its afterimage", () => {
+    expect(ReentrySighting.mayDazzle(reentry([{ absoluteMagnitude: -3 }]))).toBe(false)
+    expect(ReentrySighting.mayDazzle(reentry([{ absoluteMagnitude: -3, lightCurve: [{ t: 0, absoluteMagnitude: -3 }, { t: 10000, absoluteMagnitude: -20 }] }]))).toBe(true)
+  })
+
   test("east is azimuth 90", () => {
     const seen = ReentrySighting.seenFrom({ lat: 0, lng: 0, heightM: 0 }, { lat: 0, lng: 1, heightM: 80000 })
     expect(seen.azimuthDeg).toBeCloseTo(90, 3)
