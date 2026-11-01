@@ -8422,5 +8422,22 @@
     "airTemperatureC": 24
    }
   ]
+ },
+ "frozen": {
+  "relief": {
+   "src": "sky-test-lanterns.relief.zip",
+   "takenOn": "2026-11-01",
+   "attribution": "Relief © IGN, LiDAR HD and RGE ALTI (Licence Ouverte 2.0) in France; © AWS Open Data (SRTM, ETOPO1) elsewhere"
+  },
+  "imagery": {
+   "src": "sky-test-lanterns.imagery.zip",
+   "takenOn": "2026-11-01",
+   "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+  },
+  "map": {
+   "src": "sky-test-lanterns.map.zip",
+   "takenOn": "2026-11-01",
+   "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+  }
  }
 }

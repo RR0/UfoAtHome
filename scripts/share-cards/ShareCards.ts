@@ -48,7 +48,9 @@ class ShareCards {
 
   /** The accounts a case replays (not the readings of it), and the sky and instrument demos: what a card, and the player's poster, is a picture of. */
   recordings(names: string[]): string[] {
-    const all = readdirSync(this.demoData).filter(file => /^(observer|sky-test|instrument)-.*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
+    // Not the files a recording keeps beside it (its .roads.json, .railways.json, .water.json): they are not recordings, and photographed
+    // as such each took the time of one, and had an `image` written into it.
+    const all = readdirSync(this.demoData).filter(file => /^(observer|sky-test|instrument)-[^.]*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
     return names.length > 0 ? all.filter(name => names.includes(name)) : all
   }
 
