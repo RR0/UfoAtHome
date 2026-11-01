@@ -55,6 +55,14 @@ export class EquidistantProjectionPass {
    * exists to take away from an eye.
    */
   static readonly MAX_HALF_ANGLE_DEG = 80
+  /**
+   * The fewest pixels of the rectilinear source per pixel of the picture, at its centre, under which the cube is drawn instead (see
+   * centreDensity). The source has to reach the corners, so it spreads its pixels thinner the wider the field: 0.59 at 60° tall in 16:9,
+   * 0.42 at 70°, 0.32 at 75°, where the decor of Chelyabinsk was its render blown up three times, windows and firs in blocks. The cube's
+   * front face holds the picture's own density whatever the field, for some 50 % more to draw at 75° (2.5 → 3.7 ms at 780 × 440):
+   * from here, above some 65° tall, it is the sharper picture for its cost. The usual 60° keeps its single source.
+   */
+  static readonly MIN_CENTRE_DENSITY = 0.5
   /** The cube's faces never finer than this, whatever the frame — six of them are drawn per frame. */
   static readonly MAX_CUBE_FACE = 2048
 
@@ -228,7 +236,17 @@ export class EquidistantProjectionPass {
 
   /** Whether a field this wide can be served from one rectilinear source at all. */
   static supports(fovDeg: number, aspect: number): boolean {
-    return this.cornerHalfAngleDeg(fovDeg, aspect) <= this.MAX_HALF_ANGLE_DEG
+    return this.cornerHalfAngleDeg(fovDeg, aspect) <= this.MAX_HALF_ANGLE_DEG && this.centreDensity(fovDeg, aspect) >= this.MIN_CENTRE_DENSITY
+  }
+
+  /**
+   * How many pixels of the rectilinear source stand for one of the picture at its centre: the source's pixels per radian there,
+   * `(H/2)/tan(half its field)`, against the picture's, `H/field`, at the same height.
+   */
+  static centreDensity(fovDeg: number, aspect: number): number {
+    const cornerRad = (this.cornerHalfAngleDeg(fovDeg, aspect) * Math.PI) / 180
+    const sourceTanHalfY = Math.tan(cornerRad) / Math.hypot(aspect, 1)
+    return (fovDeg * Math.PI) / 180 / (2 * sourceTanHalfY)
   }
 
   resize(width: number, height: number): void {

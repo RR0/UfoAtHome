@@ -10,6 +10,8 @@ export type GroundYAt = (x: number, z: number) => number
 
 /** Where a strip lies across its line at one rung: its middle, metres to the left of the direction of travel, and its half width. */
 type Lateral = { offsetM: number, halfM: number }
+/** Ribbons being laid for one mesh: their vertices and triangles, and for a track or a path where each vertex lies across its way (see RoadSystem.addGrain). */
+type RibbonBatch = { positions: number[], indices: number[], edges?: number[] }
 
 /** A street across, at one rung of its line, in metres to the left of the direction of travel (right is negative): the carriageway, and each pavement from its kerb to its outer edge. */
 interface StreetAcross {
@@ -158,11 +160,11 @@ export class RoadSystem {
     // is 490 — and five hundred draw calls to put down what is, visually, three materials would
     // cost more than everything else in the frame put together. They share a material anyway, so
     // there is nothing to lose by sharing a buffer.
-    const bySurface = new Map<RoadSurface, { positions: number[]; indices: number[] }>()
+    const bySurface = new Map<RoadSurface, RibbonBatch>()
     const paths = ways.map(way => way.points.map(point => geoToLocalMeters(point.lat, point.lng, originLat, originLng)))
     const streets = ways.map((way, at) => this.streetOf(way, paths[at], facades))
     for (const [at, way] of ways.entries()) {
-      const batch = bySurface.get(way.surface) ?? { positions: [], indices: [] }
+      const batch = bySurface.get(way.surface) ?? RoadSystem.batchFor(way.surface)
       bySurface.set(way.surface, batch)
       const street = streets[at]
       this.appendPath(paths[at], way.widthM, groundYAt, batch,
@@ -413,9 +415,9 @@ export class RoadSystem {
    */
   setStated(roads: StatedRoad[], groundYAt: GroundYAt): void {
     RoadSystem.empty(this.stated)
-    const bySurface = new Map<RoadSurface, { positions: number[]; indices: number[] }>()
+    const bySurface = new Map<RoadSurface, RibbonBatch>()
     for (const road of roads) {
-      const batch = bySurface.get(road.surface) ?? { positions: [], indices: [] }
+      const batch = bySurface.get(road.surface) ?? RoadSystem.batchFor(road.surface)
       bySurface.set(road.surface, batch)
       // z is the negated north axis, the same convention decor is placed under (see
       // GeoProjection, and SceneRenderer's own eastM/northM handling).
@@ -458,7 +460,7 @@ export class RoadSystem {
    * corner, and a road is mostly corners. The centre line is already in the patch's own metres.
    */
   private appendPath(
-    points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: { positions: number[]; indices: number[] },
+    points: { x: number; z: number }[], widthM: number, groundYAt: GroundYAt, batch: RibbonBatch,
     strip: {
       offsetM?: number, liftM?: number, minHalfM?: number, skip?: (x: number, z: number) => boolean,
       /** Where the strip lies across at each rung, in place of `offsetM` and the width: nothing is no strip at that rung. */
@@ -474,6 +476,7 @@ export class RoadSystem {
     const kept: boolean[] = []
     // Where each rung's three points stand on the ground plane: the left edge, the middle, the right edge.
     const rungs: { x: number; z: number }[][] = []
+    const halves: number[] = []
     for (let i = 0; i < centre.length; i++) {
       const before = centre[Math.max(0, i - 1)]
       const after = centre[Math.min(centre.length - 1, i + 1)]
@@ -491,6 +494,7 @@ export class RoadSystem {
       const middle = { x: centre[i].x + (-dz) * rungOffset, z: centre[i].z + dx * rungOffset }
       kept.push(lateral !== undefined && lateral.halfM > 0 && !strip.skip?.(middle.x, middle.z))
       rungs.push([{ x: middle.x + nx, z: middle.z + nz }, middle, { x: middle.x - nx, z: middle.z - nz }])
+      halves.push(rungHalf)
     }
     // A ribbon is flat between two points and the ground is not, and a road on an embankment is crowned: its middle stands higher than its edges. A
     // rung of two points laid a flat ribbon under the crown, and the ground showed through it in patches, which read as dark polygons lying on the road. So
@@ -510,6 +514,8 @@ export class RoadSystem {
     }
     for (let i = 0; i < rungs.length; i++) {
       for (let k = 0; k < 3; k++) batch.positions.push(rungs[i][k].x, heights[i][k] + lift, rungs[i][k].z)
+      // Left edge, middle, right edge: how far each is from the middle, and the half-width, for the grass of the verge (see addGrain).
+      batch.edges?.push(halves[i], halves[i], 0, halves[i], -halves[i], halves[i])
     }
     for (let i = 0; i < centre.length - 1; i++) {
       if (!kept[i] || !kept[i + 1]) continue
@@ -555,11 +561,18 @@ export class RoadSystem {
     }
   }
 
+  /** A batch of ribbons for one surface: with where each vertex lies across its way for a track or a path, whose verge is grass (see addGrain). */
+  private static batchFor(surface: RoadSurface): RibbonBatch {
+    return surface === "paved" ? { positions: [], indices: [] } : { positions: [], indices: [], edges: [] }
+  }
+
   /** All the roads of one surface as a single mesh — see set. */
-  private meshOf(surface: RoadSurface, batch: { positions: number[]; indices: number[] }, contemporary: boolean, albedoOf?: [number, number, number], grained = true): Mesh<BufferGeometry, MeshLambertMaterial> | undefined {
+  private meshOf(surface: RoadSurface, batch: RibbonBatch, contemporary: boolean, albedoOf?: [number, number, number], grained = true): Mesh<BufferGeometry, MeshLambertMaterial> | undefined {
     if (batch.indices.length === 0) return undefined
     const geometry = new BufferGeometry()
     geometry.setAttribute("position", new BufferAttribute(new Float32Array(batch.positions), 3))
+    const verge = batch.edges !== undefined && batch.edges.length * 3 === batch.positions.length * 2
+    if (verge) geometry.setAttribute("aEdge", new BufferAttribute(new Float32Array(batch.edges!), 2))
     geometry.setIndex(new BufferAttribute(new Uint32Array(batch.indices), 1))
     geometry.computeVertexNormals()
     const albedo = albedoOf ?? RoadSystem.ALBEDO[surface]
@@ -575,7 +588,7 @@ export class RoadSystem {
       polygonOffsetFactor: -2,
       polygonOffsetUnits: -2
     })
-    if (grained) this.addGrain(material, RoadSystem.GRAIN_CONTRAST[surface])
+    if (grained) this.addGrain(material, RoadSystem.GRAIN_CONTRAST[surface], verge)
     const mesh = new Mesh(geometry, material)
     mesh.name = `roads ${surface}`
     mesh.renderOrder = RoadSystem.RENDER_ORDER
@@ -591,18 +604,22 @@ export class RoadSystem {
    * surface's own metres (see GrassDetail on why not the world's), so that it goes by under a moving observer as a road does, and fading with the distance, as
    * each scale of it is let go of before it is finer than a pixel.
    */
-  private addGrain(material: MeshLambertMaterial, contrast: number): void {
+  private addGrain(material: MeshLambertMaterial, contrast: number, verge = false): void {
     const origin = this.grainOrigin
     material.onBeforeCompile = shader => {
       shader.uniforms.uRoadOrigin = { value: origin }
       shader.uniforms.uRoadContrast = { value: contrast }
+      if (verge) shader.defines = { ...shader.defines, ROAD_VERGE: "" }
       shader.vertexShader = shader.vertexShader
-        .replace("#include <common>", "#include <common>\nvarying vec2 vRoadXZ;\nuniform vec2 uRoadOrigin;")
-        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvRoadXZ = position.xz + uRoadOrigin;")
+        .replace("#include <common>", "#include <common>\nvarying vec2 vRoadXZ;\nuniform vec2 uRoadOrigin;\n#ifdef ROAD_VERGE\nattribute vec2 aEdge;\nvarying vec2 vRoadEdge;\n#endif")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvRoadXZ = position.xz + uRoadOrigin;\n#ifdef ROAD_VERGE\nvRoadEdge = aEdge;\n#endif")
       shader.fragmentShader = shader.fragmentShader
         .replace("#include <common>", `#include <common>
 varying vec2 vRoadXZ;
 uniform float uRoadContrast;
+#ifdef ROAD_VERGE
+varying vec2 vRoadEdge;
+#endif
 float roadHash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
   p += dot(p, p + 45.32);
@@ -623,10 +640,22 @@ float roadNoise(vec2 p) {
     + (roadNoise(vRoadXZ * 13.0) - 0.5) * 0.7 * (1.0 - smoothstep(9.0, 40.0, eye))
     + (roadNoise(vRoadXZ * 47.0) - 0.5) * 0.7 * (1.0 - smoothstep(2.5, 12.0, eye));
   diffuseColor.rgb *= 1.0 + grain * uRoadContrast;
+#ifdef ROAD_VERGE
+  // The verge: on a track or a path the grass of the field reaches onto the earth, in tufts and in tongues, and its edge is not a ruled line.
+  // Cut away where it does, so that the ground under it (its grass, see GrassDetail) is what is seen there. Near only: past some tens of
+  // metres the edge is under a pixel, and a cut there would only shimmer.
+  float vergeNear = 1.0 - smoothstep(20.0, 60.0, eye);
+  if (vergeNear > 0.0) {
+    float fromEdge = vRoadEdge.y - abs(vRoadEdge.x);
+    float reach = min(0.75, vRoadEdge.y * 0.4) * vergeNear
+      * (0.15 + 0.6 * roadNoise(vRoadXZ * 0.7) + 0.35 * roadNoise(vRoadXZ * 3.3) + 0.25 * roadNoise(vRoadXZ * 11.0));
+    if (fromEdge < reach) discard;
+  }
+#endif
 }`)
     }
     // A different program from every other Lambert material, which three tells apart by this key.
-    material.customProgramCacheKey = () => "rr0-road-grain"
+    material.customProgramCacheKey = () => verge ? "rr0-road-grain-verge" : "rr0-road-grain"
   }
 
   /**

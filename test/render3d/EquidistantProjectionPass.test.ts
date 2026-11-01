@@ -76,3 +76,15 @@ describe("EquidistantProjectionPass.faceRegions", () => {
     }
   })
 })
+
+describe("EquidistantProjectionPass.supports", () => {
+  it("draws through the cube once a single source would blow its centre up, not only once it cannot reach the corners", () => {
+    expect(EquidistantProjectionPass.centreDensity(60, 16 / 9)).toBeCloseTo(0.59, 2)
+    expect(EquidistantProjectionPass.centreDensity(75, 16 / 9)).toBeCloseTo(0.32, 2)
+    // The usual eye keeps its single source; Chelyabinsk's 75° no longer draws its decor three times too big.
+    expect(EquidistantProjectionPass.supports(60, 16 / 9)).toBe(true)
+    expect(EquidistantProjectionPass.supports(62, 16 / 9)).toBe(true)
+    expect(EquidistantProjectionPass.supports(70, 16 / 9)).toBe(false)
+    expect(EquidistantProjectionPass.supports(75, 16 / 9)).toBe(false)
+  })
+})

@@ -1687,6 +1687,8 @@ export class SceneRenderer {
 
   /** The list of frozen patches a build is waiting for, so that it is waited for once (see setTerrainOrigin). */
   private patchesAwaited?: TerrainPatchIndex
+  /** Where the observer was last asked to have ground under them while that list was awaited: what is built once it arrives (see setTerrainOrigin). */
+  private patchesAwaitedFor?: { lat: number, lng: number, onSettled?: () => void }
 
   /** The way the observer goes, as the recording's track gives it: what a bridge is to the ground depends on it (see ElevationHints). */
   private observerRoute?: readonly { lat: number; lng: number }[]
@@ -1737,13 +1739,18 @@ export class SceneRenderer {
     let frozenRadiusM: number | undefined
     if (patches) {
       if (!patches.loaded) {
+        // For the LAST place asked for, not the first: a recording opened at a later instant asks first for its start, then for where the observer
+        // is by then, and a paused scene asks nothing more (Socorro opened at 87 s stood on flat ground, a kilometre from the patch of its start).
+        this.patchesAwaitedFor = { lat, lng, onSettled }
         // Asked once per list, not at every tick it is awaited; and held for, as the patch itself is (see awaitArrival).
         if (this.patchesAwaited !== patches) {
           this.patchesAwaited = patches
           const providers = this.terrainProviders
           // The build asked from within the wait, so that the frame held for the list is still held for the patch.
           void this.awaitArrival(patches.ready.then(() => {
-            if (this.terrainProviders === providers) this.setTerrainOrigin(lat, lng, onSettled)
+            const asked = this.patchesAwaitedFor
+            this.patchesAwaitedFor = undefined
+            if (this.terrainProviders === providers && asked) this.setTerrainOrigin(asked.lat, asked.lng, asked.onSettled)
           }), SceneRenderer.TERRAIN_PATIENCE_MS)
         }
         return

@@ -23,7 +23,7 @@ describe("DecorParameterSets", () => {
     // A building that states no facade has a house's walls from a storey high (see DecorSystem.facadeOf): its kind is asked of every building,
     // a bare wall or none among them, which is how a warehouse written by hand says it has no windows.
     expect(shown("facade.openings", {})).toBe(true)
-    const kinds = (set.parameters.find(spec => spec.key === "facade.openings") as { choices: { value: string }[] }).choices.map(choice => choice.value)
+    const kinds = (set.parameters.find(spec => spec.key === "facade.openings") as unknown as { choices: { value: string }[] }).choices.map(choice => choice.value)
     expect(kinds).toEqual(["tall", "lancet", "plain", "none"])
   })
 

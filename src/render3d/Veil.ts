@@ -106,7 +106,13 @@ export class Veil {
     void main() {
       vOffset = position.xy;
       vec4 centre = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
-      centre.xy += position.xy * uTanRadius * length(centre.xyz);
+      // Across the line of sight to the source, not across the camera's axis: the same disc round the source for every camera that draws it,
+      // and its angles exact. Laid in the camera's own plane, it was not drawn at all by a face of the eye's cube that sees the source from the side
+      // (see EquidistantProjectionPass), and the veil of the Chelyabinsk bolide ended on an arc where that face began.
+      vec3 toward = normalize(centre.xyz);
+      vec3 across = normalize(cross(toward, abs(toward.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+      vec3 up = cross(across, toward);
+      centre.xyz += (across * position.x + up * position.y) * uTanRadius * length(centre.xyz);
       gl_Position = projectionMatrix * centre;
     }
   `

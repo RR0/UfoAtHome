@@ -19,6 +19,8 @@
   const stage = document.getElementById("stage")
   // The scene itself is photographed, never the recording's cover picture (see SceneElement.showPoster).
   stage.sceneElement.showPoster = () => {}
+  // Nor the map of where the observer stood, closed on a card (see DemoSectionPage) and over the sky in a corner of a still.
+  stage.setAttribute("show-observer-map", "false")
   if (query.get("t")) stage.setAttribute("start-time", query.get("t"))
   stage.setAttribute("src", query.get("src"))
   window.__stage = stage
