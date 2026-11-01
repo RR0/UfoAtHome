@@ -29,13 +29,17 @@ interface Vector {
 export class ReentrySystem {
   /** Drawn where meteors are, just inside the star sphere, for the same reason. */
   private static readonly RADIUS = 840
-  private static readonly MAX_SEGMENTS = 256
+  /** Room for the streaks of a break-up's whole cloud of pieces (see ReentrySheds): some hundred and twenty, eight segments each. */
+  private static readonly MAX_SEGMENTS = 1024
   private static readonly VERTICES_PER_SEGMENT = 12
-  /** The glare of the tail, degrees — the meteors' own, see MeteorSystem. */
-  private static readonly MIN_HALF_WIDTH_DEG = 0.05
+  /** The glare of the tail, degrees: wider than a meteor's (see MeteorSystem), whose 0.05 left a streak under a pixel wide on a screen, and
+   * a re-entry's streaks as bright as its heads behind them in every photograph of one invisible. */
+  private static readonly MIN_HALF_WIDTH_DEG = 0.1
   private static readonly BRIGHT_HALF_WIDTH_DEG = 0.22
-  /** How bright the tail starts, as a share of its head: the train glows, it does not outshine. */
-  private static readonly TRAIN_SHARE = 0.6
+  /** How bright the tail starts, as a share of its head: nearly as bright right behind it, as the photographs show, and never brighter. */
+  private static readonly TRAIN_SHARE = 0.9
+  /** How the tail dies away along its length: the power of the share of it left (a meteor's dies faster, at 1.6). */
+  private static readonly TRAIN_FALLOFF = 1.2
 
   readonly object = new Group()
   private readonly tiers: Points[]
@@ -118,7 +122,7 @@ export class ReentrySystem {
     ;(geometry.getAttribute("color") as BufferAttribute).needsUpdate = true
   }
 
-  /** A piece's tail: bright at the head, dying away along the path behind it, the meteors' 1.6 power. */
+  /** A piece's tail: bright at the head, dying away along the path behind it (see TRAIN_FALLOFF). */
   private pushTrain(vertex: number, train: readonly SkyPoint[], brightness: number, tint: Color): number {
     const segments = train.length - 1
     for (let i = 0; i < segments; i++) {
@@ -129,7 +133,7 @@ export class ReentrySystem {
       const to = horizontalToCartesian(train[i + 1].altitudeDeg, train[i + 1].azimuthDeg, ReentrySystem.RADIUS)
       const width = (share: number) =>
         ReentrySystem.RADIUS * (((ReentrySystem.MIN_HALF_WIDTH_DEG + ReentrySystem.BRIGHT_HALF_WIDTH_DEG * brightness * share) * Math.PI) / 180)
-      const glow = (share: number) => ReentrySystem.TRAIN_SHARE * brightness * share ** 1.6
+      const glow = (share: number) => ReentrySystem.TRAIN_SHARE * brightness * share ** ReentrySystem.TRAIN_FALLOFF
       vertex = this.pushRibbon(vertex, from, to, width(near), width(far), glow(near), glow(far), tint)
     }
     return vertex

@@ -165,6 +165,15 @@ def main():
     ]
     for fragment in fragments[:2]:
         fragment["untilT"] = assumed(last_t, end)
+    # What every photograph of a re-entry shows behind its few heads and Hartmann's "glittering tails" describe: a cloud of small pieces
+    # breaking off, each with its own streak, dropping back and drifting into a narrow fan (see ReentrySheds). Rates and sizes assumed.
+    breakup = ("Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show "
+               "each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. "
+               "How many, how bright and how fast are not given for this one: assumed.")
+    trains = "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+    for fragment, per_s in zip(fragments, (3.2, 2.6, 2.0, 1.6, 1.2, 1.0)):
+        fragment["trainS"] = assumed(round(fragment["trainS"]["value"] if isinstance(fragment["trainS"], dict) else fragment["trainS"], 1) * 2.5, trains)
+        fragment["sheds"] = assumed({"perS": per_s, "lifeS": 5, "magnitudeDrop": 2.5, "dropBack": 0.3, "spreadKmS": 1.0, "sinkKmS": 0.6, "trainS": 2.5}, breakup)
     reentry = {
         "id": "zond-iv",
         "title": {"en": "Re-entry of a piece of Zond 4's launcher", "fr": "Rentrée d'une pièce du lanceur de Zond 4",

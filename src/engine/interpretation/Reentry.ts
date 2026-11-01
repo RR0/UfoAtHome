@@ -94,6 +94,36 @@ export interface ReentryFragment {
   /** How long a stretch of its own past path still glows behind it, seconds: the tail observers
    * describe. 1.5 when absent. */
   trainS?: number
+  /** The smaller pieces it sheds as it breaks up, each of which burns, brakes and drifts away on its own (see ReentrySheds). */
+  sheds?: ReentrySheds
+}
+
+/**
+ * How a burning piece comes apart: the cloud of small fragments every photograph of a re-entry shows behind its few bright heads, each with
+ * its own streak, dropping back as the air brakes it harder than the piece it came from, and drifting a little to one side, so that the
+ * whole spreads into a narrow fan. Stated as rates and means; the pieces themselves are drawn from them, the same at every replay (see
+ * ReentrySighting.shedPieces).
+ */
+export interface ReentrySheds {
+  /** When it begins and stops shedding, ms of the recording. Its own life when absent. */
+  fromT?: number
+  untilT?: number
+  /** How many pieces it sheds a second, on average. */
+  perS: number
+  /** How long a shed piece burns, seconds, on average: between 0.4 and 1.6 times this. */
+  lifeS: number
+  /** How much fainter than its piece a shed one is, magnitudes, on average: between 0.6 and 1.4 times this. */
+  magnitudeDrop: number
+  /** How fast a shed piece falls behind, seconds of lag gained per second of its life squared (half its deceleration against its
+   * piece's, in time along the path), on average: between 0.5 and 1.5 times this. */
+  dropBack: number
+  /** How fast it drifts off the path sideways, km a second, at most: either side, anything up to this. 0.3 when absent. */
+  spreadKmS?: number
+  /** How fast it sinks below the path, km a second, on average (between 0.5 and 1.5 times this): braked harder, it falls more steeply. Seen
+   * from the side, this is what opens the fan; a drift sideways is mostly along the line of sight. 0.3 when absent. */
+  sinkKmS?: number
+  /** Its streak, seconds of its own past path. Two thirds of its piece's when absent. */
+  trainS?: number
 }
 
 /** A point of the Earth, or above it. */
@@ -109,6 +139,23 @@ export interface SkyPoint {
   altitudeDeg: number
   azimuthDeg: number
   distanceKm: number
+}
+
+/** A burning piece as it flies: a fragment of the re-entry, or one a fragment shed (see ReentrySheds). */
+export interface ReentryPiece {
+  id: string
+  fromT: number
+  untilT: number
+  /** How far behind the leading point it is along the path at `t`, ms. */
+  lagMsAt(t: number): number
+  /** How far off the path, km, to its right. */
+  acrossKmAt(t: number): number
+  /** How far below the path, km. */
+  belowKmAt(t: number): number
+  /** Its absolute magnitude at `t` (see ReentryFragment.absoluteMagnitude). */
+  magnitudeAt(t: number): number
+  color: string
+  trainMs: number
 }
 
 /** One piece of a re-entry as an observer sees it at one instant. */
@@ -183,45 +230,142 @@ export class ReentrySighting {
   static viewsAt(reentries: readonly ReentryJson[], t: number, observer: GeoPoint): ReentryFragmentView[] {
     const views: ReentryFragmentView[] = []
     for (const reentry of reentries) {
-      const first = reentry.track[0]?.t ?? 0
-      const last = reentry.track[reentry.track.length - 1]?.t ?? 0
-      reentry.fragments.forEach((fragment, index) => {
-        const fromT = fragment.fromT ?? first
-        const untilT = fragment.untilT ?? last
-        if (t < fromT || t > untilT) return
-        const lagMs = (fragment.lagS ?? 0) * 1000
-        const at = ReentrySighting.leadAt(reentry, t - lagMs)
-        if (!at) return
+      for (const piece of ReentrySighting.piecesOf(reentry)) {
+        if (t < piece.fromT || t > piece.untilT) continue
+        const at = ReentrySighting.pieceAt(reentry, piece, t)
+        if (!at) continue
         const head = ReentrySighting.seenFrom(observer, at)
-        if (head.altitudeDeg < 0) return
+        if (head.altitudeDeg < 0) continue
         // A quarter of its life at most, so a meteor burning one second still reaches its peak.
-        const fadeMs = Math.min(ReentrySighting.FADE_MS, (untilT - fromT) / 4)
-        const fade = fadeMs > 0 ? Math.min(1, (t - fromT) / fadeMs, (untilT - t) / fadeMs) : 1
+        const fadeMs = Math.min(ReentrySighting.FADE_MS, (piece.untilT - piece.fromT) / 4)
+        const fade = fadeMs > 0 ? Math.min(1, (t - piece.fromT) / fadeMs, (piece.untilT - t) / fadeMs) : 1
         // A fraction of its light, as a magnitude: 2.5 log of the share. Floored so a piece at the
         // very instant it appears is merely too faint, not infinitely so.
         const fadeMagnitudes = -2.5 * Math.log10(Math.max(fade, 1e-3))
-        const magnitude = ReentrySighting.absoluteMagnitudeAt(fragment, t) + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM) + fadeMagnitudes
+        const magnitude = piece.magnitudeAt(t) + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM) + fadeMagnitudes
         const train: SkyPoint[] = [head]
-        const trainMs = (fragment.trainS ?? ReentrySighting.DEFAULT_TRAIN_S) * 1000
         for (let k = 1; k <= ReentrySighting.TRAIN_POINTS; k++) {
           // Never further back than where it broke off: a piece has no tail from before it existed.
-          const back = Math.min((trainMs * k) / ReentrySighting.TRAIN_POINTS, t - fromT)
-          const past = ReentrySighting.leadAt(reentry, t - lagMs - back)
+          const back = Math.min((piece.trainMs * k) / ReentrySighting.TRAIN_POINTS, t - piece.fromT)
+          const past = ReentrySighting.pieceAt(reentry, piece, t - back)
           if (!past) break
           train.push(ReentrySighting.seenFrom(observer, past))
-          if (back >= t - fromT) break
+          if (back >= t - piece.fromT) break
         }
-        views.push({
-          reentryId: reentry.id,
-          fragmentId: fragment.id ?? String(index),
-          head,
-          magnitude,
-          color: fragment.color ?? ReentrySighting.DEFAULT_COLOR,
-          train
-        })
-      })
+        views.push({ reentryId: reentry.id, fragmentId: piece.id, head, magnitude, color: piece.color, train })
+      }
     }
     return views
+  }
+
+  /** Every piece of a re-entry: its fragments, and what each sheds (see ReentrySheds), worked out once per re-entry. */
+  static piecesOf(reentry: ReentryJson): readonly ReentryPiece[] {
+    const known = ReentrySighting.pieces.get(reentry)
+    if (known) return known
+    const first = reentry.track[0]?.t ?? 0
+    const last = reentry.track[reentry.track.length - 1]?.t ?? 0
+    const pieces: ReentryPiece[] = []
+    reentry.fragments.forEach((fragment, index) => {
+      const lagMs = (fragment.lagS ?? 0) * 1000
+      const piece: ReentryPiece = {
+        id: fragment.id ?? String(index),
+        fromT: fragment.fromT ?? first,
+        untilT: fragment.untilT ?? last,
+        lagMsAt: () => lagMs,
+        acrossKmAt: () => 0,
+        belowKmAt: () => 0,
+        magnitudeAt: at => ReentrySighting.absoluteMagnitudeAt(fragment, at),
+        color: fragment.color ?? ReentrySighting.DEFAULT_COLOR,
+        trainMs: (fragment.trainS ?? ReentrySighting.DEFAULT_TRAIN_S) * 1000
+      }
+      pieces.push(piece)
+      if (fragment.sheds) pieces.push(...ReentrySighting.shedPieces(piece, fragment.sheds))
+    })
+    ReentrySighting.pieces.set(reentry, pieces)
+    return pieces
+  }
+
+  private static readonly pieces = new WeakMap<ReentryJson, readonly ReentryPiece[]>()
+
+  /**
+   * The pieces `parent` sheds: one every 1/perS seconds or so, each breaking off where its parent is, then burning on its own for its life,
+   * fainter, dropping back along the path as the air brakes it harder, and drifting off it to one side. Drawn from a hash of the parent and
+   * the piece's rank, so a replay sheds the same ones.
+   */
+  static shedPieces(parent: ReentryPiece, sheds: ReentrySheds): ReentryPiece[] {
+    const fromT = sheds.fromT ?? parent.fromT
+    const untilT = Math.min(sheds.untilT ?? parent.untilT, parent.untilT)
+    if (!(sheds.perS > 0) || untilT <= fromT) return []
+    const count = Math.floor(((untilT - fromT) / 1000) * sheds.perS)
+    const spread = sheds.spreadKmS ?? 0.3
+    const sink = sheds.sinkKmS ?? 0.3
+    const trainMs = sheds.trainS !== undefined ? sheds.trainS * 1000 : parent.trainMs * (2 / 3)
+    const pieces: ReentryPiece[] = []
+    for (let rank = 0; rank < count; rank++) {
+      const random = (salt: number) => ReentrySighting.hash(`${parent.id}/${rank}/${salt}`)
+      const breakT = fromT + ((rank + random(1)) / sheds.perS) * 1000
+      const lifeMs = sheds.lifeS * (0.4 + 1.2 * random(2)) * 1000
+      const drop = sheds.magnitudeDrop * (0.6 + 0.8 * random(3))
+      const dropBack = sheds.dropBack * (0.5 + random(4))
+      const drift = spread * (2 * random(5) - 1)
+      const sinking = sink * (0.5 + random(6))
+      const lagAtBreak = parent.lagMsAt(breakT)
+      const acrossAtBreak = parent.acrossKmAt(breakT)
+      const belowAtBreak = parent.belowKmAt(breakT)
+      const sinceS = (at: number) => Math.max(0, at - breakT) / 1000
+      pieces.push({
+        id: `${parent.id}.${rank}`,
+        fromT: breakT,
+        untilT: Math.min(breakT + lifeMs, ReentrySighting.endOf(parent)),
+        lagMsAt: at => lagAtBreak + 500 * dropBack * sinceS(at) ** 2,
+        acrossKmAt: at => acrossAtBreak + drift * sinceS(at),
+        belowKmAt: at => belowAtBreak + sinking * sinceS(at),
+        magnitudeAt: at => parent.magnitudeAt(Math.min(at, parent.untilT)) + drop,
+        color: parent.color,
+        trainMs
+      })
+    }
+    return pieces
+  }
+
+  /** How late a shed piece may burn: a little past its parent, which goes out first when it slows down, not its fragments with it. */
+  private static endOf(parent: ReentryPiece): number {
+    return parent.untilT + 4000
+  }
+
+  /** A number in [0, 1) from a string, the same every time (FNV-1a). */
+  private static hash(text: string): number {
+    let h = 2166136261
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    return (h >>> 0) / 4294967296
+  }
+
+  /** Where a piece is at `t`: on the track its lag behind the leading point, then off it sideways by its drift and below it by its sinking. */
+  static pieceAt(reentry: ReentryJson, piece: ReentryPiece, t: number): GeoPoint | undefined {
+    const behind = t - piece.lagMsAt(t)
+    const at = ReentrySighting.leadAt(reentry, behind)
+    if (!at) return undefined
+    const acrossKm = piece.acrossKmAt(t)
+    const heightM = at.heightM - piece.belowKmAt(t) * 1000
+    if (acrossKm === 0) return { ...at, heightM }
+    // Which way the path runs here, from a point a second before, to step off it at right angles.
+    const before = ReentrySighting.leadAt(reentry, behind - 1000) ?? at
+    return { ...ReentrySighting.across(before, at, acrossKm), heightM }
+  }
+
+  /** The point `km` to the right of the path from `from` to `to`, at `to` (left for a negative distance), on the sphere. */
+  private static across(from: { lat: number, lng: number }, to: { lat: number, lng: number }, km: number): { lat: number, lng: number } {
+    const d = ReentrySighting.DEG
+    const lat1 = from.lat * d, lat2 = to.lat * d, dLng = (to.lng - from.lng) * d
+    const bearing = Math.atan2(Math.sin(dLng) * Math.cos(lat2), Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng))
+      + Math.PI / 2
+    const angle = km / 6371
+    const lat = Math.asin(Math.sin(lat2) * Math.cos(angle) + Math.cos(lat2) * Math.sin(angle) * Math.cos(bearing))
+    const lng = to.lng * d + Math.atan2(Math.sin(bearing) * Math.sin(angle) * Math.cos(lat2), Math.cos(angle) - Math.sin(lat2) * Math.sin(lat))
+    return { lat: lat / d, lng: lng / d }
   }
 
   /**

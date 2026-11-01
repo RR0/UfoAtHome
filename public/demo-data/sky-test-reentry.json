@@ -544,14 +544,27 @@
               "rationale": "Hartmann 1968, Condon report section VI chapter 2: golden-orange"
             },
             "trainS": {
-              "value": 2,
+              "value": 5.0,
               "basis": "assumed",
-              "rationale": "Hartmann 1968, Condon report section VI chapter 2: glittering tails"
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
             },
             "untilT": {
               "value": 140500,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
+            },
+            "sheds": {
+              "value": {
+                "perS": 3.2,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
             }
           },
           {
@@ -567,11 +580,28 @@
               "rationale": "Hartmann: 'most observers saw 2 or 3 main pieces'. Their spacing and brightness are not given: a few seconds apart along the path, and a fireball's magnitudes, are assumed."
             },
             "color": "#ffb060",
-            "trainS": 1.8,
+            "trainS": {
+              "value": 4.5,
+              "basis": "assumed",
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+            },
             "untilT": {
               "value": 140500,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
+            },
+            "sheds": {
+              "value": {
+                "perS": 2.6,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
             }
           },
           {
@@ -587,11 +617,28 @@
               "rationale": "Hartmann: 'most observers saw 2 or 3 main pieces'. Their spacing and brightness are not given: a few seconds apart along the path, and a fireball's magnitudes, are assumed."
             },
             "color": "#ffa050",
-            "trainS": 1.5,
+            "trainS": {
+              "value": 3.75,
+              "basis": "assumed",
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+            },
             "untilT": {
               "value": 132500,
               "basis": "assumed",
               "rationale": "Burned out over south-western Pennsylvania at 02:48 UTC, Molczan's decay time; the smaller pieces a little before."
+            },
+            "sheds": {
+              "value": {
+                "perS": 2.0,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
             }
           },
           {
@@ -617,7 +664,24 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "color": "#ff9a40",
-            "trainS": 1
+            "trainS": {
+              "value": 2.5,
+              "basis": "assumed",
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+            },
+            "sheds": {
+              "value": {
+                "perS": 1.6,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
+            }
           },
           {
             "id": "e",
@@ -642,7 +706,24 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "color": "#ff9a40",
-            "trainS": 1
+            "trainS": {
+              "value": 2.5,
+              "basis": "assumed",
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+            },
+            "sheds": {
+              "value": {
+                "perS": 1.2,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
+            }
           },
           {
             "id": "f",
@@ -667,7 +748,24 @@
               "rationale": "Hartmann: 'observers near the end of the trajectory saw more'. When and how many are not given: the leading piece is assumed to shed three more over West Virginia."
             },
             "color": "#ff9a40",
-            "trainS": 0.8
+            "trainS": {
+              "value": 2.0,
+              "basis": "assumed",
+              "rationale": "A streak of several seconds of path behind each piece, as the photographs show: assumed."
+            },
+            "sheds": {
+              "value": {
+                "perS": 1.0,
+                "lifeS": 5,
+                "magnitudeDrop": 2.5,
+                "dropBack": 0.3,
+                "spreadKmS": 1.0,
+                "sinkKmS": 0.6,
+                "trainS": 2.5
+              },
+              "basis": "assumed",
+              "rationale": "Hartmann: 'glittering tails'. Photographs of re-entries (Jules Verne ATV 2008, Falcon 9 2021, Long March 2022...) show each main piece trailed by dozens of small burning fragments with streaks of their own, dropping back and spreading. How many, how bright and how fast are not given for this one: assumed."
+            }
           }
         ]
       }
