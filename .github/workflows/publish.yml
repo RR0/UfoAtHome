@@ -1,0 +1,43 @@
+# Publishes the package to npm when a version tag is pushed (v0.152.0 for the version 0.152.0 of package.json), through npm's Trusted
+# Publishing: npm checks that the publication comes from this repository and this workflow (OpenID Connect), so no token is stored
+# anywhere, and the package carries its provenance. Set up once on npmjs.com, in the package's settings: a trusted publisher for the
+# repository RR0/UfoAtHome and the workflow file publish.yml.
+#
+# The tests are not run again here: a tag is pushed on a commit of master the CI has already tested, and only after `npm test` passed
+# locally. The site is deployed apart (npm run deploy:site), from the same build.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  # The OpenID Connect token npm reads to know who publishes.
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Trusted Publishing needs npm 11.5.1 at least, which Node 24 comes with.
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      # A tag that does not name the version of package.json would publish another version than the one tagged.
+      - name: The tag names the package's version
+        if: github.ref_type == 'tag'
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "The tag $GITHUB_REF_NAME does not name the package's version $version" >&2
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run build:all
+      # What prepublishOnly would build is built just above; its tests ran on the commit tagged (see the comment at the top).
+      - run: npm publish --access public --ignore-scripts
