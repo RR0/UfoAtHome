@@ -8,8 +8,8 @@ Changes (`scripts/extract-peugeot-expert.py`): scaled by 3.00/2.75 (the original
 3.00 m), turned so that its front is towards -z, centred on its box with the wheels on y = 0; its windows declared clear glass
 (KHR_materials_transmission) instead of a teal film half opaque; the windows of its rear doors made panels of the body's paint (the
 gendarmes' van had none, GEIPAN 2015-05-09194); the glass of the driver's mirror given a "Mirror" material (drawn as a mirror, see
-src/render3d/MirrorSystem.ts) and turned 10.3 degrees in its housing so that, for the driver's eye below, it shows what is 12 degrees out
+src/render3d/MirrorSystem.ts) and turned 12.6 degrees in its housing so that, for the driver's eye below, it shows what is 12 degrees out
 from straight behind and level, as a driver sets it (SUPPOSED). No other vertex is moved.
 
 The driver's eye, as `scripts/data/cases/geipan/silly-le-long-2015/add_van.py` seats it: 0.47 m left of the middle, 1.50 m above the
-ground, 0.12 m ahead of the centre of the box.
+ground, 0.25 m ahead of the centre of the box.

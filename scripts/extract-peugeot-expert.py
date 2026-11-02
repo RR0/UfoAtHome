@@ -36,7 +36,7 @@ MIRROR_SIDE_X = 20.71
 # How the glass is set in its housing, as a driver sets his: for his eye (DRIVER_EYE, in the frame of the output: x right, y up from the
 # ground, front towards -z; see add_van.py for Silly-le-Long), the middle of what it shows is MIRROR_OUTWARD_DEG out from straight behind
 # and level, which puts the van's own flank at the inner edge and the horizon across the middle. SUPPOSED: nobody says how T1's was set.
-DRIVER_EYE = (-0.47, 1.50, -0.12)
+DRIVER_EYE = (-0.47, 1.50, -0.25)
 MIRROR_OUTWARD_DEG = 12.0
 
 

@@ -6734,7 +6734,9 @@ export class SceneRenderer {
     return hits.find(hit => {
       const material = (hit.object as Mesh).material
       const materials = Array.isArray(material) ? material : [material]
-      return !materials.some(each => each && each.transparent && each.opacity < SceneRenderer.SEE_THROUGH_BELOW)
+      // Glass is looked through whatever its opacity says (see GlassMaterial): from the driver's seat, what is pointed at through the
+      // windscreen is what is outside, not the van.
+      return !materials.some(each => each && ((each.transparent && each.opacity < SceneRenderer.SEE_THROUGH_BELOW) || each instanceof GlassMaterial))
     })
   }
 
