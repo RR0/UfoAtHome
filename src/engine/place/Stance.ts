@@ -55,6 +55,8 @@ export class Stance {
   /** Undefined for an observer who does not move: a sway of 0, or a paralysed observer who states
    * none. */
   static of(sighting: Sighting): Stance | undefined {
+    // A camera fixed to a windscreen or a wall is held by nobody.
+    if (sighting.instrument.mounted) return undefined
     const still = sighting.event.tags?.includes("paralysis") || (sighting.exposure ?? 0) > Stance.HAND_HELD_S
     const scale = sighting.sway ?? (still ? 0 : 1)
     if (!(scale > 0)) return undefined

@@ -249,6 +249,12 @@ export interface Instrument {
    * optical stabilisation would be stated here, and is not claimed by any entry below.
    */
   stabilization?: number
+  /**
+   * Fixed to something rather than held: a dashcam on its windscreen, a security camera on its wall. Its picture has none of the sway
+   * and breathing of a body standing (see Stance), whatever the recording says of the person who reports it. It moves only as what it
+   * is fixed to does (a car, along the observer's track). Absent is held.
+   */
+  mounted?: boolean
   /** Binoculars or a telescope: see VisualAid. Absent on an eye and on every camera. */
   visualAid?: VisualAid
   /** What it records on, and so how the picture answers light — see RecordingMedium. Absent for an
@@ -462,6 +468,7 @@ export const INSTRUMENTS: Instrument[] = [
     // sold on (118 across the diagonal, 103 across, 58 up and down). A fisheye, not a rectilinear lens: the bent horizon of every one of
     // those films is its r = f·θ.
     id: "dashcam",
+    mounted: true,
     category: "video",
     name: "Dashcam",
     projection: "equidistant",
@@ -484,6 +491,7 @@ export const INSTRUMENTS: Instrument[] = [
     // board lens most of them were fitted with (ASSUMED, the commonest), so 67 degrees across and 53 up and down. The smear a CCD draws
     // up and down from a light too bright for it is not drawn.
     id: "cctv",
+    mounted: true,
     category: "video",
     name: "Security camera",
     projection: "rectilinear",

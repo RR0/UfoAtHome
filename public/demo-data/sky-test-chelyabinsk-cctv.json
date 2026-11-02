@@ -12,10 +12,10 @@
     "cctv"
   ],
   "description": {
-    "fr": "Le même superbolide, filmé par une caméra de surveillance fixée à quatre mètres et tournée vers la rue, comme celles qui ont enregistré les ombres tournant dans les cours. Elle ne voit presque pas le ciel : c'est la rue qui s'illumine, ses ombres qui tournent, et l'image qui brûle puis se rattrape à mesure que son exposition suit la lumière. La caméra est un type, pas un modèle : capteur CCD de 1/3 de pouce, objectif de 3,6 mm, exposition qui suit en une demi-seconde, le réglage par défaut de ces caméras. La traînée verticale qu'un CCD dessine sous une lumière trop forte n'est pas rendue.",
-    "en": "The same superbolide, filmed by a security camera fixed four metres up and facing the street, like those that recorded the shadows swinging round the yards. It hardly sees the sky: it is the street that lights up, its shadows that swing round, and the picture that burns and catches up as its exposure follows the light. The camera is a type, not a model: a 1/3-inch CCD, a 3.6 mm lens, an exposure that follows in half a second, these cameras' default setting. The vertical streak a CCD draws under a light too strong for it is not rendered.",
-    "es": "El mismo superbólido, grabado por una cámara de vigilancia fijada a cuatro metros y orientada a la calle, como las que registraron las sombras girando en los patios. Apenas ve el cielo: es la calle la que se ilumina, sus sombras las que giran, y la imagen la que se quema y se recupera a medida que su exposición sigue a la luz. La cámara es un tipo, no un modelo: CCD de 1/3 de pulgada, objetivo de 3,6 mm, exposición que sigue en medio segundo, el ajuste por defecto de estas cámaras. La franja vertical que un CCD dibuja bajo una luz demasiado fuerte no se representa.",
-    "it": "Lo stesso superbolide, ripreso da una telecamera di sorveglianza fissata a quattro metri e rivolta verso la strada, come quelle che registrarono le ombre che giravano nei cortili. Il cielo quasi non lo vede: è la strada che si illumina, le sue ombre che girano, e l'immagine che brucia e si riprende man mano che la sua esposizione segue la luce. La telecamera è un tipo, non un modello: CCD da 1/3 di pollice, obiettivo da 3,6 mm, esposizione che segue in mezzo secondo, l'impostazione predefinita di queste telecamere. La striscia verticale che un CCD disegna sotto una luce troppo forte non è resa."
+    "fr": "Le même superbolide, filmé par une caméra de surveillance fixée à trois mètres au-dessus de la rue et relevée vers le ciel du sud-ouest, là où il passe à son plus brillant. On le voit traverser l'image et se fragmenter, tandis que la rue s'illumine en bas, que ses ombres tournent, et que l'image brûle puis se rattrape à mesure que son exposition suit la lumière. La caméra est un type, pas un modèle : capteur CCD de 1/3 de pouce, objectif de 3,6 mm, exposition qui suit en une demi-seconde, le réglage par défaut de ces caméras. Fixée, elle ne bouge pas. La traînée verticale qu'un CCD dessine sous une lumière trop forte n'est pas rendue.",
+    "en": "The same superbolide, filmed by a security camera fixed three metres above the street and tilted up at the south-western sky, where it passes at its brightest. It is seen crossing the picture and breaking up, while the street lights up below, its shadows swing round, and the picture burns and catches up as its exposure follows the light. The camera is a type, not a model: a 1/3-inch CCD, a 3.6 mm lens, an exposure that follows in half a second, these cameras' default setting. Fixed, it does not move. The vertical streak a CCD draws under a light too strong for it is not rendered.",
+    "es": "El mismo superbólido, grabado por una cámara de vigilancia fijada a tres metros sobre la calle y levantada hacia el cielo del suroeste, donde pasa en su máximo brillo. Se le ve cruzar la imagen y fragmentarse, mientras la calle se ilumina abajo, sus sombras giran y la imagen se quema y luego se recupera a medida que su exposición sigue la luz. La cámara es un tipo, no un modelo: sensor CCD de 1/3 de pulgada, objetivo de 3,6 mm, exposición que sigue en medio segundo, el ajuste por defecto de estas cámaras. Fija, no se mueve. No se representa la estela vertical que un CCD dibuja bajo una luz demasiado fuerte.",
+    "it": "Lo stesso superbolide, filmato da una telecamera di sorveglianza fissata a tre metri sopra la strada e alzata verso il cielo di sud-ovest, dove passa al suo massimo splendore. Lo si vede attraversare l'immagine e frammentarsi, mentre la strada si illumina in basso, le sue ombre ruotano e l'immagine brucia per poi riprendersi man mano che l'esposizione segue la luce. La telecamera è un tipo, non un modello: sensore CCD da 1/3 di pollice, obiettivo da 3,6 mm, esposizione che segue in mezzo secondo, l'impostazione predefinita di queste telecamere. Fissa, non si muove. La striscia verticale che un CCD disegna sotto una luce troppo forte non è resa."
   },
   "time": {
     "year": 2013,
@@ -76,8 +76,8 @@
           "lat": 55.1597,
           "lng": 61.4026,
           "elevationM": 3,
-          "headingDeg": 200,
-          "pitchDeg": -12,
+          "headingDeg": 230,
+          "pitchDeg": 20,
           "fovDeg": 53
         }
       },
@@ -87,8 +87,8 @@
           "lat": 55.1597,
           "lng": 61.4026,
           "elevationM": 3,
-          "headingDeg": 200,
-          "pitchDeg": -12,
+          "headingDeg": 230,
+          "pitchDeg": 20,
           "fovDeg": 53
         }
       }
