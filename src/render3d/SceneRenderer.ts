@@ -139,6 +139,8 @@ import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { MirrorSystem } from "./MirrorSystem.js"
+import { GlassMaterial } from "./GlassMaterial.js"
+import { CabinMask } from "./CabinMask.js"
 import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
 import type { DecorObject, StreetLampSpec } from "../engine/model/Decor.js"
 import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
@@ -5409,6 +5411,7 @@ export class SceneRenderer {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
     }
+    this.hideVeilsBehindDecor()
     // What a mirror in view shows, the phenomena included: drawn before the frame that shows it (see MirrorSystem).
     if (this.mirrors.any && !this.mirrors.render(this.renderer, this.scene, this.camera, this.phenomena.any ? [PHENOMENON_LAYER] : [], !target)) {
       this.mirrorCatchUp ??= setTimeout(() => {
@@ -6258,9 +6261,17 @@ export class SceneRenderer {
   }
 
   private isSunOccluded(offsetRightDeg = 0, offsetUpDeg = 0): boolean {
+    return this.isOccludedToward(this.sunWorldPosition, offsetRightDeg, offsetUpDeg)
+  }
+
+  /**
+   * Whether the ground, the terrain or the decor stands between the eye and `target` (world), or a point of a disc round it `offsetRightDeg`
+   * and `offsetUpDeg` across the line of sight. Glass is looked through, not at: the windscreen of the van the eye is in hides nothing.
+   */
+  private isOccludedToward(target: Vector3, offsetRightDeg = 0, offsetUpDeg = 0): boolean {
     const decor = this.raycastableDecor()
     if (!this.groundMesh && !this.terrainMesh && decor.length === 0) return false
-    const direction = this.sunOcclusionDirectionScratch.copy(this.sunWorldPosition).sub(this.camera.position)
+    const direction = this.sunOcclusionDirectionScratch.copy(target).sub(this.camera.position)
     const distanceToSun = direction.length()
     direction.normalize()
     if (offsetRightDeg !== 0 || offsetUpDeg !== 0) {
@@ -6279,11 +6290,43 @@ export class SceneRenderer {
     // The ground by its own height grid (see groundBlocks); only the decor, a few boxes and models,
     // is worth a real raycast. Matrices are refreshed by the caller, see sunVisibleFraction.
     if (this.groundBlocks(this.camera.position, direction, distanceToSun)) return true
-    if (decor.length === 0) return false
+    // The cabin the eye is in by its silhouette (see CabinMask), the rest of the decor by a ray.
+    if (this.cabinMask.hides(direction)) return true
+    const around = this.cabinMask.any ? decor.filter(group => !this.cabinGroups.includes(group)) : decor
+    if (around.length === 0) return false
     this.sunOcclusionRaycaster.set(this.camera.position, direction)
-    const hit = this.sunOcclusionRaycaster.intersectObjects(decor, true)[0]
+    const hit = this.sunOcclusionRaycaster.intersectObjects(around, true).find(each => !((each.object as Mesh).material instanceof GlassMaterial))
     return hit !== undefined && hit.distance < distanceToSun
   }
+
+  /**
+   * Dims each veil in the eye (see Veil) by how much of its source the decor and the ground leave in sight, as the Sun's dazzle is (see
+   * sunVisibleFraction). The veils are drawn over everything, with no depth: without this the Moon's glare shone through the roof of the van
+   * the observer was driving, its disc hidden and its halo not. Asked every frame, since what hides a source is what moves: the eye, the van.
+   */
+  private hideVeilsBehindDecor(): void {
+    this.cabinMask.update(this.renderer, this.cabinGroups[0], this.camera.position)
+    let refreshed = false
+    for (const veil of this.glareSprites.values()) {
+      if (!veil.mesh.visible) continue
+      if (!refreshed) {
+        if (this.raycastableDecor().length > 0) this.scene.updateMatrixWorld()
+        refreshed = true
+      }
+      const target = veil.mesh.getWorldPosition(this.veilTargetScratch)
+      const radiusDeg = veil.mesh.material.uniforms.uSourceDeg.value as number
+      // The disc's centre and four points of its rim, or its centre alone for a point.
+      const samples = radiusDeg > 0.05 ? SceneRenderer.VEIL_SAMPLES : SceneRenderer.VEIL_SAMPLES.slice(0, 1)
+      let seen = 0
+      for (const [right, up] of samples) if (!this.isOccludedToward(target, right * radiusDeg, up * radiusDeg)) seen++
+      veil.share = seen / samples.length
+    }
+  }
+
+  private static readonly VEIL_SAMPLES: readonly [number, number][] = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]
+  /** What the cabin the eye is in hides of the sky — see CabinMask. */
+  private readonly cabinMask = new CabinMask()
+  private readonly veilTargetScratch = new Vector3()
 
   /**
    * Whether the ground — the flat disc, or the relief patch — stands between `origin` and the
@@ -6786,6 +6829,7 @@ export class SceneRenderer {
     this.stopTwinkle()
     this.cancelFlush()
     clearTimeout(this.mirrorCatchUp)
+    this.cabinMask.dispose()
     this.phenomena.clear()
     this.references?.disposeAll()
     this.terrainBuildToken++ // discard any terrain build still in flight

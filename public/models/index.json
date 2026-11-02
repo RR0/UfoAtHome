@@ -18,17 +18,34 @@
       }
     },
     {
-      "id": "max-iveco-daily-van",
+      "id": "koelkast-peugeot-expert",
       "kind": "vehicle",
-      "name": "Iveco Daily van, 2014 (cab and cargo body, modelled inside)",
-      "file": "max-iveco-daily-van/van.glb",
+      "name": "Peugeot Expert van (cab, side windows, modelled inside)",
+      "file": "koelkast-peugeot-expert/van.glb",
       "headingOffsetDeg": 0,
-      "sizeM": { "widthM": 2.477, "lengthM": 5.574, "heightM": 2.096 },
+      "sizeM": { "widthM": 2.185, "lengthM": 4.935, "heightM": 1.966 },
+      "parameters": {
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "paintColor",
+            "fallback": "#cc0001",
+            "label": { "en": "Paint colour", "fr": "Couleur de la peinture", "es": "Color de la pintura", "it": "Colore della vernice" },
+            "hint": {
+              "en": "The colour of the body, over the model's own red: the windows, the lights and the inside keep theirs.",
+              "fr": "La couleur de la carrosserie, sur le rouge du modèle : les vitres, les feux et l'intérieur gardent les leurs.",
+              "es": "El color de la carrocería, sobre el rojo del modelo: las ventanillas, las luces y el interior conservan los suyos.",
+              "it": "Il colore della carrozzeria, sopra il rosso del modello: i vetri, le luci e l'interno mantengono i loro."
+            }
+          }
+        ],
+        "bindings": { "paintColor": { "materials": ["^carpaint$"] } }
+      },
       "credit": {
-        "title": "Iveco Daily Van 2014 (scaled to the real size, textures scaled down)",
-        "author": "Max",
-        "license": "CC BY 4.0",
-        "sourceUrl": "https://sketchfab.com/3d-models/iveco-daily-van-2014-30003fba5b074d6eb7bc74fd5e1e7d19"
+        "title": "Peugeot Expert (simplified, windows glazed, rear windows panelled, driver's mirror set)",
+        "author": "KOElkast1007",
+        "license": "Sketchfab Standard",
+        "sourceUrl": "https://sketchfab.com/3d-models/peugeot-expert-db5a6b979f4943ee9d596051a2702dec"
       }
     },
     {

@@ -44,7 +44,8 @@ export class Veil {
         uColor: { value: new Color(0, 0, 0) },
         uTanRadius: { value: 0.1 },
         uSourceDeg: { value: 0.25 },
-        uInnerDeg: { value: 0 }
+        uInnerDeg: { value: 0 },
+        uShare: { value: 1 }
       },
       vertexShader: Veil.VERTEX,
       fragmentShader: Veil.FRAGMENT,
@@ -95,6 +96,11 @@ export class Veil {
     this.mesh.visible = false
   }
 
+  /** How much of the source the eye sees, 0 to 1: a Moon behind the roof of the van the observer drives has no veil in the eye. */
+  set share(share: number) {
+    this.mesh.material.uniforms.uShare.value = share
+  }
+
   dispose(): void {
     this.mesh.geometry.dispose()
     this.mesh.material.dispose()
@@ -122,6 +128,7 @@ export class Veil {
     uniform float uTanRadius;
     uniform float uSourceDeg;
     uniform float uInnerDeg;
+    uniform float uShare;
     varying vec2 vOffset;
     void main() {
       float reach = length(vOffset);
@@ -131,7 +138,7 @@ export class Veil {
       // Less the veil at the edge, so the quad ends where the veil is already at its faintest, and faded over the outer half: a veil so
       // strong it is still white at its edge would otherwise end on a rim.
       float veil = max(1.0 / (theta * theta) - 1.0 / (edge * edge), 0.0) * (1.0 - smoothstep(0.5 * edge, edge, theta));
-      gl_FragColor = vec4(uColor * veil, 1.0);
+      gl_FragColor = vec4(uColor * veil * uShare, 1.0);
     }
   `
 }
