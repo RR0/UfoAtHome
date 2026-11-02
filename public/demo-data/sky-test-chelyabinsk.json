@@ -74,6 +74,28 @@
    }
   }
  ],
+ "milestones": [
+  {
+   "t": 10300,
+   "label": "A",
+   "note": {
+    "fr": "Le bolide à son plus brillant, plus que le Soleil, se brise vers 30 km d'altitude et se désagrège en fragments.",
+    "en": "The bolide at its brightest, brighter than the Sun, breaks up about 30 km up and comes apart into fragments.",
+    "es": "El bólido en su máximo brillo, más que el Sol, se rompe a unos 30 km de altura y se desintegra en fragmentos.",
+    "it": "Il bolide al suo massimo splendore, più del Sole, si spezza a circa 30 km di quota e si disgrega in frammenti."
+   }
+  },
+  {
+   "t": 159000,
+   "label": "B",
+   "note": {
+    "fr": "L'onde de choc arrive : un claquement, puis un roulement de tonnerre, deux minutes et demie après l'éclair, le temps que le son parcoure les 46 km depuis la rupture.",
+    "en": "The shock wave arrives: a crack, then a roll of thunder, two and a half minutes after the flash, the time sound takes to cover the 46 km from the break-up.",
+    "es": "Llega la onda de choque: un chasquido y luego un retumbar de trueno, dos minutos y medio después del destello, el tiempo que tarda el sonido en recorrer los 46 km desde la ruptura.",
+    "it": "Arriva l'onda d'urto: uno schiocco, poi un rombo di tuono, due minuti e mezzo dopo il lampo, il tempo che il suono impiega a percorrere i 46 km dalla rottura."
+   }
+  }
+ ],
  "time": {
   "year": 2013,
   "month": 2,

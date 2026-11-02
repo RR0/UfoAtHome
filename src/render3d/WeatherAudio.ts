@@ -221,16 +221,49 @@ export class WeatherAudio {
   }
 
   /**
-   * The bang of a fireball's detonation reaching the observer (see ReentrySighting.detonationsOf): the thunder's clap played an octave and
-   * more lower, a shock wave being a single deep blow rather than a crackling roll, at `loudness` (0 to 1).
+   * The bang of a fireball's detonation reaching the observer (see ReentrySighting.detonationsOf), at `loudness` (0 to 1): a shock wave
+   * arrives as a sharp crack, the jump of pressure that broke Chelyabinsk's windows, then rolls on as thunder does. The crack is noise of
+   * every pitch dying away in a quarter of a second; the roll, the thunder's clap played a little lower. It was the clap alone, played at
+   * less than half its speed: its energy, near 100 Hz, fell to 45, which no laptop's speaker gives out, and nothing was heard.
    */
   playDetonation(loudness: number): void {
-    if (!this.context || this.paused) return
-    void this.playOneShot(THUNDER_URL, Math.min(1, Math.max(0, loudness)), WeatherAudio.DETONATION_RATE)
+    const context = this.context
+    if (!context || this.paused) return
+    const level = Math.min(1, Math.max(0, loudness))
+    const crack = context.createBufferSource()
+    crack.buffer = this.crackBuffer(context)
+    const filter = context.createBiquadFilter()
+    filter.type = "lowpass"
+    filter.frequency.value = WeatherAudio.CRACK_CUTOFF_HZ
+    const gain = context.createGain()
+    gain.gain.value = level
+    crack.connect(filter).connect(gain).connect(this.output(context))
+    crack.start()
+    void this.playOneShot(THUNDER_URL, level, WeatherAudio.DETONATION_RATE)
   }
 
-  /** How much slower than the thunder's clap a detonation is played: lower, and longer. */
-  private static readonly DETONATION_RATE = 0.45
+  /** How much slower than the thunder's clap the roll of a detonation is played: a little lower, still within what a small speaker gives out. */
+  private static readonly DETONATION_RATE = 0.8
+  /** Above this the crack is cut: what is left of a shock wave's high pitches after tens of kilometres of air. */
+  private static readonly CRACK_CUTOFF_HZ = 2500
+  /** How fast the crack dies away, seconds to a third (1/e). */
+  private static readonly CRACK_DECAY_S = 0.25
+
+  /** Noise rising in five milliseconds and dying away over CRACK_DECAY_S, made once for the context. */
+  private crackBuffer(context: AudioContext): AudioBuffer {
+    if (this.crack?.sampleRate === context.sampleRate) return this.crack
+    const length = Math.round(context.sampleRate * WeatherAudio.CRACK_DECAY_S * 6)
+    const buffer = context.createBuffer(1, length, context.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < length; i++) {
+      const s = i / context.sampleRate
+      data[i] = (Math.random() * 2 - 1) * Math.min(1, s / 0.005) * Math.exp(-s / WeatherAudio.CRACK_DECAY_S)
+    }
+    this.crack = buffer
+    return buffer
+  }
+
+  private crack?: AudioBuffer
 
   /** Stops every active source and closes the AudioContext — called from SceneElement's own
    * disconnectedCallback, alongside stopTwinkle(). Bumping both tokens first discards any loop-
