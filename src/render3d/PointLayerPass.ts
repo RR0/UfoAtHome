@@ -1,5 +1,6 @@
 import {
   BufferGeometry,
+  DoubleSide,
   HalfFloatType,
   Mesh,
   MeshBasicMaterial,
@@ -62,7 +63,9 @@ export class PointLayerPass {
   /** What stands in for each point source in this layer's own scene: the same geometry, drawn with
    * the output material, at the source's own place. */
   private readonly proxies = new Map<Points | Mesh, Points | Mesh>()
-  private readonly foreground = new MeshBasicMaterial({ color: 0x000000, fog: false })
+  /** Both sides: from inside a cabin (the van the observer drives), its roof and its pillars are the backs of a shell modelled to be seen
+   * from outside, and drawn one-sided they hid no star. */
+  private readonly foreground = new MeshBasicMaterial({ color: 0x000000, fog: false, side: DoubleSide })
   private hidden: (Points | Mesh)[] = []
 
   constructor(private width: number, private height: number) {

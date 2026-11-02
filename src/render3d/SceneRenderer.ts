@@ -5,6 +5,7 @@ import type { CloudRendering } from "./LayeredCloudSystem.js"
 // statically analyzable, which was the difference between an ~850KB and an ~180KB bundle here.
 import {
   AdditiveBlending,
+  DoubleSide,
   CustomBlending,
   ZeroFactor,
   BackSide,
@@ -5723,7 +5724,8 @@ export class SceneRenderer {
   private static readonly PHENOMENA_VIEW_MARGIN_PX = 4
 
   /** Writes nothing but depth — see renderPhenomenaPass. */
-  private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false })
+  /** Both sides, as the decor hides from either: from inside a cabin, its roof and pillars are the backs of a shell modelled for outside. */
+  private readonly decorDepthMaterial = new MeshBasicMaterial({ colorWrite: false, side: DoubleSide })
 
   /** How far a neck turns, either way from where the body points, degrees. */
   private static readonly HEAD_TURN_LIMIT_DEG = 85
