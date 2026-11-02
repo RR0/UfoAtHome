@@ -58,6 +58,10 @@ describe("sw.js", () => {
   let fetched: string[]
   let network: (url: string) => Response | Promise<Response>
   let worker: Worker
+  /** The worker as it is, its copies still being written when a response is returned. */
+  let rawRespond: (event: unknown) => Promise<Response> | undefined
+  /** What the worker asked to be kept alive for: keeping a copy, once the response is out. */
+  let pending: Promise<unknown>[]
   let UfoAtHomeWorker: { isImmutable(url: URL): boolean }
 
   beforeEach(async () => {
@@ -85,6 +89,13 @@ describe("sw.js", () => {
     const load = new Function("self", "caches", "fetch", `${source}\nreturn {worker, UfoAtHomeWorker}`)
     const loaded = load(scope, caches, fakeFetch)
     worker = loaded.worker
+    pending = []
+    // The tests look at the caches once the copies are written, as a browser would some time after.
+    rawRespond = worker.respond.bind(worker)
+    worker.respond = (e: unknown) => rawRespond(e)?.then(async response => {
+      await Promise.all(pending.splice(0))
+      return response
+    })
     UfoAtHomeWorker = loaded.UfoAtHomeWorker
   })
 
@@ -92,7 +103,7 @@ describe("sw.js", () => {
     vi.useRealTimers()
   })
 
-  const event = (request: Request) => ({request, waitUntil: () => undefined})
+  const event = (request: Request) => ({request, waitUntil: (promise: Promise<unknown>) => pending.push(promise)})
   const cacheNamed = async (name: string) => stores.get(name) ?? new FakeCache()
 
   it("leaves other people's servers to the browser", () => {
@@ -164,7 +175,7 @@ describe("sw.js", () => {
     await worker.respond(event(requestFor("/docs/", {mode: "navigate"})))!
     vi.useFakeTimers()
     network = () => new Promise<Response>(() => undefined)
-    const answer = worker.respond(event(requestFor("/docs/", {mode: "navigate"})))!
+    const answer = rawRespond(event(requestFor("/docs/", {mode: "navigate"})))!
     await vi.advanceTimersByTimeAsync(5001)
     expect(await (await answer).text()).toBe("page")
   })
@@ -269,6 +280,31 @@ describe("sw.js", () => {
       const response = await worker.respond(event(requestFor("/faq/", {mode: "navigate"})))!
       expect(await response.text()).toBe("home")
     })
+  })
+
+  it("hands the page the network's response before keeping a copy of it", async () => {
+    let written = false
+    const cache = await cacheNamed("ufoathome")
+    stores.set("ufoathome", cache)
+    const put = cache.put.bind(cache)
+    cache.put = async (request, response) => {
+      await new Promise(resolve => setTimeout(resolve, 10))
+      written = true
+      return put(request, response)
+    }
+    const response = await rawRespond(event(requestFor("/docs/", {mode: "navigate"})))!
+    expect(await response.text()).toBe("network")
+    expect(written).toBe(false)
+    await Promise.all(pending)
+    expect(written).toBe(true)
+  })
+
+  it("opens the installed app on a launch screen, without the network", async () => {
+    network = () => Promise.reject(new TypeError("offline"))
+    const response = await worker.respond(event(requestFor("/play/?file=Socorro&source=pwa", {mode: "navigate"})))!
+    const page = await response.text()
+    expect(page).toContain('url.searchParams.delete("source")')
+    expect(fetched).toEqual([])
   })
 
   it("installs what it was given, and survives a file that is missing", async () => {

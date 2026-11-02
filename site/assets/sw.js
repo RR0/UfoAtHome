@@ -29,6 +29,38 @@ class UfoAtHomeWorker {
   /** What to show offline for a page that was never opened. */
   static OFFLINE = "/offline.html"
 
+  /**
+   * What the installed app shows the moment it is opened, before the page it opens on: without it, a phone
+   * shows a blank screen while that page arrives. Written here, its style inline, so that it needs nothing
+   * from the network; it then goes on to the page, and the browser keeps it on screen until that page can
+   * be drawn. Its colours are style.css's dark ground and glow, as the manifest's background.
+   */
+  static LAUNCH_PAGE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>UFO@home</title>
+  <style>
+    html { background: #070a12; color: #f0bc44 }
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem }
+    img { width: 6rem; height: 6rem; border-radius: 22% }
+    .spinner { width: 2rem; height: 2rem; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: turn 1s linear infinite }
+    @keyframes turn { to { transform: rotate(1turn) } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 4s } }
+  </style>
+</head>
+<body>
+<img alt="" src="/icon-192.png">
+<div aria-label="Loading" class="spinner" role="progressbar"></div>
+<script>
+  const url = new URL(location.href)
+  url.searchParams.delete("source")
+  location.replace(url.pathname + url.search + url.hash)
+</script>
+</body>
+</html>`
+
   /** How long a cached copy waits for a slow network before it is served instead. */
   static PATIENCE_MS = 5000
 
@@ -89,6 +121,10 @@ class UfoAtHomeWorker {
   }
 
   async activate() {
+    // The page request leaves while the worker is still starting, instead of waiting for it.
+    if (self.registration?.navigationPreload) {
+      await self.registration.navigationPreload.enable()
+    }
     for (const name of await caches.keys()) {
       if (name.startsWith("ufoathome") && name !== UfoAtHomeWorker.CACHE && name !== UfoAtHomeWorker.DATA_CACHE) {
         await caches.delete(name)
@@ -131,22 +167,27 @@ class UfoAtHomeWorker {
       return undefined
     }
     if (request.mode === "navigate") {
+      // The manifest's start and shortcut URLs carry source=pwa: the app is being opened.
+      if (url.searchParams.get("source") === "pwa") {
+        return Promise.resolve(new Response(UfoAtHomeWorker.LAUNCH_PAGE, {headers: {"Content-Type": "text/html; charset=utf-8"}}))
+      }
       return this.navigation(event, url)
     }
     if (UfoAtHomeWorker.isImmutable(url)) {
-      return this.cacheFirst(request, UfoAtHomeWorker.CACHE)
+      return this.cacheFirst(event, request, UfoAtHomeWorker.CACHE)
     }
     if (UfoAtHomeWorker.isData(url)) {
-      return this.networkFirst(event, request, request, UfoAtHomeWorker.DATA_CACHE, true)
+      return this.networkFirst(event, fetch(request), request, UfoAtHomeWorker.DATA_CACHE, true)
     }
-    return this.networkFirst(event, request, request, UfoAtHomeWorker.CACHE, false)
+    return this.networkFirst(event, fetch(request), request, UfoAtHomeWorker.CACHE, false)
   }
 
   /** A page is kept under its path alone: `/play/?file=…` is the same page whatever it is asked to play. */
   async navigation(event, url) {
     const key = new Request(url.origin + url.pathname)
     try {
-      return await this.networkFirst(event, event.request, key, UfoAtHomeWorker.CACHE, false)
+      const source = Promise.resolve(event.preloadResponse).then(preloaded => preloaded ?? fetch(event.request))
+      return await this.networkFirst(event, source, key, UfoAtHomeWorker.CACHE, false)
     } catch (offline) {
       const cache = await caches.open(UfoAtHomeWorker.CACHE)
       return (await cache.match(UfoAtHomeWorker.OFFLINE)) ?? Response.error()
@@ -210,38 +251,48 @@ class UfoAtHomeWorker {
     }
   }
 
-  async cacheFirst(request, cacheName) {
+  async cacheFirst(event, request, cacheName) {
     const cache = await caches.open(cacheName)
     const cached = await cache.match(request)
     if (cached) {
       return cached
     }
-    const response = await fetch(request)
-    if (UfoAtHomeWorker.storable(response)) {
-      await cache.put(request, response.clone())
-    }
-    return response
+    return this.networkFirst(event, fetch(request), request, cacheName, false)
   }
 
-  async networkFirst(event, request, key, cacheName, capped) {
-    const cache = await caches.open(cacheName)
-    const cached = await cache.match(key)
-    const network = fetch(request).then(async response => {
-      if (UfoAtHomeWorker.storable(response) && await this.small(response, capped)) {
-        await cache.put(key, response.clone())
-        if (capped) {
-          await this.trim(cache)
-        }
-      }
+  /**
+   * The network's response is handed to the page as soon as its headers arrive, so that the page streams in
+   * as it would without a worker; keeping a copy happens afterwards, off the page's path. Reading the cache
+   * before the network answers, or keeping the copy before answering, held every response until it was
+   * entirely downloaded and written, and queued the others behind it (rr0.org, whose worker this one shares
+   * its design with, took 1 to 2 s per click for it).
+   *
+   * @param source The network response, already requested (a navigation preload, or a fetch).
+   */
+  networkFirst(event, source, key, cacheName, capped) {
+    let copy
+    const network = source.then(response => {
+      copy = UfoAtHomeWorker.storable(response) ? response.clone() : undefined
       return response
     })
-    if (!cached) {
-      return network
-    }
-    event.waitUntil(network.catch(() => undefined))
-    const patience = new Promise(resolve => setTimeout(() => resolve(cached), UfoAtHomeWorker.PATIENCE_MS))
-    const answer = network.then(response => response.status >= 500 ? cached : response, () => cached)
+    event.waitUntil(network.then(() => copy && this.store(cacheName, key, copy, capped)).catch(() => undefined))
+    const cached = async () => (await caches.open(cacheName)).match(key)
+    const answer = network.then(
+      async response => response.status >= 500 ? (await cached()) ?? response : response,
+      async error => (await cached()) ?? Promise.reject(error)
+    )
+    const patience = new Promise(resolve => setTimeout(() => cached().then(found => found && resolve(found)), UfoAtHomeWorker.PATIENCE_MS))
     return Promise.race([answer, patience])
+  }
+
+  async store(cacheName, key, response, capped) {
+    if (await this.small(response, capped)) {
+      const cache = await caches.open(cacheName)
+      await cache.put(key, response)
+      if (capped) {
+        await this.trim(cache)
+      }
+    }
   }
 
   /** A compressed answer carries no content-length, so its size is read off the body rather than assumed. */

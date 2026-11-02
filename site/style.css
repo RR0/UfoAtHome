@@ -650,3 +650,34 @@ td { color: var(--ink-dim); }
 .context-pager small { color: var(--ink-faint); font-weight: 400; }
 .context-next { margin-left: auto; text-align: right; }
 .context-uses .use p { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------------------------------------------------------------- installed app (OfflineKit.APP) */
+
+/* Back and forward, which the app has no browser bar to offer. */
+.app-history { display: inline-flex; white-space: nowrap; }
+.app-history[hidden] { display: none; }
+.app-history button {
+  appearance: none; border: none; background: none; cursor: pointer;
+  color: var(--ink); font-size: 1.6rem; line-height: 1; padding: 0 0.35rem;
+}
+.app-history button:disabled { opacity: 0.3; cursor: default; }
+
+/* A clicked link is loading: the progress can't be known, so the bar slows down as it goes. */
+.loading-bar {
+  position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 3px;
+  background: var(--glow-solid); transform-origin: left; pointer-events: none;
+  animation: loading-bar 8s cubic-bezier(.1, .7, .3, 1) forwards;
+}
+/* On the page that was loading: the bar completes, then fades. */
+.loading-bar.arriving {
+  animation: none; transform: scaleX(.9);
+  transition: transform .3s ease-out, opacity .4s ease-in .3s;
+}
+.loading-bar.arriving.done { transform: scaleX(1); opacity: 0; }
+@keyframes loading-bar {
+  from { transform: scaleX(.2); }
+  to { transform: scaleX(.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar { animation: none; transform: scaleX(.5); }
+}

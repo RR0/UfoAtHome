@@ -20,6 +20,8 @@ interface ShellWords {
   readonly contact: string
   readonly requestFeature: string
   readonly licence: string
+  readonly previousPage: string
+  readonly nextPage: string
 }
 
 /**
@@ -57,25 +59,29 @@ export class Layout {
       locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section",
       licensed: version => `UFO@home v${version} — ${Licence.mit()} licensed`,
       createdBy: `Created and maintained by <a href="https://rr0.org">RR0</a> — usable without it.`,
-      thisSite: "This site", theCode: "The code", contact: "Contact", requestFeature: "Request a feature", licence: "MIT licence"
+      thisSite: "This site", theCode: "The code", contact: "Contact", requestFeature: "Request a feature", licence: "MIT licence",
+      previousPage: "Previous page", nextPage: "Next page"
     },
     fr: {
       locale: "fr_FR", mainNavigation: "Navigation principale", sectionLink: "Lien vers cette section",
       licensed: version => `UFO@home v${version} — sous licence ${Licence.mit()}`,
       createdBy: `Créé et maintenu par <a href="https://rr0.org">RR0</a> — utilisable sans lui.`,
-      thisSite: "Le site", theCode: "Le code", contact: "Contact", requestFeature: "Proposer une amélioration", licence: "Licence MIT"
+      thisSite: "Le site", theCode: "Le code", contact: "Contact", requestFeature: "Proposer une amélioration", licence: "Licence MIT",
+      previousPage: "Page précédente", nextPage: "Page suivante"
     },
     es: {
       locale: "es_ES", mainNavigation: "Navegación principal", sectionLink: "Enlace a esta sección",
       licensed: version => `UFO@home v${version} — con licencia ${Licence.mit()}`,
       createdBy: `Creado y mantenido por <a href="https://rr0.org">RR0</a> — utilizable sin él.`,
-      thisSite: "Este sitio", theCode: "El código", contact: "Contacto", requestFeature: "Proponer una mejora", licence: "Licencia MIT"
+      thisSite: "Este sitio", theCode: "El código", contact: "Contacto", requestFeature: "Proponer una mejora", licence: "Licencia MIT",
+      previousPage: "Página anterior", nextPage: "Página siguiente"
     },
     it: {
       locale: "it_IT", mainNavigation: "Navigazione principale", sectionLink: "Link a questa sezione",
       licensed: version => `UFO@home v${version} — con licenza ${Licence.mit()}`,
       createdBy: `Creato e mantenuto da <a href="https://rr0.org">RR0</a> — utilizzabile senza di esso.`,
-      thisSite: "Questo sito", theCode: "Il codice", contact: "Contatti", requestFeature: "Proporre un miglioramento", licence: "Licenza MIT"
+      thisSite: "Questo sito", theCode: "Il codice", contact: "Contatti", requestFeature: "Proporre un miglioramento", licence: "Licenza MIT",
+      previousPage: "Pagina precedente", nextPage: "Pagina successiva"
     }
   }
 
@@ -211,6 +217,7 @@ ${this.languageRedirect(page, language)}
   ${ShareCard.META}
   ${Layout.ICON_LINKS}
   ${OfflineKit.HEAD}
+  ${OfflineKit.APP}
   <link rel="stylesheet" href="/style.css">
   ${modules}
 </head>
@@ -267,9 +274,16 @@ ${OfflineKit.REGISTER}
       const currentAttr = page === current ? ` aria-current="page"` : ""
       return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(page.meta.navLabel[language])}</a>`
     }).join("\n    ")
+    const words = Layout.SHELL[language]
+    // Shown by OfflineKit.APP in the installed app only, which has no browser bar to offer them.
+    const history = `<span class="app-history" hidden>
+    <button type="button" class="app-back" title="${words.previousPage}" aria-label="${words.previousPage}">‹</button>
+    <button type="button" class="app-forward" title="${words.nextPage}" aria-label="${words.nextPage}">›</button>
+  </span>`
     return `<header class="site-header">
+  ${history}
   <a class="brand" href="/"><img class="brand-logo" src="/logo-96.png" width="28" height="28" alt="">UFO<span class="at">@</span>home</a>
-  <nav class="site-nav" aria-label="${Layout.SHELL[language].mainNavigation}">
+  <nav class="site-nav" aria-label="${words.mainNavigation}">
     ${links}
   </nav>
 </header>`

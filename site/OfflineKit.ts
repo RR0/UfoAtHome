@@ -49,13 +49,92 @@ if ("serviceWorker" in navigator) {
 }
 </script>`
 
+  /**
+   * What the installed app lacks for having no browser bar, and gets back here: a sign that a clicked link
+   * is loading, and back and forward buttons (the header's .app-history, hidden otherwise). Nothing changes
+   * in a browser tab. In the <head>, so that a page that was loading can complete the bar before it is drawn.
+   *
+   * The app is recognised by its display mode, or on iOS by navigator.standalone, whose home-screen apps
+   * may not report the manifest's mode.
+   */
+  static readonly APP = `<script>
+(function () {
+  if (!(matchMedia("(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)").matches || navigator.standalone)) { return }
+  var bar = document.createElement("div")
+  bar.className = "loading-bar"
+  bar.setAttribute("aria-hidden", "true")
+  var giveUp
+  var hide = function () { clearTimeout(giveUp); bar.remove(); sessionStorage.removeItem("ufoathome-loading") }
+  var show = function () {
+    document.documentElement.append(bar)
+    // The next page completes the bar: a page that comes quickly still shows that it came.
+    sessionStorage.setItem("ufoathome-loading", String(Date.now()))
+    giveUp = setTimeout(hide, 20000)  // A navigation the browser dropped (a download, a 204) never unloads the page.
+  }
+  if ("navigation" in window) {
+    navigation.addEventListener("navigate", function (event) {
+      if (!event.destination.sameDocument && !event.downloadRequest && event.navigationType !== "reload") { show() }
+    })
+  } else {
+    addEventListener("click", function (event) {
+      var link = event.target.closest && event.target.closest("a[href]")
+      var url = link && new URL(link.href, location.href)
+      if (url && !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey
+        && !event.altKey && !link.target && !link.hasAttribute("download") && url.protocol.indexOf("http") === 0
+        && !(url.pathname === location.pathname && url.search === location.search && url.hash)) { show() }
+    })
+  }
+  var leftAt = Number(sessionStorage.getItem("ufoathome-loading"))
+  if (leftAt && Date.now() - leftAt < 20000) {
+    sessionStorage.removeItem("ufoathome-loading")
+    var arriving = document.createElement("div")
+    arriving.className = "loading-bar arriving"
+    arriving.setAttribute("aria-hidden", "true")
+    document.documentElement.append(arriving)
+    // Completed once the page has been drawn with it: done before the first frame, there would be nothing to see.
+    addEventListener("load", function () {
+      requestAnimationFrame(function () { requestAnimationFrame(function () {
+        arriving.classList.add("done")
+        setTimeout(function () { arriving.remove() }, 1500)
+      }) })
+    })
+  }
+  addEventListener("DOMContentLoaded", function () {
+    var history = document.querySelector(".app-history")
+    if (!history) { return }
+    var back = history.querySelector(".app-back")
+    var forward = history.querySelector(".app-forward")
+    back.addEventListener("click", function () { window.history.back() })
+    forward.addEventListener("click", function () { window.history.forward() })
+    history.hidden = false
+    // Where the browser says whether there is somewhere to go, a button that would do nothing is shown disabled.
+    if ("navigation" in window && "canGoBack" in navigation) {
+      var update = function () { back.disabled = !navigation.canGoBack; forward.disabled = !navigation.canGoForward }
+      update()
+      navigation.addEventListener("currententrychange", update)
+    }
+  })
+  addEventListener("pageshow", function (event) {
+    // Back from the back/forward cache, the page comes as it was left: with its bar, and its buttons as they were.
+    if (!event.persisted) { return }
+    hide()
+    var history = document.querySelector(".app-history")
+    if (history && "navigation" in window && "canGoBack" in navigation) {
+      history.querySelector(".app-back").disabled = !navigation.canGoBack
+      history.querySelector(".app-forward").disabled = !navigation.canGoForward
+    }
+  })
+})()
+</script>`
+
   manifest(): string {
     return JSON.stringify({
       id: "/",
       name: "UFO@home",
       short_name: "UFO@home",
       description: "Replay what a witness saw, under the sky of that night.",
-      start_url: "/",
+      // source=pwa tells the worker that the app is being opened: it answers with a launch screen.
+      start_url: "/?source=pwa",
       scope: "/",
       display: "standalone",
       background_color: OfflineKit.THEME_DARK,
@@ -65,8 +144,8 @@ if ("serviceWorker" in navigator) {
         {src: "/logo.png", sizes: "512x512", type: "image/png", purpose: "any"}
       ],
       shortcuts: [
-        {name: "Player", url: "/play/", icons: [{src: "/icon-192.png", sizes: "192x192"}]},
-        {name: "Editor", url: "/edit/", icons: [{src: "/icon-192.png", sizes: "192x192"}]}
+        {name: "Player", url: "/play/?source=pwa", icons: [{src: "/icon-192.png", sizes: "192x192"}]},
+        {name: "Editor", url: "/edit/?source=pwa", icons: [{src: "/icon-192.png", sizes: "192x192"}]}
       ]
     }, undefined, 2) + "\n"
   }

@@ -10,7 +10,7 @@ describe("OfflineKit", () => {
 
   it("describes an app that opens on the home page, in its own window", () => {
     const manifest = JSON.parse(kit.manifest())
-    expect(manifest).toMatchObject({start_url: "/", scope: "/", display: "standalone"})
+    expect(manifest).toMatchObject({start_url: "/?source=pwa", scope: "/", display: "standalone"})
     expect(manifest.icons.map((icon: { sizes: string }) => icon.sizes)).toEqual(["192x192", "512x512"])
   })
 
