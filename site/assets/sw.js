@@ -35,7 +35,8 @@ class UfoAtHomeWorker {
    * from the network; it then goes on to the page, and the browser keeps it on screen until that page can
    * be drawn. It shows the logo (precached), on style.css's dark ground as the manifest's background.
    */
-  static LAUNCH_PAGE = `<!DOCTYPE html>
+  static launchPage(logo) {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -51,15 +52,40 @@ class UfoAtHomeWorker {
   </style>
 </head>
 <body>
-<img alt="UFO@home" src="/logo.png">
+<img alt="UFO@home" id="logo" src="${logo}">
 <div aria-label="Loading" class="spinner" role="progressbar"></div>
 <script>
   const url = new URL(location.href)
   url.searchParams.delete("source")
-  location.replace(url.pathname + url.search + url.hash)
+  // Gone on only once the logo is on screen: going at once, the phone left this page before drawing it.
+  const go = () => location.replace(url.pathname + url.search + url.hash)
+  document.getElementById("logo").decode().then(go, go)
 </script>
 </body>
 </html>`
+  }
+
+  /**
+   * The launch screen, its logo written into it from the cache, where the installation put it: asked to
+   * the network, it came too late to be seen.
+   */
+  async launch() {
+    const cached = await (await caches.open(UfoAtHomeWorker.CACHE)).match(UfoAtHomeWorker.LAUNCH_LOGO)
+    const logo = cached ? await UfoAtHomeWorker.dataUrl(cached) : UfoAtHomeWorker.LAUNCH_LOGO
+    return new Response(UfoAtHomeWorker.launchPage(logo), {headers: {"Content-Type": "text/html; charset=utf-8"}})
+  }
+
+  static async dataUrl(response) {
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    let binary = ""
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
+    }
+    return `data:${response.headers.get("content-type") ?? "image/png"};base64,${btoa(binary)}`
+  }
+
+  /** The logo the launch screen shows; precached (see OfflineKit). */
+  static LAUNCH_LOGO = "/logo.png"
 
   /** How long a cached copy waits for a slow network before it is served instead. */
   static PATIENCE_MS = 5000
@@ -169,7 +195,7 @@ class UfoAtHomeWorker {
     if (request.mode === "navigate") {
       // The manifest's start and shortcut URLs carry source=pwa: the app is being opened.
       if (url.searchParams.get("source") === "pwa") {
-        return Promise.resolve(new Response(UfoAtHomeWorker.LAUNCH_PAGE, {headers: {"Content-Type": "text/html; charset=utf-8"}}))
+        return this.launch()
       }
       return this.navigation(event, url)
     }

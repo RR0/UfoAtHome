@@ -307,6 +307,14 @@ describe("sw.js", () => {
     expect(fetched).toEqual([])
   })
 
+  it("writes the logo into the launch screen, from the cache, so that it is drawn at once", async () => {
+    const cache = await cacheNamed("ufoathome")
+    stores.set("ufoathome", cache)
+    await cache.put("/logo.png", basic("PNG", {headers: {"content-type": "image/png"}}))
+    const response = await worker.respond(event(requestFor("/?source=pwa", {mode: "navigate"})))!
+    expect(await response.text()).toContain(`src="data:image/png;base64,${btoa("PNG")}"`)
+  })
+
   it("installs what it was given, and survives a file that is missing", async () => {
     network = url => url.endsWith("/style.css") ? basic("", {status: 404}) : basic("page")
     await worker.install()
