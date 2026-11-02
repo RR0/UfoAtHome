@@ -1,5 +1,5 @@
 import {
-  BufferGeometry, HalfFloatType, LinearFilter, Material, Matrix3, Matrix4, Mesh, Object3D, PerspectiveCamera, Plane, Scene, ShaderMaterial, Vector3,
+  BufferGeometry, HalfFloatType, Raycaster, LinearFilter, Material, Matrix3, Matrix4, Mesh, Object3D, PerspectiveCamera, Plane, Scene, ShaderMaterial, Vector3,
   Vector4, WebGLRenderTarget, WebGLRenderer
 } from "three"
 
@@ -102,6 +102,30 @@ export class MirrorSystem {
       mesh.material = material
       this.mirrors.push({ mesh, ...flat, target, material })
     })
+  }
+
+  /**
+   * Sends `raycaster`'s ray on through the mirror it meets, if it meets one before `distanceLimit` (whatever stands nearer, a door
+   * pillar, hides it): from the glass, turned about the same plane the mirror is drawn with. What is pointed at in a mirror is what it
+   * shows, not the van it is on.
+   *
+   * @returns Whether the ray was turned.
+   */
+  reflect(raycaster: Raycaster, nearerThan: (distance: number) => boolean = () => true): boolean {
+    if (this.mirrors.length === 0) return false
+    const hit = raycaster.intersectObjects(this.mirrors.map(mirror => mirror.mesh), false)[0]
+    if (!hit || !nearerThan(hit.distance)) return false
+    const mirror = this.mirrors.find(each => each.mesh === hit.object)!
+    mirror.mesh.updateWorldMatrix(true, false)
+    this.normal.copy(mirror.normal).applyMatrix3(this.normalMatrix.getNormalMatrix(mirror.mesh.matrixWorld)).normalize()
+    raycaster.ray.origin.copy(hit.point).addScaledVector(this.normal, 1e-3 * Math.sign(-raycaster.ray.direction.dot(this.normal)))
+    raycaster.ray.direction.reflect(this.normal).normalize()
+    return true
+  }
+
+  /** Whether `object` is the glass of one of the mirrors. */
+  isMirror(object: Object3D): boolean {
+    return this.mirrors.some(mirror => mirror.mesh === object)
   }
 
   /** Forgets every mirror, as the decor they belong to is taken down. */

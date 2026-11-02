@@ -6047,6 +6047,18 @@ export class SceneRenderer {
    * noticeably towards the frame's edges.
    */
   private aimAtScreenPoint(raycaster: Raycaster, ndcX: number, ndcY: number): void {
+    this.aimStraightAtScreenPoint(raycaster, ndcX, ndcY)
+    // The pointer's ray, and only it, goes on through a mirror (see MirrorSystem.reflect), unless the cabin stands in front of the glass.
+    // Where a phenomenon is drawn and what hides it are what the eye sees straight, never what it sees in a mirror.
+    if (raycaster === this.raycaster && this.mirrors.any) {
+      this.mirrors.reflect(raycaster, distance => {
+        const cabin = SceneRenderer.firstSolid(raycaster.intersectObjects(this.cabinGroups, true))
+        return !cabin || cabin.distance >= distance - 1e-3 || this.mirrors.isMirror(cabin.object)
+      })
+    }
+  }
+
+  private aimStraightAtScreenPoint(raycaster: Raycaster, ndcX: number, ndcY: number): void {
     const pass = this.projectionKind === "equidistant" ? this.equidistantPass : undefined
     if (!pass) {
       raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
