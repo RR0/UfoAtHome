@@ -18,18 +18,18 @@
       }
     },
     {
-      "id": "koelkast-peugeot-expert",
+      "id": "tonielpro-peugeot-expert-2012",
       "kind": "vehicle",
-      "name": "Peugeot Expert van (cab, side windows, modelled inside)",
-      "file": "koelkast-peugeot-expert/van.glb",
+      "name": "Peugeot Expert van, 2012 (cab, side windows, seats and dashboard)",
+      "file": "tonielpro-peugeot-expert-2012/van.glb",
       "headingOffsetDeg": 0,
-      "sizeM": { "widthM": 2.185, "lengthM": 4.935, "heightM": 1.966 },
+      "sizeM": { "widthM": 2.175, "lengthM": 4.838, "heightM": 1.908 },
       "parameters": {
         "parameters": [
           {
             "type": "colour",
             "key": "paintColor",
-            "fallback": "#cc0001",
+            "fallback": "#8b0000",
             "label": { "en": "Paint colour", "fr": "Couleur de la peinture", "es": "Color de la pintura", "it": "Colore della vernice" },
             "hint": {
               "en": "The colour of the body, over the model's own red: the windows, the lights and the inside keep theirs.",
@@ -39,13 +39,13 @@
             }
           }
         ],
-        "bindings": { "paintColor": { "materials": ["^carpaint$"] } }
+        "bindings": { "paintColor": { "materials": ["^M_0021_DarkRed$"] } }
       },
       "credit": {
-        "title": "Peugeot Expert (simplified, windows glazed, rear windows panelled, driver's mirror set)",
-        "author": "KOElkast1007",
-        "license": "Sketchfab Standard",
-        "sourceUrl": "https://sketchfab.com/3d-models/peugeot-expert-db5a6b979f4943ee9d596051a2702dec"
+        "title": "2012 Peugeot Expert (scaled to the real size, windows glazed, rear windows panelled, driver's mirror set)",
+        "author": "tonielpro520",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/2012-peugeot-expert-685aadd153804845a8f022d3e9ea4a0f"
       }
     },
     {
