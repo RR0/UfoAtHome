@@ -42,4 +42,5 @@ jobs:
       - run: npm ci
       - run: npm run build:all
       # What prepublishOnly would build is built just above; its tests ran on the commit tagged (see the comment at the top).
-      - run: npm publish --access public --ignore-scripts
+      # Verbose: what the exchange of the OpenID Connect token for a publishing one said, when it fails, is only said at that level.
+      - run: npm publish --access public --ignore-scripts --loglevel verbose
