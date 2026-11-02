@@ -33,7 +33,7 @@ class UfoAtHomeWorker {
    * What the installed app shows the moment it is opened, before the page it opens on: without it, a phone
    * shows a blank screen while that page arrives. Written here, its style inline, so that it needs nothing
    * from the network; it then goes on to the page, and the browser keeps it on screen until that page can
-   * be drawn. Its colours are style.css's dark ground and glow, as the manifest's background.
+   * be drawn. It shows the logo (precached), on style.css's dark ground as the manifest's background.
    */
   static LAUNCH_PAGE = `<!DOCTYPE html>
 <html lang="en">
@@ -44,14 +44,14 @@ class UfoAtHomeWorker {
   <style>
     html { background: #070a12; color: #f0bc44 }
     body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem }
-    img { width: 6rem; height: 6rem; border-radius: 22% }
+    img { width: min(50vw, 12rem); height: auto; border-radius: 22% }
     .spinner { width: 2rem; height: 2rem; border: 3px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: turn 1s linear infinite }
     @keyframes turn { to { transform: rotate(1turn) } }
     @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 4s } }
   </style>
 </head>
 <body>
-<img alt="" src="/icon-192.png">
+<img alt="UFO@home" src="/logo.png">
 <div aria-label="Loading" class="spinner" role="progressbar"></div>
 <script>
   const url = new URL(location.href)
