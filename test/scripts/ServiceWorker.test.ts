@@ -48,6 +48,7 @@ function requestFor(url: string, init: { mode?: string, range?: boolean } = {}):
 interface Worker {
   respond(event: unknown): Promise<Response> | undefined
   install(): Promise<void>
+  completeTrunk(): Promise<void>
   activate(): Promise<void>
   keep(urls: string[], page: string): Promise<void>
 }
@@ -315,9 +316,22 @@ describe("sw.js", () => {
     expect(await response.text()).toContain(`src="data:image/png;base64,${btoa("PNG")}"`)
   })
 
-  it("installs what it was given, and survives a file that is missing", async () => {
-    network = url => url.endsWith("/style.css") ? basic("", {status: 404}) : basic("page")
+  it("installs with only what the launch screen and an unvisited page need, so that installing ends", async () => {
     await worker.install()
+    expect([...(await cacheNamed("ufoathome")).entries.keys()].sort()).toEqual([`${ORIGIN}/logo.png`, `${ORIGIN}/offline.html`])
+  })
+
+  it("then fetches the rest of what it was given, and survives a file that is missing", async () => {
+    network = url => url.endsWith("/style.css") ? basic("", {status: 404}) : basic("page")
+    await worker.completeTrunk()
     expect([...(await cacheNamed("ufoathome")).entries.keys()]).toEqual([`${ORIGIN}/play/`])
+  })
+
+  it("does not fetch again what the trunk already holds", async () => {
+    const cache = await cacheNamed("ufoathome")
+    stores.set("ufoathome", cache)
+    await cache.put("/play/", basic("kept"))
+    await worker.completeTrunk()
+    expect(fetched).toEqual([`${ORIGIN}/style.css`])
   })
 })
