@@ -391,9 +391,10 @@ export class BodySystem {
   /**
    * Draws as glass whatever a model says transmits light (KHR_materials_transmission, which three
    * reads into a MeshPhysicalMaterial's `transmission`) — see GlassMaterial on why not three's own.
-   * Glass that thin casts next to no shadow, so it casts none.
+   * Glass that thin casts next to no shadow, so it casts none. The decor's models are glazed the same
+   * way (a van's windscreen, see SceneRenderer).
    */
-  private static glaze(scene: Object3D): void {
+  static glaze(scene: Object3D): void {
     scene.traverse(child => {
       if (!(child instanceof Mesh)) return
       const material = child.material

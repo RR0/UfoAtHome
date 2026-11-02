@@ -2949,7 +2949,12 @@ export class SceneRenderer {
       const group = this.decorGroups.get(object.id)
       if (!group) return
       // What stands round it, for whatever of it is shiny — see Reflections.
-      if (!standIn && object.kind !== "tree") Reflections.reflectOn(scene)
+      if (!standIn && object.kind !== "tree") {
+        // A vehicle's windows, which a model says are glass, are drawn as glass, as a body's are (see BodySystem.glaze): seen from the
+        // seat, the grey film a model paints for them veiled the whole night through the windscreen.
+        BodySystem.glaze(scene)
+        Reflections.reflectOn(scene)
+      }
       // Only the catalogue can say what the real thing is; a bare url states a file and nothing
       // about what it depicts (see DecorModelEntry.sizeM and DecorSystem.applyModel).
       const loaded = { ref: JSON.stringify(ref), scene, headingOffsetDeg: ref.headingOffsetDeg ?? entry?.headingOffsetDeg, depictedSizeM: entry?.sizeM, credit, bindings: entry?.parameters?.bindings }
@@ -4985,7 +4990,7 @@ export class SceneRenderer {
   private cabinGroups: Object3D[] = []
 
   /**
-   * The aircraft the eye is inside of (a flight deck), found on where each one IS at the instant being drawn: its placement, resolved now, against the eye, and not
+   * The aircraft or the vehicle the eye is inside of (a flight deck, a van's cab), found on where each one IS at the instant being drawn: its placement, resolved now, against the eye, and not
    * on the bounds the last frame left. Those are where the object was, which after a jump in the timeline, or an aperçu drawn at another moment, is far from
    * the eye: the cabin was left and entered again at every one, its shadow box and its map resized each time, the light pulsing.
    * A terrace or a wall whose box holds the eye is only where the observer stands. (What the observer is declared to inhabit, a room or a car, has its own
@@ -4994,7 +4999,7 @@ export class SceneRenderer {
   private findCabin(t: number, offset: { x: number, z: number }, shift: { x: number, z: number }): Object3D[] {
     const inside: Object3D[] = []
     for (const object of this.decorObjects) {
-      if (object.kind !== "aircraft" || (object.observerSide !== undefined && canHoldObserver(object.kind))) continue
+      if ((object.kind !== "aircraft" && object.kind !== "vehicle") || (object.observerSide !== undefined && canHoldObserver(object.kind))) continue
       const group = this.decorGroups.get(object.id)
       if (!group) continue
       const placement = resolveDecorPlacementAt(object, t)

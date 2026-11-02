@@ -18,6 +18,20 @@
       }
     },
     {
+      "id": "max-iveco-daily-van",
+      "kind": "vehicle",
+      "name": "Iveco Daily van, 2014 (cab and cargo body, modelled inside)",
+      "file": "max-iveco-daily-van/van.glb",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 2.477, "lengthM": 5.574, "heightM": 2.096 },
+      "credit": {
+        "title": "Iveco Daily Van 2014 (scaled to the real size, textures scaled down)",
+        "author": "Max",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/iveco-daily-van-2014-30003fba5b074d6eb7bc74fd5e1e7d19"
+      }
+    },
+    {
       "id": "kenney-car-kit-police",
       "kind": "vehicle",
       "name": "Patrol car (generic, stylised)",
