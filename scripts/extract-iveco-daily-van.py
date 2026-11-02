@@ -20,6 +20,7 @@ Run from the repository root (needs the standard library and ImageMagick's `magi
     python3 scripts/extract-iveco-daily-van.py ~/Downloads/iveco_daily_van_2014 public/models/max-iveco-daily-van/van.glb
 """
 import json
+import math
 import pathlib
 import struct
 import subprocess
@@ -32,6 +33,12 @@ DETAIL_PX = 512
 # The driver's (left) door, and the islands of its texture (u0, v0, u1, v1) that the two glasses of its mirror are mapped on.
 MIRROR_MESH = "Front_door_L_Front door_0"
 MIRROR_UV = ((0.118, 0.785, 0.170, 0.853), (0.018, 0.701, 0.070, 0.7385))
+# How the glass is set in its housing, as a driver sets his: for his eye (DRIVER_EYE, in the frame of the output: x right, y up from the
+# ground, front towards -z; see add_van.py for Silly-le-Long), the middle of what it shows is MIRROR_OUTWARD_DEG out from straight behind
+# and level, which puts the van's own flank at the inner edge and the horizon across the middle. The model's own setting showed the
+# ground 29 degrees out and 8 down. SUPPOSED: nobody says how T1's was set.
+DRIVER_EYE = (-0.45, 1.65, -0.75)
+MIRROR_OUTWARD_DEG = 12.0
 
 
 def matrix_of(node):
@@ -106,9 +113,56 @@ def glaze(gltf):
     gltf["extensionsUsed"] = sorted(set(gltf.get("extensionsUsed", [])) | {"KHR_materials_transmission", "KHR_materials_ior"})
 
 
-def cut_mirror(gltf, binary):
-    """Moves the triangles of the driver's door whose three corners lie on MIRROR_UV into a primitive of their own, of material "Mirror"."""
-    node = next(node for node in gltf["nodes"] if node.get("name") == MIRROR_MESH)
+def world_of(gltf, target):
+    """The matrix that takes `target`'s own frame to the scene's."""
+    parents = {child: index for index, node in enumerate(gltf["nodes"]) for child in node.get("children", [])}
+    m = [[1.0 if i == j else 0.0 for j in range(4)] for i in range(4)]
+    index = target
+    while index is not None:
+        m = multiply(matrix_of(gltf["nodes"][index]), m)
+        index = parents.get(index)
+    return m
+
+
+def invert3(m):
+    a, b, c = m[0][:3], m[1][:3], m[2][:3]
+    det = a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0])
+    cof = [[b[1] * c[2] - b[2] * c[1], a[2] * c[1] - a[1] * c[2], a[1] * b[2] - a[2] * b[1]],
+           [b[2] * c[0] - b[0] * c[2], a[0] * c[2] - a[2] * c[0], a[2] * b[0] - a[0] * b[2]],
+           [b[0] * c[1] - b[1] * c[0], a[1] * c[0] - a[0] * c[1], a[0] * b[1] - a[1] * b[0]]]
+    return [[cof[i][j] / det for j in range(3)] for i in range(3)]
+
+
+def linear(m, v):
+    return [sum(m[i][k] * v[k] for k in range(3)) for i in range(3)]
+
+
+def unit(v):
+    length = sum(x * x for x in v) ** 0.5
+    return [x / length for x in v]
+
+
+def cross(a, b):
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+
+
+def rotation(a, b):
+    """The rotation (3 x 3) that turns the unit vector a onto the unit vector b (Rodrigues)."""
+    axis = cross(a, b)
+    sine, cosine = sum(x * x for x in axis) ** 0.5, sum(x * y for x, y in zip(a, b))
+    if sine < 1e-9:
+        return [[1.0 if i == j else 0.0 for j in range(3)] for i in range(3)]
+    k = [x / sine for x in axis]
+    skew = [[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]]
+    square = [[sum(skew[i][n] * skew[n][j] for n in range(3)) for j in range(3)] for i in range(3)]
+    return [[(1.0 if i == j else 0.0) + sine * skew[i][j] + (1 - cosine) * square[i][j] for j in range(3)] for i in range(3)]
+
+
+def cut_mirror(gltf, binary, placed):
+    """Moves the triangles of the driver's door whose three corners lie on MIRROR_UV into a primitive of their own, of material "Mirror", their
+    vertices copied and the glass turned about its middle as MIRROR_OUTWARD_DEG says (`placed` takes the scene to the output's frame)."""
+    node_index = next(index for index, node in enumerate(gltf["nodes"]) if node.get("name") == MIRROR_MESH)
+    node = gltf["nodes"][node_index]
     primitive = gltf["meshes"][node["mesh"]]["primitives"][0]
     uv = read(gltf, binary, primitive["attributes"]["TEXCOORD_0"])
     indices = [i[0] for i in read(gltf, binary, primitive["indices"])]
@@ -119,6 +173,54 @@ def cut_mirror(gltf, binary):
         (mirror if all(on_glass(v) for v in triangle) else kept).extend(triangle)
     if not mirror:
         raise SystemExit("no triangle of the mirror found")
+    # The glass's own vertices, in the output's frame.
+    used = sorted(set(mirror))
+    renumber = {v: i for i, v in enumerate(used)}
+    position = read(gltf, binary, primitive["attributes"]["POSITION"])
+    normal = read(gltf, binary, primitive["attributes"]["NORMAL"])
+    to_out = multiply(placed, world_of(gltf, node_index))
+    points = [apply(to_out, position[v]) for v in used]
+    # Its middle and the side it faces (towards the eye), weighted by area.
+    facing, middle, area = [0.0] * 3, [0.0] * 3, 0.0
+    for k in range(0, len(mirror), 3):
+        a, b, c = (points[renumber[v]] for v in mirror[k:k + 3])
+        n = cross([b[i] - a[i] for i in range(3)], [c[i] - a[i] for i in range(3)])
+        twice = sum(x * x for x in n) ** 0.5
+        if facing != [0.0] * 3 and sum(x * y for x, y in zip(n, facing)) < 0:
+            n = [-x for x in n]
+        facing = [facing[i] + n[i] for i in range(3)]
+        middle = [middle[i] + (a[i] + b[i] + c[i]) * twice / 6 for i in range(3)]
+        area += twice / 2
+    middle = [x / area for x in middle]
+    facing = unit(facing)
+    incoming = unit([middle[i] - DRIVER_EYE[i] for i in range(3)])
+    if sum(x * y for x, y in zip(facing, incoming)) > 0:
+        facing = [-x for x in facing]
+    # A mirror's normal halves the way in (reversed) and the way out.
+    outward = math.radians(MIRROR_OUTWARD_DEG)
+    out = [-math.sin(outward), 0.0, math.cos(outward)]
+    wanted = unit([out[i] - incoming[i] for i in range(3)])
+    turn = rotation(facing, wanted)
+    print(f"mirror: turned {math.degrees(math.acos(max(-1, min(1, sum(x * y for x, y in zip(facing, wanted)))))):.1f} degrees")
+    back = invert3(to_out)
+    shift = [to_out[i][3] for i in range(3)]
+    moved = []
+    for p in points:
+        q = [middle[i] + x for i, x in enumerate(linear(turn, [p[i] - middle[i] for i in range(3)]))]
+        moved.append(linear(back, [q[i] - shift[i] for i in range(3)]))
+    local_turn = [[sum(back[i][a] * sum(turn[a][b] * to_out[b][j] for b in range(3)) for a in range(3)) for j in range(3)] for i in range(3)]
+    normals = [unit(linear(local_turn, normal[v])) for v in used]
+    uvs = [uv[v] for v in used]
+    attributes = {
+        "POSITION": append(gltf, binary, struct.pack(f"<{3 * len(moved)}f", *[x for p in moved for x in p]),
+                           {"componentType": 5126, "count": len(moved), "type": "VEC3",
+                            "min": [min(p[i] for p in moved) for i in range(3)], "max": [max(p[i] for p in moved) for i in range(3)]}),
+        "NORMAL": append(gltf, binary, struct.pack(f"<{3 * len(normals)}f", *[x for n in normals for x in n]),
+                         {"componentType": 5126, "count": len(normals), "type": "VEC3"}),
+        "TEXCOORD_0": append(gltf, binary, struct.pack(f"<{2 * len(uvs)}f", *[x for t in uvs for x in t]),
+                             {"componentType": 5126, "count": len(uvs), "type": "VEC2"}),
+    }
+    mirror = [renumber[v] for v in mirror]
     for target, triangles in ((primitive, kept), (None, mirror)):
         index = append(gltf, binary, struct.pack(f"<{len(triangles)}I", *triangles),
                        {"componentType": 5125, "count": len(triangles), "type": "SCALAR"})
@@ -127,7 +229,7 @@ def cut_mirror(gltf, binary):
         else:
             gltf["materials"].append({"name": "Mirror", "pbrMetallicRoughness": {"baseColorFactor": [1, 1, 1, 1], "metallicFactor": 1.0,
                                                                                  "roughnessFactor": 0.0}})
-            gltf["meshes"][node["mesh"]]["primitives"].append({"attributes": primitive["attributes"], "indices": index,
+            gltf["meshes"][node["mesh"]]["primitives"].append({"attributes": attributes, "indices": index,
                                                                "material": len(gltf["materials"]) - 1})
     print(f"mirror: {len(mirror) // 3} triangles")
 
@@ -139,8 +241,13 @@ def main(source, output):
     while len(binary) % 4:
         binary.append(0)
 
+    # Scaled, turned half round about y (x and z change sign) and moved: one node above the scene's roots.
+    low, high = bounds(gltf)
+    centre_x, centre_z = (low[0] + high[0]) / 2, (low[2] + high[2]) / 2
+    s = SCALE
+    placed = [[-s, 0, 0, s * centre_x], [0, s, 0, -s * low[1]], [0, 0, -s, s * centre_z], [0, 0, 0, 1]]
     glaze(gltf)
-    cut_mirror(gltf, binary)
+    cut_mirror(gltf, binary, placed)
 
     # Which images are colour: they are scaled less, and the windows' keeps its alpha.
     colour = {gltf["textures"][m["pbrMetallicRoughness"]["baseColorTexture"]["index"]]["source"]
@@ -159,11 +266,7 @@ def main(source, output):
                 binary.append(0)
             gltf["images"][index] = {"bufferView": len(gltf["bufferViews"]) - 1, "mimeType": "image/png" if keeps_alpha else "image/jpeg"}
 
-    # Scaled, turned half round about y (x and z change sign) and moved: one node above the scene's roots.
-    low, high = bounds(gltf)
-    centre_x, centre_z = (low[0] + high[0]) / 2, (low[2] + high[2]) / 2
-    s = SCALE
-    root = {"name": "van", "matrix": [-s, 0, 0, 0, 0, s, 0, 0, 0, 0, -s, 0, s * centre_x, -s * low[1], s * centre_z, 1],
+    root = {"name": "van", "matrix": [placed[r][c] for c in range(4) for r in range(4)],
             "children": gltf["scenes"][gltf.get("scene", 0)]["nodes"]}
     gltf["nodes"].append(root)
     gltf["scenes"] = [{"nodes": [len(gltf["nodes"]) - 1]}]

@@ -138,6 +138,7 @@ import type { Instrument, MeteringMode, ProjectionKind, RecordingMedium } from "
 import type { LensFlareSystem } from "./LensFlareEffect.js"
 import { WindowLighting } from "./WindowLighting.js"
 import { DecorSystem } from "./DecorSystem.js"
+import { MirrorSystem } from "./MirrorSystem.js"
 import { StreetFurnitureGeometry } from "./StreetFurnitureGeometry.js"
 import type { DecorObject, StreetLampSpec } from "../engine/model/Decor.js"
 import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
@@ -2563,6 +2564,7 @@ export class SceneRenderer {
       DecorSystem.dispose(group)
     }
     this.decorGroups.clear()
+    this.mirrors.clear()
     this.streetlightLights.clear()
     this.headlightSystem?.clear(true)
     this.headlightSettings.clear()
@@ -2916,8 +2918,15 @@ export class SceneRenderer {
     // What the model publishes as settings (a costume colour, the landing gear) reaches its parts.
     DecorSystem.applyModelParameters(copy, object.modelParameters, loaded.bindings)
     DecorSystem.applyModel(group, object, copy, { headingOffsetDeg: loaded.headingOffsetDeg, depictedSizeM: loaded.depictedSizeM })
+    // What the model says is a mirror shows what is behind it (a van's door mirror, see MirrorSystem).
+    this.mirrors.adopt(copy)
     this.decorModelCredits.set(object.id, loaded.credit)
   }
+
+  /** The mirrors of the decor's models — see MirrorSystem. */
+  private readonly mirrors = new MirrorSystem()
+  /** The frame asked for once the mirrors may be drawn again, when the last one kept their picture. */
+  private mirrorCatchUp: ReturnType<typeof setTimeout> | undefined
 
   /** The generic models drawn in the place of the exact ones still to come, by address: one parsed file
    * shared by every aircraft waiting for its own. */
@@ -5400,6 +5409,13 @@ export class SceneRenderer {
       this.camera.far = furthestPhenomenonM
       this.camera.updateProjectionMatrix()
     }
+    // What a mirror in view shows, the phenomena included: drawn before the frame that shows it (see MirrorSystem).
+    if (this.mirrors.any && !this.mirrors.render(this.renderer, this.scene, this.camera, this.phenomena.any ? [PHENOMENON_LAYER] : [], !target)) {
+      this.mirrorCatchUp ??= setTimeout(() => {
+        this.mirrorCatchUp = undefined
+        this.render()
+      }, MirrorSystem.INTERVAL_MS)
+    }
     // This scene's eye, for the finish every picture of the page shares (see EYE_UNIFORMS).
     EYE_UNIFORMS.uRodShare.value = this.scatteredSky?.rodShare ?? 0
     EYE_UNIFORMS.uRelativeScale.value = this.relativeScale
@@ -6769,6 +6785,7 @@ export class SceneRenderer {
     this.stopTerrainFade()
     this.stopTwinkle()
     this.cancelFlush()
+    clearTimeout(this.mirrorCatchUp)
     this.phenomena.clear()
     this.references?.disposeAll()
     this.terrainBuildToken++ // discard any terrain build still in flight
@@ -6840,6 +6857,7 @@ export class SceneRenderer {
       DecorSystem.dispose(group)
     }
     this.decorGroups.clear()
+    this.mirrors.clear()
     this.decorLamps = []
     this.streetlightLights.clear()
     if (this.lensFlare) {

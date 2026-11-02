@@ -42969,9 +42969,9 @@
     "pose":{
      "lat":49.1159166,
      "lng":2.77546,
-     "elevationM":0.05,
-     "headingDeg":232.89,
-     "pitchDeg":2.75,
+     "elevationM":0.0,
+     "headingDeg":275.14,
+     "pitchDeg":-1.72,
      "fovDeg":60
     }
    },
@@ -42980,9 +42980,9 @@
     "pose":{
      "lat":49.11593777,
      "lng":2.77548794,
-     "elevationM":0.05,
-     "headingDeg":232.78,
-     "pitchDeg":2.72,
+     "elevationM":0.0,
+     "headingDeg":327.93,
+     "pitchDeg":-7.31,
      "fovDeg":60
     }
    },
@@ -42991,9 +42991,9 @@
     "pose":{
      "lat":49.11595896,
      "lng":2.77551591,
-     "elevationM":0.05,
-     "headingDeg":232.67,
-     "pitchDeg":2.69,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43002,9 +43002,9 @@
     "pose":{
      "lat":49.11598016,
      "lng":2.77554391,
-     "elevationM":0.05,
-     "headingDeg":232.56,
-     "pitchDeg":2.66,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43013,9 +43013,9 @@
     "pose":{
      "lat":49.11600139,
      "lng":2.77557194,
-     "elevationM":0.05,
-     "headingDeg":232.44,
-     "pitchDeg":2.63,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43024,9 +43024,9 @@
     "pose":{
      "lat":49.11602264,
      "lng":2.7756,
-     "elevationM":0.05,
-     "headingDeg":232.33,
-     "pitchDeg":2.6,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43035,9 +43035,9 @@
     "pose":{
      "lat":49.11604391,
      "lng":2.77562808,
-     "elevationM":0.05,
-     "headingDeg":232.22,
-     "pitchDeg":2.57,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43046,9 +43046,9 @@
     "pose":{
      "lat":49.1160652,
      "lng":2.77565618,
-     "elevationM":0.05,
-     "headingDeg":232.11,
-     "pitchDeg":2.54,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43057,9 +43057,9 @@
     "pose":{
      "lat":49.1160865,
      "lng":2.7756843,
-     "elevationM":0.05,
-     "headingDeg":232.0,
-     "pitchDeg":2.51,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43068,9 +43068,9 @@
     "pose":{
      "lat":49.11610782,
      "lng":2.77571244,
-     "elevationM":0.05,
-     "headingDeg":231.9,
-     "pitchDeg":2.48,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43079,9 +43079,9 @@
     "pose":{
      "lat":49.11612916,
      "lng":2.7757406,
-     "elevationM":0.05,
-     "headingDeg":231.81,
-     "pitchDeg":2.46,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43090,9 +43090,9 @@
     "pose":{
      "lat":49.11615051,
      "lng":2.77576879,
-     "elevationM":0.05,
-     "headingDeg":231.71,
-     "pitchDeg":2.43,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43101,9 +43101,9 @@
     "pose":{
      "lat":49.11617189,
      "lng":2.77579699,
-     "elevationM":0.05,
-     "headingDeg":231.62,
-     "pitchDeg":2.4,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43112,9 +43112,9 @@
     "pose":{
      "lat":49.11619328,
      "lng":2.77582523,
-     "elevationM":0.05,
-     "headingDeg":231.52,
-     "pitchDeg":2.37,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43123,9 +43123,9 @@
     "pose":{
      "lat":49.1162147,
      "lng":2.77585349,
-     "elevationM":0.05,
-     "headingDeg":231.42,
-     "pitchDeg":2.34,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43134,9 +43134,9 @@
     "pose":{
      "lat":49.11623614,
      "lng":2.77588178,
-     "elevationM":0.05,
-     "headingDeg":231.33,
-     "pitchDeg":2.32,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43145,9 +43145,9 @@
     "pose":{
      "lat":49.1162576,
      "lng":2.7759101,
-     "elevationM":0.05,
-     "headingDeg":231.23,
-     "pitchDeg":2.29,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43156,9 +43156,9 @@
     "pose":{
      "lat":49.11627909,
      "lng":2.77593845,
-     "elevationM":0.05,
-     "headingDeg":231.14,
-     "pitchDeg":2.27,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43167,9 +43167,9 @@
     "pose":{
      "lat":49.1163006,
      "lng":2.77596683,
-     "elevationM":0.05,
-     "headingDeg":231.06,
-     "pitchDeg":2.25,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43178,9 +43178,9 @@
     "pose":{
      "lat":49.11632213,
      "lng":2.77599524,
-     "elevationM":0.05,
-     "headingDeg":230.98,
-     "pitchDeg":2.22,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43189,9 +43189,9 @@
     "pose":{
      "lat":49.11634369,
      "lng":2.77602368,
-     "elevationM":0.05,
-     "headingDeg":230.89,
-     "pitchDeg":2.2,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43200,9 +43200,9 @@
     "pose":{
      "lat":49.11636526,
      "lng":2.77605215,
-     "elevationM":0.05,
-     "headingDeg":230.81,
-     "pitchDeg":2.18,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43211,9 +43211,9 @@
     "pose":{
      "lat":49.11638686,
      "lng":2.77608064,
-     "elevationM":0.05,
-     "headingDeg":230.72,
-     "pitchDeg":2.15,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43222,9 +43222,9 @@
     "pose":{
      "lat":49.11640847,
      "lng":2.77610916,
-     "elevationM":0.05,
-     "headingDeg":230.64,
-     "pitchDeg":2.13,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43233,9 +43233,9 @@
     "pose":{
      "lat":49.1164301,
      "lng":2.7761377,
-     "elevationM":0.05,
-     "headingDeg":230.55,
-     "pitchDeg":2.11,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43244,9 +43244,9 @@
     "pose":{
      "lat":49.11645175,
      "lng":2.77616627,
-     "elevationM":0.05,
-     "headingDeg":230.48,
-     "pitchDeg":2.09,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43255,9 +43255,9 @@
     "pose":{
      "lat":49.11647341,
      "lng":2.77619487,
-     "elevationM":0.05,
-     "headingDeg":230.4,
-     "pitchDeg":2.07,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43266,9 +43266,9 @@
     "pose":{
      "lat":49.11649509,
      "lng":2.77622349,
-     "elevationM":0.05,
-     "headingDeg":230.32,
-     "pitchDeg":2.05,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43277,9 +43277,9 @@
     "pose":{
      "lat":49.11651679,
      "lng":2.77625214,
-     "elevationM":0.05,
-     "headingDeg":230.25,
-     "pitchDeg":2.02,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43288,9 +43288,9 @@
     "pose":{
      "lat":49.11653851,
      "lng":2.77628082,
-     "elevationM":0.05,
-     "headingDeg":230.18,
-     "pitchDeg":2.0,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43299,9 +43299,9 @@
     "pose":{
      "lat":49.11656026,
      "lng":2.77630952,
-     "elevationM":0.05,
-     "headingDeg":230.1,
-     "pitchDeg":1.98,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43310,9 +43310,9 @@
     "pose":{
      "lat":49.11658202,
      "lng":2.77633825,
-     "elevationM":0.05,
-     "headingDeg":230.02,
-     "pitchDeg":1.96,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43321,9 +43321,9 @@
     "pose":{
      "lat":49.1166038,
      "lng":2.776367,
-     "elevationM":0.05,
-     "headingDeg":229.95,
-     "pitchDeg":1.94,
+     "elevationM":0.0,
+     "headingDeg":359.64,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43332,9 +43332,9 @@
     "pose":{
      "lat":49.11662561,
      "lng":2.77639577,
-     "elevationM":0.05,
-     "headingDeg":229.88,
-     "pitchDeg":1.92,
+     "elevationM":0.0,
+     "headingDeg":359.62,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43343,9 +43343,9 @@
     "pose":{
      "lat":49.11664744,
      "lng":2.77642456,
-     "elevationM":0.05,
-     "headingDeg":229.82,
-     "pitchDeg":1.9,
+     "elevationM":0.0,
+     "headingDeg":359.61,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43354,9 +43354,9 @@
     "pose":{
      "lat":49.11666929,
      "lng":2.77645336,
-     "elevationM":0.05,
-     "headingDeg":229.75,
-     "pitchDeg":1.88,
+     "elevationM":0.0,
+     "headingDeg":359.61,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43365,9 +43365,9 @@
     "pose":{
      "lat":49.11669117,
      "lng":2.7764822,
-     "elevationM":0.05,
-     "headingDeg":229.69,
-     "pitchDeg":1.86,
+     "elevationM":0.0,
+     "headingDeg":359.61,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43376,9 +43376,9 @@
     "pose":{
      "lat":49.11671306,
      "lng":2.77651107,
-     "elevationM":0.05,
-     "headingDeg":229.62,
-     "pitchDeg":1.85,
+     "elevationM":0.0,
+     "headingDeg":359.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43387,9 +43387,9 @@
     "pose":{
      "lat":49.11673496,
      "lng":2.77653997,
-     "elevationM":0.05,
-     "headingDeg":229.55,
-     "pitchDeg":1.83,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43398,9 +43398,9 @@
     "pose":{
      "lat":49.11675688,
      "lng":2.77656891,
-     "elevationM":0.05,
-     "headingDeg":229.49,
-     "pitchDeg":1.81,
+     "elevationM":0.0,
+     "headingDeg":359.68,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43409,9 +43409,9 @@
     "pose":{
      "lat":49.1167788,
      "lng":2.7765979,
-     "elevationM":0.05,
-     "headingDeg":229.42,
-     "pitchDeg":1.79,
+     "elevationM":0.0,
+     "headingDeg":359.72,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43420,9 +43420,9 @@
     "pose":{
      "lat":49.11680074,
      "lng":2.77662691,
-     "elevationM":0.05,
-     "headingDeg":229.36,
-     "pitchDeg":1.77,
+     "elevationM":0.0,
+     "headingDeg":359.67,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43431,9 +43431,9 @@
     "pose":{
      "lat":49.11682272,
      "lng":2.77665592,
-     "elevationM":0.05,
-     "headingDeg":229.3,
-     "pitchDeg":1.76,
+     "elevationM":0.0,
+     "headingDeg":359.65,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43442,9 +43442,9 @@
     "pose":{
      "lat":49.11684471,
      "lng":2.77668496,
-     "elevationM":0.05,
-     "headingDeg":229.24,
-     "pitchDeg":1.74,
+     "elevationM":0.0,
+     "headingDeg":359.66,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43453,9 +43453,9 @@
     "pose":{
      "lat":49.11686671,
      "lng":2.77671404,
-     "elevationM":0.05,
-     "headingDeg":229.18,
-     "pitchDeg":1.73,
+     "elevationM":0.0,
+     "headingDeg":359.71,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43464,9 +43464,9 @@
     "pose":{
      "lat":49.11688871,
      "lng":2.77674319,
-     "elevationM":0.05,
-     "headingDeg":229.13,
-     "pitchDeg":1.71,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43475,9 +43475,9 @@
     "pose":{
      "lat":49.1169107,
      "lng":2.77677242,
-     "elevationM":0.05,
-     "headingDeg":229.07,
-     "pitchDeg":1.69,
+     "elevationM":0.0,
+     "headingDeg":359.9,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43486,9 +43486,9 @@
     "pose":{
      "lat":49.11693267,
      "lng":2.77680175,
-     "elevationM":0.05,
-     "headingDeg":229.01,
-     "pitchDeg":1.68,
+     "elevationM":0.0,
+     "headingDeg":0.05,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43497,9 +43497,9 @@
     "pose":{
      "lat":49.1169546,
      "lng":2.7768312,
-     "elevationM":0.05,
-     "headingDeg":228.95,
-     "pitchDeg":1.66,
+     "elevationM":0.0,
+     "headingDeg":0.22,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43508,9 +43508,9 @@
     "pose":{
      "lat":49.11697648,
      "lng":2.7768608,
-     "elevationM":0.05,
-     "headingDeg":228.9,
-     "pitchDeg":1.65,
+     "elevationM":0.0,
+     "headingDeg":0.46,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43519,9 +43519,9 @@
     "pose":{
      "lat":49.11699831,
      "lng":2.77689055,
-     "elevationM":0.05,
-     "headingDeg":228.85,
-     "pitchDeg":1.63,
+     "elevationM":0.0,
+     "headingDeg":0.63,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43530,9 +43530,9 @@
     "pose":{
      "lat":49.11702012,
      "lng":2.77692041,
-     "elevationM":0.05,
-     "headingDeg":228.81,
-     "pitchDeg":1.61,
+     "elevationM":0.0,
+     "headingDeg":0.75,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43541,9 +43541,9 @@
     "pose":{
      "lat":49.11704191,
      "lng":2.77695035,
-     "elevationM":0.05,
-     "headingDeg":228.76,
-     "pitchDeg":1.6,
+     "elevationM":0.0,
+     "headingDeg":0.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43552,9 +43552,9 @@
     "pose":{
      "lat":49.11706372,
      "lng":2.77698033,
-     "elevationM":0.05,
-     "headingDeg":228.71,
-     "pitchDeg":1.58,
+     "elevationM":0.0,
+     "headingDeg":0.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43563,9 +43563,9 @@
     "pose":{
      "lat":49.11708555,
      "lng":2.77701032,
-     "elevationM":0.05,
-     "headingDeg":228.66,
-     "pitchDeg":1.57,
+     "elevationM":0.0,
+     "headingDeg":0.74,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43574,9 +43574,9 @@
     "pose":{
      "lat":49.11710744,
      "lng":2.77704029,
-     "elevationM":0.05,
-     "headingDeg":228.62,
-     "pitchDeg":1.55,
+     "elevationM":0.0,
+     "headingDeg":0.62,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43585,9 +43585,9 @@
     "pose":{
      "lat":49.1171294,
      "lng":2.7770702,
-     "elevationM":0.05,
-     "headingDeg":228.57,
-     "pitchDeg":1.54,
+     "elevationM":0.0,
+     "headingDeg":0.45,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43596,9 +43596,9 @@
     "pose":{
      "lat":49.11715142,
      "lng":2.77710007,
-     "elevationM":0.05,
-     "headingDeg":228.52,
-     "pitchDeg":1.53,
+     "elevationM":0.0,
+     "headingDeg":0.4,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43607,9 +43607,9 @@
     "pose":{
      "lat":49.11717348,
      "lng":2.77712994,
-     "elevationM":0.05,
-     "headingDeg":228.48,
-     "pitchDeg":1.51,
+     "elevationM":0.0,
+     "headingDeg":0.35,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43618,9 +43618,9 @@
     "pose":{
      "lat":49.11719557,
      "lng":2.77715982,
-     "elevationM":0.05,
-     "headingDeg":228.44,
-     "pitchDeg":1.5,
+     "elevationM":0.0,
+     "headingDeg":0.3,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43629,9 +43629,9 @@
     "pose":{
      "lat":49.1172177,
      "lng":2.77718969,
-     "elevationM":0.05,
-     "headingDeg":228.39,
-     "pitchDeg":1.48,
+     "elevationM":0.0,
+     "headingDeg":0.25,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43640,9 +43640,9 @@
     "pose":{
      "lat":49.11723987,
      "lng":2.77721955,
-     "elevationM":0.05,
-     "headingDeg":228.34,
-     "pitchDeg":1.47,
+     "elevationM":0.0,
+     "headingDeg":0.2,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43651,9 +43651,9 @@
     "pose":{
      "lat":49.11726207,
      "lng":2.77724941,
-     "elevationM":0.05,
-     "headingDeg":228.3,
-     "pitchDeg":1.46,
+     "elevationM":0.0,
+     "headingDeg":0.14,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43662,9 +43662,9 @@
     "pose":{
      "lat":49.11728432,
      "lng":2.77727926,
-     "elevationM":0.05,
-     "headingDeg":228.25,
-     "pitchDeg":1.44,
+     "elevationM":0.0,
+     "headingDeg":0.08,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43673,9 +43673,9 @@
     "pose":{
      "lat":49.1173066,
      "lng":2.7773091,
-     "elevationM":0.05,
-     "headingDeg":228.21,
-     "pitchDeg":1.43,
+     "elevationM":0.0,
+     "headingDeg":0.02,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43684,9 +43684,9 @@
     "pose":{
      "lat":49.11732893,
      "lng":2.77733891,
-     "elevationM":0.05,
-     "headingDeg":228.17,
-     "pitchDeg":1.42,
+     "elevationM":0.0,
+     "headingDeg":359.92,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43695,9 +43695,9 @@
     "pose":{
      "lat":49.1173513,
      "lng":2.77736869,
-     "elevationM":0.05,
-     "headingDeg":228.12,
-     "pitchDeg":1.41,
+     "elevationM":0.0,
+     "headingDeg":359.84,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43706,9 +43706,9 @@
     "pose":{
      "lat":49.11737372,
      "lng":2.77739846,
-     "elevationM":0.05,
-     "headingDeg":228.08,
-     "pitchDeg":1.4,
+     "elevationM":0.0,
+     "headingDeg":359.78,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43717,9 +43717,9 @@
     "pose":{
      "lat":49.11739618,
      "lng":2.77742822,
-     "elevationM":0.05,
-     "headingDeg":228.03,
-     "pitchDeg":1.39,
+     "elevationM":0.0,
+     "headingDeg":359.75,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43728,9 +43728,9 @@
     "pose":{
      "lat":49.11741866,
      "lng":2.77745799,
-     "elevationM":0.05,
-     "headingDeg":227.99,
-     "pitchDeg":1.37,
+     "elevationM":0.0,
+     "headingDeg":359.73,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43739,9 +43739,9 @@
     "pose":{
      "lat":49.11744116,
      "lng":2.77748779,
-     "elevationM":0.05,
-     "headingDeg":227.95,
-     "pitchDeg":1.36,
+     "elevationM":0.0,
+     "headingDeg":359.74,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43750,9 +43750,9 @@
     "pose":{
      "lat":49.11746368,
      "lng":2.77751762,
-     "elevationM":0.05,
-     "headingDeg":227.9,
-     "pitchDeg":1.35,
+     "elevationM":0.0,
+     "headingDeg":359.77,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43761,9 +43761,9 @@
     "pose":{
      "lat":49.1174862,
      "lng":2.7775475,
-     "elevationM":0.05,
-     "headingDeg":227.86,
-     "pitchDeg":1.34,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43772,9 +43772,9 @@
     "pose":{
      "lat":49.11750873,
      "lng":2.77757743,
-     "elevationM":0.05,
-     "headingDeg":227.82,
-     "pitchDeg":1.33,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43783,9 +43783,9 @@
     "pose":{
      "lat":49.11753128,
      "lng":2.77760738,
-     "elevationM":0.05,
-     "headingDeg":227.78,
-     "pitchDeg":1.32,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43794,9 +43794,9 @@
     "pose":{
      "lat":49.11755384,
      "lng":2.77763736,
-     "elevationM":0.05,
-     "headingDeg":227.74,
-     "pitchDeg":1.31,
+     "elevationM":0.0,
+     "headingDeg":359.84,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43805,9 +43805,9 @@
     "pose":{
      "lat":49.11757642,
      "lng":2.77766736,
-     "elevationM":0.05,
-     "headingDeg":227.7,
-     "pitchDeg":1.29,
+     "elevationM":0.0,
+     "headingDeg":359.84,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43816,9 +43816,9 @@
     "pose":{
      "lat":49.11759902,
      "lng":2.7776974,
-     "elevationM":0.05,
-     "headingDeg":227.66,
-     "pitchDeg":1.28,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43827,9 +43827,9 @@
     "pose":{
      "lat":49.11762165,
      "lng":2.77772747,
-     "elevationM":0.05,
-     "headingDeg":227.62,
-     "pitchDeg":1.27,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43838,9 +43838,9 @@
     "pose":{
      "lat":49.11764431,
      "lng":2.77775757,
-     "elevationM":0.05,
-     "headingDeg":227.58,
-     "pitchDeg":1.26,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43849,9 +43849,9 @@
     "pose":{
      "lat":49.117667,
      "lng":2.7777877,
-     "elevationM":0.05,
-     "headingDeg":227.54,
-     "pitchDeg":1.25,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43860,9 +43860,9 @@
     "pose":{
      "lat":49.11768972,
      "lng":2.77781786,
-     "elevationM":0.05,
-     "headingDeg":227.5,
-     "pitchDeg":1.25,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43871,9 +43871,9 @@
     "pose":{
      "lat":49.11771247,
      "lng":2.77784805,
-     "elevationM":0.05,
-     "headingDeg":227.47,
-     "pitchDeg":1.24,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43882,9 +43882,9 @@
     "pose":{
      "lat":49.11773524,
      "lng":2.77787827,
-     "elevationM":0.05,
-     "headingDeg":227.43,
-     "pitchDeg":1.23,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43893,9 +43893,9 @@
     "pose":{
      "lat":49.11775804,
      "lng":2.77790852,
-     "elevationM":0.05,
-     "headingDeg":227.39,
-     "pitchDeg":1.23,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43904,9 +43904,9 @@
     "pose":{
      "lat":49.11778086,
      "lng":2.77793881,
-     "elevationM":0.05,
-     "headingDeg":227.35,
-     "pitchDeg":1.23,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43915,9 +43915,9 @@
     "pose":{
      "lat":49.11780372,
      "lng":2.77796913,
-     "elevationM":0.05,
-     "headingDeg":227.32,
-     "pitchDeg":1.22,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43926,9 +43926,9 @@
     "pose":{
      "lat":49.11782659,
      "lng":2.7779995,
-     "elevationM":0.05,
-     "headingDeg":227.28,
-     "pitchDeg":1.21,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43937,9 +43937,9 @@
     "pose":{
      "lat":49.1178495,
      "lng":2.7780299,
-     "elevationM":0.05,
-     "headingDeg":227.24,
-     "pitchDeg":1.21,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43948,9 +43948,9 @@
     "pose":{
      "lat":49.11787243,
      "lng":2.77806034,
-     "elevationM":0.05,
-     "headingDeg":227.21,
-     "pitchDeg":1.2,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43959,9 +43959,9 @@
     "pose":{
      "lat":49.11789539,
      "lng":2.77809083,
-     "elevationM":0.05,
-     "headingDeg":227.17,
-     "pitchDeg":1.2,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43970,9 +43970,9 @@
     "pose":{
      "lat":49.11791837,
      "lng":2.77812135,
-     "elevationM":0.05,
-     "headingDeg":227.14,
-     "pitchDeg":1.19,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43981,9 +43981,9 @@
     "pose":{
      "lat":49.11794138,
      "lng":2.77815191,
-     "elevationM":0.05,
-     "headingDeg":227.11,
-     "pitchDeg":1.19,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -43992,9 +43992,9 @@
     "pose":{
      "lat":49.11796442,
      "lng":2.7781825,
-     "elevationM":0.05,
-     "headingDeg":227.07,
-     "pitchDeg":1.18,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44003,9 +44003,9 @@
     "pose":{
      "lat":49.11798748,
      "lng":2.77821313,
-     "elevationM":0.05,
-     "headingDeg":227.04,
-     "pitchDeg":1.17,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44014,9 +44014,9 @@
     "pose":{
      "lat":49.11801058,
      "lng":2.7782438,
-     "elevationM":0.05,
-     "headingDeg":227.0,
-     "pitchDeg":1.17,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44025,9 +44025,9 @@
     "pose":{
      "lat":49.1180337,
      "lng":2.7782745,
-     "elevationM":0.05,
-     "headingDeg":226.97,
-     "pitchDeg":1.16,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44036,9 +44036,9 @@
     "pose":{
      "lat":49.11805685,
      "lng":2.77830524,
-     "elevationM":0.05,
-     "headingDeg":226.94,
-     "pitchDeg":1.16,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44047,9 +44047,9 @@
     "pose":{
      "lat":49.11808003,
      "lng":2.77833601,
-     "elevationM":0.05,
-     "headingDeg":226.91,
-     "pitchDeg":1.15,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44058,9 +44058,9 @@
     "pose":{
      "lat":49.11810324,
      "lng":2.77836681,
-     "elevationM":0.05,
-     "headingDeg":226.88,
-     "pitchDeg":1.15,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44069,9 +44069,9 @@
     "pose":{
      "lat":49.11812648,
      "lng":2.77839766,
-     "elevationM":0.05,
-     "headingDeg":226.84,
-     "pitchDeg":1.14,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44080,9 +44080,9 @@
     "pose":{
      "lat":49.11814975,
      "lng":2.77842854,
-     "elevationM":0.05,
-     "headingDeg":226.81,
-     "pitchDeg":1.14,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44091,9 +44091,9 @@
     "pose":{
      "lat":49.11817304,
      "lng":2.77845945,
-     "elevationM":0.05,
-     "headingDeg":226.78,
-     "pitchDeg":1.13,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44102,9 +44102,9 @@
     "pose":{
      "lat":49.11819636,
      "lng":2.77849041,
-     "elevationM":0.05,
-     "headingDeg":226.75,
-     "pitchDeg":1.12,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44113,9 +44113,9 @@
     "pose":{
      "lat":49.1182197,
      "lng":2.7785214,
-     "elevationM":0.05,
-     "headingDeg":226.72,
-     "pitchDeg":1.12,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44124,9 +44124,9 @@
     "pose":{
      "lat":49.11824307,
      "lng":2.77855243,
-     "elevationM":0.05,
-     "headingDeg":226.69,
-     "pitchDeg":1.12,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44135,9 +44135,9 @@
     "pose":{
      "lat":49.11826646,
      "lng":2.7785835,
-     "elevationM":0.05,
-     "headingDeg":226.66,
-     "pitchDeg":1.11,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44146,9 +44146,9 @@
     "pose":{
      "lat":49.11828988,
      "lng":2.77861461,
-     "elevationM":0.05,
-     "headingDeg":226.63,
-     "pitchDeg":1.11,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44157,9 +44157,9 @@
     "pose":{
      "lat":49.11831333,
      "lng":2.77864576,
-     "elevationM":0.05,
-     "headingDeg":226.6,
-     "pitchDeg":1.1,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44168,9 +44168,9 @@
     "pose":{
      "lat":49.11833681,
      "lng":2.77867694,
-     "elevationM":0.05,
-     "headingDeg":226.58,
-     "pitchDeg":1.1,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44179,9 +44179,9 @@
     "pose":{
      "lat":49.11836031,
      "lng":2.77870816,
-     "elevationM":0.05,
-     "headingDeg":226.55,
-     "pitchDeg":1.1,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44190,9 +44190,9 @@
     "pose":{
      "lat":49.11838384,
      "lng":2.77873941,
-     "elevationM":0.05,
-     "headingDeg":226.52,
-     "pitchDeg":1.09,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44201,9 +44201,9 @@
     "pose":{
      "lat":49.1184074,
      "lng":2.7787707,
-     "elevationM":0.05,
-     "headingDeg":226.49,
-     "pitchDeg":1.09,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44212,9 +44212,9 @@
     "pose":{
      "lat":49.11843099,
      "lng":2.77880202,
-     "elevationM":0.05,
-     "headingDeg":226.46,
-     "pitchDeg":1.08,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44223,9 +44223,9 @@
     "pose":{
      "lat":49.11845461,
      "lng":2.77883338,
-     "elevationM":0.05,
-     "headingDeg":226.44,
-     "pitchDeg":1.08,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44234,9 +44234,9 @@
     "pose":{
      "lat":49.11847825,
      "lng":2.77886478,
-     "elevationM":0.05,
-     "headingDeg":226.41,
-     "pitchDeg":1.08,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44245,9 +44245,9 @@
     "pose":{
      "lat":49.11850193,
      "lng":2.77889621,
-     "elevationM":0.05,
-     "headingDeg":226.38,
-     "pitchDeg":1.07,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44256,9 +44256,9 @@
     "pose":{
      "lat":49.11852563,
      "lng":2.77892768,
-     "elevationM":0.05,
-     "headingDeg":226.35,
-     "pitchDeg":1.06,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44267,9 +44267,9 @@
     "pose":{
      "lat":49.11854936,
      "lng":2.77895918,
-     "elevationM":0.05,
-     "headingDeg":226.32,
-     "pitchDeg":1.06,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44278,9 +44278,9 @@
     "pose":{
      "lat":49.11857311,
      "lng":2.77899072,
-     "elevationM":0.05,
-     "headingDeg":226.3,
-     "pitchDeg":1.06,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44289,9 +44289,9 @@
     "pose":{
      "lat":49.1185969,
      "lng":2.7790223,
-     "elevationM":0.05,
-     "headingDeg":226.27,
-     "pitchDeg":1.05,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44300,9 +44300,9 @@
     "pose":{
      "lat":49.11862071,
      "lng":2.77905391,
-     "elevationM":0.05,
-     "headingDeg":226.25,
-     "pitchDeg":1.05,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44311,9 +44311,9 @@
     "pose":{
      "lat":49.11864456,
      "lng":2.77908556,
-     "elevationM":0.05,
-     "headingDeg":226.22,
-     "pitchDeg":1.04,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44322,9 +44322,9 @@
     "pose":{
      "lat":49.11866843,
      "lng":2.77911724,
-     "elevationM":0.05,
-     "headingDeg":226.19,
-     "pitchDeg":1.04,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44333,9 +44333,9 @@
     "pose":{
      "lat":49.11869233,
      "lng":2.77914896,
-     "elevationM":0.05,
-     "headingDeg":226.17,
-     "pitchDeg":1.04,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44344,9 +44344,9 @@
     "pose":{
      "lat":49.11871626,
      "lng":2.77918072,
-     "elevationM":0.05,
-     "headingDeg":226.14,
-     "pitchDeg":1.03,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44355,9 +44355,9 @@
     "pose":{
      "lat":49.11874021,
      "lng":2.77921251,
-     "elevationM":0.05,
-     "headingDeg":226.12,
-     "pitchDeg":1.03,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44366,9 +44366,9 @@
     "pose":{
      "lat":49.11876419,
      "lng":2.77924434,
-     "elevationM":0.05,
-     "headingDeg":226.09,
-     "pitchDeg":1.02,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44377,9 +44377,9 @@
     "pose":{
      "lat":49.1187882,
      "lng":2.7792762,
-     "elevationM":0.05,
-     "headingDeg":226.07,
-     "pitchDeg":1.02,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44388,9 +44388,9 @@
     "pose":{
      "lat":49.11881223,
      "lng":2.7793081,
-     "elevationM":0.05,
-     "headingDeg":226.05,
-     "pitchDeg":1.02,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44399,9 +44399,9 @@
     "pose":{
      "lat":49.11883629,
      "lng":2.77934003,
-     "elevationM":0.05,
-     "headingDeg":226.02,
-     "pitchDeg":1.01,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44410,9 +44410,9 @@
     "pose":{
      "lat":49.11886038,
      "lng":2.779372,
-     "elevationM":0.05,
-     "headingDeg":226.0,
-     "pitchDeg":1.01,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44421,9 +44421,9 @@
     "pose":{
      "lat":49.11888449,
      "lng":2.77940401,
-     "elevationM":0.05,
-     "headingDeg":225.97,
-     "pitchDeg":1.0,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44432,9 +44432,9 @@
     "pose":{
      "lat":49.11890863,
      "lng":2.77943605,
-     "elevationM":0.05,
-     "headingDeg":225.95,
-     "pitchDeg":1.0,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44443,9 +44443,9 @@
     "pose":{
      "lat":49.11893279,
      "lng":2.77946813,
-     "elevationM":0.05,
-     "headingDeg":225.93,
-     "pitchDeg":1.0,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44454,9 +44454,9 @@
     "pose":{
      "lat":49.11895698,
      "lng":2.77950024,
-     "elevationM":0.05,
-     "headingDeg":225.9,
-     "pitchDeg":0.99,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44465,9 +44465,9 @@
     "pose":{
      "lat":49.1189812,
      "lng":2.7795324,
-     "elevationM":0.05,
-     "headingDeg":225.88,
-     "pitchDeg":0.99,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44476,9 +44476,9 @@
     "pose":{
      "lat":49.11900544,
      "lng":2.77956459,
-     "elevationM":0.05,
-     "headingDeg":225.86,
-     "pitchDeg":0.99,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44487,9 +44487,9 @@
     "pose":{
      "lat":49.11902971,
      "lng":2.77959683,
-     "elevationM":0.05,
-     "headingDeg":225.83,
-     "pitchDeg":0.98,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44498,9 +44498,9 @@
     "pose":{
      "lat":49.119054,
      "lng":2.77962909,
-     "elevationM":0.05,
-     "headingDeg":225.81,
-     "pitchDeg":0.98,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44509,9 +44509,9 @@
     "pose":{
      "lat":49.11907833,
      "lng":2.7796614,
-     "elevationM":0.05,
-     "headingDeg":225.79,
-     "pitchDeg":0.97,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44520,9 +44520,9 @@
     "pose":{
      "lat":49.11910267,
      "lng":2.77969374,
-     "elevationM":0.05,
-     "headingDeg":225.77,
-     "pitchDeg":0.97,
+     "elevationM":0.0,
+     "headingDeg":359.83,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44531,9 +44531,9 @@
     "pose":{
      "lat":49.11912705,
      "lng":2.77972612,
-     "elevationM":0.05,
-     "headingDeg":225.74,
-     "pitchDeg":0.97,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44542,9 +44542,9 @@
     "pose":{
      "lat":49.11915146,
      "lng":2.77975854,
-     "elevationM":0.05,
-     "headingDeg":225.72,
-     "pitchDeg":0.96,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44553,9 +44553,9 @@
     "pose":{
      "lat":49.1191759,
      "lng":2.779791,
-     "elevationM":0.05,
-     "headingDeg":225.7,
-     "pitchDeg":0.96,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44564,9 +44564,9 @@
     "pose":{
      "lat":49.11920037,
      "lng":2.7798235,
-     "elevationM":0.05,
-     "headingDeg":225.68,
-     "pitchDeg":0.96,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44575,9 +44575,9 @@
     "pose":{
      "lat":49.11922488,
      "lng":2.77985603,
-     "elevationM":0.05,
-     "headingDeg":225.66,
-     "pitchDeg":0.95,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44586,9 +44586,9 @@
     "pose":{
      "lat":49.11924941,
      "lng":2.7798886,
-     "elevationM":0.05,
-     "headingDeg":225.64,
-     "pitchDeg":0.95,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44597,9 +44597,9 @@
     "pose":{
      "lat":49.11927397,
      "lng":2.77992121,
-     "elevationM":0.05,
-     "headingDeg":225.62,
-     "pitchDeg":0.95,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44608,9 +44608,9 @@
     "pose":{
      "lat":49.11929857,
      "lng":2.77995386,
-     "elevationM":0.05,
-     "headingDeg":225.6,
-     "pitchDeg":0.94,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44619,9 +44619,9 @@
     "pose":{
      "lat":49.11932319,
      "lng":2.77998654,
-     "elevationM":0.05,
-     "headingDeg":225.58,
-     "pitchDeg":0.94,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44630,9 +44630,9 @@
     "pose":{
      "lat":49.11934783,
      "lng":2.78001925,
-     "elevationM":0.05,
-     "headingDeg":225.56,
-     "pitchDeg":0.93,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44641,9 +44641,9 @@
     "pose":{
      "lat":49.1193725,
      "lng":2.780052,
-     "elevationM":0.05,
-     "headingDeg":225.54,
-     "pitchDeg":0.93,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44652,9 +44652,9 @@
     "pose":{
      "lat":49.11939719,
      "lng":2.78008478,
-     "elevationM":0.05,
-     "headingDeg":225.52,
-     "pitchDeg":0.93,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44663,9 +44663,9 @@
     "pose":{
      "lat":49.11942192,
      "lng":2.78011759,
-     "elevationM":0.05,
-     "headingDeg":225.5,
-     "pitchDeg":0.93,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44674,9 +44674,9 @@
     "pose":{
      "lat":49.11944666,
      "lng":2.78015043,
-     "elevationM":0.05,
-     "headingDeg":225.48,
-     "pitchDeg":0.92,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44685,9 +44685,9 @@
     "pose":{
      "lat":49.11947144,
      "lng":2.78018331,
-     "elevationM":0.05,
-     "headingDeg":225.46,
-     "pitchDeg":0.92,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44696,9 +44696,9 @@
     "pose":{
      "lat":49.11949624,
      "lng":2.78021623,
-     "elevationM":0.05,
-     "headingDeg":225.44,
-     "pitchDeg":0.92,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44707,9 +44707,9 @@
     "pose":{
      "lat":49.11952107,
      "lng":2.78024918,
-     "elevationM":0.05,
-     "headingDeg":225.42,
-     "pitchDeg":0.92,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44718,9 +44718,9 @@
     "pose":{
      "lat":49.11954592,
      "lng":2.78028217,
-     "elevationM":0.05,
-     "headingDeg":225.4,
-     "pitchDeg":0.91,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44729,9 +44729,9 @@
     "pose":{
      "lat":49.1195708,
      "lng":2.7803152,
-     "elevationM":0.05,
-     "headingDeg":225.38,
-     "pitchDeg":0.91,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44740,9 +44740,9 @@
     "pose":{
      "lat":49.11959571,
      "lng":2.78034827,
-     "elevationM":0.05,
-     "headingDeg":225.36,
-     "pitchDeg":0.91,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44751,9 +44751,9 @@
     "pose":{
      "lat":49.11962064,
      "lng":2.78038138,
-     "elevationM":0.05,
-     "headingDeg":225.34,
-     "pitchDeg":0.91,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44762,9 +44762,9 @@
     "pose":{
      "lat":49.1196456,
      "lng":2.78041452,
-     "elevationM":0.05,
-     "headingDeg":225.33,
-     "pitchDeg":0.9,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44773,9 +44773,9 @@
     "pose":{
      "lat":49.11967058,
      "lng":2.7804477,
-     "elevationM":0.05,
-     "headingDeg":225.31,
-     "pitchDeg":0.9,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44784,9 +44784,9 @@
     "pose":{
      "lat":49.11969559,
      "lng":2.78048092,
-     "elevationM":0.05,
-     "headingDeg":225.29,
-     "pitchDeg":0.9,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44795,9 +44795,9 @@
     "pose":{
      "lat":49.11972063,
      "lng":2.78051417,
-     "elevationM":0.05,
-     "headingDeg":225.28,
-     "pitchDeg":0.9,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44806,9 +44806,9 @@
     "pose":{
      "lat":49.1197457,
      "lng":2.78054747,
-     "elevationM":0.05,
-     "headingDeg":225.26,
-     "pitchDeg":0.89,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44817,9 +44817,9 @@
     "pose":{
      "lat":49.1197708,
      "lng":2.7805808,
-     "elevationM":0.05,
-     "headingDeg":225.24,
-     "pitchDeg":0.89,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44828,9 +44828,9 @@
     "pose":{
      "lat":49.11979593,
      "lng":2.78061417,
-     "elevationM":0.05,
-     "headingDeg":225.22,
-     "pitchDeg":0.89,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44839,9 +44839,9 @@
     "pose":{
      "lat":49.11982108,
      "lng":2.78064758,
-     "elevationM":0.05,
-     "headingDeg":225.21,
-     "pitchDeg":0.88,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44850,9 +44850,9 @@
     "pose":{
      "lat":49.11984626,
      "lng":2.78068102,
-     "elevationM":0.05,
-     "headingDeg":225.19,
-     "pitchDeg":0.88,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44861,9 +44861,9 @@
     "pose":{
      "lat":49.11987147,
      "lng":2.78071451,
-     "elevationM":0.05,
-     "headingDeg":225.17,
-     "pitchDeg":0.88,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44872,9 +44872,9 @@
     "pose":{
      "lat":49.11989671,
      "lng":2.78074803,
-     "elevationM":0.05,
-     "headingDeg":225.15,
-     "pitchDeg":0.87,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44883,9 +44883,9 @@
     "pose":{
      "lat":49.11992198,
      "lng":2.78078158,
-     "elevationM":0.05,
-     "headingDeg":225.14,
-     "pitchDeg":0.87,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44894,9 +44894,9 @@
     "pose":{
      "lat":49.11994728,
      "lng":2.78081517,
-     "elevationM":0.05,
-     "headingDeg":225.12,
-     "pitchDeg":0.86,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44905,9 +44905,9 @@
     "pose":{
      "lat":49.1199726,
      "lng":2.7808488,
-     "elevationM":0.05,
-     "headingDeg":225.1,
-     "pitchDeg":0.86,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44916,9 +44916,9 @@
     "pose":{
      "lat":49.11999795,
      "lng":2.78088246,
-     "elevationM":0.05,
-     "headingDeg":225.08,
-     "pitchDeg":0.86,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44927,9 +44927,9 @@
     "pose":{
      "lat":49.12002333,
      "lng":2.78091616,
-     "elevationM":0.05,
-     "headingDeg":225.07,
-     "pitchDeg":0.85,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44938,9 +44938,9 @@
     "pose":{
      "lat":49.12004874,
      "lng":2.78094989,
-     "elevationM":0.05,
-     "headingDeg":225.05,
-     "pitchDeg":0.85,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44949,9 +44949,9 @@
     "pose":{
      "lat":49.12007417,
      "lng":2.78098366,
-     "elevationM":0.05,
-     "headingDeg":225.03,
-     "pitchDeg":0.85,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44960,9 +44960,9 @@
     "pose":{
      "lat":49.12009964,
      "lng":2.78101747,
-     "elevationM":0.05,
-     "headingDeg":225.02,
-     "pitchDeg":0.85,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44971,9 +44971,9 @@
     "pose":{
      "lat":49.12012513,
      "lng":2.78105131,
-     "elevationM":0.05,
-     "headingDeg":225.0,
-     "pitchDeg":0.84,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44982,9 +44982,9 @@
     "pose":{
      "lat":49.12015065,
      "lng":2.78108519,
-     "elevationM":0.05,
-     "headingDeg":224.99,
-     "pitchDeg":0.84,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -44993,9 +44993,9 @@
     "pose":{
      "lat":49.1201762,
      "lng":2.7811191,
-     "elevationM":0.05,
-     "headingDeg":224.97,
-     "pitchDeg":0.84,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45004,9 +45004,9 @@
     "pose":{
      "lat":49.12020178,
      "lng":2.78115305,
-     "elevationM":0.05,
-     "headingDeg":224.95,
-     "pitchDeg":0.84,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45015,9 +45015,9 @@
     "pose":{
      "lat":49.12022738,
      "lng":2.78118703,
-     "elevationM":0.05,
-     "headingDeg":224.94,
-     "pitchDeg":0.83,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45026,9 +45026,9 @@
     "pose":{
      "lat":49.12025302,
      "lng":2.78122105,
-     "elevationM":0.05,
-     "headingDeg":224.92,
-     "pitchDeg":0.83,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45037,9 +45037,9 @@
     "pose":{
      "lat":49.12027868,
      "lng":2.78125511,
-     "elevationM":0.05,
-     "headingDeg":224.91,
-     "pitchDeg":0.83,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45048,9 +45048,9 @@
     "pose":{
      "lat":49.12030437,
      "lng":2.7812892,
-     "elevationM":0.05,
-     "headingDeg":224.89,
-     "pitchDeg":0.83,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45059,9 +45059,9 @@
     "pose":{
      "lat":49.12033009,
      "lng":2.78132333,
-     "elevationM":0.05,
-     "headingDeg":224.87,
-     "pitchDeg":0.82,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45070,9 +45070,9 @@
     "pose":{
      "lat":49.12035583,
      "lng":2.78135749,
-     "elevationM":0.05,
-     "headingDeg":224.86,
-     "pitchDeg":0.82,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45081,9 +45081,9 @@
     "pose":{
      "lat":49.1203816,
      "lng":2.7813917,
-     "elevationM":0.05,
-     "headingDeg":224.84,
-     "pitchDeg":0.82,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45092,9 +45092,9 @@
     "pose":{
      "lat":49.12040739,
      "lng":2.78142595,
-     "elevationM":0.05,
-     "headingDeg":224.83,
-     "pitchDeg":0.82,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45103,9 +45103,9 @@
     "pose":{
      "lat":49.12043322,
      "lng":2.78146023,
-     "elevationM":0.05,
-     "headingDeg":224.81,
-     "pitchDeg":0.81,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45114,9 +45114,9 @@
     "pose":{
      "lat":49.12045906,
      "lng":2.78149455,
-     "elevationM":0.05,
-     "headingDeg":224.8,
-     "pitchDeg":0.81,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45125,9 +45125,9 @@
     "pose":{
      "lat":49.12048494,
      "lng":2.78152891,
-     "elevationM":0.05,
-     "headingDeg":224.78,
-     "pitchDeg":0.81,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45136,9 +45136,9 @@
     "pose":{
      "lat":49.12051084,
      "lng":2.78156331,
-     "elevationM":0.05,
-     "headingDeg":224.77,
-     "pitchDeg":0.81,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45147,9 +45147,9 @@
     "pose":{
      "lat":49.12053677,
      "lng":2.78159774,
-     "elevationM":0.05,
-     "headingDeg":224.76,
-     "pitchDeg":0.81,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45158,9 +45158,9 @@
     "pose":{
      "lat":49.12056272,
      "lng":2.7816322,
-     "elevationM":0.05,
-     "headingDeg":224.74,
-     "pitchDeg":0.8,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45169,9 +45169,9 @@
     "pose":{
      "lat":49.1205887,
      "lng":2.7816667,
-     "elevationM":0.05,
-     "headingDeg":224.73,
-     "pitchDeg":0.8,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45180,9 +45180,9 @@
     "pose":{
      "lat":49.12061471,
      "lng":2.78170123,
-     "elevationM":0.05,
-     "headingDeg":224.72,
-     "pitchDeg":0.8,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45191,9 +45191,9 @@
     "pose":{
      "lat":49.12064074,
      "lng":2.78173579,
-     "elevationM":0.05,
-     "headingDeg":224.7,
-     "pitchDeg":0.8,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45202,9 +45202,9 @@
     "pose":{
      "lat":49.1206668,
      "lng":2.78177038,
-     "elevationM":0.05,
-     "headingDeg":224.69,
-     "pitchDeg":0.79,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45213,9 +45213,9 @@
     "pose":{
      "lat":49.12069288,
      "lng":2.78180501,
-     "elevationM":0.05,
-     "headingDeg":224.67,
-     "pitchDeg":0.79,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45224,9 +45224,9 @@
     "pose":{
      "lat":49.12071899,
      "lng":2.78183967,
-     "elevationM":0.05,
-     "headingDeg":224.66,
-     "pitchDeg":0.79,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45235,9 +45235,9 @@
     "pose":{
      "lat":49.12074513,
      "lng":2.78187437,
-     "elevationM":0.05,
-     "headingDeg":224.65,
-     "pitchDeg":0.79,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45246,9 +45246,9 @@
     "pose":{
      "lat":49.1207713,
      "lng":2.78190912,
-     "elevationM":0.05,
-     "headingDeg":224.63,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45257,9 +45257,9 @@
     "pose":{
      "lat":49.1207975,
      "lng":2.7819439,
-     "elevationM":0.05,
-     "headingDeg":224.62,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45268,9 +45268,9 @@
     "pose":{
      "lat":49.12082373,
      "lng":2.78197873,
-     "elevationM":0.05,
-     "headingDeg":224.61,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45279,9 +45279,9 @@
     "pose":{
      "lat":49.12084998,
      "lng":2.7820136,
-     "elevationM":0.05,
-     "headingDeg":224.59,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45290,9 +45290,9 @@
     "pose":{
      "lat":49.12087626,
      "lng":2.78204851,
-     "elevationM":0.05,
-     "headingDeg":224.58,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45301,9 +45301,9 @@
     "pose":{
      "lat":49.12090258,
      "lng":2.78208346,
-     "elevationM":0.05,
-     "headingDeg":224.56,
-     "pitchDeg":0.78,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45312,9 +45312,9 @@
     "pose":{
      "lat":49.12092891,
      "lng":2.78211844,
-     "elevationM":0.05,
-     "headingDeg":224.55,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45323,9 +45323,9 @@
     "pose":{
      "lat":49.12095528,
      "lng":2.78215346,
-     "elevationM":0.05,
-     "headingDeg":224.54,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45334,9 +45334,9 @@
     "pose":{
      "lat":49.12098168,
      "lng":2.78218852,
-     "elevationM":0.05,
-     "headingDeg":224.52,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45345,9 +45345,9 @@
     "pose":{
      "lat":49.1210081,
      "lng":2.7822236,
-     "elevationM":0.05,
-     "headingDeg":224.51,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45356,9 +45356,9 @@
     "pose":{
      "lat":49.12103455,
      "lng":2.78225872,
-     "elevationM":0.05,
-     "headingDeg":224.5,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45367,9 +45367,9 @@
     "pose":{
      "lat":49.12106103,
      "lng":2.78229386,
-     "elevationM":0.05,
-     "headingDeg":224.48,
-     "pitchDeg":0.77,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45378,9 +45378,9 @@
     "pose":{
      "lat":49.12108754,
      "lng":2.78232905,
-     "elevationM":0.05,
-     "headingDeg":224.47,
-     "pitchDeg":0.76,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45389,9 +45389,9 @@
     "pose":{
      "lat":49.12111408,
      "lng":2.78236426,
-     "elevationM":0.05,
-     "headingDeg":224.46,
-     "pitchDeg":0.76,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45400,9 +45400,9 @@
     "pose":{
      "lat":49.12114064,
      "lng":2.78239952,
-     "elevationM":0.05,
-     "headingDeg":224.45,
-     "pitchDeg":0.76,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45411,9 +45411,9 @@
     "pose":{
      "lat":49.12116723,
      "lng":2.7824348,
-     "elevationM":0.05,
-     "headingDeg":224.43,
-     "pitchDeg":0.76,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45422,9 +45422,9 @@
     "pose":{
      "lat":49.12119385,
      "lng":2.78247013,
-     "elevationM":0.05,
-     "headingDeg":224.42,
-     "pitchDeg":0.75,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45433,9 +45433,9 @@
     "pose":{
      "lat":49.1212205,
      "lng":2.7825055,
-     "elevationM":0.05,
-     "headingDeg":224.41,
-     "pitchDeg":0.75,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45444,9 +45444,9 @@
     "pose":{
      "lat":49.12124718,
      "lng":2.78254091,
-     "elevationM":0.05,
-     "headingDeg":224.4,
-     "pitchDeg":0.75,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45455,9 +45455,9 @@
     "pose":{
      "lat":49.12127388,
      "lng":2.78257635,
-     "elevationM":0.05,
-     "headingDeg":224.38,
-     "pitchDeg":0.75,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45466,9 +45466,9 @@
     "pose":{
      "lat":49.12130062,
      "lng":2.78261184,
-     "elevationM":0.05,
-     "headingDeg":224.37,
-     "pitchDeg":0.75,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45477,9 +45477,9 @@
     "pose":{
      "lat":49.12132738,
      "lng":2.78264736,
-     "elevationM":0.05,
-     "headingDeg":224.36,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45488,9 +45488,9 @@
     "pose":{
      "lat":49.12135417,
      "lng":2.78268291,
-     "elevationM":0.05,
-     "headingDeg":224.35,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45499,9 +45499,9 @@
     "pose":{
      "lat":49.12138099,
      "lng":2.78271851,
-     "elevationM":0.05,
-     "headingDeg":224.33,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45510,9 +45510,9 @@
     "pose":{
      "lat":49.12140783,
      "lng":2.78275414,
-     "elevationM":0.05,
-     "headingDeg":224.32,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45521,9 +45521,9 @@
     "pose":{
      "lat":49.1214347,
      "lng":2.7827898,
-     "elevationM":0.05,
-     "headingDeg":224.31,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45532,9 +45532,9 @@
     "pose":{
      "lat":49.12146159,
      "lng":2.7828255,
-     "elevationM":0.05,
-     "headingDeg":224.3,
-     "pitchDeg":0.74,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45543,9 +45543,9 @@
     "pose":{
      "lat":49.1214885,
      "lng":2.78286122,
-     "elevationM":0.05,
-     "headingDeg":224.29,
-     "pitchDeg":0.73,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45554,9 +45554,9 @@
     "pose":{
      "lat":49.12151544,
      "lng":2.78289698,
-     "elevationM":0.05,
-     "headingDeg":224.28,
-     "pitchDeg":0.73,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45565,9 +45565,9 @@
     "pose":{
      "lat":49.1215424,
      "lng":2.78293278,
-     "elevationM":0.05,
-     "headingDeg":224.26,
-     "pitchDeg":0.73,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45576,9 +45576,9 @@
     "pose":{
      "lat":49.12156939,
      "lng":2.78296861,
-     "elevationM":0.05,
-     "headingDeg":224.25,
-     "pitchDeg":0.73,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45587,9 +45587,9 @@
     "pose":{
      "lat":49.12159642,
      "lng":2.78300449,
-     "elevationM":0.05,
-     "headingDeg":224.24,
-     "pitchDeg":0.72,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45598,9 +45598,9 @@
     "pose":{
      "lat":49.12162349,
      "lng":2.78304042,
-     "elevationM":0.05,
-     "headingDeg":224.23,
-     "pitchDeg":0.72,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45609,9 +45609,9 @@
     "pose":{
      "lat":49.1216506,
      "lng":2.7830764,
-     "elevationM":0.05,
-     "headingDeg":224.22,
-     "pitchDeg":0.72,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45620,9 +45620,9 @@
     "pose":{
      "lat":49.12167775,
      "lng":2.78311242,
-     "elevationM":0.05,
-     "headingDeg":224.21,
-     "pitchDeg":0.72,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45631,9 +45631,9 @@
     "pose":{
      "lat":49.12170493,
      "lng":2.78314849,
-     "elevationM":0.05,
-     "headingDeg":224.2,
-     "pitchDeg":0.71,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45642,9 +45642,9 @@
     "pose":{
      "lat":49.12173214,
      "lng":2.78318459,
-     "elevationM":0.05,
-     "headingDeg":224.19,
-     "pitchDeg":0.71,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45653,9 +45653,9 @@
     "pose":{
      "lat":49.12175939,
      "lng":2.78322074,
-     "elevationM":0.05,
-     "headingDeg":224.18,
-     "pitchDeg":0.71,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45664,9 +45664,9 @@
     "pose":{
      "lat":49.12178668,
      "lng":2.78325695,
-     "elevationM":0.05,
-     "headingDeg":224.17,
-     "pitchDeg":0.71,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45675,9 +45675,9 @@
     "pose":{
      "lat":49.12181401,
      "lng":2.7832932,
-     "elevationM":0.05,
-     "headingDeg":224.16,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45686,9 +45686,9 @@
     "pose":{
      "lat":49.12184138,
      "lng":2.78332952,
-     "elevationM":0.05,
-     "headingDeg":224.15,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45697,9 +45697,9 @@
     "pose":{
      "lat":49.1218688,
      "lng":2.7833659,
-     "elevationM":0.05,
-     "headingDeg":224.14,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45708,9 +45708,9 @@
     "pose":{
      "lat":49.12189626,
      "lng":2.78340234,
-     "elevationM":0.05,
-     "headingDeg":224.13,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45719,9 +45719,9 @@
     "pose":{
      "lat":49.12192375,
      "lng":2.78343884,
-     "elevationM":0.05,
-     "headingDeg":224.12,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45730,9 +45730,9 @@
     "pose":{
      "lat":49.12195129,
      "lng":2.78347539,
-     "elevationM":0.05,
-     "headingDeg":224.11,
-     "pitchDeg":0.7,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45741,9 +45741,9 @@
     "pose":{
      "lat":49.12197887,
      "lng":2.783512,
-     "elevationM":0.05,
-     "headingDeg":224.1,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45752,9 +45752,9 @@
     "pose":{
      "lat":49.12200649,
      "lng":2.78354867,
-     "elevationM":0.05,
-     "headingDeg":224.08,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45763,9 +45763,9 @@
     "pose":{
      "lat":49.12203415,
      "lng":2.78358539,
-     "elevationM":0.05,
-     "headingDeg":224.07,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45774,9 +45774,9 @@
     "pose":{
      "lat":49.12206185,
      "lng":2.78362217,
-     "elevationM":0.05,
-     "headingDeg":224.06,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45785,9 +45785,9 @@
     "pose":{
      "lat":49.1220896,
      "lng":2.783659,
-     "elevationM":0.05,
-     "headingDeg":224.05,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45796,9 +45796,9 @@
     "pose":{
      "lat":49.12211739,
      "lng":2.78369589,
-     "elevationM":0.05,
-     "headingDeg":224.04,
-     "pitchDeg":0.69,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45807,9 +45807,9 @@
     "pose":{
      "lat":49.12214522,
      "lng":2.78373284,
-     "elevationM":0.05,
-     "headingDeg":224.03,
-     "pitchDeg":0.68,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45818,9 +45818,9 @@
     "pose":{
      "lat":49.1221731,
      "lng":2.78376985,
-     "elevationM":0.05,
-     "headingDeg":224.02,
-     "pitchDeg":0.68,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45829,9 +45829,9 @@
     "pose":{
      "lat":49.12220101,
      "lng":2.78380691,
-     "elevationM":0.05,
-     "headingDeg":224.01,
-     "pitchDeg":0.68,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45840,9 +45840,9 @@
     "pose":{
      "lat":49.12222897,
      "lng":2.78384402,
-     "elevationM":0.05,
-     "headingDeg":224.0,
-     "pitchDeg":0.68,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45851,9 +45851,9 @@
     "pose":{
      "lat":49.12225697,
      "lng":2.78388119,
-     "elevationM":0.05,
-     "headingDeg":223.99,
-     "pitchDeg":0.68,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45862,9 +45862,9 @@
     "pose":{
      "lat":49.12228501,
      "lng":2.78391842,
-     "elevationM":0.05,
-     "headingDeg":223.98,
-     "pitchDeg":0.67,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45873,9 +45873,9 @@
     "pose":{
      "lat":49.1223131,
      "lng":2.7839557,
-     "elevationM":0.05,
-     "headingDeg":223.97,
-     "pitchDeg":0.67,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45884,9 +45884,9 @@
     "pose":{
      "lat":49.12234123,
      "lng":2.78399303,
-     "elevationM":0.05,
-     "headingDeg":223.96,
-     "pitchDeg":0.67,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45895,9 +45895,9 @@
     "pose":{
      "lat":49.1223694,
      "lng":2.78403042,
-     "elevationM":0.05,
-     "headingDeg":223.95,
-     "pitchDeg":0.67,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45906,9 +45906,9 @@
     "pose":{
      "lat":49.12239761,
      "lng":2.78406786,
-     "elevationM":0.05,
-     "headingDeg":223.94,
-     "pitchDeg":0.66,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45917,9 +45917,9 @@
     "pose":{
      "lat":49.12242586,
      "lng":2.78410536,
-     "elevationM":0.05,
-     "headingDeg":223.94,
-     "pitchDeg":0.66,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45928,9 +45928,9 @@
     "pose":{
      "lat":49.12245416,
      "lng":2.78414291,
-     "elevationM":0.05,
-     "headingDeg":223.93,
-     "pitchDeg":0.66,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45939,9 +45939,9 @@
     "pose":{
      "lat":49.1224825,
      "lng":2.78418051,
-     "elevationM":0.05,
-     "headingDeg":223.92,
-     "pitchDeg":0.66,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45950,9 +45950,9 @@
     "pose":{
      "lat":49.12251088,
      "lng":2.78421818,
-     "elevationM":0.05,
-     "headingDeg":223.91,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45961,9 +45961,9 @@
     "pose":{
      "lat":49.1225393,
      "lng":2.7842559,
-     "elevationM":0.05,
-     "headingDeg":223.9,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45972,9 +45972,9 @@
     "pose":{
      "lat":49.12256776,
      "lng":2.78429368,
-     "elevationM":0.05,
-     "headingDeg":223.89,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45983,9 +45983,9 @@
     "pose":{
      "lat":49.12259627,
      "lng":2.78433151,
-     "elevationM":0.05,
-     "headingDeg":223.88,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -45994,9 +45994,9 @@
     "pose":{
      "lat":49.12262482,
      "lng":2.7843694,
-     "elevationM":0.05,
-     "headingDeg":223.87,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46005,9 +46005,9 @@
     "pose":{
      "lat":49.12265341,
      "lng":2.78440734,
-     "elevationM":0.05,
-     "headingDeg":223.86,
-     "pitchDeg":0.65,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46016,9 +46016,9 @@
     "pose":{
      "lat":49.12268205,
      "lng":2.78444535,
-     "elevationM":0.05,
-     "headingDeg":223.85,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46027,9 +46027,9 @@
     "pose":{
      "lat":49.12271072,
      "lng":2.78448341,
-     "elevationM":0.05,
-     "headingDeg":223.84,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46038,9 +46038,9 @@
     "pose":{
      "lat":49.12273944,
      "lng":2.78452152,
-     "elevationM":0.05,
-     "headingDeg":223.83,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46049,9 +46049,9 @@
     "pose":{
      "lat":49.1227682,
      "lng":2.7845597,
-     "elevationM":0.05,
-     "headingDeg":223.82,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46060,9 +46060,9 @@
     "pose":{
      "lat":49.122797,
      "lng":2.78459794,
-     "elevationM":0.05,
-     "headingDeg":223.81,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46071,9 +46071,9 @@
     "pose":{
      "lat":49.12282585,
      "lng":2.78463624,
-     "elevationM":0.05,
-     "headingDeg":223.8,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46082,9 +46082,9 @@
     "pose":{
      "lat":49.12285473,
      "lng":2.78467459,
-     "elevationM":0.05,
-     "headingDeg":223.79,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46093,9 +46093,9 @@
     "pose":{
      "lat":49.12288366,
      "lng":2.78471301,
-     "elevationM":0.05,
-     "headingDeg":223.79,
-     "pitchDeg":0.64,
+     "elevationM":0.0,
+     "headingDeg":359.82,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46104,9 +46104,9 @@
     "pose":{
      "lat":49.12291263,
      "lng":2.78475148,
-     "elevationM":0.05,
-     "headingDeg":223.78,
-     "pitchDeg":0.63,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46115,9 +46115,9 @@
     "pose":{
      "lat":49.12294165,
      "lng":2.78479,
-     "elevationM":0.05,
-     "headingDeg":223.77,
-     "pitchDeg":0.63,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46126,9 +46126,9 @@
     "pose":{
      "lat":49.1229707,
      "lng":2.78482857,
-     "elevationM":0.05,
-     "headingDeg":223.76,
-     "pitchDeg":0.63,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46137,9 +46137,9 @@
     "pose":{
      "lat":49.1229998,
      "lng":2.7848672,
-     "elevationM":0.05,
-     "headingDeg":223.75,
-     "pitchDeg":0.63,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46148,9 +46148,9 @@
     "pose":{
      "lat":49.12302894,
      "lng":2.78490587,
-     "elevationM":0.05,
-     "headingDeg":223.74,
-     "pitchDeg":0.63,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46159,9 +46159,9 @@
     "pose":{
      "lat":49.12305812,
      "lng":2.7849446,
-     "elevationM":0.05,
-     "headingDeg":223.73,
-     "pitchDeg":0.62,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46170,9 +46170,9 @@
     "pose":{
      "lat":49.12308735,
      "lng":2.78498338,
-     "elevationM":0.05,
-     "headingDeg":223.72,
-     "pitchDeg":0.62,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46181,9 +46181,9 @@
     "pose":{
      "lat":49.12311661,
      "lng":2.78502221,
-     "elevationM":0.05,
-     "headingDeg":223.72,
-     "pitchDeg":0.62,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46192,9 +46192,9 @@
     "pose":{
      "lat":49.12314592,
      "lng":2.78506109,
-     "elevationM":0.05,
-     "headingDeg":223.71,
-     "pitchDeg":0.62,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46203,9 +46203,9 @@
     "pose":{
      "lat":49.12317527,
      "lng":2.78510004,
-     "elevationM":0.05,
-     "headingDeg":223.7,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46214,9 +46214,9 @@
     "pose":{
      "lat":49.12320466,
      "lng":2.78513904,
-     "elevationM":0.05,
-     "headingDeg":223.69,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46225,9 +46225,9 @@
     "pose":{
      "lat":49.1232341,
      "lng":2.7851781,
-     "elevationM":0.05,
-     "headingDeg":223.68,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46236,9 +46236,9 @@
     "pose":{
      "lat":49.12326358,
      "lng":2.78521722,
-     "elevationM":0.05,
-     "headingDeg":223.67,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46247,9 +46247,9 @@
     "pose":{
      "lat":49.1232931,
      "lng":2.78525641,
-     "elevationM":0.05,
-     "headingDeg":223.67,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46258,9 +46258,9 @@
     "pose":{
      "lat":49.12332266,
      "lng":2.78529565,
-     "elevationM":0.05,
-     "headingDeg":223.66,
-     "pitchDeg":0.61,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46269,9 +46269,9 @@
     "pose":{
      "lat":49.12335226,
      "lng":2.78533495,
-     "elevationM":0.05,
-     "headingDeg":223.65,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46280,9 +46280,9 @@
     "pose":{
      "lat":49.12338191,
      "lng":2.78537431,
-     "elevationM":0.05,
-     "headingDeg":223.64,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46291,9 +46291,9 @@
     "pose":{
      "lat":49.1234116,
      "lng":2.78541372,
-     "elevationM":0.05,
-     "headingDeg":223.64,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46302,9 +46302,9 @@
     "pose":{
      "lat":49.12344133,
      "lng":2.78545318,
-     "elevationM":0.05,
-     "headingDeg":223.63,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46313,9 +46313,9 @@
     "pose":{
      "lat":49.1234711,
      "lng":2.7854927,
-     "elevationM":0.05,
-     "headingDeg":223.62,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46324,9 +46324,9 @@
     "pose":{
      "lat":49.12350091,
      "lng":2.78553227,
-     "elevationM":0.05,
-     "headingDeg":223.61,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46335,9 +46335,9 @@
     "pose":{
      "lat":49.12353077,
      "lng":2.78557189,
-     "elevationM":0.05,
-     "headingDeg":223.6,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46346,9 +46346,9 @@
     "pose":{
      "lat":49.12356067,
      "lng":2.78561157,
-     "elevationM":0.05,
-     "headingDeg":223.59,
-     "pitchDeg":0.6,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46357,9 +46357,9 @@
     "pose":{
      "lat":49.12359061,
      "lng":2.78565131,
-     "elevationM":0.05,
-     "headingDeg":223.59,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46368,9 +46368,9 @@
     "pose":{
      "lat":49.1236206,
      "lng":2.7856911,
-     "elevationM":0.05,
-     "headingDeg":223.58,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46379,9 +46379,9 @@
     "pose":{
      "lat":49.12365062,
      "lng":2.78573094,
-     "elevationM":0.05,
-     "headingDeg":223.57,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46390,9 +46390,9 @@
     "pose":{
      "lat":49.12368069,
      "lng":2.78577084,
-     "elevationM":0.05,
-     "headingDeg":223.56,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46401,9 +46401,9 @@
     "pose":{
      "lat":49.1237108,
      "lng":2.7858108,
-     "elevationM":0.05,
-     "headingDeg":223.55,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46412,9 +46412,9 @@
     "pose":{
      "lat":49.12374095,
      "lng":2.78585082,
-     "elevationM":0.05,
-     "headingDeg":223.54,
-     "pitchDeg":0.59,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46423,9 +46423,9 @@
     "pose":{
      "lat":49.12377115,
      "lng":2.78589089,
-     "elevationM":0.05,
-     "headingDeg":223.54,
-     "pitchDeg":0.58,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46434,9 +46434,9 @@
     "pose":{
      "lat":49.12380138,
      "lng":2.78593102,
-     "elevationM":0.05,
-     "headingDeg":223.53,
-     "pitchDeg":0.58,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46445,9 +46445,9 @@
     "pose":{
      "lat":49.12383166,
      "lng":2.78597121,
-     "elevationM":0.05,
-     "headingDeg":223.52,
-     "pitchDeg":0.58,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46456,9 +46456,9 @@
     "pose":{
      "lat":49.12386198,
      "lng":2.78601145,
-     "elevationM":0.05,
-     "headingDeg":223.51,
-     "pitchDeg":0.58,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46467,9 +46467,9 @@
     "pose":{
      "lat":49.12389235,
      "lng":2.78605174,
-     "elevationM":0.05,
-     "headingDeg":223.51,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46478,9 +46478,9 @@
     "pose":{
      "lat":49.12392275,
      "lng":2.7860921,
-     "elevationM":0.05,
-     "headingDeg":223.5,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46489,9 +46489,9 @@
     "pose":{
      "lat":49.1239532,
      "lng":2.7861325,
-     "elevationM":0.05,
-     "headingDeg":223.49,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46500,9 +46500,9 @@
     "pose":{
      "lat":49.12398369,
      "lng":2.78617296,
-     "elevationM":0.05,
-     "headingDeg":223.48,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46511,9 +46511,9 @@
     "pose":{
      "lat":49.12401422,
      "lng":2.78621347,
-     "elevationM":0.05,
-     "headingDeg":223.48,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46522,9 +46522,9 @@
     "pose":{
      "lat":49.1240448,
      "lng":2.78625403,
-     "elevationM":0.05,
-     "headingDeg":223.47,
-     "pitchDeg":0.57,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46533,9 +46533,9 @@
     "pose":{
      "lat":49.12407541,
      "lng":2.78629465,
-     "elevationM":0.05,
-     "headingDeg":223.46,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46544,9 +46544,9 @@
     "pose":{
      "lat":49.12410607,
      "lng":2.78633533,
-     "elevationM":0.05,
-     "headingDeg":223.45,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46555,9 +46555,9 @@
     "pose":{
      "lat":49.12413677,
      "lng":2.78637606,
-     "elevationM":0.05,
-     "headingDeg":223.45,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46566,9 +46566,9 @@
     "pose":{
      "lat":49.12416751,
      "lng":2.78641685,
-     "elevationM":0.05,
-     "headingDeg":223.44,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46577,9 +46577,9 @@
     "pose":{
      "lat":49.1241983,
      "lng":2.7864577,
-     "elevationM":0.05,
-     "headingDeg":223.43,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46588,9 +46588,9 @@
     "pose":{
      "lat":49.12422913,
      "lng":2.78649861,
-     "elevationM":0.05,
-     "headingDeg":223.42,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46599,9 +46599,9 @@
     "pose":{
      "lat":49.12426,
      "lng":2.78653958,
-     "elevationM":0.05,
-     "headingDeg":223.42,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46610,9 +46610,9 @@
     "pose":{
      "lat":49.12429091,
      "lng":2.78658061,
-     "elevationM":0.05,
-     "headingDeg":223.41,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46621,9 +46621,9 @@
     "pose":{
      "lat":49.12432186,
      "lng":2.7866217,
-     "elevationM":0.05,
-     "headingDeg":223.41,
-     "pitchDeg":0.56,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46632,9 +46632,9 @@
     "pose":{
      "lat":49.12435286,
      "lng":2.78666284,
-     "elevationM":0.05,
-     "headingDeg":223.4,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46643,9 +46643,9 @@
     "pose":{
      "lat":49.1243839,
      "lng":2.78670404,
-     "elevationM":0.05,
-     "headingDeg":223.39,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46654,9 +46654,9 @@
     "pose":{
      "lat":49.12441498,
      "lng":2.78674529,
-     "elevationM":0.05,
-     "headingDeg":223.39,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46665,9 +46665,9 @@
     "pose":{
      "lat":49.1244461,
      "lng":2.7867866,
-     "elevationM":0.05,
-     "headingDeg":223.38,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46676,9 +46676,9 @@
     "pose":{
      "lat":49.12447726,
      "lng":2.78682796,
-     "elevationM":0.05,
-     "headingDeg":223.37,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46687,9 +46687,9 @@
     "pose":{
      "lat":49.12450847,
      "lng":2.78686937,
-     "elevationM":0.05,
-     "headingDeg":223.37,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46698,9 +46698,9 @@
     "pose":{
      "lat":49.12453972,
      "lng":2.78691084,
-     "elevationM":0.05,
-     "headingDeg":223.36,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46709,9 +46709,9 @@
     "pose":{
      "lat":49.12457101,
      "lng":2.78695236,
-     "elevationM":0.05,
-     "headingDeg":223.35,
-     "pitchDeg":0.55,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46720,9 +46720,9 @@
     "pose":{
      "lat":49.12460235,
      "lng":2.78699393,
-     "elevationM":0.05,
-     "headingDeg":223.34,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46731,9 +46731,9 @@
     "pose":{
      "lat":49.12463372,
      "lng":2.78703556,
-     "elevationM":0.05,
-     "headingDeg":223.34,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46742,9 +46742,9 @@
     "pose":{
      "lat":49.12466514,
      "lng":2.78707725,
-     "elevationM":0.05,
-     "headingDeg":223.33,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46753,9 +46753,9 @@
     "pose":{
      "lat":49.1246966,
      "lng":2.787119,
-     "elevationM":0.05,
-     "headingDeg":223.32,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46764,9 +46764,9 @@
     "pose":{
      "lat":49.1247281,
      "lng":2.7871608,
-     "elevationM":0.05,
-     "headingDeg":223.31,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46775,9 +46775,9 @@
     "pose":{
      "lat":49.12475965,
      "lng":2.78720266,
-     "elevationM":0.05,
-     "headingDeg":223.31,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46786,9 +46786,9 @@
     "pose":{
      "lat":49.12479123,
      "lng":2.78724458,
-     "elevationM":0.05,
-     "headingDeg":223.3,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46797,9 +46797,9 @@
     "pose":{
      "lat":49.12482286,
      "lng":2.78728656,
-     "elevationM":0.05,
-     "headingDeg":223.3,
-     "pitchDeg":0.54,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46808,9 +46808,9 @@
     "pose":{
      "lat":49.12485453,
      "lng":2.78732859,
-     "elevationM":0.05,
-     "headingDeg":223.29,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46819,9 +46819,9 @@
     "pose":{
      "lat":49.12488625,
      "lng":2.78737067,
-     "elevationM":0.05,
-     "headingDeg":223.28,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46830,9 +46830,9 @@
     "pose":{
      "lat":49.124918,
      "lng":2.78741281,
-     "elevationM":0.05,
-     "headingDeg":223.28,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46841,9 +46841,9 @@
     "pose":{
      "lat":49.1249498,
      "lng":2.787455,
-     "elevationM":0.05,
-     "headingDeg":223.27,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46852,9 +46852,9 @@
     "pose":{
      "lat":49.12498164,
      "lng":2.78749724,
-     "elevationM":0.05,
-     "headingDeg":223.26,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46863,9 +46863,9 @@
     "pose":{
      "lat":49.12501352,
      "lng":2.78753954,
-     "elevationM":0.05,
-     "headingDeg":223.26,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46874,9 +46874,9 @@
     "pose":{
      "lat":49.12504545,
      "lng":2.78758189,
-     "elevationM":0.05,
-     "headingDeg":223.25,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46885,9 +46885,9 @@
     "pose":{
      "lat":49.12507741,
      "lng":2.7876243,
-     "elevationM":0.05,
-     "headingDeg":223.25,
-     "pitchDeg":0.53,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46896,9 +46896,9 @@
     "pose":{
      "lat":49.12510942,
      "lng":2.78766676,
-     "elevationM":0.05,
-     "headingDeg":223.24,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46907,9 +46907,9 @@
     "pose":{
      "lat":49.12514147,
      "lng":2.78770928,
-     "elevationM":0.05,
-     "headingDeg":223.23,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46918,9 +46918,9 @@
     "pose":{
      "lat":49.12517356,
      "lng":2.78775186,
-     "elevationM":0.05,
-     "headingDeg":223.23,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46929,9 +46929,9 @@
     "pose":{
      "lat":49.1252057,
      "lng":2.7877945,
-     "elevationM":0.05,
-     "headingDeg":223.22,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46940,9 +46940,9 @@
     "pose":{
      "lat":49.12523788,
      "lng":2.7878372,
-     "elevationM":0.05,
-     "headingDeg":223.21,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46951,9 +46951,9 @@
     "pose":{
      "lat":49.1252701,
      "lng":2.78787996,
-     "elevationM":0.05,
-     "headingDeg":223.21,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46962,9 +46962,9 @@
     "pose":{
      "lat":49.12530236,
      "lng":2.78792278,
-     "elevationM":0.05,
-     "headingDeg":223.2,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46973,9 +46973,9 @@
     "pose":{
      "lat":49.12533467,
      "lng":2.78796565,
-     "elevationM":0.05,
-     "headingDeg":223.2,
-     "pitchDeg":0.52,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46984,9 +46984,9 @@
     "pose":{
      "lat":49.12536702,
      "lng":2.78800858,
-     "elevationM":0.05,
-     "headingDeg":223.19,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -46995,9 +46995,9 @@
     "pose":{
      "lat":49.1253994,
      "lng":2.78805157,
-     "elevationM":0.05,
-     "headingDeg":223.18,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47006,9 +47006,9 @@
     "pose":{
      "lat":49.12543183,
      "lng":2.78809461,
-     "elevationM":0.05,
-     "headingDeg":223.18,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47017,9 +47017,9 @@
     "pose":{
      "lat":49.1254643,
      "lng":2.7881377,
-     "elevationM":0.05,
-     "headingDeg":223.17,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47028,9 +47028,9 @@
     "pose":{
      "lat":49.12549681,
      "lng":2.78818085,
-     "elevationM":0.05,
-     "headingDeg":223.16,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47039,9 +47039,9 @@
     "pose":{
      "lat":49.12552935,
      "lng":2.78822404,
-     "elevationM":0.05,
-     "headingDeg":223.16,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47050,9 +47050,9 @@
     "pose":{
      "lat":49.12556194,
      "lng":2.7882673,
-     "elevationM":0.05,
-     "headingDeg":223.15,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47061,9 +47061,9 @@
     "pose":{
      "lat":49.12559456,
      "lng":2.78831061,
-     "elevationM":0.05,
-     "headingDeg":223.15,
-     "pitchDeg":0.51,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47072,9 +47072,9 @@
     "pose":{
      "lat":49.12562723,
      "lng":2.78835397,
-     "elevationM":0.05,
-     "headingDeg":223.14,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47083,9 +47083,9 @@
     "pose":{
      "lat":49.12565994,
      "lng":2.78839739,
-     "elevationM":0.05,
-     "headingDeg":223.13,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47094,9 +47094,9 @@
     "pose":{
      "lat":49.1256927,
      "lng":2.78844087,
-     "elevationM":0.05,
-     "headingDeg":223.13,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47105,9 +47105,9 @@
     "pose":{
      "lat":49.1257255,
      "lng":2.7884844,
-     "elevationM":0.05,
-     "headingDeg":223.12,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47116,9 +47116,9 @@
     "pose":{
      "lat":49.12575835,
      "lng":2.78852799,
-     "elevationM":0.05,
-     "headingDeg":223.12,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47127,9 +47127,9 @@
     "pose":{
      "lat":49.12579124,
      "lng":2.78857164,
-     "elevationM":0.05,
-     "headingDeg":223.11,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47138,9 +47138,9 @@
     "pose":{
      "lat":49.12582418,
      "lng":2.78861534,
-     "elevationM":0.05,
-     "headingDeg":223.11,
-     "pitchDeg":0.5,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47149,9 +47149,9 @@
     "pose":{
      "lat":49.12585716,
      "lng":2.7886591,
-     "elevationM":0.05,
-     "headingDeg":223.1,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47160,9 +47160,9 @@
     "pose":{
      "lat":49.12589019,
      "lng":2.78870292,
-     "elevationM":0.05,
-     "headingDeg":223.1,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47171,9 +47171,9 @@
     "pose":{
      "lat":49.12592325,
      "lng":2.78874679,
-     "elevationM":0.05,
-     "headingDeg":223.09,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47182,9 +47182,9 @@
     "pose":{
      "lat":49.12595636,
      "lng":2.78879072,
-     "elevationM":0.05,
-     "headingDeg":223.09,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47193,9 +47193,9 @@
     "pose":{
      "lat":49.1259895,
      "lng":2.7888347,
-     "elevationM":0.05,
-     "headingDeg":223.08,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47204,9 +47204,9 @@
     "pose":{
      "lat":49.12602268,
      "lng":2.78887874,
-     "elevationM":0.05,
-     "headingDeg":223.07,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47215,9 +47215,9 @@
     "pose":{
      "lat":49.1260559,
      "lng":2.78892284,
-     "elevationM":0.05,
-     "headingDeg":223.07,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47226,9 +47226,9 @@
     "pose":{
      "lat":49.12608916,
      "lng":2.788967,
-     "elevationM":0.05,
-     "headingDeg":223.06,
-     "pitchDeg":0.49,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47237,9 +47237,9 @@
     "pose":{
      "lat":49.12612246,
      "lng":2.78901121,
-     "elevationM":0.05,
-     "headingDeg":223.06,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47248,9 +47248,9 @@
     "pose":{
      "lat":49.12615581,
      "lng":2.78905547,
-     "elevationM":0.05,
-     "headingDeg":223.05,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47259,9 +47259,9 @@
     "pose":{
      "lat":49.12618919,
      "lng":2.78909979,
-     "elevationM":0.05,
-     "headingDeg":223.04,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.81,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47270,9 +47270,9 @@
     "pose":{
      "lat":49.12622262,
      "lng":2.78914417,
-     "elevationM":0.05,
-     "headingDeg":223.04,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47281,9 +47281,9 @@
     "pose":{
      "lat":49.1262561,
      "lng":2.7891886,
-     "elevationM":0.05,
-     "headingDeg":223.03,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47292,9 +47292,9 @@
     "pose":{
      "lat":49.12628962,
      "lng":2.78923308,
-     "elevationM":0.05,
-     "headingDeg":223.03,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47303,9 +47303,9 @@
     "pose":{
      "lat":49.12632319,
      "lng":2.78927762,
-     "elevationM":0.05,
-     "headingDeg":223.02,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47314,9 +47314,9 @@
     "pose":{
      "lat":49.1263568,
      "lng":2.78932221,
-     "elevationM":0.05,
-     "headingDeg":223.02,
-     "pitchDeg":0.48,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47325,9 +47325,9 @@
     "pose":{
      "lat":49.12639046,
      "lng":2.78936685,
-     "elevationM":0.05,
-     "headingDeg":223.01,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47336,9 +47336,9 @@
     "pose":{
      "lat":49.12642415,
      "lng":2.78941155,
-     "elevationM":0.05,
-     "headingDeg":223.01,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47347,9 +47347,9 @@
     "pose":{
      "lat":49.12645789,
      "lng":2.78945631,
-     "elevationM":0.05,
-     "headingDeg":223.0,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47358,9 +47358,9 @@
     "pose":{
      "lat":49.12649168,
      "lng":2.78950112,
-     "elevationM":0.05,
-     "headingDeg":223.0,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47369,9 +47369,9 @@
     "pose":{
      "lat":49.1265255,
      "lng":2.789546,
-     "elevationM":0.05,
-     "headingDeg":222.99,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47380,9 +47380,9 @@
     "pose":{
      "lat":49.12655937,
      "lng":2.78959094,
-     "elevationM":0.05,
-     "headingDeg":222.99,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47391,9 +47391,9 @@
     "pose":{
      "lat":49.12659327,
      "lng":2.78963593,
-     "elevationM":0.05,
-     "headingDeg":222.98,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47402,9 +47402,9 @@
     "pose":{
      "lat":49.12662723,
      "lng":2.78968099,
-     "elevationM":0.05,
-     "headingDeg":222.98,
-     "pitchDeg":0.47,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47413,9 +47413,9 @@
     "pose":{
      "lat":49.12666122,
      "lng":2.7897261,
-     "elevationM":0.05,
-     "headingDeg":222.97,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47424,9 +47424,9 @@
     "pose":{
      "lat":49.12669525,
      "lng":2.78977127,
-     "elevationM":0.05,
-     "headingDeg":222.97,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47435,9 +47435,9 @@
     "pose":{
      "lat":49.12672933,
      "lng":2.78981649,
-     "elevationM":0.05,
-     "headingDeg":222.96,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47446,9 +47446,9 @@
     "pose":{
      "lat":49.12676344,
      "lng":2.78986177,
-     "elevationM":0.05,
-     "headingDeg":222.96,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47457,9 +47457,9 @@
     "pose":{
      "lat":49.1267976,
      "lng":2.7899071,
-     "elevationM":0.05,
-     "headingDeg":222.95,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47468,9 +47468,9 @@
     "pose":{
      "lat":49.12683179,
      "lng":2.78995248,
-     "elevationM":0.05,
-     "headingDeg":222.94,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47479,9 +47479,9 @@
     "pose":{
      "lat":49.12686603,
      "lng":2.78999792,
-     "elevationM":0.05,
-     "headingDeg":222.94,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47490,9 +47490,9 @@
     "pose":{
      "lat":49.1269003,
      "lng":2.79004341,
-     "elevationM":0.05,
-     "headingDeg":222.94,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47501,9 +47501,9 @@
     "pose":{
      "lat":49.12693462,
      "lng":2.79008896,
-     "elevationM":0.05,
-     "headingDeg":222.93,
-     "pitchDeg":0.46,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47512,9 +47512,9 @@
     "pose":{
      "lat":49.12696898,
      "lng":2.79013456,
-     "elevationM":0.05,
-     "headingDeg":222.93,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47523,9 +47523,9 @@
     "pose":{
      "lat":49.12700337,
      "lng":2.79018022,
-     "elevationM":0.05,
-     "headingDeg":222.92,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47534,9 +47534,9 @@
     "pose":{
      "lat":49.12703782,
      "lng":2.79022593,
-     "elevationM":0.05,
-     "headingDeg":222.92,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47545,9 +47545,9 @@
     "pose":{
      "lat":49.1270723,
      "lng":2.7902717,
-     "elevationM":0.05,
-     "headingDeg":222.91,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47556,9 +47556,9 @@
     "pose":{
      "lat":49.12710683,
      "lng":2.79031752,
-     "elevationM":0.05,
-     "headingDeg":222.91,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47567,9 +47567,9 @@
     "pose":{
      "lat":49.12714139,
      "lng":2.79036339,
-     "elevationM":0.05,
-     "headingDeg":222.9,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47578,9 +47578,9 @@
     "pose":{
      "lat":49.127176,
      "lng":2.79040932,
-     "elevationM":0.05,
-     "headingDeg":222.9,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47589,9 +47589,9 @@
     "pose":{
      "lat":49.12721066,
      "lng":2.7904553,
-     "elevationM":0.05,
-     "headingDeg":222.89,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47600,9 +47600,9 @@
     "pose":{
      "lat":49.12724535,
      "lng":2.79050134,
-     "elevationM":0.05,
-     "headingDeg":222.89,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47611,9 +47611,9 @@
     "pose":{
      "lat":49.12728009,
      "lng":2.79054743,
-     "elevationM":0.05,
-     "headingDeg":222.88,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47622,9 +47622,9 @@
     "pose":{
      "lat":49.12731487,
      "lng":2.79059359,
-     "elevationM":0.05,
-     "headingDeg":222.88,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47633,9 +47633,9 @@
     "pose":{
      "lat":49.1273497,
      "lng":2.7906398,
-     "elevationM":0.05,
-     "headingDeg":222.87,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.8,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47644,9 +47644,9 @@
     "pose":{
      "lat":49.12738651,
      "lng":2.79068864,
-     "elevationM":0.05,
-     "headingDeg":222.87,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47655,9 +47655,9 @@
     "pose":{
      "lat":49.12742612,
      "lng":2.7907412,
-     "elevationM":0.05,
-     "headingDeg":222.86,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47666,9 +47666,9 @@
     "pose":{
      "lat":49.12746688,
      "lng":2.79079529,
-     "elevationM":0.05,
-     "headingDeg":222.86,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47677,9 +47677,9 @@
     "pose":{
      "lat":49.12750714,
      "lng":2.79084871,
-     "elevationM":0.05,
-     "headingDeg":222.85,
-     "pitchDeg":0.45,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47688,9 +47688,9 @@
     "pose":{
      "lat":49.12754522,
      "lng":2.79089924,
-     "elevationM":0.05,
-     "headingDeg":222.85,
-     "pitchDeg":0.44,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47699,9 +47699,9 @@
     "pose":{
      "lat":49.12757949,
      "lng":2.79094471,
-     "elevationM":0.05,
-     "headingDeg":222.84,
-     "pitchDeg":0.44,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47710,9 +47710,9 @@
     "pose":{
      "lat":49.12760826,
      "lng":2.79098289,
-     "elevationM":0.05,
-     "headingDeg":222.84,
-     "pitchDeg":0.44,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    },
@@ -47721,9 +47721,9 @@
     "pose":{
      "lat":49.1276299,
      "lng":2.7910116,
-     "elevationM":0.05,
-     "headingDeg":222.83,
-     "pitchDeg":0.44,
+     "elevationM":0.0,
+     "headingDeg":359.79,
+     "pitchDeg":-10.66,
      "fovDeg":60
     }
    }
