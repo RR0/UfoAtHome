@@ -1065,6 +1065,22 @@ export class SceneElement extends HTMLElement {
     }
   }
 
+  /**
+   * Whether a fireball or a re-entry of the recording is heard as a detonation where the observer stands (see ReentrySighting.detonationsOf):
+   * something to hear, so the player's sound is not shown off. Chelyabinsk's thunder was, with its button greyed as for a silent recording.
+   */
+  private detonates(sighting: Sighting): boolean {
+    const reentries = [...(sighting.skyEvents?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
+    const pose = resolveObserverPoseAt(sighting, 0)
+    const place = sighting.event.place?.[0]
+    const lat = pose?.lat ?? place?.lat
+    const lng = pose?.lng ?? place?.lng
+    // Not kept: the editor changes a recording in place, and the fireballs of the archive arrive after it. Cheap enough, asked only when
+    // the player's button is drawn, the pieces themselves being kept per re-entry (see ReentrySighting.piecesOf).
+    return reentries.length > 0 && lat !== undefined && lng !== undefined
+      && ReentrySighting.detonationsOf(reentries, { lat, lng, heightM: pose?.elevationM ?? 0 }).length > 0
+  }
+
   /** The detonations last worked out, and what from (see hearDetonations). */
   private detonationsFor?: { reentries: readonly ReentryJson[], key: string, detonations: ReentryDetonation[] }
   private lastDetonationT?: number
@@ -1257,6 +1273,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.ambientSound = sighting => sighting.vehicle !== undefined
       || sighting.decor.some(decor => decor.engine !== undefined)
       || sighting.weatherTrack.allKeyframes.some(frame => frame.weather.precipitationType !== "none" || frame.weather.windSpeed > 1)
+      || this.detonates(sighting)
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<ReferenceViewDetail>).detail))
     this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
