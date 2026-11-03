@@ -167,6 +167,12 @@ describe("DecorSystem stated size", () => {
     expect(box.min.y).toBeCloseTo(0, 6)
   })
 
+  it("draws a building lower than a storey as tall as it was measured, not raised to a storey", () => {
+    // Trans-en-Provence's stone cabin: 2.4 m, and the craft leaving over it from behind it.
+    const box = new Box3().setFromObject(DecorSystem.build(building({ sizeM: { widthM: 5, lengthM: 3.2, heightM: 2.4 } }), false))
+    expect(box.max.y - box.min.y).toBeCloseTo(2.4, 6)
+  })
+
   it("moves the seat with the body, so a observer inside a longer car still looks out of it", () => {
     const natural = DecorSystem.naturalSize("vehicle")
     const plain = DecorSystem.occupantView(vehicle({ observerSide: "front-left" }))

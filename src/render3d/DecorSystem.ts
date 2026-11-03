@@ -1140,9 +1140,13 @@ export class DecorSystem {
     mesh.name = DecorSystem.ROOF_NAME
   }
 
-  /** The walls' height: the stated one less the rise of the roof, never under one storey. */
+  /**
+   * The walls' height: the stated one less the rise of the roof, never under one storey, and never over the height stated. A building lower than
+   * a storey is a shed, a hut, a pump's shelter, as tall as it was measured: Trans-en-Provence's 2.4 m stone cabin, raised to a storey, hid
+   * the craft rising over it from the observer standing behind it.
+   */
   private static wallHeightOf(object: DecorObject, heightM: number): number {
-    return Math.max(BUILDING_FLOOR_HEIGHT, heightM - (object.roof ? RoofGeometry.normalised(object.roof).riseM : 0))
+    return Math.min(heightM, Math.max(BUILDING_FLOOR_HEIGHT, heightM - (object.roof ? RoofGeometry.normalised(object.roof).riseM : 0)))
   }
 
   /** A roof's own colour as the linear-ish triple a part is built from, tile red by default: a roof nobody measured is not the colour of its walls. */
