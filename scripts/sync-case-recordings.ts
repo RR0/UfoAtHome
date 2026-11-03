@@ -57,6 +57,7 @@ const RECORDINGS: CaseRecording[] = [
   // it has to sit at the same place beside it on both hosts.
   { published: "maffliers/vue-p024-2012-09-09.jpg", dossier: "Maffliers/maffliers/vue-p024-2012-09-09.jpg" },
   { published: "observer-silly-le-long.json", dossier: "SillyLeLong/observer-silly-le-long.json" },
+  { published: "observer-silly-le-long-temoins.json", dossier: "SillyLeLong/observer-silly-le-long-temoins.json" },
   { published: "observer-duboc.json", dossier: "Duboc/observer-duboc.json" },
   { published: "observer-duboc-copilot.json", dossier: "Duboc/observer-duboc-copilot.json" },
   { published: "observer-duboc-steward.json", dossier: "Duboc/observer-duboc-steward.json" },

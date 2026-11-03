@@ -2,7 +2,7 @@
  "version":1,
  "id":"2015-05-31-SillyLeLong-T1",
  "image":"https://ufoathome.org/demo-data/share/silly-le-long.jpg",
- "summaryTime":61.54,
+ "summaryTime":56,
  "time":{
   "year":2015,
   "month":5,
@@ -23,7 +23,12 @@
  ],
  "observer":{
   "id":"SillyLeLong-2015-T1",
-  "title":"T1 (GEIPAN 2015-05-09194)"
+  "title":{
+   "fr":"T1, vitesse de la simulation du GEIPAN",
+   "en":"T1, at the GEIPAN simulation's speed",
+   "es":"T1, velocidad de la simulación del GEIPAN",
+   "it":"T1, velocità della simulazione del GEIPAN"
+  }
  },
  "vehicle":{
   "kind":"van",
