@@ -3,6 +3,8 @@ import { BoxGeometry, BufferGeometry, DirectionalLight, Float32BufferAttribute, 
 import { SceneRenderer } from "../../src/render3d/SceneRenderer.js"
 import { DecorSystem } from "../../src/render3d/DecorSystem.js"
 import { RoadSystem } from "../../src/render3d/RoadSystem.js"
+import { MirrorSystem } from "../../src/render3d/MirrorSystem.js"
+import { CabinMask } from "../../src/render3d/CabinMask.js"
 import { HeadlightSystem } from "../../src/render3d/HeadlightSystem.js"
 import { AerialPerspective } from "../../src/engine/atmosphere/AerialPerspective.js"
 
@@ -28,7 +30,9 @@ function renderer() {
     bodySystem: { reflectors: [] },
     // The Sun's light and the scratch its shadow frustum is placed with (see placeShadowFrustum).
     celestialLight: new DirectionalLight(), celestialLightTarget: new Object3D(), lightDirection: new Vector3(0, 1, 0),
-    shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3()
+    shadowUp: new Vector3(0, 1, 0), shadowAxisX: new Vector3(), shadowAxisY: new Vector3(), shadowWorld: new Vector3(),
+    // The mirrors a pointer may be sent on through, and the silhouette of the cabin round the eye (see MirrorSystem, CabinMask): none here.
+    mirrors: new MirrorSystem(), cabinMask: new CabinMask(), cabinGroups: []
   })
 }
 

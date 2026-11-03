@@ -85,6 +85,7 @@ export class EmitterLights {
     WaterSystem: "none: water mirrors, it gives out no light",
     TraceSystem: "none: a trace on the ground is lit, it gives out no light",
     ReferenceSystem: "none: a photograph laid over the scene, not in it",
+    MirrorSystem: "none: a mirror shows the scene's light, it gives out none",
     HeadlightSystem: "own lights: a vehicle's headlamps are spot lights, aimed",
     FlameEffect: "emitters: through BodySystem, which states each flame",
     LensFlareEffect: "none: a dazzle in the eye, nothing in the world",
