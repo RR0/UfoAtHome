@@ -9,7 +9,10 @@ Tavion 48 = 22:50:34 UTC, the GEIPAN's best start (CR p.39).
 import json, math, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.abspath(os.path.join(HERE, "../../../../../public/demo-data"))
+OUT = os.environ.get("SILLY_OUT") or os.path.abspath(os.path.join(HERE, "../../../../../public/demo-data"))
+# Which of the two speeds the van is driven at (see SPEEDS): "geipan", the simulation's, which writes observer-silly-le-long.json, its reading and
+# the case; or "temoins", the witnesses', which writes observer-silly-le-long-temoins.json alone, from the first (run it after).
+VARIANT = os.environ.get("SILLY_VARIANT", "geipan")
 R = 6371008.8
 osm = json.load(open(os.path.join(HERE, "osm.json")))
 ways = {e["id"]: e for e in osm["elements"]}
@@ -73,6 +76,21 @@ S_BRIDGE = project(*BRIDGE)
 SPEEDS = [(48.0, 138.0), (56.2, 135.72), (84.6, 73.23), (119.2, 48.56), (125.4, 47.02), (128.9, 42.59),
           (161.7, 48.11), (202.0, 57.52), (257.2, 77.25)]
 T_END = 250.0  # T1 loses it at Ttemoin 277 = Tavion 202 + 46.5 (CR p.54)
+# The witnesses' speed: the reconstitution's, without the factor the simulation multiplied it by. "Dans la première phase, « mouvement
+# parallèle », pour obtenir l'effet que l'avion devient quasi fixe par rapport aux étoiles, il faut corriger la vitesse du véhicule d'un facteur
+# multiplicatif 1.3" (CR p.51), and "Cette vitesse de 130km/h a été infirmée par le témoin en aout. Tout au plus, il roulait à 100km/h" (CR
+# p.51); T2 "90 ou 100km/h au début" (CR p.10), "On fait ce parcours à 110km/h grand maximum" (CR p.49). So: 1.3 taken out until the end of
+# that phase (Tavion 56.2), less and less of it until the van slows (Tavion 84.6, from where the simulation follows the witness's own
+# driving: SUPPOSED, the report gives the factor of the first phase only).
+FIRST_PHASE_FACTOR = 1.3
+
+
+def factor(tau):
+    if tau <= 56.2:
+        return FIRST_PHASE_FACTOR
+    if tau >= 84.6:
+        return 1.0
+    return FIRST_PHASE_FACTOR + (1.0 - FIRST_PHASE_FACTOR) * (tau - 56.2) / (84.6 - 56.2)
 
 
 def speed(tau):
@@ -87,12 +105,36 @@ def speed(tau):
 DT = 0.1
 s_of = {}
 s = 0.0
-taus = [round(48 + i * DT, 1) for i in range(int((T_END + 5 - 48) / DT) + 1)]
+taus = [round(48 + i * DT, 1) for i in range(int((T_END + 80 - 48) / DT) + 1)]
 for tau in taus:
     s_of[tau] = s
     s += speed(tau) * DT
 shift = S_BRIDGE + 15 - s_of[119.2]
 van = lambda tau: at(s_of[round(tau, 1)] + shift)
+# The simulation's van, whatever the variant: the aircraft is solved from what it saw, and the phenomenon's size was fitted from where it was.
+s_geipan, shift_geipan = dict(s_of), shift
+van_geipan = lambda tau: at(s_geipan[round(tau, 1)] + shift_geipan)
+if VARIANT == "temoins":
+    # From the same place at the same instant (the first sight, near PR4), slower: the bridge comes later, and the end at the same place.
+    s_of, s = {}, 0.0
+    for tau in taus:
+        s_of[tau] = s
+        s += speed(tau) / factor(tau) * DT
+    shift = s_geipan[48.0] + shift_geipan - s_of[48.0]
+    end_s = s_geipan[T_END] + shift_geipan
+    T_END = next(tau for tau in taus if s_of[tau] + shift >= end_s)
+
+
+def same_place(tau_geipan):
+    """The instant the van is where the simulation's van was at `tau_geipan`."""
+    target = s_geipan[round(tau_geipan, 1)] + shift_geipan
+    return next((tau for tau in taus if s_of[tau] + shift >= target), taus[-1])
+
+
+def geipan_tau_at(tau):
+    """The simulation's instant at the place the van is at `tau`."""
+    here = s_of[round(min(tau, taus[-1]), 1)] + shift
+    return next((each for each in taus if s_geipan[each] + shift_geipan >= here), taus[-1])
 
 # --- The runway (OSM 96594549, "07/25", asphalt, 698 m): threshold 25 at its east end.
 rwy = ways[96594549]["geometry"]
@@ -113,7 +155,7 @@ def on_axis(x):
 
 def solve_x(tau, dist, elev):
     """Where on the approach the aircraft must be for the van to see it at that distance."""
-    ve, vn, _ = van(tau)
+    ve, vn, _ = van_geipan(tau)
     dh = dist * math.cos(math.radians(elev))
     # |on_axis(x) - V|^2 = dh^2, a quadratic in x.
     ax, ay = THR[0] - ve, THR[1] - vn
@@ -161,7 +203,7 @@ def aircraft_h(tau):
 
 print("check against the GEIPAN's table:")
 for tau, dist, elev in SIM:
-    ve, vn, _ = van(tau)
+    ve, vn, _ = van_geipan(tau)
     ae, an = on_axis(aircraft_x(tau))
     h = aircraft_h(tau)
     dh = math.hypot(ae - ve, an - vn)
@@ -200,8 +242,8 @@ def interp(table, tau, col):
     return table[-1][col]
 
 
-def phen_distance(tau):
-    ve, vn, _ = van(tau)
+def phen_distance(tau, where=None):
+    ve, vn, _ = (where or van)(tau)
     return math.hypot(PHEN[0] - ve, PHEN[1] - vn)
 
 
@@ -209,15 +251,17 @@ def phen_distance(tau):
 # width in METRES that are blended, and the angles follow from the distance at each instant:
 # blending the angles themselves drew it 3.5 degrees too high halfway to the bridge, where a still
 # object's elevation grows as the inverse of its distance, not in a straight line.
-PHEN_METRES = [(tau, 2 * phen_distance(min(tau, taus[-1])) * math.tan(math.radians(size / 2)),
-                phen_distance(min(tau, taus[-1])) * math.tan(math.radians(elev))) for tau, size, elev in PHEN_SIM]
+PHEN_METRES = [(tau, 2 * phen_distance(min(tau, taus[-1]), van_geipan) * math.tan(math.radians(size / 2)),
+                phen_distance(min(tau, taus[-1]), van_geipan) * math.tan(math.radians(elev))) for tau, size, elev in PHEN_SIM]
 
 
 def phen(tau):
     ve, vn, hdg = van(tau)
     az = math.degrees(math.atan2(PHEN[0] - ve, PHEN[1] - vn)) % 360
     d = phen_distance(tau)
-    width, height = interp(PHEN_METRES, tau, 1), interp(PHEN_METRES, tau, 2)
+    # Read at the simulation's instant for this PLACE: the fit is of where the van was, whatever its speed.
+    tau_geipan = geipan_tau_at(tau)
+    width, height = interp(PHEN_METRES, tau_geipan, 1), interp(PHEN_METRES, tau_geipan, 2)
     return az, math.degrees(math.atan2(height, d)), math.degrees(2 * math.atan(width / (2 * d))), hdg
 
 
@@ -476,7 +520,7 @@ rec = {
     "utcOffsetHours": 2,
     "timeZone": "Europe/Paris",
     "place": [{"lat": round(ORIGIN[0], 7), "lng": round(ORIGIN[1], 7), "name": "RN2, Le Plessis-Belleville / Silly-le-Long, Oise, France"}],
-    "observer": {"id": "SillyLeLong-2015-T1", "title": "T1 (GEIPAN 2015-05-09194)"},
+    "observer": {"id": "SillyLeLong-2015-T1", "title": {"fr": "T1, vitesse de la simulation du GEIPAN", "en": "T1, at the GEIPAN simulation's speed", "es": "T1, velocidad de la simulación del GEIPAN", "it": "T1, velocità della simulazione del GEIPAN"}},
     # A service van, "moteur très bruyant", no radio, seen through the closed side window and the
     # mirror (CR p.4, 8, 32): heard from inside, windows shut, louder than an ordinary van.
     "vehicle": {"kind": "van", "windowsOpen": False, "noise": 1.5},
@@ -520,13 +564,13 @@ rec = {
     "milestones": [
         {"t": 0, "label": "A", "note": {"fr": "Premier aperçu vers le PR4 : deux feux blancs fixes et un rouge clignotant, bas, devant à gauche.",
                                          "en": "First sight near PR4: two steady white lights and a flashing red one, low, ahead left.", "es": "Primer avistamiento cerca del PR4: dos luces blancas fijas y una roja intermitente, bajas, delante a la izquierda.", "it": "Primo avvistamento vicino al PR4: due luci bianche fisse e una rossa lampeggiante, basse, davanti a sinistra."}},
-        {"t": ms(84.6), "label": "B", "note": {"fr": "Une masse sombre et plate apparaît autour des feux ; le fourgon ralentit sous 50 km/h.",
+        {"t": ms(same_place(84.6)), "label": "B", "note": {"fr": "Une masse sombre et plate apparaît autour des feux ; le fourgon ralentit sous 50 km/h.",
                                                "en": "A dark flat mass appears around the lights; the van slows below 50 km/h.", "es": "Una masa oscura y plana aparece alrededor de las luces; la furgoneta baja de 50 km/h.", "it": "Una massa scura e piatta appare attorno alle luci; il furgone rallenta sotto i 50 km/h."}},
         {"t": ms(T_BRIDGE), "label": "C", "note": {"fr": "Juste après le pont : immobile à gauche, un peu plus haut que le pont.",
                                                     "en": "Just past the bridge: still, on the left, a little higher than the bridge.", "es": "Justo pasado el puente: inmóvil, a la izquierda, un poco más alta que el puente.", "it": "Appena dopo il ponte: ferma, a sinistra, un po' più in alto del ponte."}},
         {"t": ms(T_BRIDGE + 2.0), "label": "D", "note": {"fr": "Vu de côté puis de derrière : V aplati gris béton, deux rectangles blancs, 2 s allumés, 2 s éteints.",
                                                   "en": "Seen from the side then behind: a flattened concrete-grey V, two white rectangles, 2 s on, 2 s off.", "es": "Vista de lado y luego desde atrás: una V aplanada gris hormigón, dos rectángulos blancos, 2 s encendidos, 2 s apagados.", "it": "Vista di lato poi da dietro: una V appiattita grigio cemento, due rettangoli bianchi, 2 s accesi, 2 s spenti."}},
-        {"t": ms(141.8), "label": "E", "note": {"fr": "T1 se baisse un peu pour le voir dans le rétroviseur gauche.",
+        {"t": ms(same_place(141.8)), "label": "E", "note": {"fr": "T1 se baisse un peu pour le voir dans le rétroviseur gauche.",
                                                  "en": "T1 crouches a little to see it in the left mirror.", "es": "T1 se agacha un poco para verla en el retrovisor izquierdo.", "it": "T1 si abbassa un po' per vederla nello specchietto sinistro."}},
         {"t": ms(T_END), "label": "F", "note": {"fr": "Perdu dans le rétroviseur, 1,8 km après le pont, là où la route descend.",
                                                  "en": "Lost in the mirror, 1.8 km past the bridge, where the road dips.", "es": "Perdida en el retrovisor, 1,8 km pasado el puente, donde la carretera baja.", "it": "Persa nello specchietto, 1,8 km dopo il ponte, dove la strada scende."}},
@@ -635,6 +679,20 @@ reading["interpretation"] = {
     "bodies": [{"id": "sr20", "title": {"fr": "Cirrus SR20 F-HOBS", "en": "Cirrus SR20 F-HOBS", "es": "Cirrus SR20 F-HOBS", "it": "Cirrus SR20 F-HOBS"},
                 "explains": ["pan"],
                 "model": {"id": "poly-google-airliner"}, "track": body_track}]}
+if VARIANT == "temoins":
+    # Everything else is the first recording's (its surroundings, its frozen data, its sources): only what the speed changes is this one's.
+    first = json.load(open(os.path.join(OUT, "observer-silly-le-long.json"), encoding="utf-8"))
+    for key in ("durationSeconds", "observerTrack", "timeline", "milestones", "interpretation"):
+        first[key] = rec[key]
+    first["id"] = f"{rec['id']}-temoins"
+    first["observer"] = {"id": "SillyLeLong-2015-T1-temoins", "title": {"fr": "T1, vitesse des témoins", "en": "T1, at the witnesses' speed", "es": "T1, velocidad de los testigos", "it": "T1, velocità dei testimoni"}}
+    first["decor"] = [aircraft if d["id"] == "f-hobs" else d for d in first["decor"] if d["id"] != "van"]
+    with open(os.path.join(OUT, "observer-silly-le-long-temoins.json"), "w", encoding="utf-8") as f:
+        json.dump(first, f, ensure_ascii=False, indent=1, separators=(",", ":"))
+        f.write("\n")
+    print(f"witnesses' speed: bridge at Tavion {T_BRIDGE:.1f}, lost at {T_END:.1f} ({T_END - T0:.0f} s)")
+    raise SystemExit(0)
+
 with open(os.path.join(OUT, "interpretation-silly-le-long-1.json"), "w", encoding="utf-8") as f:
     json.dump(reading, f, ensure_ascii=False, indent=1)
     f.write("\n")
