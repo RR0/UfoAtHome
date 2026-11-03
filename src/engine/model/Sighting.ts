@@ -29,6 +29,8 @@ import type { Account } from "./Account.js"
 import type { FrozenData } from "./FrozenData.js"
 import { Level2Date } from "@rr0/time/core"
 import { Level2DateParser } from "@rr0/time/parsers"
+import type { RecordingEventJson } from "../events/RecordingEvent.js"
+import type { EventsExpansion } from "../events/RecordingEvents.js"
 
 /**
  * A fuzzy date, structurally aligned with @rr0/time's Level2Date fields
@@ -542,6 +544,15 @@ export class Sighting {
    * in a vehicle the decor draws. Not readonly, same reasoning as account above.
    */
   vehicle?: ObserverVehicle
+
+  /**
+   * What the actors of the recording did, stated as events with their parameters instead of the values they imply: see RecordingEventJson.
+   * Their values are worked out when the recording is read (RecordingEvents.expand); not readonly, same reasoning as account above.
+   */
+  events?: RecordingEventJson[]
+
+  /** What the events were worked out into, to tell at writing whether those values are still theirs: see RecordingEvents. */
+  eventsExpansion?: EventsExpansion
 
   /**
    * How many people THIS observer's account puts at the scene, themselves included — counted off the

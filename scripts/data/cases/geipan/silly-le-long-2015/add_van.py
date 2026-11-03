@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Puts the gendarmes' van around T1's eye in observer-silly-le-long.json (run after build_silly.py and the surroundings).
+"""SUPERSEDED by events_silly.py (2026-11-03): T1's poses and the van's track are no longer written, but worked out by the player from his
+events (src/engine/events: DriveExpansion, GazeExpansion), by the law below, which they took over. Kept as the record of that law, and of
+what the events were checked against (test/engine/events/silly-poses.json).
+
+Puts the gendarmes' van around T1's eye in observer-silly-le-long.json (run after build_silly.py and the surroundings).
 
 The van is a decor object whose track is the eye's own, shifted back by where the driver's eye is in the model (EYE, in the frame of
 tonielpro-peugeot-expert-2012: x to the right, y up from the ground, the front towards -z), turned with the road. The decor's heading is HELD between

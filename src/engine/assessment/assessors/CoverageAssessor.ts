@@ -67,7 +67,7 @@ export class CoverageAssessor implements Assessor {
   async assess(sighting: Sighting): Promise<Assessment> {
     // The values without their wrappers, and the provenance separately: this walks paths, and a
     // wrapped value would put a `.value` step in the middle of every one of them.
-    const recording = plainSightingJson(sighting) as unknown as Record<string, unknown>
+    const recording = plainSightingJson(sighting, true) as unknown as Record<string, unknown>
     const criteria = QUESTIONS.map(question => CoverageAssessor.answer(question, recording, sighting))
     return {
       score: criteria.filter(criterion => criterion.basis === "stated").length / criteria.length,

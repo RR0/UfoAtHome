@@ -32,6 +32,8 @@ import { SightingShapes } from "./SightingShapes.js"
 import { SightingPositions } from "./SightingPositions.js"
 import { Provenance } from "./Provenance.js"
 import { FormatVersion } from "./FormatVersion.js"
+import type { RecordingEventJson } from "../events/RecordingEvent.js"
+import { RecordingEvents } from "../events/RecordingEvents.js"
 
 /**
  * Standalone "one JSON file per case" format (e.g. a future sighting.json
@@ -91,6 +93,11 @@ export interface SightingRecordingJson {
   /** The observer's position/elevation/orientation over time — absent for older recordings, which
    * fall back to the legacy static place[0] (see Sighting.ts's resolveObserverPoseAt). */
   observerTrack?: ObserverTrackJson
+  /**
+   * What the actors of the recording did, as events with their parameters (see RecordingEventJson): the observer's poses, and the track of
+   * the vehicle they are in, are worked out from them when they are not written (see RecordingEvents).
+   */
+  events?: RecordingEventJson[]
   /** Weather over time — absent for older recordings, which fall back to the legacy static
    * `weather` field below (see Sighting.ts's resolveWeatherAt). */
   weatherTrack?: WeatherTrackJson
@@ -171,9 +178,12 @@ export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
 }
 
-/** The recording without any provenance put back on — what toSightingJson wraps, and what a caller
- * that only wants the values (a comparison, a digest) can ask for directly. */
-export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
+/**
+ * The recording without any provenance put back on — what toSightingJson wraps, and what a caller
+ * that only wants the values (a comparison, a digest) can ask for directly. What the recording's events give
+ * is left out, as the file writes it (see RecordingEvents), unless `expanded` asks for every value.
+ */
+export function plainSightingJson(sighting: Sighting, expanded = false): SightingRecordingJson {
   // What gets written is the perception, not the pixels: every shape's stated angular extent is
   // refreshed from the box it is currently drawn as, since between load and save `bounds` is what
   // every editing gesture moved. Mutates the live sighting on purpose — it only ADDS the angle the
@@ -204,11 +214,16 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
     tags: sighting.event.tags,
     timeline: sighting.timeline.toJSON(),
     // How each place was said, with the numbers of where it now is (see SightingPositions).
-    observerTrack: SightingPositions.restatedObserverTrack(sighting),
+    observerTrack: !expanded && RecordingEvents.observerTrackIsExpanded(sighting) ? undefined : SightingPositions.restatedObserverTrack(sighting),
+    events: sighting.events?.length ? sighting.events : undefined,
     weatherTrack: sighting.weatherTrack.toJSON(),
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
-    decor: SightingPositions.restatedDecor(sighting),
+    decor: SightingPositions.restatedDecor(sighting).map(object => {
+      if (expanded || !RecordingEvents.decorTrackIsExpanded(sighting, object.id, object.track)) return object
+      const { track: _track, ...stated } = object
+      return stated
+    }),
     milestones: sighting.milestones.length > 0 ? sighting.milestones : undefined,
     references: sighting.references.length > 0 ? sighting.references : undefined,
     roads: sighting.roads.length > 0 ? sighting.roads : undefined,
@@ -307,6 +322,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
+  sighting.events = json.events
   // The events of the sky were written in the interpretation before they had a place of their own: read from there too, and moved out.
   const stated = SkyEvents.read(json.skyEvents, json.interpretation)
   sighting.interpretation = stated.interpretation
@@ -314,6 +330,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.skyEvents = stated.skyEvents
   sighting.frozen = json.frozen
   sighting.loadIssues = issues
+  // Before the shapes are placed: they follow the observer's poses, which the events may be what gives.
+  RecordingEvents.expand(sighting)
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's observer turn their head without taking the sky with them.
