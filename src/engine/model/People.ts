@@ -1,9 +1,10 @@
 /**
  * A lightweight, plain reference to a real-world person (the observer), structurally aligned with
- * @rr0/data's PeopleJson (id/title/lastName/firstNames) but dependency-free — same reason and same
- * pattern as SightingTime/SightingLocation in Sighting.ts: importing the real People class would
- * drag its Node-only glob/fs-based export barrel into the browser bundle (see
- * engine/interop/rr0Data.ts for converting to/from the real class).
+ * @rr0/data's PeopleJson (id/title/lastName/firstNames) but declared here: the recording format's
+ * schema is generated from this project's own types (scripts/build-sighting-schema.ts), and PeopleJson
+ * would bring its every field into it, deprecated ones included; and the title is a SaidText (one per
+ * language), not PeopleJson's single string. See engine/interop/rr0Data.ts for converting to/from the
+ * real class.
  *
  * A reference first, a record second: `id` names the person, and the other fields describe them in
  * value when nobody has given them an id yet. Where an id points to is the business of whoever

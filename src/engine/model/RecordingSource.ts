@@ -3,7 +3,7 @@
  *
  * The shape of an RR0 source (SourceJson in @rr0/data, what a case's events carry as `sources`),
  * restated rather than imported: the schema this project generates describes only what it declares
- * itself, and the barrel of @rr0/data does not bundle for the browser. The same keys, so a recording's
+ * itself, and SourceJson would bring all of RR0Data's fields into it. The same keys, so a recording's
  * sources go into an RR0 case unchanged. `type` is RR0's own ("book", "article"); a web page or a
  * post has none and is simply its `url`.
  */

@@ -5,12 +5,11 @@
  * script generating a case's sighting.json from its RR0Event, or importing
  * one into the widget).
  *
- * Deliberately NOT imported by the Web Component or the demo entry point —
- * @rr0/data's single "./dist/index.js" export barrel drags in Node-only
- * file-scanning factories (glob/path-scurry/minipass, real fs.realpathSync
- * calls) that have no browser equivalent. Keeping this module out of that
- * import graph is what lets `vite build` produce a self-contained browser
- * bundle at all. See engine/model/Sighting.ts for the full rationale.
+ * Not imported by the Web Component or the demo entry point yet: @rr0/data
+ * bundles for the browser since 0.3.53 (its "browser" export condition),
+ * but @rr0/place still has a single entry point that also exports Node-only
+ * services (fs, Google Maps), which `vite build` cannot bundle. See
+ * engine/model/Sighting.ts.
  */
 import { EventTime, RR0Event } from "@rr0/data"
 import { Level2Date } from "@rr0/time"

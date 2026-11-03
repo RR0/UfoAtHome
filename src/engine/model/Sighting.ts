@@ -178,18 +178,14 @@ export interface SightingLocation {
  * The sighting's real-world metadata, structurally aligned with
  * @rr0/data's RR0Event<"sighting"> but held as plain data.
  *
- * Why not the real RR0Event/Level2Date/Place classes here: @rr0/data
- * publishes a single "./dist/index.js" export barrel that re-exports its
- * Node-only file-scanning factories/services (AbstractDataFactory,
- * TypedDataFactory, PeopleFactory...) alongside RR0Event itself; those pull
- * in glob/path-scurry/minipass, which call real fs.realpathSync and other
- * APIs with no browser equivalent. Importing RR0Event here would drag that
- * whole graph into this browser-bundled engine and break `vite build`
- * (confirmed: even aggressively polyfilling node:events/node:stream/
- * node:string_decoder still bottoms out at path-scurry's literal fs calls).
- * Real RR0Event/Level2Date/Place interop lives in engine/interop/rr0Data.ts,
- * a Node-only module never imported by the Web Component/demo, so it's
- * excluded from the browser build graph entirely.
+ * Why not the real RR0Event/Level2Date/Place classes here: a recording is
+ * JSON, written and read by people, and its schema is generated from these
+ * types (scripts/build-sighting-schema.ts): a time is its fields, not an
+ * EDTF class, a place its coordinates. @rr0/data itself now bundles for the
+ * browser (its "browser" export condition, since 0.3.53); @rr0/place does
+ * not yet (its single entry point also exports Node-only services), which
+ * still keeps engine/interop/rr0Data.ts, where the real classes are
+ * converted to and from, out of the Web Component's import graph.
  */
 export interface SightingEvent {
   eventType: "sighting"
