@@ -1,7 +1,7 @@
 {
   "name": "@rr0/ufoathome",
   "type": "module",
-  "version": "0.153.0",
+  "version": "0.154.0",
   "description": "UFO@home — record and replay a UFO sighting's shape, movement and appearance",
   "author": "Jérôme Beau <rr0@rr0.org> (https://rr0.org)",
   "license": "MIT",
@@ -69,8 +69,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
-    "@rr0/data": "^0.3.54",
-    "@rr0/place": "^0.5.4",
+    "@rr0/data": "^0.3.55",
+    "@rr0/place": "^0.5.5",
     "@rr0/time": "^2.2.0",
     "astronomy-engine": "^2.1.19",
     "satellite.js": "6.0.1",
