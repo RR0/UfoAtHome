@@ -7112,7 +7112,7 @@ describe("SightingEditorElement and a observer's own interpretation", () => {
   it("draws the angles it edits, never the observer's bodies over them", () => {
     const element = mount()
     const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation: { bodies: [body] } }
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation: { bodies: [body] } } as never
     const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { interpretation: unknown }
     expect(scene.interpretation).toBeUndefined()
   })
@@ -7126,7 +7126,7 @@ describe("SightingEditorElement bodies", () => {
   it("draws the observer's bodies, beside the shapes' outlines, everywhere but in the Shapes part", async () => {
     const element = mount()
     const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation }
+    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation } as never
     const shadow = element.shadowRoot!
     const scene = shadow.querySelector("rr0-scene") as unknown as { interpretation?: unknown, compareAccount: boolean }
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
@@ -7363,6 +7363,29 @@ describe("the account's view selector: shapes (2D) or bodies (3D)", () => {
     const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")]
     tabs.find(tab => tab.getAttribute("aria-controls") === "group-location")!.click()
     expect(select(element).value).toBe("bodies")
+  })
+
+  it("opens on the part that has something in it when the other has nothing, and keeps a part chosen that has", () => {
+    const groupTab = (element: SightingEditorElement) =>
+      [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-shape")!
+    // Bodies only (Trans-en-Provence): the Phenomenon opens on them, and draws them.
+    const bodiesOnly = mountEmpty()
+    bodiesOnly.sightingData = { ...ACCOUNT, timeline: { keyframes: [] } } as never
+    groupTab(bodiesOnly).click()
+    expect(part(bodiesOnly, "shape-bodies").hidden).toBe(false)
+    expect(select(bodiesOnly).value).toBe("bodies")
+    // Shapes only: the Shapes part, from the Bodies part left open.
+    const shapesOnly = mountEmpty()
+    shapesOnly.sightingData = ACCOUNT as never
+    select(shapesOnly).value = "bodies"
+    select(shapesOnly).dispatchEvent(new Event("change"))
+    shapesOnly.sightingData = { ...ACCOUNT, interpretation: undefined } as never
+    expect(part(shapesOnly, "shape-shapes").hidden).toBe(false)
+    // Both: what was chosen stays.
+    const both = mountEmpty()
+    both.sightingData = ACCOUNT as never
+    groupTab(both).click()
+    expect(part(both, "shape-shapes").hidden).toBe(false)
   })
 
   it("is a recording with no interpretation drawn as shapes, and is not offered to a reading", () => {

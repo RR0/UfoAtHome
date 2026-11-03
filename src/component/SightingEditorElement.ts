@@ -2274,6 +2274,7 @@ export class SightingEditorElement extends HTMLElement {
     this.cloudEditor.reset()
     this.bodyEditor?.sync()
     this.syncBodiesShown()
+    if (this.isGroupIdOpen("group-shape")) this.showPhenomenonPartWithContent()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -6137,6 +6138,7 @@ export class SightingEditorElement extends HTMLElement {
     // What the parts of the Sky group say they can do depends on the place, which another group may just have given; and the part open
     // is built the first time the group opens.
     if (open && tab.getAttribute("aria-controls") === "group-weather") this.syncSkyParts()
+    if (open && tab.getAttribute("aria-controls") === "group-shape") this.showPhenomenonPartWithContent()
     // The candidates read the account, the place and the time as they stand now, which another section may just have changed.
     if (open && tab.getAttribute("aria-controls") === "group-observation") this.candidatesView?.refresh()
     this.placeDecorItem()
@@ -7018,6 +7020,26 @@ export class SightingEditorElement extends HTMLElement {
     if (tab.getAttribute("aria-controls") === "sky-lanterns") void this.loadLanternEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
+  }
+
+  /**
+   * Shows the part of the Phenomenon group that has something in it, when the one shown has nothing and the other has: a recording whose
+   * phenomenon is only bodies (Trans-en-Provence's craft) opened on its empty Shapes, which also hid the bodies (see syncBodiesShown).
+   * What the author chose stays chosen: this only moves away from an empty part.
+   */
+  private showPhenomenonPartWithContent(): void {
+    const sighting = this.ufoElement.sighting
+    const hasShapes = sighting.timeline.sourceIds.length > 0
+    const hasBodies = (sighting.interpretation?.bodies?.length ?? 0) > 0
+    const bodiesShown = this.shadow.getElementById("shape-bodies")?.hidden === false
+    const wanted = bodiesShown ? (!hasBodies && hasShapes ? "shape-shapes" : undefined) : (!hasShapes && hasBodies ? "shape-bodies" : undefined)
+    const tab = wanted && this.subgroupTabs.find(candidate => candidate.getAttribute("aria-controls") === wanted)
+    if (!tab) return
+    // Not the author's choice: an assessment arriving later may still open what lacks most, as before.
+    const { sectionChosen, opensMostLacking } = this
+    this.openSubgroup(tab)
+    this.sectionChosen = sectionChosen
+    this.opensMostLacking = opensMostLacking
   }
 
   /** Opens the part of a group a control stands in, when it stands in one — so that a summary chip
