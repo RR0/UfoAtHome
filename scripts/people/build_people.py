@@ -97,7 +97,9 @@ PEOPLE.append(BEING_PV_0702)
 # grand crâne sans aucun cheveu, leur peau était lisse, sans barbe", "leur carrure était à peine plus large
 # que leur tête", "la tête rentrée dans les épaules", "une combinaison assez foncée d'une seule pièce".
 # ASSUMED: the child's build, the eyes' colour, their shoes ("je n'ai pas fait attention à leurs pieds").
-BEING_PV_0818 = dict(id="valensole-being-pv-1965-08-18", name="Valensole being, as told on 18 August 1965", gender=1.0,
+# Its file is named after its postures: a model changed is a file of another name, never the same file changed under a reader who keeps it a
+# week (see site/build.ts's _headers).
+BEING_PV_0818 = dict(id="valensole-being-pv-1965-08-18-postures", name="Valensole being, as told on 18 August 1965", gender=1.0,
                      age=0.15, weight=0.25, muscle=0.15, heightM=0.95, skin="young_caucasian_male",
                      clothes=["male_coverall02"], shoes="shoes03", hair=None, eyebrows=None, eyelashes=None,
                      targets={"ears/l-ear-scale-vert-incr": 1.0, "ears/r-ear-scale-vert-incr": 1.0,
