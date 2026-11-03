@@ -1,5 +1,5 @@
 import type { BodyJson, BodyKeyframe } from "../interpretation/Interpretation.js"
-import type { MotionParams, RecordingEventJson, RideParams, RiseParams, SpinParams } from "./RecordingEvent.js"
+import type { MotionParams, RecordingEventJson, RideParams, RiseParams, SpinParams, TurnParams } from "./RecordingEvent.js"
 
 /** Where a body is, in the frame its keyframes place it in: metres east and north, and how high its bottom is above the ground. */
 interface Place {
@@ -28,7 +28,13 @@ export class BodyExpansion {
     }
     for (const key of this.body.track) put({ ...key })
     const ordered = [...this.events].sort((a, b) => a.t - b.t)
+    // Where each movement and the heading stand before the events, as the body states them (a being crouched to begin with).
     const motions = new Map<string, number>()
+    let headingDeg = 0
+    for (const key of this.body.track) {
+      for (const [name, value] of Object.entries(key.motions ?? {})) motions.set(name, value)
+      if (key.attitude?.headingDeg !== undefined) headingDeg = key.attitude.headingDeg
+    }
     let place = this.startPlace()
     for (const event of ordered) {
       if (event.eventType === "motion" || event.eventType === "spin") {
@@ -57,6 +63,11 @@ export class BodyExpansion {
         for (let t = event.t; t < until; t += BodyExpansion.SAMPLE_MS) put(BodyExpansion.key(t, at((t - event.t) / (until - event.t))))
         place = at(1)
         put(BodyExpansion.key(until, place))
+      } else if (event.eventType === "turn") {
+        const params = event.params as unknown as TurnParams
+        put({ t: event.t, attitude: { headingDeg } })
+        put({ t: event.until ?? event.t, attitude: { headingDeg: params.headingDeg } })
+        headingDeg = params.headingDeg
       } else if (event.eventType === "vanish") {
         put({ t: event.t, present: false })
       }

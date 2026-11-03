@@ -53,6 +53,20 @@ Blender 5.2 (4.2 or later works too), with the official MPFB extension: there is
    of `male_casualsuit01` and `female_casualsuit01` (files renamed, the old name replaced inside the `.mhclo` and `.mhmat`)
    whose diffuse texture is one plain colour with a little grain, made like the coveralls above, so that no logo shows.
 
+## Where the tools are kept
+
+MPFB and the system assets (with the derived clothes of steps 3 to 5 already made) are kept, not in a scratch folder, in
+`/Users/javarome/project/@rr0/tools/makehuman/`, beside the repositories and in none of them: `mpfb-2.0.18.zip`, `assets/` (`MH_ASSETS`)
+and `blender-profile/` (`BLENDER_USER_RESOURCES`, MPFB 2.0.18 installed in it, with Blender 5.2).
+
+## Postures
+
+A person whose entry lists `postures` (the Valensole being of 18 August: `["crouch"]`) is exported with its skeleton, standing with its
+arms down as its rest pose, and each posture as a glTF animation of that name, from standing at its start to the posture at its end. A
+recording plays it as any movement of a model (`motion` on `crouch`, 0 standing, 1 crouched), so that a being is seen to crouch or to stand
+up, and one that nothing says of stands. The crouch's angles (`CROUCH`) are SUPPOSED. The player clones such a model with its skeleton
+(SkeletonUtils), or two beings of one model would move as one.
+
 ## Running it
 
 ```

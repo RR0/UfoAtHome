@@ -45,6 +45,25 @@ def craft_events(variant):
     ]
 
 
+def being_events(variant):
+    """The two beings of the account of 18 August: crouched by the craft, then standing (the second turning round), until they go back in."""
+    if variant == "pv":
+        return []
+    stood = wrap(0, "stated", "\"Ils étaient accroupis\", then stood up as he came near (account of 18 August 1965); when, from his account's order")
+    return [
+        {"type": "event", "eventType": "motion", "who": "etre-1", "t": 46000, "until": 48000, "params": {"motion": "crouch", "to": stood}},
+        {"type": "event", "eventType": "motion", "who": "etre-2", "t": 46000, "until": 48000, "params": {"motion": "crouch", "to": stood}},
+        {"type": "event", "eventType": "turn", "who": "etre-2", "t": 48000, "until": 50000, "params": {
+            "headingDeg": wrap(0, "assumed", "Turned towards him, as the other was")}},
+        {"type": "event", "eventType": "vanish", "who": "etre-1", "t": 60000},
+        {"type": "event", "eventType": "vanish", "who": "etre-2", "t": 60000},
+    ]
+
+
+# What a being is to begin with, crouched: its standing size (the model crouches by its own movement, see build_people.py's postures).
+BEING_START = {"sizeM": {"widthM": 0.34, "lengthM": 0.27, "heightM": 0.95}, "motions": {"crouch": 1}}
+
+
 def events(variant):
     look = {"type": "event", "eventType": "look", "t": 0, "params": {
         "headingDeg": wrap(180, "assumed", "Towards the craft, which is due south of him the whole time"), "pitchDeg": 2, "fovDeg": 60}}
@@ -56,6 +75,7 @@ def events(variant):
     return [
         look,
         *craft_events(variant),
+        *being_events(variant),
         {"type": "event", "eventType": "walk", "t": 0, "until": 55000, "params": {
             "from": wrap(START, "derived", "Behind the rabbit hutch, the craft some 90 m away"),
             "to": wrap({"lat": 43.844758, "lng": 5.9632}, "stated", "He came along the vine to within 6 m of it, where he was held motionless"),
@@ -96,6 +116,8 @@ def main(path, variant):
         track = body["track"]
         keys = track["value"] if isinstance(track, dict) and "value" in track else track
         kept = [k for k in keys if k["t"] <= moved[body["id"]] and not (k["t"] == moved[body["id"]] and k["t"] > 0)]
+        if body["id"].startswith("etre-"):
+            kept = [{**k, **BEING_START} if k["t"] == 0 else k for k in kept]
         if isinstance(track, dict) and "value" in track:
             track["value"] = kept
         else:

@@ -23,6 +23,7 @@ import type { Reflector } from "./Reflections.js"
 import type { LuminanceDisplay } from "./Photometry.js"
 export type { LuminanceDisplay } from "./Photometry.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
+import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -160,7 +161,9 @@ export class BodySystem {
     }
     const loaded = await loading
     if (!loaded) return undefined
-    const scene = loaded.scene.clone(true)
+    // Cloned with its skeleton: a figure that crouches is a skinned mesh (see scripts/people/build_people.py), which a plain clone leaves
+    // bound to the original's bones, so that two beings of one model would crouch as one.
+    const scene = cloneWithSkeleton(loaded.scene)
     scene.traverse(child => {
       if (!(child instanceof Mesh)) return
       child.material = Array.isArray(child.material) ? child.material.map(material => material.clone()) : child.material.clone()

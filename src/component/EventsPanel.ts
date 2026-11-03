@@ -50,7 +50,7 @@ export class EventsPanel {
   private static readonly ADDABLE: Record<EventsActor, string[]> = {
     observer: ["look", "walk", "follow"],
     phenomenon: ["stand", "blink", "vanish"],
-    bodies: ["motion", "spin", "rise", "ride", "vanish"]
+    bodies: ["motion", "spin", "rise", "turn", "ride", "vanish"]
   }
 
   private messages: EventsMessages
@@ -186,7 +186,8 @@ export class EventsPanel {
       motion: { until: t + 2000, params: { motion: "", to: 1 } },
       spin: { until: t + 5000, params: { motion: "", turnsPerS: 0.5 } },
       rise: { until: t + 3000, params: { distanceM: 1, angleDeg: 0, headingDeg: 0, stops: true } },
-      ride: { params: { in: firstBody, aboveM: 0 } }
+      ride: { params: { in: firstBody, aboveM: 0 } },
+      turn: { until: t + 1000, params: { headingDeg: 0 } }
     }
     const draft = drafts[kind] ?? {}
     const event: RecordingEventJson = {

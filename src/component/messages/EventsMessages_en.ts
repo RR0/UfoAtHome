@@ -13,7 +13,7 @@ export const eventsMessages_en: EventsMessages = {
   overriddenBodiesNote: "Keyframes of its own win over these events.",
   add: "Add an event", remove: "Remove the event", none: "No event",
   resetToEvents: "Back to the events",
-  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in" },
+  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in", turn: "Turns" },
   params: {
     vehicle: "Vehicle", path: "Route", speeds: "Speeds", speedDivisors: "Speeds divided by", through: "Goes through", eye: "Eye in the vehicle",
     fovDeg: "Field of view", target: "Watching", pitchShare: "Looks up to (share of its height)", keepDeg: "Keeps it within", glanceBeyondDeg: "Glances beyond",

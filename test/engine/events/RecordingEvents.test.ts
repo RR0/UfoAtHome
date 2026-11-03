@@ -113,6 +113,20 @@ describe("RecordingEvents", () => {
     expect(written.value).toHaveLength(1)
   })
 
+  it("has the beings crouched by the craft, then standing, the second turning round, until they go back in", () => {
+    const sighting = fromSightingJson(valensole as unknown as SightingRecordingJson)
+    const ground = { heightAt: () => 0 }
+    const eyeAt = (t: number) => BodyPlacement.eyeOf(sighting, t, ground)
+    const being = (id: string) => new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === id)!, ground, eyeAt)
+    // Their model crouches by its own movement, at its standing size (see build_people.py's postures).
+    expect(being("etre-1").at(30000)!.motions!.crouch).toBe(1)
+    expect(being("etre-1").at(47000)!.motions!.crouch).toBeCloseTo(0.5, 5)
+    expect(being("etre-1").at(50000)!.motions!.crouch).toBe(0)
+    expect(being("etre-1").at(30000)!.sizeM.heightM).toBeCloseTo(0.95, 5)
+    expect(being("etre-2").at(50000)!.attitude.headingDeg).toBeCloseTo(0, 5)
+    expect(being("etre-2").at(60000)).toBeUndefined()
+  })
+
   it("carries the passenger in the craft, wherever it goes", () => {
     const sighting = fromSightingJson(valensolePv as unknown as SightingRecordingJson)
     const ground = { heightAt: () => 0 }

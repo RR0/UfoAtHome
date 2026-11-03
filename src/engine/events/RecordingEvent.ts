@@ -126,6 +126,11 @@ export interface RiseParams {
   stops?: boolean
 }
 
+/** A body turns to face `headingDeg` (`turn`), between the event's start and its end. */
+export interface TurnParams {
+  headingDeg: number
+}
+
 /** A body is carried by another (`ride`, `in` its id): it goes where that one goes, `aboveM` higher (a passenger in the craft), and goes with it. */
 export interface RideParams {
   in: string

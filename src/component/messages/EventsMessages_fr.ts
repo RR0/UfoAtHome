@@ -13,7 +13,7 @@ export const eventsMessages_fr: EventsMessages = {
   overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
   add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement",
   resetToEvents: "Revenir aux événements",
-  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par" },
+  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne" },
   params: {
     vehicle: "Véhicule", path: "Trajet", speeds: "Vitesses", speedDivisors: "Vitesses divisées par", through: "Passe par", eye: "Œil dans le véhicule",
     fovDeg: "Champ de vision", target: "Regarde", pitchShare: "Lève les yeux jusqu'à (part de sa hauteur)", keepDeg: "Le garde à moins de", glanceBeyondDeg: "Coups d'œil au-delà de",

@@ -108,7 +108,10 @@ BEING_PV_0818 = dict(id="valensole-being-pv-1965-08-18", name="Valensole being, 
                               "chin/chin-prominent-decr": 1.0, "chin/chin-height-decr": 1.0,
                               "chin/chin-width-decr": 0.5, "chin/chin-bones-decr": 1.0,
                               "head/head-round": 1.0, "head/head-scale-horiz-incr": 0.6},
-                     head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4, girth=(0.85, 0.9)))
+                     head=dict(volumeRatio=HEAD_VOLUME_RATIO, sinkShare=0.4, girth=(0.85, 0.9)),
+                     # "Ils étaient accroupis", then stood: exported with its skeleton and a movement from standing to crouched (see
+                     # export_rigged), which a recording plays by its events.
+                     postures=["crouch"])
 PEOPLE.append(BEING_PV_0818)
 
 
@@ -360,6 +363,150 @@ def export(spec, baked, out_dir):
     return path, os.path.getsize(path), scale
 
 
+# A crouch, as angles about the left-right axis (degrees): the thighs forward, the shins back, the feet kept flat, the back leant forward
+# and the head raised to keep looking ahead. SUPPOSED: nobody described how they crouched, only that they did.
+CROUCH = dict(thighDeg=100, kneeDeg=130, spineDeg=30, neckDeg=-20)
+CROUCH_FRAMES = 24
+
+
+def turn_about_x(rig, name, degrees):
+    """Turns a pose bone about the left-right axis through its head, in the armature's frame (its children follow)."""
+    pb = rig.pose.bones[name]
+    head = pb.head.copy()
+    pb.matrix = Matrix.Translation(head) @ Matrix.Rotation(math.radians(degrees), 4, "X") @ Matrix.Translation(-head) @ pb.matrix
+    bpy.context.view_layer.update()
+
+
+def straighten_forearms(rig):
+    """The rig's rest pose has the elbows bent, the hands held out in front: the forearms are turned into the line of the upper arms, so that
+    the hands hang at the sides."""
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.mode_set(mode="POSE")
+    for side in ("L", "R"):
+        upper = rig.pose.bones["upperarm02." + side]
+        lower = rig.pose.bones["lowerarm01." + side]
+        along = (upper.tail - upper.head).normalized()
+        forearm = (lower.tail - lower.head).normalized()
+        axis = forearm.cross(along)
+        if axis.length < 1e-6:
+            continue
+        angle = forearm.angle(along)
+        head = lower.head.copy()
+        lower.matrix = Matrix.Translation(head) @ Matrix.Rotation(angle, 4, axis.normalized()) @ Matrix.Translation(-head) @ lower.matrix
+        bpy.context.view_layer.update()
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def crouch(rig):
+    """The rig crouched, its feet where they stood: the front of a MakeHuman is -Y, so a thigh comes forward by a negative turn about X."""
+    ankle = {side: rig.pose.bones["foot." + side].head.z for side in ("L", "R")}
+    for side in ("L", "R"):
+        turn_about_x(rig, "upperleg01." + side, -CROUCH["thighDeg"])
+        turn_about_x(rig, "lowerleg01." + side, CROUCH["kneeDeg"])
+        turn_about_x(rig, "foot." + side, CROUCH["thighDeg"] - CROUCH["kneeDeg"])
+    turn_about_x(rig, "spine05", CROUCH["spineDeg"])
+    turn_about_x(rig, "neck01", CROUCH["neckDeg"])
+    # Down by as much as the ankles rose: the feet stay on the ground.
+    drop = min(rig.pose.bones["foot." + side].head.z - ankle[side] for side in ("L", "R"))
+    root = rig.pose.bones["root"]
+    root.matrix = Matrix.Translation((0, 0, -drop)) @ root.matrix
+    bpy.context.view_layer.update()
+
+
+def key_pose(rig, frame):
+    for pb in rig.pose.bones:
+        pb.keyframe_insert("location", frame=frame)
+        pb.keyframe_insert("rotation_quaternion" if pb.rotation_mode == "QUATERNION" else "rotation_euler", frame=frame)
+
+
+def export_rigged(spec, basemesh, rig, family, out_dir):
+    """A person with its skeleton, and each of its postures as a movement of its own (a glTF animation of that name, from standing at its
+    start to the posture at its end), which a recording plays by its events (see BodyKeyframe.motions): standing when nothing says otherwise.
+
+    The meshes keep only their armature: their shape keys and their other modifiers (the helpers' masks, the lighter mesh) are applied, so
+    that what is exported is what is drawn. A head reshaped (see reshape_head) is reshaped at rest, where the skin is bound."""
+    meshes = [o for o in family if o.type == "MESH" and not o.hide_viewport]
+    for obj in [o for o in family if o.type == "MESH" and o.hide_viewport]:
+        bpy.data.objects.remove(obj, do_unlink=True)
+    for obj in meshes:
+        bpy.ops.object.select_all(action="DESELECT")
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        if obj.data.shape_keys:
+            bpy.ops.object.shape_key_remove(all=True, apply_mix=True)
+        ratio = DECIMATION.get(thing_of(obj))
+        if ratio:
+            modifier = obj.modifiers.new("Lighter", "DECIMATE")
+            modifier.ratio = ratio
+        for modifier in list(obj.modifiers):
+            if modifier.type == "ARMATURE":
+                continue
+            bpy.ops.object.modifier_move_to_index(modifier=modifier.name, index=0)
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+        for polygon in obj.data.polygons:
+            polygon.use_smooth = True
+    # Standing, arms down, is made the rest pose, the one the skin is bound in: what a recording that says nothing draws, and what the
+    # player measures the model by (its arms out at rest made a figure as wide as its reach). The meshes take the pose, the skeleton is
+    # set at it, and the meshes are bound to it again.
+    drop_arms(rig)
+    straighten_forearms(rig)
+    for obj in meshes:
+        bpy.ops.object.select_all(action="DESELECT")
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        for modifier in [m for m in obj.modifiers if m.type == "ARMATURE"]:
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+        bound = obj.modifiers.new("Armature", "ARMATURE")
+        bound.object = rig
+    bpy.ops.object.select_all(action="DESELECT")
+    rig.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.mode_set(mode="POSE")
+    bpy.ops.pose.armature_apply(selected=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    rig.data.pose_position = "REST"
+    bpy.context.view_layer.update()
+    if spec.get("head"):
+        reshape_head(meshes, spec["head"])
+    rig.data.pose_position = "POSE"
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.select_all(action="DESELECT")
+    rig.select_set(True)
+    bpy.ops.object.mode_set(mode="POSE")
+    for posture in spec["postures"]:
+        # The posture worked out first, with no animation to put the bones back as each is turned, then keyed: standing at the start of
+        # the movement, the posture at its end.
+        rig.animation_data_clear()
+        for pb in rig.pose.bones:
+            pb.matrix_basis = Matrix()
+        bpy.context.view_layer.update()
+        if posture == "crouch":
+            crouch(rig)
+        posed = {pb.name: pb.matrix_basis.copy() for pb in rig.pose.bones}
+        for pb in rig.pose.bones:
+            pb.matrix_basis = Matrix()
+        rig.animation_data_create()
+        action = bpy.data.actions.new(posture)
+        rig.animation_data.action = action
+        key_pose(rig, 1)
+        for pb in rig.pose.bones:
+            pb.matrix_basis = posed[pb.name]
+        key_pose(rig, 1 + CROUCH_FRAMES)
+        action.use_fake_user = True
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.scene.frame_set(1)
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in meshes + [rig]:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    path = os.path.join(out_dir, spec["id"] + ".glb")
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False, export_yup=True,
+                              export_image_format="JPEG", export_jpeg_quality=85, export_skins=True, export_def_bones=True,
+                              export_animations=True, export_animation_mode="ACTIONS")
+    height, _ = height_of(meshes)
+    return path, os.path.getsize(path), height
+
+
 def clear_scene():
     for obj in list(bpy.data.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
@@ -385,10 +532,15 @@ def main():
             continue
         clear_scene()
         basemesh, rig = create_person(spec, data)
-        drop_arms(rig)
         family = [basemesh] + [o for o in set(basemesh.children_recursive) | set(rig.children_recursive) if o is not basemesh]
         make_opaque()
         shrink_textures()
+        if spec.get("postures"):
+            path, size, height = export_rigged(spec, basemesh, rig, family, out_dir)
+            report[spec["id"]] = {"file": os.path.basename(path), "bytes": size, "height": round(height, 3), "postures": spec["postures"]}
+            print("PERSON", spec["id"], report[spec["id"]])
+            continue
+        drop_arms(rig)
         baked = bake(family)
         if spec.get("head"):
             reshape_head(baked, spec["head"])
