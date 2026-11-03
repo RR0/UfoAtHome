@@ -8,7 +8,10 @@
 // Same requirements as page-scroll.mjs (headed Chrome outside the sandbox, PLAYWRIGHT_MODULE).
 // ORIGIN (default localhost:5182), W × H the stage in CSS pixels (1100 × 620), DPR the pinned
 // ratio (2), DRAWS the drawings timed per configuration (40), AT the instant drawn in seconds (3),
-// LIST=1 only lists the scene's parts, SHOT=1 also saves the frame as <demo>-<TAG>.png.
+// LIST=1 only lists the scene's parts, SHOT=1 also saves the frame as <demo>-<TAG>.png,
+// ONLY=<part> (a name as LIST=1 prints it, without its count) also times that part alone. LIB the module that
+// defines <rr0-scene> (default the built /lib/rr0-scene.mjs; /src/component/SceneElement.ts times the dev
+// server's sources, without a build: ORIGIN=http://localhost:3000, its defines then read from /@vite/env).
 import { createRequire } from "node:module"
 import { mkdir, writeFile } from "node:fs/promises"
 
@@ -31,16 +34,19 @@ try {
     await page.route("**/perf-harness*", route => route.fulfill({ contentType: "text/html", body: `
       <body style="margin:0;background:#888"><rr0-scene id="s" style="display:block;width:${width}px;height:${height}px"></rr0-scene>
       <script type="module">
-        import "/lib/rr0-scene.mjs";
+        ${(process.env.LIB || "").startsWith("/src/") ? 'await import("/@vite/env");' : ""}
+        const lib = await import("${process.env.LIB || "/lib/rr0-scene.mjs"}"); lib.registerScene?.();
         await customElements.whenDefined("rr0-scene");
         const scene = document.getElementById("s"); window.scene = scene;
         await scene.loadFromSrc("/demo-data/${demo}.json");
         window.ready = true;
       </script>` }))
     await page.goto(`${origin}/perf-harness`)
-    await page.waitForFunction(() => window.ready, undefined, { timeout: 60000 })
+    page.on("console", message => { if (message.type() === "error") errors.push(message.text()) })
+    await page.waitForFunction(() => window.ready, undefined, { timeout: Number(process.env.LOAD_TIMEOUT_MS || 60000) })
+      .catch(error => { throw new Error(`${error.message}\n${errors.slice(0, 5).join("\n")}`) })
     await page.waitForTimeout(4000)
-    const measured = await page.evaluate(async ({ draws, list, at }) => {
+    const measured = await page.evaluate(async ({ draws, list, at, only }) => {
       const scene = window.scene, r = scene.sceneRenderer, three = r.renderer
       scene.ufoElement.play()
       await new Promise(res => setTimeout(res, 2500))
@@ -84,7 +90,12 @@ try {
         parts.get(key).push(child)
       }
       const canvas = three.domElement
-      const info = { canvas: [canvas.width, canvas.height], pixelRatio: three.getPixelRatio(), fov: r.camera.fov,
+      // Every pass of one image (shadow map, scene, composition), not just the last one drawn.
+      three.info.autoReset = false
+      three.info.reset()
+      r.renderOnce()
+      three.info.autoReset = true
+      const info = { triangles: three.info.render.triangles, calls: three.info.render.calls, canvas: [canvas.width, canvas.height], pixelRatio: three.getPixelRatio(), fov: r.camera.fov,
         projection: r.projectionKind, cloudRendering: r.cloudRendering,
         parts: [...parts].map(([k, v]) => `${k}×${v.length}`) }
       if (list) return info
@@ -95,13 +106,25 @@ try {
         rows[`-${key}`] = await timeDraws()
         objects.forEach((o, i) => { o.visible = before[i] })
       }
+      // ONLY=<part> also times that part drawn alone (with the lights): a part too cheap to show against the
+      // noise of the whole frame is then timed against an empty one.
+      if (only) {
+        const lights = o => o.isLight || o.type === "Object3D"
+        const before = roots.map(o => o.visible)
+        roots.forEach(o => { o.visible = lights(o) })
+        rows.empty = await timeDraws()
+        for (const o of parts.get(only) ?? []) o.visible = true
+        r.renderOnce()
+        rows[`only ${only}`] = await timeDraws()
+        roots.forEach((o, i) => { o.visible = before[i] })
+      }
       const shadows = three.shadowMap.autoUpdate
       three.shadowMap.autoUpdate = false
       rows["-shadow map update"] = await timeDraws()
       three.shadowMap.autoUpdate = shadows
       rows.fullAgain = await timeDraws()
       return { ...info, gpuMs: rows }
-    }, { draws, list: process.env.LIST === "1", at: Number(process.env.AT || 3) })
+    }, { draws, list: process.env.LIST === "1", at: Number(process.env.AT || 3), only: process.env.ONLY })
     if (process.env.SHOT === "1") {
       await page.evaluate(() => window.scene.sceneRenderer.renderOnce())
       await page.locator("#s").screenshot({ path: `${outDir}/${demo}-${process.env.TAG || "now"}.png` })
