@@ -298,6 +298,24 @@ export class SightingSummary {
     return `${d}°${String(m).padStart(2, "0")}′${String(sec).padStart(2, "0")}″ ${this.naming.point(degrees < 0 ? negative : positive)}`
   }
 
+  /** Faster than this, km/h, the observer is no longer walking: a brisk walk is 6. */
+  static readonly WALK_KMH = 7
+  /** Over how long, ms, the speed is measured, centred on the instant. */
+  private static readonly SPEED_SPAN_MS = 1000
+
+  /** How fast the observer goes over the ground at `timeMs`, km/h, from where the track puts them half a second either side; undefined
+   * where it says no place. Metres from degrees as the engine counts them (111 320 m a degree, the longitude by the cosine of the latitude). */
+  static speedKmhAt(sighting: Sighting, timeMs: number): number | undefined {
+    const half = SightingSummary.SPEED_SPAN_MS / 2
+    const from = Math.max(0, timeMs - half)
+    const before = resolveObserverPoseAt(sighting, from)
+    const after = resolveObserverPoseAt(sighting, from + 2 * half)
+    if (before?.lat === undefined || before.lng === undefined || after?.lat === undefined || after.lng === undefined) return undefined
+    const northM = (after.lat - before.lat) * 111320
+    const eastM = (after.lng - before.lng) * 111320 * Math.cos(before.lat * Math.PI / 180)
+    return Math.hypot(northM, eastM) / (2 * half / 1000) * 3.6
+  }
+
   private addLocation(entries: SummaryEntry[], sighting: Sighting, timeMs: number, groundElevationM: number | undefined, roadGradeDeg: number): void {
     const place = sighting.event.place?.[0]
     this.push(entries, "location", "placeName", this.labels.placeName, place?.name)
@@ -314,6 +332,10 @@ export class SightingSummary {
       pose.headingDeg === undefined ? "°" : `° (${this.naming.point(pose.headingDeg)})`)
     // What the view is raised to, not only what the file says: on a climb the road tilts it (see RoadGrade).
     this.push(entries, "location", "pitch", this.labels.pitch, pose.pitchDeg === undefined ? undefined : this.rounded(pose.pitchDeg + roadGradeDeg), "°")
+    // How fast the observer goes, once it is more than a walk: a driver's 106 km/h is part of what he saw (the time he had, how far
+    // things went by), and a walk or standing still states nothing worth a chip.
+    const speedKmh = SightingSummary.speedKmhAt(sighting, timeMs)
+    if (speedKmh !== undefined && speedKmh > SightingSummary.WALK_KMH) this.push(entries, "location", "speed", this.labels.speed, Math.round(speedKmh), "km/h")
     // Told apart rather than guessed at: with the terrain's height known this is an altitude above
     // sea level, which is what "Altitude" means in both components; without it, the only true
     // thing that can be said is the height above the ground the pose actually holds — and zero of

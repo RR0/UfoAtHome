@@ -17,6 +17,7 @@ export const sightingLabels_en: SightingLabels = {
   longitude: "Longitude",
   heading: "Heading",
   pitch: "Tilt",
+  speed: "Speed",
   roll: "Roll",
   sway: "Sway at rest",
   swayTitle: "How much the body holding the instrument moves the view when not walking: 1 for a person standing, 0 for a tripod. Blank: 1 (0 if the account says the observer was paralysed)",

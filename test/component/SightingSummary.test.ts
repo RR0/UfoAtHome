@@ -146,6 +146,32 @@ describe("SightingSummary", () => {
     })
   })
 
+  describe("the observer's speed", () => {
+    /** An observer going north `metres` in ten seconds, steadily (two keyframes on one straight line). */
+    const going = (metres: number): Sighting => {
+      const sighting = Sighting.create(undefined, [{ lat: 49.1, lng: 2.75 }])
+      const pose = { lng: 2.75, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 }
+      sighting.observerTrack.addKeyframe(0, { ...pose, lat: 49.1 })
+      sighting.observerTrack.addKeyframe(10000, { ...pose, lat: 49.1 + metres / 111320 })
+      return sighting
+    }
+    const speedAt = (sighting: Sighting, timeMs: number) => summary.entriesFor(sighting, timeMs).find(entry => entry.field === "speed")
+
+    it("is a chip in km/h once the observer goes faster than a walk", () => {
+      const entry = speedAt(going(294), 5000)
+      expect(entry?.group).toBe("location")
+      expect(entry?.unit).toBe("km/h")
+      // 294 m in 10 s is 106 km/h on average; the track's own curve is not straight in time, but near the middle it is close.
+      expect(Number(entry?.value)).toBeGreaterThan(95)
+      expect(Number(entry?.value)).toBeLessThan(170)
+    })
+
+    it("says nothing of a walk, nor of standing still", () => {
+      expect(speedAt(going(14), 5000)).toBeUndefined()
+      expect(speedAt(going(0), 5000)).toBeUndefined()
+    })
+  })
+
   describe("a coordinate, where zero is a value and not a gap", () => {
     it("keeps a heading of due north", () => {
       const sighting = Sighting.create(undefined, [{ lat: 32.4, lng: -86.3 }])

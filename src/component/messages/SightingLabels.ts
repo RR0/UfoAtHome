@@ -47,6 +47,8 @@ export interface SightingLabels {
   longitude: string
   heading: string
   pitch: string
+  /** How fast the observer goes over the ground, shown only when faster than a walk — see SightingSummary.addLocation. */
+  speed: string
   /** How far the instrument was tilted about its own line of sight — see ObserverPose.rollDeg. */
   roll: string
   /** How much the body holding the instrument moves the view at rest — see Sighting.sway. */

@@ -17,6 +17,7 @@ export const sightingLabels_es: SightingLabels = {
   longitude: "Longitud",
   heading: "Orientación",
   pitch: "Inclinación",
+  speed: "Velocidad",
   roll: "Alabeo",
   sway: "Vaivén en reposo",
   swayTitle: "Cuánto mueve la vista el cuerpo que sostiene el instrumento cuando no camina: 1 para una persona de pie, 0 para un trípode. Vacío: 1 (0 si el relato dice que el observador estaba paralizado)",

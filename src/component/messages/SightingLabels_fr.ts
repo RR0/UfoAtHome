@@ -17,6 +17,7 @@ export const sightingLabels_fr: SightingLabels = {
   longitude: "Longitude",
   heading: "Orientation",
   pitch: "Inclinaison",
+  speed: "Vitesse",
   roll: "Roulis",
   sway: "Bougé au repos",
   swayTitle: "Combien le corps qui tient l'instrument fait bouger la vue hors de la marche : 1 pour une personne debout, 0 pour un trépied. Vide : 1 (0 si le compte rendu dit l'observateur paralysé)",
