@@ -5,10 +5,10 @@ import { eventsMessages_fr } from "../../src/component/messages/EventsMessages_f
 import { TimelineTracks } from "../../src/component/TimelineTracks.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-function mounted() {
+function mounted(actor: "observer" | "phenomenon" = "observer") {
   const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
   const root = document.createElement("div")
-  root.innerHTML = `<h3><span id="label-section-events"></span></h3><div class="events-body"></div>`
+  root.innerHTML = `<h3><span class="events-title"></span></h3><div class="events-body"></div>`
   document.body.append(root)
   const calls = { editing: 0, changed: 0, seek: [] as number[] }
   const panel = new EventsPanel(root, {
@@ -16,7 +16,7 @@ function mounted() {
     editing: () => calls.editing++,
     changed: () => calls.changed++,
     seek: t => calls.seek.push(t)
-  }, eventsMessages_fr)
+  }, eventsMessages_fr, actor)
   panel.render()
   return { sighting, root, panel, calls }
 }
@@ -59,9 +59,30 @@ describe("EventsPanel", () => {
     sighting.observerTrack.addKeyframe(first.t, { ...first.pose, headingDeg: 10 })
     panel.sync()
     expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.overriddenNote)
-    root.querySelector<HTMLButtonElement>("#events-reset")!.click()
+    root.querySelector<HTMLButtonElement>(".events-reset")!.click()
     expect(sighting.observerTrack.allKeyframes[0].pose.headingDeg).not.toBe(10)
     expect(toSightingJson(sighting).observerTrack).toBeUndefined()
+  })
+})
+
+describe("EventsPanel of the phenomenon", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+  })
+
+  it("lists what the phenomenon did, and works the account's shapes out again when its size is typed", () => {
+    const { sighting, root } = mounted("phenomenon")
+    const items = [...root.querySelectorAll(".events-list > li")]
+    expect(items.map(item => item.querySelector(".event-kind")!.textContent)).toEqual(["Se tient", "Aspect", "Aspect", "Clignote", "Clignote", "Disparaît"])
+    expect(items[1].textContent).toContain("4 parties")
+    expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.derivedShapesNote)
+    const before = sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg
+    // Its width at 36.6 s (the third row: an instant, a width, a height each), doubled.
+    const width = items[0].querySelectorAll<HTMLInputElement>(".event-rows input")[7]
+    width.value = String(Number(width.value) * 2)
+    width.dispatchEvent(new Event("change"))
+    expect(sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg).toBeGreaterThan(before)
+    expect(toSightingJson(sighting).timeline.keyframes).toEqual([])
   })
 })
 

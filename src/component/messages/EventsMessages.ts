@@ -6,6 +6,11 @@ export interface EventsMessages {
   derivedNote: string
   /** Under the title, once the author wrote poses of their own: they win, until the events are given back. */
   overriddenNote: string
+  /** The same, for the phenomenon's events and the account's shapes. */
+  derivedShapesNote: string
+  overriddenShapesNote: string
+  /** How many parts a look has: "{n} parts". */
+  parts: string
   /** The button that gives the observer the events' poses again. */
   resetToEvents: string
   /** The kinds of event, by their eventType. */

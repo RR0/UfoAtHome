@@ -503,6 +503,7 @@ export class SightingEditorElement extends HTMLElement {
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
   private readonly sectionFilePanel: SectionFilePanel
   private readonly eventsPanel: EventsPanel
+  private readonly phenomenonEventsPanel: EventsPanel
   /** The Files group's picker: the recording, then each annex (see refreshFileItems). */
   private readonly fileItemSelect: HTMLSelectElement
   /** Where a recording comes in: a file of the author's, or an address (see InputFileElement). */
@@ -1512,7 +1513,7 @@ export class SightingEditorElement extends HTMLElement {
       }
     })
     this.sectionFilePanel.localize(this.messages)
-    this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, {
+    const eventsHost = {
       sighting: () => this.ufoElement.sighting,
       editing: () => this.armHistory(),
       changed: () => {
@@ -1522,9 +1523,12 @@ export class SightingEditorElement extends HTMLElement {
         this.refreshTimelineMarks()
         this.scheduleFileSync()
         this.eventsPanel.render()
+        this.phenomenonEventsPanel.render()
       },
-      seek: t => this.goToMark(t)
-    }, this.messages.events)
+      seek: (t: number) => this.goToMark(t)
+    }
+    this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, this.messages.events)
+    this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, this.messages.events, "phenomenon")
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
@@ -2292,6 +2296,7 @@ export class SightingEditorElement extends HTMLElement {
     this.syncBodiesShown()
     if (this.isGroupIdOpen("group-shape")) this.showPhenomenonPartWithContent()
     this.eventsPanel.render()
+    this.phenomenonEventsPanel.render()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -6806,9 +6811,9 @@ export class SightingEditorElement extends HTMLElement {
       this.refreshTimelineMarks()
     }
     const tracks: TimelineTrack[] = [
-      { id: "shapes", label: m.shapesTrack, color: "#f5c451", times: sighting.timeline.allKeyframes.map(keyframe => keyframe.t), open: () => this.revealShapePanel(),
+      { id: "shapes", label: m.shapesTrack, color: "#f5c451", ...this.eventMarks("phenomenon"), open: () => this.revealShapePanel(),
         add: edit(() => { if (sighting.timeline.sourceIds.includes(this.currentSourceId)) this.applyAppearanceAtPlayhead(undefined, false) }) },
-      { id: "observer", label: m.observerTrack, color: "#7fd4ff", ...this.observerTrackMarks(), open: () => open("group-location"),
+      { id: "observer", label: m.observerTrack, color: "#7fd4ff", ...this.eventMarks("observer"), open: () => open("group-location"),
         add: edit(() => this.updateObserver()) },
       { id: "weather", label: m.weatherTrack, color: "#b9c8d8", times: sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-weather"),
         add: edit(() => this.applyWeatherAtPlayhead()) },
@@ -6818,13 +6823,18 @@ export class SightingEditorElement extends HTMLElement {
     this.timelineTracks.show(tracks, this.ufoElement.seekableDuration, this.ufoElement.currentTime)
   }
 
-  /** The observer's track as the tracks and the seek bar show it: its events while the poses are theirs, its keyframes otherwise. */
-  private observerTrackMarks(): { times: number[], spans?: TimelineSpan[] } {
+  /**
+   * A track as the tracks and the seek bar show it: the actor's events while what they give is theirs (the observer's poses, the account's
+   * shapes), its keyframes otherwise.
+   */
+  private eventMarks(actor: "observer" | "phenomenon"): { times: number[], spans?: TimelineSpan[] } {
     const sighting = this.ufoElement.sighting
-    if (!RecordingEvents.observerTrackIsExpanded(sighting)) return { times: sighting.observerTrack.allKeyframes.map(keyframe => keyframe.t) }
+    const theirs = actor === "observer" ? RecordingEvents.observerTrackIsExpanded(sighting) : RecordingEvents.timelineIsExpanded(sighting)
+    const keyframes = actor === "observer" ? sighting.observerTrack.allKeyframes : sighting.timeline.allKeyframes
+    if (!theirs) return { times: keyframes.map(keyframe => keyframe.t) }
     const end = this.ufoElement.seekableDuration
     const spans = (sighting.events ?? [])
-      .filter(event => (event.who ?? "observer") === "observer")
+      .filter(event => (event.who ?? "observer") === actor)
       .map(event => ({ t: event.t, until: event.until ?? end, label: this.messages.events.kinds[event.eventType] ?? event.eventType }))
     return { times: [], spans }
   }
@@ -6833,12 +6843,17 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const keyframes = (label: string, times: Iterable<number>): TimelineMark[] =>
       [...times].map(t => ({ t, kind: "keyframe" as const, label: `${this.messages.keyframeMark} (${label})` }))
-    const shapes = (selectedOnly: boolean) => keyframes(this.messages.shapesTrack, sighting.timeline.allKeyframes
-      .filter(keyframe => !selectedOnly || keyframe.shapes.some(state => this.selectedSourceIds.has(state.sourceId)))
-      .map(keyframe => keyframe.t))
+    const shapes = (selectedOnly: boolean): TimelineMark[] => {
+      // The phenomenon's events where they give the shapes, not the hundreds of keyframes they give.
+      const { spans } = this.eventMarks("phenomenon")
+      if (spans) return spans.map(span => ({ t: span.t, kind: "event" as const, label: span.label }))
+      return keyframes(this.messages.shapesTrack, sighting.timeline.allKeyframes
+        .filter(keyframe => !selectedOnly || keyframe.shapes.some(state => this.selectedSourceIds.has(state.sourceId)))
+        .map(keyframe => keyframe.t))
+    }
     // The observer's events where they give the poses, not the thousands of poses they give.
     const observer = (): TimelineMark[] => {
-      const { times, spans } = this.observerTrackMarks()
+      const { times, spans } = this.eventMarks("observer")
       return spans ? spans.map(span => ({ t: span.t, kind: "event" as const, label: span.label })) : keyframes(this.messages.observerTrack, times)
     }
     const weather = () => keyframes(this.messages.weatherTrack, sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t))
@@ -6856,6 +6871,7 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshTracks()
     // A pose written by hand makes the author's poses win: the events panel says so as soon as it happens.
     this.eventsPanel?.sync()
+    this.phenomenonEventsPanel?.sync()
     this.witnessErrorView?.refreshFields()
     if (this.activeSceneField) this.refreshSceneField()
   }
@@ -10838,6 +10854,7 @@ export class SightingEditorElement extends HTMLElement {
     this.frozenPanel.localize(messages)
     this.sectionFilePanel.localize(messages)
     this.eventsPanel.localize(messages.events)
+    this.phenomenonEventsPanel.localize(messages.events)
     this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
     this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep

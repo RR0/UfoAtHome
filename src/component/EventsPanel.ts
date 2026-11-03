@@ -14,8 +14,11 @@ export interface EventsPanelHost {
   seek(t: number): void
 }
 
+/** Whose events a panel shows: the observer's (their poses, the tracks of what carries them), or the phenomenon's (the account's shapes). */
+export type EventsActor = "observer" | "phenomenon"
+
 /**
- * The observer's events in the editor (see RecordingEvents): each one, when it starts and ends, and its parameters, with what each says of
+ * An actor's events in the editor (see RecordingEvents): each one, when it starts and ends, and its parameters, with what each says of
  * where it came from. A number or a list of speeds is edited where it stands, and the poses are worked out again at once; a value typed is the
  * author's, and forgets the basis it had. A path, a place or a point of the vehicle is shown, not edited here: they come from a survey or a
  * model. While the author's own poses win over the events (they moved the observer by hand), it says so, and offers the events back.
@@ -31,13 +34,13 @@ export class EventsPanel {
 .event-kind:hover { text-decoration: underline; background: none; }
 .event-params { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
 .event-params input[type="number"] { width: 6em; }
-.event-rows { display: grid; grid-template-columns: repeat(2, max-content); gap: 2px 8px; }
+.event-rows { display: grid; grid-template-columns: repeat(var(--columns, 2), max-content); gap: 2px 8px; }
 .event-basis { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--ink-dim); }
 `
 
   private messages: EventsMessages
 
-  constructor(private readonly root: HTMLElement, private readonly host: EventsPanelHost, messages: EventsMessages) {
+  constructor(private readonly root: HTMLElement, private readonly host: EventsPanelHost, messages: EventsMessages, private readonly actor: EventsActor = "observer") {
     this.messages = messages
   }
 
@@ -51,29 +54,37 @@ export class EventsPanel {
 
   /** Shows the events again if whose poses they are changed since it last did. */
   sync(): void {
-    if (RecordingEvents.observerTrackIsExpanded(this.host.sighting()) !== this.shownTheirs) this.render()
+    if (this.theirs() !== this.shownTheirs) this.render()
+  }
+
+  /** Whether what the actor's events give is still theirs: no pose, no shape written by hand since. */
+  private theirs(): boolean {
+    const sighting = this.host.sighting()
+    return this.actor === "observer" ? RecordingEvents.observerTrackIsExpanded(sighting) : RecordingEvents.timelineIsExpanded(sighting)
   }
 
   /** Shows the recording's events as they now stand: nothing at all for a recording that states none. */
   render(): void {
     const sighting = this.host.sighting()
-    this.shownTheirs = RecordingEvents.observerTrackIsExpanded(sighting)
-    // The observer's own, each with its place among the recording's events, which is where what it says of its parameters is kept.
-    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => (event.who ?? "observer") === "observer")
+    this.shownTheirs = this.theirs()
+    // The actor's own, each with its place among the recording's events, which is where what it says of its parameters is kept.
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => (event.who ?? "observer") === this.actor)
     this.root.hidden = events.length === 0
-    this.root.querySelector<HTMLElement>("#label-section-events")!.textContent = this.messages.title
+    this.root.querySelector<HTMLElement>(".events-title")!.textContent = this.messages.title
     const body = this.root.querySelector<HTMLElement>(".events-body")!
     body.replaceChildren()
     if (events.length === 0) return
     const theirs = this.shownTheirs
     const note = document.createElement("p")
     note.className = "events-note"
-    note.textContent = theirs ? this.messages.derivedNote : this.messages.overriddenNote
+    note.textContent = this.actor === "observer"
+      ? theirs ? this.messages.derivedNote : this.messages.overriddenNote
+      : theirs ? this.messages.derivedShapesNote : this.messages.overriddenShapesNote
     body.append(note)
     if (!theirs) {
       const reset = document.createElement("button")
       reset.type = "button"
-      reset.id = "events-reset"
+      reset.className = "events-reset"
       reset.textContent = this.messages.resetToEvents
       reset.addEventListener("click", () => {
         this.host.editing()
@@ -125,20 +136,23 @@ export class EventsPanel {
       return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" ? 0.05 : key.endsWith("S") ? 0.05 : 1)
     }
     if (Array.isArray(value) && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {
-      const field = key === "speeds" ? "kmh" : key === "speedDivisors" ? "divisor" : undefined
-      if (field) {
-        const rows = document.createElement("span")
-        rows.className = "event-rows"
-        for (const row of value as Record<string, number>[]) {
-          rows.append(
-            this.seconds(row.t, typed => { row.t = typed }, path, `${this.messages.at} `),
-            this.number(row[field], typed => { row[field] = typed }, path, field === "kmh" ? "km/h" : "", field === "kmh" ? 1 : 0.05)
-          )
-        }
-        return rows
+      // A table of instants: each row's instant and its numbers (a speed, a divisor, a width and a height), edited where they stand.
+      const fields = Object.keys(value[0] ?? {}).filter(field => field !== "t" && typeof value[0][field] === "number")
+      const units: Record<string, string> = { kmh: "km/h", widthM: "m", heightM: "m", altitudeM: "m" }
+      const rows = document.createElement("span")
+      rows.className = "event-rows"
+      rows.style.setProperty("--columns", String(1 + fields.length))
+      for (const row of value as Record<string, number>[]) {
+        rows.append(this.seconds(row.t, typed => { row.t = typed }, path, `${this.messages.at} `))
+        for (const field of fields) rows.append(this.number(row[field], typed => { row[field] = typed }, path, units[field] ?? "", field === "divisor" ? 0.05 : 1))
       }
-      return document.createTextNode(this.messages.points.replace("{n}", String(value.length)))
+      return rows
     }
+    // A look's parts: how many; a blink's: which.
+    if (Array.isArray(value) && value.every(part => typeof part === "object" && part !== null && typeof part.sourceId === "string")) {
+      return document.createTextNode(this.messages.parts.replace("{n}", String(value.length)))
+    }
+    if (Array.isArray(value) && value.every(part => typeof part === "string")) return document.createTextNode(value.join(", "))
     // A route: its places, which a survey drew.
     if (Array.isArray(value)) return document.createTextNode(this.messages.points.replace("{n}", String(value.length)))
     if (typeof value === "object" && value !== null) {
@@ -151,6 +165,8 @@ export class EventsPanel {
         return span
       }
       if (typeof place.x === "number") return document.createTextNode(`${place.x}, ${place.y}, ${place.z} m`)
+      // What a blinking part is when off: its fields, as the file says them (a colour shows as itself).
+      return document.createTextNode(Object.entries(place).map(([field, said]) => `${field} ${said ?? "∅"}`).join(", "))
     }
     return document.createTextNode(String(value))
   }

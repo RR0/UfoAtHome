@@ -1,3 +1,5 @@
+import type { SaidText } from "../model/SaidText.js"
+
 /**
  * What an actor of a recording did, stated as an event with its parameters instead of the values it implies: "T1 drives along the RN2 at
  * these speeds", "he keeps the phenomenon in the corner of his eye", "he leans to his mirror". The values (the observer's poses, the van's
@@ -73,6 +75,52 @@ export interface FlyParams {
   at: { t: number, metresBefore: number }
   /** How high above the observer's eye, m, at instants of the recording: linear between them, held beyond. */
   heights: { t: number, altitudeM: number }[]
+}
+
+/**
+ * The phenomenon stands at a place the observer stated (`who` "phenomenon"): its direction in their sky is read from there at every instant,
+ * and its size from `metres`, its width and its height above the observer's eye, which may change (a reconstitution fitted to what they
+ * pointed at). How it looks is said by `look`.
+ */
+export interface StandParams {
+  place: EventPlace
+  /** Its width and its height above the eye, m, at instants of the recording: linear between them, held beyond. */
+  metres: { t: number, widthM: number, heightM: number }[]
+}
+
+/**
+ * One part of how the phenomenon looks: a shape of the account, placed and sized in shares of the phenomenon's width as it appears (its
+ * angular width at that instant): `alongShare` along it from its middle (negative to the left), `upShare` above it.
+ */
+export interface LookPart {
+  sourceId: string
+  title?: SaidText
+  kind: "oval" | "polygon"
+  /** A polygon's outline, in shares of its own box, x to the right and y down. */
+  points?: { x: number, y: number }[]
+  color: string
+  brightness?: number
+  halo?: number
+  widthShare: number
+  /** An oval's is its width. */
+  heightShare?: number
+  minWidthDeg?: number
+  minHeightDeg?: number
+  alongShare?: number
+  upShare?: number
+}
+
+/** How the phenomenon looks from `t` on (as the observer drew it): its parts. A part another look has and this one has not is not seen. */
+export interface LookParams {
+  parts: LookPart[]
+}
+
+/** Parts of the phenomenon blink: on for `onS`, then off for `offS`, from the event's start; off, they take `off` (null takes a field away). */
+export interface BlinkParams {
+  parts: string[]
+  onS: number
+  offS: number
+  off: { color?: string, transparency?: number, brightness?: number | null }
 }
 
 /**

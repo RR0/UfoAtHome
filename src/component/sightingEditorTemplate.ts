@@ -264,7 +264,7 @@ export const html = `
     </div>
     <!-- What the observer did, as events whose values the player works out (see EventsPanel): absent from a recording that states none. -->
     <div class="form-section events-section" id="events-section" hidden>
-    <h3 class="section-title"><span id="label-section-events">Events</span></h3>
+    <h3 class="section-title"><span id="label-section-events" class="events-title">Events</span></h3>
     <div class="events-body"></div>
     </div>
     <div class="form-section" data-fold="all">
@@ -695,6 +695,11 @@ export const html = `
     <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
+  <!-- What the phenomenon did, as events whose shapes the player works out (see EventsPanel): absent from a recording that states none. -->
+  <div class="form-section events-section" id="phenomenon-events-section" hidden>
+  <h3 class="section-title"><span id="label-section-phenomenon-events" class="events-title">Events</span></h3>
+  <div class="events-body"></div>
+  </div>
   <div class="toolbar">
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
          picked shape, gone while there is none. -->

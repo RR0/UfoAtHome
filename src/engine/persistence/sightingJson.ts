@@ -212,7 +212,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     summary: sighting.event.summary,
     summaryTime: sighting.event.summaryTime,
     tags: sighting.event.tags,
-    timeline: sighting.timeline.toJSON(),
+    timeline: !expanded && RecordingEvents.timelineIsExpanded(sighting) ? { keyframes: [] } : sighting.timeline.toJSON(),
     // How each place was said, with the numbers of where it now is (see SightingPositions).
     observerTrack: !expanded && RecordingEvents.observerTrackIsExpanded(sighting) ? undefined : SightingPositions.restatedObserverTrack(sighting),
     events: sighting.events?.length ? sighting.events : undefined,
@@ -336,6 +336,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's observer turn their head without taking the sky with them.
   SightingShapes.toPosition(sighting)
+  RecordingEvents.settle(sighting)
   return sighting
 }
 

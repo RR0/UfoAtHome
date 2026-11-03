@@ -102,6 +102,33 @@ HEIGHTS = [(56.2, 182.75715920035987), (84.6, 130.86141923993748), (119.2, 118.3
            (128.9, 102.28217491549732), (161.7, 42.37993911395558), (202.0, 0.0)]
 
 
+# The phenomenon, as build_silly.py draws it (its front_shapes, rear_shapes and keyframes), by variant: when the bar becomes the V under the
+# bridge's deck (T_SWITCH), when the rectangles stop blinking (T_END), when it is lost (T_END + 0.5 s), and its size: build_silly.PHEN_METRES,
+# the GEIPAN simulation's fitted size and elevation turned into metres at its instants (for the witnesses' speed, at the instants the van is
+# where the simulation's was then).
+PHENOMENON = {
+    "geipan": {"switch": 69500, "end": 202000, "vanish": 202500, "metres": [
+        (0, 34.481865001039154, 25.862580550941594), (8200, 34.31177029211056, 26.031427948634526), (36600, 31.991476039460714, 19.811764400875774),
+        (71200, 25.346678777057857, 20.256454601309603), (77400, 41.09324256299565, 30.771552880027997), (80900, 61.295209886782814, 27.933759117179576),
+        (113700, 52.25622171226259, 20.660760769530814), (154000, 37.82469507912616, 24.144786670689438), (209200, 38.51365951227697, 26.693272210704002)]},
+    "temoins": {"switch": 83800, "end": 210800, "vanish": 211300, "metres": [
+        (0, 34.481865001039154, 25.862580550941594), (10800, 34.31177029211056, 26.031427948634526), (46200, 31.991476039460714, 19.811764400875774),
+        (85900, 25.346678777057857, 20.256454601309603), (92600, 41.09324256299565, 30.771552880027997), (96200, 61.295209886782814, 27.933759117179576),
+        (127200, 52.25622171226259, 20.660760769530814), (165300, 37.82469507912616, 24.144786670689438), (217900, 38.51365951227697, 26.693272210704002)]},
+}
+TITLES = {
+    "pan": {"fr": "Le phénomène", "en": "The phenomenon", "es": "El fenómeno", "it": "Il fenomeno"},
+    "blanc-g": {"fr": "Feu blanc fixe (gauche)", "en": "Steady white light (left)", "es": "Luz blanca fija (izquierda)", "it": "Luce bianca fissa (sinistra)"},
+    "blanc-d": {"fr": "Feu blanc fixe (droite)", "en": "Steady white light (right)", "es": "Luz blanca fija (derecha)", "it": "Luce bianca fissa (destra)"},
+    "rouge": {"fr": "Feu rouge clignotant", "en": "Flashing red light", "es": "Luz roja intermitente", "it": "Luce rossa lampeggiante"},
+    "rect-g": {"fr": "Rectangle blanc (gauche)", "en": "White rectangle (left)", "es": "Rectángulo blanco (izquierda)", "it": "Rettangolo bianco (sinistro)"},
+    "rect-d": {"fr": "Rectangle blanc (droite)", "en": "White rectangle (right)", "es": "Rectángulo blanco (derecha)", "it": "Rettangolo bianco (destro)"},
+}
+BAR = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 0, "y": 1}]
+VEE = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 0.45}, {"x": 0.5, "y": 1}, {"x": 0, "y": 0.45}]
+WHITE = "#f4f7ff"
+
+
 def wrap(value, basis, rationale):
     return {"value": value, "basis": basis, "rationale": rationale}
 
@@ -146,6 +173,32 @@ def events(recording, variant):
         "at": {"t": 0, "metresBefore": round(APPROACH_X0 + APPROACH_SLOPE * T0, 3)},
         "heights": wrap(heights, "derived", "The simulation's heights above the eye at its instants (CR p.49-54); the touch-and-go's climb ASSUMED"),
     }
+    ph = PHENOMENON[variant]
+    light = lambda source, along, color: {"sourceId": source, "title": TITLES[source], "kind": "oval", "color": color, "brightness": 0.8, "halo": 1.2,
+                                          "widthShare": 0.035, "minWidthDeg": 0.18, "alongShare": along}
+    rect = lambda source, along: {"sourceId": source, "title": TITLES[source], "kind": "polygon", "points": BAR, "color": WHITE, "brightness": 0.5,
+                                  "widthShare": 0.095, "heightShare": 0.06, "alongShare": along, "upShare": 0.06}
+    phenomenon = [
+        {"type": "event", "eventType": "stand", "who": "phenomenon", "t": 0, "until": ph["vanish"], "params": {
+            "place": target,
+            "metres": wrap([{"t": t, "widthM": round(w, 3), "heightM": round(h, 3)} for t, w, h in ph["metres"]], "derived",
+                           "The GEIPAN simulation's size and elevation fitted to T1's pointings (CR p.49-54), as metres at its distance then")}},
+        {"type": "event", "eventType": "look", "who": "phenomenon", "t": 0, "until": ph["switch"], "params": {"parts": wrap([
+            {"sourceId": "pan", "title": TITLES["pan"], "kind": "polygon", "points": BAR, "color": "#1d1f22", "widthShare": 1, "heightShare": 0.07, "minHeightDeg": 0.12},
+            light("blanc-g", -0.5, WHITE), light("blanc-d", 0.5, WHITE),
+            light("rouge", -0.385, "#ff2a1f")], "stated", "From the front, low and far: the dark flat bar of drawing 004, its two white lights at its ends and "
+                                                         "the red one about 11.5 % of its span right of the left one (CR p.4-6)")}},
+        {"type": "event", "eventType": "look", "who": "phenomenon", "t": ph["switch"], "until": ph["vanish"], "params": {"parts": wrap([
+            {"sourceId": "pan", "title": TITLES["pan"], "kind": "polygon", "points": VEE, "color": "#8e9194", "widthShare": 1, "heightShare": 0.2},
+            rect("rect-g", -0.4525), rect("rect-d", 0.4525)], "stated", "Past the bridge, close and from behind: the grey V of drawing 005, "
+                                                                        "\"représente correctement la forme\", and its two white rectangles (CR p.8)")}},
+        {"type": "event", "eventType": "blink", "who": "phenomenon", "t": 0, "until": ph["switch"], "params": {
+            "parts": ["rouge"], "onS": wrap(0.5, "stated", "0.5 s on, 0.5 s off (CR p.5)"), "offS": 0.5, "off": {"transparency": 1, "brightness": 0}}},
+        {"type": "event", "eventType": "blink", "who": "phenomenon", "t": ph["switch"], "until": ph["end"], "params": {
+            "parts": ["rect-g", "rect-d"], "onS": wrap(2, "stated", "2 s on, 2 s off, together (CR p.8)"), "offS": 2,
+            "off": {"color": "#0b0c0e", "brightness": None}}},
+        {"type": "event", "eventType": "vanish", "who": "phenomenon", "t": ph["vanish"]},
+    ]
     return [
         {"type": "event", "eventType": "drive", "t": 0, "until": until, "params": drive},
         {"type": "event", "eventType": "fly", "who": "f-hobs", "t": 0, "until": until, "params": fly},
@@ -158,6 +211,7 @@ def events(recording, variant):
         {"type": "event", "eventType": "lean", "t": e, "until": e + 5800, "params": {
             "offsetM": wrap({"x": -0.10, "y": -0.05, "z": -0.12}, "stated", "\"Il a dû au début se baisser légèrement pour réussir à le voir\" (CR p.9); how far, SUPPOSED"),
             "holdS": 5.0, "turnS": 0.8}},
+        *phenomenon,
         {"type": "event", "eventType": "watch", "t": e, "params": {
             "mirror": {"x": -0.999, "y": 1.227, "z": -0.895},
             "target": target, "pitchShare": 0.6,
@@ -171,6 +225,7 @@ def main(path, variant):
     recording = json.load(open(path))
     recording["events"] = events(recording, variant)
     recording["observerTrack"] = {"keyframes": []}
+    recording["timeline"] = {"keyframes": []}
     for decor in recording["decor"]:
         if decor["id"] in ("van", "f-hobs"):
             decor.pop("track", None)

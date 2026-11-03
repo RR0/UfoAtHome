@@ -51,10 +51,32 @@ describe("RecordingEvents", () => {
     expect(toSightingJson(sighting).decor!.find(object => object.id === "f-hobs")!.track).toBeUndefined()
   })
 
+  it("draws the account's shapes from where the phenomenon stood, how it looked and how its lights blinked, as the script that wrote them did", () => {
+    const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
+    const at = (t: number, id: string) => sighting.timeline.getInterpolatedShapeAt(t, id)!
+    // build_silly.py's shapes: from the front, the bar and its lights; past the bridge, the V and its rectangles, off at 71.5 s.
+    for (const [t, id, azimuthDeg, altitudeDeg, widthDeg] of [
+      [40000, "pan", 34.16, 2.273, 3.5876], [40000, "blanc-g", 32.365, 2.273, 0.18], [40000, "rouge", 32.778, 2.273, 0.18],
+      [71500, "pan", 290.087, 16.684, 21.3411], [71500, "rect-d", 300.239, 17.965, 2.0274]
+    ] as const) {
+      const shape = at(t, id)
+      expect(angle(shape.aim!.azimuthDeg, azimuthDeg), `${id} azimuth at ${t}`).toBeLessThan(0.1)
+      expect(Math.abs(shape.aim!.altitudeDeg - altitudeDeg), `${id} altitude at ${t}`).toBeLessThan(0.05)
+      expect(Math.abs(shape.angular!.widthDeg - widthDeg), `${id} width at ${t}`).toBeLessThan(0.05)
+    }
+    expect(at(71500, "rect-g").color).toBe("#0b0c0e")
+    expect(at(73500, "rect-g").color).toBe("#f4f7ff")
+    expect(at(71500, "blanc-g").transparency).toBe(1)
+    // The red light: on, then off half a second later.
+    expect(at(1000, "rouge").transparency).toBe(0)
+    expect(at(500, "rouge").transparency).toBe(1)
+    expect(toSightingJson(sighting).timeline.keyframes).toEqual([])
+  })
+
   it("writes back the events and not what they give, while it is what they give", () => {
     const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
     const written = toSightingJson(sighting)
-    expect(written.events).toHaveLength(5)
+    expect(written.events).toHaveLength(11)
     expect(written.observerTrack).toBeUndefined()
     expect(written.decor!.find(object => object.id === "van")!.track).toBeUndefined()
     // Read again, the same poses.
