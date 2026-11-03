@@ -107,7 +107,7 @@ class CaseRecordingSync {
       return 1
     }
     let drifted = 0
-    for (const recording of RECORDINGS) {
+    for (const recording of this.withAnnexes(RECORDINGS)) {
       const source = path.join(this.here, recording.published)
       const target = path.join(this.there, recording.dossier)
       const published = readFileSync(source)
@@ -123,11 +123,47 @@ class CaseRecordingSync {
       console.log(`updated: ${recording.dossier} <- ${recording.published}`)
     }
     if (drifted === 0) {
-      console.log(`${RECORDINGS.length} recordings, both hosts identical.`)
+      console.log(`${RECORDINGS.length} recordings and the files they name, both hosts identical.`)
       return 0
     }
     // Copying is a success; finding drift in check mode is the failure the mode exists to report.
     return this.checkOnly ? 1 : 0
+  }
+
+  /**
+   * The recordings, each followed by the files it names by an address relative to itself: the annexes its frozen data and its own sections
+   * are kept in (relief, imagery, roads… see FrozenData), and the pictures laid over its scene. Read relative to the recording, they have to
+   * sit beside it on both hosts, and a recording copied without them asks for files the dossier does not have: Cussac's ground, synced with
+   * its frozen data and not its annexes, came out without its photograph on rr0.org.
+   */
+  private withAnnexes(recordings: CaseRecording[]): CaseRecording[] {
+    const all: CaseRecording[] = []
+    const seen = new Set<string>()
+    const add = (recording: CaseRecording) => {
+      if (seen.has(recording.dossier)) return
+      seen.add(recording.dossier)
+      all.push(recording)
+    }
+    for (const recording of recordings) {
+      add(recording)
+      if (!recording.published.endsWith(".json")) continue
+      const json = JSON.parse(readFileSync(path.join(this.here, recording.published), "utf8")) as {
+        frozen?: Record<string, { src?: unknown } | boolean | undefined>
+        references?: { src?: unknown }[]
+      }
+      const named = [
+        ...Object.values(json.frozen ?? {}).map(group => typeof group === "object" ? group?.src : undefined),
+        ...(json.references ?? []).map(reference => reference.src)
+      ]
+      for (const src of named) {
+        if (typeof src !== "string" || /^([a-z]+:|\/)/i.test(src)) continue
+        add({
+          published: path.posix.join(path.posix.dirname(recording.published), src),
+          dossier: path.posix.join(path.posix.dirname(recording.dossier), src)
+        })
+      }
+    }
+    return all
   }
 }
 
