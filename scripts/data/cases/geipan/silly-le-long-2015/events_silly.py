@@ -90,6 +90,18 @@ def start_place():
     return geo(*at(s_of[48.0] + S_THROUGH - s_of[119.2]))
 
 
+# The aircraft, as build_silly.py solves it from the simulation's pointings (CR p.49-54): the runway (OSM 96594549, threshold 25 at its east
+# end), a uniform approach along its centreline fitted to them, and their heights above the eye, then a touch-and-go.
+rwy = ways[96594549]["geometry"]
+THR_E, THR_N = enu(rwy[0]["lat"], rwy[0]["lon"])
+END_E, END_N = enu(rwy[-1]["lat"], rwy[-1]["lon"])
+LAND_HDG = math.degrees(math.atan2(END_E - THR_E, END_N - THR_N)) % 360
+# build_silly.x0 and .slope: metres before the threshold at Tavion 0, and their rate (m/s, negative: towards it).
+APPROACH_X0, APPROACH_SLOPE = 6318.6885163556635, -33.96764010718883
+HEIGHTS = [(56.2, 182.75715920035987), (84.6, 130.86141923993748), (119.2, 118.37374731167196), (125.4, 109.57200010783303),
+           (128.9, 102.28217491549732), (161.7, 42.37993911395558), (202.0, 0.0)]
+
+
 def wrap(value, basis, rationale):
     return {"value": value, "basis": basis, "rationale": rationale}
 
@@ -99,6 +111,8 @@ def events(recording, variant):
     until = recording["durationSeconds"] * 1000 if variant == "geipan" else None
     keys = recording["observerTrack"]["keyframes"]
     until = max(k["t"] for k in keys) if keys else until
+    # Run again on a recording already stated as events: the end it already says.
+    until = next((event["until"] for event in recording.get("events", []) if event["eventType"] == "drive"), until)
     speeds = wrap([{"t": ms(tau), "kmh": kmh} for tau, kmh in SPEEDS], "derived",
                   "The GEIPAN simulation's displayed speeds: the reconstitution's speed times its correction factor (CR p.49-53)")
     drive = {
@@ -119,8 +133,22 @@ def events(recording, variant):
                                       "The 1.3 the simulation multiplied the witnesses' speed by in the first phase (CR p.51), taken out; less and less "
                                       "of it until the van slows (SUPPOSED: the report gives the factor of the first phase only)")
     target = wrap({"lat": 49.114222, "lng": 2.772042}, "stated", "RN2 PK 5+500, 49°06'51.20\"N 2°46'19.35\"E, stationary the whole time (PV p.7, CR p.5, 33)")
+    (h0t, h0), (h1t, h1) = HEIGHTS[0], HEIGHTS[1]
+    heights = [{"t": 0, "altitudeM": round(h0 + (h0t - T0) * (h1 - h0) / (h0t - h1t), 3)}]
+    heights += [{"t": ms(tau), "altitudeM": round(h, 3)} for tau, h in HEIGHTS]
+    # The touch-and-go: the roll, then the climb-out along the runway at 3 m/s (CR p.54: still in line 45 s climbing; the rate ASSUMED).
+    heights += [{"t": ms(210), "altitudeM": 0}, {"t": ms(330), "altitudeM": 360}]
+    fly = {
+        "from": wrap({"lat": rwy[0]["lat"], "lng": rwy[0]["lon"]}, "stated", "Threshold 25 of runway 07/25 of Le Plessis-Belleville (OSM 96594549)"),
+        "headingDeg": wrap(round(LAND_HDG, 3), "derived", "The runway's own heading, from its two ends (OSM 96594549)"),
+        "speeds": wrap([{"t": 0, "kmh": round(-APPROACH_SLOPE * 3.6, 3)}], "derived",
+                       "A uniform approach fitted to the distances and elevations the GEIPAN simulation gives of the aircraft seen from the van (CR p.49-54)"),
+        "at": {"t": 0, "metresBefore": round(APPROACH_X0 + APPROACH_SLOPE * T0, 3)},
+        "heights": wrap(heights, "derived", "The simulation's heights above the eye at its instants (CR p.49-54); the touch-and-go's climb ASSUMED"),
+    }
     return [
         {"type": "event", "eventType": "drive", "t": 0, "until": until, "params": drive},
+        {"type": "event", "eventType": "fly", "who": "f-hobs", "t": 0, "until": until, "params": fly},
         {"type": "event", "eventType": "lookAhead", "t": 0, "until": e, "params": {
             "target": target, "pitchShare": 0.6,
             "keepDeg": wrap(25, "assumed", "A driver keeps what he watches in the corner of his eye, and looks at the road"),
@@ -144,7 +172,7 @@ def main(path, variant):
     recording["events"] = events(recording, variant)
     recording["observerTrack"] = {"keyframes": []}
     for decor in recording["decor"]:
-        if decor["id"] == "van":
+        if decor["id"] in ("van", "f-hobs"):
             decor.pop("track", None)
     with open(path, "w") as out:
         json.dump(recording, out, ensure_ascii=False, indent=1, separators=(",", ":"))

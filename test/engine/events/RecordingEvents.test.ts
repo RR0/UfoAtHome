@@ -35,10 +35,26 @@ describe("RecordingEvents", () => {
     }
   })
 
+  it("flies the aircraft down the runway's centreline, as the script that wrote its track did", () => {
+    const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
+    const track = new Map(sighting.decor.find(object => object.id === "f-hobs")!.track!.map(keyframe => [keyframe.t, keyframe]))
+    expect(track.size).toBe(102)
+    // build_silly.py's track, counted from where the road starts rather than from the observer: under a metre apart three kilometres off.
+    for (const want of [
+      { t: 0, eastM: 3328.2, northM: 2381.3, altitudeM: 197.7 }, { t: 60000, eastM: 1460.2, northM: 1566.3, altitudeM: 122.4 },
+      { t: 120000, eastM: -407.8, northM: 751.3, altitudeM: 35.8 }, { t: 202000, eastM: -2960.8, northM: -362.5, altitudeM: 120 }
+    ]) {
+      const got = track.get(want.t)!
+      expect(Math.hypot(got.eastM - want.eastM, got.northM - want.northM), `place at ${want.t}`).toBeLessThan(1)
+      expect(Math.abs(got.altitudeM! - want.altitudeM), `height at ${want.t}`).toBeLessThan(0.1)
+    }
+    expect(toSightingJson(sighting).decor!.find(object => object.id === "f-hobs")!.track).toBeUndefined()
+  })
+
   it("writes back the events and not what they give, while it is what they give", () => {
     const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
     const written = toSightingJson(sighting)
-    expect(written.events).toHaveLength(4)
+    expect(written.events).toHaveLength(5)
     expect(written.observerTrack).toBeUndefined()
     expect(written.decor!.find(object => object.id === "van")!.track).toBeUndefined()
     // Read again, the same poses.

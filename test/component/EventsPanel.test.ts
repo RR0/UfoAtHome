@@ -30,6 +30,8 @@ describe("EventsPanel", () => {
     const { root } = mounted()
     const items = [...root.querySelectorAll(".events-list > li")]
     expect(items.map(item => item.querySelector(".event-kind")!.textContent)).toEqual(["Conduit", "Regarde la route", "Se penche", "Regarde dans le rétroviseur"])
+    // The aircraft's flight is not the observer's: it is the aircraft's own.
+    expect(root.textContent).not.toContain("fly")
     const drive = items[0].textContent!
     expect(drive).toContain("Vitesses")
     expect(drive).toContain("points")

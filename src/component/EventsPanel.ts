@@ -58,13 +58,14 @@ export class EventsPanel {
   render(): void {
     const sighting = this.host.sighting()
     this.shownTheirs = RecordingEvents.observerTrackIsExpanded(sighting)
-    const events = sighting.events ?? []
+    // The observer's own, each with its place among the recording's events, which is where what it says of its parameters is kept.
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => (event.who ?? "observer") === "observer")
     this.root.hidden = events.length === 0
     this.root.querySelector<HTMLElement>("#label-section-events")!.textContent = this.messages.title
     const body = this.root.querySelector<HTMLElement>(".events-body")!
     body.replaceChildren()
     if (events.length === 0) return
-    const theirs = RecordingEvents.observerTrackIsExpanded(sighting)
+    const theirs = this.shownTheirs
     const note = document.createElement("p")
     note.className = "events-note"
     note.textContent = theirs ? this.messages.derivedNote : this.messages.overriddenNote
@@ -83,7 +84,7 @@ export class EventsPanel {
     }
     const list = document.createElement("ul")
     list.className = "events-list"
-    events.forEach((event, index) => list.append(this.item(event, index)))
+    for (const { event, index } of events) list.append(this.item(event, index))
     body.append(list)
   }
 

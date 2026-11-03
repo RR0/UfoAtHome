@@ -58,6 +58,24 @@ export interface DriveParams {
 }
 
 /**
+ * A decor object flies (an aircraft, `who` its id): along a straight line that ends at `from`, on `headingDeg`, at `speeds`, `metresBefore`
+ * that place at the instant `at.t`; at `heights` above the observer's eye. Its track is written every two seconds, as a recording's tracks
+ * are.
+ */
+export interface FlyParams {
+  /** Where its line leads: a runway's threshold. */
+  from: EventPlace
+  /** Which way it flies, degrees from north. */
+  headingDeg: number
+  /** Its ground speed, km/h, at instants of the recording: linear between them, held beyond. */
+  speeds: { t: number, kmh: number }[]
+  /** How far before `from` it is at one instant. */
+  at: { t: number, metresBefore: number }
+  /** How high above the observer's eye, m, at instants of the recording: linear between them, held beyond. */
+  heights: { t: number, altitudeM: number }[]
+}
+
+/**
  * The observer looks down the road, and keeps what they watch in the corner of their eye: while it is within `glanceBeyondDeg` of the vehicle's
  * axis, they turn only as far as keeps it within about `keepDeg` of where they look; further off, they glance at it for `glanceS`, then look
  * back at the road for `roadS`, and so on.

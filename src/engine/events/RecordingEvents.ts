@@ -3,7 +3,7 @@ import type { ObserverKeyframe } from "../model/ObserverTrack.js"
 import type { Sighting } from "../model/Sighting.js"
 import { DriveExpansion } from "./DriveExpansion.js"
 import { GazeExpansion } from "./GazeExpansion.js"
-import type { DriveParams, LeanParams, LookAheadParams, RecordingEventJson, WatchParams } from "./RecordingEvent.js"
+import type { DriveParams, FlyParams, LeanParams, LookAheadParams, RecordingEventJson, WatchParams } from "./RecordingEvent.js"
 
 /** What the events of a recording were worked out into, as it was: what is written back as events alone if nothing has changed it since. */
 export interface EventsExpansion {
@@ -24,6 +24,8 @@ export interface EventsExpansion {
  * - lookAhead: see LookAheadParams;
  * - lean: see LeanParams;
  * - watch: see WatchParams.
+ *
+ * A decor object's (`who` its id): fly, see FlyParams.
  */
 export class RecordingEvents {
   /** A standing observer's eye above the ground, m: a seated one's elevation is counted from it (see BodyPlacement.EYE_HEIGHT_M). */
@@ -33,6 +35,63 @@ export class RecordingEvents {
 
   /** Gives `sighting` the values of its events, where it states none of its own. */
   static expand(sighting: Sighting): void {
+    RecordingEvents.expandObserver(sighting)
+    RecordingEvents.expandFlights(sighting)
+  }
+
+  /** The tracks of the decor objects that fly (see FlyParams), placed from the observer's first pose as every decor object is. */
+  private static expandFlights(sighting: Sighting): void {
+    const origin = sighting.observerTrack.allKeyframes[0]?.pose ?? sighting.event.place?.[0]
+    if (origin?.lat === undefined || origin.lng === undefined) return
+    const cosOrigin = Math.cos(origin.lat * Math.PI / 180)
+    for (const event of sighting.events ?? []) {
+      if (event.eventType !== "fly" || event.who === undefined) continue
+      const object = sighting.decor.find(candidate => candidate.id === event.who)
+      if (!object || object.track?.length) continue
+      const params = event.params as unknown as FlyParams
+      const until = event.until ?? RecordingEvents.endOf(sighting)
+      const h = params.headingDeg * Math.PI / 180
+      const fromEast = (params.from.lng - origin.lng) * Math.PI / 180 * RecordingEvents.R * cosOrigin
+      const fromNorth = (params.from.lat - origin.lat) * Math.PI / 180 * RecordingEvents.R
+      const speeds = params.speeds.map(({ t, kmh }) => ({ t, value: kmh / 3.6 }))
+      const heights = params.heights.map(({ t, altitudeM }) => ({ t, value: altitudeM }))
+      // How far it has flown from `at.t` to `t`, m: the speeds integrated, either way in time.
+      const flown = (t: number) => {
+        const step = Math.sign(t - params.at.t) * RecordingEvents.FLY_STEP_MS
+        let metres = 0
+        for (let u = params.at.t; step !== 0 && (step > 0 ? u < t : u > t); u += step) {
+          const next = step > 0 ? Math.min(t, u + step) : Math.max(t, u + step)
+          metres += (DriveExpansion.linear(speeds, u) + DriveExpansion.linear(speeds, next)) / 2 * (next - u) / 1000
+        }
+        return metres
+      }
+      const track: DecorPlacementKeyframe[] = []
+      for (let t = event.t; t <= until; t += DriveExpansion.SAMPLE_MS) {
+        const before = params.at.metresBefore - flown(t)
+        track.push({
+          t,
+          eastM: fromEast - Math.sin(h) * before,
+          northM: fromNorth - Math.cos(h) * before,
+          altitudeM: DriveExpansion.linear(heights, t),
+          headingDeg: params.headingDeg
+        })
+      }
+      object.track = track
+      object.eastM = track[0].eastM
+      object.northM = track[0].northM
+      object.headingDeg = params.headingDeg
+      sighting.eventsExpansion ??= { decorTracks: {} }
+      sighting.eventsExpansion.decorTracks[object.id] = JSON.stringify(track)
+    }
+  }
+
+  /** The Earth's mean radius, m, as the surveys' frame uses it. */
+  private static readonly R = 6371008.8
+  /** The integration step of a flight's speeds, ms. */
+  private static readonly FLY_STEP_MS = 100
+
+  /** Gives the observer, and the vehicle they are in, the values of their events. */
+  private static expandObserver(sighting: Sighting): void {
     const events = (sighting.events ?? []).filter(event => (event.who ?? "observer") === "observer")
     const drive = events.find(event => event.eventType === "drive")
     const lookAhead = events.find(event => event.eventType === "lookAhead")
