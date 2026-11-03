@@ -1958,7 +1958,9 @@ ${EditorTheme.HEAD}
 .section-chips .tab-badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .app > .group-panel {
   margin: 0;
-  padding: 20px 18px 24px;
+  /* Its top padding is what what sticks at its top (the text's search panel) rises by, to stick at its edge rather than below it. */
+  --group-panel-padding-top: 20px;
+  padding: var(--group-panel-padding-top) 18px 24px;
   border: 0;
   border-radius: 0;
   background: var(--ground-raised);

@@ -259,6 +259,9 @@ export class SightingFileEditor {
           ".cm-panels": {
             backgroundColor: "color-mix(in srgb, currentColor 6%, var(--ground-raised, Canvas))", color: "inherit", borderColor: "color-mix(in srgb, currentColor 25%, transparent)"
           },
+          // Stuck at the very top of what scrolls the text, over the padding of the panel that holds it: stuck at that padding, it left a
+          // line of the text showing above it.
+          ".cm-panels-top": { top: "calc(-1 * var(--group-panel-padding-top, 0px))" },
           // Fields and buttons likewise: left to the search panel's defaults they took the page's text colour on a white ground, and what was
           // typed was not legible (white on white on a light page).
           ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit", color: "inherit" },
