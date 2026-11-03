@@ -8,13 +8,13 @@ export const eventsMessages_en: EventsMessages = {
   overriddenShapesNote: "This recording's own shapes win over the phenomenon's events.",
   parts: "{n} parts",
   resetToEvents: "Back to the events",
-  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks", blink: "Blinks", vanish: "Is lost" },
+  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost" },
   params: {
     vehicle: "Vehicle", path: "Route", speeds: "Speeds", speedDivisors: "Speeds divided by", through: "Goes through", eye: "Eye in the vehicle",
     fovDeg: "Field of view", target: "Watching", pitchShare: "Looks up to (share of its height)", keepDeg: "Keeps it within", glanceBeyondDeg: "Glances beyond",
     glanceS: "Glance", roadS: "Back on the road", offsetM: "Moves the eye by", holdS: "For", turnS: "In", mirror: "Mirror", firstS: "First",
     mirrorS: "In the mirror", glancesUntil: "Glances at it until",
-    place: "Where", metres: "Size (width, height above the eye)", parts: "Parts", onS: "On", offS: "Off", off: "Off, it is"
+    place: "Where", metres: "Size (width, height above the eye)", parts: "Parts", onS: "On", offS: "Off", off: "Off, it is", from: "From", to: "To", share: "Share of the way towards it", headingDeg: "Heading", pitchDeg: "Tilt"
   },
   from: "from",
   to: "to",

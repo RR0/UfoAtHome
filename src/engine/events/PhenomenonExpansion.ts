@@ -2,7 +2,7 @@ import type { Sighting } from "../model/Sighting.js"
 import type { Keyframe, ShapeState } from "../model/Keyframe.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { DriveExpansion } from "./DriveExpansion.js"
-import type { BlinkParams, EventPlace, LookParams, LookPart, RecordingEventJson, StandParams } from "./RecordingEvent.js"
+import type { BlinkParams, EventPlace, AppearanceParams, LookPart, RecordingEventJson, StandParams } from "./RecordingEvent.js"
 
 /** A look and when it lasts. */
 interface Look {
@@ -12,7 +12,7 @@ interface Look {
 }
 
 /**
- * The account's shapes worked out from what the phenomenon did (see StandParams, LookParams, BlinkParams, and `vanish`: it is no longer seen
+ * The account's shapes worked out from what the phenomenon did (see StandParams, AppearanceParams, BlinkParams, and `vanish`: it is no longer seen
  * from then on): its parts where its place is in the observer's sky at each instant, at the size its metres make at that distance, as each
  * look draws them, blinking as they blinked.
  *
@@ -29,10 +29,10 @@ export class PhenomenonExpansion {
   private readonly vanishAt: number | undefined
 
   constructor(private readonly sighting: Sighting, private readonly stand: RecordingEventJson, events: RecordingEventJson[], end: number) {
-    const looks = events.filter(event => event.eventType === "look").sort((a, b) => a.t - b.t)
+    const looks = events.filter(event => event.eventType === "appearance").sort((a, b) => a.t - b.t)
     this.vanishAt = events.find(event => event.eventType === "vanish")?.t
     const last = this.vanishAt ?? end
-    this.looks = looks.map((event, k) => ({ t: event.t, until: event.until ?? looks[k + 1]?.t ?? last, parts: (event.params as unknown as LookParams).parts }))
+    this.looks = looks.map((event, k) => ({ t: event.t, until: event.until ?? looks[k + 1]?.t ?? last, parts: (event.params as unknown as AppearanceParams).parts }))
     this.blinks = events.filter(event => event.eventType === "blink")
       .map(event => ({ t: event.t, until: event.until ?? last, params: event.params as unknown as BlinkParams }))
   }

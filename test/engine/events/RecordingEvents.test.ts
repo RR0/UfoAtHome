@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import silly from "../../../public/demo-data/observer-silly-le-long.json"
 import sillyTemoins from "../../../public/demo-data/observer-silly-le-long-temoins.json"
+import valensole from "../../../public/demo-data/observer-valensole.json"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 import reference from "./silly-poses.json"
 
@@ -71,6 +72,23 @@ describe("RecordingEvents", () => {
     expect(at(1000, "rouge").transparency).toBe(0)
     expect(at(500, "rouge").transparency).toBe(1)
     expect(toSightingJson(sighting).timeline.keyframes).toEqual([])
+  })
+
+  it("walks Masse to the craft and follows it with his eyes as it leaves, as the poses written before did", () => {
+    const sighting = fromSightingJson(valensole as unknown as SightingRecordingJson)
+    // The poses Valensole held before its events: where he stood, and the look that followed the craft (7868ec62).
+    const before = [[0, 43.845508, 180, 2], [15000, 43.845304, 180, 2], [30000, 43.845099, 180, 2], [45000, 43.844895, 180, 2], [55000, 43.844758, 180, 2],
+      [250000, 43.844758, 180, 2], [254000, 43.844758, 180, 3.08], [256000, 43.844758, 180, 3.29], [258000, 43.844758, 223.27, 18.94],
+      [260000, 43.844758, 239.62, 27.85], [262000, 43.844758, 246.11, 32.67], [262500, 43.844758, 247.8, 33.47], [270000, 43.844758, 247.8, 33.47]]
+    for (const [t, lat, headingDeg, pitchDeg] of before) {
+      const pose = sighting.observerTrack.getInterpolatedPoseAt(t)!
+      // One even walk slowing into its stop, where four stretches were written: within a metre on the way, exact where he stops.
+      expect(Math.abs(pose.lat! - lat) * 111320, `place at ${t}`).toBeLessThan(t === 0 || t >= 55000 ? 0.01 : 1)
+      // The look that trails the craft: a share of the way towards it, which the poses before held at 85 to 88 %.
+      expect(angle(pose.headingDeg!, headingDeg), `heading at ${t}`).toBeLessThan(4)
+      expect(Math.abs(pose.pitchDeg - pitchDeg), `pitch at ${t}`).toBeLessThan(0.5)
+    }
+    expect(toSightingJson(sighting).observerTrack).toBeUndefined()
   })
 
   it("writes back the events and not what they give, while it is what they give", () => {

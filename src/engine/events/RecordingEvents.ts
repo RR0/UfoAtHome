@@ -3,6 +3,7 @@ import type { ObserverKeyframe } from "../model/ObserverTrack.js"
 import type { Sighting } from "../model/Sighting.js"
 import { DriveExpansion } from "./DriveExpansion.js"
 import { GazeExpansion } from "./GazeExpansion.js"
+import { FootExpansion } from "./FootExpansion.js"
 import { PhenomenonExpansion } from "./PhenomenonExpansion.js"
 import { Timeline } from "../model/Timeline.js"
 import { SightingShapes } from "../persistence/SightingShapes.js"
@@ -26,7 +27,8 @@ export interface EventsExpansion {
  * them are not applied (a recording written before them, or one exported expanded, reads as it did); a vehicle with a track of its own keeps
  * it. What the events give is written back as the events alone as long as it is what they give: an edit of the poses keeps the edited poses.
  *
- * The observer's kinds, all needing a `drive` (the motion of the vehicle they are in):
+ * The observer's kinds on foot: look (a look held), walk (see WalkParams), follow (see FollowParams). In a vehicle, all needing a `drive` (its
+ * motion):
  * - drive: see DriveParams;
  * - lookAhead: see LookAheadParams;
  * - lean: see LeanParams;
@@ -131,7 +133,15 @@ export class RecordingEvents {
     const events = (sighting.events ?? []).filter(event => (event.who ?? "observer") === "observer")
     const drive = events.find(event => event.eventType === "drive")
     const lookAhead = events.find(event => event.eventType === "lookAhead")
-    if (!drive || !lookAhead || sighting.observerTrack.allKeyframes.length > 0) return
+    if (sighting.observerTrack.allKeyframes.length > 0) return
+    if (!drive) {
+      // On foot: where they walk, what they look at, what they follow.
+      if (new FootExpansion(sighting, events).keyframes().length > 0) {
+        sighting.eventsExpansion = { observerTrack: JSON.stringify(sighting.observerTrack.toJSON()), decorTracks: {} }
+      }
+      return
+    }
+    if (!lookAhead) return
     const until = drive.until ?? RecordingEvents.endOf(sighting)
     const driveParams = drive.params as unknown as DriveParams
     const expansion = new DriveExpansion(driveParams, drive.t, until)

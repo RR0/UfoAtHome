@@ -183,12 +183,12 @@ def events(recording, variant):
             "place": target,
             "metres": wrap([{"t": t, "widthM": round(w, 3), "heightM": round(h, 3)} for t, w, h in ph["metres"]], "derived",
                            "The GEIPAN simulation's size and elevation fitted to T1's pointings (CR p.49-54), as metres at its distance then")}},
-        {"type": "event", "eventType": "look", "who": "phenomenon", "t": 0, "until": ph["switch"], "params": {"parts": wrap([
+        {"type": "event", "eventType": "appearance", "who": "phenomenon", "t": 0, "until": ph["switch"], "params": {"parts": wrap([
             {"sourceId": "pan", "title": TITLES["pan"], "kind": "polygon", "points": BAR, "color": "#1d1f22", "widthShare": 1, "heightShare": 0.07, "minHeightDeg": 0.12},
             light("blanc-g", -0.5, WHITE), light("blanc-d", 0.5, WHITE),
             light("rouge", -0.385, "#ff2a1f")], "stated", "From the front, low and far: the dark flat bar of drawing 004, its two white lights at its ends and "
                                                          "the red one about 11.5 % of its span right of the left one (CR p.4-6)")}},
-        {"type": "event", "eventType": "look", "who": "phenomenon", "t": ph["switch"], "until": ph["vanish"], "params": {"parts": wrap([
+        {"type": "event", "eventType": "appearance", "who": "phenomenon", "t": ph["switch"], "until": ph["vanish"], "params": {"parts": wrap([
             {"sourceId": "pan", "title": TITLES["pan"], "kind": "polygon", "points": VEE, "color": "#8e9194", "widthShare": 1, "heightShare": 0.2},
             rect("rect-g", -0.4525), rect("rect-d", 0.4525)], "stated", "Past the bridge, close and from behind: the grey V of drawing 005, "
                                                                         "\"représente correctement la forme\", and its two white rectangles (CR p.8)")}},

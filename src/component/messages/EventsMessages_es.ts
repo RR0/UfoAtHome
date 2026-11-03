@@ -8,13 +8,13 @@ export const eventsMessages_es: EventsMessages = {
   overriddenShapesNote: "Las formas propias de esta grabación prevalecen sobre los eventos del fenómeno.",
   parts: "{n} partes",
   resetToEvents: "Volver a los eventos",
-  kinds: { drive: "Conduce", lookAhead: "Mira la carretera", lean: "Se inclina", watch: "Mira por el retrovisor", stand: "Se sitúa", look: "Aspecto", blink: "Parpadea", vanish: "Desaparece" },
+  kinds: { drive: "Conduce", lookAhead: "Mira la carretera", lean: "Se inclina", watch: "Mira por el retrovisor", stand: "Se sitúa", look: "Mira", appearance: "Aspecto", walk: "Camina", follow: "Sigue con la mirada", blink: "Parpadea", vanish: "Desaparece" },
   params: {
     vehicle: "Vehículo", path: "Trayecto", speeds: "Velocidades", speedDivisors: "Velocidades divididas por", through: "Pasa por", eye: "Ojo en el vehículo",
     fovDeg: "Campo de visión", target: "Mira", pitchShare: "Alza la vista hasta (parte de su altura)", keepDeg: "Lo mantiene a menos de", glanceBeyondDeg: "Vistazos más allá de",
     glanceS: "Vistazo", roadS: "De vuelta a la carretera", offsetM: "Desplaza el ojo", holdS: "Durante", turnS: "En", mirror: "Retrovisor", firstS: "Primero",
     mirrorS: "En el retrovisor", glancesUntil: "Vistazos directos hasta",
-    place: "Dónde", metres: "Tamaño (ancho, altura sobre el ojo)", parts: "Partes", onS: "Encendido", offS: "Apagado", off: "Apagado, está"
+    place: "Dónde", metres: "Tamaño (ancho, altura sobre el ojo)", parts: "Partes", onS: "Encendido", offS: "Apagado", off: "Apagado, está", from: "Desde", to: "Hasta", share: "Parte del camino hacia él", headingDeg: "Rumbo", pitchDeg: "Inclinación"
   },
   from: "de",
   to: "a",

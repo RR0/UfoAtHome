@@ -77,10 +77,34 @@ export interface FlyParams {
   heights: { t: number, altitudeM: number }[]
 }
 
+/** The observer holds a look (`look` with `who` the observer): where they look, from the event's start on (until another look or a follow turns them). */
+export interface HoldLookParams {
+  headingDeg: number
+  pitchDeg: number
+  /** Their field of view, degrees (60 when absent: an eye). */
+  fovDeg?: number
+}
+
+/** The observer walks from `from` to `to`, from the event's start to its end, as a person walks (see HumanMotion.paced and Gait). */
+export interface WalkParams {
+  from: EventPlace
+  to: EventPlace
+}
+
+/**
+ * The observer follows a body of the recording with their eyes (`target`, its id), from the event's start to its end: at each of the body's
+ * keyframes in between, their look turns `share` of the way from where it was at the start towards the body, so that it trails what it follows
+ * instead of holding it in the middle, as eyes do a moving thing.
+ */
+export interface FollowParams {
+  target: string
+  share: number
+}
+
 /**
  * The phenomenon stands at a place the observer stated (`who` "phenomenon"): its direction in their sky is read from there at every instant,
  * and its size from `metres`, its width and its height above the observer's eye, which may change (a reconstitution fitted to what they
- * pointed at). How it looks is said by `look`.
+ * pointed at). How it looks is said by `appearance`.
  */
 export interface StandParams {
   place: EventPlace
@@ -110,8 +134,8 @@ export interface LookPart {
   upShare?: number
 }
 
-/** How the phenomenon looks from `t` on (as the observer drew it): its parts. A part another look has and this one has not is not seen. */
-export interface LookParams {
+/** How the phenomenon looks from `t` on (`appearance`, as the observer drew it): its parts. A part another appearance has and this one has not is not seen. */
+export interface AppearanceParams {
   parts: LookPart[]
 }
 
