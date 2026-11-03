@@ -41,6 +41,8 @@ export interface BodyEditorHost {
   lookAt(body: BodyJson): void
   /** The playhead, ms. */
   currentTime(): number
+  /** The body picked in the list changed (or the list did): what is shown of that body elsewhere follows it (its events). */
+  bodySelected?(id: string | undefined): void
   /** Moves the playhead to `t`, ms: how a keyframe picked in the list is shown. */
   seekTo(t: number): void
   /** The body as it stands at `t` — see SceneElement.bodyReading. */
@@ -98,12 +100,18 @@ export class BodyEditor {
     this.render()
   }
 
+  /** The body picked in the list. */
+  get selectedId(): string | undefined {
+    return this.currentId
+  }
+
   /** Shows what the recording states now: after a recording is loaded, or a shape renamed. */
   sync(): void {
     const bodies = this.bodies
     if (!bodies.some(body => body.id === this.currentId)) this.currentId = bodies[0]?.id
     this.input("body-interpretation-title").value = this.host.said().read(this.interpretation?.title) ?? ""
     this.list?.setItems(bodies.map(body => ({ id: body.id, label: this.labelOf(body) })), this.currentId)
+    this.host.bodySelected?.(this.currentId)
     const start = this.host.newBodyStart()
     this.list?.setAddState(start !== undefined, !start ? undefined
       : start.label !== undefined ? this.messages.addBodyHint.replace("{shape}", start.label) : this.messages.addBodyHintView)

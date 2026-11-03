@@ -1,12 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest"
 import silly from "../../public/demo-data/observer-silly-le-long.json"
+import valensole from "../../public/demo-data/observer-valensole.json"
 import { EventsPanel } from "../../src/component/EventsPanel.js"
 import { eventsMessages_fr } from "../../src/component/messages/EventsMessages_fr.js"
 import { TimelineTracks } from "../../src/component/TimelineTracks.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-function mounted(actor: "observer" | "phenomenon" = "observer") {
-  const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
+function mounted(actor: "observer" | "phenomenon" | "bodies" = "observer", json: unknown = silly, now = 0) {
+  const sighting = fromSightingJson(json as SightingRecordingJson)
   const root = document.createElement("div")
   root.innerHTML = `<h3><span class="events-title"></span></h3><div class="events-body"></div>`
   document.body.append(root)
@@ -14,11 +15,18 @@ function mounted(actor: "observer" | "phenomenon" = "observer") {
   const panel = new EventsPanel(root, {
     sighting: () => sighting,
     editing: () => calls.editing++,
-    changed: () => calls.changed++,
-    seek: t => calls.seek.push(t)
+    changed: () => { calls.changed++; panel.render() },
+    seek: t => calls.seek.push(t),
+    now: () => now,
+    currentBody: () => sighting.interpretation?.bodies[0]?.id
   }, eventsMessages_fr, actor)
   panel.render()
-  return { sighting, root, panel, calls }
+  const picker = () => root.querySelector<HTMLSelectElement>(`#${actor}-event`)!
+  const pick = (index: number) => {
+    picker().value = picker().options[index].value
+    picker().dispatchEvent(new Event("change"))
+  }
+  return { sighting, root, panel, calls, picker, pick }
 }
 
 describe("EventsPanel", () => {
@@ -26,23 +34,23 @@ describe("EventsPanel", () => {
     document.body.innerHTML = ""
   })
 
-  it("lists the observer's events, their parameters and where those come from", () => {
-    const { root } = mounted()
-    const items = [...root.querySelectorAll(".events-list > li")]
-    expect(items.map(item => item.querySelector(".event-kind")!.textContent)).toEqual(["Conduit", "Regarde la route", "Se penche", "Regarde dans le rétroviseur"])
-    // The aircraft's flight is not the observer's: it is the aircraft's own.
-    expect(root.textContent).not.toContain("fly")
-    const drive = items[0].textContent!
-    expect(drive).toContain("Vitesses")
-    expect(drive).toContain("points")
-    expect(items[0].querySelector(".event-basis[data-basis='derived']")).not.toBeNull()
+  it("lists the observer's events to pick from, and shows the picked one's parameters, and where they come from", () => {
+    const { root, picker, pick, calls } = mounted()
+    expect([...picker().options].map(option => option.text)).toEqual(["0:00 · Conduit", "0:00 · Regarde la route", "1:33.8 · Se penche", "1:33.8 · Regarde dans le rétroviseur"])
+    // One event's fields at a time.
+    expect(root.querySelector(".events-fields")!.textContent).toContain("Vitesses")
+    expect(root.querySelector(".events-fields .event-basis[data-basis='derived']")).not.toBeNull()
+    pick(2)
+    expect(calls.seek).toEqual([93800])
+    expect(root.querySelector(".events-fields")!.textContent).toContain("Déplace l'œil de")
+    expect(root.querySelector(".events-fields")!.textContent).not.toContain("Vitesses")
     expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.derivedNote)
   })
 
   it("works the poses out again when a speed is typed, and writes the events alone", () => {
     const { sighting, root, calls } = mounted()
     const before = sighting.observerTrack.allKeyframes.find(keyframe => keyframe.t === 2000)!.pose.lat!
-    const speed = root.querySelectorAll<HTMLInputElement>(".events-list > li:first-child .event-rows input")[1]
+    const speed = root.querySelectorAll<HTMLInputElement>(".events-fields .event-rows input")[1]
     speed.value = "120"
     speed.dispatchEvent(new Event("change"))
     expect(calls).toMatchObject({ editing: 1, changed: 1 })
@@ -63,6 +71,25 @@ describe("EventsPanel", () => {
     expect(sighting.observerTrack.allKeyframes[0].pose.headingDeg).not.toBe(10)
     expect(toSightingJson(sighting).observerTrack).toBeUndefined()
   })
+
+  it("adds an event of a kind at the playhead, picks it, and removes it, what is said of the others' parameters following them", () => {
+    const { sighting, root, picker } = mounted("bodies", valensole, 100000)
+    const count = sighting.events!.length
+    root.querySelector<HTMLButtonElement>("#bodies-event-add")!.click()
+    root.querySelector<HTMLElement>("#bodies-event-kind-rise")!.click()
+    expect(sighting.events).toHaveLength(count + 1)
+    expect(sighting.events![count]).toMatchObject({ eventType: "rise", who: "craft", t: 100000, until: 103000 })
+    expect(picker().value).toBe(String(count))
+    // A rise is drawn at once: the craft is off the ground in the middle of it.
+    expect(sighting.interpretation!.bodies[0].track.some(key => key.t > 100000 && key.t < 103000 && (key.altitudeAboveGroundM ?? 0) > 0)).toBe(true)
+    // The first event, and what was said of the craft's first rise (the fourth event), which moves up one.
+    const riseBasis = sighting.provenance.at("events.3.params.angleDeg")
+    picker().value = "0"
+    picker().dispatchEvent(new Event("change"))
+    root.querySelector<HTMLButtonElement>("#bodies-event-delete")!.click()
+    expect(sighting.events).toHaveLength(count)
+    expect(sighting.provenance.at("events.2.params.angleDeg")).toEqual(riseBasis)
+  })
 })
 
 describe("EventsPanel of the phenomenon", () => {
@@ -71,14 +98,12 @@ describe("EventsPanel of the phenomenon", () => {
   })
 
   it("lists what the phenomenon did, and works the account's shapes out again when its size is typed", () => {
-    const { sighting, root } = mounted("phenomenon")
-    const items = [...root.querySelectorAll(".events-list > li")]
-    expect(items.map(item => item.querySelector(".event-kind")!.textContent)).toEqual(["Se tient", "Aspect", "Aspect", "Clignote", "Clignote", "Disparaît"])
-    expect(items[1].textContent).toContain("4 parties")
+    const { sighting, root, picker } = mounted("phenomenon")
+    expect([...picker().options].map(option => option.text.split(" · ")[1])).toEqual(["Se tient", "Aspect", "Aspect", "Clignote", "Clignote", "Disparaît"])
     expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.derivedShapesNote)
     const before = sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg
     // Its width at 36.6 s (the third row: an instant, a width, a height each), doubled.
-    const width = items[0].querySelectorAll<HTMLInputElement>(".event-rows input")[7]
+    const width = root.querySelectorAll<HTMLInputElement>(".events-fields .event-rows input")[7]
     width.value = String(Number(width.value) * 2)
     width.dispatchEvent(new Event("change"))
     expect(sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg).toBeGreaterThan(before)

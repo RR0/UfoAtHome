@@ -1527,7 +1527,13 @@ export class SightingEditorElement extends HTMLElement {
         this.phenomenonEventsPanel.render()
         this.bodiesEventsPanel.render()
       },
-      seek: (t: number) => this.goToMark(t)
+      seek: (t: number) => this.goToMark(t),
+      now: () => this.ufoElement.currentTime,
+      currentBody: () => this.bodyEditor?.selectedId ?? this.ufoElement.sighting.interpretation?.bodies[0]?.id,
+      bodyLabel: (id: string) => {
+        const body = this.ufoElement.sighting.interpretation?.bodies.find(candidate => candidate.id === id)
+        return this.said.read(body?.title) ?? id
+      }
     }
     this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, this.messages.events)
     this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, this.messages.events, "phenomenon")
@@ -8329,6 +8335,7 @@ export class SightingEditorElement extends HTMLElement {
     this.bodyEditorLoading ??= import("./BodyEditor.js").then(({ BodyEditor }) => {
       this.bodyEditor = new BodyEditor(this.shadow.getElementById("body-editor")!, {
         sighting: () => this.ufoElement.sighting,
+        bodySelected: () => this.bodiesEventsPanel.render(),
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
         positionPlace: () => this.framePlace(),

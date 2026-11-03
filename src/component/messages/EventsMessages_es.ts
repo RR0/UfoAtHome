@@ -1,7 +1,9 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_es: EventsMessages = {
-  title: "Eventos",
+  title: "Eventos del observador",
+  phenomenonTitle: "Eventos del fenómeno",
+  bodyTitle: "Eventos de {body}",
   derivedNote: "Las poses del observador se calculan a partir de estos eventos. Mover al observador o girar su mirada a mano escribe poses propias, que prevalecen sobre ellos.",
   overriddenNote: "Las poses propias de esta grabación prevalecen sobre sus eventos.",
   derivedShapesNote: "Las formas del relato se calculan a partir de lo que hizo el fenómeno. Dibujarlas a mano escribe formas propias, que prevalecen sobre estos eventos.",
@@ -9,6 +11,7 @@ export const eventsMessages_es: EventsMessages = {
   parts: "{n} partes",
   derivedBodiesNote: "Los fotogramas clave de estos cuerpos se calculan a partir de lo que hicieron. Los fotogramas clave puestos a mano prevalecen sobre estos eventos.",
   overriddenBodiesNote: "Fotogramas clave propios prevalecen sobre estos eventos.",
+  add: "Añadir un evento", remove: "Eliminar el evento", none: "Ningún evento",
   resetToEvents: "Volver a los eventos",
   kinds: { drive: "Conduce", lookAhead: "Mira la carretera", lean: "Se inclina", watch: "Mira por el retrovisor", stand: "Se sitúa", look: "Mira", appearance: "Aspecto", walk: "Camina", follow: "Sigue con la mirada", blink: "Parpadea", vanish: "Desaparece", motion: "Se mueve", spin: "Gira", rise: "Se eleva", ride: "Va en" },
   params: {

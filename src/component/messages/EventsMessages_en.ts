@@ -1,7 +1,9 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_en: EventsMessages = {
-  title: "Events",
+  title: "Observer's events",
+  phenomenonTitle: "Phenomenon's events",
+  bodyTitle: "Events of {body}",
   derivedNote: "The observer's poses are worked out from these events. Moving the observer or turning their gaze by hand writes poses of your own, which win over them.",
   overriddenNote: "This recording's own poses win over its events.",
   derivedShapesNote: "The account's shapes are worked out from what the phenomenon did. Drawing them by hand writes shapes of your own, which win over these events.",
@@ -9,6 +11,7 @@ export const eventsMessages_en: EventsMessages = {
   parts: "{n} parts",
   derivedBodiesNote: "These bodies' keyframes are worked out from what they did. Keyframes set by hand win over these events.",
   overriddenBodiesNote: "Keyframes of its own win over these events.",
+  add: "Add an event", remove: "Remove the event", none: "No event",
   resetToEvents: "Back to the events",
   kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in" },
   params: {

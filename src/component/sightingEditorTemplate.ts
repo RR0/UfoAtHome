@@ -695,11 +695,6 @@ export const html = `
     <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
-  <!-- What the phenomenon did, as events whose shapes the player works out (see EventsPanel): absent from a recording that states none. -->
-  <div class="form-section events-section" id="phenomenon-events-section" hidden>
-  <h3 class="section-title"><span id="label-section-phenomenon-events" class="events-title">Events</span></h3>
-  <div class="events-body"></div>
-  </div>
   <div class="toolbar">
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
          picked shape, gone while there is none. -->
@@ -772,15 +767,20 @@ export const html = `
     </div>
     </div>
   </div>
+  <!-- What the phenomenon did, as events whose shapes the player works out (see EventsPanel): after the shapes, whose list it is not. -->
+  <div class="form-section events-section" id="phenomenon-events-section" hidden>
+  <h3 class="section-title"><span id="label-section-phenomenon-events" class="events-title">Events</span></h3>
+  <div class="events-body"></div>
+  </div>
   </section>
   <section class="subgroup-panel" id="shape-bodies" aria-labelledby="label-bodies-subgroup" hidden>
-    <!-- What the bodies did, as events whose keyframes the player works out (see EventsPanel): absent from a recording that states none. -->
+    <div class="toolbar">
+      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-list, #body-editor .body-keys { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; } #body-editor .body-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-parameters[hidden] { display: none !important; } #body-editor .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #body-editor .parameter-set { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor .parameter-row { flex-basis: 100%; } #body-editor input.invalid { outline: 2px solid #c33; } #body-editor input[data-key="title"] { width: 18em; } #body-editor input[data-key="id"], #body-editor input[data-key="outlineNode"] { width: 10em; } #body-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="body-editor"></div>
+    </div>
+    <!-- What the bodies did, as events whose keyframes the player works out (see EventsPanel): the picked body's, after its fields. -->
     <div class="form-section events-section" id="bodies-events-section" hidden>
     <h3 class="section-title"><span id="label-section-bodies-events" class="events-title">Events</span></h3>
     <div class="events-body"></div>
-    </div>
-    <div class="toolbar">
-      <style>#body-editor { flex-basis: 100%; min-width: 0; } #body-editor .body-list, #body-editor .body-keys { flex-basis: 100%; min-width: 0; } #body-editor .body-editor, #body-editor .body-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-fields { flex-basis: 100%; min-width: 0; } #body-editor .body-fields[hidden], #body-editor [hidden] { display: none !important; } #body-editor select { min-width: 0; width: 100%; } #body-editor .body-intro { flex-basis: 100%; margin: 0; } #body-editor .body-explains { flex-basis: 100%; min-width: 0; box-sizing: border-box; margin: 0; } #body-editor #body-explains { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor #body-explains label { white-space: normal; } #body-editor .body-track { margin: 0; } #body-editor details { flex-basis: 100%; min-width: 0; } #body-editor details[open] { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor details > summary { flex-basis: 100%; } #body-editor input, #body-editor select { max-width: 100%; box-sizing: border-box; } #body-editor input[type="color"] { width: 3em; padding: 0; } #body-editor #body-id, #body-editor #body-outline-node { width: 10em; } #body-editor #body-title, #body-editor #body-interpretation-title { width: 18em; } #body-editor label { min-width: 0; max-width: 100%; } #body-editor .body-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #body-editor .body-parameters[hidden] { display: none !important; } #body-editor .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #body-editor .parameter-set { display: flex; flex-wrap: wrap; gap: .3em 1em; } #body-editor .parameter-row { flex-basis: 100%; } #body-editor input.invalid { outline: 2px solid #c33; } #body-editor input[data-key="title"] { width: 18em; } #body-editor input[data-key="id"], #body-editor input[data-key="outlineNode"] { width: 10em; } #body-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="body-editor"></div>
     </div>
   </section>
 </section>

@@ -82,12 +82,14 @@ export class WitnessErrorView {
 .section-head .model-pick { display: inline-flex; align-items: center; gap: 8px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .section-intro { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--ink-dim); }
 .parameter-rows { grid-column: 1 / -1; display: grid; gap: 6px; }
-.parameter-row { display: grid; grid-template-columns: minmax(10em, auto) minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline; padding: 10px 14px;
+/* Its own rows only: a ParameterForm names its rows the same, and these, laid on them, crushed a set's label under its ticks (a body's
+   "Stands for the shapes"). */
+.parameter-rows > .parameter-row { display: grid; grid-template-columns: minmax(10em, auto) minmax(0, 1fr) auto; gap: 4px 14px; align-items: baseline; padding: 10px 14px;
   border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground); }
-.parameter-row strong { font-size: 14px; }
-.parameter-row .scope { color: var(--ink-faint); font-size: 13px; }
+.parameter-rows > .parameter-row strong { font-size: 14px; }
+.parameter-rows > .parameter-row .scope { color: var(--ink-faint); font-size: 13px; }
 .extrapolation { grid-column: 1 / -1; margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); font-size: 13px; color: var(--ink); }
-@container (max-width: 640px) { .moon-gauge { grid-template-columns: minmax(0, 1fr); } .parameter-row { grid-template-columns: minmax(0, 1fr) auto; } }
+@container (max-width: 640px) { .moon-gauge { grid-template-columns: minmax(0, 1fr); } .parameter-rows > .parameter-row { grid-template-columns: minmax(0, 1fr) auto; } }
 `
 
   private readonly fields: WitnessField[] = []
