@@ -46,6 +46,11 @@ class SchemaBuilder {
    * recursive, but nothing stops one becoming so, and an unguarded walk would not survive it. */
   private readonly open = new Set<ts.Type>()
 
+  /** Whether a declaration file is one of RR0's packages (@rr0/data…), whose types the format shares. */
+  static fromRR0(fileName: string): boolean {
+    return /[\\/]node_modules[\\/]@rr0[\\/]/.test(fileName)
+  }
+
   constructor(private readonly program: ts.Program) {
     this.checker = program.getTypeChecker()
   }
@@ -68,17 +73,35 @@ class SchemaBuilder {
 
   fieldsOf(type: ts.Type): Record<string, SchemaField> {
     const fields: Record<string, SchemaField> = {}
-    for (const property of this.checker.getPropertiesOfType(type)) {
-      const declaration = property.valueDeclaration ?? property.declarations?.[0]
-      // Only what this project declares. A property whose declaration is in a .d.ts came from the
-      // standard library, and offering it would be offering `push`, `map` and `toLocaleString` as
-      // keys of a recording — which is what `timeline.groups` did until this line existed.
-      if (!declaration || declaration.getSourceFile().isDeclarationFile) {
-        continue
-      }
+    for (const property of this.offeredPropertiesOf(type)) {
+      const declaration = (property.valueDeclaration ?? property.declarations?.[0])!
       fields[property.name] = this.describe(this.checker.getTypeOfSymbolAtLocation(property, declaration), property)
     }
     return fields
+  }
+
+  /** The properties of `type` a recording may hold, without describing them (which descends into theirs). */
+  private offeredPropertiesOf(type: ts.Type): ts.Symbol[] {
+    const offered: ts.Symbol[] = []
+    for (const property of this.checker.getPropertiesOfType(type)) {
+      const declaration = property.valueDeclaration ?? property.declarations?.[0]
+      // Only what this project and RR0's packages declare. A property whose declaration is in any other
+      // .d.ts came from the standard library, and offering it would be offering `push`, `map` and
+      // `toLocaleString` as keys of a recording — which is what `timeline.groups` did until this line
+      // existed. RR0's own types (@rr0/data's PeopleJson, SourceJson…) are the format's too: a recording
+      // speaks them, as rr0.org does.
+      if (!declaration || (declaration.getSourceFile().isDeclarationFile && !SchemaBuilder.fromRR0(declaration.getSourceFile().fileName))) {
+        continue
+      }
+      // What RR0 keeps for its own older files is neither offered nor written here. This project's own deprecated fields stay: it still
+      // reads them (a facade's `plain`), so a file holding one is still a valid file.
+      const fromRR0 = SchemaBuilder.fromRR0(declaration.getSourceFile().fileName)
+      if (fromRR0 && property.getJsDocTags(this.checker).some(tag => tag.name === "deprecated")) {
+        continue
+      }
+      offered.push(property)
+    }
+    return offered
   }
 
   private describe(type: ts.Type, property?: ts.Symbol): SchemaField {
@@ -141,9 +164,10 @@ class SchemaBuilder {
    * empty one — which would read as "nothing goes here" in the editor, the opposite of the truth.
    * An array has none either, whatever its prototype says. */
   private isObject(type: ts.Type): boolean {
-    return (type.flags & ts.TypeFlags.Object) !== 0
+    // An intersection is an object too: RR0's types are written as one (PeopleJson is RR0DataJson & its own fields).
+    return (type.flags & (ts.TypeFlags.Object | ts.TypeFlags.Intersection)) !== 0
       && !this.checker.isArrayType(type)
-      && Object.keys(this.fieldsOf(type)).length > 0
+      && this.offeredPropertiesOf(type).length > 0
   }
 
   /** The branches' fields as one set. A key several branches share keeps the first description,

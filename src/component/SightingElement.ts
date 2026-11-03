@@ -1507,7 +1507,8 @@ export class SightingElement extends HTMLElement {
     const dt = document.createElement("dt")
     dt.textContent = label
     const dd = document.createElement("dd")
-    const name = source.title ?? source.url ?? ""
+    // A title in the reader's language, the source being RR0's (see RecordingSource).
+    const name = this.said.read(source.title) ?? source.url ?? ""
     if (source.url && /^https?:\/\//i.test(source.url)) {
       const link = document.createElement("a")
       link.href = source.url
