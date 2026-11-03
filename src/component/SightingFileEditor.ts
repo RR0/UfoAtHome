@@ -253,9 +253,12 @@ export class SightingFileEditor {
           ".cm-changed-line": { backgroundColor: "color-mix(in srgb, #2f81f7 13%, transparent)" },
           // What the picture showed: warmer and edged, over the changed lines' tint when both are there.
           ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
-          // The search panel's colours are the page's own, in the dark as in the light.
-          // The search panel follows the page, not the system: derived from the text colour the page gave, as the editor's own caret is.
-          ".cm-panels": { backgroundColor: "color-mix(in srgb, currentColor 6%, transparent)", color: "inherit", borderColor: "color-mix(in srgb, currentColor 25%, transparent)" },
+          // The search panel follows the page, not the system: derived from the text colour the page gave, as the editor's own caret is. Over
+          // the editor's own ground, not over nothing: it stays at the top while the text scrolls under it, and a tint alone let the text
+          // show through its fields and buttons.
+          ".cm-panels": {
+            backgroundColor: "color-mix(in srgb, currentColor 6%, var(--ground-raised, Canvas))", color: "inherit", borderColor: "color-mix(in srgb, currentColor 25%, transparent)"
+          },
           // Fields and buttons likewise: left to the search panel's defaults they took the page's text colour on a white ground, and what was
           // typed was not legible (white on white on a light page).
           ".cm-panel.cm-search input, .cm-panel.cm-search button": { fontSize: "inherit", color: "inherit" },
