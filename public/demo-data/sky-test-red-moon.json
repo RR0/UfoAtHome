@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-red-moon",
   "image": "https://ufoathome.org/demo-data/share/sky-test-red-moon.jpg",
   "tags": [
@@ -13,22 +13,18 @@
     "es": "Un cielo de prueba para la «luna rojiza» (la «lune rousse» del folclore francés): la Luna llena del 1 de mayo de 2026, saliendo sobre París (21:24). La «lune rousse» es la lunación que empieza con la primera Luna nueva después de Pascua (aquí el 17 de abril, siendo Pascua el 5): su Luna llena sale frente a un Sol ya alto, y por tanto baja. Culmina aquí a solo 20° (frente a 56° en noviembre), vista a través de mucho aire, que le quita el azul: eso es lo que la vuelve rojiza. No es ni más grande ni más brillante que otra (esta incluso está cerca del apogeo, a 402 000 km, 0,495° de ancho), y no es ella quien quema los brotes jóvenes: son las noches despejadas de primavera, que dejan escapar el calor del día, haya Luna o no. La escena solo hace lo que hace el aire: el color viene del recorrido por la atmósfera a cada altura.",
     "it": "Un cielo di prova per la «luna rossa» (la «lune rousse» del folclore francese): la Luna piena del 1° maggio 2026, al sorgere su Parigi (21:24). La «lune rousse» è la lunazione che comincia con la prima Luna nuova dopo Pasqua (qui il 17 aprile, essendo Pasqua il 5): la sua Luna piena sorge di fronte a un Sole già alto, e quindi bassa. Culmina qui a soli 20° (contro 56° a novembre), vista attraverso molta aria, che le toglie il blu: è questo che la rende rossastra. Non è né più grande né più luminosa di un'altra (questa è anzi vicina all'apogeo, a 402 000 km, 0,495° di larghezza), e non è lei a bruciare i germogli: sono le notti serene di primavera, che lasciano fuggire il calore del giorno, con o senza Luna. La scena fa solo ciò che fa l'aria: il colore viene dal percorso nell'atmosfera a ogni altezza."
   },
-  "time": {
-    "year": 2026,
-    "month": 5,
-    "day": 1,
-    "hour": 21,
-    "minute": 30
-  },
+  "time": "2026-05-01T21:30",
   "utcOffsetHours": 2,
   "durationSeconds": 900,
-  "place": [
-    {
-      "lat": 48.8566,
-      "lng": 2.3522,
-      "name": "Paris, France"
-    }
-  ],
+  "place": {
+    "name": "Paris, France",
+    "locations": [
+      {
+        "lat": 48.8566,
+        "lng": 2.3522
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

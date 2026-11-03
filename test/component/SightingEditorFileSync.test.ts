@@ -485,7 +485,7 @@ describe("a place said from something else", () => {
     const element = mount()
     addBuildings(element, 2)
     const json = element.sightingData
-    element.sightingData = { ...json, place: [{ lat: 44, lng: 5 }], decor: json.decor!.map((decor, i) => ({ ...decor, eastM: i * 100, northM: 0 })) }
+    element.sightingData = { ...json, place: { locations: [{ lat: 44, lng: 5 }] }, decor: json.decor!.map((decor, i) => ({ ...decor, eastM: i * 100, northM: 0 })) }
     const [house, shed] = element.sightingData.decor!
     const inside = element as unknown as { selectDecor(id: string): void }
     inside.selectDecor(shed.id)
@@ -505,7 +505,7 @@ describe("a place said from something else", () => {
     const element = mount()
     addBuildings(element, 1)
     const json = element.sightingData
-    element.sightingData = { ...json, place: [{ lat: 44, lng: 5 }], decor: json.decor!.map(decor => ({ ...decor, eastM: 100, northM: 0 })) }
+    element.sightingData = { ...json, place: { locations: [{ lat: 44, lng: 5 }] }, decor: json.decor!.map(decor => ({ ...decor, eastM: 100, northM: 0 })) }
     const root = element.shadowRoot!
     const house = element.sightingData.decor![0]
     const position = root.querySelector("rr0-input-position[name=observer]") as HTMLElement
@@ -533,7 +533,7 @@ describe("the weather of a recording", () => {
 
   const station = {
     version: 1, id: "case", time: { value: { year: 1981, month: 1, day: 8, hour: 17, minute: 0, second: 0 }, basis: "stated", rationale: "r" },
-    durationSeconds: 40, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 40000, shapes: [] }] }, place: [{ lat: 43.4, lng: 6.5 }],
+    durationSeconds: 40, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 40000, shapes: [] }] }, place: { locations: [{ lat: 43.4, lng: 6.5 }] },
     weatherSource: { id: "station", name: "A station" },
     weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0.25, cloudBaseM: 3000, relativeHumidity: 0.3, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0 } }] }
   }

@@ -142,6 +142,9 @@ class SiteBuilder {
     // be checked before it is played: a recording's (linked from the format page), a case's (which the editor of a case completes
     // from) and an interview transcript's. Each at two addresses: under the version of its format, which is its $id and what a file
     // names in its own $schema, and at the root, the current version, where links made before formats had versions point.
+    // The schemas of the versions before the current one stay at their addresses, for the files that name them: kept in site/schema/,
+    // as they were published, since the types only describe the current one.
+    await cp(join(this.root, "site", "schema"), join(this.out, "schema"), { recursive: true })
     for (const format of ["sighting", "case", "interview"] as const) {
       const schema = join(this.root, "src", "generated", `${format}.schema.json`)
       const versioned = join(this.out, new URL(FormatVersion.schemaUrl(format)).pathname)

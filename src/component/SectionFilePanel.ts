@@ -1,6 +1,8 @@
 import type { FrozenData, RecordingSectionName, SectionAnnex } from "../engine/model/FrozenData.js"
 import { FrozenGroups, RecordingSections } from "../engine/model/FrozenData.js"
 import type { Sighting } from "../engine/model/Sighting.js"
+import { FormatVersion } from "../engine/persistence/FormatVersion.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import type { JsonPath } from "./JsonPaths.js"
@@ -134,7 +136,7 @@ export class SectionFilePanel {
   /** The section's keys as the recording states them, with what it says of where they came from. */
   private bytesOf(name: RecordingSectionName): Uint8Array {
     const json = toSightingJson(this.host.sighting()) as unknown as Record<string, unknown>
-    const annex: SectionAnnex = { version: 1 }
+    const annex: SectionAnnex = { version: FormatVersion.CURRENT.sighting }
     for (const key of RecordingSections.KEYS[name]) if (json[key] !== undefined) annex[key] = json[key]
     return new TextEncoder().encode(JSON.stringify(annex))
   }
@@ -174,7 +176,8 @@ export class SectionFilePanel {
     try {
       const { InputFileElement } = await import("./InputFileElement.js")
       const bytes = await InputFileElement.bytesOf(pick.url ? { url: this.resolve(pick.url) } : pick)
-      given = JSON.parse(new TextDecoder().decode(bytes))
+      // As the current version of the format writes it, whichever this file was written in.
+      given = SightingMigration.toCurrent(JSON.parse(new TextDecoder().decode(bytes)))
       if (typeof given !== "object" || given === null || RecordingSections.KEYS[name].every(key => given[key] === undefined)) throw new Error("Not this section")
     } catch {
       MessageStyle.show(this.note, this.messages.annexUnreadable, "warning")

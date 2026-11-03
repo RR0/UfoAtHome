@@ -3,7 +3,7 @@ import { IdentityGuard } from "../../src/engine/persistence/IdentityGuard.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const recording = (extra: Partial<SightingRecordingJson>): SightingRecordingJson =>
-  ({ version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] }, ...extra }) as SightingRecordingJson
+  ({ version: 2, timeline: { keyframes: [{ t: 0, shapes: [] }] }, ...extra }) as SightingRecordingJson
 
 const kinds = (json: SightingRecordingJson, loaded?: SightingRecordingJson) =>
   IdentityGuard.inspect(json, loaded).map(finding => finding.kind)
@@ -51,7 +51,7 @@ describe("IdentityGuard", () => {
   })
 
   it("finds the name of a place that is an address", () => {
-    expect(kinds(recording({ place: [{ lat: 1, lng: 2, name: "3 avenue Foch, Paris" } as never] }))).toEqual(["address"])
+    expect(kinds(recording({ place: { name: "3 avenue Foch, Paris", locations: [{ lat: 1, lng: 2 }] } }))).toEqual(["address"])
   })
 
   it("reports only what the recording did not already state when it was opened", () => {

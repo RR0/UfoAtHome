@@ -4,7 +4,9 @@ import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { RecordingIssue } from "./RecordingIssue.js"
 import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
-import type { SightingLocation, SightingTime } from "../model/Sighting.js"
+import { formatEdtfTime, parseEdtfTime, type SightingLocation, type SightingTime } from "../model/Sighting.js"
+import type { PlaceJson } from "@rr0/place"
+import { SightingMigration } from "./SightingMigration.js"
 import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
@@ -43,17 +45,19 @@ import { FormatVersion } from "./FormatVersion.js"
  * consumers all read plain values. What the types say is what a reader gets.
  */
 export interface SightingRecordingJson {
-  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/1/sighting.schema.json. Not read. */
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/2/sighting.schema.json. Not read. */
   $schema?: string
-  /** The version of the format this file is written in (see FormatVersion): 1, the only one so far. A file of a newer version is refused, not misread. */
-  version: 1
+  /** The version of the format this file is written in (see FormatVersion): 2. A file of version 1 is read through SightingMigration; one
+   * of a newer version is refused, not misread. */
+  version: 2
   /** Which account this is, unique across every recording anywhere: the day it happened, then
    * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
    * interpretations name it by — see Sighting.id. */
   id?: string
-  time?: SightingTime
-  /** See SightingEvent.endTime. */
-  endTime?: SightingTime
+  /** When it happened, as EDTF in the legal time of `utcOffsetHours` ("2015-05-31T00:50:34", "1965-07-01~"), as RR0's events write it. */
+  time?: string
+  /** When it ended, as EDTF: see SightingEvent.endTime. */
+  endTime?: string
   /** See SightingEvent.durationSeconds. */
   durationSeconds?: number
   /** See SightingEvent.durationText. */
@@ -62,7 +66,8 @@ export interface SightingRecordingJson {
   utcOffsetHours?: number
   /** See SightingEvent.timeZone — the IANA rule `utcOffsetHours` was derived from, when it was. */
   timeZone?: string
-  place?: SightingLocation[]
+  /** Where it happened: its name and its coordinates (@rr0/place's PlaceJson), as RR0's events write it. */
+  place?: PlaceJson
   /** See Sighting.observer. */
   observer?: People
   /** Who saw it and how their account travelled — see Account, and Sighting.account. */
@@ -151,6 +156,17 @@ export interface SightingRecordingJson {
   frozen?: FrozenData
 }
 
+/** A recording in version 1 of the format: its time as the fields of a date, its place as a list of named locations (see SightingMigration). */
+export type SightingRecordingJsonV1 = Omit<SightingRecordingJson, "version" | "time" | "endTime" | "place"> & {
+  version?: 1
+  time?: SightingTime
+  endTime?: SightingTime
+  place?: SightingLocation[]
+}
+
+/** What a recording may be read from: the current version of the format, or an older one, migrated as it is read. */
+export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV1
+
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
 }
@@ -167,15 +183,15 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
   // see BaseShape.aim. Same rule as the angle above: the drawing is the newer statement.
   SightingShapes.toAim(sighting)
   return {
-    version: 1,
+    version: 2,
     id: sighting.id,
-    time: sighting.event.time,
-    endTime: sighting.event.endTime,
+    time: SightingJsonDates.write(sighting.event.time),
+    endTime: SightingJsonDates.write(sighting.event.endTime),
     durationSeconds: sighting.event.durationSeconds,
     durationText: sighting.event.durationText,
     utcOffsetHours: sighting.event.utcOffsetHours,
     timeZone: sighting.event.timeZone,
-    place: sighting.event.place,
+    place: SightingJsonPlaces.write(sighting.event.place),
     observer: sighting.observer,
     account: sighting.account,
     sources: sighting.sources?.length ? sighting.sources : undefined,
@@ -212,11 +228,13 @@ export function plainSightingJson(sighting: Sighting): SightingRecordingJson {
   }
 }
 
-export function fromSightingJson(json: SightingRecordingJson): Sighting {
+export function fromSightingJson(json: ReadableSightingJson): Sighting {
   FormatVersion.check(json, "sighting")
+  // In the current version before anything reads it: the rest of the engine only knows that one.
+  const current = SightingMigration.toCurrent(json)
   // Off first, so that nothing below has to know a value could have arrived wrapped — see
   // Provenance's own doc comment on why the wrapper lives no longer than the file does.
-  const { recording: plain, provenance } = Provenance.strip(json)
+  const { recording: plain, provenance } = Provenance.strip(current)
   const sighting = fromPlainSightingJson(plain)
   sighting.provenance = provenance
   return sighting
@@ -227,13 +245,13 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   const sighting = new Sighting(
     {
       eventType: "sighting",
-      time: json.time,
-      endTime: json.endTime,
+      time: SightingJsonDates.read(json.time),
+      endTime: SightingJsonDates.read(json.endTime),
       durationSeconds: json.durationSeconds,
       durationText: json.durationText,
       utcOffsetHours: json.utcOffsetHours,
       timeZone: json.timeZone,
-      place: json.place,
+      place: SightingJsonPlaces.read(json.place),
       description: json.description,
       image: json.image,
       summary: json.summary,
@@ -301,4 +319,33 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   // step that lets a recording's observer turn their head without taking the sky with them.
   SightingShapes.toPosition(sighting)
   return sighting
+}
+
+/** A recording's dates as the file writes them (EDTF text) and as the engine holds them (SightingTime). */
+class SightingJsonDates {
+
+  static read(text: string | undefined): SightingTime | undefined {
+    return text === undefined || text.trim() === "" ? undefined : parseEdtfTime(text)
+  }
+
+  static write(time: SightingTime | undefined): string | undefined {
+    if (time === undefined) return undefined
+    const text = formatEdtfTime(time)
+    return text === "" ? undefined : text
+  }
+}
+
+/** A recording's place as the file writes it (one PlaceJson) and as the engine holds it (its locations, the name on each). */
+class SightingJsonPlaces {
+
+  static read(place: PlaceJson | undefined): SightingLocation[] | undefined {
+    if (!place?.locations?.length) return undefined
+    return place.locations.map(({ lat, lng }) => ({ lat, lng, ...(place.name === undefined ? {} : { name: place.name }) }))
+  }
+
+  static write(locations: SightingLocation[] | undefined): PlaceJson | undefined {
+    if (!locations?.length) return undefined
+    const name = locations.find(location => location.name)?.name
+    return { ...(name === undefined ? {} : { name }), locations: locations.map(({ lat, lng }) => ({ lat, lng })) }
+  }
 }

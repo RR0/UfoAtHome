@@ -113,10 +113,9 @@ export class IdentityGuard {
     const said = (text: unknown): string[] => typeof text === "string" ? [text]
       : typeof text === "object" && text !== null ? Object.values(text).filter((value): value is string => typeof value === "string")
         : []
-    const places = (json.place ?? []).map(place => {
-      const located = place as unknown as { name?: unknown, value?: { name?: unknown } }
-      return located.name ?? located.value?.name
-    })
+    // The place's name, its provenance taken off if it carries one (this reads the file as it is written).
+    const located = json.place as unknown as { name?: unknown, value?: { name?: unknown } } | undefined
+    const places = located === undefined ? [] : [located.name ?? located.value?.name]
     return [
       ...said(json.description), ...said(json.summary), ...said(json.account?.observerOccupation),
       ...places.flatMap(said)

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
 
 describe("sightingJson", () => {
@@ -17,7 +17,7 @@ describe("sightingJson", () => {
 
     const restored = fromSightingJson(toSightingJson(sighting))
 
-    expect(restored.event.time).toEqual({ year: 1987, month: 6, day: 12 })
+    expect(restored.event.time).toMatchObject({ year: 1987, month: 6, day: 12 })
     expect(restored.event.place).toEqual([{ lat: 45.188529, lng: 5.724524 }])
     expect(restored.observer).toEqual({ id: "observer-1" })
     expect(restored.timeline.getShapeAt(0, "ufo-1")?.bounds).toEqual({ x: 10, y: 20, width: 40, height: 24 })
@@ -208,6 +208,7 @@ describe("sightingJson", () => {
     // about sound, which replays as silence.
     expect(toSightingJson(restored)).toEqual({
       ...json,
+      version: 2,
       timeline: { ...json.timeline, order: [], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
@@ -220,7 +221,7 @@ describe("sightingJson", () => {
       caseId: "ChilesWhitted",
       observer: { id: "ChilesClarence", dirName: "people/c/ChilesClarence" },
       timeline: { keyframes: [] }
-    } as SightingRecordingJson
+    } as SightingRecordingJsonV1
 
     const written = toSightingJson(fromSightingJson(json))
 
@@ -309,7 +310,7 @@ describe("sightingJson", () => {
       durationSeconds: 300,
       timeline: { keyframes: [] }
     })
-    expect(restored.event.endTime).toEqual({ year: 1948, month: 7, day: 24, hour: 2, minute: 50 })
+    expect(restored.event.endTime).toMatchObject({ year: 1948, month: 7, day: 24, hour: 2, minute: 50 })
     expect(restored.event.durationSeconds).toBe(300)
   })
 

@@ -32,7 +32,7 @@ const DRAFT_TOOL = {
             path: {
               type: "string",
               description: "Where the value sits in `recording`, dot-joined, array indices as steps: "
-                + "\"time.hour\", \"place.0.lat\", "
+                + "\"time\", \"place.locations.0.lat\", "
                 + "\"timeline.keyframes.1.shapes.0.shape.angular.widthDeg\"."
             },
             basis: {

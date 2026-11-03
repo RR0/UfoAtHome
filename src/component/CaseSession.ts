@@ -1,4 +1,5 @@
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
@@ -165,6 +166,8 @@ export class CaseSession {
 
   /** Remembers what a track's recording is now, as loaded or as edited. */
   keep(track: CaseTrack, recording: SightingRecordingJson, fresh = false): void {
+    // In the current version of the format (see SightingMigration): a file of an older one is written back in it once edited.
+    recording = SightingMigration.toCurrent(recording)
     track.recording = recording
     if (fresh) track.loaded = JSON.stringify(recording)
     // What a reading is called is what its own interpretation says: the case's event follows it.
@@ -323,7 +326,7 @@ export class CaseSession {
       tags: _tags, timeline: _timeline, milestones: _milestones, interpretation: _interpretation, ...scene } = structuredClone(base)
     void [_id, _version, _observer, _account, _description, _sources, _tags, _timeline, _milestones, _interpretation]
     const recording = {
-      version: 1,
+      version: 2,
       id: `${base.id ?? stem}-interpretation-${number}`,
       ...scene,
       tags: ["interpretation"],

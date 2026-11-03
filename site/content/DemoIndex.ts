@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import type { DemoCatalogue, DemoSectionId } from "./DemoCatalogue.js"
 import { SITE_LANGUAGES, type SiteLanguage } from "../SitePage.js"
+import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
+import { SightingMigration } from "../../src/engine/persistence/SightingMigration.js"
 
 /** One demo as the hub's search sees it. */
 export interface DemoIndexEntry {
@@ -37,7 +39,7 @@ export class DemoIndex {
       Record<SiteLanguage, DemoIndexEntry[]>
     for (const group of this.catalogue.groups) {
       for (const demo of group.demos) {
-        const recording = JSON.parse(await readFile(join(this.root, "public", demo.src), "utf8"))
+        const recording = SightingMigration.toCurrent(JSON.parse(await readFile(join(this.root, "public", demo.src), "utf8")))
         const date = DemoIndex.isoDate(recording.time)
         const tags: string[] = recording.tags ?? []
         for (const language of SITE_LANGUAGES) {
@@ -56,9 +58,9 @@ export class DemoIndex {
     return index
   }
 
-  /** The time as the recording states it: a bare object, or one wrapped with its basis. */
+  /** The day (or month, or year) of the time as the recording states it: EDTF text, bare or wrapped with its basis. */
   private static isoDate(time: any): string | undefined {
-    const stated = time?.value ?? time
+    const stated = parseEdtfTime(typeof time === "object" && time !== null ? time.value : time)
     if (!stated?.year) return undefined
     const part = (n: number) => String(n).padStart(2, "0")
     return [String(stated.year).padStart(4, "0"),

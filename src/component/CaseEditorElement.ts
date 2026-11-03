@@ -1,4 +1,6 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { EditorTheme } from "./EditorTheme.js"
@@ -545,7 +547,9 @@ export class CaseEditorElement extends HTMLElement {
     return this.editor.sightingData
   }
 
-  set sightingData(json: SightingRecordingJson) {
+  set sightingData(readable: ReadableSightingJson) {
+    // A file of an older version of the format is read as the current one (see SightingMigration).
+    const json = SightingMigration.toCurrent(readable)
     this.closeCase()
     this.editor.sightingData = json
   }
@@ -851,7 +855,7 @@ export class CaseEditorElement extends HTMLElement {
 
   private async loadTrack(track: CaseTrack): Promise<void> {
     if (track.recording) return
-    track.recording = (await SightingFetch.recording(track.url)) as SightingRecordingJson
+    track.recording = SightingMigration.toCurrent((await SightingFetch.recording(track.url)) as SightingRecordingJson)
     // As it was fetched: what a recording is changed from. A recording shown has it taken again from the form (see showTrack).
     track.loaded = JSON.stringify(track.recording)
   }
@@ -1262,7 +1266,10 @@ export class CaseEditorElement extends HTMLElement {
   private makeCase(): void {
     if (this.session) return
     const recording = this.editor.sightingData
-    const when = recording.time ? CaseEditorElement.rr0TimeOf(formatEdtfTime(recording.time)) : undefined
+    // Stated with what it says of where it came from, the time is its value.
+    const time = recording.time as string | { value: string } | undefined
+    const edtf = typeof time === "object" ? time.value : time
+    const when = edtf ? CaseEditorElement.rr0TimeOf(edtf) : undefined
     const title = this.said.read(recording.observer?.title as never)
     const from = this.getAttribute("src") ? new URL(this.getAttribute("src")!, location.href).href : undefined
     this.session = CaseSession.around(recording, when, title, from, location.href)
@@ -1570,7 +1577,7 @@ export class CaseEditorElement extends HTMLElement {
       if (source === "blank") {
         const stem = (observer || "observation").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
         recording = {
-          version: 1,
+          version: 2,
           id: `${when ? `${when}-` : ""}${stem}`,
           ...(observer ? { observer: { title: observer } } : {}),
           ...(when ? { time: when } : {}),

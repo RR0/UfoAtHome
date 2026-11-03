@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-reentry",
   "image": "https://ufoathome.org/demo-data/share/sky-test-reentry.jpg",
   "summaryTime": 52,
@@ -74,23 +74,18 @@
       }
     }
   ],
-  "time": {
-    "year": 1968,
-    "month": 3,
-    "day": 3,
-    "hour": 21,
-    "minute": 45,
-    "second": 35
-  },
+  "time": "1968-03-03T21:45:35",
   "utcOffsetHours": -5,
   "durationSeconds": 145,
-  "place": [
-    {
-      "lat": 37.7719,
-      "lng": -87.1112,
-      "name": "Owensboro, Kentucky"
-    }
-  ],
+  "place": {
+    "name": "Owensboro, Kentucky",
+    "locations": [
+      {
+        "lat": 37.7719,
+        "lng": -87.1112
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

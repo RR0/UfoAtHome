@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-lanterns",
  "summaryTime": 115,
  "image": "https://ufoathome.org/demo-data/share/sky-test-lanterns.jpg",
@@ -13,23 +13,18 @@
   "es": "Una docena de farolillos voladores soltados al anochecer la noche de Yi Peng, al pie del Doi Suthep en Chiang Mai, filmados por uno de quienes los sueltan: suben ante él y luego derivan hacia la montaña hasta ser a lo lejos un grupo suelto de puntos anaranjados, que se apagan uno a uno.",
   "it": "Una dozzina di lanterne volanti lasciate andare al crepuscolo la sera di Yi Peng, ai piedi del Doi Suthep a Chiang Mai, filmate da uno di quelli che le lasciano andare: salgono davanti a lui, poi derivano verso la montagna finché sono in lontananza un gruppo sparso di punti arancioni, che si spengono uno a uno."
  },
- "time": {
-  "year": 2025,
-  "month": 11,
-  "day": 5,
-  "hour": 18,
-  "minute": 30,
-  "second": 0
- },
+ "time": "2025-11-05T18:30:00",
  "utcOffsetHours": 7,
  "durationSeconds": 750,
- "place": [
-  {
-   "lat": 18.7955,
-   "lng": 98.9555,
-   "name": "Chiang Mai, foot of Doi Suthep"
-  }
- ],
+ "place": {
+  "name": "Chiang Mai, foot of Doi Suthep",
+  "locations": [
+   {
+    "lat": 18.7955,
+    "lng": 98.9555
+   }
+  ]
+ },
  "instrument": "phone-landscape",
  "exposureSeconds": 0.03333333333333333,
  "weatherTrack": {

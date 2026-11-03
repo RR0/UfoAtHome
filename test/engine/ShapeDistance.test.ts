@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { ShapeDistance } from "../../src/engine/shape/ShapeDistance.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
 
 const shape = (widthDeg: number) => ({
   sourceId: "ufo-1",
@@ -29,7 +29,7 @@ const pose = (lat: number, headingDeg: number) => ({
  * the craft grows from 2.22° to 30.09° across. Then he stops, and at 258 s the craft leaves and
  * shrinks again while he turns his head to follow it.
  */
-const valensole = (): SightingRecordingJson => ({
+const valensole = (): SightingRecordingJsonV1 => ({
   version: 1,
   time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
   utcOffsetHours: 1,

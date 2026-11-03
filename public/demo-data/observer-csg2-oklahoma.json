@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "observer-csg2-oklahoma",
   "image": "https://ufoathome.org/demo-data/share/csg2-oklahoma.jpg",
   "observer": {
@@ -26,23 +26,18 @@
     "es": "La segunda etapa de CSG-2 frenando para salir de su órbita y purgando sus depósitos, el 1 de febrero de 2022 a las 00:49 UTC (18:49 en Oklahoma), tal como la habría visto un observador en Oklahoma City. Esa tarde se tomaron fotografías de la espiral en Oklahoma (difundidas por Cees Bassa en SeeSat-L), pero no se encontró ningún relato desde allí: este observador se supone. La noche está más avanzada que en Colorado, donde Ron Lee vio una nube pálida: el Sol está 11 grados bajo el horizonte en lugar de 6, y la misma espiral destaca, luminosa, sobre un cielo oscuro, vista de sesgo. La órbita es la de CSG-2 misma, según Space-Track; el frenado, las purgas y el giro se suponen.",
     "it": "Il secondo stadio di CSG-2 che frena per lasciare l'orbita e scarica i serbatoi, il 1° febbraio 2022 alle 00:49 UTC (18:49 in Oklahoma), come l'avrebbe visto un osservatore a Oklahoma City. Quella sera in Oklahoma furono scattate fotografie della spirale (diffuse da Cees Bassa su SeeSat-L), ma non è stato trovato alcun resoconto da lì: questo osservatore è supposto. La notte è più avanzata che in Colorado, dove Ron Lee vide una nube pallida: il Sole è 11 gradi sotto l'orizzonte invece di 6, e la stessa spirale risalta, luminosa, su un cielo scuro, vista di sbieco. L'orbita è quella di CSG-2 stesso, secondo Space-Track; la frenata, gli scarichi e la rotazione sono supposti."
   },
-  "time": {
-    "year": 2022,
-    "month": 1,
-    "day": 31,
-    "hour": 18,
-    "minute": 47,
-    "second": 30
-  },
+  "time": "2022-01-31T18:47:30",
   "utcOffsetHours": -6,
   "durationSeconds": 480,
-  "place": [
-    {
-      "lat": 35.4676,
-      "lng": -97.5164,
-      "name": "Oklahoma City, Oklahoma"
-    }
-  ],
+  "place": {
+    "name": "Oklahoma City, Oklahoma",
+    "locations": [
+      {
+        "lat": 35.4676,
+        "lng": -97.5164
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

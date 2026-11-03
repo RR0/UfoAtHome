@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-moon-aureole",
   "image": "https://ufoathome.org/demo-data/share/sky-test-moon-aureole.jpg",
   "description": {
@@ -8,21 +8,17 @@
     "es": "Cielo de prueba: la aureola de la Luna llena. Una Luna llena a 21,6° de altura en el sur, aire muy húmedo (90 %) y sin nubes, el observador de cara a ella. El resplandor que la rodea en unos diez grados es su luz difractada por las partículas más grandes de la bruma, que se hinchan con la humedad: blanquecino y sin anillos, porque esas partículas tienen todos los tamaños.",
     "it": "Cielo di prova: l'aureola della Luna piena. Una Luna piena a 21,6° di altezza a sud, aria molto umida (90 %) e nessuna nuvola, l'osservatore rivolto verso di essa. Il chiarore che la circonda per una decina di gradi è la sua luce diffratta dalle particelle più grandi della foschia, che si gonfiano con l'umidità: biancastro e senza anelli, perché quelle particelle hanno tutte le dimensioni."
   },
-  "time": {
-    "year": 2020,
-    "month": 6,
-    "day": 6,
-    "hour": 2,
-    "minute": 30
-  },
+  "time": "2020-06-06T02:30",
   "utcOffsetHours": 2,
   "durationSeconds": 12,
-  "place": [
-    {
-      "lat": 45,
-      "lng": 5
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 45,
+        "lng": 5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

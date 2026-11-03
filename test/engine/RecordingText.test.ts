@@ -4,7 +4,7 @@ import type { SightingRecordingJson } from "../../src/engine/persistence/sightin
 
 const outline = Array.from({ length: 50 }, (_, i) => ({ x: i, y: i % 3 }))
 const recording = {
-  version: 1,
+  version: 2,
   timeline: {
     keyframes: [0, 100, 200].map(t => ({ t, shapes: [{ sourceId: "p", shape: { kind: "polygon", bounds: { x: 0, y: 0, width: 50, height: 3 }, points: outline, aim: { azimuthDeg: t / 10, altitudeDeg: 5 } } }] })),
     order: ["p"], groups: []
@@ -23,7 +23,7 @@ describe("RecordingText", () => {
   })
 
   it("writes a recording without keyframes the same either way", () => {
-    const bare = { version: 1 } as SightingRecordingJson
+    const bare = { version: 2 } as SightingRecordingJson
     expect(RecordingText.of(bare, "thin")).toBe(JSON.stringify(bare, null, 2))
   })
 })

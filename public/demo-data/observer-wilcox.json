@@ -1,23 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "1964-04-24-WilcoxGary",
   "image": "https://ufoathome.org/demo-data/share/wilcox.jpg",
   "summaryTime": 7115,
-  "time": {
-    "year": 1964,
-    "month": 4,
-    "day": 24,
-    "hour": 10,
-    "minute": 0
-  },
+  "time": "1964-04-24T10:00",
   "durationSeconds": 7200,
   "utcOffsetHours": -5,
-  "place": [
-    {
-      "lat": 42.229,
-      "lng": -76.181
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 42.229,
+        "lng": -76.181
+      }
+    ]
+  },
   "observer": {
     "id": "WilcoxGary",
     "title": "Gary T. Wilcox"

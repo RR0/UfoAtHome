@@ -574,9 +574,9 @@ describe("meteor scheduling", () => {
   /** The Geminid peak over Provence: the radiant stands 77 degrees up at 3 a.m., which is about as
    * strong as any sky this project can look up ever gets. */
   const geminidNight = {
-    time: { year: 2023, month: 12, day: 14, hour: 3, minute: 0 },
+    time: "2023-12-14T03:00",
     utcOffsetHours: 1,
-    place: [{ lat: 43.8379, lng: 5.9822 }],
+    place: { locations: [{ lat: 43.8379, lng: 5.9822 }] },
     durationSeconds: 300
   }
 
@@ -639,9 +639,9 @@ describe("meteor scheduling", () => {
 
 describe("which meteor gets offered", () => {
   const geminidNight = {
-    time: { year: 2023, month: 12, day: 14, hour: 3, minute: 0 },
+    time: "2023-12-14T03:00",
     utcOffsetHours: 1,
-    place: [{ lat: 43.8379, lng: 5.9822 }],
+    place: { locations: [{ lat: 43.8379, lng: 5.9822 }] },
     durationSeconds: 300
   }
 

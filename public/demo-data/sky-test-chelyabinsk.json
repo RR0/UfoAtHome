@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-chelyabinsk",
  "image": "https://ufoathome.org/demo-data/share/sky-test-chelyabinsk.jpg",
  "tags": [
@@ -96,24 +96,19 @@
    }
   }
  ],
- "time": {
-  "year": 2013,
-  "month": 2,
-  "day": 15,
-  "hour": 9,
-  "minute": 20,
-  "second": 23
- },
+ "time": "2013-02-15T09:20:23",
  "utcOffsetHours": 6,
  "durationSeconds": 225,
  "summaryTime": 12,
- "place": [
-  {
-   "lat": 55.1597,
-   "lng": 61.4026,
-   "name": "Chelyabinsk, Lenin Avenue"
-  }
- ],
+ "place": {
+  "name": "Chelyabinsk, Lenin Avenue",
+  "locations": [
+   {
+    "lat": 55.1597,
+    "lng": 61.4026
+   }
+  ]
+ },
  "weatherTrack": {
   "keyframes": [
    {

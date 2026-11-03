@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-clouds",
   "image": "https://ufoathome.org/demo-data/share/sky-test-clouds.jpg",
   "tags": [
@@ -12,21 +12,17 @@
     "es": "Un cielo sintético: tres capas de nubes definidas en metros, y una nube del campo enunciada en metros, para mover y redimensionar en el editor sin que deje de ser una de sus vecinas. El viento y la oscuridad cambian a lo largo de dos minutos mientras el observador se desplaza 600 m. Sin relato.",
     "it": "Un cielo sintetico: tre strati di nuvole definiti in metri, e una nuvola del campo indicata in metri, da spostare e ridimensionare nell'editor restando una delle sue vicine. Vento e oscurità cambiano nell'arco di due minuti mentre l'osservatore si sposta di 600 m. Nessun resoconto."
   },
-  "time": {
-    "year": 2020,
-    "month": 6,
-    "day": 21,
-    "hour": 14,
-    "minute": 0
-  },
+  "time": "2020-06-21T14:00",
   "utcOffsetHours": 2,
   "durationSeconds": 120,
-  "place": [
-    {
-      "lat": 45.0,
-      "lng": 5.0
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 45,
+        "lng": 5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

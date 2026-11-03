@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-zodiacal",
   "image": "https://ufoathome.org/demo-data/share/sky-test-zodiacal.jpg",
   "tags": [
@@ -13,21 +13,17 @@
     "es": "Un cielo de prueba para la luz zodiacal — el “falso amanecer”, visto aquí al atardecer. Pide un Sol ya bajo el horizonte (16°) pero no demasiado, una eclíptica erguida sobre el horizonte (marzo, en los trópicos: Tenerife), nada de Luna y un cielo despejado. El cono se alza donde se puso el Sol, en el oeste, inclinado a lo largo del zodiaco. Es el extraño resplandor de los manuales: sin bordes, inmóvil, desaparecido una hora después.",
     "it": "Un cielo di prova per la luce zodiacale — la “falsa alba”, vista qui di sera. Richiede un Sole già sotto l'orizzonte (16°) ma non troppo, un'eclittica che si erge dall'orizzonte (marzo, ai tropici: Tenerife), niente Luna e un cielo sereno. Il cono sta dove il Sole è tramontato, a ovest, inclinato lungo lo zodiaco. È lo strano chiarore dei manuali: senza contorni, immobile, sparito un'ora dopo."
   },
-  "time": {
-    "year": 2020,
-    "month": 3,
-    "day": 20,
-    "hour": 20,
-    "minute": 30
-  },
+  "time": "2020-03-20T20:30",
   "utcOffsetHours": 0,
   "durationSeconds": 24,
-  "place": [
-    {
-      "lat": 28.3,
-      "lng": -16.5
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 28.3,
+        "lng": -16.5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

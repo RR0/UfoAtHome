@@ -430,7 +430,7 @@ describe("SightingEditorElement observer/time fields", () => {
     setInput(shadow, "lng", "5.993")
     setInput(shadow, "heading", "270")
 
-    expect(element.sightingData.place).toEqual([{ lat: 43.837, lng: 5.993 }])
+    expect(element.sightingData.place).toEqual({ locations: [{ lat: 43.837, lng: 5.993 }] })
     expect(element.sightingData.observerTrack?.keyframes).toEqual([
       { t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: 270, pitchDeg: 0, fovDeg: 60 } }
     ])
@@ -626,15 +626,7 @@ describe("SightingEditorElement observer/time fields", () => {
     const shadow = element.shadowRoot!
     setInput(shadow, "obs-time", "1965-07-01T05:00")
 
-    expect(element.sightingData.time).toEqual({
-      year: 1965,
-      month: 7,
-      day: 1,
-      hour: 5,
-      minute: 0,
-      second: undefined,
-      raw: "1965-07-01T05:00"
-    })
+    expect(element.sightingData.time).toBe("1965-07-01T05:00")
   })
 
   it("clears event.time entirely once the observation-start field is emptied", () => {
@@ -654,15 +646,7 @@ describe("SightingEditorElement observer/time fields", () => {
 
     const input = shadow.getElementById("obs-time") as HTMLInputElement
     expect(input.classList.contains("invalid")).toBe(false)
-    expect(element.sightingData.time).toEqual({
-      year: 1965,
-      month: 7,
-      day: 1,
-      hour: 5,
-      minute: 0,
-      second: undefined,
-      raw: "1965-07-01T05:00"
-    })
+    expect(element.sightingData.time).toBe("1965-07-01T05:00")
   })
 
   it("marks the observation-start field invalid only on blur, leaving event.time unchanged", () => {
@@ -676,15 +660,7 @@ describe("SightingEditorElement observer/time fields", () => {
 
     expect(input.classList.contains("invalid")).toBe(true)
     expect(input.validationMessage).not.toBe("")
-    expect(element.sightingData.time).toEqual({
-      year: 1965,
-      month: 7,
-      day: 1,
-      hour: 5,
-      minute: 0,
-      second: undefined,
-      raw: "1965-07-01T05:00"
-    })
+    expect(element.sightingData.time).toBe("1965-07-01T05:00")
   })
 
   it("clears the invalid flag on blur once the text is fixed to something valid", () => {
@@ -705,8 +681,8 @@ describe("SightingEditorElement observer/time fields", () => {
     const shadow = element.shadowRoot!
     setInput(shadow, "obs-time", "2025-06?")
 
-    expect(element.sightingData.time?.raw).toBe("2025-06?")
-    expect(element.sightingData.time?.year).toBe(2025)
+    // Written as EDTF (format version 2), as typed.
+    expect(element.sightingData.time).toBe("2025-06?")
   })
 
   it("loading sightingData re-populates the observer/time fields", () => {
@@ -743,15 +719,7 @@ describe("SightingEditorElement metadata fields", () => {
     const shadow = element.shadowRoot!
     setInput(shadow, "obs-end-time", "1965-07-01T05:30")
 
-    expect(element.sightingData.endTime).toEqual({
-      year: 1965,
-      month: 7,
-      day: 1,
-      hour: 5,
-      minute: 30,
-      second: undefined,
-      raw: "1965-07-01T05:30"
-    })
+    expect(element.sightingData.endTime).toBe("1965-07-01T05:30")
   })
 
   it("clears event.endTime entirely once the observation-end field is emptied", () => {
@@ -1186,6 +1154,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
     }))
     expect(element.sightingData).toEqual({
       ...json,
+      version: 2,
       timeline: { keyframes: keyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
@@ -5452,7 +5421,7 @@ describe("SightingEditorElement place search", () => {
 
     expect((field(element, "lat") as HTMLInputElement).value).toBe("43.8379283")
     expect((field(element, "lng") as HTMLInputElement).value).toBe("5.9839867")
-    expect(element.sightingData.place).toEqual([{ lat: 43.8379283, lng: 5.9839867, name: VALENSOLE.name }])
+    expect(element.sightingData.place).toEqual({ name: VALENSOLE.name, locations: [{ lat: 43.8379283, lng: 5.9839867 }] })
   })
 
   it("replaces the typed name with the qualified one it actually resolved", async () => {
@@ -5491,7 +5460,7 @@ describe("SightingEditorElement place search", () => {
     picker.dispatchEvent(new Event("change"))
 
     expect((field(element, "lat") as HTMLInputElement).value).toBe("42.1")
-    expect(element.sightingData.place?.[0].name).toBe(SPRINGFIELDS[1].name)
+    expect(element.sightingData.place?.name).toBe(SPRINGFIELDS[1].name)
   })
 
   it("says so when no place bears the name", async () => {
@@ -5525,7 +5494,7 @@ describe("SightingEditorElement place search", () => {
     lng.value = "5.99"
     lng.dispatchEvent(new Event("input"))
 
-    expect(element.sightingData.place?.[0].name).toBe("the lavender field east of the farm")
+    expect(element.sightingData.place?.name).toBe("the lavender field east of the farm")
   })
 
   it("restores the place name a recording carries", () => {
@@ -5728,7 +5697,7 @@ describe("SightingEditorElement date picker", () => {
     const element = mount()
     pick(element, "obs-time-native", "1965-07-01T05:45")
 
-    expect(element.sightingData.time).toEqual({ year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" })
+    expect(element.sightingData.time).toBe("1965-07-01T05:45")
     expect(control<HTMLInputElement>(element, "obs-time").value).toBe("1965-07-01T05:45")
   })
 
@@ -5742,11 +5711,11 @@ describe("SightingEditorElement date picker", () => {
     }
     toggleOf(element, "obs-time").click()
     typeIn("1965-07-01T05:45~")
-    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45~")
+    expect(element.sightingData.time).toBe("1965-07-01T05:45~")
     typeIn("1965-07-01T05:45?")
-    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45?")
+    expect(element.sightingData.time).toBe("1965-07-01T05:45?")
     typeIn("1965-07-01T05:45")
-    expect(element.sightingData.time!.raw).toBe("1965-07-01T05:45")
+    expect(element.sightingData.time).toBe("1965-07-01T05:45")
   })
 
   it("opens a date in doubt in EDTF, and an exact full instant in the picker", () => {
@@ -5781,7 +5750,7 @@ describe("SightingEditorElement date picker", () => {
     // "02:45:30" or "02:45:30.000", as the browser pleases.
     expect(picker.value).toMatch(/^1948-07-24T02:45:30(\.0+)?$/)
     picker.dispatchEvent(new Event("change", { bubbles: true }))
-    expect(element.sightingData.time).toMatchObject({ hour: 2, minute: 45, second: 30 })
+    expect(element.sightingData.time).toBe("1948-07-24T02:45:30")
   })
 
   // A mode is a way of saying something, not a statement.
@@ -5812,7 +5781,7 @@ describe("SightingEditorElement date picker", () => {
     picker.value = ""
     picker.dispatchEvent(new Event("change"))
 
-    expect(element.sightingData.time).toEqual({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
+    expect(element.sightingData.time).toBe("1948-07-24T02:45")
   })
 
   it("withdraws the time when the picker is genuinely cleared", () => {
@@ -6157,7 +6126,7 @@ describe("SightingEditorElement location coherence", () => {
     setInput(element, "lng", "6.093")
     await waitFor(() => placeName(element).value === RIEZ.name)
 
-    expect(element.sightingData.place?.[0].name).toBe(RIEZ.name)
+    expect(element.sightingData.place?.name).toBe(RIEZ.name)
   })
 
   it("clears a name the coordinates have moved away from any place at all", async () => {
@@ -6169,7 +6138,7 @@ describe("SightingEditorElement location coherence", () => {
     await waitFor(() => placeName(element).value === "")
 
     // A name left describing somewhere the sighting is not at would be worse than none.
-    expect(element.sightingData.place?.[0].name).toBeUndefined()
+    expect(element.sightingData.place?.name).toBeUndefined()
   })
 
   it("leaves a name the observer typed themselves alone", async () => {

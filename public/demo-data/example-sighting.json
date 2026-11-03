@@ -1,7 +1,7 @@
 {
-  "version": 1,
-  "time": { "year": 1987, "month": 6, "day": 12 },
-  "place": [{ "lat": 45.188529, "lng": 5.724524 }],
+  "version": 2,
+  "time": "1987-06-12",
+  "place": {"locations": [{"lat": 45.188529, "lng": 5.724524}]},
   "observer": { "id": "demo-observer-1" },
   "timeline": {
     "keyframes": [

@@ -1,24 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "1948-07-24-ChilesClarence",
   "image": "https://ufoathome.org/demo-data/share/chiles.jpg",
   "summaryTime": 3,
-  "time": {
-    "year": 1948,
-    "month": 7,
-    "day": 24,
-    "hour": 2,
-    "minute": 45,
-    "second": 3
-  },
+  "time": "1948-07-24T02:45:03",
   "durationSeconds": 7,
   "utcOffsetHours": -6,
-  "place": [
-    {
-      "lat": 32.3792,
-      "lng": -86.3077
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 32.3792,
+        "lng": -86.3077
+      }
+    ]
+  },
   "observer": {
     "id": "ChilesClarence",
     "title": "Clarence Chiles"

@@ -62,7 +62,7 @@ describe("CoverageAssessor", () => {
     const criteria = await assess(landevennec)
 
     expect(of(criteria, "when").basis).toBe("stated")
-    expect(of(criteria, "when").paths).toContain("time.year")
+    expect(of(criteria, "when").paths).toContain("time")
   })
 
   it("takes the weakest basis holding an answer up, never the best", async () => {
@@ -138,7 +138,7 @@ describe("CoverageAssessor", () => {
 
   it("scores an empty recording at nothing, not at nothing-known", async () => {
     const assessment = await ASSESSMENT_SOURCES[0].create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] } } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 2, timeline: { keyframes: [] } } as SightingRecordingJson))
 
     expect(assessment.score).toBe(0)
   })

@@ -1,4 +1,6 @@
 import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.js"
+import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
@@ -2258,7 +2260,9 @@ export class SightingEditorElement extends HTMLElement {
     return this.ufoElement.sightingData
   }
 
-  set sightingData(json: SightingRecordingJson) {
+  set sightingData(readable: ReadableSightingJson) {
+    // A file of an older version of the format is read as the current one (see SightingMigration).
+    const json = SightingMigration.toCurrent(readable)
     // Wherever it came from, it is not the file at the last address until loadUrl says so.
     this.sourceUrl = undefined
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
@@ -2799,7 +2803,7 @@ export class SightingEditorElement extends HTMLElement {
       const src = json.frozen?.[section]?.src
       const file = src !== undefined ? files[folder + src] : undefined
       if (!file) continue
-      const kept = JSON.parse(strFromU8(file)) as Record<string, unknown>
+      const kept = SightingMigration.toCurrent(JSON.parse(strFromU8(file)) as Record<string, unknown>)
       for (const key of RecordingSections.KEYS[section]) if (kept[key] !== undefined) json[key] = kept[key]
       put = true
     }

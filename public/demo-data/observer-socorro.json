@@ -1,23 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "1964-04-24-ZamoraLonnie",
   "image": "https://ufoathome.org/demo-data/share/socorro.jpg",
   "summaryTime": 87,
-  "time": {
-    "year": 1964,
-    "month": 4,
-    "day": 24,
-    "hour": 17,
-    "minute": 50
-  },
+  "time": "1964-04-24T17:50",
   "durationSeconds": 120,
   "utcOffsetHours": -7,
-  "place": [
-    {
-      "lat": 34.050918,
-      "lng": -106.891693
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 34.050918,
+        "lng": -106.891693
+      }
+    ]
+  },
   "observer": {
     "id": "ZamoraLonnie",
     "title": "Lonnie Zamora"

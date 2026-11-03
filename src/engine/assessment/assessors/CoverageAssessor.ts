@@ -25,12 +25,13 @@ interface Question {
  * with its own entry in the registry and its own credit.
  */
 const QUESTIONS: Question[] = [
-  { id: "when", paths: ["time.year", "time.month", "time.day", "time.hour", "time.minute", "time.raw"] },
-  { id: "where", paths: ["place.*.lat", "place.*.lng", "observerTrack.keyframes.*.pose.lat", "observerTrack.keyframes.*.pose.lng"] },
+  // The date is one EDTF text since version 2 of the format (see SightingMigration).
+  { id: "when", paths: ["time"] },
+  { id: "where", paths: ["place.locations.*.lat", "place.locations.*.lng", "observerTrack.keyframes.*.pose.lat", "observerTrack.keyframes.*.pose.lng"] },
   { id: "facing", paths: ["observerTrack.keyframes.*.pose.headingDeg"] },
   { id: "apparent-size", paths: ["timeline.keyframes.*.shapes.*.shape.angular.widthDeg", "timeline.keyframes.*.shapes.*.shape.angular.heightDeg"] },
   { id: "sky-position", paths: ["timeline.keyframes.*.shapes.*.shape.aim.azimuthDeg", "timeline.keyframes.*.shapes.*.shape.aim.altitudeDeg"] },
-  { id: "how-long", paths: ["durationSeconds", "endTime.hour", "endTime.minute", "endTime.raw"] },
+  { id: "how-long", paths: ["durationSeconds", "endTime"] },
   { id: "appearance", paths: ["timeline.keyframes.*.shapes.*.shape.kind", "timeline.keyframes.*.shapes.*.shape.title", "timeline.keyframes.*.shapes.*.shape.color", "timeline.keyframes.*.shapes.*.shape.brightness"] },
   { id: "movement", paths: ["timeline.keyframes.1.t", "observerTrack.keyframes.1.t"] },
   { id: "sound", paths: ["soundTrack.keyframes.*.sound.kind"] },
@@ -81,12 +82,22 @@ export class CoverageAssessor implements Assessor {
     if (paths.length === 0) {
       return { id: question.id, paths: [] }
     }
-    const bases = paths.map(path => sighting.provenance.at(path)?.basis ?? "stated")
+    const bases = paths.map(path => CoverageAssessor.basisAt(path, sighting) ?? "stated")
     return {
       id: question.id,
       basis: WEAKEST_FIRST.find(basis => bases.includes(basis)),
       paths
     }
+  }
+
+  /** What is said of the value at `path`, or of the nearest value holding it: a place stated with its basis holds its coordinates. */
+  private static basisAt(path: string, sighting: Sighting): Basis | undefined {
+    const steps = path.split(".")
+    for (let length = steps.length; length > 0; length--) {
+      const basis = sighting.provenance.at(steps.slice(0, length).join("."))?.basis
+      if (basis) return basis
+    }
+    return undefined
   }
 
   /** Every concrete path the pattern matches AND the recording actually has a value at. A pattern

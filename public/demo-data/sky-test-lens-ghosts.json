@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-lens-ghosts",
  "image": "https://ufoathome.org/demo-data/share/sky-test-lens-ghosts.jpg",
  "summaryTime": 20,
@@ -14,23 +14,18 @@
   "es": "Un teléfono filma un cruce de noche: el reflejo de cada luz (un semáforo, las farolas, la luna llena, los faros de un coche) está al otro lado del centro de la imagen, y se mueve al revés.",
   "it": "Un telefono filma un incrocio di notte: il riflesso di ogni luce (un semaforo, i lampioni, la luna piena, i fari di un'auto) sta dall'altra parte del centro dell'immagine, e si muove al contrario."
  },
- "time": {
-  "year": 2026,
-  "month": 1,
-  "day": 3,
-  "hour": 19,
-  "minute": 0,
-  "second": 0
- },
+ "time": "2026-01-03T19:00:00",
  "utcOffsetHours": 1,
  "durationSeconds": 51,
- "place": [
-  {
-   "lat": 48.3,
-   "lng": 1.7,
-   "name": "Beauce"
-  }
- ],
+ "place": {
+  "name": "Beauce",
+  "locations": [
+   {
+    "lat": 48.3,
+    "lng": 1.7
+   }
+  ]
+ },
  "instrument": "phone-landscape",
  "exposureSeconds": 0.03333333333333333,
  "weatherTrack": {

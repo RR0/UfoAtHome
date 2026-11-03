@@ -74,7 +74,10 @@ export class RecordingRules {
    mark it "assumed".`
     },
     {
-      draft: `Times are the local legal time at the place. State the IANA \`timeZone\` the observer's own clock
+      draft: `\`time\` (and \`endTime\`) is EDTF text, as RR0's events write it: \`"1964-04-24T17:45"\`, with EDTF's doubt where
+   the account has one (\`"1965-07-01T05:45~"\` about, \`"1965-07-01?"\` uncertain). \`place\` is one place, its name fully
+   qualified and its coordinates: \`{"name": "Socorro, Socorro County, New Mexico, USA", "locations": [{"lat": 34.06, "lng": -106.89}]}\`.
+   Times are the local legal time at the place. State the IANA \`timeZone\` the observer's own clock
    was on ("Europe/Paris", "America/Denver") and NEVER \`utcOffsetHours\`: the editor works the
    offset out from that zone's own historical rules at that date, out of the platform's IANA
    database (see TimeZones.offsetHoursAt), and it is right about summer time as it was then rather
@@ -82,7 +85,9 @@ export class RecordingRules {
    Choosing the zone is the part that needs reading the account, because a zone's BOUNDARIES have
    moved: Montgomery, Alabama is "America/Chicago", which observed summer time in 1948 while Alabama
    did not, so the zone that matches the observer is not always the one their coordinates fall in.`,
-      file: `Times are the local legal time at the place, as the observer's clock read it. Give the IANA
+      file: `\`time\` and \`endTime\` are EDTF text (\`"1964-04-24T17:45"\`, \`"1965-07-01T05:45~"\`), as RR0's events write them;
+   \`place\` is one place: \`{"name": "Socorro, Socorro County, New Mexico, USA", "locations": [{"lat": 34.06, "lng": -106.89}]}\`.
+   Times are the local legal time at the place, as the observer's clock read it. Give the IANA
    \`timeZone\` their clock was on ("Europe/Paris") AND \`utcOffsetHours\`, the legal offset on that
    date, summer time included (+2 for France in June 2012, +1 in 1965): the player places the sky
    from the number alone, and without it approximates the offset from the longitude, which knows
@@ -93,8 +98,8 @@ export class RecordingRules {
    account gives a vague length ("a few minutes", "five to ten"), write what was said in \`durationText\`,
    an ISO 8601 duration with the doubt EDTF has (\`"PT3M~"\`, about three minutes) or a range
    (\`"PT5M/PT10M"\`), AND the length to play at in \`durationSeconds\` (the duration, or the middle of the
-   range), marked "assumed". Or give \`endTime\`, whose \`raw\` takes the approximation suffix:
-   {"raw": "1974-05-20T19:02~", "year": 1974, "month": 5, "day": 20, "hour": 19, "minute": 2}.`,
+   range), marked "assumed". Or give \`endTime\`, EDTF like \`time\`, with the approximation suffix:
+   \`"1974-05-20T19:02~"\`.`,
       file: `Duration: \`durationSeconds\` is the one length the reconstruction is played at, a bare number. For a
    vague length ("a few minutes"), state it in \`durationText\` (an ISO 8601 duration with a doubt, \`"PT3M~"\`, or a
    range, \`"PT5M/PT10M"\`) and put the length chosen to play at in \`durationSeconds\`, with its provenance. Use

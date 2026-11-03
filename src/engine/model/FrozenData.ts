@@ -79,7 +79,8 @@ export type RecordingSectionName = "weather" | "place" | "lightPollution" | "dec
 
 /** A section's annex: those keys of the recording, kept in a file beside it, with when and from whom they were taken. */
 export interface SectionAnnex {
-  version: 1
+  /** The version of the recording format its keys are written in (see FormatVersion). */
+  version: number
   takenOn?: string
   attribution?: string
   [key: string]: unknown

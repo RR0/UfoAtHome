@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-nova",
   "image": "https://ufoathome.org/demo-data/share/sky-test-nova.jpg",
   "tags": [
@@ -13,22 +13,18 @@
     "es": "Un cielo de prueba para una estrella nueva: Nova Aquilae, vista desde París el 10 de junio de 1918 a las 23:30, a 29° de altura en el sureste, de magnitud 0,2, casi tan brillante como Vega. La noche anterior no brillaba nada allí. Su brillo no se calcula con una fórmula: se interpola entre las observaciones de la AAVSO agrupadas por Strope, Schaefer y Henden (2010), y no se dibuja nada antes de la primera ni después de la última. La línea “Sky:” del editor la nombra y da su magnitud y posición, y el botón 🌟 orienta al observador hacia ella.",
     "it": "Un cielo di prova per una stella nuova: Nova Aquilae, vista da Parigi il 10 giugno 1918 alle 23:30, a 29° di altezza a sud-est, magnitudine 0,2, luminosa quasi quanto Vega. La notte prima, lì non brillava nulla. La sua luminosità non è calcolata da una formula: è interpolata tra le osservazioni AAVSO raggruppate da Strope, Schaefer e Henden (2010), e nulla è disegnato prima della prima o dopo l'ultima. La riga “Sky:” dell'editor la nomina e ne dà magnitudine e posizione, e il pulsante 🌟 volge l'osservatore verso di essa."
   },
-  "time": {
-    "year": 1918,
-    "month": 6,
-    "day": 10,
-    "hour": 23,
-    "minute": 30
-  },
+  "time": "1918-06-10T23:30",
   "utcOffsetHours": 1,
   "durationSeconds": 20,
-  "place": [
-    {
-      "lat": 48.8566,
-      "lng": 2.3522,
-      "name": "Paris, France"
-    }
-  ],
+  "place": {
+    "name": "Paris, France",
+    "locations": [
+      {
+        "lat": 48.8566,
+        "lng": 2.3522
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

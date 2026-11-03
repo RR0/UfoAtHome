@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-satellites",
   "image": "https://ufoathome.org/demo-data/share/sky-test-satellites.jpg",
   "summaryTime": 46,
@@ -14,23 +14,18 @@
     "es": "Un cielo de prueba para la cuestión de los satélites, dos días después de un lanzamiento de Starlink. El 29 de julio de 2025 hacia las 11 de la noche en París, el Sol está 11° bajo el horizonte: el observador está a oscuras, la órbita baja aún al sol. Los satélites lanzados el 27 de julio vuelan en fila a unos 260 km, aún no elevados a su altura operativa ni oscurecidos, y cruzan uno tras otro hacia el oeste-noroeste. Cada punto se calcula a partir de los elementos orbitales archivados ese día, no se coloca a mano.",
     "it": "Un cielo di prova per la questione dei satelliti, due giorni dopo un lancio Starlink. Il 29 luglio 2025 verso le 11 di sera a Parigi il Sole è 11° sotto l'orizzonte: l'osservatore è al buio, l'orbita bassa ancora illuminata dal Sole. I satelliti lanciati il 27 luglio volano in fila a circa 260 km, non ancora portati alla quota operativa né oscurati, e passano uno dopo l'altro verso ovest-nord-ovest. Ogni punto è calcolato dagli elementi orbitali archiviati quel giorno, non posizionato a mano."
   },
-  "time": {
-    "year": 2025,
-    "month": 7,
-    "day": 29,
-    "hour": 23,
-    "minute": 5,
-    "second": 18
-  },
+  "time": "2025-07-29T23:05:18",
   "utcOffsetHours": 2,
   "durationSeconds": 222,
-  "place": [
-    {
-      "lat": 48.8566,
-      "lng": 2.3522,
-      "name": "Paris, France"
-    }
-  ],
+  "place": {
+    "name": "Paris, France",
+    "locations": [
+      {
+        "lat": 48.8566,
+        "lng": 2.3522
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

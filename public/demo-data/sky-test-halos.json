@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-halos",
   "image": "https://ufoathome.org/demo-data/share/sky-test-halos.jpg",
   "tags": [
@@ -15,22 +15,18 @@
     "es": "Un halo fotografiado con un teléfono, reconstruido donde y cuando se tomó: Royan, el 29 de octubre de 2026 a las 15:30, el Sol a 21° de altura tras un velo de cirrostratos (85%) cuyos cristales caen bien planos (95% de alineación). Aquí nada es una forma colocada: un prisma hexagonal de hielo y la ley de Snell producen el anillo de 22°, los parhelios, el arco tangente y el círculo parhélico, y no se ha elegido ni un solo ángulo. El encuadre inicial es el de la fotografía, deducido de ella: los dos parhelios, a 22,8° del Sol, dan el campo del teléfono (67° por 53°), y la posición del Sol da el rumbo y la inclinación. El cielo no cambia; es el teléfono el que se mueve. El pequeño disco sobre el Sol no está en el cielo sino en el objetivo: una imagen del Sol devuelta entre sus lentes. Los reflejos de ese tipo siempre se alinean en la recta que une el Sol con el centro de la imagen, el más visible al otro lado del centro. Cuando el Sol pasa a la izquierda, él pasa a la derecha; cuando el Sol baja, él sube; con el Sol en el centro, los reflejos se confunden con él; al hacer zoom, se separan. Los ángulos del halo de 22° (borde rojo a 21,7°) y de los parhelios se han comprobado coherentes con los de Atmospheric Optics (https://atoptics.co.uk), la referencia sobre estos fenómenos.",
     "it": "Un alone fotografato con un telefono, ricostruito dove e quando è stato scattato: Royan, il 29 ottobre 2026 alle 15:30, il Sole alto 21° dietro un velo di cirrostrati (85%) i cui cristalli cadono ben piatti (allineamento 95%). Nulla qui è una forma posizionata: un prisma esagonale di ghiaccio e la legge di Snell producono l'anello di 22°, i pareli, l'arco tangente e il cerchio parelico, e non è stato scelto un solo angolo. L'inquadratura iniziale è quella della fotografia, ricavata da essa: i due pareli, a 22,8° dal Sole, danno il campo del telefono (67° per 53°), e la posizione del Sole dà la direzione e l'inclinazione. Il cielo non cambia; è il telefono a muoversi. Il piccolo disco sopra il Sole non è nel cielo ma nell'obiettivo: un'immagine del Sole rimandata tra le sue lenti. I riflessi di questo tipo stanno sempre sulla retta che unisce il Sole al centro dell'immagine, il più visibile dall'altra parte del centro. Quando il Sole va a sinistra, lui va a destra; quando il Sole scende, lui sale; con il Sole al centro, i riflessi si confondono con lui; zoomando, si allontanano. Gli angoli dell'alone di 22° (bordo rosso a 21,7°) e dei pareli sono stati verificati coerenti con quelli di Atmospheric Optics (https://atoptics.co.uk), il riferimento su questi fenomeni."
   },
-  "time": {
-    "year": 2026,
-    "month": 10,
-    "day": 29,
-    "hour": 15,
-    "minute": 30
-  },
+  "time": "2026-10-29T15:30",
   "utcOffsetHours": 1,
   "durationSeconds": 66,
-  "place": [
-    {
-      "lat": 45.631536,
-      "lng": -0.9868809,
-      "name": "Royan, France"
-    }
-  ],
+  "place": {
+    "name": "Royan, France",
+    "locations": [
+      {
+        "lat": 45.631536,
+        "lng": -0.9868809
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

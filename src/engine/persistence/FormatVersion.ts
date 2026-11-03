@@ -29,13 +29,13 @@ export class FormatVersionError extends Error {
  * A file that leaves `version` out is version 1, the only one there was before files were checked: a case never had one.
  *
  * Reading a newer version is refused rather than attempted: the engine would play something other than what the file says, and
- * nothing on screen would say so. When a version 2 exists, reading version 1 will go through a migration here, so that the rest of
- * the engine only ever sees the current version.
+ * nothing on screen would say so. An older version is read through a migration (SightingMigration for a recording: version 2 writes
+ * the time as EDTF and the place as a PlaceJson, as RR0 does), so that the rest of the engine only ever sees the current version.
  */
 export class FormatVersion {
 
   /** The version of each format this engine reads and writes. */
-  static readonly CURRENT: Record<FormatName, number> = { sighting: 1, case: 1, interview: 1 }
+  static readonly CURRENT: Record<FormatName, number> = { sighting: 2, case: 1, interview: 1 }
 
   /** Where the schemas are published, one directory per version. */
   static readonly SCHEMA_BASE = "https://ufoathome.org/schema"

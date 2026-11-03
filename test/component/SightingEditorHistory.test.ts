@@ -391,7 +391,7 @@ describe("the scenery taken from a survey of the place", () => {
     const element = mount()
     element.surroundingsProvider = surveyOf(FOUND)
     // A recording is loaded where it stands: its own scenery, whatever it is, is its own.
-    element.sightingData = { ...element.sightingData, place: [{ lat: 49.1049, lng: -1.0754 }] }
+    element.sightingData = { ...element.sightingData, place: { locations: [{ lat: 49.1049, lng: -1.0754 }] } }
     await new Promise(resolve => setTimeout(resolve, 1200))
     expect(element.sightingData.decor ?? []).toHaveLength(0)
   })

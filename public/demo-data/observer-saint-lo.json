@@ -1,19 +1,12 @@
 {
- "version": 1,
+ "version": 2,
  "id": "2026-08-11-SaintLo",
  "image": "https://ufoathome.org/demo-data/share/saint-lo.jpg",
  "tags": [
   "aerial observation"
  ],
  "summaryTime": 3.12,
- "time": {
-  "year": 2026,
-  "month": 8,
-  "day": 11,
-  "hour": 2,
-  "minute": 30,
-  "raw": "2026-08-11T02:30~"
- },
+ "time": "2026-08-11T02:30~",
  "utcOffsetHours": {
   "value": 2,
   "basis": "derived",
@@ -25,17 +18,19 @@
   "basis": "stated",
   "rationale": "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye"
  },
- "place": [
-  {
-   "value": {
-    "lat": 49.10489,
-    "lng": -1.075382,
-    "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"
-   },
-   "basis": "stated",
-   "rationale": "the exact spot he stood on, from the Google Maps link he sent on 2026-10-12 (the park of the Musée du Bocage normand, which is open day and night)"
-  }
- ],
+ "place": {
+  "value": {
+   "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France",
+   "locations": [
+    {
+     "lat": 49.10489,
+     "lng": -1.075382
+    }
+   ]
+  },
+  "basis": "stated",
+  "rationale": "the exact spot he stood on, from the Google Maps link he sent on 2026-10-12 (the park of the Musée du Bocage normand, which is open day and night)"
+ },
  "observer": {
   "title": "Q. B."
  },

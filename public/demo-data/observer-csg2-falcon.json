@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "observer-csg2-falcon",
   "image": "https://ufoathome.org/demo-data/share/csg2-falcon.jpg",
   "observer": {
@@ -21,23 +21,18 @@
     "es": "La misma segunda etapa de CSG-2 hora y media después de su lanzamiento, el 1 de febrero de 2022 a las 00:49 UTC (17:49 en Colorado, en el crepúsculo), tal como Ron Lee la vio desde Falcon (Colorado) y la contó en SeeSat-L: «Al este. Quizá era visible antes pero acababa de salir. Siguió, más débil, yendo hacia el sur.» La etapa, a 620 km sobre Kansas, acababa de frenar para salir de su órbita y purgaba sus depósitos mientras giraba; alcanzó el aire sobre el Pacífico a las 01:05 UTC (Bob Christy). La órbita es la de CSG-2 misma, según Space-Track; el frenado, las purgas y el giro se suponen.",
     "it": "Lo stesso secondo stadio di CSG-2 un'ora e mezza dopo il lancio, il 1° febbraio 2022 alle 00:49 UTC (17:49 in Colorado, nel crepuscolo), come Ron Lee lo vide da Falcon (Colorado) e lo riferì su SeeSat-L: «A est. Forse era visibile prima ma ero appena uscito. È continuato, più debole, andando verso sud.» Lo stadio, a 620 km sopra il Kansas, aveva appena frenato per lasciare l'orbita e scaricava i serbatoi ruotando; raggiunse l'aria sopra il Pacifico alle 01:05 UTC (Bob Christy). L'orbita è quella di CSG-2 stesso, secondo Space-Track; la frenata, gli scarichi e la rotazione sono supposti."
   },
-  "time": {
-    "year": 2022,
-    "month": 1,
-    "day": 31,
-    "hour": 17,
-    "minute": 47,
-    "second": 30
-  },
+  "time": "2022-01-31T17:47:30",
   "utcOffsetHours": -7,
   "durationSeconds": 480,
-  "place": [
-    {
-      "lat": 38.9331,
-      "lng": -104.6086,
-      "name": "Falcon, Colorado"
-    }
-  ],
+  "place": {
+    "name": "Falcon, Colorado",
+    "locations": [
+      {
+        "lat": 38.9331,
+        "lng": -104.6086
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

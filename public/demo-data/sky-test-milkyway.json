@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-milkyway",
   "image": "https://ufoathome.org/demo-data/share/sky-test-milkyway.jpg",
   "summaryTime": 8,
@@ -14,21 +14,17 @@
     "es": "Un cielo de prueba para la Vía Láctea. Pide cuatro cosas a la vez: nada de Luna (la Luna nueva del 20 de julio de 2020), un Sol 65° bajo el horizonte, un cielo sin nubes y el centro galáctico alto — aquí a 81° de altura en el suroeste, visto desde el desierto de Atacama. Quita una de ellas y no queda nada que ver: que es exactamente lo que separa “no había Vía Láctea” de “no podría haberla visto”.",
     "it": "Un cielo di prova per la Via Lattea. Richiede quattro cose contemporaneamente: niente Luna (la Luna nuova del 20 luglio 2020), un Sole 65° sotto l'orizzonte, un cielo senza nuvole e il centro galattico alto — qui a 81° di altezza a sud-ovest, visto dal deserto di Atacama. Togline una e non resta più nulla da vedere: ed è esattamente ciò che separa “non c'era la Via Lattea” da “non avrei potuto vederla”."
   },
-  "time": {
-    "year": 2020,
-    "month": 7,
-    "day": 20,
-    "hour": 23,
-    "minute": 0
-  },
+  "time": "2020-07-20T23:00",
   "utcOffsetHours": -4,
   "durationSeconds": 24,
-  "place": [
-    {
-      "lat": -24.0,
-      "lng": -70.0
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": -24,
+        "lng": -70
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

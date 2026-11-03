@@ -44,8 +44,8 @@ describe("SightingCompletion", () => {
     })
 
     it("sees through an array to the shape of one of its members", () => {
-      // `place` is SightingLocation[], and what a reader needs inside it is the keys of one place.
-      const offered = labels('{ "place": [ { | } ] }')
+      // `place.locations` is a list, and what a reader needs inside it is the keys of one location.
+      const offered = labels('{ "place": { "locations": [ { | } ] } }')
       expect(offered).toContain('"lat"')
       expect(offered).toContain('"lng"')
     })

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-comet",
   "image": "https://ufoathome.org/demo-data/share/sky-test-comet.jpg",
   "tags": [
@@ -12,22 +12,18 @@
     "es": "Un cielo de prueba para un cometa: Hale-Bopp la tarde del 1 de abril de 1997, visto desde París al anochecer, a 30° de altura en el noroeste, de magnitud −0,8 con una cola de 20° de largo. Su órbita no está almacenada — se propaga en variables universales a partir de los elementos de su propio paso por el perihelio, y la cola se proyecta a partir de una longitud física en el espacio en lugar de dibujarse a un tamaño elegido. La línea “Sky:” del editor da su magnitud, su altura y la longitud de su cola, y se niega a concluir nada en lugar del lector.",
     "it": "Un cielo di prova per una cometa: la Hale-Bopp la sera del 1 aprile 1997, vista da Parigi al crepuscolo, a 30° di altezza a nord-ovest, magnitudine −0,8 con una coda lunga 20°. La sua orbita non è memorizzata — è propagata in variabili universali a partire dagli elementi del suo stesso passaggio al perielio, e la coda è proiettata da una lunghezza fisica nello spazio anziché disegnata con una dimensione scelta. La riga “Sky:” dell'editor ne dà la magnitudine, l'altezza e la lunghezza della coda, e si rifiuta di trarre qualsiasi conclusione al posto del lettore."
   },
-  "time": {
-    "year": 1997,
-    "month": 4,
-    "day": 1,
-    "hour": 21,
-    "minute": 15
-  },
+  "time": "1997-04-01T21:15",
   "utcOffsetHours": 2,
   "durationSeconds": 24,
-  "place": [
-    {
-      "lat": 48.8566,
-      "lng": 2.3522,
-      "name": "Paris, France"
-    }
-  ],
+  "place": {
+    "name": "Paris, France",
+    "locations": [
+      {
+        "lat": 48.8566,
+        "lng": 2.3522
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

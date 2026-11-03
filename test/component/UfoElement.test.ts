@@ -198,6 +198,9 @@ describe("UfoElement", () => {
     // is soundTrack (see SoundTrack.ts) — empty meaning nothing was recorded about sound.
     expect(element.sightingData).toEqual({
       ...sampleJson,
+      version: 2,
+      time: "1948-07-24",
+      place: { locations: [{ lat: 32.3792, lng: -86.3077 }] },
       timeline: { keyframes: sampleKeyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
@@ -1213,7 +1216,7 @@ describe("switching the counters between clock time and elapsed time", () => {
 describe("UfoElement sequencing API", () => {
 
   const twoSecondSighting = (): SightingRecordingJson => ({
-    version: 1,
+    version: 2,
     durationSeconds: 2,
     timeline: {
       keyframes: [
@@ -1311,7 +1314,7 @@ describe("double-click on the canvas", () => {
     angle: 0, transparency: 0, haloScale: 0, selected: false
   })
   const sighting = (): SightingRecordingJson => ({
-    version: 1,
+    version: 2,
     durationSeconds: 2,
     timeline: {
       keyframes: [

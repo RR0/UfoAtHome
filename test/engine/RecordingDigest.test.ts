@@ -5,8 +5,8 @@ import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/s
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const recording = (): SightingRecordingJson => ({
-  version: 1,
-  time: { year: 1964, month: 4, day: 24, hour: 17, minute: 45 },
+  version: 2,
+  time: "1964-04-24T17:45",
   id: "socorro",
   observer: { id: "zamora", title: "Lonnie Zamora" },
   timeline: {
@@ -39,7 +39,7 @@ describe("RecordingDigest", () => {
   it("keeps the account whole", () => {
     const digest = RecordingDigest.of(recording())
 
-    expect(digest?.time).toEqual({ year: 1964, month: 4, day: 24, hour: 17, minute: 45 })
+    expect(digest?.time).toBe("1964-04-24T17:45")
     expect(digest?.id).toBe("socorro")
     expect(digest?.observer).toEqual({ id: "zamora", title: "Lonnie Zamora" })
   })
@@ -65,12 +65,12 @@ describe("RecordingDigest", () => {
   it("says nothing about an empty editor", () => {
     // An empty recording is not a statement, and offering its emptiness would invite it to be read
     // as one.
-    expect(RecordingDigest.of({ version: 1, timeline: { keyframes: [] } })).toBeUndefined()
+    expect(RecordingDigest.of({ version: 2, timeline: { keyframes: [] } })).toBeUndefined()
   })
 
   it("omits an angle or a direction a shape never stated", () => {
     const bare: SightingRecordingJson = {
-      version: 1,
+      version: 2,
       timeline: {
         keyframes: [{
           t: 0,
@@ -107,8 +107,8 @@ describe("DraftRecording", () => {
     // into a drawing (SightingShapes.toBounds/toPosition) read a box before replacing it — so one
     // that asserts nothing has to be there for them to read.
     const draft = {
-      version: 1 as const,
-      time: { year: 1964 },
+      version: 2 as const,
+      time: "1964",
       timeline: {
         keyframes: [{
           t: 0,

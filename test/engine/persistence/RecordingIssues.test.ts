@@ -16,9 +16,9 @@ const recordings = Object.entries(files)
 /** A recording that only states what a hand-written file would, with `extra` merged in. */
 function recording(extra: Record<string, unknown> = {}): SightingRecordingJson {
   return {
-    version: 1,
-    time: { year: 2012, month: 6, day: 29 },
-    place: [{ lat: 49.08, lng: 2.33 }],
+    version: 2,
+    time: "2012-06-29",
+    place: { locations: [{ lat: 49.08, lng: 2.33 }] },
     observerTrack: { keyframes: [{ t: 0, pose: { lat: 49.08, lng: 2.33, elevationM: 0, headingDeg: 350, pitchDeg: 0, fovDeg: 40 } }] },
     timeline: {
       keyframes: [{

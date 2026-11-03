@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "observer-csg2-nassau",
   "image": "https://ufoathome.org/demo-data/share/csg2-nassau.jpg",
   "observer": {
@@ -25,23 +25,18 @@
     "es": "El lanzamiento de CSG-2 tal como lo habría visto un observador en Nassau, el 31 de enero de 2022 justo después de la puesta del Sol: un Falcon 9 salido de Cabo Cañaveral pasando hacia el sur junto a las Bahamas, a 200 km al oeste, su segunda etapa ardiendo entre 100 y 185 km de altura, donde el Sol aún brilla, entre el ojo y el Sol puesto. No se encontró ningún relato desde allí: este observador se supone, situado donde la física dice que la estela podía verse (desde Orlando el cielo era aún demasiado claro y la estela demasiado baja), y lo que muestra es lo que calcula el motor, el Sol, la sombra de la Tierra, la expansión y la luz. La misma etapa se ve hora y media después desde Colorado (véase el caso).",
     "it": "Il lancio di CSG-2 come l'avrebbe visto un osservatore a Nassau, il 31 gennaio 2022 subito dopo il tramonto: un Falcon 9 partito da Cape Canaveral che passa verso sud lungo le Bahamas, 200 km a ovest, il secondo stadio che brucia tra 100 e 185 km di quota, dove il Sole splende ancora, tra l'occhio e il Sole tramontato. Non è stato trovato alcun resoconto da lì: questo osservatore è supposto, posto dove la fisica dice che la scia poteva vedersi (da Orlando il cielo era ancora troppo chiaro e la scia troppo bassa), e ciò che mostra è ciò che il motore calcola, il Sole, l'ombra della Terra, l'espansione e la luce. Lo stesso stadio è visto un'ora e mezza dopo dal Colorado (vedi il caso)."
   },
-  "time": {
-    "year": 2022,
-    "month": 1,
-    "day": 31,
-    "hour": 18,
-    "minute": 13,
-    "second": 0
-  },
+  "time": "2022-01-31T18:13:00",
   "utcOffsetHours": -5,
   "durationSeconds": 480,
-  "place": [
-    {
-      "lat": 25.048,
-      "lng": -77.3554,
-      "name": "Nassau, Bahamas"
-    }
-  ],
+  "place": {
+    "name": "Nassau, Bahamas",
+    "locations": [
+      {
+        "lat": 25.048,
+        "lng": -77.3554
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

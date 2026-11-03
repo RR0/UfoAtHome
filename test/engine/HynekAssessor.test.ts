@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest"
 import { ASSESSMENT_SOURCES } from "../../src/engine/assessment/assessmentSources.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
 
 const hynek = ASSESSMENT_SOURCES.find(source => source.id === "hynek")!
 
-const classify = (json: Partial<SightingRecordingJson>): Promise<string | undefined> =>
+const classify = (json: Partial<SightingRecordingJsonV1>): Promise<string | undefined> =>
   hynek.create()
-    .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...json } as SightingRecordingJson))
+    .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...json } as SightingRecordingJsonV1))
     .then(assessment => assessment.verdict)
 
 /** Landévennec: 20 May 1974, 19:00 legal time in Brittany, which is UTC+1 that year. The Sun is
@@ -50,7 +50,7 @@ describe("HynekAssessor", () => {
     // is stored, and no instrument in the registry is a radar. An author cannot fill those in, so
     // saying "unanswered" would send them to do the impossible.
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
     const of = (id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
     for (const id of ["traces", "radar"]) {
@@ -80,7 +80,7 @@ describe("HynekAssessor", () => {
     expect(await classify(withBeings)).toBe("ce3")
 
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...withBeings } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...withBeings } as SightingRecordingJsonV1))
     expect(assessment.criteria.find(criterion => criterion.id === "entities")!.paths)
       .toEqual(["decor.0", "decor.1"])
   })
@@ -104,7 +104,7 @@ describe("HynekAssessor", () => {
 
   it("says which of its grounds it worked out", async () => {
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
     const daylight = assessment.criteria.find(criterion => criterion.id === "daylight")!
 
     expect(daylight.basis).toBe("derived")
@@ -113,7 +113,7 @@ describe("HynekAssessor", () => {
 
   it("reaches no score, because it classifies rather than measures", async () => {
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
 
     expect(assessment.score).toBeUndefined()
     expect(assessment.verdict).toBe("dd")
@@ -144,7 +144,7 @@ describe("HynekAssessor", () => {
     expect(await classify(walk)).toBe("ce1")
 
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, ...walk } as unknown as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 1, ...walk } as unknown as SightingRecordingJsonV1))
     const proximity = assessment.criteria.find(criterion => criterion.id === "proximity")!
     expect(proximity.basis).toBe("derived")
     expect(proximity.unsupported).toBeUndefined()

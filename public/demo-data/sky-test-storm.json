@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-storm",
   "image": "https://ufoathome.org/demo-data/share/sky-test-storm.jpg",
   "summaryTime": 1,
@@ -14,23 +14,18 @@
     "es": "Un cielo de prueba para el mal tiempo: una tormenta al anochecer, base de las nubes a 600 m, lluvia intensa, 5 m/s de viento. La lluvia tiene su propio shader y deriva con el viento real; los relámpagos iluminan las nubes y toda la escena, y el trueno llega con el retraso que impone su distancia. Todo se detiene con el reproductor: una reproducción en pausa es un instante de una observación, no un ambiente. Aquí la meteorología se declara a mano — en un caso real fechado se consultaría en ERA5 y se mostraría en solo lectura.",
     "it": "Un cielo di prova per il maltempo: un temporale a inizio serata, base delle nuvole a 600 m, pioggia forte, 5 m/s di vento. La pioggia ha un proprio shader e deriva con il vento reale; i fulmini illuminano le nuvole e l'intera scena, e il tuono arriva con il ritardo che la sua distanza impone. Tutto si ferma con il lettore: una riproduzione in pausa è un istante di un'osservazione, non un'atmosfera. Qui il meteo è indicato a mano — su un vero caso datato verrebbe cercato in ERA5 e mostrato in sola lettura."
   },
-  "time": {
-    "year": 2021,
-    "month": 7,
-    "day": 14,
-    "hour": 21,
-    "minute": 6,
-    "second": 22
-  },
+  "time": "2021-07-14T21:06:22",
   "utcOffsetHours": 2,
   "durationSeconds": 20,
-  "place": [
-    {
-      "lat": 48.8566,
-      "lng": 2.3522,
-      "name": "Paris, France"
-    }
-  ],
+  "place": {
+    "name": "Paris, France",
+    "locations": [
+      {
+        "lat": 48.8566,
+        "lng": 2.3522
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

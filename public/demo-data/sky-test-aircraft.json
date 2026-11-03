@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-aircraft",
   "image": "https://ufoathome.org/demo-data/share/sky-test-aircraft.jpg",
   "tags": [
@@ -13,22 +13,18 @@
     "es": "Una reproducción, no un relato: lo que da un avión de línea cuando se fotografía con una exposición larga. Aquí no se dibuja ninguna forma de OVNI, porque no la hay. Una cámara de 35 mm a 50 mm cargada con película ISO 400, veinte segundos a f/2,8, apuntando al oeste-suroeste. La exposición se revela cuando la reproducción está en pausa: mientras se reproduce, el avión se ve pasar instante a instante, y es al detenerse cuando los veinte segundos se suman en la película. Gennevilliers está justo bajo la prolongación del eje de la pista 07 de Le Bourget, a 10 km del umbral: un bimotor a reacción en final pasa por allí a unos 700 m de altura, a 260 km/h, con los faros de aterrizaje encendidos y de cara al objetivo. Los faros de aterrizaje, demasiado brillantes para la película, trazan una línea blanca; las luces de posición, dos de colores; los estroboscopios dejan puntos a intervalos regulares, y la separación de esos puntos es exactamente la velocidad angular dividida por la frecuencia de los destellos. Eso es lo que separa la fotografía de un avión de la de un objeto que no parpadea, y es la lectura que nunca recibió la fotografía de Gennevilliers del 5 de noviembre de 1990, publicada como una nave monumental. El eje de la pista es el de OpenStreetMap; la senda de planeo de 3°, la velocidad y la intensidad de los faros de aterrizaje vistos de frente son supuestas.",
     "it": "Una riproduzione, non un resoconto: ciò che dà un aereo di linea fotografato in posa lunga. Nessuna forma di UFO è disegnata qui, perché non ce n'è. Una fotocamera 35 mm a 50 mm caricata con pellicola ISO 400, venti secondi a f/2,8, puntata verso ovest-sud-ovest. La posa si sviluppa quando la riproduzione è in pausa: mentre scorre, l'aereo si vede passare istante per istante, ed è quando si ferma che i venti secondi si sommano sulla pellicola. Gennevilliers si trova proprio sotto il prolungamento dell'asse della pista 07 di Le Bourget, a 10 km dalla soglia: un bimotore a reazione in finale vi passa a circa 700 m di altezza, a 260 km/h, fari di atterraggio accesi e rivolti verso l'obiettivo. I fari di atterraggio, troppo intensi per la pellicola, tracciano una linea bianca; le luci di navigazione, due linee colorate; le luci stroboscopiche lasciano punti a intervalli regolari, e la spaziatura di quei punti è esattamente la velocità angolare divisa per la frequenza dei lampi. È ciò che distingue la fotografia di un aereo da quella di un oggetto che non lampeggia, ed è la lettura che la fotografia di Gennevilliers del 5 novembre 1990 non ha mai avuto, pubblicata come un velivolo monumentale. L'asse della pista è quello di OpenStreetMap; il sentiero di discesa di 3°, la velocità e l'intensità dei fari di atterraggio visti frontalmente sono ipotizzati."
   },
-  "time": {
-    "year": 1990,
-    "month": 11,
-    "day": 5,
-    "hour": 19,
-    "minute": 0
-  },
+  "time": "1990-11-05T19:00",
   "utcOffsetHours": 1,
   "durationSeconds": 20,
-  "place": [
-    {
-      "lat": 48.9339,
-      "lng": 2.2986,
-      "name": "Gennevilliers, Hauts-de-Seine, France"
-    }
-  ],
+  "place": {
+    "name": "Gennevilliers, Hauts-de-Seine, France",
+    "locations": [
+      {
+        "lat": 48.9339,
+        "lng": 2.2986
+      }
+    ]
+  },
   "instrument": "slr-35mm-50",
   "exposureSeconds": 20,
   "iso": 400,

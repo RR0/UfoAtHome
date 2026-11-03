@@ -121,14 +121,14 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Field</th><th>Meaning</th></tr>
-      <tr><td><code>version</code></td><td>The version of the format: <code>1</code> (see Versions of the format)</td></tr>
+      <tr><td><code>version</code></td><td>The version of the format: <code>2</code> (see Versions of the format)</td></tr>
       <tr><td><code>id</code></td><td>Which account this is, unique across every recording anywhere: the day, then who saw it (<code>"1964-04-24-ZamoraLonnie"</code>), or where for an anonymous observer (<code>"1964-04-24-Socorro"</code>). What a case names it by is not this id but its event's own (see below).</td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, every part optional — that is how the format states “1954” or “around 05:00”. <code>raw</code> is the date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, and it is what the date means: <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), or <code>"05:00"</code> alone for a time of day remembered without its date. The numbers are kept in step with it for what computes (the sky, the clock). It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> or <code>winter</code>) states a date known only as “in the spring of 2022” (EDTF <code>2022-21</code>), where <code>month</code> and <code>day</code> are left out.</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td>The date as written in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, in the legal time of <code>utcOffsetHours</code>, as RR0's events write it: <code>"1964-04-24T17:50"</code>, <code>"1954"</code>, <code>"1948-07-24T02:45~"</code> (approximate), <code>"2025-06?"</code> (uncertain), <code>"1965-07-01%"</code> (both), <code>"19XX"</code> (a masked year), <code>"2022-21"</code> (the spring of 2022), or <code>"05:00"</code> alone for a time of day remembered without its date. Each part is optional from the right, which is how the format states “1954” or “around 05:00”. It is a subset of EDTF (level 0, these qualifiers on the whole date, masked years, seasons); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> is RR0's full EDTF model, into which UFO@home's own tooling converts a recording's dates</td></tr>
       <tr><td><code>durationSeconds</code></td><td>An alternative to <code>endTime</code>, and it wins if both are given</td></tr>
       <tr><td><code>durationText</code></td><td>The length as it was stated when it was not exact: an ISO 8601 duration with a doubt (<code>PT10M~</code>) or a range (<code>PT5M/PT10M</code>). <code>durationSeconds</code> is then the one length played at, chosen from it</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the observer's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
       <tr><td><code>timeZone</code></td><td>The IANA zone the offset was derived from (<code>"Europe/Paris"</code>): the rule, where <code>utcOffsetHours</code> is the number it gave at that date. Only the number is read to place the sky; the zone is what lets the offset be derived again when the date changes</td></tr>
-      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> is the fully qualified place name the coordinates were resolved from</td></tr>
+      <tr><td><code>place</code></td><td>Where it happened, as RR0's events write a place (<a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>'s <code>PlaceJson</code>): <code>{ name, locations: [{ lat, lng }] }</code>, <code>name</code> being the fully qualified place name the coordinates were resolved from</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous observer. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>What stands for the observation where it is only linked to and never played: the card a shared link shows (see <a href="/docs/share/">Sharing</a>). <code>image</code> is a picture, an address (absolute, relative to the file, or an RR0 path from the site root); <code>summary</code> a sentence or two, one string or one per language. Absent, the card shows the logo and says who saw it, in which case and when, as far as the file tells. <code>summaryTime</code> is the second of the recording at which the picture of the card is photographed (0 by default: the first image), for a recording whose first image does not show the phenomenon; only the project's capture tool reads it, never the player</td></tr>
@@ -387,11 +387,11 @@ export class DocsFormatPage extends DocsSection {
       means the same in both; it draws no shape of its own (an empty <code>timeline</code>); and it holds the bodies in
       its own <code>interpretation</code>, described above. A body's <code>explains</code> names the shapes of the account.</p>
     <pre data-json=""><code>{
-  "version": 1,
+  "version": 2,
   "id": "1950-05-11-TrentPaul-interpretation-2",
-  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "time": "1950-05-11T19:45",
   "utcOffsetHours": -7,
-  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "place": { "locations": [{ "lat": 45.104167, "lng": -123.330556 }] },
   "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
   "tags": ["interpretation"],
   "timeline": { "keyframes": [], "order": [], "groups": [] },
@@ -530,15 +530,16 @@ export class DocsFormatPage extends DocsSection {
       problem).</p>
 
     <h3>Versions of the format</h3>
-    <p>A file states the version of its format in <code>version</code>: <code>1</code>, the only
-      one so far. It is the version of the FORMAT, not of UFO@home: adding a field does not change
-      it, since an older player ignores what it does not know, and every file of version 1 written
-      since the format began still plays. It changes only the day a field would change meaning or
-      shape, and that day the player will read both, the older through a conversion. A file of a
-      version newer than the player is refused with a message saying so, rather than played as
-      something it does not say.</p>
+    <p>A file states the version of its format in <code>version</code>: <code>2</code> since 2026-11. It is the version of the FORMAT, not of UFO@home: adding a field does not change
+      it, since an older player ignores what it does not know. It changes only the day a field changes meaning or
+      shape, and the player then reads both, the older through a conversion. Version 2 writes <code>time</code> and
+      <code>endTime</code> as EDTF text instead of the fields of a date (<code>{ "year": 1964, "month": 4, … }</code>), and
+      <code>place</code> as one place instead of a list of locations each with its own name, so that a recording and an event
+      of RR0 say “when” and “where” alike; every file of version 1 still plays, converted as it is read, what it said of where
+      its values came from kept. A file of a version newer than the player is refused with a message saying so, rather than
+      played as something it does not say.</p>
     <p>Each version has its own schema, at an address that names it:
-      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (and
+      <code>https://ufoathome.org/schema/2/sighting.schema.json</code> (and
       <code>case.schema.json</code>, <code>interview.schema.json</code> beside it).
       <code>/sighting.schema.json</code> is always the current version. A file may name the one it
       was written against in <code>"$schema"</code>, which editors such as VS Code use to check it
@@ -622,14 +623,14 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>version</code></td><td>La version du format : <code>1</code> (voir Versions du format)</td></tr>
+      <tr><td><code>version</code></td><td>La version du format : <code>2</code> (voir Versions du format)</td></tr>
       <tr><td><code>id</code></td><td>Quel compte rendu c'est, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un observateur anonyme (<code>"1964-04-24-Socorro"</code>). Ce par quoi un dossier le désigne n'est pas cet id mais celui de son événement (voir plus bas).</td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, chaque partie facultative — c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». <code>raw</code> est la date telle qu'écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, et c'est elle qui fait foi : <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Les nombres sont tenus en accord avec elle pour ce qui calcule (le ciel, l'horloge). C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> ou <code>winter</code>) dit une date connue seulement comme « au printemps 2022 » (EDTF <code>2022-21</code>), où <code>month</code> et <code>day</code> sont omis.</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td>La date écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, à l'heure légale de <code>utcOffsetHours</code>, comme l'écrivent les événements de RR0 : <code>"1964-04-24T17:50"</code>, <code>"1954"</code>, <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), <code>"2022-21"</code> (le printemps 2022), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Chaque partie est facultative en partant de la droite : c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées, saisons) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
       <tr><td><code>durationText</code></td><td>La durée telle qu'elle a été énoncée quand elle n'était pas exacte : une durée ISO 8601 avec un doute (<code>PT10M~</code>) ou une plage (<code>PT5M/PT10M</code>). <code>durationSeconds</code> est alors l'unique durée à laquelle on joue, choisie à partir d'elle</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre de l'observateur (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
       <tr><td><code>timeZone</code></td><td>Le fuseau IANA dont le décalage a été dérivé (<code>"Europe/Paris"</code>) : la règle, là où <code>utcOffsetHours</code> est le nombre qu'elle donnait à cette date. Seul le nombre sert à placer le ciel ; le fuseau permet de dériver à nouveau le décalage quand la date change</td></tr>
-      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> est le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
+      <tr><td><code>place</code></td><td>Où cela s'est passé, comme les événements de RR0 écrivent un lieu (le <code>PlaceJson</code> de <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>) : <code>{ name, locations: [{ lat, lng }] }</code>, <code>name</code> étant le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un observateur anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Ce qui tient lieu de l'observation là où elle n'est que citée, jamais jouée : la carte qu'affiche un lien partagé (voir <a href="/docs/share/">Partager</a>). <code>image</code> est une image, une adresse (absolue, relative au fichier, ou un chemin RR0 depuis la racine du site) ; <code>summary</code> une phrase ou deux, une chaîne ou une par langue. Absents, la carte montre le logo et dit qui l'a vue, dans quel dossier et quand, pour autant que le fichier le dise. <code>summaryTime</code> est la seconde de l'enregistrement où l'on photographie l'image de la carte (0 par défaut : la première image), pour un enregistrement dont la première image ne montre pas le phénomène ; seul l'outil de capture du projet le lit, jamais le lecteur</td></tr>
@@ -894,11 +895,11 @@ export class DocsFormatPage extends DocsSection {
       <code>timeline</code> vide) ; et il porte les corps dans son propre <code>interpretation</code>, décrit plus haut.
       Les <code>explains</code> d'un corps désignent les formes du compte rendu.</p>
     <pre data-json=""><code>{
-  "version": 1,
+  "version": 2,
   "id": "1950-05-11-TrentPaul-interpretation-2",
-  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "time": "1950-05-11T19:45",
   "utcOffsetHours": -7,
-  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "place": { "locations": [{ "lat": 45.104167, "lng": -123.330556 }] },
   "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
   "tags": ["interpretation"],
   "timeline": { "keyframes": [], "order": [], "groups": [] },
@@ -1040,15 +1041,16 @@ export class DocsFormatPage extends DocsSection {
       depuis la keyframe précédente relève de la règle ci-dessus, pas d'un problème).</p>
 
     <h3>Versions du format</h3>
-    <p>Un fichier indique la version de son format dans <code>version</code> : <code>1</code>, la
-      seule à ce jour. C'est la version du FORMAT, pas celle d'UFO@home : ajouter un champ ne la
-      change pas, puisqu'un lecteur plus ancien ignore ce qu'il ne connaît pas, et tout fichier de
-      version 1 écrit depuis les débuts du format se joue encore. Elle ne change que le jour où un
-      champ changerait de sens ou de forme, et ce jour-là le lecteur lira les deux, l'ancienne par
-      une conversion. Un fichier d'une version plus récente que le lecteur est refusé avec un message
-      qui le dit, plutôt que joué comme ce qu'il ne dit pas.</p>
+    <p>Un fichier indique la version de son format dans <code>version</code> : <code>2</code> depuis novembre 2026. C'est la version du FORMAT, pas celle d'UFO@home : ajouter un champ ne la
+      change pas, puisqu'un lecteur plus ancien ignore ce qu'il ne connaît pas. Elle ne change que le jour où un
+      champ change de sens ou de forme, et le lecteur lit alors les deux, l'ancienne par une conversion. La version 2 écrit
+      <code>time</code> et <code>endTime</code> en texte EDTF plutôt qu'en champs d'une date (<code>{ "year": 1964, "month": 4, … }</code>),
+      et <code>place</code> comme un lieu plutôt que comme une liste de positions portant chacune son nom, pour qu'un
+      enregistrement et un événement de RR0 disent « quand » et « où » de la même façon ; tout fichier de version 1 se joue
+      encore, converti à la lecture, ce qu'il disait de l'origine de ses valeurs conservé. Un fichier d'une version plus récente
+      que le lecteur est refusé avec un message qui le dit, plutôt que joué comme ce qu'il ne dit pas.</p>
     <p>Chaque version a son schéma, à une adresse qui la nomme :
-      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (et
+      <code>https://ufoathome.org/schema/2/sighting.schema.json</code> (et
       <code>case.schema.json</code>, <code>interview.schema.json</code> à côté).
       <code>/sighting.schema.json</code> est toujours la version courante. Un fichier peut nommer
       celle d'après laquelle il a été écrit dans <code>"$schema"</code>, dont se servent des
@@ -1130,14 +1132,14 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significado</th></tr>
-      <tr><td><code>version</code></td><td>La versión del formato: <code>1</code> (ver Versiones del formato)</td></tr>
+      <tr><td><code>version</code></td><td>La versión del formato: <code>2</code> (ver Versiones del formato)</td></tr>
       <tr><td><code>id</code></td><td>Qué relato es este, único entre todas las grabaciones de cualquier parte: el día, y luego quién lo vio (<code>"1964-04-24-ZamoraLonnie"</code>), o dónde para un observador anónimo (<code>"1964-04-24-Socorro"</code>). Aquello por lo que un caso lo nombra no es este id sino el de su evento (véase más abajo).</td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, cada parte opcional — así es como el formato expresa “1954” o “hacia las 05:00”. <code>raw</code> es la fecha tal como se escribe en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, y es lo que la fecha significa: <code>"1948-07-24T02:45~"</code> (aproximada), <code>"2025-06?"</code> (incierta), <code>"1965-07-01%"</code> (ambas cosas), <code>"19XX"</code> (un año enmascarado), o <code>"05:00"</code> solo, para una hora del día recordada sin su fecha. Los números se mantienen de acuerdo con ella para lo que se calcula (el cielo, el reloj). Es un subconjunto de EDTF (nivel 0, estos calificadores sobre la fecha entera, años enmascarados); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> es el modelo EDTF completo de RR0, al que las herramientas propias de UFO@home convierten las fechas de una grabación <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una fecha conocida solo como «en primavera de 2022» (EDTF <code>2022-21</code>), donde se omiten <code>month</code> y <code>day</code>.</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td>La fecha escrita en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, en la hora legal de <code>utcOffsetHours</code>, como la escriben los eventos de RR0: <code>"1964-04-24T17:50"</code>, <code>"1954"</code>, <code>"1948-07-24T02:45~"</code> (aproximada), <code>"2025-06?"</code> (incierta), <code>"1965-07-01%"</code> (ambas), <code>"19XX"</code> (un año enmascarado), <code>"2022-21"</code> (la primavera de 2022), o <code>"05:00"</code> solo para una hora recordada sin su fecha. Cada parte es opcional empezando por la derecha: así expresa el formato “1954” o “hacia las 05:00”. Es un subconjunto de EDTF (nivel 0, estos calificativos sobre la fecha entera, años enmascarados, estaciones); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> es el modelo EDTF completo de RR0, al que las herramientas de UFO@home convierten las fechas de una grabación</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Una alternativa a <code>endTime</code>, y prevalece si se dan las dos</td></tr>
       <tr><td><code>durationText</code></td><td>La duración tal como se enunció cuando no era exacta: una duración ISO 8601 con una duda (<code>PT10M~</code>) o un rango (<code>PT5M/PT10M</code>). <code>durationSeconds</code> es entonces la única duración a la que se reproduce, elegida a partir de ella</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>La hora LEGAL que marcaba el reloj del observador (+1 para Francia en 1965). Si falta, se aproxima a partir de la longitud, que no puede conocer la hora legal ni un cambio de horario de verano</td></tr>
       <tr><td><code>timeZone</code></td><td>La zona IANA de la que se derivó el desfase (<code>"Europe/Paris"</code>): la regla, mientras que <code>utcOffsetHours</code> es el número que daba en esa fecha. Solo se lee el número para situar el cielo; la zona es lo que permite derivar de nuevo el desfase cuando cambia la fecha</td></tr>
-      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> es el nombre completo del lugar a partir del cual se resolvieron las coordenadas</td></tr>
+      <tr><td><code>place</code></td><td>Dónde ocurrió, como los eventos de RR0 escriben un lugar (el <code>PlaceJson</code> de <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>): <code>{ name, locations: [{ lat, lng }] }</code>, siendo <code>name</code> el nombre completo del lugar a partir del cual se resolvieron las coordenadas</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, todos opcionales; se omite por completo para un observador anónimo. <code>id</code> es una referencia a la persona (en RR0, su directorio: <code>"ZamoraLonnie"</code>); los demás campos la describen cuando nadie le ha dado uno</td></tr>
       <tr><td><code>description</code></td><td>El relato en prosa — una cadena, o una por idioma (véase más abajo)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Lo que representa la observación donde solo se enlaza y nunca se reproduce: la tarjeta que muestra un enlace compartido (véase <a href="/docs/share/">Compartir</a>). <code>image</code> es una imagen, una dirección (absoluta, relativa al archivo, o una ruta RR0 desde la raíz del sitio); <code>summary</code> una o dos frases, una cadena o una por idioma. Ausentes, la tarjeta muestra el logotipo y dice quién la vio, en qué caso y cuándo, hasta donde lo diga el archivo. <code>summaryTime</code> es el segundo de la grabación en que se fotografía la imagen de la tarjeta (0 por defecto: la primera imagen), para una grabación cuya primera imagen no muestra el fenómeno; solo la herramienta de captura del proyecto lo lee, nunca el reproductor</td></tr>
@@ -1395,11 +1397,11 @@ export class DocsFormatPage extends DocsSection {
       mismo en ambas; no dibuja ninguna forma (una <code>timeline</code> vacía); y guarda los cuerpos en su propia
       <code>interpretation</code>, descrita arriba. El <code>explains</code> de un cuerpo nombra las formas del relato.</p>
     <pre data-json=""><code>{
-  "version": 1,
+  "version": 2,
   "id": "1950-05-11-TrentPaul-interpretation-2",
-  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "time": "1950-05-11T19:45",
   "utcOffsetHours": -7,
-  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "place": { "locations": [{ "lat": 45.104167, "lng": -123.330556 }] },
   "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
   "tags": ["interpretation"],
   "timeline": { "keyframes": [], "order": [], "groups": [] },
@@ -1538,15 +1540,16 @@ export class DocsFormatPage extends DocsSection {
       fotograma clave anterior es la regla de arriba, no un problema).</p>
 
     <h3>Versiones del formato</h3>
-    <p>Un archivo indica la versión de su formato en <code>version</code>: <code>1</code>, la única
-      hasta ahora. Es la versión del FORMATO, no la de UFO@home: añadir un campo no la cambia, ya que
-      un reproductor más antiguo ignora lo que no conoce, y todo archivo de versión 1 escrito desde el
-      principio del formato se sigue reproduciendo. Solo cambia el día en que un campo cambiaría de
-      sentido o de forma, y ese día el reproductor leerá ambas, la antigua mediante una conversión. Un
-      archivo de una versión más reciente que el reproductor se rechaza con un mensaje que lo dice, en
-      lugar de reproducirse como algo que no dice.</p>
+    <p>Un archivo indica la versión de su formato en <code>version</code>: <code>2</code> desde noviembre de 2026. Es la versión del FORMATO, no la de UFO@home: añadir un campo no la cambia, ya que
+      un reproductor más antiguo ignora lo que no conoce. Solo cambia el día en que un campo cambia de
+      sentido o de forma, y el reproductor lee entonces ambas, la antigua mediante una conversión. La versión 2 escribe
+      <code>time</code> y <code>endTime</code> como texto EDTF en lugar de los campos de una fecha (<code>{ "year": 1964, "month": 4, … }</code>),
+      y <code>place</code> como un lugar en lugar de una lista de posiciones cada una con su nombre, para que una grabación y un
+      evento de RR0 digan “cuándo” y “dónde” de la misma manera; todo archivo de versión 1 se sigue reproduciendo, convertido al
+      leerse, conservando lo que decía del origen de sus valores. Un archivo de una versión más reciente que el reproductor se
+      rechaza con un mensaje que lo dice, en lugar de reproducirse como algo que no dice.</p>
     <p>Cada versión tiene su esquema, en una dirección que la nombra:
-      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (y
+      <code>https://ufoathome.org/schema/2/sighting.schema.json</code> (y
       <code>case.schema.json</code>, <code>interview.schema.json</code> al lado).
       <code>/sighting.schema.json</code> es siempre la versión actual. Un archivo puede nombrar aquella
       con la que se escribió en <code>"$schema"</code>, que editores como VS Code usan para comprobarlo
@@ -1628,14 +1631,14 @@ export class DocsFormatPage extends DocsSection {
     <div class="table-scroll">
     <table>
       <tr><th>Campo</th><th>Significato</th></tr>
-      <tr><td><code>version</code></td><td>La versione del formato: <code>1</code> (vedi Versioni del formato)</td></tr>
+      <tr><td><code>version</code></td><td>La versione del formato: <code>2</code> (vedi Versioni del formato)</td></tr>
       <tr><td><code>id</code></td><td>Quale resoconto è, unico fra tutte le registrazioni ovunque: il giorno, poi chi l'ha visto (<code>"1964-04-24-ZamoraLonnie"</code>), o il luogo per un osservatore anonimo (<code>"1964-04-24-Socorro"</code>). Ciò con cui un caso lo designa non è questo id ma quello del suo evento (vedi più sotto).</td></tr>
-      <tr><td><code>time</code>, <code>endTime</code></td><td><code>{ year, month, day, hour, minute, second, raw }</code>, ogni parte facoltativa — è così che il formato esprime “1954” o “verso le 05:00”. <code>raw</code> è la data come scritta in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, ed è ciò che la data significa: <code>"1948-07-24T02:45~"</code> (approssimativa), <code>"2025-06?"</code> (incerta), <code>"1965-07-01%"</code> (entrambe le cose), <code>"19XX"</code> (un anno mascherato), oppure <code>"05:00"</code> da solo per un'ora del giorno ricordata senza la sua data. I numeri sono tenuti in accordo con essa per ciò che si calcola (il cielo, l'orologio). È un sottoinsieme di EDTF (livello 0, questi qualificatori sull'intera data, anni mascherati); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> è il modello EDTF completo di RR0, in cui gli strumenti propri di UFO@home convertono le date di una registrazione <code>season</code> (<code>spring</code>, <code>summer</code>, <code>autumn</code> o <code>winter</code>) dice una data nota solo come «in primavera del 2022» (EDTF <code>2022-21</code>), dove <code>month</code> e <code>day</code> sono omessi.</td></tr>
+      <tr><td><code>time</code>, <code>endTime</code></td><td>La data scritta in <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, nell'ora legale di <code>utcOffsetHours</code>, come la scrivono gli eventi di RR0: <code>"1964-04-24T17:50"</code>, <code>"1954"</code>, <code>"1948-07-24T02:45~"</code> (approssimativa), <code>"2025-06?"</code> (incerta), <code>"1965-07-01%"</code> (entrambe), <code>"19XX"</code> (un anno mascherato), <code>"2022-21"</code> (la primavera del 2022), o <code>"05:00"</code> da solo per un'ora ricordata senza la sua data. Ogni parte è facoltativa partendo da destra: è così che il formato esprime “1954” o “verso le 05:00”. È un sottoinsieme di EDTF (livello 0, questi qualificatori sull'intera data, anni mascherati, stagioni); <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> è il modello EDTF completo di RR0, in cui gli strumenti di UFO@home convertono le date di una registrazione</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Un'alternativa a <code>endTime</code>, e prevale se sono date entrambe</td></tr>
       <tr><td><code>durationText</code></td><td>La durata come è stata enunciata quando non era esatta: una durata ISO 8601 con un dubbio (<code>PT10M~</code>) o un intervallo (<code>PT5M/PT10M</code>). <code>durationSeconds</code> è allora l'unica durata a cui si riproduce, scelta a partire da essa</td></tr>
       <tr><td><code>utcOffsetHours</code></td><td>L'ora LEGALE su cui era regolato l'orologio dell'osservatore (+1 per la Francia nel 1965). Se manca, viene approssimata dalla longitudine, che non può conoscere l'ora legale né un passaggio all'ora estiva</td></tr>
       <tr><td><code>timeZone</code></td><td>Il fuso IANA da cui è stato ricavato lo scarto (<code>"Europe/Paris"</code>): la regola, mentre <code>utcOffsetHours</code> è il numero che dava a quella data. Per collocare il cielo si legge solo il numero; il fuso è ciò che permette di ricavare di nuovo lo scarto quando la data cambia</td></tr>
-      <tr><td><code>place</code></td><td><code>[{ lat, lng, name }]</code> — <code>name</code> è il nome completo del luogo da cui sono state risolte le coordinate</td></tr>
+      <tr><td><code>place</code></td><td>Dove è successo, come gli eventi di RR0 scrivono un luogo (il <code>PlaceJson</code> di <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>): <code>{ name, locations: [{ lat, lng }] }</code>, dove <code>name</code> è il nome completo del luogo da cui sono state ricavate le coordinate</td></tr>
       <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tutti facoltativi; da omettere del tutto per un osservatore anonimo. <code>id</code> è un riferimento alla persona (su RR0, la sua directory: <code>"ZamoraLonnie"</code>); gli altri campi la descrivono quando nessuno gliene ha ancora dato uno</td></tr>
       <tr><td><code>description</code></td><td>Il resoconto in prosa — una stringa, o una per lingua (vedi sotto)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Ciò che rappresenta l'osservazione dove è solo collegata e mai riprodotta: la scheda che mostra un link condiviso (vedi <a href="/docs/share/">Condividere</a>). <code>image</code> è un'immagine, un indirizzo (assoluto, relativo al file, o un percorso RR0 dalla radice del sito); <code>summary</code> una o due frasi, una stringa o una per lingua. Assenti, la scheda mostra il logo e dice chi l'ha vista, in quale caso e quando, per quanto lo dica il file. <code>summaryTime</code> è il secondo della registrazione in cui si fotografa l'immagine della scheda (0 per default: la prima immagine), per una registrazione la cui prima immagine non mostra il fenomeno; solo lo strumento di cattura del progetto lo legge, mai il lettore</td></tr>
@@ -1894,11 +1897,11 @@ export class DocsFormatPage extends DocsSection {
       corpi nella propria <code>interpretation</code>, descritta sopra. L'<code>explains</code> di un corpo designa le
       forme del resoconto.</p>
     <pre data-json=""><code>{
-  "version": 1,
+  "version": 2,
   "id": "1950-05-11-TrentPaul-interpretation-2",
-  "time": { "year": 1950, "month": 5, "day": 11, "hour": 19, "minute": 45 },
+  "time": "1950-05-11T19:45",
   "utcOffsetHours": -7,
-  "place": [{ "value": { "lat": 45.104167, "lng": -123.330556 } }],
+  "place": { "locations": [{ "lat": 45.104167, "lng": -123.330556 }] },
   "observerTrack": { "keyframes": [{ "t": 0, "pose": { "lat": 45.104167, "lng": -123.330556, "headingDeg": 41.3, "pitchDeg": 14.85, "fovDeg": 33.4 } }] },
   "tags": ["interpretation"],
   "timeline": { "keyframes": [], "order": [], "groups": [] },
@@ -2037,15 +2040,16 @@ export class DocsFormatPage extends DocsSection {
       fotogramma chiave precedente è la regola di cui sopra, non un problema).</p>
 
     <h3>Versioni del formato</h3>
-    <p>Un file indica la versione del suo formato in <code>version</code>: <code>1</code>, l'unica
-      finora. È la versione del FORMATO, non quella di UFO@home: aggiungere un campo non la cambia,
-      perché un lettore più vecchio ignora ciò che non conosce, e ogni file di versione 1 scritto dagli
-      inizi del formato si riproduce ancora. Cambia solo il giorno in cui un campo cambierebbe senso o
-      forma, e quel giorno il lettore leggerà entrambe, la vecchia tramite una conversione. Un file di
-      una versione più recente del lettore viene rifiutato con un messaggio che lo dice, invece di essere
-      riprodotto come qualcosa che non dice.</p>
+    <p>Un file indica la versione del suo formato in <code>version</code>: <code>2</code> da novembre 2026. È la versione del FORMATO, non quella di UFO@home: aggiungere un campo non la cambia,
+      perché un lettore più vecchio ignora ciò che non conosce. Cambia solo il giorno in cui un campo cambia senso o
+      forma, e il lettore legge allora entrambe, la vecchia tramite una conversione. La versione 2 scrive <code>time</code> e
+      <code>endTime</code> come testo EDTF invece dei campi di una data (<code>{ "year": 1964, "month": 4, … }</code>), e
+      <code>place</code> come un luogo invece di un elenco di posizioni ciascuna con il suo nome, perché una registrazione e un
+      evento di RR0 dicano “quando” e “dove” allo stesso modo; ogni file di versione 1 si riproduce ancora, convertito alla
+      lettura, conservando ciò che diceva dell'origine dei suoi valori. Un file di una versione più recente del lettore viene
+      rifiutato con un messaggio che lo dice, invece di essere riprodotto come qualcosa che non dice.</p>
     <p>Ogni versione ha il suo schema, a un indirizzo che la nomina:
-      <code>https://ufoathome.org/schema/1/sighting.schema.json</code> (e
+      <code>https://ufoathome.org/schema/2/sighting.schema.json</code> (e
       <code>case.schema.json</code>, <code>interview.schema.json</code> accanto).
       <code>/sighting.schema.json</code> è sempre la versione corrente. Un file può nominare quella
       secondo cui è stato scritto in <code>"$schema"</code>, che editor come VS Code usano per

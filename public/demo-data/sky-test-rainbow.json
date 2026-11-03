@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-rainbow",
   "image": "https://ufoathome.org/demo-data/share/sky-test-rainbow.jpg",
   "tags": [
@@ -12,21 +12,17 @@
     "es": "Un cielo de prueba, no un caso: no se registra ninguna forma. Las condiciones son las que exige un arcoíris — lluvia (0,9), un Sol bajo (9,5° de altura) y una capa baja fragmentada (0,3) que lo deje pasar — y el observador mira al punto opuesto al Sol (rumbo 246°), que es donde se alza el arco. La meteorología está DECLARADA (sin weatherSource), así que una consulta de registros no la sobrescribirá.",
     "it": "Un cielo di prova, non un caso: nessuna forma è registrata. Le condizioni sono quelle che un arcobaleno richiede — pioggia (0,9), un Sole basso (9,5° di altezza) e uno strato basso frammentato (0,3) perché la sua luce passi — e l'osservatore guarda il punto opposto al Sole (direzione 246°), che è dove sta l'arco. Il meteo è DICHIARATO (nessun weatherSource), quindi una ricerca nei dati registrati non lo sovrascriverà."
   },
-  "time": {
-    "year": 2020,
-    "month": 6,
-    "day": 21,
-    "hour": 7,
-    "minute": 0
-  },
+  "time": "2020-06-21T07:00",
   "utcOffsetHours": 2,
   "durationSeconds": 24,
-  "place": [
-    {
-      "lat": 45.0,
-      "lng": 5.0
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 45,
+        "lng": 5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

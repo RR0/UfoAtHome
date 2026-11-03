@@ -1,4 +1,6 @@
 import { PlayerIcons } from "./PlayerIcons.js"
+import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
@@ -21,6 +23,7 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
+import { parseEdtfTime } from "../engine/model/Sighting.js"
 import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
@@ -30,7 +33,6 @@ import { AppLocation } from "./AppLocation.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
-import type { SightingTime } from "../engine/model/Sighting.js"
 
 registerScene()
 ShareDialogElement.register()
@@ -485,7 +487,9 @@ export class SightingElement extends HTMLElement {
     return this.entries.find(entry => entry.src === this.currentSrc)?.sighting
   }
 
-  set sightingData(sighting: SightingRecordingJson) {
+  set sightingData(readable: ReadableSightingJson) {
+    // A file of an older version of the format is read as the current one (see SightingMigration).
+    const sighting = SightingMigration.toCurrent(readable)
     this.startPending = true
     this.currentSrc = ""
     this.setEntries([{ src: "", sighting }], undefined)
@@ -531,7 +535,9 @@ export class SightingElement extends HTMLElement {
   }
 
   private setEntries(entries: ObserverEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
-    this.entries = entries
+    // In the current version of the format from here on (see SightingMigration): what this element reads of a recording itself (its date,
+    // its place, for the information panel) is read in one shape only.
+    this.entries = entries.map(entry => ({ ...entry, sighting: SightingMigration.toCurrent(entry.sighting) }))
     this.caseSource = caseSource
     if (caseSource) this.reportCaseProblems(caseSource.json, entries)
 
@@ -995,7 +1001,8 @@ export class SightingElement extends HTMLElement {
    */
   private startSeconds(entry: ObserverEntry): number | undefined {
     const clock = PlaybackPosition.clock(this.getAttribute(START_CLOCK_ATTRIBUTE))
-    const placed = clock ? PlaybackPosition.elapsedSince(this.plain(entry).time as SightingTime | undefined, clock) : undefined
+    const time = this.plain(entry).time
+    const placed = clock ? PlaybackPosition.elapsedSince(time === undefined ? undefined : parseEdtfTime(time), clock) : undefined
     return placed ?? PlaybackPosition.delta(this.getAttribute(START_TIME_ATTRIBUTE))
   }
 
@@ -1159,8 +1166,8 @@ export class SightingElement extends HTMLElement {
   }
 
   private formatDate(sighting: SightingRecordingJson): string | undefined {
-    const place = sighting.place?.[0]
-    const date = sightingTimeToDate(sighting.time ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
+    const place = sighting.place?.locations?.[0]
+    const date = sightingTimeToDate((sighting.time ? parseEdtfTime(sighting.time) : undefined) ?? {}, place?.lng ?? 0, sighting.utcOffsetHours)
     if (!date) return undefined
     const localMs = date.getTime() + this.utcOffsetHoursOf(sighting, place?.lng ?? 0) * 3_600_000
     // A date the file states wrongly is one missing line, not an empty panel: formatting throws on it.
@@ -1180,7 +1187,7 @@ export class SightingElement extends HTMLElement {
   }
 
   private formatLocation(sighting: SightingRecordingJson): string | undefined {
-    const place = sighting.place?.[0]
+    const place = sighting.place?.locations?.[0]
     if (!place) return undefined
     return `${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`
   }
@@ -1528,8 +1535,8 @@ export class SightingElement extends HTMLElement {
 
   /** What the Date line is made of, for its basis — see basisOf. */
   private static readonly DATE_PATHS = ["time", "utcOffsetHours", "timeZone"] as const
-  /** And the Location line: the first place, the one it shows. */
-  private static readonly PLACE_PATHS = ["place.0"] as const
+  /** And the Location line: the place, its name and its locations. */
+  private static readonly PLACE_PATHS = ["place"] as const
 
   private appendInfoRow(list: HTMLElement, label: string, value: string, qualified?: { basis: Basis, rationales: string[] }): void {
     const dt = document.createElement("dt")

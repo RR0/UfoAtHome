@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-laser-meudon",
  "image": "https://ufoathome.org/demo-data/share/sky-test-laser-meudon.jpg",
  "summaryTime": 90,
@@ -16,23 +16,18 @@
   "es": "Un cielo de prueba para un haz de luz: el disparo del 9 de octubre de 2026, cuando el Observatorio de París envió un láser verde de 10 W (532 nm, pulsado) de la cúpula de Meudon a la de París y de vuelta, 17 km en 57 microsegundos, por los 350 años de la velocidad finita de la luz de Rømer. Visto desde el parque del observatorio de Meudon, hacia París. No es el relato de un observador: es el haz tal como lo hace la física, una recta a través del espacio de la que solo se ve lo que el aire difunde hacia el ojo, mucho más vivo donde pasa por encima que donde se aleja hacia el horizonte. La altura del emisor en el edificio, la apertura del haz, la hora y las nubes se suponen a partir de las fotografías; sus extremos, potencia y color son los que dio el Observatorio.",
   "it": "Un cielo di prova per un fascio di luce: il tiro del 9 ottobre 2026, quando l'Osservatorio di Parigi inviò un laser verde da 10 W (532 nm, pulsato) dalla cupola di Meudon a quella di Parigi e ritorno, 17 km in 57 microsecondi, per i 350 anni della velocità finita della luce di Rømer. Visto dal parco dell'osservatorio di Meudon, verso Parigi. Non è il resoconto di un osservatore: è il fascio come lo fa la fisica, una retta nello spazio di cui si vede solo ciò che l'aria ne diffonde verso l'occhio, molto più vivo dove passa sopra la testa che dove si allontana verso l'orizzonte. L'altezza dell'emettitore sull'edificio, l'apertura del fascio, l'ora e le nuvole sono supposte dalle fotografie; le estremità, la potenza e il colore sono quelli forniti dall'Osservatorio."
  },
- "time": {
-  "year": 2026,
-  "month": 10,
-  "day": 9,
-  "hour": 19,
-  "minute": 40,
-  "second": 0
- },
+ "time": "2026-10-09T19:40:00",
  "utcOffsetHours": 2,
  "durationSeconds": 90,
- "place": [
-  {
-   "lat": 48.8054,
-   "lng": 2.233,
-   "name": "Observatoire de Meudon"
-  }
- ],
+ "place": {
+  "name": "Observatoire de Meudon",
+  "locations": [
+   {
+    "lat": 48.8054,
+    "lng": 2.233
+   }
+  ]
+ },
  "weatherTrack": {
   "keyframes": [
    {

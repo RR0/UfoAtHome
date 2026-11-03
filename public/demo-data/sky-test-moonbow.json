@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-moonbow",
   "image": "https://ufoathome.org/demo-data/share/sky-test-moonbow.jpg",
   "tags": [
@@ -13,21 +13,17 @@
     "es": "El mismo cielo de prueba bajo una Luna llena: un arcoíris lunar. La misma lluvia, una Luna llena a 21,6° de altura en el sur, el observador vuelto hacia el punto opuesto (rumbo 10°). El arco es veinte veces más tenue que el del Sol y sale BLANCO, porque eso es lo que percibe un ojo a ese nivel de luz.",
     "it": "Lo stesso cielo di prova sotto la Luna piena: un arcobaleno lunare. Stessa pioggia, una Luna piena a 21,6° di altezza a sud, l'osservatore rivolto verso il punto opposto (direzione 10°). L'arco è venti volte più debole di quello del Sole e risulta BIANCO, perché è ciò che un occhio riferisce a quel livello di luce."
   },
-  "time": {
-    "year": 2020,
-    "month": 6,
-    "day": 6,
-    "hour": 2,
-    "minute": 30
-  },
+  "time": "2020-06-06T02:30",
   "utcOffsetHours": 2,
   "durationSeconds": 24,
-  "place": [
-    {
-      "lat": 45.0,
-      "lng": 5.0
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 45,
+        "lng": 5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

@@ -1,22 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "instrument-slr",
   "image": "https://ufoathome.org/demo-data/share/instrument-slr.jpg",
-  "time": {
-    "year": 1964,
-    "month": 4,
-    "day": 24,
-    "hour": 17,
-    "minute": 50
-  },
+  "time": "1964-04-24T17:50",
   "durationSeconds": 20,
   "utcOffsetHours": -7,
-  "place": [
-    {
-      "lat": 34.0425,
-      "lng": -106.897778
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 34.0425,
+        "lng": -106.897778
+      }
+    ]
+  },
   "description": {
     "fr": "La même observation, au reflex 24×36 avec l'objectif de 50 mm livré avec le boîtier. Le champ tombe à 27° de haut — d'où le fait qu'une lumière photographiée n'a si souvent rien de reconnaissable à côté d'elle dans le cadre. Et un objectif projette en f·tan θ : ce qui s'éloigne de l'axe est étiré, de 42 % à 33° du centre. C'est juste pour une photographie, et faux pour un œil.",
     "en": "The same sighting, on a 35 mm SLR with the 50 mm lens the body came with. The field drops to 27° high — which is why a photographed light so often has nothing recognisable beside it in the frame. And a lens projects in f·tan θ: whatever is off-axis is stretched, by 42% at 33° from the centre. That is right for a photograph, and wrong for an eye.",

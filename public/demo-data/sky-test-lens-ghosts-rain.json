@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-lens-ghosts-rain",
  "image": "https://ufoathome.org/demo-data/share/sky-test-lens-ghosts-rain.jpg",
  "summaryTime": 40,
@@ -14,23 +14,18 @@
   "es": "El mismo cruce filmado a través de una ventana durante un chubasco: seco, una lluvia de espaldas que deja el cristal seco, el viento que gira y la lanza sobre el cristal, un aguacero, y las últimas gotas que bajan.",
   "it": "Lo stesso incrocio filmato attraverso una finestra durante un acquazzone: asciutto, una pioggia alle spalle che lascia il vetro asciutto, il vento che gira e la getta sul vetro, un temporale, poi le ultime gocce che scendono."
  },
- "time": {
-  "year": 2026,
-  "month": 1,
-  "day": 3,
-  "hour": 19,
-  "minute": 0,
-  "second": 0
- },
+ "time": "2026-01-03T19:00:00",
  "utcOffsetHours": 1,
  "durationSeconds": 75,
- "place": [
-  {
-   "lat": 48.3,
-   "lng": 1.7,
-   "name": "Beauce"
-  }
- ],
+ "place": {
+  "name": "Beauce",
+  "locations": [
+   {
+    "lat": 48.3,
+    "lng": 1.7
+   }
+  ]
+ },
  "instrument": "phone-landscape",
  "exposureSeconds": 0.03333333333333333,
  "weatherTrack": {

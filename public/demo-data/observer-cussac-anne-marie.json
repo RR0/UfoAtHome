@@ -1,28 +1,23 @@
 {
- "version": 1,
+ "version": 2,
  "id": "1967-08-29-DelpeuchAnneMarie",
  "image": "https://ufoathome.org/demo-data/share/cussac-anne-marie.jpg",
- "time": {
-  "year": 1967,
-  "month": 8,
-  "day": 29,
-  "hour": 10,
-  "minute": 30,
-  "raw": "1967-08-29T10:30~"
- },
+ "time": "1967-08-29T10:30~",
  "durationSeconds": 32,
  "utcOffsetHours": 1,
  "timeZone": "Europe/Paris",
- "place": [
-  {
-   "value": {
-    "lat": 44.981239,
-    "lng": 2.917224
-   },
-   "basis": "derived",
-   "rationale": "Her brother's spot (the dossier's Plan.kml) moved 13 m west along the road: the GEPAN had her place her own point \"dans le champ à 13 m à l'ouest de celui déterminé par son frère, parallèlement à la route\" (annex A8, p. A8.26), the point it then measured her angles from. The spot is the same as the other recording's, 13 m along."
-  }
- ],
+ "place": {
+  "value": {
+   "locations": [
+    {
+     "lat": 44.981239,
+     "lng": 2.917224
+    }
+   ]
+  },
+  "basis": "derived",
+  "rationale": "Her brother's spot (the dossier's Plan.kml) moved 13 m west along the road: the GEPAN had her place her own point \"dans le champ à 13 m à l'ouest de celui déterminé par son frère, parallèlement à la route\" (annex A8, p. A8.26), the point it then measured her angles from. The spot is the same as the other recording's, 13 m along."
+ },
  "observer": {
   "id": "DelpeuchAnneMarie",
   "title": "Anne-Marie Delpeuch"

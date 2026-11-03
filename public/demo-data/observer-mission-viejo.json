@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "2026-09-28-GreenstreetSteven",
  "image": "https://ufoathome.org/demo-data/share/mission-viejo.jpg",
  "summaryTime": 1.09,
@@ -7,14 +7,7 @@
     "orb",
     "dusk"
   ],
- "time": {
-  "year": 2026,
-  "month": 9,
-  "day": 28,
-  "hour": 19,
-  "minute": 45,
-  "raw": "2026-09-28T19:45~"
- },
+ "time": "2026-09-28T19:45~",
  "utcOffsetHours": {
   "value": -7,
   "basis": "derived",
@@ -26,17 +19,19 @@
   "basis": "stated",
   "rationale": "\"saw it for just over 2 seconds\""
  },
- "place": [
-  {
-   "value": {
-    "lat": 33.6,
-    "lng": -117.672,
-    "name": "Mission Viejo, Orange County, California, USA"
-   },
-   "basis": "assumed",
-   "rationale": "the post names the city only; its centre is taken"
-  }
- ],
+ "place": {
+  "value": {
+   "name": "Mission Viejo, Orange County, California, USA",
+   "locations": [
+    {
+     "lat": 33.6,
+     "lng": -117.672
+    }
+   ]
+  },
+  "basis": "assumed",
+  "rationale": "the post names the city only; its centre is taken"
+ },
  "observer": {
   "title": "Steven Greenstreet"
  },

@@ -1,25 +1,21 @@
 {
- "version": 1,
+ "version": 2,
  "id": "2012-06-29-Maffliers",
  "image": "https://ufoathome.org/demo-data/share/maffliers.jpg",
  "summaryTime": 18.86,
- "time": {
-  "year": 2012,
-  "month": 6,
-  "day": 29,
-  "hour": 6,
-  "minute": 6
- },
+ "time": "2012-06-29T06:06",
  "durationSeconds": 25,
  "utcOffsetHours": 2,
  "timeZone": "Europe/Paris",
- "place": [
-  {
-   "lat": 49.078927,
-   "lng": 2.327339,
-   "name": "Maffliers, Val-d'Oise, France"
-  }
- ],
+ "place": {
+  "name": "Maffliers, Val-d'Oise, France",
+  "locations": [
+   {
+    "lat": 49.078927,
+    "lng": 2.327339
+   }
+  ]
+ },
  "observer": {
   "id": "Maffliers-2012",
   "title": "Anonymous (GEIPAN 2012-06-08256)"

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-eclipse",
   "image": "https://ufoathome.org/demo-data/share/sky-test-eclipse.jpg",
   "tags": [
@@ -14,22 +14,18 @@
     "es": "Un eclipse total de Sol: el del 11 de agosto de 1999, visto desde Reims, de 12:15 a 12:35 (hora de verano). Nada se declara: en cada instante, las posiciones del Sol y de la Luna vistas desde aquí (paralaje incluida, por lo que Reims tiene totalidad y París un simple 99 %) dan la parte del disco oculta, y la escena deduce sola el creciente, la luz que baja, la corona cuando el disco queda del todo cubierto, y las estrellas y los planetas cuando el cielo es lo bastante oscuro. Se mira primero a través de un filtro solar (gafas de eclipse, densidad 5), la única manera de ver la forma del Sol: sin él un creciente deslumbra tanto como un Sol entero. Las gafas se quitan a las 12:24:34, cuatro segundos después de que empiece la totalidad (12:24:30, durante dos minutos), cuando ya han pasado los últimos granos de luz; se vuelven a poner a las 12:26:32, dos segundos antes de que reaparezca el Sol. El filtro es un campo de la grabación como la apertura del objetivo: se pone y se quita en el punto elegido de la duración, y se mantiene hasta la siguiente clave. Aproximaciones asumidas: corona redonda (sus chorros dependen del Sol de ese día), perlas de Baily dibujadas con el relieve de la Luna medido por el LOLA de la NASA (una muestra cada 2 km: faltan los detalles más finos), y un anillo anaranjado alrededor del horizonte, la luz del aire que sigue iluminado más allá de la sombra de la Luna (calculada, no observada: en cada dirección, la luz del aire hasta unas decenas de kilómetros, bajo un Sol menos eclipsado que aquí por la paralaje de la Luna; es más fuerte del lado donde el borde de la sombra está más cerca, y la longitud de visión de 30 km es supuesta). En el cenit, el cielo de la totalidad vale 0,7 cd/m² (13 magnitudes por segundo de arco cuadrado), lo que midieron los eclipses de 2016, 2017 y 2024; el horizonte calculado, frente a las medidas de Jackson Hole en 2017, está dentro de un factor de 1,3 a 1,4 a 15° y 45° de altura.",
     "it": "Un'eclissi totale di Sole: quella dell'11 agosto 1999, vista da Reims, dalle 12:15 alle 12:35 (ora estiva). Nulla è dichiarato: a ogni istante, le posizioni del Sole e della Luna viste da qui (parallasse compresa, per cui Reims ha la totalità e Parigi un semplice 99 %) danno la parte di disco nascosta, e la scena ricava da sola la falce, la luce che cala, la corona quando il disco è tutto coperto e le stelle e i pianeti quando il cielo è abbastanza buio. Si guarda prima attraverso un filtro solare (occhiali da eclissi, densità 5), l'unico modo di vedere la forma del Sole: senza di esso una falce abbaglia quanto un Sole intero. Gli occhiali si tolgono alle 12:24:34, quattro secondi dopo l'inizio della totalità (12:24:30, per due minuti), passati gli ultimi grani di luce; si rimettono alle 12:26:32, due secondi prima che il Sole riappaia. Il filtro è un campo della registrazione come l'apertura dell'obiettivo: si mette e si toglie nel punto scelto della durata, e si mantiene fino al fotogramma chiave successivo. Approssimazioni dichiarate: corona rotonda (i suoi getti dipendono dal Sole di quel giorno), grani di Baily disegnati dal rilievo della Luna misurato dal LOLA della NASA (un campione ogni 2 km: mancano i dettagli più fini), e un anello arancione tutt'intorno all'orizzonte, la luce dell'aria che resta illuminata oltre l'ombra della Luna (calcolata, non osservata: in ogni direzione, la luce dell'aria fino a qualche decina di chilometri, sotto un Sole meno eclissato che qui per la parallasse della Luna; è più forte dal lato in cui il bordo dell'ombra è più vicino, e la lunghezza di visuale di 30 km è supposta). Allo zenit il cielo della totalità vale 0,7 cd/m² (13 magnitudini per secondo d'arco quadrato), quanto hanno misurato le eclissi del 2016, 2017 e 2024; l'orizzonte calcolato, confrontato con le misure di Jackson Hole del 2017, è entro un fattore 1,3–1,4 a 15° e 45° di altezza."
   },
-  "time": {
-    "year": 1999,
-    "month": 8,
-    "day": 11,
-    "hour": 12,
-    "minute": 15
-  },
+  "time": "1999-08-11T12:15",
   "utcOffsetHours": 2,
   "durationSeconds": 1200,
-  "place": [
-    {
-      "lat": 49.2583,
-      "lng": 4.0317,
-      "name": "Reims, France"
-    }
-  ],
+  "place": {
+    "name": "Reims, France",
+    "locations": [
+      {
+        "lat": 49.2583,
+        "lng": 4.0317
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

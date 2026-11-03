@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "sky-test-moon-corona",
   "image": "https://ufoathome.org/demo-data/share/sky-test-moon-corona.jpg",
   "description": {
@@ -8,21 +8,17 @@
     "es": "Cielo de prueba: la corona de la Luna llena. La misma Luna tras un velo fino y continuo de altocúmulos a 3 000 m, de espesor óptico 0,3 a su través: sus gotitas, casi todas del mismo tamaño, difractan su luz en un disco azulado rodeado de rojo hacia los dos grados y medio. Un velo más espeso la ahogaría en su propio resplandor, y pasado un espesor óptico de 3 no quedaría nada de ella. Los halos de 22° son obra del hielo, no del agua: aquí no hay ninguno.",
     "it": "Cielo di prova: la corona della Luna piena. La stessa Luna dietro un velo sottile e continuo di altocumuli a 3.000 m, di spessore ottico 0,3: le sue goccioline, quasi tutte della stessa dimensione, diffrangono la sua luce in un disco bluastro orlato di rosso verso i due gradi e mezzo. Un velo più spesso la annegherebbe nel suo stesso chiarore, e oltre uno spessore ottico di 3 non ne resterebbe nulla. Gli aloni di 22° sono opera del ghiaccio, non dell'acqua: qui non ce ne sono."
   },
-  "time": {
-    "year": 2020,
-    "month": 6,
-    "day": 6,
-    "hour": 2,
-    "minute": 30
-  },
+  "time": "2020-06-06T02:30",
   "utcOffsetHours": 2,
   "durationSeconds": 12,
-  "place": [
-    {
-      "lat": 45,
-      "lng": 5
-    }
-  ],
+  "place": {
+    "locations": [
+      {
+        "lat": 45,
+        "lng": 5
+      }
+    ]
+  },
   "weatherTrack": {
     "keyframes": [
       {

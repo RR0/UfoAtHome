@@ -1,4 +1,6 @@
 import { RoadGrade } from "../engine/place/RoadGrade.js"
+import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { VehicleAudio } from "../audio/VehicleAudio.js"
 import { VehicleHearing } from "../engine/place/VehicleHearing.js"
 import type { AircraftKind } from "../engine/traffic/AircraftModels.js"
@@ -1672,7 +1674,9 @@ export class SceneElement extends HTMLElement {
     return this.ufoElement.sightingData
   }
 
-  set sightingData(json: SightingRecordingJson) {
+  set sightingData(readable: ReadableSightingJson) {
+    // A file of an older version of the format is read as the current one (see SightingMigration).
+    const json = SightingMigration.toCurrent(readable)
     this.ufoElement.sightingData = json
     this.upperAirHeardLive = undefined
     this.seekPreview?.recordingChanged(json)

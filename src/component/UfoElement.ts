@@ -1,4 +1,6 @@
 import { html, css } from "./ufoTemplate.js"
+import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
+import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { Instruments } from "../engine/instrument/Instrument.js"
 import { Gait } from "../engine/place/Gait.js"
@@ -971,7 +973,9 @@ export class UfoElement extends HTMLElement {
     return toSightingJson(this.currentSighting)
   }
 
-  set sightingData(json: SightingRecordingJson) {
+  set sightingData(readable: ReadableSightingJson) {
+    // A file of an older version of the format is read as the current one (see SightingMigration).
+    const json = SightingMigration.toCurrent(readable)
     // Without this, switching sightings mid-playback (e.g. SightingElement's observer picker)
     // orphans the old Player: its requestAnimationFrame loop was never cancelled, so it keeps
     // ticking in the background — calling this same onFrame with the *old* timeline's positions

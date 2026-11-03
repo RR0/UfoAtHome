@@ -259,8 +259,8 @@ describe("SightingEditorElement drafting from an account", () => {
   it("writes what a first draft states into the editor", async () => {
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { id: "valensole", durationSeconds: 270, time: { year: 1965, month: 7, day: 1 } },
-      claims: [{ path: "time.year", basis: "stated" as const, rationale: "le 1er juillet 1965" }],
+      recording: { id: "valensole", durationSeconds: 270, time: "1965-07-01" },
+      claims: [{ path: "time", basis: "stated" as const, rationale: "le 1er juillet 1965" }],
       gaps: ["the account gives no heading"]
     })
 
@@ -269,9 +269,7 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(element.sightingData.id).toBe("valensole")
     expect(element.sightingData.durationSeconds).toBe(270)
     // Wrapped, because the claim gave that value a rationale — the file says where it came from.
-    expect(element.sightingData.time).toMatchObject({
-      year: { value: 1965, rationale: "le 1er juillet 1965" }, month: 7, day: 1
-    })
+    expect(element.sightingData.time).toMatchObject({ value: "1965-07-01", rationale: "le 1er juillet 1965" })
   })
 
   it("never writes the account back over itself", async () => {
@@ -300,7 +298,7 @@ describe("SightingEditorElement drafting from an account", () => {
 
     await draft(element, "The account.")
 
-    expect(element.sightingData.place?.[0]).toMatchObject({ lat: 43.837, lng: 5.993 })
+    expect(element.sightingData.place?.locations?.[0]).toMatchObject({ lat: 43.837, lng: 5.993 })
     expect(element.sightingData.id).toBe("valensole")
   })
 
@@ -322,9 +320,9 @@ describe("SightingEditorElement drafting from an account", () => {
     // is how it stops being checked.
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { time: { year: 1974 }, durationSeconds: 120, utcOffsetHours: 1 },
+      recording: { time: "1974", durationSeconds: 120, utcOffsetHours: 1 },
       claims: [
-        { path: "time.year", basis: "stated" as const, rationale: "lundi 20 mai 1974" },
+        { path: "time", basis: "stated" as const, rationale: "lundi 20 mai 1974" },
         { path: "durationSeconds", basis: "assumed" as const, rationale: "\"quelques mn\" gives no number" },
         { path: "utcOffsetHours", basis: "derived" as const, rationale: "France had no summer time in 1974" }
       ],
@@ -342,7 +340,7 @@ describe("SightingEditorElement drafting from an account", () => {
       sightingEditorMessages_en.narrativeGaps
     ])
     expect([...report.querySelectorAll(".claim code")].map(c => c.textContent))
-      .toEqual(["durationSeconds", "utcOffsetHours", "time.year"])
+      .toEqual(["durationSeconds", "utcOffsetHours", "time"])
     // A quotation for a quotation, plain text for a piece of reasoning.
     expect(report.querySelector(".claim.stated q")?.textContent).toBe("lundi 20 mai 1974")
     expect(report.querySelector(".claim.assumed q")).toBeNull()
@@ -398,7 +396,7 @@ describe("SightingEditorElement drafting from an account", () => {
     const element = mount()
     answer = () => Promise.resolve({
       recording: {
-        time: { year: 1974, month: 5, day: 20, hour: 19, minute: 0 },
+        time: "1974-05-20T19:00",
         timeZone: "Europe/Paris",
         utcOffsetHours: 2
       },
@@ -417,7 +415,7 @@ describe("SightingEditorElement drafting from an account", () => {
   it("keeps an offset a draft states when it named no zone to derive one from", async () => {
     const element = mount()
     answer = () => Promise.resolve({
-      recording: { time: { year: 1974 }, utcOffsetHours: 2 },
+      recording: { time: "1974", utcOffsetHours: 2 },
       claims: [],
       gaps: []
     })

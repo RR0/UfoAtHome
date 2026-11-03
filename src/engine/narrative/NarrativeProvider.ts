@@ -26,7 +26,7 @@ export interface NarrativeImage {
  * — see Basis, whose vocabulary this shares and which is what ends up in the file.
  */
 export interface NarrativeClaim {
-  /** Where the value goes, as a path into SightingRecordingJson — "time.hour", "place.0.lat",
+  /** Where the value goes, as a path into SightingRecordingJson — "time", "place.locations.0.lat",
    * "timeline.keyframes.1.shapes.0.shape.angular.widthDeg". The same vocabulary Provenance stores
    * paths in, so a claim needs no translation to be kept. */
   path: string

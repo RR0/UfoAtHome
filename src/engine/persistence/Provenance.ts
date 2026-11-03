@@ -76,7 +76,7 @@ type JsonObject = Record<string, unknown>
  * before the recording is written. In between, the model is what it has always been, and the
  * provenance rides along on the Sighting as one map rather than as a thousand wrappers.
  *
- * Paths are dot-joined with array indices as steps ("time.year", "place.0.lat",
+ * Paths are dot-joined with array indices as steps ("time", "place.locations.0.lat",
  * "timeline.keyframes.1.shapes.0.shape.angular.widthDeg"), which is also how a provider names them
  * (see NarrativeClaim.path) — one vocabulary, so a claim can be stored without translation.
  */

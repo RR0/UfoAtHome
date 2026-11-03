@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "id": "sky-test-washington-capitol",
  "image": "https://ufoathome.org/demo-data/share/sky-test-washington-capitol.jpg",
  "summaryTime": 6,
@@ -22,23 +22,18 @@
    "url": "https://rr0.org/science/crypto/ufo/enquete/dossier/Washington/"
   }
  ],
- "time": {
-  "year": 1952,
-  "month": 7,
-  "day": 19,
-  "hour": 23,
-  "minute": 30,
-  "second": 0
- },
+ "time": "1952-07-19T23:30:00",
  "utcOffsetHours": -4,
  "durationSeconds": 68,
- "place": [
-  {
-   "lat": 38.88992,
-   "lng": -77.01169715745546,
-   "name": "Washington, D.C."
-  }
- ],
+ "place": {
+  "name": "Washington, D.C.",
+  "locations": [
+   {
+    "lat": 38.88992,
+    "lng": -77.01169715745546
+   }
+  ]
+ },
  "instrument": "rectilinear-lens",
  "exposureSeconds": 0.03333333333333333,
  "iso": 2000,

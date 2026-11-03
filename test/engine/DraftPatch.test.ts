@@ -2,18 +2,18 @@ import { describe, expect, it } from "vitest"
 import { DraftPatch } from "../../src/engine/narrative/DraftPatch.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-const empty = (): SightingRecordingJson => ({ version: 1, timeline: { keyframes: [] } })
+const empty = (): SightingRecordingJson => ({ version: 2, timeline: { keyframes: [] } })
 
 describe("DraftPatch", () => {
   it("names every leaf a draft states, and none of the objects holding them", () => {
     // Naming `observer` would write the whole of it and take with it any sibling key the account
     // happens not to mention.
     const paths = DraftPatch.stated({
-      time: { year: 1965, month: 7, day: 1 },
+      time: "1965-07-01",
       observer: { id: "masse", title: "Maurice Masse" }
     })
 
-    expect(paths).toEqual(["time.year", "time.month", "time.day", "observer.id", "observer.title"])
+    expect(paths).toEqual(["time", "observer.id", "observer.title"])
   })
 
   it("treats an array as one value, so a stated timeline is written whole", () => {
@@ -28,17 +28,17 @@ describe("DraftPatch", () => {
     // placed — none of that is in a account, so no reading of one may touch it.
     const editor: SightingRecordingJson = {
       ...empty(),
-      place: [{ lat: 43.837, lng: 5.993 }],
+      place: { locations: [{ lat: 43.837, lng: 5.993 }] },
       instrument: "instamatic-104",
       durationSeconds: 270
     }
-    const draft = { time: { year: 1965 }, id: "valensole" }
+    const draft = { time: "1965", id: "valensole" }
 
     const patched = DraftPatch.apply(editor, draft, DraftPatch.stated(draft))
 
-    expect(patched.time).toEqual({ year: 1965 })
+    expect(patched.time).toEqual("1965")
     expect(patched.id).toBe("valensole")
-    expect(patched.place).toEqual([{ lat: 43.837, lng: 5.993 }])
+    expect(patched.place).toEqual({ locations: [{ lat: 43.837, lng: 5.993 }] })
     expect(patched.instrument).toBe("instamatic-104")
     expect(patched.durationSeconds).toBe(270)
   })
