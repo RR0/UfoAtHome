@@ -4,6 +4,7 @@ import sillyTemoins from "../../../public/demo-data/observer-silly-le-long-temoi
 import valensole from "../../../public/demo-data/observer-valensole.json"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 import reference from "./silly-poses.json"
+import { BodyPlacement } from "../../../src/engine/interpretation/BodyPlacement.js"
 
 /** Poses of T1 as add_van.py wrote them before his events were (one in fifty, and his lean to the mirror), with the van's place then. */
 type Reference = { count: number, poses: { t: number, lat: number, lng: number, elevationM: number, headingDeg: number, pitchDeg: number,
@@ -74,19 +75,22 @@ describe("RecordingEvents", () => {
     expect(toSightingJson(sighting).timeline.keyframes).toEqual([])
   })
 
-  it("walks Masse to the craft and follows it with his eyes as it leaves, as the poses written before did", () => {
+  it("walks Masse to the craft, and keeps it in the middle of his eyes as it leaves", () => {
     const sighting = fromSightingJson(valensole as unknown as SightingRecordingJson)
-    // The poses Valensole held before its events: where he stood, and the look that followed the craft (7868ec62).
-    const before = [[0, 43.845508, 180, 2], [15000, 43.845304, 180, 2], [30000, 43.845099, 180, 2], [45000, 43.844895, 180, 2], [55000, 43.844758, 180, 2],
-      [250000, 43.844758, 180, 2], [254000, 43.844758, 180, 3.08], [256000, 43.844758, 180, 3.29], [258000, 43.844758, 223.27, 18.94],
-      [260000, 43.844758, 239.62, 27.85], [262000, 43.844758, 246.11, 32.67], [262500, 43.844758, 247.8, 33.47], [270000, 43.844758, 247.8, 33.47]]
-    for (const [t, lat, headingDeg, pitchDeg] of before) {
-      const pose = sighting.observerTrack.getInterpolatedPoseAt(t)!
+    // Where he stood in the poses Valensole held before its events.
+    for (const [t, lat] of [[0, 43.845508], [15000, 43.845304], [30000, 43.845099], [45000, 43.844895], [55000, 43.844758], [270000, 43.844758]]) {
       // One even walk slowing into its stop, where four stretches were written: within a metre on the way, exact where he stops.
-      expect(Math.abs(pose.lat! - lat) * 111320, `place at ${t}`).toBeLessThan(t === 0 || t >= 55000 ? 0.01 : 1)
-      // The look that trails the craft: a share of the way towards it, which the poses before held at 85 to 88 %.
-      expect(angle(pose.headingDeg!, headingDeg), `heading at ${t}`).toBeLessThan(4)
-      expect(Math.abs(pose.pitchDeg - pitchDeg), `pitch at ${t}`).toBeLessThan(0.5)
+      expect(Math.abs(sighting.observerTrack.getInterpolatedPoseAt(t)!.lat! - lat) * 111320, `place at ${t}`).toBeLessThan(t === 0 || t >= 55000 ? 0.01 : 1)
+    }
+    const ground = { heightAt: () => 0 }
+    const eyeAt = (t: number) => BodyPlacement.eyeOf(sighting, t, ground)
+    const craft = new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === "craft")!, ground, eyeAt)
+    for (const t of [254000, 256000, 258000, 260000, 262000]) {
+      const body = craft.at(t)!, eye = eyeAt(t)!
+      const pose = sighting.observerTrack.getInterpolatedPoseAt(t)!
+      const east = body.eastM - eye.eastM, north = body.northM - eye.northM
+      expect(angle(pose.headingDeg!, Math.atan2(east, north) * 180 / Math.PI), `heading at ${t}`).toBeLessThan(0.01)
+      expect(Math.abs(pose.pitchDeg - Math.atan2(body.upM - eye.upM, Math.hypot(east, north)) * 180 / Math.PI), `pitch at ${t}`).toBeLessThan(0.01)
     }
     expect(toSightingJson(sighting).observerTrack).toBeUndefined()
   })

@@ -53,7 +53,7 @@ export class FootExpansion {
     return [...this.sighting.observerTrack.allKeyframes]
   }
 
-  /** The look turned towards a body at each of its keyframes while it is followed, trailing it by what `share` leaves. */
+  /** The look on a body at each of its keyframes while it is followed. */
   private follow(event: RecordingEventJson, from: HoldLookParams): void {
     const params = event.params as unknown as FollowParams
     const body = this.sighting.interpretation?.bodies.find(candidate => candidate.id === params.target)
@@ -70,10 +70,10 @@ export class FootExpansion {
       const pose = this.sighting.observerTrack.getInterpolatedPoseAt(key.t)
       if (!state || !eye || !pose) continue
       const east = state.eastM - eye.eastM, north = state.northM - eye.northM, up = state.upM - eye.upM
-      const towards = Math.atan2(east, north) * 180 / Math.PI
-      const turn = ((towards - from.headingDeg + 540) % 360 + 360) % 360 - 180
-      const rise = Math.atan2(up, Math.hypot(east, north)) * 180 / Math.PI - from.pitchDeg
-      last = { headingDeg: ((from.headingDeg + params.share * turn) % 360 + 360) % 360, pitchDeg: from.pitchDeg + params.share * rise }
+      last = {
+        headingDeg: ((Math.atan2(east, north) * 180 / Math.PI) % 360 + 360) % 360,
+        pitchDeg: Math.atan2(up, Math.hypot(east, north)) * 180 / Math.PI
+      }
       this.sighting.observerTrack.addKeyframe(key.t, { ...pose, headingDeg: last.headingDeg, pitchDeg: last.pitchDeg })
     }
     // Where it was lost, the look stays.

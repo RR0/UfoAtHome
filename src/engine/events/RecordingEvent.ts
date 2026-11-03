@@ -92,13 +92,12 @@ export interface WalkParams {
 }
 
 /**
- * The observer follows a body of the recording with their eyes (`target`, its id), from the event's start to its end: at each of the body's
- * keyframes in between, their look turns `share` of the way from where it was at the start towards the body, so that it trails what it follows
- * instead of holding it in the middle, as eyes do a moving thing.
+ * The observer follows a body of the recording with their eyes (`target`, its id), from the event's start to its end: they look at it at each of
+ * the body's keyframes in between, so that it is in the middle of what they see; between those, their look turns as a head does (see
+ * HumanMotion.gaze), which is all the lag eyes have on what they follow.
  */
 export interface FollowParams {
   target: string
-  share: number
 }
 
 /**

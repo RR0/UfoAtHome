@@ -14,7 +14,7 @@ export const eventsMessages_es: EventsMessages = {
     fovDeg: "Campo de visión", target: "Mira", pitchShare: "Alza la vista hasta (parte de su altura)", keepDeg: "Lo mantiene a menos de", glanceBeyondDeg: "Vistazos más allá de",
     glanceS: "Vistazo", roadS: "De vuelta a la carretera", offsetM: "Desplaza el ojo", holdS: "Durante", turnS: "En", mirror: "Retrovisor", firstS: "Primero",
     mirrorS: "En el retrovisor", glancesUntil: "Vistazos directos hasta",
-    place: "Dónde", metres: "Tamaño (ancho, altura sobre el ojo)", parts: "Partes", onS: "Encendido", offS: "Apagado", off: "Apagado, está", from: "Desde", to: "Hasta", share: "Parte del camino hacia él", headingDeg: "Rumbo", pitchDeg: "Inclinación"
+    place: "Dónde", metres: "Tamaño (ancho, altura sobre el ojo)", parts: "Partes", onS: "Encendido", offS: "Apagado", off: "Apagado, está", from: "Desde", to: "Hasta", headingDeg: "Rumbo", pitchDeg: "Inclinación"
   },
   from: "de",
   to: "a",

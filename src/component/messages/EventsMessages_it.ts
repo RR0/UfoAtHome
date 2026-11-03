@@ -14,7 +14,7 @@ export const eventsMessages_it: EventsMessages = {
     fovDeg: "Campo visivo", target: "Guarda", pitchShare: "Alza lo sguardo fino a (parte della sua altezza)", keepDeg: "Lo tiene entro", glanceBeyondDeg: "Occhiate oltre",
     glanceS: "Occhiata", roadS: "Di nuovo sulla strada", offsetM: "Sposta l'occhio di", holdS: "Per", turnS: "In", mirror: "Specchietto", firstS: "Prima",
     mirrorS: "Nello specchietto", glancesUntil: "Occhiate dirette fino a",
-    place: "Dove", metres: "Dimensione (larghezza, altezza sopra l'occhio)", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", from: "Da", to: "A", share: "Parte del percorso verso di lui", headingDeg: "Rotta", pitchDeg: "Inclinazione"
+    place: "Dove", metres: "Dimensione (larghezza, altezza sopra l'occhio)", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", from: "Da", to: "A", headingDeg: "Rotta", pitchDeg: "Inclinazione"
   },
   from: "da",
   to: "a",

@@ -35,8 +35,7 @@ def events(variant):
             "to": wrap({"lat": 43.844758, "lng": 5.9632}, "stated", "He came along the vine to within 6 m of it, where he was held motionless"),
         }},
         {"type": "event", "eventType": "follow", "t": 250000, "until": 262500, "params": {
-            "target": "craft",
-            "share": wrap(0.85, "assumed", "He followed it with his eyes; a look trails a moving thing rather than holding it in the middle"),
+            "target": wrap("craft", "stated", "He followed it with his eyes as it left (account of 18 August 1965)"),
         }},
     ]
 
@@ -44,6 +43,8 @@ def events(variant):
 def main(path, variant):
     """Replaces the poses by the events in the file's own text: the rest of it, written by hand, keeps its layout."""
     text = open(path, encoding="utf-8").read()
+    # Run again on a recording already stated as events: its events line goes, and is written again.
+    text = "".join(line for line in text.splitlines(keepends=True) if not line.lstrip().startswith('"events": ['))
     key = '"observerTrack":'
     at = text.index(key)
     start = at + len(key)
