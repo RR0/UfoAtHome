@@ -504,6 +504,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly sectionFilePanel: SectionFilePanel
   private readonly eventsPanel: EventsPanel
   private readonly phenomenonEventsPanel: EventsPanel
+  private readonly bodiesEventsPanel: EventsPanel
   /** The Files group's picker: the recording, then each annex (see refreshFileItems). */
   private readonly fileItemSelect: HTMLSelectElement
   /** Where a recording comes in: a file of the author's, or an address (see InputFileElement). */
@@ -1524,11 +1525,13 @@ export class SightingEditorElement extends HTMLElement {
         this.scheduleFileSync()
         this.eventsPanel.render()
         this.phenomenonEventsPanel.render()
+        this.bodiesEventsPanel.render()
       },
       seek: (t: number) => this.goToMark(t)
     }
     this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, this.messages.events)
     this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, this.messages.events, "phenomenon")
+    this.bodiesEventsPanel = new EventsPanel(this.shadow.getElementById("bodies-events-section")!, eventsHost, this.messages.events, "bodies")
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
@@ -2297,6 +2300,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.isGroupIdOpen("group-shape")) this.showPhenomenonPartWithContent()
     this.eventsPanel.render()
     this.phenomenonEventsPanel.render()
+    this.bodiesEventsPanel.render()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -6872,6 +6876,7 @@ export class SightingEditorElement extends HTMLElement {
     // A pose written by hand makes the author's poses win: the events panel says so as soon as it happens.
     this.eventsPanel?.sync()
     this.phenomenonEventsPanel?.sync()
+    this.bodiesEventsPanel?.sync()
     this.witnessErrorView?.refreshFields()
     if (this.activeSceneField) this.refreshSceneField()
   }
@@ -10855,6 +10860,7 @@ export class SightingEditorElement extends HTMLElement {
     this.sectionFilePanel.localize(messages)
     this.eventsPanel.localize(messages.events)
     this.phenomenonEventsPanel.localize(messages.events)
+    this.bodiesEventsPanel.localize(messages.events)
     this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
     this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep

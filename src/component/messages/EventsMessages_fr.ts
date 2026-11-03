@@ -7,14 +7,16 @@ export const eventsMessages_fr: EventsMessages = {
   derivedShapesNote: "Les formes du compte rendu sont calculées à partir de ce qu'a fait le phénomène. Les dessiner à la main écrit vos propres formes, qui l'emportent sur ces événements.",
   overriddenShapesNote: "Les formes propres à cet enregistrement l'emportent sur les événements du phénomène.",
   parts: "{n} parties",
+  derivedBodiesNote: "Les images clés de ces corps sont calculées à partir de ce qu'ils ont fait. Des images clés posées à la main l'emportent sur ces événements.",
+  overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
   resetToEvents: "Revenir aux événements",
-  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît" },
+  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par" },
   params: {
     vehicle: "Véhicule", path: "Trajet", speeds: "Vitesses", speedDivisors: "Vitesses divisées par", through: "Passe par", eye: "Œil dans le véhicule",
     fovDeg: "Champ de vision", target: "Regarde", pitchShare: "Lève les yeux jusqu'à (part de sa hauteur)", keepDeg: "Le garde à moins de", glanceBeyondDeg: "Coups d'œil au-delà de",
     glanceS: "Coup d'œil", roadS: "Retour sur la route", offsetM: "Déplace l'œil de", holdS: "Pendant", turnS: "En", mirror: "Rétroviseur", firstS: "D'abord",
     mirrorS: "Dans le rétroviseur", glancesUntil: "Coups d'œil directs jusqu'à",
-    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", headingDeg: "Cap", pitchDeg: "Inclinaison"
+    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", motion: "Mouvement", turnsPerS: "Tours par seconde", distanceM: "Distance", angleDeg: "Écart à la verticale", stops: "S'arrête", in: "Dans", aboveM: "Au-dessus", headingDeg: "Cap", pitchDeg: "Inclinaison"
   },
   from: "de",
   to: "à",

@@ -15,7 +15,7 @@ export interface EventsPanelHost {
 }
 
 /** Whose events a panel shows: the observer's (their poses, the tracks of what carries them), or the phenomenon's (the account's shapes). */
-export type EventsActor = "observer" | "phenomenon"
+export type EventsActor = "observer" | "phenomenon" | "bodies"
 
 /**
  * An actor's events in the editor (see RecordingEvents): each one, when it starts and ends, and its parameters, with what each says of
@@ -60,7 +60,9 @@ export class EventsPanel {
   /** Whether what the actor's events give is still theirs: no pose, no shape written by hand since. */
   private theirs(): boolean {
     const sighting = this.host.sighting()
-    return this.actor === "observer" ? RecordingEvents.observerTrackIsExpanded(sighting) : RecordingEvents.timelineIsExpanded(sighting)
+    return this.actor === "observer" ? RecordingEvents.observerTrackIsExpanded(sighting)
+      : this.actor === "phenomenon" ? RecordingEvents.timelineIsExpanded(sighting)
+      : RecordingEvents.bodiesAreExpanded(sighting)
   }
 
   /** Shows the recording's events as they now stand: nothing at all for a recording that states none. */
@@ -68,7 +70,9 @@ export class EventsPanel {
     const sighting = this.host.sighting()
     this.shownTheirs = this.theirs()
     // The actor's own, each with its place among the recording's events, which is where what it says of its parameters is kept.
-    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => (event.who ?? "observer") === this.actor)
+    const bodyIds = new Set((sighting.interpretation?.bodies ?? []).map(body => body.id))
+    const mine = (who: string) => this.actor === "bodies" ? bodyIds.has(who) : who === this.actor
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => mine(event.who ?? "observer"))
     this.root.hidden = events.length === 0
     this.root.querySelector<HTMLElement>(".events-title")!.textContent = this.messages.title
     const body = this.root.querySelector<HTMLElement>(".events-body")!
@@ -79,7 +83,9 @@ export class EventsPanel {
     note.className = "events-note"
     note.textContent = this.actor === "observer"
       ? theirs ? this.messages.derivedNote : this.messages.overriddenNote
-      : theirs ? this.messages.derivedShapesNote : this.messages.overriddenShapesNote
+      : this.actor === "phenomenon"
+        ? theirs ? this.messages.derivedShapesNote : this.messages.overriddenShapesNote
+        : theirs ? this.messages.derivedBodiesNote : this.messages.overriddenBodiesNote
     body.append(note)
     if (!theirs) {
       const reset = document.createElement("button")
@@ -107,6 +113,8 @@ export class EventsPanel {
     kind.type = "button"
     kind.className = "event-kind"
     kind.textContent = this.messages.kinds[event.eventType] ?? event.eventType
+    // Several bodies may have events: whose each one is.
+    if (this.actor === "bodies" && event.who) kind.textContent = `${event.who} · ${kind.textContent}`
     kind.addEventListener("click", () => this.host.seek(event.t))
     head.append(kind, this.messages.from, this.seconds(event.t, value => { event.t = value }, `events.${index}.t`))
     if (event.until !== undefined) head.append(this.messages.to, this.seconds(event.until, value => { event.until = value }, `events.${index}.until`))
@@ -132,8 +140,10 @@ export class EventsPanel {
     if (typeof value === "number") {
       // An instant of the recording is shown and typed in seconds, like the event's own.
       if (key === "glancesUntil") return this.seconds(value, typed => { params[key] = typed }, path)
-      const unit = key.endsWith("Deg") ? "°" : key.endsWith("S") ? "s" : ""
-      return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" ? 0.05 : key.endsWith("S") ? 0.05 : 1)
+      // By the parameter's name: degrees, seconds (glanceS, but not turnsPerS, a rate), metres.
+      const seconds = key.endsWith("S") && !key.endsWith("PerS")
+      const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : ""
+      return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" || seconds || key.endsWith("PerS") ? 0.05 : key.endsWith("M") ? 0.01 : 1)
     }
     if (Array.isArray(value) && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {
       // A table of instants: each row's instant and its numbers (a speed, a divisor, a width and a height), edited where they stand.

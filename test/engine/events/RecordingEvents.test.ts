@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import silly from "../../../public/demo-data/observer-silly-le-long.json"
 import sillyTemoins from "../../../public/demo-data/observer-silly-le-long-temoins.json"
 import valensole from "../../../public/demo-data/observer-valensole.json"
+import valensolePv from "../../../public/demo-data/observer-valensole-pv-1965-07-02.json"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 import reference from "./silly-poses.json"
 import { BodyPlacement } from "../../../src/engine/interpretation/BodyPlacement.js"
@@ -93,6 +94,37 @@ describe("RecordingEvents", () => {
       expect(Math.abs(pose.pitchDeg - Math.atan2(body.upM - eye.upM, Math.hypot(east, north)) * 180 / Math.PI), `pitch at ${t}`).toBeLessThan(0.01)
     }
     expect(toSightingJson(sighting).observerTrack).toBeUndefined()
+  })
+
+  it("draws the craft away as Masse told it: the tube drawn in, the legs turning, straight up, then off at a slant, gone", () => {
+    const sighting = fromSightingJson(valensole as unknown as SightingRecordingJson)
+    const ground = { heightAt: () => 0 }
+    const craft = new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === "craft")!, ground, t => BodyPlacement.eyeOf(sighting, t, ground))
+    expect(craft.at(247000)!.motions!["pivot-retract"]).toBeCloseTo(0.5, 5)
+    // Half a turn a second, from 248 s.
+    expect(craft.at(258000)!.motions!["legs-turn"]).toBeCloseTo(5, 5)
+    // On the ground, then 0.79 m up, straight, then where he lost it, 51 degrees off the vertical towards the west.
+    expect(craft.at(250000)!.upM).toBeCloseTo(1.21, 2)
+    expect(craft.at(255000)!).toMatchObject({ eastM: expect.closeTo(0, 2), upM: expect.closeTo(2, 1) })
+    const lost = craft.at(262000)!
+    expect(Math.hypot(lost.eastM + 29.4, lost.upM - 25.87)).toBeLessThan(0.2)
+    expect(craft.at(262500)).toBeUndefined()
+    const written = toSightingJson(sighting).interpretation!.bodies.find(body => body.id === "craft")!.track as unknown as { value: unknown[] }
+    expect(written.value).toHaveLength(1)
+  })
+
+  it("carries the passenger in the craft, wherever it goes", () => {
+    const sighting = fromSightingJson(valensolePv as unknown as SightingRecordingJson)
+    const ground = { heightAt: () => 0 }
+    const eyeAt = (t: number) => BodyPlacement.eyeOf(sighting, t, ground)
+    const bodies = sighting.interpretation!.bodies
+    const craft = new BodyPlacement(bodies.find(body => body.id === "craft")!, ground, eyeAt)
+    const passenger = new BodyPlacement(bodies.find(body => body.id === "passager")!, ground, eyeAt)
+    for (const t of [61000, 62000, 63000, 63750]) {
+      const a = craft.at(t)!, b = passenger.at(t)!
+      expect(Math.hypot(a.eastM - b.eastM, a.northM - b.northM), `beside it at ${t}`).toBeLessThan(0.01)
+    }
+    expect(passenger.at(64000)).toBeUndefined()
   })
 
   it("writes back the events and not what they give, while it is what they give", () => {

@@ -9,6 +9,9 @@ export interface EventsMessages {
   /** The same, for the phenomenon's events and the account's shapes. */
   derivedShapesNote: string
   overriddenShapesNote: string
+  /** The same, for the bodies' events and their keyframes. */
+  derivedBodiesNote: string
+  overriddenBodiesNote: string
   /** How many parts a look has: "{n} parts". */
   parts: string
   /** The button that gives the observer the events' poses again. */

@@ -4,14 +4,18 @@ import type { Sighting } from "../model/Sighting.js"
 import { DriveExpansion } from "./DriveExpansion.js"
 import { GazeExpansion } from "./GazeExpansion.js"
 import { FootExpansion } from "./FootExpansion.js"
+import { BodyExpansion } from "./BodyExpansion.js"
+import type { BodyJson, BodyKeyframe, InterpretationJson } from "../interpretation/Interpretation.js"
 import { PhenomenonExpansion } from "./PhenomenonExpansion.js"
 import { Timeline } from "../model/Timeline.js"
 import { SightingShapes } from "../persistence/SightingShapes.js"
-import type { DriveParams, FlyParams, LeanParams, LookAheadParams, RecordingEventJson, StandParams, WatchParams } from "./RecordingEvent.js"
+import type { DriveParams, FlyParams, LeanParams, LookAheadParams, RecordingEventJson, RideParams, StandParams, WatchParams } from "./RecordingEvent.js"
 
 /** What the events of a recording were worked out into, as it was: what is written back as events alone if nothing has changed it since. */
 export interface EventsExpansion {
   observerTrack?: string
+  /** The bodies the events moved: the track each stated itself, and the one the events made of it. */
+  bodies?: Record<string, { stated: string, expanded: string }>
   /** The account's shapes, once they have been drawn as a recording writes them (see settle). */
   timeline?: string
   /** Whether the account's shapes are the events', and are still to be taken as they are once drawn. */
@@ -44,6 +48,8 @@ export class RecordingEvents {
 
   /** Gives `sighting` the values of its events, where it states none of its own. */
   static expand(sighting: Sighting): void {
+    // The bodies first: an observer may follow one with their eyes.
+    RecordingEvents.expandBodies(sighting)
     RecordingEvents.expandObserver(sighting)
     RecordingEvents.expandFlights(sighting)
     RecordingEvents.expandPhenomenon(sighting)
@@ -137,7 +143,7 @@ export class RecordingEvents {
     if (!drive) {
       // On foot: where they walk, what they look at, what they follow.
       if (new FootExpansion(sighting, events).keyframes().length > 0) {
-        sighting.eventsExpansion = { observerTrack: JSON.stringify(sighting.observerTrack.toJSON()), decorTracks: {} }
+        sighting.eventsExpansion = { ...sighting.eventsExpansion, observerTrack: JSON.stringify(sighting.observerTrack.toJSON()), decorTracks: sighting.eventsExpansion?.decorTracks ?? {} }
       }
       return
     }
@@ -196,7 +202,42 @@ export class RecordingEvents {
       vehicle.headingDeg = track[0].headingDeg
       result.decorTracks[vehicle.id] = JSON.stringify(track)
     }
-    sighting.eventsExpansion = result
+    sighting.eventsExpansion = { ...sighting.eventsExpansion, ...result }
+  }
+
+  /**
+   * The keyframes of the interpretation's bodies, from their events (see BodyExpansion), added to what each states itself, where it states
+   * nothing from the first of them on: a body whose track goes further itself is played as it is.
+   */
+  private static expandBodies(sighting: Sighting): void {
+    const bodies = sighting.interpretation?.bodies ?? []
+    // Those that move by themselves, then those carried by them.
+    const rides = (body: BodyJson) => (sighting.events ?? []).some(event => event.who === body.id && event.eventType === "ride")
+    for (const body of [...bodies.filter(body => !rides(body)), ...bodies.filter(rides)]) {
+      const events = (sighting.events ?? []).filter(event => event.who === body.id)
+      if (events.length === 0) continue
+      const first = Math.min(...events.map(event => event.t))
+      if (body.track.some(key => key.t > first)) continue
+      const stated = JSON.stringify(body.track)
+      const ride = events.find(event => event.eventType === "ride")
+      const carrier = ride && bodies.find(candidate => candidate.id === (ride.params as unknown as RideParams).in)
+      body.track = ride ? (carrier ? BodyExpansion.ride(body, ride, carrier) : body.track) : new BodyExpansion(body, events).track()
+      sighting.eventsExpansion ??= { decorTracks: {} }
+      sighting.eventsExpansion.bodies = { ...sighting.eventsExpansion.bodies, [body.id]: { stated, expanded: JSON.stringify(body.track) } }
+    }
+  }
+
+  /** The interpretation as a file writes it: each body the events moved with the track it states itself, while the events' is unchanged. */
+  static writtenInterpretation(sighting: Sighting, interpretation: InterpretationJson | undefined): InterpretationJson | undefined {
+    const bodies = sighting.eventsExpansion?.bodies
+    if (!interpretation || !bodies) return interpretation
+    return {
+      ...interpretation,
+      bodies: interpretation.bodies.map(body => {
+        const expansion = bodies[body.id]
+        return expansion && JSON.stringify(body.track) === expansion.expanded ? { ...body, track: JSON.parse(expansion.stated) as BodyKeyframe[] } : body
+      })
+    }
   }
 
   /**
@@ -215,6 +256,11 @@ export class RecordingEvents {
   }
 
   private static again(sighting: Sighting, observer: boolean, shapes: boolean): void {
+    // The bodies the events moved, back to what they state, where they are still what the events made of them.
+    for (const body of sighting.interpretation?.bodies ?? []) {
+      const expansion = sighting.eventsExpansion?.bodies?.[body.id]
+      if (expansion && JSON.stringify(body.track) === expansion.expanded) body.track = JSON.parse(expansion.stated) as BodyKeyframe[]
+    }
     if (observer) {
       for (const id of Object.keys(sighting.eventsExpansion?.decorTracks ?? {})) {
         const object = sighting.decor.find(candidate => candidate.id === id)
@@ -231,6 +277,12 @@ export class RecordingEvents {
       SightingShapes.toPosition(sighting)
     }
     RecordingEvents.settle(sighting)
+  }
+
+  /** Whether the bodies the events moved are still as they made them. */
+  static bodiesAreExpanded(sighting: Sighting): boolean {
+    const expansions = sighting.eventsExpansion?.bodies ?? {}
+    return (sighting.interpretation?.bodies ?? []).every(body => !expansions[body.id] || JSON.stringify(body.track) === expansions[body.id].expanded)
   }
 
   /** Whether the observer's track is still what the events gave: written back as the events alone, then. */

@@ -20,16 +20,42 @@ def wrap(value, basis, rationale):
     return {"value": value, "basis": basis, "rationale": rationale}
 
 
+def craft_events(variant):
+    """The craft leaving, as Masse told it, from where it stood (and, in the statement to the gendarmes, its passenger going with it)."""
+    if variant == "pv":
+        return [
+            {"type": "event", "eventType": "spin", "who": "craft", "t": 61000, "until": 63800, "params": {
+                "motion": "legs-turn", "turnsPerS": wrap(0.5, "assumed", "The six legs turned as it left (PV n° 445); how fast, nobody said")}},
+            {"type": "event", "eventType": "rise", "who": "craft", "t": 61000, "until": 63800, "params": {
+                "distanceM": 11.77, "angleDeg": wrap(53.6, "stated", "\"L'engin part en oblique\" (PV n° 445); how steep, from where it was lost"),
+                "headingDeg": 251.6, "stops": False}},
+            {"type": "event", "eventType": "vanish", "who": "craft", "t": 64000},
+            {"type": "event", "eventType": "ride", "who": "passager", "t": 0, "until": 64000, "params": {"in": "craft", "aboveM": 1.68}},
+        ]
+    return [
+        {"type": "event", "eventType": "motion", "who": "craft", "t": 246000, "until": 248000, "params": {
+            "motion": "pivot-retract", "to": wrap(1, "stated", "\"Le tube central rentre dans l'engin\" (account of 18 August 1965)")}},
+        {"type": "event", "eventType": "spin", "who": "craft", "t": 248000, "until": 262000, "params": {
+            "motion": "legs-turn", "turnsPerS": wrap(0.5, "assumed", "\"Ses 6 pieds se mettent à tourner\"; how fast, nobody said")}},
+        {"type": "event", "eventType": "rise", "who": "craft", "t": 250000, "until": 254000, "params": {
+            "distanceM": 0.79, "angleDeg": wrap(0, "stated", "\"Il s'élève\": straight up, before it goes off at a slant"), "stops": True}},
+        {"type": "event", "eventType": "rise", "who": "craft", "t": 256000, "until": 262000, "params": {
+            "distanceM": 37.89, "angleDeg": wrap(51, "stated", "\"Il part en oblique\"; how steep, from where he followed it to"), "headingDeg": 267.6, "stops": False}},
+        {"type": "event", "eventType": "vanish", "who": "craft", "t": 262500},
+    ]
+
+
 def events(variant):
     look = {"type": "event", "eventType": "look", "t": 0, "params": {
         "headingDeg": wrap(180, "assumed", "Towards the craft, which is due south of him the whole time"), "pitchDeg": 2, "fovDeg": 60}}
     if variant == "pv":
-        return [look, {"type": "event", "eventType": "walk", "t": 0, "until": 20000, "params": {
+        return [look, *craft_events(variant), {"type": "event", "eventType": "walk", "t": 0, "until": 20000, "params": {
             "from": wrap(START, "derived", "Behind the rabbit hutch, the craft some 90 m away"),
             "to": wrap({"lat": 43.84523940495868, "lng": 5.9632}, "stated", "\"Il voit l'engin de 60 m environ\" (PV n° 445): where he stopped"),
         }}]
     return [
         look,
+        *craft_events(variant),
         {"type": "event", "eventType": "walk", "t": 0, "until": 55000, "params": {
             "from": wrap(START, "derived", "Behind the rabbit hutch, the craft some 90 m away"),
             "to": wrap({"lat": 43.844758, "lng": 5.9632}, "stated", "He came along the vine to within 6 m of it, where he was held motionless"),
@@ -55,6 +81,30 @@ def main(path, variant):
     indent = text[line_start:at]
     stated = json.dumps(events(variant), ensure_ascii=False)
     text = text[:line_start] + f'{indent}"events": {stated},\n{indent}"observerTrack": {{"keyframes": []}}' + text[end:]
+    # The bodies the events move keep only what they state before them: where they stand, their size, how they look.
+    recording = json.loads(text)
+    moved = {event["who"]: min(e["t"] for e in events(variant) if e.get("who") == event["who"]) for event in events(variant) if event.get("who") not in (None, "observer")}
+    key = '"interpretation":'
+    at = text.index(key)
+    start = at + len(key)
+    while text[start] in " \n":
+        start += 1
+    interpretation, end = json.JSONDecoder().raw_decode(text, start)
+    for body in interpretation["bodies"]:
+        if body["id"] not in moved:
+            continue
+        track = body["track"]
+        keys = track["value"] if isinstance(track, dict) and "value" in track else track
+        kept = [k for k in keys if k["t"] <= moved[body["id"]] and not (k["t"] == moved[body["id"]] and k["t"] > 0)]
+        if isinstance(track, dict) and "value" in track:
+            track["value"] = kept
+        else:
+            body["track"] = kept
+    line_start = text.rindex("\n", 0, at) + 1
+    indent = text[line_start:at]
+    step = len(text.split("\n", 2)[1]) - len(text.split("\n", 2)[1].lstrip())
+    written = json.dumps(interpretation, ensure_ascii=False, indent=step).replace("\n", "\n" + indent)
+    text = text[:start] + written + text[end:]
     json.loads(text)
     open(path, "w", encoding="utf-8").write(text)
     print(f"{path}: {len(events(variant))} events")

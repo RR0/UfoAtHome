@@ -101,6 +101,38 @@ export interface FollowParams {
 }
 
 /**
+ * A body of the interpretation (`who`, its id) plays one of its model's movements once (`motion`): from where it was to `to`, between the
+ * event's start and its end. What moves (the central tube drawn into the hull) is the model's: the event says when, and how far.
+ */
+export interface MotionParams {
+  motion: string
+  to: number
+}
+
+/** A body keeps one of its model's movements turning (`spin`): `turnsPerS` turns a second, from the event's start to its end (the legs turning). */
+export interface SpinParams {
+  motion: string
+  turnsPerS: number
+}
+
+/**
+ * A body rises (`rise`): `distanceM` along a straight line `angleDeg` off the vertical (0, straight up), towards `headingDeg`, between the event's
+ * start and its end. Starting from still, it either `stops` at the end, slowing down into it, or keeps going faster and faster (a departure).
+ */
+export interface RiseParams {
+  distanceM: number
+  angleDeg: number
+  headingDeg?: number
+  stops?: boolean
+}
+
+/** A body is carried by another (`ride`, `in` its id): it goes where that one goes, `aboveM` higher (a passenger in the craft), and goes with it. */
+export interface RideParams {
+  in: string
+  aboveM: number
+}
+
+/**
  * The phenomenon stands at a place the observer stated (`who` "phenomenon"): its direction in their sky is read from there at every instant,
  * and its size from `metres`, its width and its height above the observer's eye, which may change (a reconstitution fitted to what they
  * pointed at). How it looks is said by `appearance`.
