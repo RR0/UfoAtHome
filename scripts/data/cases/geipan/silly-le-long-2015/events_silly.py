@@ -127,7 +127,7 @@ def events(recording, variant):
             "glanceBeyondDeg": wrap(50, "assumed", "Further off than that he does not look away from the road for long"),
             "glanceS": wrap(1.25, "assumed", "Nobody timed his glances; their order is his (CR p.9)"),
             "roadS": wrap(2.5, "assumed", "Nobody timed his glances; their order is his (CR p.9)")}},
-        {"type": "event", "eventType": "lean", "t": e, "params": {
+        {"type": "event", "eventType": "lean", "t": e, "until": e + 5800, "params": {
             "offsetM": wrap({"x": -0.10, "y": -0.05, "z": -0.12}, "stated", "\"Il a dû au début se baisser légèrement pour réussir à le voir\" (CR p.9); how far, SUPPOSED"),
             "holdS": 5.0, "turnS": 0.8}},
         {"type": "event", "eventType": "watch", "t": e, "params": {

@@ -7,10 +7,19 @@ export interface TimelineTrack {
   /** The track's own colour, the same in both schemes: the timeline is drawn over the scene's dark. */
   color: string
   times: readonly number[]
+  /** The events that give this track its values, as bars from their start to their end (see RecordingEvents): shown instead of keyframes. */
+  spans?: readonly TimelineSpan[]
   /** Opens the section that edits this track. */
   open(): void
   /** Puts a keyframe of this track at the playhead, or edits the one already there. */
   add(): void
+}
+
+/** An event on a track, from when to when, ms. */
+export interface TimelineSpan {
+  t: number
+  until: number
+  label: string
 }
 
 /** What the tracks say, beyond each track's own name. */
@@ -39,6 +48,8 @@ export class TimelineTracks {
 .track-lane { position: relative; height: 24px; border-radius: 6px; background: var(--ground-sunken, rgba(127, 127, 127, .12)); cursor: pointer; }
 .track-lane .kf { position: absolute; top: 50%; width: 9px; height: 9px; margin: -5px 0 0 -5px; border: 1.5px solid var(--track); background: transparent; transform: rotate(45deg); pointer-events: none; }
 .track-lane .kf[aria-current="true"] { background: var(--track); }
+.track-lane .span { position: absolute; box-sizing: border-box; min-width: 3px; border: 1px solid var(--track); border-radius: 4px; background: color-mix(in srgb, var(--track) 30%, transparent);
+  overflow: hidden; padding: 0 4px; font: 600 10px/1 var(--sans, inherit); color: var(--ink, inherit); white-space: nowrap; text-overflow: ellipsis; display: flex; align-items: center; pointer-events: none; }
 .track-lane .playhead { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #f5c451; pointer-events: none; }
 .track-add { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; border-radius: 8px; }
 `
@@ -62,7 +73,7 @@ export class TimelineTracks {
   show(tracks: readonly TimelineTrack[], duration: number, currentTime: number): void {
     this.tracks = tracks
     this.duration = duration
-    const signature = JSON.stringify([duration, tracks.map(track => [track.id, track.label, track.times])])
+    const signature = JSON.stringify([duration, tracks.map(track => [track.id, track.label, track.times, track.spans])])
     if (signature !== this.drawn) {
       this.drawn = signature
       this.draw()
@@ -86,6 +97,25 @@ export class TimelineTracks {
       lane.style.setProperty("--track", track.color)
       lane.setAttribute("role", "group")
       lane.setAttribute("aria-label", track.label)
+      // The events in rows, each in the first where it overlaps none: a drive under the looks it carries.
+      const rows: number[] = []
+      const placed = (track.spans ?? []).map(event => {
+        let row = rows.findIndex(end => end <= event.t)
+        if (row < 0) row = rows.push(0) - 1
+        rows[row] = event.until
+        return { event, row }
+      })
+      for (const { event, row } of placed) {
+        const bar = document.createElement("span")
+        bar.className = "span"
+        bar.textContent = event.label
+        bar.title = event.label
+        bar.style.left = `${(event.t / span) * 100}%`
+        bar.style.width = `${((Math.min(event.until, span) - event.t) / span) * 100}%`
+        bar.style.top = `${(row / rows.length) * 100}%`
+        bar.style.height = `${100 / rows.length}%`
+        lane.append(bar)
+      }
       for (const t of track.times) {
         const diamond = document.createElement("span")
         diamond.className = "kf"

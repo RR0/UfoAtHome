@@ -88,6 +88,26 @@ export class RecordingEvents {
     sighting.eventsExpansion = result
   }
 
+  /**
+   * Works the events' values out again after an event was edited: the poses they gave (and the vehicle's track) are replaced by what they give
+   * now. Poses the author wrote themselves are kept, and keep winning (see reset).
+   */
+  static refresh(sighting: Sighting): void {
+    if (sighting.observerTrack.allKeyframes.length > 0 && !RecordingEvents.observerTrackIsExpanded(sighting)) return
+    RecordingEvents.reset(sighting)
+  }
+
+  /** Gives the observer, and the vehicle they are in, the values of their events again, whatever poses or track they were given since. */
+  static reset(sighting: Sighting): void {
+    for (const id of Object.keys(sighting.eventsExpansion?.decorTracks ?? {})) {
+      const object = sighting.decor.find(candidate => candidate.id === id)
+      if (object) delete object.track
+    }
+    sighting.observerTrack.clear()
+    sighting.eventsExpansion = undefined
+    RecordingEvents.expand(sighting)
+  }
+
   /** Whether the observer's track is still what the events gave: written back as the events alone, then. */
   static observerTrackIsExpanded(sighting: Sighting): boolean {
     return sighting.eventsExpansion?.observerTrack !== undefined

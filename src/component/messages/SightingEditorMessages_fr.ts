@@ -1,3 +1,4 @@
+import { eventsMessages_fr } from "./EventsMessages_fr.js"
 import { witnessErrorMessages_fr } from "./WitnessErrorMessages_fr.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import { sightingLabels_fr } from "./SightingLabels_fr.js"
@@ -196,6 +197,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   close: "Fermer",
   editorKicker: "Éditeur d'observation",
   witnessError: witnessErrorMessages_fr,
+  events: eventsMessages_fr,
   expandTracks: "Déployer les pistes",
   collapseTracks: "Replier les pistes",
   addKeyframeHere: "Ajouter une image clé ici",

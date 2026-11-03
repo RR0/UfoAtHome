@@ -1,4 +1,5 @@
 import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
+import type { EventsMessages } from "./EventsMessages.js"
 import type { TimelineTracksMessages } from "../TimelineTracks.js"
 import type { SectionFoldMessages } from "../SectionFolds.js"
 import type { InputFileMessages } from "../InputFileElement.js"
@@ -327,6 +328,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   editorKicker: string
   /** What the editor says of the errors an observer's values may hold (see WitnessErrorView). */
   witnessError: WitnessErrorMessages
+  /** The events panel (see EventsPanel). */
+  events: EventsMessages
   /** The button that lays the tracks out under the scene, and folds them back. */
   expandTracks: string
   collapseTracks: string

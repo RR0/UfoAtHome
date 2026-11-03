@@ -6,6 +6,7 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
 import { TimelineTracks } from "./TimelineTracks.js"
+import { EventsPanel } from "./EventsPanel.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
@@ -260,6 +261,11 @@ export const html = `
          SightingEditorElement.applyGroundElevation. -->
     <!-- The night sky of the place, towns and all — see Sighting.lightPollution. Blank is a natural
          sky, which is what every recording that says nothing gets. -->
+    </div>
+    <!-- What the observer did, as events whose values the player works out (see EventsPanel): absent from a recording that states none. -->
+    <div class="form-section events-section" id="events-section" hidden>
+    <h3 class="section-title"><span id="label-section-events">Events</span></h3>
+    <div class="events-body"></div>
     </div>
     <div class="form-section" data-fold="all">
     <h3 class="section-title"><span id="label-section-night-sky">Night sky</span></h3>
@@ -791,7 +797,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${SceneFieldOverlay.CSS}${WitnessErrorView.CSS}${CandidatesView.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${EventsPanel.CSS}${SceneFieldOverlay.CSS}${WitnessErrorView.CSS}${CandidatesView.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -1651,6 +1657,12 @@ select.weather-field:disabled {
   bottom: 0;
   height: 30%;
   opacity: 0.6;
+}
+/* Where an event starts: the observer's colour on the tracks, as tall as a keyframe's. */
+.timeline-mark.event {
+  bottom: 0;
+  height: 45%;
+  background: #7fd4ff;
 }
 .timeline-mark.milestone {
   top: 10%;

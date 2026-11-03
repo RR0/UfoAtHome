@@ -1,7 +1,7 @@
 /** One instant worth seeing on a seek bar — a keyframe of what is being edited, or a named moment. */
 export interface TimelineMark {
   t: number
-  kind: "keyframe" | "milestone"
+  kind: "keyframe" | "event" | "milestone"
   /** What the bar says when the pointer is over it. */
   label: string
 }
