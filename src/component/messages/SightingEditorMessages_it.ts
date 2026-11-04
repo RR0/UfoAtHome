@@ -203,6 +203,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   collapseTracks: "Comprimi le tracce",
   addKeyframeHere: "Aggiungi un fotogramma chiave qui",
   keyframeHere: "Qui c'è un fotogramma chiave: modificarlo lo cambia",
+  zoomHint: "Pizzicare o Ctrl + rotella: ingrandire · scorrere di lato o Maiusc + rotella: spostare",
   overlayHorizon: "Orizzonte · inclinazione {deg}°",
   overlayFov: "Campo visivo {v}° × {h}°",
   overlayWind: "Soffia verso {point} · {speed} m/s",

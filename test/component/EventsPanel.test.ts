@@ -114,7 +114,7 @@ describe("EventsPanel of the phenomenon", () => {
 describe("TimelineTracks", () => {
   it("draws a track's events as bars, in rows where they overlap", () => {
     const host = document.createElement("div")
-    const tracks = new TimelineTracks(host, () => undefined, { addKeyframeHere: "", keyframeHere: "" })
+    const tracks = new TimelineTracks(host, () => undefined, { addKeyframeHere: "", keyframeHere: "", zoomHint: "" })
     tracks.show([{
       id: "observer", label: "observateur", color: "#7fd4ff", times: [],
       spans: [{ t: 0, until: 100, label: "Conduit" }, { t: 0, until: 50, label: "Regarde la route" }, { t: 50, until: 100, label: "Regarde dans le rétroviseur" }],
