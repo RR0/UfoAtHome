@@ -115,6 +115,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** A tick's name under the pointer, then which track it belongs to. */
   keyframeMark: string
   shapesTrack: string
+  /** The phenomenon's track while it is drawn as its bodies (the 3D view of the account). */
+  bodiesTrack: string
   observerTrack: string
   weatherTrack: string
   soundTrack: string

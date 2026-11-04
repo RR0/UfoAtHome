@@ -57,6 +57,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   nextKeyframe: "Next keyframe",
   keyframeMark: "Keyframe",
   shapesTrack: "shapes",
+  bodiesTrack: "bodies",
   observerTrack: "observer",
   weatherTrack: "weather",
   soundTrack: "sound",

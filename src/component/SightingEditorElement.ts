@@ -6820,9 +6820,15 @@ export class SightingEditorElement extends HTMLElement {
       this.scheduleHistoryRecord()
       this.refreshTimelineMarks()
     }
+    // The phenomenon's track is what the account is drawn as: its shapes, or its bodies.
+    const phenomenon: TimelineTrack = this.showsBodies
+      ? { id: "bodies", label: m.bodiesTrack, color: "#f5c451", ...this.eventMarks("bodies"), open: () => this.chooseAccountView(true),
+          // The body keyframed is the one shown in its section: opened first when it is not yet.
+          add: () => this.bodyEditor ? edit(() => this.bodyEditor!.keyframeHere())() : this.chooseAccountView(true) }
+      : { id: "shapes", label: m.shapesTrack, color: "#f5c451", ...this.eventMarks("phenomenon"), open: () => this.revealShapePanel(),
+          add: edit(() => { if (sighting.timeline.sourceIds.includes(this.currentSourceId)) this.applyAppearanceAtPlayhead(undefined, false) }) }
     const tracks: TimelineTrack[] = [
-      { id: "shapes", label: m.shapesTrack, color: "#f5c451", ...this.eventMarks("phenomenon"), open: () => this.revealShapePanel(),
-        add: edit(() => { if (sighting.timeline.sourceIds.includes(this.currentSourceId)) this.applyAppearanceAtPlayhead(undefined, false) }) },
+      phenomenon,
       { id: "observer", label: m.observerTrack, color: "#7fd4ff", ...this.eventMarks("observer"), open: () => open("group-location"),
         add: edit(() => this.updateObserver()) },
       { id: "weather", label: m.weatherTrack, color: "#b9c8d8", times: sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-weather"),
@@ -6837,8 +6843,9 @@ export class SightingEditorElement extends HTMLElement {
    * A track as the tracks and the seek bar show it: the actor's events while what they give is theirs (the observer's poses, the account's
    * shapes), its keyframes otherwise.
    */
-  private eventMarks(actor: "observer" | "phenomenon"): { times: number[], spans?: TimelineSpan[] } {
+  private eventMarks(actor: "observer" | "phenomenon" | "bodies"): { times: number[], spans?: TimelineSpan[] } {
     const sighting = this.ufoElement.sighting
+    if (actor === "bodies") return this.bodyMarks()
     const theirs = actor === "observer" ? RecordingEvents.observerTrackIsExpanded(sighting) : RecordingEvents.timelineIsExpanded(sighting)
     const keyframes = actor === "observer" ? sighting.observerTrack.allKeyframes : sighting.timeline.allKeyframes
     if (!theirs) return { times: keyframes.map(keyframe => keyframe.t) }
@@ -6849,12 +6856,39 @@ export class SightingEditorElement extends HTMLElement {
     return { times: [], spans }
   }
 
+  /** The bodies' track: what they did while their keyframes are still what it gave, their keyframes otherwise. */
+  private bodyMarks(): { times: number[], spans?: TimelineSpan[] } {
+    const sighting = this.ufoElement.sighting
+    const bodies = sighting.interpretation?.bodies ?? []
+    const ids = new Set(bodies.map(body => body.id))
+    const events = (sighting.events ?? []).filter(event => ids.has(event.who ?? ""))
+    if (events.length === 0 || !RecordingEvents.bodiesAreExpanded(sighting)) {
+      return { times: [...new Set(bodies.flatMap(body => body.track.map(key => key.t)))].sort((a, b) => a - b) }
+    }
+    const end = this.ufoElement.seekableDuration
+    const spans = events.map(event => {
+      const body = bodies.find(candidate => candidate.id === event.who)
+      const kind = this.messages.events.kinds[event.eventType] ?? event.eventType
+      return { t: event.t, until: event.until ?? end, label: bodies.length > 1 ? `${this.said.read(body?.title) ?? event.who} · ${kind}` : kind }
+    })
+    return { times: [], spans }
+  }
+
+  /** Whether the account is drawn as its bodies (the 3D view), not its shapes. */
+  private get showsBodies(): boolean {
+    return this.accountViewSelect.value === "bodies"
+  }
+
   private refreshTimelineMarks(): void {
     const sighting = this.ufoElement.sighting
     const keyframes = (label: string, times: Iterable<number>): TimelineMark[] =>
       [...times].map(t => ({ t, kind: "keyframe" as const, label: `${this.messages.keyframeMark} (${label})` }))
     const shapes = (selectedOnly: boolean): TimelineMark[] => {
       // The phenomenon's events where they give the shapes, not the hundreds of keyframes they give.
+      if (this.showsBodies) {
+        const marks = this.eventMarks("bodies")
+        return marks.spans ? marks.spans.map(span => ({ t: span.t, kind: "event" as const, label: span.label })) : keyframes(this.messages.bodiesTrack, marks.times)
+      }
       const { spans } = this.eventMarks("phenomenon")
       if (spans) return spans.map(span => ({ t: span.t, kind: "event" as const, label: span.label }))
       return keyframes(this.messages.shapesTrack, sighting.timeline.allKeyframes
@@ -7032,7 +7066,11 @@ export class SightingEditorElement extends HTMLElement {
     this.sceneElement.compareAccount = shown && interpretation !== undefined
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
-    this.accountViewSelect.value = shown && interpretation !== undefined ? "bodies" : "shapes"
+    const view = shown && interpretation !== undefined ? "bodies" : "shapes"
+    const changed = this.accountViewSelect.value !== view
+    this.accountViewSelect.value = view
+    // The phenomenon's track and marks follow what the account is drawn as.
+    if (changed) this.refreshTimelineMarks()
     this.syncSkyParts()
     this.shadow.getElementById("account-view-row")!.hidden = this.isReading
   }

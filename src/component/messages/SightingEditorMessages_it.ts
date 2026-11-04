@@ -57,6 +57,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   nextKeyframe: "Fotogramma chiave successivo",
   keyframeMark: "Fotogramma chiave",
   shapesTrack: "forme",
+  bodiesTrack: "corpi",
   observerTrack: "osservatore",
   weatherTrack: "meteo",
   soundTrack: "suono",

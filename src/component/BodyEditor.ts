@@ -248,7 +248,7 @@ export class BodyEditor {
       ids: { list: "body-key", remove: "body-key-delete", add: "body-key-add" },
       navigation: { scope: this.container, onStep: direction => this.stepKeyframe(direction) },
       onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe(true) },
-      onAdd: () => this.editView(() => undefined),
+      onAdd: () => this.keyframeHere(),
       onRemove: () => this.deleteKeyframe()
     })
     this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere, previous: m.previousKeyframe, next: m.nextKeyframe })
@@ -489,6 +489,11 @@ export class BodyEditor {
   }
 
   /** The body on show in the fields — the one the picture frames with handles. */
+  /** Puts a keyframe of the body shown at the playhead: what it is there, or keeps the one already there. */
+  keyframeHere(): void {
+    this.editView(() => undefined)
+  }
+
   get currentBodyId(): string | undefined {
     return this.current?.id
   }
