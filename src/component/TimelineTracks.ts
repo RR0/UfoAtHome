@@ -13,10 +13,16 @@ export interface TimelineTrack {
   open(): void
   /** Puts a keyframe of this track at the playhead, or edits the one already there. */
   add(): void
+  /** The span picked, by its id: its details are those the section shows. */
+  selected?: string
+  /** Picks a span pressed in the lane, by its id: the section shows its details. */
+  select?(id: string): void
 }
 
 /** An event on a track, from when to when, ms. */
 export interface TimelineSpan {
+  /** Which it is, for the track to pick it (see TimelineTrack.select). */
+  id?: string
   t: number
   until: number
   label: string
@@ -61,6 +67,9 @@ export class TimelineTracks {
 .track-lane .kf[aria-current="true"] { background: var(--track); }
 .track-lane .span { position: absolute; box-sizing: border-box; min-width: 3px; border: 1px solid var(--track); border-radius: 4px; background: color-mix(in srgb, var(--track) 30%, transparent);
   overflow: hidden; padding: 0 4px; font: 600 10px/1 var(--sans, inherit); color: var(--ink, inherit); white-space: nowrap; text-overflow: ellipsis; display: flex; align-items: center; pointer-events: none; }
+.track-lane .span[data-id] { pointer-events: auto; cursor: pointer; }
+.track-lane .span[data-id]:hover { background: color-mix(in srgb, var(--track) 45%, transparent); }
+.track-lane .span[aria-selected="true"] { border-width: 2px; background: color-mix(in srgb, var(--track) 65%, transparent); }
 .track-lane .playhead { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #f5c451; pointer-events: none; }
 .track-lane [hidden] { display: none; }
 .track-add { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; border-radius: 8px; }
@@ -220,6 +229,14 @@ export class TimelineTracks {
         bar.title = event.label
         bar.dataset.t = String(event.t)
         bar.dataset.until = String(event.until)
+        if (event.id !== undefined && track.select) {
+          const id = event.id
+          bar.dataset.id = id
+          bar.addEventListener("pointerdown", pressed => {
+            pressed.stopPropagation()
+            track.select!(id)
+          })
+        }
         bar.style.top = `${(row / rows.length) * 100}%`
         bar.style.height = `${100 / rows.length}%`
         lane.append(bar)
@@ -233,7 +250,7 @@ export class TimelineTracks {
       const playhead = document.createElement("span")
       playhead.className = "playhead"
       lane.append(playhead)
-      lane.addEventListener("pointerdown", event => this.seekFrom(lane, track, event))
+      lane.addEventListener("pointerdown", event => this.dragPlayhead(lane, track, event))
       const add = document.createElement("button")
       add.type = "button"
       add.className = "icon-btn track-add"
@@ -275,6 +292,21 @@ export class TimelineTracks {
     this.thumb.style.width = `${(this.windowLength / whole) * 100}%`
   }
 
+  /** A press on a lane moves the playhead there, and it follows the pointer while it is held, as on the seek bar. */
+  private dragPlayhead(lane: HTMLElement, track: TimelineTrack, event: PointerEvent): void {
+    this.seekFrom(lane, track, event)
+    lane.setPointerCapture?.(event.pointerId)
+    const move = (moved: PointerEvent) => this.seekFrom(lane, track, moved)
+    const end = () => {
+      lane.removeEventListener("pointermove", move)
+      lane.removeEventListener("pointerup", end)
+      lane.removeEventListener("pointercancel", end)
+    }
+    lane.addEventListener("pointermove", move)
+    lane.addEventListener("pointerup", end)
+    lane.addEventListener("pointercancel", end)
+  }
+
   /** A press within a diamond's reach lands on it; elsewhere, on the instant under the pointer. */
   private seekFrom(lane: HTMLElement, track: TimelineTrack, event: PointerEvent): void {
     const box = lane.getBoundingClientRect()
@@ -293,6 +325,8 @@ export class TimelineTracks {
       if (!lane || !add) continue
       const here = track.times.some(t => Math.abs(t - currentTime) < 1)
       for (const diamond of lane.querySelectorAll<HTMLElement>(".kf")) diamond.setAttribute("aria-current", String(Math.abs(Number(diamond.dataset.t) - currentTime) < 1))
+      // The span picked is marked where it is drawn: picking another draws nothing anew (a focused track stays unfolded).
+      for (const bar of lane.querySelectorAll<HTMLElement>(".span[data-id]")) bar.setAttribute("aria-selected", String(bar.dataset.id === track.selected))
       const playhead = lane.querySelector<HTMLElement>(".playhead")!
       playhead.hidden = currentTime < this.windowStart || currentTime > end
       playhead.style.left = `${this.x(Math.min(Math.max(1, this.duration), currentTime))}%`

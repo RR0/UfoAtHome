@@ -52,4 +52,27 @@ describe("TimelineTracks", () => {
     tracks.zoomTo(1e9)
     expect(tracks.zoomed).toBe(false)
   })
+
+  it("picks a span pressed, shows it picked, and drags the playhead along a lane", () => {
+    const host = document.createElement("div")
+    const picked: string[] = []
+    const seeks: number[] = []
+    const tracks = new TimelineTracks(host, t => seeks.push(t), messages)
+    const spans = [{ id: "3", t: 1000, until: 4000, label: "Turns" }, { id: "5", t: 5000, until: 9000, label: "Rises" }]
+    const shown = (selected?: string) => tracks.show([{ ...track([], []), spans, selected, select: id => picked.push(id) }], 10000, 0)
+    shown()
+    host.querySelectorAll<HTMLElement>(".span")[1].dispatchEvent(new Event("pointerdown", { bubbles: true }))
+    expect(picked).toEqual(["5"])
+    expect(seeks).toEqual([])
+    shown("5")
+    expect([...host.querySelectorAll<HTMLElement>(".span")].map(bar => bar.getAttribute("aria-selected"))).toEqual(["false", "true"])
+    const lane = host.querySelector<HTMLElement>(".track-lane")!
+    lane.getBoundingClientRect = () => ({ left: 0, width: 100, top: 0, height: 24, right: 100, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
+    const press = (type: string, clientX: number) => { const event = new Event(type, { bubbles: true }); Object.assign(event, { clientX, pointerId: 1 }); lane.dispatchEvent(event) }
+    press("pointerdown", 20)
+    press("pointermove", 70)
+    press("pointerup", 70)
+    press("pointermove", 90)
+    expect(seeks).toEqual([2000, 7000])
+  })
 })

@@ -1530,6 +1530,7 @@ export class SightingEditorElement extends HTMLElement {
       seek: (t: number) => this.goToMark(t),
       now: () => this.ufoElement.currentTime,
       currentBody: () => this.bodyEditor?.selectedId ?? this.ufoElement.sighting.interpretation?.bodies[0]?.id,
+      picked: () => this.refreshTracks(),
       bodyLabel: (id: string) => {
         const body = this.ufoElement.sighting.interpretation?.bodies.find(candidate => candidate.id === id)
         return this.said.read(body?.title) ?? id
@@ -6823,13 +6824,16 @@ export class SightingEditorElement extends HTMLElement {
     // The phenomenon's track is what the account is drawn as: its shapes, or its bodies.
     const phenomenon: TimelineTrack = this.showsBodies
       ? { id: "bodies", label: m.bodiesTrack, color: "#f5c451", ...this.eventMarks("bodies"), open: () => this.chooseAccountView(true),
+          selected: this.pickedEvent(this.bodiesEventsPanel), select: id => this.pickEvent(Number(id)),
           // The body keyframed is the one shown in its section: opened first when it is not yet.
           add: () => this.bodyEditor ? edit(() => this.bodyEditor!.keyframeHere())() : this.chooseAccountView(true) }
       : { id: "shapes", label: m.shapesTrack, color: "#f5c451", ...this.eventMarks("phenomenon"), open: () => this.revealShapePanel(),
+          selected: this.pickedEvent(this.phenomenonEventsPanel), select: id => this.pickEvent(Number(id)),
           add: edit(() => { if (sighting.timeline.sourceIds.includes(this.currentSourceId)) this.applyAppearanceAtPlayhead(undefined, false) }) }
     const tracks: TimelineTrack[] = [
       phenomenon,
       { id: "observer", label: m.observerTrack, color: "#7fd4ff", ...this.eventMarks("observer"), open: () => open("group-location"),
+        selected: this.pickedEvent(this.eventsPanel), select: id => this.pickEvent(Number(id)),
         add: edit(() => this.updateObserver()) },
       { id: "weather", label: m.weatherTrack, color: "#b9c8d8", times: sighting.weatherTrack.allKeyframes.map(keyframe => keyframe.t), open: () => open("group-weather"),
         add: edit(() => this.applyWeatherAtPlayhead()) },
@@ -6851,8 +6855,9 @@ export class SightingEditorElement extends HTMLElement {
     if (!theirs) return { times: keyframes.map(keyframe => keyframe.t) }
     const end = this.ufoElement.seekableDuration
     const spans = (sighting.events ?? [])
-      .filter(event => (event.who ?? "observer") === actor)
-      .map(event => ({ t: event.t, until: event.until ?? end, label: this.messages.events.kinds[event.eventType] ?? event.eventType }))
+      .map((event, index) => ({ event, index }))
+      .filter(({ event }) => (event.who ?? "observer") === actor)
+      .map(({ event, index }) => ({ id: String(index), t: event.t, until: event.until ?? end, label: this.messages.events.kinds[event.eventType] ?? event.eventType }))
     return { times: [], spans }
   }
 
@@ -6861,17 +6866,54 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const bodies = sighting.interpretation?.bodies ?? []
     const ids = new Set(bodies.map(body => body.id))
-    const events = (sighting.events ?? []).filter(event => ids.has(event.who ?? ""))
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => ids.has(event.who ?? ""))
     if (events.length === 0 || !RecordingEvents.bodiesAreExpanded(sighting)) {
       return { times: [...new Set(bodies.flatMap(body => body.track.map(key => key.t)))].sort((a, b) => a - b) }
     }
     const end = this.ufoElement.seekableDuration
-    const spans = events.map(event => {
+    const spans = events.map(({ event, index }) => {
       const body = bodies.find(candidate => candidate.id === event.who)
       const kind = this.messages.events.kinds[event.eventType] ?? event.eventType
-      return { t: event.t, until: event.until ?? end, label: bodies.length > 1 ? `${this.said.read(body?.title) ?? event.who} · ${kind}` : kind }
+      return { id: String(index), t: event.t, until: event.until ?? end, label: bodies.length > 1 ? `${this.said.read(body?.title) ?? event.who} · ${kind}` : kind }
     })
     return { times: [], spans }
+  }
+
+  /** The event a panel shows the fields of, as a track names its spans; none while the panel's section is closed. */
+  private pickedEvent(panel: EventsPanel | undefined): string | undefined {
+    const index = panel?.pickedIndex
+    const section = panel === this.eventsPanel ? "events-section" : panel === this.phenomenonEventsPanel ? "phenomenon-events-section" : "bodies-events-section"
+    const shown = this.shadow.getElementById(section)
+    // Shown picked only where its fields can be seen: a closed section edits nothing.
+    return index === undefined || !shown || shown.closest("[hidden]") ? undefined : String(index)
+  }
+
+  /**
+   * A span pressed in the tracks: its event is picked in the panel of its actor, opened where it is (the observer's under Location, the
+   * phenomenon's under its shapes, a body's under its bodies, with that body shown), and the playhead goes to where it starts.
+   */
+  private pickEvent(index: number): void {
+    const sighting = this.ufoElement.sighting
+    const event = sighting.events?.[index]
+    if (!event) return
+    const who = event.who ?? "observer"
+    if (who === "observer") {
+      const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-location")
+      if (tab) this.toggleGroup(tab, true)
+      this.eventsPanel.pick(index)
+    } else if (who === "phenomenon") {
+      this.revealShapePanel()
+      this.phenomenonEventsPanel.pick(index)
+    } else {
+      this.chooseAccountView(true)
+      void this.loadBodyEditor().then(editor => {
+        editor.show(who)
+        this.bodiesEventsPanel.pick(index)
+        this.refreshTracks()
+      })
+    }
+    this.goToMark(event.t)
+    this.refreshTracks()
   }
 
   /** Whether the account is drawn as its bodies (the 3D view), not its shapes. */

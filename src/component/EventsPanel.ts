@@ -20,6 +20,8 @@ export interface EventsPanelHost {
   currentBody?(): string | undefined
   /** What a body is called, as the list of bodies names it. */
   bodyLabel?(id: string): string
+  /** Another event was picked: the tracks show it picked too. */
+  picked?(): void
 }
 
 /** Whose events a panel shows: the observer's (their poses, the tracks of what carries them), the phenomenon's (the account's shapes), a body's. */
@@ -87,6 +89,7 @@ export class EventsPanel {
         const event = this.host.sighting().events?.[this.picked]
         if (event) this.host.seek(event.t)
         this.render()
+        this.host.picked?.()
       },
       onAdd: kind => { if (kind) this.add(kind) },
       onRemove: () => this.remove()
@@ -131,6 +134,18 @@ export class EventsPanel {
   private events(): { event: RecordingEventJson, index: number }[] {
     const who = this.who()
     return (this.host.sighting().events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => who !== undefined && (event.who ?? "observer") === who)
+  }
+
+  /** The picked event, by its place among the recording's events: the one whose fields are shown. */
+  get pickedIndex(): number | undefined {
+    return this.picked
+  }
+
+  /** Picks the event at `index` among the recording's events (one of this panel's), as a press on its bar in the tracks does, and shows its fields. */
+  pick(index: number): void {
+    this.picked = index
+    this.render()
+    this.root.scrollIntoView?.({ block: "nearest" })
   }
 
   /** Shows the actor's events as they now stand, and the picked one's fields. */
