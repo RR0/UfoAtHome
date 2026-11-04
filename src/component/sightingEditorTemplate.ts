@@ -60,6 +60,8 @@ export const html = `
   <button id="toggle-tracks" type="button" class="icon-btn" aria-expanded="false" aria-controls="timeline-tracks" title="Expand the tracks" aria-label="Expand the tracks"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
 </div>
 </div>
+<!-- Drags the scene taller or shorter, which gives the form under it the height it leaves (see SightingEditorElement.resizeScene). -->
+<div id="scene-resize" class="scene-resize" role="separator" aria-orientation="horizontal" tabindex="0"></div>
 <nav id="group-tabs" class="section-chips">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false">${Icons.SUMMARY}<span id="label-observation-group">Summary</span></button>
   <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false">${Icons.WITNESS}<span id="label-observer-group">Witness</span></button>
@@ -1886,6 +1888,12 @@ ${EditorTheme.TOKENS}
   --rr0-scene-max-height: 50dvh;
 }
 .app > :is(.editor-head, .scene-card, #group-tabs, #timeline-tracks) { flex: none; }
+/* A grip under the scene: a line to drag up or down, wider where the pointer finds it. */
+.app > .scene-resize { flex: none; position: relative; height: 8px; margin: -4px 0; z-index: 5; cursor: ns-resize; touch-action: none; }
+.app > .scene-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 36px; height: 4px; margin: -2px 0 0 -18px; border-radius: 2px;
+  background: var(--line-strong, rgba(127, 127, 127, .5)); opacity: 0; transition: opacity .15s ease; }
+.app > .scene-resize:is(:hover, :focus-visible, .dragging)::after { opacity: 1; }
+.app > .scene-resize:focus-visible { outline: none; }
 .app > .group-panel { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
 /* A box to tick in a row of fields stands as tall as they do, its label level with their middle (the toolbars align on their foot). */
 .app .toolbar > label:has(> input[type="checkbox"]) { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; }

@@ -200,6 +200,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   witnessError: witnessErrorMessages_es,
   events: eventsMessages_es,
   expandTracks: "Desplegar las pistas",
+  resizeScene: "Arrastrar para agrandar o reducir la escena (doble clic: tamaño original)",
   collapseTracks: "Plegar las pistas",
   addKeyframeHere: "Añadir un fotograma clave aquí",
   keyframeHere: "Aquí hay un fotograma clave: editarlo lo modifica",

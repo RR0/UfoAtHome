@@ -1282,6 +1282,7 @@ export class SightingEditorElement extends HTMLElement {
     this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
     this.tracksToggle = this.shadow.getElementById("toggle-tracks") as HTMLButtonElement
     this.tracksToggle.addEventListener("click", () => this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") !== "true"))
+    this.resizeScene(this.shadow.getElementById("scene-resize")!)
     // A touch has no hover: it shows the scene's toggles and timeline for a while (see the design handoff, §3.2).
     this.shadow.querySelector(".scene-card")!.addEventListener("pointerdown", event => {
       if ((event as PointerEvent).pointerType === "touch") this.showOverlays()
@@ -6787,6 +6788,54 @@ export class SightingEditorElement extends HTMLElement {
     this.overlayTimer = setTimeout(() => delete card.dataset.shown, 3500)
   }
 
+  /** Where the height the author gave the scene is kept, for the next recording opened in this browser. */
+  private static readonly SCENE_HEIGHT_KEY = "rr0-editor-scene-height"
+
+  /**
+   * The grip under the scene: dragged (or moved by the arrow keys), it makes the scene shorter, which gives the form the height it leaves, or
+   * taller, as far as its format lets it be in this width; a double-click gives it back the height the editor gives it. Kept in this browser.
+   */
+  private resizeScene(grip: HTMLElement): void {
+    const app = this.shadow.querySelector<HTMLElement>(".app")!
+    // The scene, which took the place of its slot: its height is what is dragged.
+    const slot = this.sceneElement
+    const set = (heightPx: number | undefined) => {
+      if (heightPx === undefined) app.style.removeProperty("--rr0-scene-max-height")
+      else app.style.setProperty("--rr0-scene-max-height", `${Math.round(Math.min(window.innerHeight * 0.85, Math.max(120, heightPx)))}px`)
+      try {
+        if (heightPx === undefined) localStorage.removeItem(SightingEditorElement.SCENE_HEIGHT_KEY)
+        else localStorage.setItem(SightingEditorElement.SCENE_HEIGHT_KEY, app.style.getPropertyValue("--rr0-scene-max-height"))
+      } catch { /* No storage here (a private window, a preview): the height lasts as long as the page. */ }
+    }
+    try {
+      const kept = localStorage.getItem(SightingEditorElement.SCENE_HEIGHT_KEY)
+      if (kept && /^\d+px$/.test(kept)) app.style.setProperty("--rr0-scene-max-height", kept)
+    } catch { /* As above. */ }
+    grip.addEventListener("pointerdown", event => {
+      event.preventDefault()
+      const from = event.clientY
+      const start = slot.getBoundingClientRect().height
+      grip.setPointerCapture?.(event.pointerId)
+      grip.classList.add("dragging")
+      const move = (moved: PointerEvent) => set(start + moved.clientY - from)
+      const end = () => {
+        grip.classList.remove("dragging")
+        grip.removeEventListener("pointermove", move)
+        grip.removeEventListener("pointerup", end)
+        grip.removeEventListener("pointercancel", end)
+      }
+      grip.addEventListener("pointermove", move)
+      grip.addEventListener("pointerup", end)
+      grip.addEventListener("pointercancel", end)
+    })
+    grip.addEventListener("keydown", event => {
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return
+      event.preventDefault()
+      set(slot.getBoundingClientRect().height + (event.key === "ArrowUp" ? -20 : 20))
+    })
+    grip.addEventListener("dblclick", () => set(undefined))
+  }
+
   /** Lays the tracks out after the sections' chips, or folds them back into the timeline over the scene. */
   private setTracksShown(shown: boolean): void {
     const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
@@ -10932,6 +10981,11 @@ export class SightingEditorElement extends HTMLElement {
     this.accountViewSelect.options[0].textContent = messages.accountView2d
     this.accountViewSelect.options[1].textContent = messages.accountView3d
     this.accountViewSelect.title = messages.accountViewHint
+    const grip = this.shadow.getElementById("scene-resize")
+    if (grip) {
+      grip.title = messages.resizeScene
+      grip.setAttribute("aria-label", messages.resizeScene)
+    }
     this.durationInput.placeholder = messages.durationPlaceholder
     this.durationElement.messages = messages
     this.addShapeButton.title = messages.addShape

@@ -200,6 +200,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   witnessError: witnessErrorMessages_en,
   events: eventsMessages_en,
   expandTracks: "Expand the tracks",
+  resizeScene: "Drag to make the scene taller or shorter (double-click: back to its own size)",
   collapseTracks: "Collapse the tracks",
   addKeyframeHere: "Add a keyframe here",
   keyframeHere: "A keyframe is here: editing it changes it",

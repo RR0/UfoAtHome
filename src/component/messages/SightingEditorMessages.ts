@@ -334,6 +334,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   events: EventsMessages
   /** The button that lays the tracks out under the scene, and folds them back. */
   expandTracks: string
+  /** The grip under the scene: what dragging it does. */
+  resizeScene: string
   collapseTracks: string
   /** What the scene says over itself while a field it shows is edited (see SceneFieldOverlay): the tilt's horizon, the field of view, the wind. */
   overlayHorizon: string

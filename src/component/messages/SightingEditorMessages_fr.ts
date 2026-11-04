@@ -200,6 +200,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   witnessError: witnessErrorMessages_fr,
   events: eventsMessages_fr,
   expandTracks: "Déployer les pistes",
+  resizeScene: "Glisser pour agrandir ou réduire la scène (double-clic : taille d'origine)",
   collapseTracks: "Replier les pistes",
   addKeyframeHere: "Ajouter une image clé ici",
   keyframeHere: "Une image clé est ici : l'éditer la modifie",
