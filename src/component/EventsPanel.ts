@@ -145,7 +145,8 @@ export class EventsPanel {
   pick(index: number): void {
     this.picked = index
     this.render()
-    this.root.scrollIntoView?.({ block: "nearest" })
+    // Its title at the top of the part that scrolls: whose events these are is read first.
+    this.root.scrollIntoView?.({ block: "start" })
   }
 
   /** Shows the actor's events as they now stand, and the picked one's fields. */
