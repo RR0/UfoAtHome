@@ -45,7 +45,12 @@ export class TimelineTracks {
 /* The tracks' names are the words the marks of the seek bar use inside a sentence ("Keyframe (shapes)"): capitalised here, where they stand alone. */
 .track-name::first-letter { text-transform: uppercase; }
 .track-name:hover { color: var(--ink, inherit); text-decoration: underline; background: none; }
-.track-lane { position: relative; height: 24px; border-radius: 6px; background: var(--ground-sunken, rgba(127, 127, 127, .12)); cursor: pointer; }
+.track-row { display: contents; }
+.track-lane { position: relative; height: 24px; border-radius: 6px; background: var(--ground-sunken, rgba(127, 127, 127, .12)); cursor: pointer; transition: height .15s ease; }
+.track-lane:focus-visible { outline: 2px solid var(--track); outline-offset: 1px; }
+/* A track focused (its name, its lane or its "+") unfolds to show all its events, each row at a readable height; it folds back when the focus leaves. */
+.track-row:focus-within .track-lane { height: max(24px, calc(var(--rows, 1) * 18px + 4px)); }
+.track-row:focus-within .track-lane .span { font-size: 11px; }
 .track-lane .kf { position: absolute; top: 50%; width: 9px; height: 9px; margin: -5px 0 0 -5px; border: 1.5px solid var(--track); background: transparent; transform: rotate(45deg); pointer-events: none; }
 .track-lane .kf[aria-current="true"] { background: var(--track); }
 .track-lane .span { position: absolute; box-sizing: border-box; min-width: 3px; border: 1px solid var(--track); border-radius: 4px; background: color-mix(in srgb, var(--track) 30%, transparent);
@@ -97,6 +102,7 @@ export class TimelineTracks {
       lane.style.setProperty("--track", track.color)
       lane.setAttribute("role", "group")
       lane.setAttribute("aria-label", track.label)
+      lane.tabIndex = 0
       // The events in rows, each in the first where it overlaps none: a drive under the looks it carries.
       const rows: number[] = []
       const placed = (track.spans ?? []).map(event => {
@@ -105,6 +111,7 @@ export class TimelineTracks {
         rows[row] = event.until
         return { event, row }
       })
+      lane.style.setProperty("--rows", String(Math.max(1, rows.length)))
       for (const { event, row } of placed) {
         const bar = document.createElement("span")
         bar.className = "span"
@@ -132,7 +139,11 @@ export class TimelineTracks {
       add.className = "icon-btn track-add"
       add.innerHTML = Icons.PLUS
       add.addEventListener("click", () => track.add())
-      this.host.append(name, lane, add)
+      // One row of the grid, kept together so that a focus anywhere in it unfolds its lane.
+      const row = document.createElement("div")
+      row.className = "track-row"
+      row.append(name, lane, add)
+      this.host.append(row)
       this.lanes.set(track.id, lane)
       this.adds.set(track.id, add)
     }
