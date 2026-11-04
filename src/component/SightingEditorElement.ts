@@ -6785,7 +6785,7 @@ export class SightingEditorElement extends HTMLElement {
     this.overlayTimer = setTimeout(() => delete card.dataset.shown, 3500)
   }
 
-  /** Lays the tracks out under the scene, or folds them back into the timeline over it. */
+  /** Lays the tracks out after the sections' chips, or folds them back into the timeline over the scene. */
   private setTracksShown(shown: boolean): void {
     const card = this.shadow.querySelector<HTMLElement>(".scene-card")!
     card.toggleAttribute("data-tracks", shown)

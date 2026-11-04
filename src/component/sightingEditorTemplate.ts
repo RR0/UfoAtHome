@@ -56,10 +56,9 @@ export const html = `
   </div>
   <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">${Icons.NEXT_MARK}</button>
   <span id="time-end" class="time-label">0:00</span>
-  <!-- Lays the tracks out under the scene (see TimelineTracks): the timeline then leaves the picture and stays in view. -->
+  <!-- Lays the tracks out after the sections' chips (see TimelineTracks): the timeline then leaves the picture and stays in view. -->
   <button id="toggle-tracks" type="button" class="icon-btn" aria-expanded="false" aria-controls="timeline-tracks" title="Expand the tracks" aria-label="Expand the tracks"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
 </div>
-<div id="timeline-tracks" hidden></div>
 </div>
 <nav id="group-tabs" class="section-chips">
   <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false">${Icons.SUMMARY}<span id="label-observation-group">Summary</span></button>
@@ -75,6 +74,8 @@ export const html = `
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
 </nav>
+<!-- The tracks, laid out after the sections' chips rather than under the scene: the chips stay where they are when the tracks unfold. -->
+<div id="timeline-tracks" hidden></div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <!-- One section, its id held back: what a case names this account by, set once (see SectionFolds). -->
   <div class="form-section">
@@ -1884,7 +1885,7 @@ ${EditorTheme.TOKENS}
   max-height: 100dvh;
   --rr0-scene-max-height: 50dvh;
 }
-.app > :is(.editor-head, .scene-card, #group-tabs) { flex: none; }
+.app > :is(.editor-head, .scene-card, #group-tabs, #timeline-tracks) { flex: none; }
 .app > .group-panel { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
 /* A box to tick in a row of fields stands as tall as they do, its label level with their middle (the toolbars align on their foot). */
 .app .toolbar > label:has(> input[type="checkbox"]) { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; }
@@ -2114,7 +2115,7 @@ ${EditorTheme.fields(".app")}
 .scene-card[data-tracks] > .playback-row :is(button, input[type="range"]) { color: var(--ink); }
 .scene-card[data-tracks] > .playback-row .icon-btn { border-color: var(--line-strong); }
 #toggle-tracks[aria-expanded="true"] { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
-.scene-card > #timeline-tracks { background: var(--ground-raised); color: var(--ink); }
+.app > #timeline-tracks { background: var(--ground-raised); color: var(--ink); border-bottom: 1px solid var(--line); }
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
