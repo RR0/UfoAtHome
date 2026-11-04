@@ -4,9 +4,11 @@ import valensole from "../../public/demo-data/observer-valensole.json"
 import { EventsPanel } from "../../src/component/EventsPanel.js"
 import { eventsMessages_fr } from "../../src/component/messages/EventsMessages_fr.js"
 import { TimelineTracks } from "../../src/component/TimelineTracks.js"
+import { positionInputMessages_en, type PositionInputElement } from "../../src/component/PositionInputElement.js"
+import type { PositionFrame } from "../../src/engine/model/SaidPosition.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-function mounted(actor: "observer" | "phenomenon" | "bodies" = "observer", json: unknown = silly, now = 0) {
+function mounted(actor: "observer" | "phenomenon" | "bodies" = "observer", json: unknown = silly, now = 0, frame?: PositionFrame) {
   const sighting = fromSightingJson(json as SightingRecordingJson)
   const root = document.createElement("div")
   root.innerHTML = `<h3><span class="events-title"></span></h3><div class="events-body"></div>`
@@ -18,7 +20,8 @@ function mounted(actor: "observer" | "phenomenon" | "bodies" = "observer", json:
     changed: () => { calls.changed++; panel.render() },
     seek: t => calls.seek.push(t),
     now: () => now,
-    currentBody: () => sighting.interpretation?.bodies[0]?.id
+    currentBody: () => sighting.interpretation?.bodies[0]?.id,
+    ...(frame ? { positionFrame: () => frame, positionMessages: () => positionInputMessages_en } : {})
   }, eventsMessages_fr, actor)
   panel.render()
   const picker = () => root.querySelector<HTMLSelectElement>(`#${actor}-event`)!
@@ -112,6 +115,22 @@ describe("EventsPanel of the phenomenon", () => {
 })
 
 describe("TimelineTracks", () => {
+  it("says a place as every position is, from the observer or as degrees, and keeps how it was said once the focus leaves it", () => {
+    const { sighting, root, pick, picker, calls } = mounted("observer", valensole, 0, { origin: { lat: 43.8447, lng: 5.9632 }, references: [{ label: "the observer", eastM: 0, northM: 0 }] })
+    pick([...picker().options].findIndex(option => option.text.includes("Marche")))
+    const to = root.querySelectorAll<PositionInputElement>(".events-fields rr0-input-position")[1]
+    expect(to).toBeDefined()
+    to.querySelector<HTMLButtonElement>(".position-mode")!.click()
+    to.eastInput.value = "10"
+    to.eastInput.dispatchEvent(new Event("input", { bubbles: true }))
+    to.dispatchEvent(new FocusEvent("focusout", { bubbles: true }))
+    const event = sighting.events!.find(candidate => candidate.eventType === "walk")!
+    const place = event.params!.to as { lat: number, lng: number, said?: { eastM: number } }
+    expect(place.said?.eastM).toBe(10)
+    expect(place.lng).toBeGreaterThan(5.9632)
+    expect(calls.changed).toBe(1)
+  })
+
   it("draws a track's events as bars, in rows where they overlap", () => {
     const host = document.createElement("div")
     const tracks = new TimelineTracks(host, () => undefined, { addKeyframeHere: "", keyframeHere: "", zoomHint: "" })

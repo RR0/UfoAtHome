@@ -4,6 +4,9 @@ import { RecordingEvents } from "../engine/events/RecordingEvents.js"
 import type { EventsMessages } from "./messages/EventsMessages.js"
 import { ElementList } from "./ElementList.js"
 import type { ProvenanceEntry } from "../engine/persistence/Provenance.js"
+import type { GeoPoint, PositionFrame, SaidPosition } from "../engine/model/SaidPosition.js"
+import { register as registerPositionInput } from "./PositionInputElement.js"
+import type { PositionChange, PositionInputElement, PositionInputMessages } from "./PositionInputElement.js"
 
 /** What the panel needs of the editor that holds it. */
 export interface EventsPanelHost {
@@ -22,6 +25,9 @@ export interface EventsPanelHost {
   bodyLabel?(id: string): string
   /** Another event was picked: the tracks show it picked too. */
   picked?(): void
+  /** What a place can be said from (see PositionFrame): with it, a place is said as every position of the editor is, relative or absolute. */
+  positionFrame?(): PositionFrame
+  positionMessages?(): PositionInputMessages
 }
 
 /** Whose events a panel shows: the observer's (their poses, the tracks of what carries them), the phenomenon's (the account's shapes), a body's. */
@@ -299,7 +305,7 @@ export class EventsPanel {
         // A place: its latitude and longitude, and when it was there, for a drive's.
         const span = document.createElement("span")
         if (typeof place.t === "number") span.append(this.seconds(place.t, typed => { place.t = typed }, path, `${this.messages.at} `), " ")
-        span.append(this.number(place.lat, typed => { place.lat = typed }, path, "°", 0.000001), " ", this.number(place.lng, typed => { place.lng = typed }, path, "°", 0.000001))
+        span.append(this.position(value as GeoPoint & { said?: SaidPosition }, path))
         return span
       }
       if (typeof place.x === "number") return document.createTextNode(`${place.x}, ${place.y}, ${place.z} m`)
@@ -307,6 +313,47 @@ export class EventsPanel {
       return document.createTextNode(Object.entries(place).map(([field, said]) => `${field} ${said ?? "∅"}`).join(", "))
     }
     return document.createTextNode(String(value))
+  }
+
+  /**
+   * A place, as every position of the editor is said (see PositionInputElement): from the observer or something else in the scene, or as a
+   * latitude and a longitude. The event keeps its latitude and longitude, and how it was said beside them (`said`). Written once the
+   * focus leaves it, as a number field is on its "change": a write draws the fields again, which would take the one being typed in away.
+   */
+  private position(place: GeoPoint & { said?: SaidPosition }, path: string): Node {
+    const frame = this.host.positionFrame?.()
+    const messages = this.host.positionMessages?.()
+    if (!frame || !messages) {
+      const span = document.createElement("span")
+      span.append(this.number(place.lat, typed => { place.lat = typed }, path, "°", 0.000001), " ", this.number(place.lng, typed => { place.lng = typed }, path, "°", 0.000001))
+      return span
+    }
+    registerPositionInput()
+    const element = document.createElement("rr0-input-position") as PositionInputElement
+    element.setAttribute("native", "geo")
+    element.setAttribute("name", path.replace(/\./g, "-"))
+    element.build()
+    element.messages = messages
+    // What it stands on is the parameter's, said after it (see basis): not twice.
+    element.basisShown = false
+    element.frame = frame
+    element.value = { lat: place.lat, lng: place.lng }
+    element.said = place.said
+    let pending: PositionChange | undefined
+    element.addEventListener("positionchange", event => { pending = (event as CustomEvent<PositionChange>).detail })
+    element.addEventListener("focusout", event => {
+      if (!pending || element.contains(event.relatedTarget as Node | null)) return
+      const { value, said } = pending
+      pending = undefined
+      if (!("lat" in value)) return
+      this.edited(() => {
+        place.lat = Math.round(value.lat * 1e7) / 1e7
+        place.lng = Math.round(value.lng * 1e7) / 1e7
+        if (said) place.said = said
+        else delete place.said
+      }, path)
+    })
+    return element
   }
 
   private text(value: string, set: (value: string) => void, path: string): Node {

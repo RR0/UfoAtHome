@@ -1531,6 +1531,8 @@ export class SightingEditorElement extends HTMLElement {
       now: () => this.ufoElement.currentTime,
       currentBody: () => this.bodyEditor?.selectedId ?? this.ufoElement.sighting.interpretation?.bodies[0]?.id,
       picked: () => this.refreshTracks(),
+      positionFrame: () => this.positionFrame(),
+      positionMessages: () => this.messages,
       bodyLabel: (id: string) => {
         const body = this.ufoElement.sighting.interpretation?.bodies.find(candidate => candidate.id === id)
         return this.said.read(body?.title) ?? id
