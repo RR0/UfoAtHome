@@ -272,6 +272,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   accountView2d: "2D · forme",
   accountView3d: "3D · corpi",
   accountViewHint: "Ciò che mostra il render e ciò che si modifica: le forme che l'osservatore ha disegnato, o i corpi che ha detto che fossero",
+  accountCompare: "Confronta con il resoconto",
+  accountCompareHint: "Disegna a puntini, accanto ai corpi, le forme che l'osservatore ha disegnato",
   datePrecise: "precisa",
   dateEdtf: "imprecisa",
   dateHelpTitle: "Che cosa accetta il testo (EDTF)",

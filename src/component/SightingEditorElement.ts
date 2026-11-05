@@ -479,6 +479,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly durationInput: HTMLInputElement
   /** Which way the account is drawn and edited: its shapes (2D) or its bodies (3D) — see syncBodiesShown. */
   private readonly accountViewSelect: HTMLSelectElement
+  /** Whether the bodies are drawn with the shapes beside them as outlines (see syncBodiesShown). */
+  private readonly accountCompareInput: HTMLInputElement
   /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
@@ -1250,6 +1252,7 @@ export class SightingEditorElement extends HTMLElement {
       })
     }
     this.accountViewSelect = this.shadow.getElementById("account-view") as HTMLSelectElement
+    this.accountCompareInput = this.shadow.getElementById("account-compare") as HTMLInputElement
     this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
@@ -2068,6 +2071,7 @@ export class SightingEditorElement extends HTMLElement {
     })
     // Choosing how the account is drawn opens the part of the Phenomenon group that edits it.
     this.accountViewSelect.addEventListener("change", () => this.chooseAccountView(this.accountViewSelect.value === "bodies"))
+    this.accountCompareInput.addEventListener("change", () => this.syncBodiesShown())
     this.utcOffsetInput.addEventListener("input", () => this.updateUtcOffset())
     this.timeZoneSelect.addEventListener("change", () => {
       // Picked by hand: from here on it is the author's, and moving the place no longer touches it.
@@ -7171,7 +7175,8 @@ export class SightingEditorElement extends HTMLElement {
   /**
    * Draws the observer's bodies, with the shapes beside them as outlines — the player's comparison
    * (see SceneElement.compareAccount), so what the observer drew stays in view and the body is
-   * read against it — everywhere but in the Shapes part of the Phenomenon group. There the shapes
+   * read against it — everywhere but in the Shapes part of the Phenomenon group, and unless "Compare with the account" is unticked, which
+   * leaves the bodies alone, as the player's button does. There the shapes
    * are drawn in full and alone: their colour, halo and brilliance are what that part edits, and a
    * body over them would hide the very thing being edited (see SceneElement.accountInTheRound).
    * Drawn only in the Bodies part at first, an airliner vanished as soon as another group was
@@ -7199,7 +7204,7 @@ export class SightingEditorElement extends HTMLElement {
     // While the shapes are edited, the bodies of a reading are not drawn over them; what it computes in the sky (lanterns, decoy flares)
     // is no body that stands for a shape, and stays, as the launches and beams do.
     const interpretation = shown ? whole : this.skyOf(whole)
-    this.sceneElement.compareAccount = shown && interpretation !== undefined
+    this.sceneElement.compareAccount = shown && interpretation !== undefined && this.accountCompareInput.checked
     if (this.sceneElement.interpretation !== interpretation) this.sceneElement.interpretation = interpretation
     // The selector says what is shown, and a reading has no shapes to choose between.
     const view = shown && interpretation !== undefined ? "bodies" : "shapes"
@@ -7209,6 +7214,8 @@ export class SightingEditorElement extends HTMLElement {
     if (changed) this.refreshTimelineMarks()
     this.syncSkyParts()
     this.shadow.getElementById("account-view-row")!.hidden = this.isReading
+    // Offered while there are bodies to compare the shapes with; a reading has no shapes.
+    this.shadow.getElementById("account-compare-row")!.hidden = this.isReading || view !== "bodies"
   }
 
   /**
@@ -11024,6 +11031,8 @@ export class SightingEditorElement extends HTMLElement {
     this.accountViewSelect.options[0].textContent = messages.accountView2d
     this.accountViewSelect.options[1].textContent = messages.accountView3d
     this.accountViewSelect.title = messages.accountViewHint
+    this.shadow.getElementById("label-account-compare")!.textContent = messages.accountCompare
+    this.shadow.getElementById("account-compare-row")!.title = messages.accountCompareHint
     const grip = this.shadow.getElementById("scene-resize")
     if (grip) {
       grip.title = messages.resizeScene

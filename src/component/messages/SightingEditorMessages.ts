@@ -419,6 +419,9 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   accountView2d: string
   accountView3d: string
   accountViewHint: string
+  /** Whether the shapes are drawn as outlines beside the bodies, to read them against what the observer drew. */
+  accountCompare: string
+  accountCompareHint: string
   datePrecise: string
   dateEdtf: string
   dateHelpTitle: string

@@ -698,6 +698,8 @@ export const html = `
        they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
   <label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
     <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
+  <!-- The shapes beside the bodies as outlines (see SceneElement.compareAccount), or the bodies alone: the player's own choice. -->
+  <label id="account-compare-row" class="account-view" hidden><input id="account-compare" type="checkbox" checked/> <span id="label-account-compare">Compare with the account</span></label>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
