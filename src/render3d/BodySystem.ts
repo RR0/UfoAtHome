@@ -743,7 +743,9 @@ export class BodySystem {
         return hit !== null && hit.distanceTo(eye) < far
       }).map(({ object }) => object)
       const blocked = crossed.length > 0 && this.lightRay.intersectObjects(crossed, true)
-        .some(hit => hit.object instanceof Mesh && !own.includes(hit.object) && hit.distance < far - 0.05)
+        // Glass is looked through, as the Sun's and the Moon's are (see SceneRenderer.isOccludedToward): the windscreen of the van the eye is
+        // in took every light seen through it out of the eye's glare.
+        .some(hit => hit.object instanceof Mesh && !own.includes(hit.object) && !(hit.object.material instanceof GlassMaterial) && hit.distance < far - 0.05)
       if (!blocked) clear++
     }
     return clear / points.length

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3 } from "three"
 import { BodySystem } from "../../src/render3d/BodySystem.js"
+import { GlassMaterial } from "../../src/render3d/GlassMaterial.js"
 import type { BodyState } from "../../src/engine/interpretation/BodyPlacement.js"
 import type { Veil } from "../../src/render3d/Veil.js"
 
@@ -95,6 +96,17 @@ describe("BodySystem veil", () => {
     const behind = veil(0)
     expect(behind === undefined || behind.mesh.visible === false).toBe(true)
     expect(veil(500)!.mesh.visible).toBe(true)
+  })
+
+  it("is seen through glass, as through the windscreen of the van the eye is in", () => {
+    const pane = new Mesh(new BoxGeometry(4, 4, 0.01), new GlassMaterial(1.5))
+    pane.position.set(0, 1.6, -1)
+    const van = new Group()
+    van.add(pane)
+    van.updateMatrixWorld(true)
+    const system = new BodySystem(async () => undefined as never, () => undefined, () => 1e-5)
+    system.set([glowing(2e6)], { originX: 0, originZ: 0, originGroundY: 0, eye: new Vector3(0, 1.6, 0), occluders: [van] })
+    expect((system as unknown as { glares: Map<string, Veil> }).glares.get("ball")!.mesh.visible).toBe(true)
   })
 
   describe("maskedShare", () => {
