@@ -1,10 +1,11 @@
-import type { DecorPlacementKeyframe } from "../model/Decor.js"
+import type { DecorObject, DecorPlacementKeyframe } from "../model/Decor.js"
 import type { ObserverKeyframe } from "../model/ObserverTrack.js"
 import type { Sighting } from "../model/Sighting.js"
 import { DriveExpansion } from "./DriveExpansion.js"
 import { GazeExpansion } from "./GazeExpansion.js"
 import { FootExpansion } from "./FootExpansion.js"
 import { BodyExpansion } from "./BodyExpansion.js"
+import { DecorLightExpansion } from "./DecorLightExpansion.js"
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "../interpretation/Interpretation.js"
 import { PhenomenonExpansion } from "./PhenomenonExpansion.js"
 import { RecordingActors } from "./RecordingActors.js"
@@ -22,6 +23,8 @@ export interface EventsExpansion {
   /** Whether the account's shapes are the events', and are still to be taken as they are once drawn. */
   timelinePending?: boolean
   decorTracks: Record<string, string>
+  /** The decor objects whose lamps the events switched: the lamps each stated itself, and the ones the events made of them. */
+  decorLights?: Record<string, { stated: string, expanded: string }>
 }
 
 /**
@@ -39,7 +42,8 @@ export interface EventsExpansion {
  * - lean: see LeanParams;
  * - watch: see WatchParams.
  *
- * A decor object's (`who` its id): fly, see FlyParams.
+ * A decor object's (`who` its id): fly, see FlyParams. A lamp of it, or a group of them (`who` "f-hobs/strobes"): light and blink, see
+ * DecorLightExpansion.
  */
 export class RecordingEvents {
   /** A standing observer's eye above the ground, m: a seated one's elevation is counted from it (see BodyPlacement.EYE_HEIGHT_M). */
@@ -53,7 +57,27 @@ export class RecordingEvents {
     RecordingEvents.expandBodies(sighting)
     RecordingEvents.expandObserver(sighting)
     RecordingEvents.expandFlights(sighting)
+    RecordingEvents.expandDecorLights(sighting)
     RecordingEvents.expandPhenomenon(sighting)
+  }
+
+  /** The lamps of the decor switched by the events about them (see DecorLightExpansion), unless the file switches them itself. */
+  private static expandDecorLights(sighting: Sighting): void {
+    for (const object of sighting.decor) {
+      if (!object.lights?.length || object.lights.some(light => light.keyframes?.length)) continue
+      const events = (sighting.events ?? []).filter(event => DecorLightExpansion.partOf(event.who, object.id) !== undefined)
+      if (events.length === 0) continue
+      const stated = JSON.stringify(object.lights)
+      object.lights = new DecorLightExpansion(object, events, RecordingEvents.endOf(sighting)).lights()
+      sighting.eventsExpansion ??= { decorTracks: {} }
+      sighting.eventsExpansion.decorLights = { ...sighting.eventsExpansion.decorLights, [object.id]: { stated, expanded: JSON.stringify(object.lights) } }
+    }
+  }
+
+  /** A decor object's lamps as a file writes them: as it stated them, while they are what the events made of them. */
+  static writtenLights(sighting: Sighting, id: string, lights: DecorObject["lights"]): DecorObject["lights"] {
+    const expansion = sighting.eventsExpansion?.decorLights?.[id]
+    return expansion && JSON.stringify(lights) === expansion.expanded ? JSON.parse(expansion.stated) as DecorObject["lights"] : lights
   }
 
   /**
@@ -289,6 +313,8 @@ export class RecordingEvents {
       const expansion = sighting.eventsExpansion?.bodies?.[body.id]
       if (expansion && JSON.stringify(body.track) === expansion.expanded) body.track = JSON.parse(expansion.stated) as BodyKeyframe[]
     }
+    // So are the lamps of the decor they switched.
+    for (const object of sighting.decor) if (object.lights) object.lights = RecordingEvents.writtenLights(sighting, object.id, object.lights)
     if (observer) {
       for (const id of Object.keys(sighting.eventsExpansion?.decorTracks ?? {})) {
         const object = sighting.decor.find(candidate => candidate.id === id)

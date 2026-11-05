@@ -7,6 +7,7 @@ import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "..
 import reference from "./silly-poses.json"
 import { RecordingActors } from "../../../src/engine/events/RecordingActors.js"
 import { BodyPlacement } from "../../../src/engine/interpretation/BodyPlacement.js"
+import { isLightOnAt, lightOnFractionBetween, lightStateAt } from "../../../src/engine/model/Decor.js"
 
 /** Poses of T1 as add_van.py wrote them before his events were (one in fifty, and his lean to the mirror), with the van's place then. */
 type Reference = { count: number, poses: { t: number, lat: number, lng: number, elevationM: number, headingDeg: number, pitchDeg: number,
@@ -181,6 +182,51 @@ describe("RecordingEvents", () => {
     expect(car.at(6500)!.lights).toMatchObject({ blue: 0, red: 0 })
     expect(car.at(19100)!.lights).toMatchObject({ blue: 200, red: 200 })
     expect(RecordingActors.issues(sighting)).toEqual([])
+  })
+
+  it("switches the lamps of a decor object from the events about them, one or a group, and writes back the events alone", () => {
+    const steady = { kind: "steady" } as const
+    const json = {
+      version: 3, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 60,
+      decor: [{ id: "plane", kind: "aircraft", eastM: 0, northM: 500, headingDeg: 0,
+        groups: [{ id: "strobes", members: ["strobe-port", "strobe-starboard"] }],
+        lights: [
+          { id: "landing", offsetM: { x: 0, y: 0, z: 3 }, color: "#ffffff", intensity: 6, pattern: steady },
+          { id: "strobe-port", offsetM: { x: -5, y: 0, z: 0 }, color: "#ffffff", intensity: 0, pattern: steady },
+          { id: "strobe-starboard", offsetM: { x: 5, y: 0, z: 0 }, color: "#ffffff", intensity: 0, pattern: steady },
+          { id: "nav", offsetM: { x: 0, y: 1, z: 0 }, color: "#ff0000", pattern: steady }
+        ] }],
+      events: [
+        // The landing light put out at 10 s, for good.
+        { type: "event", eventType: "light", who: "plane/landing", t: 10000, params: { intensity: 0 } },
+        // The strobes, off to begin with, flashing a twentieth of a second every second from 20 s to 40 s.
+        { type: "event", eventType: "blink", who: "plane/strobes", t: 20000, until: 40000, params: { onS: 0.05, offS: 0.95, intensity: 20 } }
+      ]
+    }
+    const sighting = fromSightingJson(structuredClone(json) as unknown as SightingRecordingJson)
+    const lamp = (id: string) => sighting.decor[0].lights!.find(light => light.id === id)!
+    expect(isLightOnAt(lamp("landing"), 9999)).toBe(true)
+    expect(isLightOnAt(lamp("landing"), 10000)).toBe(false)
+    expect(isLightOnAt(lamp("landing"), 59000)).toBe(false)
+    for (const id of ["strobe-port", "strobe-starboard"]) {
+      expect(isLightOnAt(lamp(id), 19990)).toBe(false)
+      expect(isLightOnAt(lamp(id), 20010)).toBe(true)
+      expect(isLightOnAt(lamp(id), 20500)).toBe(false)
+      expect(isLightOnAt(lamp(id), 33020)).toBe(true)
+      expect(lightStateAt(lamp(id), 33020).intensity).toBe(20)
+      expect(isLightOnAt(lamp(id), 40010)).toBe(false)
+      // A pose of the whole blink: lit a twentieth of it, whatever its instants.
+      expect(lightOnFractionBetween(lamp(id), 20000, 40000)).toBeCloseTo(0.05, 6)
+      expect(lightOnFractionBetween(lamp(id), 0, 60000)).toBeCloseTo(1 / 60, 6)
+    }
+    expect(lamp("nav").keyframes).toBeUndefined()
+    expect(RecordingActors.issues(sighting)).toEqual([])
+    // Written back as the lamps it states, and the events.
+    const written = toSightingJson(sighting)
+    expect(written.decor![0].lights).toEqual(json.decor[0].lights)
+    // A lamp it has not is no part of it.
+    sighting.events![0].who = "plane/beacon"
+    expect(RecordingActors.issues(sighting).map(issue => issue.id)).toEqual(["plane/beacon"])
   })
 
   it("has the beings crouched by the craft, then standing, the second turning round, until they go back in", () => {

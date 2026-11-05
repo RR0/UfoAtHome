@@ -72,6 +72,14 @@ export class RecordingActors {
     return { element: who.slice(0, at), part: who.slice(at + 1) }
   }
 
+  /** Whether `part` names something of its element: anything of a body's model; a lamp of a decor object, or one of its groups. */
+  private static hasPart(sighting: Sighting, kind: ActorKind, part: { element: string, part: string }): boolean {
+    if (kind === "body") return true
+    if (kind !== "decor") return false
+    const object = sighting.decor.find(candidate => candidate.id === part.element)
+    return Boolean(object?.lights?.some(light => light.id === part.part) || object?.groups?.some(group => group.id === part.part))
+  }
+
   /** Whether `event` is the observer's. */
   static isObserver(sighting: Sighting, event: RecordingEventJson): boolean {
     return event.who === RecordingActors.observerId(sighting)
@@ -109,9 +117,9 @@ export class RecordingActors {
     const ids = RecordingActors.ids(sighting)
     for (const [id, kinds] of ids) if (kinds.length > 1) issues.push({ kind: "duplicate-id", id, path: kinds.join(", ") })
     ;(sighting.events ?? []).forEach((event, index) => {
-      // A part of a body: of a body there is; which parts its model has, only its file says.
+      // A part of a body (which parts its model has, only its file says), or a lamp of a decor object, or a group of them: of one there is.
       const part = RecordingActors.partOf(event.who)
-      if (part && ids.get(part.element)?.length === 1 && ids.get(part.element)![0] === "body") return
+      if (part && ids.get(part.element)?.length === 1 && RecordingActors.hasPart(sighting, ids.get(part.element)![0], part)) return
       if (event.who === undefined || !ids.has(event.who)) issues.push({ kind: "unknown-who", id: event.who ?? "", path: `events.${index}.who` })
     })
     return issues

@@ -227,6 +227,8 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     soundTrack: sighting.soundTrack.toJSON(),
     weather: sighting.weather,
     decor: SightingPositions.restatedDecor(sighting).map(object => {
+      // Its lamps as it stated them, while they are what the events switched them to.
+      if (!expanded && object.lights) object = { ...object, lights: RecordingEvents.writtenLights(sighting, object.id, object.lights) }
       if (expanded || !RecordingEvents.decorTrackIsExpanded(sighting, object.id, object.track)) return object
       const { track: _track, ...stated } = object
       return stated

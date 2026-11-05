@@ -398,6 +398,26 @@ export interface DecorLight {
    * traffic light's lens throws its light down the road it faces and is dark from behind. Absent: a lamp seen alike from every side.
    */
   beamDeg?: number
+  /**
+   * How it is switched during the recording, sorted by t: from each keyframe's instant on, it is at that `intensity` (0: off) and blinks by
+   * that `pattern`, each its own when the keyframe says none; before the first, as its own fields say. At once, as a lamp is switched: a
+   * landing light put out, strobes switched on. What the events about it give (`light`, `blink`, see RecordingEvents), or stated as they are.
+   */
+  keyframes?: DecorLightKeyframe[]
+}
+
+/** How a lamp is switched from an instant on (see DecorLight.keyframes). */
+export interface DecorLightKeyframe {
+  t: number
+  intensity?: number
+  pattern?: LightPattern
+}
+
+/** Parts of an object taken together, so that one event is about them all: an aircraft's strobes, by its lamps' ids, or other groups. */
+export interface PartGroupJson {
+  id: string
+  title?: SaidText
+  members: string[]
 }
 
 /** The lamp of a streetlight (see DecorObject.lamp). */
@@ -509,6 +529,8 @@ export interface DecorObject {
    * stays for what it already drove (a streetlamp, a car's headlights). A rig of lamps is the
    * finer statement, and the only one that can carry a flash rate. */
   lights?: DecorLight[]
+  /** Its lamps taken together (see PartGroupJson), named in an event as one lamp is, `id/group`: "f-hobs/strobes". Optional. */
+  groups?: PartGroupJson[]
   /** Where the object is over time, when it moves — an aircraft crossing the sky, a car driving
    * past. Sorted by t, interpolated (see resolveDecorPlacementAt). Absent means it stays at the
    * `eastM`/`northM`/`headingDeg` above, which is what scenery normally does.
@@ -777,8 +799,20 @@ export function resolveDecorSeatAt(decor: DecorObject, t: number): { side?: Deco
  * which cannot miss a flash between two samples.
  */
 export function isLightOnAt(light: DecorLight, t: number): boolean {
-  if (light.pattern.kind === "steady") return true
+  const state = lightStateAt(light, t)
+  if (state.intensity <= 0) return false
+  if (state.pattern.kind === "steady") return true
   return lightOnFractionBetween(light, t, t + 1) > 0.5
+}
+
+/** How a lamp is switched at `t` (see DecorLight.keyframes): its intensity, 0 when off, and the pattern it blinks by. */
+export function lightStateAt(light: DecorLight, t: number): { intensity: number, pattern: LightPattern } {
+  let key: DecorLightKeyframe | undefined
+  for (const candidate of light.keyframes ?? []) {
+    if (candidate.t > t) break
+    key = candidate
+  }
+  return { intensity: key?.intensity ?? light.intensity ?? 1, pattern: key?.pattern ?? light.pattern }
 }
 
 /**
@@ -795,8 +829,23 @@ export function isLightOnAt(light: DecorLight, t: number): boolean {
  * `floor(u)·duty + min(frac(u), duty)`.
  */
 export function lightOnFractionBetween(light: DecorLight, t0: number, t1: number): number {
-  if (light.pattern.kind === "steady") return 1
-  const { perMinute, dutyCycle, phase = 0 } = light.pattern
+  const keys = light.keyframes ?? []
+  if (keys.length === 0) return patternOnFractionBetween(light.pattern, t0, t1)
+  // Each stretch of the interval as it was switched then: off counts for nothing.
+  const cuts = [t0, ...keys.map(key => key.t).filter(t => t > t0 && t < t1), t1]
+  if (t1 <= t0) return lightStateAt(light, t0).intensity > 0 ? patternOnFractionBetween(lightStateAt(light, t0).pattern, t0, t1) : 0
+  let lit = 0
+  for (let index = 0; index < cuts.length - 1; index++) {
+    const state = lightStateAt(light, cuts[index])
+    if (state.intensity > 0) lit += patternOnFractionBetween(state.pattern, cuts[index], cuts[index + 1]) * (cuts[index + 1] - cuts[index])
+  }
+  return lit / (t1 - t0)
+}
+
+/** What fraction of `[t0, t1)` a lamp blinking by `pattern` is lit (see lightOnFractionBetween). */
+function patternOnFractionBetween(pattern: LightPattern, t0: number, t1: number): number {
+  if (pattern.kind === "steady") return 1
+  const { perMinute, dutyCycle, phase = 0 } = pattern
   const duty = Math.min(Math.max(dutyCycle, 0), 1)
   if (duty === 0 || perMinute <= 0) return 0
   const periodMs = 60_000 / perMinute

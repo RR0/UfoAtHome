@@ -511,6 +511,18 @@ describe("DecorSystem declared lamps seen against a sky", () => {
     DecorSystem.setLights(group, [{ ...beacon, pattern: { kind: "flash" as const, perMinute: 60, dutyCycle: 0.1 } }], 50, 5000)
     expect(lamp(group).visible).toBe(true)
   })
+
+  it("draws a lamp as it is switched at the instant: out, then lit twice as bright", () => {
+    const switched = { ...beacon, keyframes: [{ t: 1000, intensity: 0 }, { t: 2000, intensity: (beacon.intensity ?? 1) * 2 }] }
+    const group = DecorSystem.build({ id: "plane", kind: "aircraft", eastM: 0, northM: 0, lights: [switched] }, false)
+    DecorSystem.setLights(group, [switched], 500, 5000)
+    const before = (lamp(group).material as MeshBasicMaterial).color.r
+    DecorSystem.setLights(group, [switched], 1500, 5000)
+    expect(lamp(group).visible).toBe(false)
+    DecorSystem.setLights(group, [switched], 2500, 5000)
+    expect(lamp(group).visible).toBe(true)
+    expect((lamp(group).material as MeshBasicMaterial).color.r / before).toBeCloseTo(2, 3)
+  })
 })
 
 describe("DecorSystem.fitTerrace", () => {

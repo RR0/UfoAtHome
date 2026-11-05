@@ -5,7 +5,7 @@ import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import type { DecorFacade, DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize, StreetLampSpec } from "../engine/model/Decor.js"
-import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween } from "../engine/model/Decor.js"
+import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween, lightStateAt } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 import { RoofGeometry } from "./RoofGeometry.js"
@@ -1653,7 +1653,9 @@ export class DecorSystem {
       const material = child.material as MeshBasicMaterial
       const base = (child.userData as DecorMeshUserData).lightColor
       if (base) {
-        const emitted = share * towardEye * LAMP_CANDELA * (light.intensity ?? 1) * luminancePerCandela
+        // As bright as it is switched then (see DecorLight.keyframes); a share of its interval lit at all already says when it was off.
+        const intensity = light.keyframes?.length ? Math.max(lightStateAt(light, t).intensity, lightStateAt(light, t + stepMs).intensity) : light.intensity ?? 1
+        const emitted = share * towardEye * LAMP_CANDELA * intensity * luminancePerCandela
         const rgb = [base[0] * emitted * transmittance[0], base[1] * emitted * transmittance[1], base[2] * emitted * transmittance[2]]
         // Held where the picture's half floats still tell its channels apart (see LAMP_MAX_RELATIVE): far above white, and the hue kept.
         const fit = Math.min(1, LAMP_MAX_RELATIVE / Math.max(rgb[0], rgb[1], rgb[2], 1e-30))
