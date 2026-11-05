@@ -3,7 +3,7 @@ import { CaseSession } from "../../src/component/CaseSession.js"
 import type { CaseJson } from "../../src/engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-const account = { version: 2, id: "1950-05-11-TrentPaul", time: "1950", utcOffsetHours: -7, place: { locations: [{ lat: 45, lng: -123 }] }, observer: { id: "TrentPaul" }, description: "Account", decor: [{ id: "house", kind: "building", eastM: 1, northM: 2 }], weatherTrack: { keyframes: [] }, instrument: "roamer-1-120", observerTrack: { keyframes: [] }, timeline: { keyframes: [] }, interpretation: { bodies: [] } } as unknown as SightingRecordingJson
+const account = { version: 3, id: "1950-05-11-TrentPaul", time: "1950", utcOffsetHours: -7, place: { locations: [{ lat: 45, lng: -123 }] }, observer: { id: "TrentPaul" }, description: "Account", decor: [{ id: "house", kind: "building", eastM: 1, northM: 2 }], weatherTrack: { keyframes: [] }, instrument: "roamer-1-120", observerTrack: { keyframes: [] }, timeline: { keyframes: [] }, interpretation: { bodies: [] } } as unknown as SightingRecordingJson
 const caseJson = (): CaseJson => ({
   id: "McMinnville1950",
   events: [

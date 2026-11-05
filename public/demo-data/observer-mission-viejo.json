@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "id": "2026-09-28-GreenstreetSteven",
  "image": "https://ufoathome.org/demo-data/share/mission-viejo.jpg",
  "summaryTime": 1.09,
@@ -129,10 +129,13 @@
    "orb-core"
   ],
   "groups": [
-   [
-    "orb-rim",
-    "orb-core"
-   ]
+   {
+    "id": "group-1",
+    "members": [
+     "orb-rim",
+     "orb-core"
+    ]
+   }
   ],
   "keyframes": [
    {

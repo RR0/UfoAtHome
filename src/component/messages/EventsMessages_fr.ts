@@ -9,6 +9,7 @@ export const eventsMessages_fr: EventsMessages = {
   derivedShapesNote: "Les formes du compte rendu sont calculées à partir de ce qu'a fait le phénomène. Les dessiner à la main écrit vos propres formes, qui l'emportent sur ces événements.",
   overriddenShapesNote: "Les formes propres à cet enregistrement l'emportent sur les événements du phénomène.",
   parts: "{n} parties",
+  who: "Sujet",
   derivedBodiesNote: "Les images clés de ces corps sont calculées à partir de ce qu'ils ont fait. Des images clés posées à la main l'emportent sur ces événements.",
   overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
   add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement",

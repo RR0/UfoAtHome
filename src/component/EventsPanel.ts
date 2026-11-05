@@ -1,6 +1,7 @@
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import { RecordingEvents } from "../engine/events/RecordingEvents.js"
+import { RecordingActors } from "../engine/events/RecordingActors.js"
 import type { EventsMessages } from "./messages/EventsMessages.js"
 import { ElementList } from "./ElementList.js"
 import type { ProvenanceEntry } from "../engine/persistence/Provenance.js"
@@ -23,6 +24,11 @@ export interface EventsPanelHost {
   currentBody?(): string | undefined
   /** What a body is called, as the list of bodies names it. */
   bodyLabel?(id: string): string
+  /** The shape or group of shapes picked in the account, as one click picks it (its outermost group): what an event of the phenomenon
+   * added is about. */
+  currentShapes?(): string | undefined
+  /** What a shape or a group of shapes is called. */
+  shapesLabel?(id: string): string
   /** Another event was picked: the tracks show it picked too. */
   picked?(): void
   /** What a place can be said from (see PositionFrame): with it, a place is said as every position of the editor is, relative or absolute. */
@@ -131,15 +137,31 @@ export class EventsPanel {
       : RecordingEvents.bodiesAreExpanded(sighting)
   }
 
-  /** Whose events these are: the observer, the phenomenon, or the body picked in the list of bodies. */
+  /**
+   * Whom an event added is about: the observer, by their id; the shape or group of shapes picked in the account (the phenomenon where none
+   * is, as its `stand` says, else its outermost group or shape); the body picked in the list of bodies.
+   */
   private who(): string | undefined {
-    return this.actor === "bodies" ? this.host.currentBody?.() : this.actor
+    const sighting = this.host.sighting()
+    if (this.actor === "observer") return RecordingActors.observerId(sighting)
+    if (this.actor === "bodies") return this.host.currentBody?.()
+    const picked = this.host.currentShapes?.()
+    if (picked !== undefined) return picked
+    const stand = (sighting.events ?? []).find(event => event.eventType === "stand" && RecordingActors.isPhenomenon(sighting, event))
+    if (stand?.who !== undefined) return stand.who
+    const shapes = RecordingActors.shapeIds(sighting)
+    return shapes.length > 0 ? sighting.timeline.topOf(shapes[0]) : undefined
   }
 
-  /** The actor's events, each with its place among the recording's events, which is where what it says of its parameters is kept. */
+  /** The actor's events, each with its place among the recording's events, which is where what it says of its parameters is kept: the
+   * observer's; those of the account's shapes, whichever shape or group each is about; the picked body's. */
   private events(): { event: RecordingEventJson, index: number }[] {
-    const who = this.who()
-    return (this.host.sighting().events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => who !== undefined && (event.who ?? "observer") === who)
+    const sighting = this.host.sighting()
+    const body = this.actor === "bodies" ? this.host.currentBody?.() : undefined
+    const theirs = (event: RecordingEventJson) => this.actor === "observer" ? RecordingActors.isObserver(sighting, event)
+      : this.actor === "phenomenon" ? RecordingActors.isPhenomenon(sighting, event)
+      : body !== undefined && event.who === body
+    return (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => theirs(event))
   }
 
   /** The picked event, by its place among the recording's events: the one whose fields are shown. */
@@ -163,7 +185,7 @@ export class EventsPanel {
       : this.actor === "phenomenon" ? this.messages.phenomenonTitle
       : this.messages.bodyTitle.replace("{body}", this.host.bodyLabel?.(this.who() ?? "") ?? this.who() ?? "")
     // A panel of the bodies needs a body to say whose events it would add.
-    this.root.hidden = this.who() === undefined
+    this.root.hidden = this.actor === "bodies" && this.who() === undefined
     const events = this.events()
     if (!events.some(({ index }) => index === this.picked)) this.picked = events[0]?.index
     const theirs = this.shownTheirs
@@ -203,7 +225,7 @@ export class EventsPanel {
       walk: { until: t + 10000, params: { from: { ...here }, to: { ...here } } },
       follow: { until: t + 5000, params: { target: firstBody } },
       stand: { params: { place: { ...here }, metres: [{ t, widthM: 1, heightM: 1 }] } },
-      blink: { until: t + 5000, params: { parts: [], onS: 0.5, offS: 0.5, off: { transparency: 1 } } },
+      blink: { until: t + 5000, params: { onS: 0.5, offS: 0.5, off: { transparency: 1 } } },
       vanish: {},
       motion: { until: t + 2000, params: { motion: "", to: 1 } },
       spin: { until: t + 5000, params: { motion: "", turnsPerS: 0.5 } },
@@ -213,7 +235,7 @@ export class EventsPanel {
     }
     const draft = drafts[kind] ?? {}
     const event: RecordingEventJson = {
-      type: "event", eventType: kind, ...(who === "observer" ? {} : { who }), t,
+      type: "event", eventType: kind, who, t,
       ...(draft.until === undefined ? {} : { until: draft.until }), ...(draft.params ? { params: draft.params } : {})
     }
     this.host.editing()
@@ -253,6 +275,12 @@ export class EventsPanel {
     if (event.until !== undefined) head.append(this.messages.to, this.seconds(event.until, value => { event.until = value }, `events.${index}.until`))
     const params = document.createElement("div")
     params.className = "event-params"
+    // An event of the phenomenon is about one of its shapes or groups: the whole of it, or the part that does this.
+    if (this.actor === "phenomenon") {
+      const label = document.createElement("span")
+      label.textContent = this.messages.who
+      params.append(label, this.subject(event))
+    }
     for (const [key, value] of Object.entries(event.params ?? {})) {
       const label = document.createElement("span")
       label.textContent = this.messages.params[key] ?? key
@@ -263,6 +291,29 @@ export class EventsPanel {
       params.append(label, cell)
     }
     return [head, params]
+  }
+
+  /** Which of the account's shapes or groups of shapes an event is about, picked among them: groups first, as they hold the shapes. */
+  private subject(event: RecordingEventJson): HTMLSelectElement {
+    const sighting = this.host.sighting()
+    const select = document.createElement("select")
+    select.className = "event-who"
+    const ids = [...sighting.timeline.allGroups.map(group => group.id), ...RecordingActors.shapeIds(sighting)]
+    if (event.who !== undefined && !ids.includes(event.who)) ids.unshift(event.who)
+    for (const id of ids) {
+      const option = document.createElement("option")
+      option.value = id
+      option.textContent = this.host.shapesLabel?.(id) ?? id
+      select.append(option)
+    }
+    select.value = event.who ?? ""
+    select.addEventListener("change", () => {
+      this.host.editing()
+      event.who = select.value
+      RecordingEvents.refresh(sighting)
+      this.host.changed()
+    })
+    return select
   }
 
   /** A parameter: edited where it is a number or a list of instants and numbers, shown otherwise. */

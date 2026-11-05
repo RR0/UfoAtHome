@@ -9,6 +9,7 @@ export const eventsMessages_en: EventsMessages = {
   derivedShapesNote: "The account's shapes are worked out from what the phenomenon did. Drawing them by hand writes shapes of your own, which win over these events.",
   overriddenShapesNote: "This recording's own shapes win over the phenomenon's events.",
   parts: "{n} parts",
+  who: "Subject",
   derivedBodiesNote: "These bodies' keyframes are worked out from what they did. Keyframes set by hand win over these events.",
   overriddenBodiesNote: "Keyframes of its own win over these events.",
   add: "Add an event", remove: "Remove the event", none: "No event",

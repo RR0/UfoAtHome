@@ -208,7 +208,7 @@ describe("sightingJson", () => {
     // about sound, which replays as silence.
     expect(toSightingJson(restored)).toEqual({
       ...json,
-      version: 2,
+      version: 3,
       timeline: { ...json.timeline, order: [], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []

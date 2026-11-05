@@ -47,11 +47,11 @@ import { RecordingEvents } from "../events/RecordingEvents.js"
  * consumers all read plain values. What the types say is what a reader gets.
  */
 export interface SightingRecordingJson {
-  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/2/sighting.schema.json. Not read. */
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/3/sighting.schema.json. Not read. */
   $schema?: string
-  /** The version of the format this file is written in (see FormatVersion): 2. A file of version 1 is read through SightingMigration; one
-   * of a newer version is refused, not misread. */
-  version: 2
+  /** The version of the format this file is written in (see FormatVersion): 3. A file of an older version is read through
+   * SightingMigration; one of a newer version is refused, not misread. */
+  version: 3
   /** Which account this is, unique across every recording anywhere: the day it happened, then
    * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
    * interpretations name it by — see Sighting.id. */
@@ -171,8 +171,15 @@ export type SightingRecordingJsonV1 = Omit<SightingRecordingJson, "version" | "t
   place?: SightingLocation[]
 }
 
+/** A recording in version 2 of the format: its groups of shapes as lists of members, its events' `who` "observer" or "phenomenon" (see
+ * SightingMigration). */
+export type SightingRecordingJsonV2 = Omit<SightingRecordingJson, "version" | "timeline"> & {
+  version: 2
+  timeline: Omit<TimelineJson, "groups"> & { groups?: string[][] }
+}
+
 /** What a recording may be read from: the current version of the format, or an older one, migrated as it is read. */
-export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV1
+export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV2 | SightingRecordingJsonV1
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
@@ -193,7 +200,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
   // see BaseShape.aim. Same rule as the angle above: the drawing is the newer statement.
   SightingShapes.toAim(sighting)
   return {
-    version: 2,
+    version: 3,
     id: sighting.id,
     time: SightingJsonDates.write(sighting.event.time),
     endTime: SightingJsonDates.write(sighting.event.endTime),
@@ -212,7 +219,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     summary: sighting.event.summary,
     summaryTime: sighting.event.summaryTime,
     tags: sighting.event.tags,
-    timeline: !expanded && RecordingEvents.timelineIsExpanded(sighting) ? { keyframes: [] } : sighting.timeline.toJSON(),
+    timeline: !expanded && RecordingEvents.timelineIsExpanded(sighting) ? RecordingEvents.timelineWithoutShapes(sighting) : sighting.timeline.toJSON(),
     // How each place was said, with the numbers of where it now is (see SightingPositions).
     observerTrack: !expanded && RecordingEvents.observerTrackIsExpanded(sighting) ? undefined : SightingPositions.restatedObserverTrack(sighting),
     events: sighting.events?.length ? sighting.events : undefined,
@@ -273,7 +280,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
       summaryTime: json.summaryTime,
       tags: json.tags
     },
-    Timeline.fromJSON(json.timeline, issues),
+    // Its groups as written: the shapes they hold may be drawn by the events only (see pruneGroups below).
+    Timeline.fromJSON(json.timeline, issues, false),
     json.observerTrack ? ObserverTrack.fromJSON(json.observerTrack) : new ObserverTrack(),
     json.weatherTrack ? WeatherTrack.fromJSON(json.weatherTrack) : new WeatherTrack(),
     json.soundTrack ? SoundTrack.fromJSON(json.soundTrack) : new SoundTrack(),
@@ -322,7 +330,8 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
-  sighting.events = json.events
+  // Whom each event is about, by an id: the observer's when it says none (see RecordingActors).
+  sighting.events = json.events?.map(event => event.who === undefined ? { ...event, who: SightingMigration.observerIdOf(json) } : event)
   // The events of the sky were written in the interpretation before they had a place of their own: read from there too, and moved out.
   const stated = SkyEvents.read(json.skyEvents, json.interpretation)
   sighting.interpretation = stated.interpretation
@@ -332,6 +341,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.loadIssues = issues
   // Before the shapes are placed: they follow the observer's poses, which the events may be what gives.
   RecordingEvents.expand(sighting)
+  sighting.timeline.pruneGroups()
   SightingShapes.toBounds(sighting)
   // Positions follow the stated directions the way sizes follow the stated angles — and this is the
   // step that lets a recording's observer turn their head without taking the sky with them.

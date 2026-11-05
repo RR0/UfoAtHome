@@ -9,6 +9,7 @@ export const eventsMessages_es: EventsMessages = {
   derivedShapesNote: "Las formas del relato se calculan a partir de lo que hizo el fenómeno. Dibujarlas a mano escribe formas propias, que prevalecen sobre estos eventos.",
   overriddenShapesNote: "Las formas propias de esta grabación prevalecen sobre los eventos del fenómeno.",
   parts: "{n} partes",
+  who: "Sujeto",
   derivedBodiesNote: "Los fotogramas clave de estos cuerpos se calculan a partir de lo que hicieron. Los fotogramas clave puestos a mano prevalecen sobre estos eventos.",
   overriddenBodiesNote: "Fotogramas clave propios prevalecen sobre estos eventos.",
   add: "Añadir un evento", remove: "Eliminar el evento", none: "Ningún evento",

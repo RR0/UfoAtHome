@@ -327,7 +327,7 @@ describe("SightingElement", () => {
     select.value = "whitted.json"
     select.dispatchEvent(new Event("change"))
     expect(seen).toEqual(["chiles.json", "whitted.json"])
-    expect(element.sightingData).toEqual({ ...janeSighting, version: 2 })
+    expect(element.sightingData).toEqual({ ...janeSighting, version: 3 })
   })
 
   it("shows the live select, not plain text, once there's more than one observer", async () => {

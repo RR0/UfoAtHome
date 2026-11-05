@@ -14,7 +14,11 @@ export interface RecordingEventJson {
   type?: "event"
   /** What kind of event: "drive", "lookAhead", "lean", "watch" (see RecordingEvents). */
   eventType: string
-  /** Whom it is about: "observer" (the default). */
+  /**
+   * Whom it is about, by an id of the recording (see RecordingActors): the observer's (`observer.id`, the default when it is read), a shape's
+   * or a group of shapes' of the account (the phenomenon, or the part of it that does this: a group of lights that blink), a body's of the
+   * interpretation, a decor object's. Always written.
+   */
   who?: string
   /** When it starts, ms from the start of the recording. */
   t: number
@@ -138,7 +142,7 @@ export interface RideParams {
 }
 
 /**
- * The phenomenon stands at a place the observer stated (`who` "phenomenon"): its direction in their sky is read from there at every instant,
+ * The phenomenon stands at a place the observer stated (`who` the shape or the group of shapes it is drawn as): its direction in their sky is read from there at every instant,
  * and its size from `metres`, its width and its height above the observer's eye, which may change (a reconstitution fitted to what they
  * pointed at). How it looks is said by `appearance`.
  */
@@ -175,9 +179,9 @@ export interface AppearanceParams {
   parts: LookPart[]
 }
 
-/** Parts of the phenomenon blink: on for `onS`, then off for `offS`, from the event's start; off, they take `off` (null takes a field away). */
+/** The shapes the event is about (`who`, one or a group) blink: on for `onS`, then off for `offS`, from the event's start; off, they take `off`
+ * (null takes a field away). */
 export interface BlinkParams {
-  parts: string[]
   onS: number
   offS: number
   off: { color?: string, transparency?: number, brightness?: number | null }

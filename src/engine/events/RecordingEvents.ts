@@ -7,7 +7,8 @@ import { FootExpansion } from "./FootExpansion.js"
 import { BodyExpansion } from "./BodyExpansion.js"
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "../interpretation/Interpretation.js"
 import { PhenomenonExpansion } from "./PhenomenonExpansion.js"
-import { Timeline } from "../model/Timeline.js"
+import { RecordingActors } from "./RecordingActors.js"
+import { Timeline, type TimelineJson } from "../model/Timeline.js"
 import { SightingShapes } from "../persistence/SightingShapes.js"
 import type { DriveParams, FlyParams, LeanParams, LookAheadParams, RecordingEventJson, RideParams, StandParams, WatchParams } from "./RecordingEvent.js"
 
@@ -55,15 +56,41 @@ export class RecordingEvents {
     RecordingEvents.expandPhenomenon(sighting)
   }
 
-  /** The account's shapes, from what the phenomenon did (see PhenomenonExpansion), when the recording draws none itself. */
+  /**
+   * The account's shapes, from what each phenomenon did (see PhenomenonExpansion), when the recording draws none itself. A phenomenon is what
+   * a `stand` is about (a shape, or a group of them): what it does is said by the events about it, and about any shape or group it holds
+   * (a group of its lights blinks).
+   */
   private static expandPhenomenon(sighting: Sighting): void {
-    const events = (sighting.events ?? []).filter(event => event.who === "phenomenon")
-    const stand = events.find(event => event.eventType === "stand")
-    if (!stand || sighting.timeline.allKeyframes.length > 0) return
-    const json = new PhenomenonExpansion(sighting, stand, events, stand.until ?? RecordingEvents.endOf(sighting)).timeline()
-    for (const keyframe of Timeline.fromJSON(json).allKeyframes) sighting.timeline.addKeyframe(keyframe.t, keyframe.shapes)
+    if (sighting.timeline.allKeyframes.length > 0) return
+    const stands = RecordingEvents.stands(sighting)
+    for (const stand of stands) {
+      const within = RecordingActors.within(sighting, stand.who!)
+      const events = (sighting.events ?? []).filter(event => event.who !== undefined && within.has(event.who))
+      const json = new PhenomenonExpansion(sighting, stand, events, stand.until ?? RecordingEvents.endOf(sighting)).timeline()
+      for (const keyframe of Timeline.fromJSON(json).allKeyframes) sighting.timeline.addKeyframe(keyframe.t, keyframe.shapes)
+    }
+    if (stands.length === 0) return
     sighting.eventsExpansion ??= { decorTracks: {} }
     sighting.eventsExpansion.timelinePending = true
+  }
+
+  /** The events that say where a phenomenon of the account stands: one for each. */
+  private static stands(sighting: Sighting): RecordingEventJson[] {
+    return (sighting.events ?? []).filter(event => event.eventType === "stand" && RecordingActors.isPhenomenon(sighting, event))
+  }
+
+  /** The account's shapes as the events' snapshot compares them: their keyframes and order, not how they are grouped, which the file
+   * writes whether the events draw them or not. */
+  private static shapesOf(sighting: Sighting): string {
+    const { groups: _, ...shapes } = sighting.timeline.toJSON()
+    return JSON.stringify(shapes)
+  }
+
+  /** The timeline a file writes when the events draw its shapes: none, but how they are grouped. */
+  static timelineWithoutShapes(sighting: Sighting): TimelineJson {
+    const groups = sighting.timeline.toJSON().groups ?? []
+    return groups.length > 0 ? { keyframes: [], groups } : { keyframes: [] }
   }
 
   /**
@@ -74,13 +101,13 @@ export class RecordingEvents {
     if (!sighting.eventsExpansion?.timelinePending) return
     SightingShapes.toAngular(sighting)
     SightingShapes.toAim(sighting)
-    sighting.eventsExpansion.timeline = JSON.stringify(sighting.timeline.toJSON())
+    sighting.eventsExpansion.timeline = RecordingEvents.shapesOf(sighting)
     sighting.eventsExpansion.timelinePending = false
   }
 
   /** Whether the account's shapes are still what the events gave: written back as the events alone, then. */
   static timelineIsExpanded(sighting: Sighting): boolean {
-    return sighting.eventsExpansion?.timeline !== undefined && sighting.eventsExpansion.timeline === JSON.stringify(sighting.timeline.toJSON())
+    return sighting.eventsExpansion?.timeline !== undefined && sighting.eventsExpansion.timeline === RecordingEvents.shapesOf(sighting)
   }
 
   /** The tracks of the decor objects that fly (see FlyParams), placed from the observer's first pose as every decor object is. */
@@ -136,7 +163,7 @@ export class RecordingEvents {
 
   /** Gives the observer, and the vehicle they are in, the values of their events. */
   private static expandObserver(sighting: Sighting): void {
-    const events = (sighting.events ?? []).filter(event => (event.who ?? "observer") === "observer")
+    const events = (sighting.events ?? []).filter(event => RecordingActors.isObserver(sighting, event))
     const drive = events.find(event => event.eventType === "drive")
     const lookAhead = events.find(event => event.eventType === "lookAhead")
     if (sighting.observerTrack.allKeyframes.length > 0) return
@@ -159,7 +186,7 @@ export class RecordingEvents {
       watch && { t: watch.t, params: watch.params as unknown as WatchParams },
       t => {
         // Its height from where it stands, when the recording says, seen from the vehicle's place then; from the account's shapes otherwise.
-        const stand = sighting.events?.find(event => event.who === "phenomenon" && event.eventType === "stand")
+        const stand = RecordingEvents.stands(sighting)[0]
         if (!stand) return RecordingEvents.phenomenonPitchAt(sighting, t)
         const place = expansion.stateAt(t)
         return PhenomenonExpansion.seenFrom(stand.params as unknown as StandParams, { lat: place.lat, lng: place.lng }, t).altitudeDeg
@@ -252,7 +279,7 @@ export class RecordingEvents {
 
   /** Gives the recording the values of its events again, whatever poses, tracks or shapes it was given since. */
   static reset(sighting: Sighting): void {
-    RecordingEvents.again(sighting, true, (sighting.events ?? []).some(event => event.who === "phenomenon" && event.eventType === "stand"))
+    RecordingEvents.again(sighting, true, RecordingEvents.stands(sighting).length > 0)
   }
 
   private static again(sighting: Sighting, observer: boolean, shapes: boolean): void {
@@ -268,9 +295,16 @@ export class RecordingEvents {
       }
       sighting.observerTrack.clear()
     }
-    if (shapes) for (const id of [...sighting.timeline.sourceIds]) sighting.timeline.removeSource(id)
+    // How the shapes are grouped is the author's, kept through their being drawn again.
+    const groups = sighting.timeline.toJSON().groups ?? []
+    if (shapes) {
+      for (const id of [...sighting.timeline.sourceIds]) sighting.timeline.removeSource(id)
+      // Before the events draw them again: what a `stand` is about may be one of the groups.
+      sighting.timeline.setGroups(groups, false)
+    }
     sighting.eventsExpansion = undefined
     RecordingEvents.expand(sighting)
+    if (shapes) sighting.timeline.pruneGroups()
     if (shapes) {
       // Drawn as a recording read is (see fromSightingJson): their boxes from their angles, their places from their directions.
       SightingShapes.toBounds(sighting)

@@ -6,7 +6,7 @@ import { InterviewFile } from "../../../src/engine/persistence/interviewJson.js"
 
 describe("FormatVersion", () => {
   it("names each schema under its version", () => {
-    expect(FormatVersion.schemaUrl("sighting")).toBe("https://ufoathome.org/schema/2/sighting.schema.json")
+    expect(FormatVersion.schemaUrl("sighting")).toBe("https://ufoathome.org/schema/3/sighting.schema.json")
     expect(FormatVersion.schemaUrl("case", 2)).toBe("https://ufoathome.org/schema/2/case.schema.json")
   })
 
@@ -21,14 +21,14 @@ describe("FormatVersion", () => {
   it("refuses a newer version, saying which", () => {
     const error = (() => {
       try {
-        FormatVersion.check({ version: 3 }, "sighting")
+        FormatVersion.check({ version: 4 }, "sighting")
       } catch (thrown) {
         return thrown
       }
     })()
     expect(error).toBeInstanceOf(FormatVersionError)
-    expect((error as FormatVersionError).found).toBe(3)
-    expect((error as FormatVersionError).said("{found} > {supported}")).toBe("3 > 2")
+    expect((error as FormatVersionError).found).toBe(4)
+    expect((error as FormatVersionError).said("{found} > {supported}")).toBe("4 > 3")
   })
 
   it("refuses what is not a version", () => {
@@ -38,7 +38,7 @@ describe("FormatVersion", () => {
   })
 
   it("is checked by every reader", () => {
-    const recording = { version: 3, timeline: { keyframes: [] } } as unknown as SightingRecordingJson
+    const recording = { version: 4, timeline: { keyframes: [] } } as unknown as SightingRecordingJson
     expect(() => fromSightingJson(recording)).toThrow(FormatVersionError)
     expect(() => CaseFile.check({ version: 2 } as never)).toThrow(FormatVersionError)
     expect(() => InterviewFile.read({ version: 2, speakers: {} })).toThrow(FormatVersionError)

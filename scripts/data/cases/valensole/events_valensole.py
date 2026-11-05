@@ -64,11 +64,12 @@ def being_events(variant):
 BEING_START = {"sizeM": {"widthM": 0.34, "lengthM": 0.27, "heightM": 0.95}, "motions": {"crouch": 1}}
 
 
-def events(variant):
-    look = {"type": "event", "eventType": "look", "t": 0, "params": {
+def events(variant, observer="MasseMaurice"):
+    """`observer`: his id in the recording, whom his events are about."""
+    look = {"type": "event", "eventType": "look", "who": observer, "t": 0, "params": {
         "headingDeg": wrap(180, "assumed", "Towards the craft, which is due south of him the whole time"), "pitchDeg": 2, "fovDeg": 60}}
     if variant == "pv":
-        return [look, *craft_events(variant), {"type": "event", "eventType": "walk", "t": 0, "until": 20000, "params": {
+        return [look, *craft_events(variant), {"type": "event", "eventType": "walk", "who": observer, "t": 0, "until": 20000, "params": {
             "from": wrap(START, "derived", "Behind the rabbit hutch, the craft some 90 m away"),
             "to": wrap({"lat": 43.84523940495868, "lng": 5.9632}, "stated", "\"Il voit l'engin de 60 m environ\" (PV n° 445): where he stopped"),
         }}]
@@ -76,11 +77,11 @@ def events(variant):
         look,
         *craft_events(variant),
         *being_events(variant),
-        {"type": "event", "eventType": "walk", "t": 0, "until": 55000, "params": {
+        {"type": "event", "eventType": "walk", "who": observer, "t": 0, "until": 55000, "params": {
             "from": wrap(START, "derived", "Behind the rabbit hutch, the craft some 90 m away"),
             "to": wrap({"lat": 43.844758, "lng": 5.9632}, "stated", "He came along the vine to within 6 m of it, where he was held motionless"),
         }},
-        {"type": "event", "eventType": "follow", "t": 250000, "until": 262500, "params": {
+        {"type": "event", "eventType": "follow", "who": observer, "t": 250000, "until": 262500, "params": {
             "target": wrap("craft", "stated", "He followed it with his eyes as it left (account of 18 August 1965)"),
         }},
     ]
@@ -89,6 +90,9 @@ def events(variant):
 def main(path, variant):
     """Replaces the poses by the events in the file's own text: the rest of it, written by hand, keeps its layout."""
     text = open(path, encoding="utf-8").read()
+    observer = json.loads(text)["observer"]["id"]
+    # Version 3 of the format: every event says whom it is about.
+    text = text.replace('"version": 2,', '"version": 3,', 1)
     # Run again on a recording already stated as events: its events line goes, and is written again.
     text = "".join(line for line in text.splitlines(keepends=True) if not line.lstrip().startswith('"events": ['))
     key = '"observerTrack":'
@@ -99,11 +103,12 @@ def main(path, variant):
     _, end = json.JSONDecoder().raw_decode(text, start)
     line_start = text.rindex("\n", 0, at) + 1
     indent = text[line_start:at]
-    stated = json.dumps(events(variant), ensure_ascii=False)
+    stated = json.dumps(events(variant, observer), ensure_ascii=False)
     text = text[:line_start] + f'{indent}"events": {stated},\n{indent}"observerTrack": {{"keyframes": []}}' + text[end:]
     # The bodies the events move keep only what they state before them: where they stand, their size, how they look.
     recording = json.loads(text)
-    moved = {event["who"]: min(e["t"] for e in events(variant) if e.get("who") == event["who"]) for event in events(variant) if event.get("who") not in (None, "observer")}
+    stated_events = events(variant, observer)
+    moved = {event["who"]: min(e["t"] for e in stated_events if e.get("who") == event["who"]) for event in stated_events if event.get("who") != observer}
     key = '"interpretation":'
     at = text.index(key)
     start = at + len(key)
@@ -129,7 +134,7 @@ def main(path, variant):
     text = text[:start] + written + text[end:]
     json.loads(text)
     open(path, "w", encoding="utf-8").write(text)
-    print(f"{path}: {len(events(variant))} events")
+    print(f"{path}: {len(stated_events)} events")
 
 
 if __name__ == "__main__":

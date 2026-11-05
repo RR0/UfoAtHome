@@ -138,7 +138,7 @@ describe("CoverageAssessor", () => {
 
   it("scores an empty recording at nothing, not at nothing-known", async () => {
     const assessment = await ASSESSMENT_SOURCES[0].create()
-      .assess(fromSightingJson({ version: 2, timeline: { keyframes: [] } } as SightingRecordingJson))
+      .assess(fromSightingJson({ version: 3, timeline: { keyframes: [] } } as SightingRecordingJson))
 
     expect(assessment.score).toBe(0)
   })

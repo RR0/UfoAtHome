@@ -5,7 +5,7 @@ import { fromSightingJson, type SightingRecordingJsonV1 } from "../../../src/eng
 describe("SightingMigration", () => {
 
   it("leaves a recording of the current version as it is, the same object", () => {
-    const current = { version: 2 as const, time: "1964-04-24T17:50", timeline: { keyframes: [] } }
+    const current = { version: 3 as const, time: "1964-04-24T17:50", timeline: { keyframes: [] } }
     expect(SightingMigration.toCurrent(current)).toBe(current)
   })
 
@@ -15,7 +15,7 @@ describe("SightingMigration", () => {
       endTime: { year: 1964, month: 4, day: 24, hour: 17, minute: 52 },
       timeline: { keyframes: [] }
     } as SightingRecordingJsonV1)
-    expect(migrated).toMatchObject({ version: 2, time: "1967-08-29T10:30~", endTime: "1964-04-24T17:52" })
+    expect(migrated).toMatchObject({ version: 3, time: "1967-08-29T10:30~", endTime: "1964-04-24T17:52" })
   })
 
   it("keeps what a time said of where it came from, its own or one of its fields'", () => {

@@ -16,6 +16,8 @@ export interface EventsMessages {
   overriddenBodiesNote: string
   /** How many parts a look has: "{n} parts". */
   parts: string
+  /** What an event of the phenomenon is about: one of its shapes, or a group of them. */
+  who: string
   /** The list's buttons: add an event, remove the picked one; and what it says with none. */
   add: string
   remove: string

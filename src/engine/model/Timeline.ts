@@ -3,6 +3,20 @@ import type { Shape } from "../shape/Shape.js"
 import { lerpShape, shapeContains } from "../shape/Shape.js"
 import { KeyframeCompletion } from "./KeyframeCompletion.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
+import type { SaidText } from "./SaidText.js"
+
+/**
+ * Shapes grouped under one id, so that one id can say all of them: clicking any member selects the whole group, and an event of the
+ * recording can be about the group (the phenomenon stands, appears, vanishes) or about one part of it (a group of lights blinks) by its id
+ * (see RecordingEventJson.who). A member is a shape's sourceId or another group's id: a group may hold groups, as a phenomenon holds the
+ * lights that blink together. A shape or a group is in at most one group, and a group always has at least 2 members.
+ */
+export interface ShapeGroupJson {
+  /** Unique among the recording's ids: its shapes', its groups', its bodies', its decor's and its observer's. */
+  id: string
+  title?: SaidText
+  members: string[]
+}
 
 export interface TimelineJson {
   keyframes: Keyframe[]
@@ -10,9 +24,9 @@ export interface TimelineJson {
    * anything saved before z-order control existed, or hand-written JSON; fromJSON() then falls
    * back to first-appearance order (the old implicit behavior), same as if this were `[]`. */
   order?: string[]
-  /** Each inner array is one group's member sourceIds (always >= 2 members) — see Timeline's own
-   * `groups` field. Optional/back-compat, same reasoning as `order`. */
-  groups?: string[][]
+  /** The groups of shapes (see ShapeGroupJson). Optional: absent means none. Version 2 of the format wrote each as the list of its
+   * members' sourceIds, without an id (see SightingMigration). */
+  groups?: ShapeGroupJson[]
   /** The length of the observation the keyframes were placed against, in ms, when it is longer than
    * the last keyframe — a shape placed at 0 s then moved at 5 s of a 10 s observation has keyframes
    * at 0 and 5000 only, and without this the recording would end (and be stretched over the whole
@@ -35,10 +49,8 @@ export class Timeline {
    * MUST agree, or a click could hit a shape while its own paint order shows something else on
    * top of it. */
   private order: string[] = []
-  /** Each inner array is one group's member sourceIds (always >= 2 members) — a persisted, named
-   * multi-selection: clicking any one member later re-selects the whole group. Unlike `order`
-   * (per-source), a source belongs to at most one group at a time — see group()/ungroup(). */
-  private groups: string[][] = []
+  /** The groups of shapes, see ShapeGroupJson and group()/ungroup(). */
+  private groups: ShapeGroupJson[] = []
   /** Authored length when it outlasts the last keyframe — see TimelineJson.span and setSpan. */
   private span = 0
 
@@ -207,41 +219,114 @@ export class Timeline {
     }
   }
 
-  /** Groups the given sources into one named group: each is first detached from any group it was
-   * already in (shrinking it, or dissolving it entirely if that would drop it below 2 members —
-   * a source can belong to at most one group at a time, so re-grouping across existing groups
-   * collapses them into the new one). No-op if fewer than 2 sourceIds are given. */
-  group(sourceIds: string[]): void {
-    if (sourceIds.length < 2) return
-    for (const id of sourceIds) this.removeFromGroup(id)
-    this.groups.push([...sourceIds])
+  /**
+   * Groups the given sources into one new group: each source's whole top group joins as one member when all of its shapes are given (a group
+   * of groups, then), and a source is otherwise first taken out of the group it was in (shrinking it, or dissolving it if fewer than 2
+   * members would remain). No-op unless that makes at least 2 members.
+   *
+   * @return the new group's id, or undefined when none was made.
+   */
+  group(sourceIds: string[], id?: string): string | undefined {
+    const given = new Set(sourceIds)
+    const members: string[] = []
+    for (const sourceId of sourceIds) {
+      const top = this.topOf(sourceId)
+      const unit = top !== sourceId && this.leavesOf(top).every(leaf => given.has(leaf)) ? top : sourceId
+      if (unit === sourceId && top !== sourceId) this.removeFromGroup(sourceId)
+      if (!members.includes(unit)) members.push(unit)
+    }
+    if (members.length < 2) return undefined
+    const groupId = id ?? this.freshGroupId()
+    this.groups.push({ id: groupId, members })
+    return groupId
   }
 
-  /** Dissolves the whole group containing sourceId (every member becomes ungrouped, not just that
-   * one) — standard vector-editor "Ungroup" semantics, deliberately different from removeFromGroup's
-   * shrink-if-possible behavior. No-op if sourceId isn't grouped. */
+  /** Dissolves the top group containing sourceId (its members, shapes or groups, are no longer in it) — standard vector-editor "Ungroup"
+   * semantics, deliberately different from removeFromGroup's shrink-if-possible behavior. No-op if sourceId isn't grouped. */
   ungroup(sourceId: string): void {
-    const index = this.groups.findIndex(group => group.includes(sourceId))
-    if (index !== -1) this.groups.splice(index, 1)
+    const top = this.topOf(sourceId)
+    if (top === sourceId) return
+    this.groups = this.groups.filter(group => group.id !== top)
   }
 
-  /** Full member list of the group containing sourceId, else undefined. */
+  /** The shapes of the top group containing sourceId (what one click on it selects), else undefined. */
   groupMembers(sourceId: string): string[] | undefined {
-    return this.groups.find(group => group.includes(sourceId))
+    const top = this.topOf(sourceId)
+    return top === sourceId ? undefined : this.leavesOf(top)
   }
 
-  /** Detaches sourceId from whichever group (if any) currently contains it, shrinking that group
-   * in place — or dropping it entirely if that would leave fewer than 2 members. Used by
-   * removeSource (a deleted shape can't remain a group member, but its former groupmates should
-   * stay grouped if enough remain) and by group() (to detach a member being re-grouped elsewhere). */
-  private removeFromGroup(sourceId: string): void {
-    const index = this.groups.findIndex(group => group.includes(sourceId))
-    if (index === -1) return
-    const remaining = this.groups[index].filter(id => id !== sourceId)
-    if (remaining.length < 2) {
-      this.groups.splice(index, 1)
-    } else {
-      this.groups[index] = remaining
+  /** The groups, as the file writes them. */
+  get allGroups(): ReadonlyArray<ShapeGroupJson> {
+    return this.groups
+  }
+
+  /** Groups the shapes as `groups` say, what they hold that is not drawn left out (see pruneGroups) unless `pruned` is false. */
+  setGroups(groups: ReadonlyArray<ShapeGroupJson>, pruned = true): void {
+    this.groups = groups.map(group => ({ ...group, members: [...group.members] }))
+    if (pruned) this.pruneGroups()
+  }
+
+  /** The group of that id. */
+  groupOf(id: string): ShapeGroupJson | undefined {
+    return this.groups.find(group => group.id === id)
+  }
+
+  /** The shapes `id` says: a group's, through the groups it holds; a shape's (or any other id's) itself. */
+  leavesOf(id: string, seen = new Set<string>()): string[] {
+    const group = this.groupOf(id)
+    if (!group) return [id]
+    if (seen.has(id)) return []
+    seen.add(id)
+    return group.members.flatMap(member => this.leavesOf(member, seen))
+  }
+
+  /** The group `id` is a member of. */
+  parentOf(id: string): ShapeGroupJson | undefined {
+    return this.groups.find(group => group.members.includes(id))
+  }
+
+  /** The outermost group `id` is in, through the groups that hold it; itself when it is in none: what one click on it selects. */
+  topOf(id: string): string {
+    let top = id
+    for (let parent = this.parentOf(top), guard = 0; parent && guard < 100; parent = this.parentOf(top), guard++) top = parent.id
+    return top
+  }
+
+  /** "group-3": the first such id no shape or group has. */
+  private freshGroupId(): string {
+    for (let n = this.groups.length + 1; ; n++) {
+      const id = `group-${n}`
+      if (!this.groupOf(id) && !this.order.includes(id)) return id
+    }
+  }
+
+  /** Takes `id` (a shape or a group) out of the group it is a member of (see collapse). Used by removeSource (a deleted shape can't remain a
+   * group member, but its former groupmates should stay grouped if enough remain) and by group() (to detach a member being re-grouped
+   * elsewhere). */
+  private removeFromGroup(id: string): void {
+    const parent = this.parentOf(id)
+    if (!parent) return
+    parent.members = parent.members.filter(member => member !== id)
+    this.collapse()
+  }
+
+  /**
+   * Drops from the groups any member that is neither a shape of the timeline nor a group (see collapse) — never inventing membership for a
+   * shape that doesn't exist. Done once the shapes are all there: a recording whose shapes the events give (see RecordingEvents) groups
+   * shapes that no keyframe of the file has yet.
+   */
+  pruneGroups(): void {
+    const known = (member: string) => this.order.includes(member) || this.groupOf(member) !== undefined
+    for (const group of this.groups) group.members = group.members.filter(known)
+    this.collapse()
+  }
+
+  /** Every group left with fewer than 2 members goes: its one member, if any, takes its place in the group that held it. */
+  private collapse(): void {
+    for (let small = this.groups.find(group => group.members.length < 2); small; small = this.groups.find(group => group.members.length < 2)) {
+      const gone = small
+      this.groups = this.groups.filter(group => group !== gone)
+      for (const group of this.groups) group.members = group.members.flatMap(member => member === gone.id ? gone.members : [member])
     }
   }
 
@@ -295,12 +380,20 @@ export class Timeline {
 
   toJSON(): TimelineJson {
     return this.span > 0
-      ? { keyframes: this.keyframes, order: this.order, groups: this.groups, span: this.span }
-      : { keyframes: this.keyframes, order: this.order, groups: this.groups }
+      ? { keyframes: this.keyframes, order: this.order, groups: this.groupsJson(), span: this.span }
+      : { keyframes: this.keyframes, order: this.order, groups: this.groupsJson() }
   }
 
-  /** `issues` receives what the file left out and had to be made up — see KeyframeCompletion. */
-  static fromJSON(json: TimelineJson, issues?: RecordingIssue[]): Timeline {
+  /** The groups as the file writes them: copies, so that a later edit does not change what was written. */
+  private groupsJson(): ShapeGroupJson[] {
+    return this.groups.map(group => ({ ...group, members: [...group.members] }))
+  }
+
+  /**
+   * `issues` receives what the file left out and had to be made up — see KeyframeCompletion. `pruned` false keeps the groups as written,
+   * members not yet drawn included, for pruneGroups to sort out once the events have drawn them.
+   */
+  static fromJSON(json: TimelineJson, issues?: RecordingIssue[], pruned = true): Timeline {
     const timeline = new Timeline()
     for (const keyframe of KeyframeCompletion.complete(json.keyframes ?? [], issues)) {
       timeline.addKeyframe(keyframe.t, keyframe.shapes)
@@ -314,12 +407,9 @@ export class Timeline {
       timeline.order = [...json.order, ...missing]
     }
     if (json.groups) {
-      // Defensively drops any group referencing an unknown/removed sourceId, and any group left
-      // with fewer than 2 known members as a result — the opposite defensive direction from
-      // `order` above (never invent phantom membership for a source that doesn't actually exist).
-      timeline.groups = json.groups
-        .map(group => group.filter(id => timeline.order.includes(id)))
-        .filter(group => group.length >= 2)
+      timeline.groups = json.groups.filter(group => typeof group?.id === "string" && Array.isArray(group.members))
+        .map(group => ({ ...group, members: [...group.members] }))
+      if (pruned) timeline.pruneGroups()
     }
     return timeline
   }

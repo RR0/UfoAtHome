@@ -1154,7 +1154,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
     }))
     expect(element.sightingData).toEqual({
       ...json,
-      version: 2,
+      version: 3,
       timeline: { keyframes: keyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []

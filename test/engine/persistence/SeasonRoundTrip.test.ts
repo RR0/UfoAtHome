@@ -4,7 +4,7 @@ import type { SightingRecordingJson } from "../../../src/engine/persistence/sigh
 
 describe("a date known to be in a season", () => {
   it("is written to a recording and read back as such", () => {
-    const recording: SightingRecordingJson = { version: 2, timeline: { keyframes: [] }, time: "2022-21" }
+    const recording: SightingRecordingJson = { version: 3, timeline: { keyframes: [] }, time: "2022-21" }
     const sighting = fromSightingJson(recording)
     expect(sighting.event.time).toMatchObject({ year: 2022, season: "spring", raw: "2022-21" })
     const written = JSON.parse(JSON.stringify(toSightingJson(sighting)))

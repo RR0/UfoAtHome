@@ -34,6 +34,8 @@ export const html = `
     <button id="save" type="button" class="pill-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save">Save</span></button>
   </div>
 </header>
+<!-- Why the recording was not saved, when it would be read back as something else than what is meant (see RecordingActors). -->
+<p id="save-refused" class="save-refused" role="alert" hidden></p>
 <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 <div class="scene-card">
 
@@ -1857,7 +1859,7 @@ select.weather-field:disabled {
 ${MessageStyle.rules(
   ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro", ".cloud-panel > p", ".cloud-panel details > p"],
   [".scenery-warning"],
-  ["#narrative-status.error", ".reference-failure"]
+  ["#narrative-status.error", ".reference-failure", ".save-refused"]
 )}
 /* ---- The design handoff's look (design_handoff_editeurs_ufoathome, README §1–3.1) ----
    The site's own tokens (site/style.css), each a light-dark() pair: they follow the colour scheme this
@@ -1887,7 +1889,9 @@ ${EditorTheme.TOKENS}
   max-height: 100dvh;
   --rr0-scene-max-height: 50dvh;
 }
-.app > :is(.editor-head, .scene-card, #group-tabs, #timeline-tracks) { flex: none; }
+.app > :is(.editor-head, .save-refused, .scene-card, #group-tabs, #timeline-tracks) { flex: none; }
+.save-refused { margin: 0; padding: 4px 24px 8px; }
+.save-refused[hidden] { display: none; }
 /* A grip under the scene: a line to drag up or down, wider where the pointer finds it. */
 .app > .scene-resize { flex: none; position: relative; height: 8px; margin: -4px 0; z-index: 5; cursor: ns-resize; touch-action: none; }
 .app > .scene-resize::after { content: ""; position: absolute; left: 50%; top: 50%; width: 36px; height: 4px; margin: -2px 0 0 -18px; border-radius: 2px;

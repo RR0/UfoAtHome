@@ -35,7 +35,7 @@ export class FormatVersionError extends Error {
 export class FormatVersion {
 
   /** The version of each format this engine reads and writes. */
-  static readonly CURRENT: Record<FormatName, number> = { sighting: 2, case: 1, interview: 1 }
+  static readonly CURRENT: Record<FormatName, number> = { sighting: 3, case: 1, interview: 1 }
 
   /** Where the schemas are published, one directory per version. */
   static readonly SCHEMA_BASE = "https://ufoathome.org/schema"

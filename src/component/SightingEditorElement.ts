@@ -18,6 +18,8 @@ import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import type { TimelineSpan, TimelineTrack } from "./TimelineTracks.js"
 import { EventsPanel } from "./EventsPanel.js"
 import { RecordingEvents } from "../engine/events/RecordingEvents.js"
+import { RecordingActors, type ActorIssue, type ActorKind } from "../engine/events/RecordingActors.js"
+import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
@@ -1531,6 +1533,11 @@ export class SightingEditorElement extends HTMLElement {
       seek: (t: number) => this.goToMark(t),
       now: () => this.ufoElement.currentTime,
       currentBody: () => this.bodyEditor?.selectedId ?? this.ufoElement.sighting.interpretation?.bodies[0]?.id,
+      currentShapes: () => {
+        const timeline = this.ufoElement.sighting.timeline
+        return timeline.sourceIds.includes(this.currentSourceId) ? timeline.topOf(this.currentSourceId) : undefined
+      },
+      shapesLabel: (id: string) => this.shapesLabel(id),
       picked: () => this.refreshTracks(),
       positionFrame: () => this.positionFrame(),
       positionMessages: () => this.messages,
@@ -2575,12 +2582,28 @@ export class SightingEditorElement extends HTMLElement {
    * Blob-and-anchor download, no server round-trip needed. Named from the observer reference
    * when known (e.g. "chiles-sighting.json"), falling back to a generic name otherwise. */
   private exportJson(): void {
+    // Not written while it would be read back as something else: an event about nothing, an id of two things.
+    const refused = this.shadow.getElementById("save-refused") as HTMLElement
+    const issues = RecordingActors.issues(this.ufoElement.sighting)
+    MessageStyle.show(refused, issues.length === 0 ? undefined : this.messages.saveRefused.replace("{reasons}", issues.map(issue => this.actorIssue(issue)).join(" ; ")), "error")
+    if (issues.length > 0) return
     const findings = IdentityGuard.inspect(this.sightingData, this.loadedJson())
     if (findings.length === 0) {
       void this.downloadJson()
       return
     }
     this.askAboutIdentity(findings)
+  }
+
+  /** One reason the recording is not saved, as the author reads it. */
+  private actorIssue(issue: ActorIssue): string {
+    const m = this.messages
+    if (issue.kind === "duplicate-id") {
+      return m.duplicateId.replace("{id}", issue.id).replace("{kinds}", issue.path.split(", ").map(kind => m.actorKinds[kind as ActorKind] ?? kind).join(", "))
+    }
+    const index = Number(issue.path.split(".")[1])
+    const event = this.ufoElement.sighting.events?.[index]
+    return m.unknownWho.replace("{n}", String(index + 1)).replace("{kind}", (event && m.events.kinds[event.eventType]) ?? event?.eventType ?? "").replace("{id}", issue.id)
   }
 
   /** The recording as it was opened or last exported: what its author has already stood behind. */
@@ -4161,7 +4184,10 @@ export class SightingEditorElement extends HTMLElement {
       lastName: this.stringOrUndefined(this.observerLastNameInput.value),
       firstNames: firstNames.length > 0 ? firstNames : undefined
     }
+    const before = RecordingActors.observerId(sighting)
     sighting.observer = Object.values(observer).some(value => value !== undefined) ? observer : undefined
+    // Their events go with them: they say whom they are about by this id.
+    RecordingActors.renamed(sighting, before, RecordingActors.observerId(sighting))
     sighting.id = this.stringOrUndefined(this.sightingIdInput.value)
     this.updateAccount()
     this.ufoElement.refresh()
@@ -6905,10 +6931,14 @@ export class SightingEditorElement extends HTMLElement {
     const keyframes = actor === "observer" ? sighting.observerTrack.allKeyframes : sighting.timeline.allKeyframes
     if (!theirs) return { times: keyframes.map(keyframe => keyframe.t) }
     const end = this.ufoElement.seekableDuration
-    const spans = (sighting.events ?? [])
-      .map((event, index) => ({ event, index }))
-      .filter(({ event }) => (event.who ?? "observer") === actor)
-      .map(({ event, index }) => ({ id: String(index), t: event.t, until: event.until ?? end, label: this.messages.events.kinds[event.eventType] ?? event.eventType }))
+    const about = (event: RecordingEventJson) => actor === "observer" ? RecordingActors.isObserver(sighting, event) : RecordingActors.isPhenomenon(sighting, event)
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => about(event))
+    // Each with what it is about, when the phenomenon's are not all about one shape or group (a group of its lights blinks).
+    const several = new Set(events.map(({ event }) => event.who)).size > 1
+    const spans = events.map(({ event, index }) => {
+      const kind = this.messages.events.kinds[event.eventType] ?? event.eventType
+      return { id: String(index), t: event.t, until: event.until ?? end, label: actor === "phenomenon" && several ? `${this.shapesLabel(event.who ?? "")} · ${kind}` : kind }
+    })
     return { times: [], spans }
   }
 
@@ -6947,12 +6977,12 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const event = sighting.events?.[index]
     if (!event) return
-    const who = event.who ?? "observer"
-    if (who === "observer") {
+    const who = event.who ?? RecordingActors.observerId(sighting)
+    if (RecordingActors.isObserver(sighting, event)) {
       const tab = this.groupTabs.find(candidate => candidate.getAttribute("aria-controls") === "group-location")
       if (tab) this.toggleGroup(tab, true)
       this.eventsPanel.pick(index)
-    } else if (who === "phenomenon") {
+    } else if (RecordingActors.isPhenomenon(sighting, event)) {
       this.revealShapePanel()
       this.phenomenonEventsPanel.pick(index)
     } else {
@@ -6965,6 +6995,15 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.goToMark(event.t)
     this.refreshTracks()
+  }
+
+  /** What a shape or a group of shapes of the account is called: its title, else its id. */
+  private shapesLabel(id: string): string {
+    const sighting = this.ufoElement.sighting
+    const group = sighting.timeline.groupOf(id)
+    if (group) return this.said.read(group.title) ?? id
+    const drawn = sighting.timeline.allKeyframes.map(keyframe => keyframe.shapes.find(shape => shape.sourceId === id)?.shape.title).find(title => title !== undefined)
+    return this.said.read(drawn) ?? id
   }
 
   /** Whether the account is drawn as its bodies (the 3D view), not its shapes. */

@@ -336,6 +336,14 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   expandTracks: string
   /** The grip under the scene: what dragging it does. */
   resizeScene: string
+  /** The recording is not saved, and why: "{reasons}" the reasons below, joined. */
+  saveRefused: string
+  /** An id of several things of the recording: {id}, and {kinds} what has it. */
+  duplicateId: string
+  /** An event about nothing: {n} its number, {kind} what it is, {id} whom it says. */
+  unknownWho: string
+  /** What an id of the recording can be the id of (see RecordingActors). */
+  actorKinds: Record<"observer" | "shape" | "group" | "body" | "decor", string>
   collapseTracks: string
   /** What the scene says over itself while a field it shows is edited (see SceneFieldOverlay): the tilt's horizon, the field of view, the wind. */
   overlayHorizon: string

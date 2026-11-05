@@ -1,5 +1,5 @@
 {
- "version":2,
+ "version":3,
  "id":"2015-05-31-SillyLeLong-T1-temoins",
  "image":"https://ufoathome.org/demo-data/share/silly-le-long-temoins.jpg",
  "summaryTime":56,
@@ -91,7 +91,38 @@
   }
  ],
  "timeline":{
-  "keyframes":[]
+  "keyframes":[],
+  "groups":[
+   {
+    "id":"phenomenon",
+    "title":{
+     "fr":"Le phénomène",
+     "en":"The phenomenon",
+     "es":"El fenómeno",
+     "it":"Il fenomeno"
+    },
+    "members":[
+     "pan",
+     "blanc-g",
+     "blanc-d",
+     "rouge",
+     "rectangles"
+    ]
+   },
+   {
+    "id":"rectangles",
+    "title":{
+     "fr":"Rectangles blancs",
+     "en":"White rectangles",
+     "es":"Rectángulos blancos",
+     "it":"Rettangoli bianchi"
+    },
+    "members":[
+     "rect-g",
+     "rect-d"
+    ]
+   }
+  ]
  },
  "observerTrack":{
   "keyframes":[]
@@ -9706,7 +9737,7 @@
   },
   "bodies":[
    {
-    "id":"pan",
+    "id":"engin",
     "title":{
      "fr":"Le phénomène",
      "en":"The phenomenon",
@@ -12707,6 +12738,7 @@
   {
    "type":"event",
    "eventType":"drive",
+   "who":"SillyLeLong-2015-T1-temoins",
    "t":0,
    "until":210000,
    "params":{
@@ -13287,6 +13319,7 @@
   {
    "type":"event",
    "eventType":"lookAhead",
+   "who":"SillyLeLong-2015-T1-temoins",
    "t":0,
    "until":108400,
    "params":{
@@ -13324,6 +13357,7 @@
   {
    "type":"event",
    "eventType":"lean",
+   "who":"SillyLeLong-2015-T1-temoins",
    "t":108400,
    "until":114200,
    "params":{
@@ -13624,13 +13658,10 @@
   {
    "type":"event",
    "eventType":"blink",
-   "who":"phenomenon",
+   "who":"rouge",
    "t":0,
    "until":83800,
    "params":{
-    "parts":[
-     "rouge"
-    ],
     "onS":{
      "value":0.5,
      "basis":"stated",
@@ -13646,14 +13677,10 @@
   {
    "type":"event",
    "eventType":"blink",
-   "who":"phenomenon",
+   "who":"rectangles",
    "t":83800,
    "until":210800,
    "params":{
-    "parts":[
-     "rect-g",
-     "rect-d"
-    ],
     "onS":{
      "value":2,
      "basis":"stated",
@@ -13675,6 +13702,7 @@
   {
    "type":"event",
    "eventType":"watch",
+   "who":"SillyLeLong-2015-T1-temoins",
    "t":108400,
    "params":{
     "mirror":{

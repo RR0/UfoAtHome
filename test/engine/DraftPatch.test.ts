@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { DraftPatch } from "../../src/engine/narrative/DraftPatch.js"
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
-const empty = (): SightingRecordingJson => ({ version: 2, timeline: { keyframes: [] } })
+const empty = (): SightingRecordingJson => ({ version: 3, timeline: { keyframes: [] } })
 
 describe("DraftPatch", () => {
   it("names every leaf a draft states, and none of the objects holding them", () => {

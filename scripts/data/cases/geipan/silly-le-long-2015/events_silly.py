@@ -124,6 +124,11 @@ TITLES = {
     "rect-g": {"fr": "Rectangle blanc (gauche)", "en": "White rectangle (left)", "es": "Rectángulo blanco (izquierda)", "it": "Rettangolo bianco (sinistro)"},
     "rect-d": {"fr": "Rectangle blanc (droite)", "en": "White rectangle (right)", "es": "Rectángulo blanco (derecha)", "it": "Rettangolo bianco (destro)"},
 }
+GROUPS = [
+    {"id": "phenomenon", "title": TITLES["pan"], "members": ["pan", "blanc-g", "blanc-d", "rouge", "rectangles"]},
+    {"id": "rectangles", "title": {"fr": "Rectangles blancs", "en": "White rectangles", "es": "Rectángulos blancos", "it": "Rettangoli bianchi"},
+     "members": ["rect-g", "rect-d"]},
+]
 BAR = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 0, "y": 1}]
 VEE = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 0.45}, {"x": 0.5, "y": 1}, {"x": 0, "y": 0.45}]
 WHITE = "#f4f7ff"
@@ -192,27 +197,28 @@ def events(recording, variant):
             {"sourceId": "pan", "title": TITLES["pan"], "kind": "polygon", "points": VEE, "color": "#8e9194", "widthShare": 1, "heightShare": 0.2},
             rect("rect-g", -0.4525), rect("rect-d", 0.4525)], "stated", "Past the bridge, close and from behind: the grey V of drawing 005, "
                                                                         "\"représente correctement la forme\", and its two white rectangles (CR p.8)")}},
-        {"type": "event", "eventType": "blink", "who": "phenomenon", "t": 0, "until": ph["switch"], "params": {
-            "parts": ["rouge"], "onS": wrap(0.5, "stated", "0.5 s on, 0.5 s off (CR p.5)"), "offS": 0.5, "off": {"transparency": 1, "brightness": 0}}},
-        {"type": "event", "eventType": "blink", "who": "phenomenon", "t": ph["switch"], "until": ph["end"], "params": {
-            "parts": ["rect-g", "rect-d"], "onS": wrap(2, "stated", "2 s on, 2 s off, together (CR p.8)"), "offS": 2,
+        {"type": "event", "eventType": "blink", "who": "rouge", "t": 0, "until": ph["switch"], "params": {
+            "onS": wrap(0.5, "stated", "0.5 s on, 0.5 s off (CR p.5)"), "offS": 0.5, "off": {"transparency": 1, "brightness": 0}}},
+        {"type": "event", "eventType": "blink", "who": "rectangles", "t": ph["switch"], "until": ph["end"], "params": {
+            "onS": wrap(2, "stated", "2 s on, 2 s off, together (CR p.8)"), "offS": 2,
             "off": {"color": "#0b0c0e", "brightness": None}}},
         {"type": "event", "eventType": "vanish", "who": "phenomenon", "t": ph["vanish"]},
     ]
+    observer = recording["observer"]["id"]
     return [
-        {"type": "event", "eventType": "drive", "t": 0, "until": until, "params": drive},
+        {"type": "event", "eventType": "drive", "who": observer, "t": 0, "until": until, "params": drive},
         {"type": "event", "eventType": "fly", "who": "f-hobs", "t": 0, "until": until, "params": fly},
-        {"type": "event", "eventType": "lookAhead", "t": 0, "until": e, "params": {
+        {"type": "event", "eventType": "lookAhead", "who": observer, "t": 0, "until": e, "params": {
             "target": target, "pitchShare": 0.6,
             "keepDeg": wrap(25, "assumed", "A driver keeps what he watches in the corner of his eye, and looks at the road"),
             "glanceBeyondDeg": wrap(50, "assumed", "Further off than that he does not look away from the road for long"),
             "glanceS": wrap(1.25, "assumed", "Nobody timed his glances; their order is his (CR p.9)"),
             "roadS": wrap(2.5, "assumed", "Nobody timed his glances; their order is his (CR p.9)")}},
-        {"type": "event", "eventType": "lean", "t": e, "until": e + 5800, "params": {
+        {"type": "event", "eventType": "lean", "who": observer, "t": e, "until": e + 5800, "params": {
             "offsetM": wrap({"x": -0.10, "y": -0.05, "z": -0.12}, "stated", "\"Il a dû au début se baisser légèrement pour réussir à le voir\" (CR p.9); how far, SUPPOSED"),
             "holdS": 5.0, "turnS": 0.8}},
         *phenomenon,
-        {"type": "event", "eventType": "watch", "t": e, "params": {
+        {"type": "event", "eventType": "watch", "who": observer, "t": e, "params": {
             "mirror": {"x": -0.999, "y": 1.227, "z": -0.895},
             "target": target, "pitchShare": 0.6,
             "firstS": 6.5, "mirrorS": 3.5, "glanceS": 1.25, "roadS": 1.0,
@@ -225,7 +231,9 @@ def main(path, variant):
     recording = json.load(open(path))
     recording["events"] = events(recording, variant)
     recording["observerTrack"] = {"keyframes": []}
-    recording["timeline"] = {"keyframes": []}
+    # The phenomenon, what its events are about: all its shapes, and the two rectangles that blink together.
+    recording["timeline"] = {"keyframes": [], "groups": GROUPS}
+    recording["version"] = 3
     for decor in recording["decor"]:
         if decor["id"] in ("van", "f-hobs"):
             decor.pop("track", None)

@@ -255,6 +255,12 @@ describe("Timeline", () => {
       return timeline
     }
 
+    function makeTimeline(ids: string[]): Timeline {
+      const timeline = new Timeline()
+      timeline.addKeyframe(0, ids.map((sourceId, k) => ({ sourceId, shape: shapeAt(k) })))
+      return timeline
+    }
+
     it("group() makes every member retrievable via groupMembers", () => {
       const timeline = threeSourceTimeline()
       timeline.group(["a", "b"])
@@ -320,11 +326,34 @@ describe("Timeline", () => {
       const timeline = Timeline.fromJSON({
         keyframes: [{ t: 0, shapes: [{ sourceId: "a", shape: shapeAt(0) }, { sourceId: "b", shape: shapeAt(1) }] }],
         groups: [
-          ["a", "b"],
-          ["a", "ghost"] // "ghost" isn't a real source -> shrinks to just ["a"] -> dropped entirely
+          { id: "g1", members: ["a", "b"] },
+          { id: "g2", members: ["c", "ghost"] } // neither is a real source -> dropped entirely
         ]
       })
       expect(timeline.groupMembers("a")).toEqual(["a", "b"])
+      expect(timeline.allGroups.map(group => group.id)).toEqual(["g1"])
+    })
+
+    it("groups whole groups as members of a new one, which one click selects, and an ungroup undoes one level", () => {
+      const timeline = makeTimeline(["a", "b", "c", "d"])
+      const lights = timeline.group(["c", "d"], "lights")
+      const whole = timeline.group(["a", "b", "c", "d"])
+      expect(lights).toBe("lights")
+      expect(timeline.groupOf(whole!)!.members).toEqual(["a", "b", "lights"])
+      expect(timeline.groupMembers("c")).toEqual(["a", "b", "c", "d"])
+      expect(timeline.leavesOf("lights")).toEqual(["c", "d"])
+      timeline.ungroup("a")
+      expect(timeline.groupMembers("a")).toBeUndefined()
+      expect(timeline.groupMembers("c")).toEqual(["c", "d"])
+    })
+
+    it("a group of groups left with one member gives way to it", () => {
+      const timeline = makeTimeline(["a", "b", "c"])
+      timeline.group(["b", "c"], "pair")
+      timeline.group(["a", "b", "c"], "whole")
+      timeline.removeSource("a")
+      expect(timeline.groupOf("whole")).toBeUndefined()
+      expect(timeline.groupMembers("b")).toEqual(["b", "c"])
     })
   })
 })

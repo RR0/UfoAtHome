@@ -25,7 +25,7 @@ export class PhenomenonExpansion {
   private static readonly R = 6371008.8
 
   private readonly looks: Look[]
-  private readonly blinks: { t: number, until: number, params: BlinkParams }[]
+  private readonly blinks: { t: number, until: number, parts: string[], params: BlinkParams }[]
   private readonly vanishAt: number | undefined
 
   constructor(private readonly sighting: Sighting, private readonly stand: RecordingEventJson, events: RecordingEventJson[], end: number) {
@@ -34,7 +34,7 @@ export class PhenomenonExpansion {
     const last = this.vanishAt ?? end
     this.looks = looks.map((event, k) => ({ t: event.t, until: event.until ?? looks[k + 1]?.t ?? last, parts: (event.params as unknown as AppearanceParams).parts }))
     this.blinks = events.filter(event => event.eventType === "blink")
-      .map(event => ({ t: event.t, until: event.until ?? last, params: event.params as unknown as BlinkParams }))
+      .map(event => ({ t: event.t, until: event.until ?? last, parts: event.who === undefined ? [] : sighting.timeline.leavesOf(event.who), params: event.params as unknown as BlinkParams }))
   }
 
   /** The account's timeline, as a file writes it. */
@@ -63,7 +63,7 @@ export class PhenomenonExpansion {
     })
     for (const blink of this.blinks) {
       for (const [from, to] of this.phases(blink)) {
-        for (const sourceId of blink.params.parts) {
+        for (const sourceId of blink.parts) {
           put(from, sourceId)
           put(to - 1, sourceId)
         }
@@ -75,7 +75,7 @@ export class PhenomenonExpansion {
   }
 
   /** The blink's phases, [from, to) each, on first. */
-  private phases(blink: { t: number, until: number, params: BlinkParams }): [number, number][] {
+  private phases(blink: { t: number, until: number, parts: string[], params: BlinkParams }): [number, number][] {
     const phases: [number, number][] = []
     let on = true
     for (let t = blink.t; t < blink.until;) {
@@ -90,7 +90,7 @@ export class PhenomenonExpansion {
   /** Whether a blinking part is off at `t`. */
   private off(sourceId: string, t: number): BlinkParams["off"] | undefined {
     for (const blink of this.blinks) {
-      if (t < blink.t || t >= blink.until || !blink.params.parts.includes(sourceId)) continue
+      if (t < blink.t || t >= blink.until || !blink.parts.includes(sourceId)) continue
       const phase = this.phases(blink).findIndex(([from, to]) => t >= from && t < to)
       if (phase % 2 === 1) return blink.params.off
     }
