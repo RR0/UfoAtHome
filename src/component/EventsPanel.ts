@@ -64,7 +64,7 @@ export class EventsPanel {
   private static readonly ADDABLE: Record<EventsActor, string[]> = {
     observer: ["look", "walk", "follow"],
     phenomenon: ["stand", "blink", "vanish"],
-    bodies: ["motion", "spin", "rise", "turn", "ride", "vanish"]
+    bodies: ["motion", "spin", "rise", "turn", "ride", "light", "blink", "vanish"]
   }
 
   private messages: EventsMessages
@@ -233,6 +233,8 @@ export class EventsPanel {
       ride: { params: { in: firstBody, aboveM: 0 } },
       turn: { until: t + 1000, params: { headingDeg: 0 } }
     }
+    // A body's blink is one of its lights': lit at a luminance while on, dark while off.
+    if (this.actor === "bodies") Object.assign(drafts, { blink: { until: t + 5000, params: { onS: 0.5, offS: 0.5, cdM2: 500 } }, light: { params: { cdM2: 500 } } })
     const draft = drafts[kind] ?? {}
     const event: RecordingEventJson = {
       type: "event", eventType: kind, who, t,
@@ -354,7 +356,7 @@ export class EventsPanel {
       if (key === "glancesUntil") return this.seconds(value, typed => { params[key] = typed }, path)
       // By the parameter's name: degrees, seconds (glanceS, but not turnsPerS, a rate), metres.
       const seconds = key.endsWith("S") && !key.endsWith("PerS")
-      const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : ""
+      const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : key === "cdM2" ? "cd/m²" : ""
       return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" || seconds || key.endsWith("PerS") ? 0.05 : key.endsWith("M") ? 0.01 : 1)
     }
     if (Array.isArray(value) && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {

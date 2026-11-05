@@ -129,6 +129,15 @@ GROUPS = [
     {"id": "rectangles", "title": {"fr": "Rectangles blancs", "en": "White rectangles", "es": "Rectángulos blancos", "it": "Rettangoli bianchi"},
      "members": ["rect-g", "rect-d"]},
 ]
+# The body T1 describes (build_silly.py's "engin"): its lights taken together, so that one event switches them all.
+BODY_GROUPS = [
+    {"id": "front", "title": {"fr": "Feux avant", "en": "Front lights", "es": "Luces delanteras", "it": "Luci anteriori"},
+     "members": ["front-white-left", "front-white-right", "front-red"]},
+    {"id": "rear", "title": {"fr": "Rectangles arrière", "en": "Rear rectangles", "es": "Rectángulos traseros", "it": "Rettangoli posteriori"},
+     "members": ["rear-left", "rear-right"]},
+]
+# Nothing measured the rectangles: ASSUMED, evenly lit like white LEDs (CR p.8), dimmer than the front lights (build_silly.REAR_CDM2).
+REAR_CDM2 = 30
 BAR = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 1}, {"x": 0, "y": 1}]
 VEE = [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 1, "y": 0.45}, {"x": 0.5, "y": 1}, {"x": 0, "y": 0.45}]
 WHITE = "#f4f7ff"
@@ -204,6 +213,17 @@ def events(recording, variant):
             "off": {"color": "#0b0c0e", "brightness": None}}},
         {"type": "event", "eventType": "vanish", "who": "phenomenon", "t": ph["vanish"]},
     ]
+    # The body's lights, as he told them: lit as its first keyframe says, the whites steady, the red blinking, until the deck hides its front
+    # and they go out (ASSUMED, see the body's rationale), then its rectangles blinking until it is lost.
+    body = [
+        {"type": "event", "eventType": "blink", "who": "engin/front-red", "t": 0, "until": ph["switch"], "params": {
+            "onS": wrap(0.5, "stated", "0.5 s on, 0.5 s off (CR p.5)"), "offS": 0.5}},
+        {"type": "event", "eventType": "light", "who": "engin/front", "t": ph["switch"], "params": {
+            "cdM2": wrap(0, "assumed", "Gone out while the deck hid it: he said only that he no longer saw them")}},
+        {"type": "event", "eventType": "blink", "who": "engin/rear", "t": ph["switch"], "until": ph["vanish"], "params": {
+            "onS": wrap(2, "stated", "2 s on, 2 s off, together (CR p.8)"), "offS": 2,
+            "cdM2": wrap(REAR_CDM2, "assumed", "Nothing measured them: evenly lit, like white LEDs (CR p.8)")}},
+    ]
     observer = recording["observer"]["id"]
     return [
         {"type": "event", "eventType": "drive", "who": observer, "t": 0, "until": until, "params": drive},
@@ -218,6 +238,7 @@ def events(recording, variant):
             "offsetM": wrap({"x": -0.10, "y": -0.05, "z": -0.12}, "stated", "\"Il a dû au début se baisser légèrement pour réussir à le voir\" (CR p.9); how far, SUPPOSED"),
             "holdS": 5.0, "turnS": 0.8}},
         *phenomenon,
+        *body,
         {"type": "event", "eventType": "watch", "who": observer, "t": e, "params": {
             "mirror": {"x": -0.999, "y": 1.227, "z": -0.895},
             "target": target, "pitchShare": 0.6,
@@ -234,6 +255,18 @@ def main(path, variant):
     # The phenomenon, what its events are about: all its shapes, and the two rectangles that blink together.
     recording["timeline"] = {"keyframes": [], "groups": GROUPS}
     recording["version"] = 3
+    # The body: where it is to begin with, and how it looks and is lit then; its events switch its lights.
+    for body in recording.get("interpretation", {}).get("bodies", []):
+        if body["id"] != "engin":
+            continue
+        body["groups"] = BODY_GROUPS
+        track = body["track"]
+        keys = track["value"] if isinstance(track, dict) and "value" in track else track
+        kept = [keys[0]]
+        if isinstance(track, dict) and "value" in track:
+            track["value"] = kept
+        else:
+            body["track"] = kept
     for decor in recording["decor"]:
         if decor["id"] in ("van", "f-hobs"):
             decor.pop("track", None)

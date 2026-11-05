@@ -11,19 +11,19 @@ export const eventsMessages_en: EventsMessages = {
   parts: "{n} parts",
   who: "Subject",
   part: "Part",
-  partHint: "A node or a bone of its model (legs, head): it turns alone, the rest of the body as it is",
+  partHint: "A node, a bone or a light of its model (legs, head, front-red), or a group of its parts (rear): it alone, the rest of the body as it is",
   wholeBody: "the whole body",
   derivedBodiesNote: "These bodies' keyframes are worked out from what they did. Keyframes set by hand win over these events.",
   overriddenBodiesNote: "Keyframes of its own win over these events.",
   add: "Add an event", remove: "Remove the event", none: "No event",
   resetToEvents: "Back to the events",
-  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in", turn: "Turns" },
+  kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in", turn: "Turns", light: "Light" },
   params: {
     vehicle: "Vehicle", path: "Route", speeds: "Speeds", speedDivisors: "Speeds divided by", through: "Goes through", eye: "Eye in the vehicle",
     fovDeg: "Field of view", target: "Watching", pitchShare: "Looks up to (share of its height)", keepDeg: "Keeps it within", glanceBeyondDeg: "Glances beyond",
     glanceS: "Glance", roadS: "Back on the road", offsetM: "Moves the eye by", holdS: "For", turnS: "In", mirror: "Mirror", firstS: "First",
     mirrorS: "In the mirror", glancesUntil: "Glances at it until",
-    place: "Where", metres: "Size (width, height above the eye)", parts: "Parts", onS: "On", offS: "Off", off: "Off, it is", motion: "Movement", turnsPerS: "Turns a second", distanceM: "Distance", angleDeg: "Off the vertical", stops: "Stops", in: "In", aboveM: "Above it", from: "From", to: "To", headingDeg: "Heading", pitchDeg: "Tilt"
+    place: "Where", metres: "Size (width, height above the eye)", parts: "Parts", onS: "On", offS: "Off", off: "Off, it is", motion: "Movement", turnsPerS: "Turns a second", distanceM: "Distance", angleDeg: "Off the vertical", stops: "Stops", in: "In", aboveM: "Above it", from: "From", to: "To", headingDeg: "Heading", pitchDeg: "Tilt", cdM2: "Luminance"
   },
   from: "from",
   to: "to",

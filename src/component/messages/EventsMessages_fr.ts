@@ -11,19 +11,19 @@ export const eventsMessages_fr: EventsMessages = {
   parts: "{n} parties",
   who: "Sujet",
   part: "Partie",
-  partHint: "Un nœud ou un os de son modèle (legs, head) : il tourne seul, le reste du corps tel qu'il est",
+  partHint: "Un nœud, un os ou un feu de son modèle (legs, head, front-red), ou un groupe de ses parties (rear) : seul concerné, le reste du corps tel qu'il est",
   wholeBody: "le corps entier",
   derivedBodiesNote: "Les images clés de ces corps sont calculées à partir de ce qu'ils ont fait. Des images clés posées à la main l'emportent sur ces événements.",
   overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
   add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement",
   resetToEvents: "Revenir aux événements",
-  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne" },
+  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne", light: "Feu" },
   params: {
     vehicle: "Véhicule", path: "Trajet", speeds: "Vitesses", speedDivisors: "Vitesses divisées par", through: "Passe par", eye: "Œil dans le véhicule",
     fovDeg: "Champ de vision", target: "Regarde", pitchShare: "Lève les yeux jusqu'à (part de sa hauteur)", keepDeg: "Le garde à moins de", glanceBeyondDeg: "Coups d'œil au-delà de",
     glanceS: "Coup d'œil", roadS: "Retour sur la route", offsetM: "Déplace l'œil de", holdS: "Pendant", turnS: "En", mirror: "Rétroviseur", firstS: "D'abord",
     mirrorS: "Dans le rétroviseur", glancesUntil: "Coups d'œil directs jusqu'à",
-    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", motion: "Mouvement", turnsPerS: "Tours par seconde", distanceM: "Distance", angleDeg: "Écart à la verticale", stops: "S'arrête", in: "Dans", aboveM: "Au-dessus", headingDeg: "Cap", pitchDeg: "Inclinaison"
+    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", motion: "Mouvement", turnsPerS: "Tours par seconde", distanceM: "Distance", angleDeg: "Écart à la verticale", stops: "S'arrête", in: "Dans", aboveM: "Au-dessus", headingDeg: "Cap", pitchDeg: "Inclinaison", cdM2: "Luminance"
   },
   from: "de",
   to: "à",

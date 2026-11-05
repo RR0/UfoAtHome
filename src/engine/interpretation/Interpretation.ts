@@ -180,12 +180,26 @@ export interface BodyJson {
    * model when absent, and always for a primitive.
    */
   outlineNode?: string
+  /**
+   * Parts of its model taken together, so that one event is about them all: its two rear lights that blink together ("rear", of
+   * `rear-left` and `rear-right`), an aircraft's strobes. Named in an event as any part is, `id/group` (see RecordingEventJson.who). Its
+   * members are parts of the model, a light by its name, or other groups of the body's; their ids are the body's own, apart from the
+   * recording's. Optional: a part is named alone as well.
+   */
+  groups?: BodyPartGroupJson[]
   track: BodyKeyframe[]
   /**
    * What it sounds like: heard from where the observer stands, late by the time sound takes to come, shifted in pitch as it comes and goes, and
    * masked by the noise of the place (see BodyHearing). Silent when absent: nothing here is a default, and a body is a claim.
    */
   sound?: BodySound
+}
+
+/** Parts of a body's model, or other groups of it, taken together (see BodyJson.groups). */
+export interface BodyPartGroupJson {
+  id: string
+  title?: SaidText
+  members: string[]
 }
 
 /**

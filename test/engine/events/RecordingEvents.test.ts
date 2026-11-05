@@ -131,6 +131,58 @@ describe("RecordingEvents", () => {
     expect(RecordingActors.issues(sighting).map(issue => issue.id)).toEqual(["etre-9/head"])
   })
 
+  it("switches the lights of T1's craft as he told them: the red blinking, the front gone out, the rectangles blinking together", () => {
+    for (const [json, at] of [[silly, { switch: 69500, vanish: 202500 }], [sillyTemoins, { switch: 83800, vanish: 211300 }]] as const) {
+      const sighting = fromSightingJson(structuredClone(json) as unknown as SightingRecordingJson)
+      const ground = { heightAt: () => 0 }
+      const craft = new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === "engin")!, ground, t => BodyPlacement.eyeOf(sighting, t, ground))
+      const lights = (t: number) => craft.at(t)!.lights!
+      // Half a second on, half a second off, from the start; the whites steady.
+      expect(lights(250)).toMatchObject({ "front-red": 500, "front-white-left": 500, "rear-left": 0 })
+      expect(lights(750)["front-red"]).toBe(0)
+      expect(lights(1250)["front-red"]).toBe(500)
+      // A switch, never a fade: on until the millisecond it goes off.
+      expect(lights(499)["front-red"]).toBe(500)
+      expect(lights(500)["front-red"]).toBe(0)
+      // The front gone out, for good, a group of three lights ("engin/front").
+      expect(lights(at.switch - 1)["front-white-right"]).toBe(500)
+      for (const t of [at.switch, at.vanish - 1, at.vanish + 5000]) {
+        expect(lights(t)).toMatchObject({ "front-red": 0, "front-white-left": 0, "front-white-right": 0 })
+      }
+      // The rectangles, two lights of one group ("engin/rear"), two seconds on, two off, together, dark once it is lost.
+      expect(lights(at.switch + 1000)).toMatchObject({ "rear-left": 30, "rear-right": 30 })
+      expect(lights(at.switch + 3000)).toMatchObject({ "rear-left": 0, "rear-right": 0 })
+      expect(lights(at.switch + 5000)).toMatchObject({ "rear-left": 30, "rear-right": 30 })
+      expect(lights(at.vanish)["rear-left"]).toBe(0)
+      // Written back as its events: the body states where it is to begin with, and how it is lit then.
+      const written = toSightingJson(sighting).interpretation!.bodies.find(body => body.id === "engin")!.track as unknown as { value: unknown[] }
+      expect(written.value).toHaveLength(1)
+    }
+  })
+
+  it("lights a light from an event, for as long as it says, and dark again after", () => {
+    const sighting = fromSightingJson({
+      version: 3, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 20,
+      interpretation: { bodies: [{ id: "car", model: { id: "ellipsoid" }, groups: [{ id: "beacons", members: ["blue", "red"] }],
+        track: [{ t: 0, eastM: 0, northM: 10, onGround: true, lights: { blue: 0, red: 0 } }] }] },
+      events: [
+        { type: "event", eventType: "light", who: "car/blue", t: 2000, until: 4000, params: { cdM2: 100 } },
+        // Without an end, a blink goes on until the end of the recording.
+        { type: "event", eventType: "blink", who: "car/beacons", t: 6000, params: { onS: 0.25, offS: 0.75, cdM2: 200 } }
+      ]
+    } as unknown as SightingRecordingJson)
+    const ground = { heightAt: () => 0 }
+    const car = new BodyPlacement(sighting.interpretation!.bodies[0], ground, () => ({ eastM: 0, northM: 0, upM: 1.6 }))
+    expect(car.at(1999)!.lights!.blue).toBe(0)
+    expect(car.at(2000)!.lights!.blue).toBe(100)
+    expect(car.at(3999)!.lights!.blue).toBe(100)
+    expect(car.at(4000)!.lights!.blue).toBe(0)
+    expect(car.at(6100)!.lights).toMatchObject({ blue: 200, red: 200 })
+    expect(car.at(6500)!.lights).toMatchObject({ blue: 0, red: 0 })
+    expect(car.at(19100)!.lights).toMatchObject({ blue: 200, red: 200 })
+    expect(RecordingActors.issues(sighting)).toEqual([])
+  })
+
   it("has the beings crouched by the craft, then standing, the second turning round, until they go back in", () => {
     const sighting = fromSightingJson(valensole as unknown as SightingRecordingJson)
     const ground = { heightAt: () => 0 }
@@ -162,7 +214,7 @@ describe("RecordingEvents", () => {
   it("writes back the events and not what they give, while it is what they give", () => {
     const sighting = fromSightingJson(silly as unknown as SightingRecordingJson)
     const written = toSightingJson(sighting)
-    expect(written.events).toHaveLength(11)
+    expect(written.events).toHaveLength(14)
     expect(written.observerTrack).toBeUndefined()
     expect(written.decor!.find(object => object.id === "van")!.track).toBeUndefined()
     // Read again, the same poses.

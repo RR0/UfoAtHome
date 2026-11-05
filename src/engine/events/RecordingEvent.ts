@@ -17,7 +17,8 @@ export interface RecordingEventJson {
   /**
    * Whom it is about, by an id of the recording (see RecordingActors): the observer's (`observer.id`, the default when it is read), a shape's
    * or a group of shapes' of the account (the phenomenon, or the part of it that does this: a group of lights that blink), a body's of the
-   * interpretation, a decor object's. Always written.
+   * interpretation, a decor object's; or one part of a body's model, `id/part` (a node, a bone, a light: "craft/legs", "engin/front-red"), or
+   * a group of its parts, `id/group` (see BodyJson.groups). Always written.
    */
   who?: string
   /** When it starts, ms from the start of the recording. */
@@ -185,12 +186,26 @@ export interface AppearanceParams {
   parts: LookPart[]
 }
 
-/** The shapes the event is about (`who`, one or a group) blink: on for `onS`, then off for `offS`, from the event's start; off, they take `off`
- * (null takes a field away). */
+/**
+ * What the event is about blinks, from its start to its end: on for `onS`, then off for `offS`, and so on. The account's shapes (`who` one or a
+ * group of them) take `off` while off (null takes a field away). A light of a body's model, or a group of them (`who` "engin/front-red",
+ * "engin/rear"), is lit at `cdM2` while on, or at what it was lit at before when it says none, and dark while off; once the event ends, it is
+ * lit again as it was before it. A light goes on or off at once: a blink is never a fade.
+ */
 export interface BlinkParams {
   onS: number
   offS: number
-  off: { color?: string, transparency?: number, brightness?: number | null }
+  off?: { color?: string, transparency?: number, brightness?: number | null }
+  /** A light's luminance while on, cd/m². */
+  cdM2?: number
+}
+
+/**
+ * A light of a body's model, or a group of them (`who` "engin/front-white-left", "engin/front"), is lit at `cdM2` from the event's start (0:
+ * switched off), and, at its end when it states one, lit again as it was before it. At once, as a light is switched.
+ */
+export interface LightParams {
+  cdM2: number
 }
 
 /**

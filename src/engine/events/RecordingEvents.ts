@@ -249,7 +249,7 @@ export class RecordingEvents {
       const stated = JSON.stringify(body.track)
       const ride = events.find(event => event.eventType === "ride")
       const carrier = ride && bodies.find(candidate => candidate.id === (ride.params as unknown as RideParams).in)
-      body.track = ride ? (carrier ? BodyExpansion.ride(body, ride, carrier) : body.track) : new BodyExpansion(body, events).track()
+      body.track = ride ? (carrier ? BodyExpansion.ride(body, ride, carrier) : body.track) : new BodyExpansion(body, events, RecordingEvents.endOf(sighting)).track()
       sighting.eventsExpansion ??= { decorTracks: {} }
       sighting.eventsExpansion.bodies = { ...sighting.eventsExpansion.bodies, [body.id]: { stated, expanded: JSON.stringify(body.track) } }
     }
