@@ -113,9 +113,13 @@ export interface MotionParams {
   to: number
 }
 
-/** A body keeps one of its model's movements turning (`spin`): `turnsPerS` turns a second, from the event's start to its end (the legs turning). */
+/**
+ * A body keeps one of its model's movements turning (`spin`): `turnsPerS` turns a second, from the event's start to its end. Or, an event about
+ * a part of it (`who` "craft/legs"), that part turns about its own upright axis, `turnsPerS` turns a second, clockwise seen from its top
+ * (negative the other way), and no `motion` is needed: the legs turning under the hull.
+ */
 export interface SpinParams {
-  motion: string
+  motion?: string
   turnsPerS: number
 }
 
@@ -132,6 +136,8 @@ export interface RiseParams {
 
 /** A body turns to face `headingDeg` (`turn`), between the event's start and its end. */
 export interface TurnParams {
+  /** The heading it turns to; for a part of it (`who` "etre-2/head"), how far it turns from where its model has it, clockwise seen from its
+   * top: a head turned to its right, 90. */
   headingDeg: number
 }
 

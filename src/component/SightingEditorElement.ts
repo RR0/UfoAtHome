@@ -6947,15 +6947,19 @@ export class SightingEditorElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const bodies = sighting.interpretation?.bodies ?? []
     const ids = new Set(bodies.map(body => body.id))
-    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => ids.has(event.who ?? ""))
+    // A body's events and its parts' ("craft/legs").
+    const bodyOf = (who: string | undefined) => RecordingActors.partOf(who)?.element ?? who ?? ""
+    const events = (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => ids.has(bodyOf(event.who)))
     if (events.length === 0 || !RecordingEvents.bodiesAreExpanded(sighting)) {
       return { times: [...new Set(bodies.flatMap(body => body.track.map(key => key.t)))].sort((a, b) => a - b) }
     }
     const end = this.ufoElement.seekableDuration
     const spans = events.map(({ event, index }) => {
-      const body = bodies.find(candidate => candidate.id === event.who)
+      const body = bodies.find(candidate => candidate.id === bodyOf(event.who))
+      const part = RecordingActors.partOf(event.who)?.part
       const kind = this.messages.events.kinds[event.eventType] ?? event.eventType
-      return { id: String(index), t: event.t, until: event.until ?? end, label: bodies.length > 1 ? `${this.said.read(body?.title) ?? event.who} · ${kind}` : kind }
+      const whose = [...(bodies.length > 1 ? [this.said.read(body?.title) ?? bodyOf(event.who)] : []), ...(part ? [part] : [])]
+      return { id: String(index), t: event.t, until: event.until ?? end, label: [...whose, kind].join(" · ") }
     })
     return { times: [], spans }
   }
@@ -6988,7 +6992,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       this.chooseAccountView(true)
       void this.loadBodyEditor().then(editor => {
-        editor.show(who)
+        editor.show(RecordingActors.partOf(who)?.element ?? who)
         this.bodiesEventsPanel.pick(index)
         this.refreshTracks()
       })

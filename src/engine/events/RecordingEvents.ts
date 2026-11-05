@@ -241,7 +241,8 @@ export class RecordingEvents {
     // Those that move by themselves, then those carried by them.
     const rides = (body: BodyJson) => (sighting.events ?? []).some(event => event.who === body.id && event.eventType === "ride")
     for (const body of [...bodies.filter(body => !rides(body)), ...bodies.filter(rides)]) {
-      const events = (sighting.events ?? []).filter(event => event.who === body.id)
+      // Its own, and those of its parts ("craft/legs").
+      const events = (sighting.events ?? []).filter(event => event.who === body.id || BodyExpansion.partOf(event.who, body.id) !== undefined)
       if (events.length === 0) continue
       const first = Math.min(...events.map(event => event.t))
       if (body.track.some(key => key.t > first)) continue

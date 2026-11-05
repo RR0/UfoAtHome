@@ -24,27 +24,44 @@ export class BodyExpansion {
     const keys = new Map<number, BodyKeyframe>()
     const put = (key: BodyKeyframe) => {
       const at = keys.get(key.t)
-      keys.set(key.t, at ? { ...at, ...key, motions: { ...at.motions, ...key.motions } } : key)
+      keys.set(key.t, at ? { ...at, ...key, motions: { ...at.motions, ...key.motions }, ...(at.turns || key.turns ? { turns: { ...at.turns, ...key.turns } } : {}) } : key)
     }
     for (const key of this.body.track) put({ ...key })
     const ordered = [...this.events].sort((a, b) => a.t - b.t)
     // Where each movement and the heading stand before the events, as the body states them (a being crouched to begin with).
     const motions = new Map<string, number>()
+    const turns = new Map<string, number>()
     let headingDeg = 0
     for (const key of this.body.track) {
       for (const [name, value] of Object.entries(key.motions ?? {})) motions.set(name, value)
+      for (const [name, value] of Object.entries(key.turns ?? {})) turns.set(name, value)
       if (key.attitude?.headingDeg !== undefined) headingDeg = key.attitude.headingDeg
     }
     let place = this.startPlace()
     for (const event of ordered) {
-      if (event.eventType === "motion" || event.eventType === "spin") {
+      const part = BodyExpansion.partOf(event.who, this.body.id)
+      if (part !== undefined) {
+        // A part of it: turned about its own upright axis, the rest of the body as it is.
+        if (event.eventType !== "spin" && event.eventType !== "turn") continue
+        const from = turns.get(part) ?? 0
+        const until = event.until ?? event.t
+        const to = event.eventType === "spin"
+          ? from + 360 * (event.params as unknown as SpinParams).turnsPerS * (until - event.t) / 1000
+          : (event.params as unknown as TurnParams).headingDeg
+        put({ t: event.t, turns: { [part]: from } })
+        put({ t: until, turns: { [part]: to } })
+        turns.set(part, to)
+        continue
+      }
+      if ((event.eventType === "motion" || event.eventType === "spin") && (event.params as { motion?: string } | undefined)?.motion) {
         const params = event.params as unknown as MotionParams & SpinParams
-        const from = motions.get(params.motion) ?? 0
+        const motion = params.motion!
+        const from = motions.get(motion) ?? 0
         const until = event.until ?? event.t
         const to = event.eventType === "motion" ? params.to : from + params.turnsPerS * (until - event.t) / 1000
-        put({ t: event.t, motions: { [params.motion]: from } })
-        put({ t: until, motions: { [params.motion]: to } })
-        motions.set(params.motion, to)
+        put({ t: event.t, motions: { [motion]: from } })
+        put({ t: until, motions: { [motion]: to } })
+        motions.set(motion, to)
       } else if (event.eventType === "rise" && place) {
         const params = event.params as unknown as RiseParams
         const until = event.until ?? event.t
@@ -88,6 +105,11 @@ export class BodyExpansion {
       keys.set(key.t, { ...keys.get(key.t), t: key.t, eastM: key.eastM, northM: key.northM, altitudeAboveGroundM: aboveGroundM })
     }
     return [...keys.values()].sort((a, b) => a.t - b.t)
+  }
+
+  /** The part of body `bodyId` an event is about (`who` "craft/legs": "legs"), when it is about a part of it. */
+  static partOf(who: string | undefined, bodyId: string): string | undefined {
+    return who !== undefined && who.startsWith(`${bodyId}/`) && who.length > bodyId.length + 1 ? who.slice(bodyId.length + 1) : undefined
   }
 
   /** Where the body stands before its events: its first keyframe that places it in metres. */

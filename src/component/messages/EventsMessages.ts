@@ -18,6 +18,10 @@ export interface EventsMessages {
   parts: string
   /** What an event of the phenomenon is about: one of its shapes, or a group of them. */
   who: string
+  /** What part of a body's model an event is about, its hint, and what none says (the whole body). */
+  part: string
+  partHint: string
+  wholeBody: string
   /** The list's buttons: add an event, remove the picked one; and what it says with none. */
   add: string
   remove: string

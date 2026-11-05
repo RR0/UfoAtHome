@@ -105,7 +105,7 @@ export const BODY_OVER_LAYER = 4
 export class BodySystem {
   readonly group = new Group()
   /** `whole`: a model that glows all over (see BodySystem.GLOWS_WHOLE), whose light is the body's own rather than its parts'. */
-  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], whole?: boolean, motions?: Map<string, AnimationAction> }>()
+  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], whole?: boolean, motions?: Map<string, AnimationAction>, parts?: Map<string, { node: Object3D, rest: Quaternion } | undefined>, loaded?: boolean }>()
   /** Bumped whenever the set of bodies is replaced, so a model arriving for a previous one is
    * dropped. */
   private token = 0
@@ -213,7 +213,9 @@ export class BodySystem {
       if (material) BodySystem.paint(material, state, display)
       BodySystem.fade(holder, state.appearance.transparency)
       if (glowing) BodySystem.light(glowing, state, display)
+      if (state.turns) BodySystem.unturn(entry, holder, state.turns)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
+      if (state.turns) BodySystem.turn(entry, state.turns)
       this.shine(state, holder, whole ? undefined : glowing, frame)
       if (whole && glowing) this.hideSpecks(holder, glowing, frame)
       // Drawn as a point under a pixel or two (see shine), its shape shows only its share of the light, and none at all under a pixel and a
@@ -951,6 +953,9 @@ export class BodySystem {
         entry.glowing = BodySystem.glowingOf(loaded.scene)
         entry.whole = loaded.scene.userData[BodySystem.GLOWS_WHOLE] === true
         entry.motions = BodySystem.motionsOf(loaded.scene)
+        // Its parts are found again in the model that has just arrived.
+        entry.parts = undefined
+        entry.loaded = true
       }
       // The instant is set again on the model that has just arrived: its exhaust node turns the
       // flame astern and its lit parts glow, and until this the first frame kept the flame the
@@ -1071,6 +1076,39 @@ export class BodySystem {
     }
     return actions
   }
+
+  /**
+   * Puts each part the track turns (see BodyKeyframe.turns) back where its model has it, before its movements are set: a part a movement
+   * also moves takes the movement's place, then the turn on top of it; one no movement moves would otherwise turn a little more each frame.
+   * A part the model has not (or not yet: the ellipsoid that stands for it while it loads) is left out, and said once.
+   */
+  private static unturn(entry: { parts?: Map<string, { node: Object3D, rest: Quaternion } | undefined>, loaded?: boolean }, holder: Object3D, turns: Record<string, number>): void {
+    entry.parts ??= new Map()
+    for (const name of Object.keys(turns)) {
+      if (!entry.parts.has(name)) {
+        const node = holder.getObjectByName(name)
+        if (node) entry.parts.set(name, { node, rest: node.quaternion.clone() })
+        else if (entry.loaded) {
+          entry.parts.set(name, undefined)
+          console.warn(`Body model has no part "${name}" to turn`)
+        }
+      }
+      const part = entry.parts.get(name)
+      if (part) part.node.quaternion.copy(part.rest)
+    }
+  }
+
+  /** Turns each part about its own upright axis (its Y) by what the track says, clockwise seen from its top. */
+  private static turn(entry: { parts?: Map<string, { node: Object3D, rest: Quaternion } | undefined> }, turns: Record<string, number>): void {
+    for (const [name, degrees] of Object.entries(turns)) {
+      const part = entry.parts?.get(name)
+      if (!part) continue
+      part.node.quaternion.multiply(BodySystem.TURN.setFromAxisAngle(BodySystem.UP, -degrees * DEG_TO_RAD))
+    }
+  }
+
+  private static readonly TURN = new Quaternion()
+  private static readonly UP = new Vector3(0, 1, 0)
 
   /**
    * Puts each movement where the track says (see BodyKeyframe.motions): a progress of 0 to 1 along

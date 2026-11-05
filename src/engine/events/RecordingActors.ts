@@ -62,6 +62,16 @@ export class RecordingActors {
     return kinds?.length === 1 ? kinds[0] : undefined
   }
 
+  /**
+   * The body and the part of its model an event is about, when its `who` names one: "craft/legs" the node `legs` of the body `craft`'s
+   * model, "etre-2/head" a bone of its skeleton. Which parts a model has, its file says (see BodyKeyframe.turns).
+   */
+  static partOf(who: string | undefined): { element: string, part: string } | undefined {
+    const at = who?.indexOf("/") ?? -1
+    if (who === undefined || at <= 0 || at === who.length - 1) return undefined
+    return { element: who.slice(0, at), part: who.slice(at + 1) }
+  }
+
   /** Whether `event` is the observer's. */
   static isObserver(sighting: Sighting, event: RecordingEventJson): boolean {
     return event.who === RecordingActors.observerId(sighting)
@@ -99,6 +109,9 @@ export class RecordingActors {
     const ids = RecordingActors.ids(sighting)
     for (const [id, kinds] of ids) if (kinds.length > 1) issues.push({ kind: "duplicate-id", id, path: kinds.join(", ") })
     ;(sighting.events ?? []).forEach((event, index) => {
+      // A part of a body: of a body there is; which parts its model has, only its file says.
+      const part = RecordingActors.partOf(event.who)
+      if (part && ids.get(part.element)?.length === 1 && ids.get(part.element)![0] === "body") return
       if (event.who === undefined || !ids.has(event.who)) issues.push({ kind: "unknown-who", id: event.who ?? "", path: `events.${index}.who` })
     })
     return issues

@@ -44,6 +44,8 @@ export interface BodyState {
   /** How far along each of its model's movements it is — see BodyKeyframe.motions. None stated,
    * none played: the model stands as it was built. */
   motions?: Record<string, number>
+  /** How far each named part of its model has turned about its own upright axis, degrees — see BodyKeyframe.turns. */
+  turns?: Record<string, number>
   /** The luminance of each of its model's lights the track names — see BodyKeyframe.lights. */
   lights?: Record<string, number>
   /** Whether it throws one at any instant at all — what lets a renderer ready the light once rather
@@ -109,11 +111,13 @@ export class BodyPlacement {
     // The same for each light, from the keyframes that name it.
     for (const key of track) {
       BodyPlacement.collect(this.motionKeys, key.t, key.motions)
+      BodyPlacement.collect(this.turnKeys, key.t, key.turns)
       BodyPlacement.collect(this.lightKeys, key.t, key.lights)
     }
   }
 
   private readonly motionKeys = new Map<string, { t: number, value: number }[]>()
+  private readonly turnKeys = new Map<string, { t: number, value: number }[]>()
   private readonly lightKeys = new Map<string, { t: number, value: number }[]>()
 
   private static collect(channels: Map<string, { t: number, value: number }[]>, t: number, values: Record<string, number> | undefined): void {
@@ -278,6 +282,7 @@ export class BodyPlacement {
       },
       flame: BodyPlacement.flameBetween(from.flame, to.flame, fraction),
       motions: this.motionsAt(t),
+      ...(this.turnKeys.size > 0 ? { turns: BodyPlacement.channelsAt(this.turnKeys, t, 0) } : {}),
       lights: this.lightsAt(t),
       throwsFlame: this.body.track.some(key => key.flame !== undefined && key.flame.luminanceCdM2 > 0)
     }

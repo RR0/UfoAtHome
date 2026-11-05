@@ -258,6 +258,13 @@ export interface BodyKeyframe {
    */
   motions?: Record<string, number>
   /**
+   * How far each named part of its model (a node of the glTF, a bone of a figure's skeleton: `legs`, `head`) has turned about its own
+   * upright axis (its Y), degrees, from where the model has it: positive clockwise seen from its top, as a heading turns. What moves
+   * one part and not the rest (the legs turning under the hull, a head turning while the body does not), from an event about that part
+   * (`who` "craft/legs", see RecordingEventJson). Blended between two keyframes that state it, held at the last one that did.
+   */
+  turns?: Record<string, number>
+  /**
    * The luminance of each of its model's own lights, cd/m², by the name of the light's material in
    * the model: what lets one body carry lights that behave each their own way — a steady white at
    * each end, a red one flashing between. The model says where each light is, how big and of what

@@ -5,6 +5,7 @@ import valensole from "../../../public/demo-data/observer-valensole.json"
 import valensolePv from "../../../public/demo-data/observer-valensole-pv-1965-07-02.json"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 import reference from "./silly-poses.json"
+import { RecordingActors } from "../../../src/engine/events/RecordingActors.js"
 import { BodyPlacement } from "../../../src/engine/interpretation/BodyPlacement.js"
 
 /** Poses of T1 as add_van.py wrote them before his events were (one in fifty, and his lean to the mirror), with the van's place then. */
@@ -101,8 +102,9 @@ describe("RecordingEvents", () => {
     const ground = { heightAt: () => 0 }
     const craft = new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === "craft")!, ground, t => BodyPlacement.eyeOf(sighting, t, ground))
     expect(craft.at(247000)!.motions!["pivot-retract"]).toBeCloseTo(0.5, 5)
-    // Half a turn a second, from 248 s.
-    expect(craft.at(258000)!.motions!["legs-turn"]).toBeCloseTo(5, 5)
+    // The legs, a part of it ("craft/legs"), half a turn a second from 248 s, anticlockwise seen from above; the hull not turning.
+    expect(craft.at(258000)!.turns!.legs).toBeCloseTo(-1800, 3)
+    expect(craft.at(258000)!.attitude.headingDeg).toBe(craft.at(240000)!.attitude.headingDeg)
     // On the ground, then 0.79 m up, straight, then where he lost it, 51 degrees off the vertical towards the west.
     expect(craft.at(250000)!.upM).toBeCloseTo(1.21, 2)
     expect(craft.at(255000)!).toMatchObject({ eastM: expect.closeTo(0, 2), upM: expect.closeTo(2, 1) })
@@ -111,6 +113,22 @@ describe("RecordingEvents", () => {
     expect(craft.at(262500)).toBeUndefined()
     const written = toSightingJson(sighting).interpretation!.bodies.find(body => body.id === "craft")!.track as unknown as { value: unknown[] }
     expect(written.value).toHaveLength(1)
+  })
+
+  it("turns a part of a body alone, to where an event about it says, as a head turns", () => {
+    const sighting = fromSightingJson({
+      ...(valensole as unknown as SightingRecordingJson),
+      events: [...(valensole as unknown as SightingRecordingJson).events!, { type: "event", eventType: "turn", who: "etre-2/head", t: 52000, until: 53000, params: { headingDeg: 60 } }]
+    } as unknown as SightingRecordingJson)
+    const ground = { heightAt: () => 0 }
+    const being = new BodyPlacement(sighting.interpretation!.bodies.find(body => body.id === "etre-2")!, ground, t => BodyPlacement.eyeOf(sighting, t, ground))
+    expect(being.at(51000)!.turns!.head).toBe(0)
+    expect(being.at(52500)!.turns!.head).toBeCloseTo(30, 5)
+    expect(being.at(55000)!.turns!.head).toBe(60)
+    expect(RecordingActors.issues(sighting)).toEqual([])
+    // A part of nothing there is is not.
+    sighting.events!.at(-1)!.who = "etre-9/head"
+    expect(RecordingActors.issues(sighting).map(issue => issue.id)).toEqual(["etre-9/head"])
   })
 
   it("has the beings crouched by the craft, then standing, the second turning round, until they go back in", () => {

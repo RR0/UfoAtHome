@@ -24,8 +24,8 @@ def craft_events(variant):
     """The craft leaving, as Masse told it, from where it stood (and, in the statement to the gendarmes, its passenger going with it)."""
     if variant == "pv":
         return [
-            {"type": "event", "eventType": "spin", "who": "craft", "t": 61000, "until": 63800, "params": {
-                "motion": "legs-turn", "turnsPerS": wrap(0.5, "assumed", "The six legs turned as it left (PV n° 445); how fast, nobody said")}},
+            {"type": "event", "eventType": "spin", "who": "craft/legs", "t": 61000, "until": 63800, "params": {
+                "turnsPerS": wrap(-0.5, "assumed", "The six legs turned as it left (PV n° 445); how fast, and which way, nobody said")}},
             {"type": "event", "eventType": "rise", "who": "craft", "t": 61000, "until": 63800, "params": {
                 "distanceM": 11.77, "angleDeg": wrap(53.6, "stated", "\"L'engin part en oblique\" (PV n° 445); how steep, from where it was lost"),
                 "headingDeg": 251.6, "stops": False}},
@@ -35,8 +35,8 @@ def craft_events(variant):
     return [
         {"type": "event", "eventType": "motion", "who": "craft", "t": 246000, "until": 248000, "params": {
             "motion": "pivot-retract", "to": wrap(1, "stated", "\"Le tube central rentre dans l'engin\" (account of 18 August 1965)")}},
-        {"type": "event", "eventType": "spin", "who": "craft", "t": 248000, "until": 262000, "params": {
-            "motion": "legs-turn", "turnsPerS": wrap(0.5, "assumed", "\"Ses 6 pieds se mettent à tourner\"; how fast, nobody said")}},
+        {"type": "event", "eventType": "spin", "who": "craft/legs", "t": 248000, "until": 262000, "params": {
+            "turnsPerS": wrap(-0.5, "assumed", "\"Ses 6 pieds se mettent à tourner\"; how fast, and which way, nobody said")}},
         {"type": "event", "eventType": "rise", "who": "craft", "t": 250000, "until": 254000, "params": {
             "distanceM": 0.79, "angleDeg": wrap(0, "stated", "\"Il s'élève\": straight up, before it goes off at a slant"), "stops": True}},
         {"type": "event", "eventType": "rise", "who": "craft", "t": 256000, "until": 262000, "params": {
@@ -108,7 +108,9 @@ def main(path, variant):
     # The bodies the events move keep only what they state before them: where they stand, their size, how they look.
     recording = json.loads(text)
     stated_events = events(variant, observer)
-    moved = {event["who"]: min(e["t"] for e in stated_events if e.get("who") == event["who"]) for event in stated_events if event.get("who") != observer}
+    # By body: an event about a part of one ("craft/legs") is the body's.
+    body_of = lambda who: who.split("/")[0]
+    moved = {body_of(event["who"]): min(e["t"] for e in stated_events if body_of(e["who"]) == body_of(event["who"])) for event in stated_events if event.get("who") != observer}
     key = '"interpretation":'
     at = text.index(key)
     start = at + len(key)

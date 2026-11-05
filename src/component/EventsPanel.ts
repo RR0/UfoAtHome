@@ -160,7 +160,7 @@ export class EventsPanel {
     const body = this.actor === "bodies" ? this.host.currentBody?.() : undefined
     const theirs = (event: RecordingEventJson) => this.actor === "observer" ? RecordingActors.isObserver(sighting, event)
       : this.actor === "phenomenon" ? RecordingActors.isPhenomenon(sighting, event)
-      : body !== undefined && event.who === body
+      : body !== undefined && (event.who === body || RecordingActors.partOf(event.who)?.element === body)
     return (sighting.events ?? []).map((event, index) => ({ event, index })).filter(({ event }) => theirs(event))
   }
 
@@ -281,6 +281,12 @@ export class EventsPanel {
       label.textContent = this.messages.who
       params.append(label, this.subject(event))
     }
+    // An event of a body is about the whole of it, or one part of its model: a node, a bone (the legs, the head).
+    if (this.actor === "bodies") {
+      const label = document.createElement("span")
+      label.textContent = this.messages.part
+      params.append(label, this.part(event))
+    }
     for (const [key, value] of Object.entries(event.params ?? {})) {
       const label = document.createElement("span")
       label.textContent = this.messages.params[key] ?? key
@@ -314,6 +320,27 @@ export class EventsPanel {
       this.host.changed()
     })
     return select
+  }
+
+  /** Which part of the body's model an event is about, typed by its name in the model: none, the whole body. */
+  private part(event: RecordingEventJson): HTMLInputElement {
+    const sighting = this.host.sighting()
+    const stated = RecordingActors.partOf(event.who)
+    const body = stated?.element ?? event.who ?? ""
+    const input = document.createElement("input")
+    input.type = "text"
+    input.className = "event-part"
+    input.value = stated?.part ?? ""
+    input.placeholder = this.messages.wholeBody
+    input.title = this.messages.partHint
+    input.addEventListener("change", () => {
+      const part = input.value.trim().replaceAll("/", "")
+      this.host.editing()
+      event.who = part ? `${body}/${part}` : body
+      RecordingEvents.refresh(sighting)
+      this.host.changed()
+    })
+    return input
   }
 
   /** A parameter: edited where it is a number or a list of instants and numbers, shown otherwise. */
