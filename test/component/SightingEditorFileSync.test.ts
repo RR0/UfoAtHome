@@ -493,7 +493,12 @@ describe("a place said from something else", () => {
     pick(root.getElementById("decorBase.eastM-from") as HTMLSelectElement, house.id)
     type(root.getElementById("decorBase.eastM") as HTMLInputElement, "20")
     type(root.getElementById("decorBase.northM") as HTMLInputElement, "-5")
-    pick(root.getElementById("decorBase.eastM-basis") as HTMLSelectElement, "measured")
+    // What it stands on, as the author says it: its pill pressed, the basis picked in its window.
+    const basis = root.getElementById("decorBase.eastM-basis") as HTMLElement & { pill: HTMLElement, openWindow?: HTMLElement }
+    basis.pill.click()
+    const select = basis.openWindow!.querySelector("select")!
+    select.value = "measured"
+    select.dispatchEvent(new Event("change"))
     const written = element.sightingData.decor!.find(decor => decor.id === shed.id)!
     // Written with what it stands on, as any value of a file may be (see StatedValue).
     expect(written.eastM).toEqual({ value: 20, basis: "measured" })

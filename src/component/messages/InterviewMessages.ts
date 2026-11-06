@@ -63,6 +63,8 @@ export interface InterviewMessages extends InputFileMessages {
   redactReason: string
   roles: { interviewer: string, interviewee: string, witness: string }
   importFile: string
+  /** What `importFile` leaves out, in its (?). */
+  importFileHint: string
   saveButton: string
   loading: string
   /** Said while the text of the transcript is not JSON the editor can read: the interview keeps the last text it understood. */

@@ -1,3 +1,4 @@
+import type { BasisInputElement } from "../../src/component/BasisInputElement.js"
 import { describe, expect, it } from "vitest"
 import { register } from "../../src/component/PositionInputElement.js"
 import type { PositionChange, PositionInputElement } from "../../src/component/PositionInputElement.js"
@@ -108,13 +109,14 @@ describe("PositionInputElement", () => {
 
   it("says what the position stands on", () => {
     const { element, bases } = make()
-    const basis = element.querySelector("#decor-basis") as HTMLSelectElement
+    const basis = element.querySelector("#decor-basis") as BasisInputElement
     element.basis = "measured"
-    expect(basis.value).toBe("measured")
-    basis.value = "assumed"
-    basis.dispatchEvent(new Event("input"))
+    expect(basis.pill.dataset.basis).toBe("measured")
+    PositionBasis.pick(basis, "assumed")
     expect(bases).toEqual(["assumed"])
     expect(element.basis).toBe("assumed")
+    // Its host keeps a basis, not a rationale: none asked.
+    expect(basis.openWindow!.querySelector("textarea")).toBeNull()
   })
 })
 
@@ -136,16 +138,24 @@ describe("a position in a ParameterForm", () => {
     }), () => undefined)
     const east = container.querySelector("#decorBase\\.eastM") as HTMLInputElement
     expect(east.value).toBe("120")
-    expect((container.querySelector(".position-basis") as HTMLSelectElement).value).toBe("measured")
+    expect((container.querySelector(".position-basis") as BasisInputElement).pill.dataset.basis).toBe("measured")
     const from = container.querySelector("select[id$='-from']") as HTMLSelectElement
     from.value = "house"
     from.dispatchEvent(new Event("input"))
     east.value = "30"
     east.dispatchEvent(new Event("input"))
     expect(element).toEqual({ eastM: 130, northM: 50, saidPosition: { relativeTo: "house", eastM: 30, northM: 0 } })
-    const basis = container.querySelector(".position-basis") as HTMLSelectElement
-    basis.value = "assumed"
-    basis.dispatchEvent(new Event("input"))
+    PositionBasis.pick(container.querySelector(".position-basis") as BasisInputElement, "assumed")
     expect(bases).toEqual(["assumed"])
   })
 })
+
+/** Picks a basis as the author does: the pill pressed, the basis picked in its window. */
+class PositionBasis {
+  static pick(basis: BasisInputElement, value: string): void {
+    basis.pill.click()
+    const select = basis.openWindow!.querySelector("select")!
+    select.value = value
+    select.dispatchEvent(new Event("change"))
+  }
+}

@@ -197,6 +197,7 @@ import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
 import { loadSceneNames, loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
+import { HintElement } from "./HintElement.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -11090,7 +11091,7 @@ export class SightingEditorElement extends HTMLElement {
     this.perceptionSettings.labels = messages.observerPerception
     this.labelObserverOccupation.textContent = messages.observerOccupation
     this.labelAccountSource.textContent = messages.accountSource
-    this.labelAccountUrl.textContent = messages.accountUrl
+    HintElement.say(this.labelAccountUrl, messages.accountUrl, messages.accountUrlHint)
     this.labelAccountFollowedUp.textContent = messages.accountFollowedUp
     for (const [id, text] of [
       ["option-source-unknown", messages.accountSourceUnknown],
@@ -11323,9 +11324,9 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceLandmarkLabel.textContent = messages.referenceLandmarkLabel
     this.referenceLandmarkLabelInput.placeholder = messages.referenceLandmarkLabelPlaceholder
     this.referenceAdoptPoseButton.textContent = messages.referenceAdoptPose
-    this.labelTraceImport.textContent = messages.traceImport
+    HintElement.say(this.labelTraceImport, messages.traceImport, messages.traceImportHint)
     this.traceSelect.setAttribute("aria-label", messages.trace)
-    this.addTraceButton.title = messages.traceImport
+    this.addTraceButton.title = `${messages.traceImport} (${messages.traceImportHint})`
     this.addTraceButton.setAttribute("aria-label", messages.traceImport)
     this.labelTraceTitle.textContent = messages.traceTitle
     this.labelTraceSource.textContent = messages.traceSource

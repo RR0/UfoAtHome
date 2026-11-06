@@ -1,3 +1,4 @@
+import { HintElement } from "./HintElement.js"
 import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
 import type { WitnessErrorMessages } from "./messages/WitnessErrorMessages.js"
 import type { Sighting } from "../engine/model/Sighting.js"
@@ -44,7 +45,7 @@ export interface WitnessField {
  * - for the observer, the conditions of their account and of their seeing, the Moon gauge and the parameters tying their errors.
  */
 export class WitnessErrorView {
-  static readonly CSS = `${BasisInputElement.CSS}
+  static readonly CSS = `${BasisInputElement.CSS}${HintElement.CSS}
 :is(label, .field)[data-basis="assumed"] :is(input, .edtf-field input) { font-style: italic; }
 /* ("> .basis-mark" in :has keeps the weight the rule had when the mark was the label's own child, over the form's flex labels.)
    A field with its basis: its name and the mark on the first line, the value and its unit on the next, the law under them. Left to
@@ -283,13 +284,14 @@ export class WitnessErrorView {
       select.addEventListener("change", () => write(select.value === "" ? undefined : select.value as T))
       return select
     }
-    const box = (text: string, checked: boolean | undefined, write: (value: boolean | undefined) => void) => {
+    const box = (text: string, checked: boolean | undefined, write: (value: boolean | undefined) => void, hint?: string) => {
       const label = document.createElement("label")
       const input = document.createElement("input")
       input.type = "checkbox"
       input.checked = checked === true
       input.addEventListener("change", () => write(input.checked ? true : undefined))
       label.append(input, ` ${text}`)
+      if (hint) label.append(HintElement.of(hint))
       return label
     }
     const independence = document.createElement("select")
@@ -304,7 +306,7 @@ export class WitnessErrorView {
       field(m.independenceField, independence))
     viewing.replaceChildren(title(m.sectionViewing),
       box(m.darkAdapted, c.darkAdapted, value => this.setConditions({ darkAdapted: value })),
-      box(m.correctedVision, c.correctedVision, value => this.setConditions({ correctedVision: value })),
+      box(m.correctedVision, c.correctedVision, value => this.setConditions({ correctedVision: value }), m.correctedVisionHint),
       box(m.glare, c.glare, value => this.setConditions({ glare: value })),
       Object.assign(document.createElement("p"), { className: "section-intro", textContent: m.viewingNote }))
     moon.replaceChildren(title(m.sectionMoon), Object.assign(document.createElement("p"), { className: "section-intro", textContent: m.moonIntro }), this.moonGauge(c))

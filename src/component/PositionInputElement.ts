@@ -1,4 +1,5 @@
 import type { Basis } from "../engine/persistence/Provenance.js"
+import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
 import type { GeoPoint, LocalPoint, PositionFrame, PositionReference, SaidPosition } from "../engine/model/SaidPosition.js"
 import { SaidPositions } from "../engine/model/SaidPosition.js"
 
@@ -30,6 +31,8 @@ export interface PositionInputMessages {
   positionBasisMeasured: string
   positionBasisDerived: string
   positionBasisAssumed: string
+  /** The basis's field in its window. */
+  positionBasisField: string
 }
 
 export const positionInputMessages_en: PositionInputMessages = {
@@ -48,7 +51,8 @@ export const positionInputMessages_en: PositionInputMessages = {
   positionBasisStated: "stated",
   positionBasisMeasured: "measured",
   positionBasisDerived: "derived",
-  positionBasisAssumed: "assumed"
+  positionBasisAssumed: "assumed",
+  positionBasisField: "Basis"
 }
 
 /**
@@ -60,7 +64,7 @@ export interface PositionChange {
   said?: SaidPosition
 }
 
-const STYLE = `
+const STYLE = `${BasisInputElement.CSS}
 rr0-input-position { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3em .5em; }
 /* As the date's own switch (see DateInputElement): it reads as part of the label, before the fields. */
 rr0-input-position .position-mode { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .15em; }
@@ -74,17 +78,8 @@ rr0-input-position .position-from { display: inline-flex; align-items: center; g
 rr0-input-position .position-from select { width: auto; max-width: 14em; }
 rr0-input-position input[type="number"] { width: 7em; }
 rr0-input-position .position-geo input[type="number"] { width: 9.5em; }
-/* What it stands on looks as a date's does (see WitnessErrorView's basis mark): a pill after the name, shown on hover or while
-   edited, and always when it is not "stated". A list, for the keyboard, drawn as the pill. */
-rr0-input-position select.position-basis.position-basis {
-  order: -2; appearance: none; -webkit-appearance: none; width: auto; height: auto !important; min-height: 0; margin: 0;
-  padding: 0 8px !important; border: 1px solid var(--glow-dim, #b08a3e) !important; border-radius: 999px !important; background: none !important;
-  font: 600 11px/1.6 var(--sans, sans-serif) !important; color: var(--glow, #8a6a2a) !important; cursor: pointer; visibility: hidden;
-}
-:is(label, .parameter-row, .observer-position):is(:hover, :focus-within) rr0-input-position select.position-basis,
-rr0-input-position:is(:hover, :focus-within) select.position-basis,
-rr0-input-position select.position-basis:is(.measured, .derived, .assumed) { visibility: visible; }
-rr0-input-position select.position-basis:is(.assumed, .derived) { font-style: italic; }
+/* What it stands on (see BasisInputElement): before the switch, as a date's. */
+rr0-input-position .position-basis { order: -2; }
 rr0-input-position .position-mode { order: -1; }
 rr0-input-position [hidden] { display: none !important; }
 `
@@ -119,7 +114,7 @@ export class PositionInputElement extends HTMLElement {
   private northField?: HTMLInputElement
   private latField?: HTMLInputElement
   private lngField?: HTMLInputElement
-  private basisSelect?: HTMLSelectElement
+  private basisSelect?: BasisInputElement
   private eastLabel?: HTMLElement
   private northLabel?: HTMLElement
   private latLabel?: HTMLElement
@@ -186,12 +181,17 @@ export class PositionInputElement extends HTMLElement {
     geoRow.append(latAxis.row, lngAxis.row)
     for (const field of [east, north]) field.addEventListener("input", () => this.typedLocal())
     for (const field of [lat, lng]) field.addEventListener("input", () => this.typedGeo())
-    const basis = doc.createElement("select")
+    registerBasisInput()
+    const basis = doc.createElement(BasisInputElement.TAG) as BasisInputElement
     basis.id = `${name}-basis`
     basis.className = "position-basis"
-    basis.addEventListener("input", () => {
-      this.shownBasis = basis.value === "" ? undefined : basis.value as Basis
-      this.markBasis()
+    // Its host keeps what a position stands on, not why.
+    basis.rationaleKept = false
+    basis.anchorKey = `${name}-basis`
+    basis.addEventListener("basischange", event => {
+      event.stopPropagation()
+      const entry = (event as CustomEvent<{ entry?: BasisEntry }>).detail.entry
+      this.shownBasis = entry?.basis === "stated" ? undefined : entry?.basis
       this.dispatchEvent(new CustomEvent("basischange", { detail: { basis: this.shownBasis }, bubbles: true, composed: true }))
     })
     this.append(style, mode, fromRow, localRow, geoRow, basis)
@@ -309,7 +309,6 @@ export class PositionInputElement extends HTMLElement {
   set basis(basis: Basis | undefined) {
     this.shownBasis = basis === "stated" ? undefined : basis
     this.build()
-    if (this.basisSelect) this.basisSelect.value = this.shownBasis ?? ""
     this.markBasis()
   }
 
@@ -357,19 +356,15 @@ export class PositionInputElement extends HTMLElement {
     this.latLabel!.textContent = wording.positionLatitude
     this.lngLabel!.textContent = wording.positionLongitude
     this.fromRow!.querySelector(".position-from-text")!.textContent = wording.positionFrom
-    const basis = this.basisSelect!
-    basis.title = wording.positionBasisHint
-    basis.replaceChildren(
-      new Option(wording.positionBasisStated, ""), new Option(wording.positionBasisMeasured, "measured"),
-      new Option(wording.positionBasisDerived, "derived"), new Option(wording.positionBasisAssumed, "assumed"))
-    basis.value = this.shownBasis ?? ""
+    this.basisSelect!.messages = {
+      title: wording.positionBasisHint, basisField: wording.positionBasisField, howField: "", rationaleField: "",
+      basis: { stated: wording.positionBasisStated, measured: wording.positionBasisMeasured, derived: wording.positionBasisDerived, assumed: wording.positionBasisAssumed }
+    }
     this.markBasis()
   }
 
   private markBasis(): void {
-    const basis = this.basisSelect
-    if (!basis) return
-    for (const name of ["measured", "derived", "assumed"]) basis.classList.toggle(name, this.shownBasis === name)
+    if (this.basisSelect) this.basisSelect.entry = this.shownBasis ? { basis: this.shownBasis } : undefined
   }
 
   /** The references, the observer first, and the one picked if it is still there. */

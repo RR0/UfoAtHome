@@ -536,6 +536,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * dropdown, the delete button, the editable name and source, what an import says — {n} traces
    * read from {name}, and {what} left out — and what each kind is called in the dropdown. */
   traceImport: string
+  /** What `traceImport` leaves out, in its (?). */
+  traceImportHint: string
   trace: string
   deleteTrace: string
   traceTitle: string
@@ -960,6 +962,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   accountSource: string
   /** The address of the recording's first source: where the account can be read as given. */
   accountUrl: string
+  /** What `accountUrl` leaves out, in its (?). */
+  accountUrlHint: string
   accountSourceUnknown: string
   accountSourceOnSite: string
   accountSourceInterview: string

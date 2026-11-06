@@ -1,5 +1,6 @@
 import type { CaseEventJson } from "../engine/persistence/caseJson.js"
 import { EditorTheme } from "./EditorTheme.js"
+import { HintElement } from "./HintElement.js"
 import { register as registerInputFile, type InputFileElement, type InputFilePick } from "./InputFileElement.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -130,6 +131,7 @@ const TEMPLATE = `
   #group-transcript > .row { margin-bottom: 12px; }
   @container (max-width: 640px) { #exchanges { --rr0-interview-max-height: 440px; } }
   ${InterviewPlayer.CSS}
+  ${HintElement.CSS}
   ${WindowClose.CSS}
   ${AddMenu.CSS}
   ${Icons.CSS}
@@ -413,7 +415,7 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-by", m.by)
     text("label-summary", m.summary)
     text("label-url", m.transcript)
-    text("label-import-file", m.importFile)
+    HintElement.say(this.shadow.getElementById("label-import-file")!, m.importFile, m.importFileHint)
     text("redact-selection", m.redactSelection)
     this.player?.setMessages(m)
     this.importInput.messages = m

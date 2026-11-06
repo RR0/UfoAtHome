@@ -54,6 +54,8 @@ rr0-input-basis[hidden] { display: none; }
 
   /** The ways a value of its kind can have been obtained, for the window's list (none: the list is not shown). */
   hows: { value: string, label: string }[] = []
+  /** Whether the host keeps a rationale (a position's host keeps its basis alone): its field is shown only then. */
+  rationaleKept = true
 
   private wording?: BasisInputMessages
   private shown?: BasisEntry
@@ -157,7 +159,7 @@ rr0-input-basis[hidden] { display: none; }
       return label
     }
     const window = this.windowElement()
-    window.replaceChildren(heading, labelled(m.basisField, basis), ...(this.hows.length > 0 ? [labelled(m.howField, how)] : []), labelled(m.rationaleField, rationale))
+    window.replaceChildren(heading, labelled(m.basisField, basis), ...(this.hows.length > 0 ? [labelled(m.howField, how)] : []), ...(this.rationaleKept ? [labelled(m.rationaleField, rationale)] : []))
     WindowClose.popover(window, m.title)
     if (typeof window.showPopover === "function" && window.isConnected) window.showPopover()
     else window.hidden = false

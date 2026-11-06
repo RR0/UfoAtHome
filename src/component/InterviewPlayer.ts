@@ -301,16 +301,18 @@ export class InterviewPlayer {
       const status = document.createElement("p")
       status.className = "recording-status"
       this.check(recording, status)
-      row.append(this.labelled(m.recordingKind, kind), this.labelled(m.recordingFile, file), this.labelled(m.recordingOffset, offset), remove, status)
+      row.append(this.labelled(m.recordingKind, kind), this.labelled(m.recordingFile, file), this.labelled(m.recordingOffset, offset, "s"), remove, status)
       return row
     }))
   }
 
-  private labelled(text: string, control: HTMLElement): HTMLElement {
+  /** A control with its name, and its unit after it. */
+  private labelled(text: string, control: HTMLElement, unit?: string): HTMLElement {
     const label = document.createElement("label")
     const name = document.createElement("span")
     name.textContent = text
     label.append(name, control)
+    if (unit) label.append(` ${unit}`)
     return label
   }
 

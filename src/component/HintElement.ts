@@ -31,6 +31,12 @@ ${HelpPopover.css("rr0-hint .hint-pop")}
     return hint
   }
 
+  /** Says `text` in `target`, and `hint`, when there is one, in a (?) after it: a label, worded again in another language. */
+  static say(target: HTMLElement, text: string, hint?: string): void {
+    target.textContent = text
+    if (hint) target.append(HintElement.of(hint))
+  }
+
   static register(): void {
     if (!customElements.get(HintElement.TAG)) customElements.define(HintElement.TAG, HintElement)
   }

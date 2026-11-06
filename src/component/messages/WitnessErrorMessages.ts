@@ -31,6 +31,8 @@ export interface WitnessErrorMessages {
   unknownChoice: string
   darkAdapted: string
   correctedVision: string
+  /** What `correctedVision` leaves out, in its (?). */
+  correctedVisionHint: string
   glare: string
   viewingNote: string
   moonIntro: string
