@@ -1,4 +1,5 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
+import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import { Vector3 } from "three"
 import { EditorView } from "@codemirror/view"
 import { register, ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
@@ -6823,7 +6824,8 @@ describe("SightingEditorElement assessment", () => {
 
     expect(nest(element)!.querySelector(".param-nest-label")!.textContent)
       .toBe(sightingEditorMessages_en.assessmentGroup)
-    expect(nest(element)!.querySelectorAll(".param-chip")).toHaveLength(1)
+    // Coverage's score, and Ballester-Guasp's "to be assessed" while the account says nothing of how it was obtained.
+    expect([...nest(element)!.querySelectorAll<HTMLElement>(".param-chip")].map(chip => chip.dataset.field)).toEqual(["coverage", "ballester-guasp"])
     // Last, which is both its own run of the group and the right place to read it.
     const chips = [...element.shadowRoot!.getElementById("param-summary")!.children]
     expect(chips[chips.length - 1]).toBe(nest(element))
@@ -6834,8 +6836,8 @@ describe("SightingEditorElement assessment", () => {
     const select = (id: string) => element.shadowRoot!.getElementById(id) as HTMLSelectElement
     const chip = () => nest(element)?.querySelector<HTMLElement>('.param-chip[data-field="ballester-guasp"]') ?? null
     await waitFor(() => nest(element) !== null)
-    // No score while the account does not say how it was obtained.
-    expect(chip()).toBeNull()
+    // No score while the account does not say how it was obtained, or its strangeness is not judged: to be assessed.
+    expect(chip()!.textContent).toContain(sightingLabels_en.assessmentVerdicts["ballester-guasp.pending"])
     for (const [id, value] of [["accountSource", "interview"], ["strangeness-appearance", "yes"]]) {
       select(id).value = value
       select(id).dispatchEvent(new Event("change"))

@@ -63,7 +63,8 @@ export const sightingLabels_en: SightingLabels = {
     "hynek.rv": "RV — radar-visual",
     "hynek.ce1": "CE1 — close encounter",
     "hynek.ce2": "CE2 — with a physical trace",
-    "hynek.ce3": "CE3 — with entities"
+    "hynek.ce3": "CE3 — with entities",
+    "ballester-guasp.pending": "to be assessed"
   },
   timeQualifierApproximate: "Approximate",
   timeQualifierUncertain: "Uncertain",

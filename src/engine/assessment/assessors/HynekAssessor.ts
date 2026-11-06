@@ -1,7 +1,7 @@
 import type { Assessment, Assessor } from "../Assessor.js"
 import type { Sighting } from "../../model/Sighting.js"
 import { computeBodyPosition, sightingTimeToDate } from "../../astronomy/CelestialPositions.js"
-import { ShapeDistance } from "../../shape/ShapeDistance.js"
+import { NearestApproach } from "../../shape/NearestApproach.js"
 
 /** How far the Sun may be below the horizon and the sighting still count as made by daylight.
  * Civil twilight: the Sun is down, and there is still enough light to see a shape as a shape rather
@@ -46,8 +46,8 @@ export class HynekAssessor implements Assessor {
     const entities = sighting.decor
       .map((object, index) => ({ object, index }))
       .filter(({ object }) => object.kind === "entity")
-    const nearestM = HynekAssessor.nearest(sighting)
-    const close = nearestM !== undefined && nearestM <= CLOSE_ENCOUNTER_M
+    const approach = NearestApproach.of(sighting)
+    const close = approach !== undefined && approach.m <= CLOSE_ENCOUNTER_M
     return {
       verdict: entities.length > 0
         ? "ce3"
@@ -66,11 +66,11 @@ export class HynekAssessor implements Assessor {
         { id: "traces", paths: [], unsupported: true },
         {
           id: "proximity",
-          // Derived and never stated: no observer measured a distance, and this one comes out of
-          // their own walk against the object's growing apparent size (see ShapeDistance), on an
-          // assumption about the object holding still that nothing in the file can confirm.
-          basis: nearestM === undefined ? undefined : "derived",
-          paths: nearestM === undefined ? [] : ["timeline", "observerTrack"]
+          // Never stated: no observer measured a distance. It comes out of their own walk against the
+          // object's growing apparent size (derived, see ShapeDistance), or else out of where the
+          // interpretation stands its bodies (assumed): see NearestApproach.
+          basis: approach?.basis,
+          paths: approach?.paths ?? []
         },
         { id: "radar", paths: [], unsupported: true },
         {
@@ -83,15 +83,6 @@ export class HynekAssessor implements Assessor {
         }
       ]
     }
-  }
-
-  /** How close the nearest shape ever came, metres, or undefined when nothing in the recording
-   * establishes a distance at all — which is the common case and the correct answer for it. */
-  private static nearest(sighting: Sighting): number | undefined {
-    const distances = sighting.timeline.sourceIds
-      .map(sourceId => ShapeDistance.of(sighting, sourceId)?.nearestM)
-      .filter((m): m is number => m !== undefined)
-    return distances.length > 0 ? Math.min(...distances) : undefined
   }
 
   /** Whether the Sun stood high enough for a shape to be seen as a shape, or undefined when the

@@ -3,7 +3,7 @@ import type { Sighting } from "../../model/Sighting.js"
 import type { Basis } from "../../persistence/Provenance.js"
 import { type Account, type ObserverActivity, type ObserversRelation, type OccupationKind, STRANGENESS_FACTORS, type StrangenessFactor } from "../../model/Account.js"
 import { SaidTexts } from "../../model/SaidText.js"
-import { ShapeDistance } from "../../shape/ShapeDistance.js"
+import { NearestApproach } from "../../shape/NearestApproach.js"
 import { CoverageAssessor } from "./CoverageAssessor.js"
 
 /** One of the figures the assessment is made of, before it is a criterion: its value, and where it was read. */
@@ -24,7 +24,7 @@ interface Reading {
  *
  * The method's own rule for what is not known is kept: it counts 0, so a recording that says little scores little, which is the method
  * telling an investigator what is missing (see each criterion's basis). Only a recording that does not say how its account was obtained
- * gets no score at all, rather than a 0 taken for a verdict. What this project reads its own way, and says so:
+ * or whose strangeness the investigators have not judged, gets no score at all but "pending", rather than a 0 taken for a verdict. What this project reads its own way, and says so:
  *
  * - The number of witnesses is the account's (Sighting.observerCount), not the case's: a case gathers one recording per account.
  *   For the same reason the observers of one recording are together; independent observers are the accounts of a case.
@@ -65,6 +65,9 @@ export class BallesterGuaspAssessor implements Assessor {
 
   static readonly FACTORS = STRANGENESS_FACTORS
 
+  /** The verdict of an account not yet assessable: how it was obtained, or its strangeness, not yet said. */
+  static readonly PENDING = "pending"
+
   /** Weakest first, as CoverageAssessor: a figure is worth no more than the least of what holds it up. */
   private static readonly WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated", "measured"]
 
@@ -82,9 +85,14 @@ export class BallesterGuaspAssessor implements Assessor {
       ...BallesterGuaspAssessor.FACTORS.map((factor, index) => this.criterion(`bg-${factor}`, strangeness[index])),
       ...(Object.keys(weights) as (keyof typeof weights)[]).map(key => this.criterion(`bg-${key}`, reliability[key]))
     ]
-    // No score until the account says how it was obtained: the method would rate it 0, which a reader takes for a verdict on the
-    // sighting where it is only the file saying nothing yet. The criteria still say what is missing.
-    return { score: account.source === undefined ? undefined : q * sigma * pi, factors: { q, sigma, pi }, criteria }
+    // No score until the account says how it was obtained and the investigators have judged its strangeness: the method would rate it 0,
+    // which a reader takes for a verdict on the sighting where it is only the file saying nothing yet. Σ's factors the recording can
+    // show (detection, a close approach) are not that judgement: an account whose appearance and movement nobody weighed is not one
+    // whose appearance and movement were found ordinary. Said "pending" instead, and the criteria still say what is missing.
+    const judged = Object.values(account.strangeness ?? {}).some(value => value !== undefined)
+    return account.source === undefined || !judged
+      ? { verdict: BallesterGuaspAssessor.PENDING, factors: { q, sigma, pi }, criteria }
+      : { score: q * sigma * pi, factors: { q, sigma, pi }, criteria }
   }
 
   private criterion(id: string, reading: Reading): AssessmentCriterion {
@@ -151,11 +159,10 @@ export class BallesterGuaspAssessor implements Assessor {
           return { value: category === "eye" || category === "binoculars" ? 0 : 1, basis: "derived", paths: ["instrumentId"] }
         }
         case "close": {
-          const distances = sighting.timeline.sourceIds
-            .map(sourceId => ShapeDistance.of(sighting, sourceId)?.nearestM)
-            .filter((m): m is number => m !== undefined)
-          if (distances.length === 0) return { value: 0, paths: [] }
-          return { value: Math.min(...distances) <= BallesterGuaspAssessor.CLOSE_M ? 1 : 0, basis: "derived", paths: ["timeline", "observerTrack"] }
+          // From the observer's walk, else from where the interpretation stands its bodies, an assumption (see NearestApproach).
+          const approach = NearestApproach.of(sighting)
+          if (approach === undefined) return { value: 0, paths: [] }
+          return { value: approach.m <= BallesterGuaspAssessor.CLOSE_M ? 1 : 0, basis: approach.basis, paths: approach.paths }
         }
         case "beings": {
           // The beings the scene places, which the account states; none placed is the scene saying there were none.

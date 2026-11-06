@@ -37,9 +37,12 @@ describe("BallesterGuaspAssessor", () => {
   it("counts what is not known as 0, the method's own rule, and says it is unanswered", async () => {
     const assessment = await assess({})
     expect(assessment.factors!.q).toBe(0)
-    // No score rather than a 0 a reader would take for a verdict, while the account does not say how it was obtained.
+    // No score rather than a 0 a reader would take for a verdict, while the account does not say how it was obtained, or its
+    // strangeness is not judged: "pending".
     expect(assessment.score).toBeUndefined()
-    expect((await assess({ account: { source: "press" } })).score).toBe(0)
+    expect(assessment.verdict).toBe("pending")
+    expect((await assess({ account: { source: "press" } })).verdict).toBe("pending")
+    expect((await assess({ account: { source: "press", strangeness: { appearance: false } } })).score).toBe(0)
     for (const id of ["bg-information", "bg-occupation", "bg-activity", "bg-age", "bg-appearance", "bg-traces"]) {
       expect(of(assessment, id).basis, id).toBeUndefined()
     }
@@ -79,5 +82,14 @@ describe("BallesterGuaspAssessor", () => {
     expect(of(judged, "bg-detection")).toMatchObject({ value: 1, basis: "stated" })
     const eye = await assess({})
     expect(of(eye, "bg-detection")).toMatchObject({ value: 0, basis: "derived" })
+  })
+
+  it("reads a close approach off where the interpretation stands what explains the phenomenon, as an assumption", async () => {
+    const at = (distanceM: number) => assess({
+      timeline: { keyframes: [] },
+      interpretation: { bodies: [{ id: "sphere", explains: ["boule"], model: { id: "sphere" }, track: [{ t: 0, eastM: distanceM, northM: 0, onGround: true }] }] }
+    } as Partial<SightingRecordingJsonV1>)
+    expect(of(await at(82), "bg-close")).toMatchObject({ value: 1, basis: "assumed", paths: ["interpretation.bodies.0"] })
+    expect(of(await at(400), "bg-close")).toMatchObject({ value: 0, basis: "assumed" })
   })
 })
