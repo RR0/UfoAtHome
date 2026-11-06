@@ -103,6 +103,10 @@ export interface WalkParams {
  */
 export interface FollowParams {
   target: string
+  /** A phenomenon going across the sky (see TravelParams): how long after the event's start the observer reacts, s; 0 when absent. */
+  reactionS?: number
+  /** How far behind it the eyes are as they follow it, s; 0 when absent. */
+  lagS?: number
 }
 
 /**
@@ -172,6 +176,10 @@ export interface LookPart {
   color: string
   brightness?: number
   halo?: number
+  /** How much of what is behind it shows through: 0 none, 1 all. */
+  transparency?: number
+  /** How soft its edge is: 0 sharp, 1 none. */
+  blur?: number
   widthShare: number
   /** An oval's is its width. */
   heightShare?: number

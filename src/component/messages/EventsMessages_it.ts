@@ -17,13 +17,13 @@ export const eventsMessages_it: EventsMessages = {
   overriddenBodiesNote: "Fotogrammi chiave propri prevalgono su questi eventi.",
   add: "Aggiungi un evento", remove: "Elimina l'evento", none: "Nessun evento",
   resetToEvents: "Torna agli eventi",
-  kinds: { drive: "Guida", lookAhead: "Guarda la strada", lean: "Si sporge", watch: "Guarda nello specchietto", stand: "Si trova", look: "Guarda", appearance: "Aspetto", walk: "Cammina", follow: "Segue con lo sguardo", blink: "Lampeggia", vanish: "Scompare", motion: "Si muove", spin: "Gira", rise: "Si alza", ride: "Viaggia in", turn: "Si gira", light: "Luce" },
+  kinds: { drive: "Guida", lookAhead: "Guarda la strada", lean: "Si sporge", watch: "Guarda nello specchietto", stand: "Si trova", look: "Guarda", appearance: "Aspetto", walk: "Cammina", follow: "Segue con lo sguardo", blink: "Lampeggia", vanish: "Scompare", motion: "Si muove", spin: "Gira", rise: "Si alza", ride: "Viaggia in", turn: "Si gira", light: "Luce", travel: "Attraversa il cielo" },
   params: {
     vehicle: "Veicolo", path: "Percorso", speeds: "Velocità", speedDivisors: "Velocità divise per", through: "Passa per", eye: "Occhio nel veicolo",
     fovDeg: "Campo visivo", target: "Guarda", pitchShare: "Alza lo sguardo fino a (parte della sua altezza)", keepDeg: "Lo tiene entro", glanceBeyondDeg: "Occhiate oltre",
     glanceS: "Occhiata", roadS: "Di nuovo sulla strada", offsetM: "Sposta l'occhio di", holdS: "Per", turnS: "In", mirror: "Specchietto", firstS: "Prima",
     mirrorS: "Nello specchietto", glancesUntil: "Occhiate dirette fino a",
-    place: "Dove", metres: "Dimensione (larghezza, altezza sopra l'occhio)", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", motion: "Movimento", turnsPerS: "Giri al secondo", distanceM: "Distanza", angleDeg: "Scarto dalla verticale", stops: "Si ferma", in: "In", aboveM: "Sopra", from: "Da", to: "A", headingDeg: "Rotta", pitchDeg: "Inclinazione", cdM2: "Luminanza"
+    place: "Dove", metres: "Dimensione (larghezza, altezza sopra l'occhio)", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", motion: "Movimento", turnsPerS: "Giri al secondo", distanceM: "Distanza", angleDeg: "Scarto dalla verticale", stops: "Si ferma", in: "In", aboveM: "Sopra", from: "Da", to: "A", headingDeg: "Rotta", pitchDeg: "Inclinazione", cdM2: "Luminanza", towards: "Verso", sizeDeg: "Dimensione allo zenit", sizeBy: "Dimensione secondo", byDeg: "Di", side: "Lato", seenFrom: "Visto da", reactionS: "Reagisce dopo", lagS: "In ritardo di"
   },
   from: "da",
   to: "a",

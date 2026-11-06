@@ -99,9 +99,9 @@ export class RecordingEvents {
     sighting.eventsExpansion.timelinePending = true
   }
 
-  /** The events that say where a phenomenon of the account stands: one for each. */
+  /** The events that say where a phenomenon of the account is: where it stands, or its way across the sky (see TravelParams); one for each. */
   private static stands(sighting: Sighting): RecordingEventJson[] {
-    return (sighting.events ?? []).filter(event => event.eventType === "stand" && RecordingActors.isPhenomenon(sighting, event))
+    return (sighting.events ?? []).filter(event => (event.eventType === "stand" || event.eventType === "travel") && RecordingActors.isPhenomenon(sighting, event))
   }
 
   /** The account's shapes as the events' snapshot compares them: their keyframes and order, not how they are grouped, which the file
@@ -210,7 +210,7 @@ export class RecordingEvents {
       watch && { t: watch.t, params: watch.params as unknown as WatchParams },
       t => {
         // Its height from where it stands, when the recording says, seen from the vehicle's place then; from the account's shapes otherwise.
-        const stand = RecordingEvents.stands(sighting)[0]
+        const stand = RecordingEvents.stands(sighting).find(event => event.eventType === "stand")
         if (!stand) return RecordingEvents.phenomenonPitchAt(sighting, t)
         const place = expansion.stateAt(t)
         return PhenomenonExpansion.seenFrom(stand.params as unknown as StandParams, { lat: place.lat, lng: place.lng }, t).altitudeDeg
