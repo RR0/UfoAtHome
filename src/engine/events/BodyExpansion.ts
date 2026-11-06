@@ -18,8 +18,11 @@ interface Place {
 export class BodyExpansion {
   private static readonly SAMPLE_MS = 250
 
-  /** @param endMs When an event that states no end ends: the end of the recording. */
-  constructor(private readonly body: BodyJson, private readonly events: RecordingEventJson[], private readonly endMs?: number) {
+  /**
+   * @param endMs When an event that states no end ends: the end of the recording.
+   * @param sampleMs How often a rise is sampled, when the recording says (see Sighting.sampleMs): SAMPLE_MS otherwise.
+   */
+  constructor(private readonly body: BodyJson, private readonly events: RecordingEventJson[], private readonly endMs?: number, private readonly sampleMs?: number) {
   }
 
   /** The body's track with its events' keyframes in it, in order. */
@@ -91,7 +94,7 @@ export class BodyExpansion {
             aboveGroundM: start.aboveGroundM + along * Math.cos(angle)
           }
         }
-        for (let t = event.t; t < until; t += BodyExpansion.SAMPLE_MS) put(BodyExpansion.key(t, at((t - event.t) / (until - event.t))))
+        for (let t = event.t; t < until; t += this.sampleMs ?? BodyExpansion.SAMPLE_MS) put(BodyExpansion.key(t, at((t - event.t) / (until - event.t))))
         place = at(1)
         put(BodyExpansion.key(until, place))
       } else if (event.eventType === "turn") {

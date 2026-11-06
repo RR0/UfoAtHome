@@ -86,8 +86,9 @@ export class FootExpansion {
     }
   }
 
-  /** How often the look on a phenomenon going across the sky is written, ms; worked out twice as often, for where it is overhead. */
-  private static readonly FOLLOW_SKY_MS = 50
+  /** How often the look on a phenomenon going across the sky is written when the recording says not (see Sighting.sampleMs), ms: as often
+   * as its shapes are (PhenomenonExpansion), which are turned on the picture of that look. */
+  private static readonly FOLLOW_SKY_MS = 25
   /** How long the eyes take to catch up with it once they react, ms (see FollowParams.reactionS). */
   private static readonly CATCH_UP_MS = 900
   /** Above this altitude, the head goes back and the body turns: the heading is spread over the time it is that high, degrees. */
@@ -111,7 +112,8 @@ export class FootExpansion {
     const until = event.until ?? end
     const lagMs = (params.lagS ?? 0) * 1000, reactionMs = (params.reactionS ?? 0) * 1000
     const times: number[] = []
-    for (let t = event.t; t <= until; t += FootExpansion.FOLLOW_SKY_MS / 2) times.push(t)
+    const step = this.sighting.sampleMs ?? FootExpansion.FOLLOW_SKY_MS
+    for (let t = event.t; t <= until; t += step) times.push(t)
     const seen = times.map(t => path.at(Math.max(travel.t, t - lagMs)))
     const headings = seen.map(direction => direction.azimuthDeg)
     const over = seen.flatMap((direction, index) => direction.altitudeDeg > FootExpansion.OVERHEAD_DEG ? [index] : [])
@@ -121,7 +123,6 @@ export class FootExpansion {
       for (let index = first; index <= last; index++) headings[index] = ((h0 + delta * SkyPath.smooth((index - first) / (last - first))) % 360 + 360) % 360
     }
     times.forEach((t, index) => {
-      if ((t - event.t) % FootExpansion.FOLLOW_SKY_MS !== 0) return
       const k = SkyPath.smooth((t - event.t - reactionMs) / FootExpansion.CATCH_UP_MS)
       const d = ((headings[index] - from.headingDeg + 540) % 360) - 180
       const pitch = Math.min(seen[index].altitudeDeg, FootExpansion.HIGHEST_PITCH_DEG)

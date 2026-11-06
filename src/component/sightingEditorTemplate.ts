@@ -769,7 +769,7 @@ export const html = `
     <h3 class="section-title"><span id="label-section-path">Path</span></h3>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
-      <label class="adv"><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="16" max="1000" step="16" value="100"/> ms</label>
+      <label class="adv"><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="1" max="1000" step="1" value="100"/> ms</label>
     </div>
     </div>
     </div>

@@ -6,6 +6,7 @@ import { GazeExpansion } from "./GazeExpansion.js"
 import { FootExpansion } from "./FootExpansion.js"
 import { BodyExpansion } from "./BodyExpansion.js"
 import { DecorLightExpansion } from "./DecorLightExpansion.js"
+import { KeyframeRuns } from "./KeyframeRuns.js"
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "../interpretation/Interpretation.js"
 import { PhenomenonExpansion } from "./PhenomenonExpansion.js"
 import { RecordingActors } from "./RecordingActors.js"
@@ -95,6 +96,7 @@ export class RecordingEvents {
       for (const keyframe of Timeline.fromJSON(json).allKeyframes) sighting.timeline.addKeyframe(keyframe.t, keyframe.shapes)
     }
     if (stands.length === 0) return
+    KeyframeRuns.timeline(sighting.timeline)
     sighting.eventsExpansion ??= { decorTracks: {} }
     sighting.eventsExpansion.timelinePending = true
   }
@@ -194,6 +196,7 @@ export class RecordingEvents {
     if (!drive) {
       // On foot: where they walk, what they look at, what they follow.
       if (new FootExpansion(sighting, events).keyframes().length > 0) {
+        KeyframeRuns.observer(sighting.observerTrack)
         sighting.eventsExpansion = { ...sighting.eventsExpansion, observerTrack: JSON.stringify(sighting.observerTrack.toJSON()), decorTracks: sighting.eventsExpansion?.decorTracks ?? {} }
       }
       return
@@ -226,6 +229,7 @@ export class RecordingEvents {
       }
     }))
     for (const keyframe of keyframes) sighting.observerTrack.addKeyframe(keyframe.t, keyframe.pose)
+    KeyframeRuns.observer(sighting.observerTrack)
     const result: EventsExpansion = { observerTrack: JSON.stringify(sighting.observerTrack.toJSON()), decorTracks: {} }
     const vehicle = driveParams.vehicle === undefined ? undefined : sighting.decor.find(object => object.id === driveParams.vehicle)
     if (vehicle && !vehicle.track?.length) {
@@ -273,7 +277,7 @@ export class RecordingEvents {
       const stated = JSON.stringify(body.track)
       const ride = events.find(event => event.eventType === "ride")
       const carrier = ride && bodies.find(candidate => candidate.id === (ride.params as unknown as RideParams).in)
-      body.track = ride ? (carrier ? BodyExpansion.ride(body, ride, carrier) : body.track) : new BodyExpansion(body, events, RecordingEvents.endOf(sighting)).track()
+      body.track = ride ? (carrier ? BodyExpansion.ride(body, ride, carrier) : body.track) : new BodyExpansion(body, events, RecordingEvents.endOf(sighting), sighting.sampleMs).track()
       sighting.eventsExpansion ??= { decorTracks: {} }
       sighting.eventsExpansion.bodies = { ...sighting.eventsExpansion.bodies, [body.id]: { stated, expanded: JSON.stringify(body.track) } }
     }

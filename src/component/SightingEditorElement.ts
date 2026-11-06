@@ -1552,6 +1552,14 @@ export class SightingEditorElement extends HTMLElement {
     this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, this.messages.events)
     this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, this.messages.events, "phenomenon")
     this.bodiesEventsPanel = new EventsPanel(this.shadow.getElementById("bodies-events-section")!, eventsHost, this.messages.events, "bodies")
+    // How often a keyframe is taken is the recording's (see Sighting.sampleMs): what the events give is worked out again at that pace.
+    this.samplingRateInput.addEventListener("change", () => {
+      const ms = Number(this.samplingRateInput.value)
+      eventsHost.editing()
+      this.ufoElement.sighting.sampleMs = Number.isFinite(ms) && ms > 0 ? ms : undefined
+      RecordingEvents.refresh(this.ufoElement.sighting)
+      eventsHost.changed()
+    })
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
@@ -7769,6 +7777,7 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshInstrumentOptions()
     this.refreshFilterOptions()
     this.syncOpticsFromInstrument()
+    if (this.samplingRateInput !== this.shadow.activeElement) this.samplingRateInput.value = String(this.samplingRate)
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -10840,8 +10849,11 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
   }
 
+  /** How often the recorder takes a keyframe when the recording says not (see Sighting.sampleMs), ms. */
+  private static readonly DEFAULT_SAMPLE_MS = 100
+
   private get samplingRate(): number {
-    return Number(this.samplingRateInput.value)
+    return this.ufoElement.sighting.sampleMs ?? SightingEditorElement.DEFAULT_SAMPLE_MS
   }
 
   private buildPrototype(bounds = this.defaultBounds()) {

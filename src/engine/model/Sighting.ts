@@ -555,6 +555,13 @@ export class Sighting {
   eventsExpansion?: EventsExpansion
 
   /**
+   * How often a keyframe is taken, ms: by the editor's recorder as a shape is moved by hand, and where the events are worked out into values
+   * (the account's shapes, the look that follows them, a body that rises), all at that same pace, so that what is drawn and the look it is
+   * drawn for never fall apart. Absent, each of those keeps its own (see RecordingEvents). Not readonly, same reasoning as account above.
+   */
+  sampleMs?: number
+
+  /**
    * How many people THIS observer's account puts at the scene, themselves included — counted off the
    * decor, never stored.
    *

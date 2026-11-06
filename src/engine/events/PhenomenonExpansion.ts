@@ -68,7 +68,7 @@ export class PhenomenonExpansion {
           if (next?.parts.some(part => part.sourceId === sourceId)) put(next.t - 1, sourceId)
           continue
         }
-        const sample = this.path ? PhenomenonExpansion.TRAVEL_SAMPLE_MS : PhenomenonExpansion.SAMPLE_MS
+        const sample = this.sighting.sampleMs ?? (this.path ? PhenomenonExpansion.TRAVEL_SAMPLE_MS : PhenomenonExpansion.SAMPLE_MS)
         for (let t = look.t; t < look.until; t += sample) put(t, sourceId)
         put(look.until - 1, sourceId)
       }

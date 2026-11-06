@@ -133,6 +133,8 @@ export interface SightingRecordingJson {
   iso?: number
   /** How the device metered the light it exposed by — see Sighting.metering. Absent means the device's own. */
   metering?: MeteringMode
+  /** How often a keyframe is taken, ms — see Sighting.sampleMs. Absent means each way of taking them keeps its own. */
+  sampleMs?: number
   /** See Sighting.lens. */
   lens?: LensStateJson
   /** How bright the night sky is at the place, towns and all: the zenith of a moonless night in
@@ -242,6 +244,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
     metering: sighting.metering,
+    sampleMs: sighting.sampleMs,
     lens: sighting.lens,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
@@ -328,6 +331,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sway = json.sway
   sighting.iso = json.iso
   sighting.metering = json.metering
+  sighting.sampleMs = json.sampleMs
   sighting.lens = json.lens
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
