@@ -39,6 +39,11 @@ export interface EventsMessages {
   points: string
   /** A speed or a divisor row's instant. */
   at: string
+  /** A row of a table of instants whose value comes at once, not from the row before; and why one would say so. */
+  atOnce: string
+  atOnceHint: string
+  addRow: string
+  removeRow: string
   /** What a value's basis is called (see Basis). */
   basis: Record<"stated" | "derived" | "assumed" | "measured", string>
 }

@@ -14541,16 +14541,13 @@
        "degPerS": 11.1262
       },
       {
-       "t": 4299,
-       "degPerS": 11.1262
-      },
-      {
        "t": 4300,
-       "degPerS": 7.7883
+       "degPerS": 7.7883,
+       "step": true
       }
      ],
      "basis": "derived",
-     "rationale": "60 degrees in 0.5 s to the zenith (\"dans les 500 millisecondes\"), then much slower: how much slower, so that it is at the tree tops due south when the spiral starts"
+     "rationale": "60 degrees in 0.5 s to the zenith (\"dans les 500 millisecondes\"), then much slower: how much slower, so that it is at the tree tops due south when the spiral starts; slower at once as it starts spiralling"
     },
     "sizeDeg": {
      "value": 3.0,

@@ -193,8 +193,8 @@ export class PhenomenonExpansion {
     const east = (params.place.lng - here.lng) * Math.PI / 180 * PhenomenonExpansion.R * Math.cos(here.lat * Math.PI / 180)
     const north = (params.place.lat - here.lat) * Math.PI / 180 * PhenomenonExpansion.R
     const distance = Math.hypot(east, north)
-    const widthM = DriveExpansion.linear(params.metres.map(({ t, widthM }) => ({ t, value: widthM })), t)
-    const heightM = DriveExpansion.linear(params.metres.map(({ t, heightM }) => ({ t, value: heightM })), t)
+    const widthM = DriveExpansion.linear(params.metres.map(({ t, widthM, step }) => ({ t, value: widthM, step })), t)
+    const heightM = DriveExpansion.linear(params.metres.map(({ t, heightM, step }) => ({ t, value: heightM, step })), t)
     return {
       azimuthDeg: ((Math.atan2(east, north) * 180 / Math.PI) % 360 + 360) % 360,
       altitudeDeg: Math.atan2(heightM, distance) * 180 / Math.PI,

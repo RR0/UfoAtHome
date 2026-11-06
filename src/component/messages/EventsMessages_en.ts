@@ -29,5 +29,9 @@ export const eventsMessages_en: EventsMessages = {
   to: "to",
   points: "{n} points",
   at: "at",
+  atOnce: "at once",
+  atOnceHint: "The value changes at once at this instant, instead of gradually from the row before",
+  addRow: "Add a row",
+  removeRow: "Remove this row",
   basis: { stated: "stated", derived: "derived", assumed: "assumed", measured: "measured" }
 }

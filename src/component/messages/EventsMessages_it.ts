@@ -29,5 +29,9 @@ export const eventsMessages_it: EventsMessages = {
   to: "a",
   points: "{n} punti",
   at: "a",
+  atOnce: "di colpo",
+  atOnceHint: "Il valore cambia di colpo in questo istante, invece di arrivare gradualmente dalla riga precedente",
+  addRow: "Aggiungi una riga",
+  removeRow: "Rimuovi questa riga",
   basis: { stated: "dichiarato", derived: "dedotto", assumed: "supposto", measured: "misurato" }
 }

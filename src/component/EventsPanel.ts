@@ -4,6 +4,7 @@ import { RecordingEvents } from "../engine/events/RecordingEvents.js"
 import { RecordingActors } from "../engine/events/RecordingActors.js"
 import type { EventsMessages } from "./messages/EventsMessages.js"
 import { ElementList } from "./ElementList.js"
+import { Icons } from "./Icons.js"
 import type { ProvenanceEntry } from "../engine/persistence/Provenance.js"
 import type { GeoPoint, PositionFrame, SaidPosition } from "../engine/model/SaidPosition.js"
 import { register as registerPositionInput } from "./PositionInputElement.js"
@@ -36,6 +37,9 @@ export interface EventsPanelHost {
   positionMessages?(): PositionInputMessages
 }
 
+/** A row of a table of instants: when, its numbers, and whether it comes at once rather than from the row before. */
+type InstantRow = { t: number, step?: boolean } & Record<string, number | boolean | undefined>
+
 /** Whose events a panel shows: the observer's (their poses, the tracks of what carries them), the phenomenon's (the account's shapes), a body's. */
 export type EventsActor = "observer" | "phenomenon" | "bodies"
 
@@ -56,7 +60,9 @@ export class EventsPanel {
 .event-params { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
 .event-params input[type="number"] { width: 6em; }
 .event-params input[type="text"] { width: 10em; }
-.event-rows { display: grid; grid-template-columns: repeat(var(--columns, 2), max-content); gap: 2px 8px; }
+.event-table { display: grid; justify-items: start; gap: 4px; }
+.event-rows { display: grid; grid-template-columns: repeat(var(--columns, 2), max-content); gap: 2px 8px; align-items: center; }
+.event-row-step { font-size: 13px; white-space: nowrap; }
 .event-basis { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--ink-dim); }
 `
 
@@ -366,18 +372,8 @@ export class EventsPanel {
       const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : key === "cdM2" ? "cd/m²" : key === "hz" ? "Hz" : ""
       return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" || seconds || key.endsWith("PerS") ? 0.05 : key.endsWith("M") ? 0.01 : 1)
     }
-    if (Array.isArray(value) && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {
-      // A table of instants: each row's instant and its numbers (a speed, a divisor, a width and a height), edited where they stand.
-      const fields = Object.keys(value[0] ?? {}).filter(field => field !== "t" && typeof value[0][field] === "number")
-      const units: Record<string, string> = { kmh: "km/h", degPerS: "°/s", widthM: "m", heightM: "m", altitudeM: "m" }
-      const rows = document.createElement("span")
-      rows.className = "event-rows"
-      rows.style.setProperty("--columns", String(1 + fields.length))
-      for (const row of value as Record<string, number>[]) {
-        rows.append(this.seconds(row.t, typed => { row.t = typed }, path, `${this.messages.at} `))
-        for (const field of fields) rows.append(this.number(row[field], typed => { row[field] = typed }, path, units[field] ?? "", field === "divisor" ? 0.05 : 1))
-      }
-      return rows
+    if (Array.isArray(value) && value.length > 0 && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {
+      return this.rows(value as InstantRow[], path)
     }
     // A look's parts: how many; a blink's: which.
     if (Array.isArray(value) && value.every(part => typeof part === "object" && part !== null && typeof part.sourceId === "string")) {
@@ -409,6 +405,61 @@ export class EventsPanel {
       return document.createTextNode(Object.entries(place).map(([field, said]) => `${field} ${said ?? "∅"}`).join(", "))
     }
     return document.createTextNode(String(value))
+  }
+
+  /**
+   * A table of instants (a speed, a divisor, a width and a height at instants of the recording), as long as the account needs: each row's
+   * instant and its numbers edited where they stand, whether its value comes at once rather than from the row before, 🗑 to remove it, and
+   * "+" to add one after the last. The rows keep in the order of their instants.
+   */
+  private rows(rows: InstantRow[], path: string): Node {
+    const fields = Object.keys(rows[0]).filter(field => field !== "t" && typeof rows[0][field] === "number")
+    const units: Record<string, string> = { kmh: "km/h", degPerS: "°/s", widthM: "m", heightM: "m", altitudeM: "m" }
+    const table = document.createElement("span")
+    table.className = "event-rows"
+    table.style.setProperty("--columns", String(3 + fields.length))
+    rows.forEach((row, index) => {
+      table.append(this.seconds(row.t, typed => {
+        row.t = typed
+        rows.sort((a, b) => a.t - b.t)
+      }, path, `${this.messages.at} `))
+      for (const field of fields) table.append(this.number(row[field] as number, typed => { row[field] = typed }, path, units[field] ?? "", field === "divisor" ? 0.05 : 1))
+      // The first row has no row before it to come from.
+      if (index === 0) table.append(document.createElement("span"))
+      else {
+        const step = document.createElement("label")
+        step.className = "event-row-step"
+        step.title = this.messages.atOnceHint
+        step.append(this.check(row.step === true, ticked => {
+          if (ticked) row.step = true
+          else delete row.step
+        }, path), ` ${this.messages.atOnce}`)
+        table.append(step)
+      }
+      const remove = document.createElement("button")
+      remove.type = "button"
+      remove.className = "icon-btn event-row-remove"
+      remove.innerHTML = Icons.TRASH
+      remove.title = remove.ariaLabel = this.messages.removeRow
+      remove.disabled = rows.length < 2
+      remove.addEventListener("click", () => this.edited(() => { rows.splice(index, 1) }, path))
+      table.append(remove)
+    })
+    const add = document.createElement("button")
+    add.type = "button"
+    add.className = "icon-btn event-row-add"
+    add.innerHTML = Icons.PLUS
+    add.title = add.ariaLabel = this.messages.addRow
+    add.addEventListener("click", () => this.edited(() => {
+      const last = rows[rows.length - 1]
+      const next: InstantRow = { ...last, t: last.t + 1000 }
+      delete next.step
+      rows.push(next)
+    }, path))
+    const span = document.createElement("span")
+    span.className = "event-table"
+    span.append(table, add)
+    return span
   }
 
   /**

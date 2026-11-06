@@ -150,8 +150,8 @@ export class RecordingEvents {
       const h = params.headingDeg * Math.PI / 180
       const fromEast = (params.from.lng - origin.lng) * Math.PI / 180 * RecordingEvents.R * cosOrigin
       const fromNorth = (params.from.lat - origin.lat) * Math.PI / 180 * RecordingEvents.R
-      const speeds = params.speeds.map(({ t, kmh }) => ({ t, value: kmh / 3.6 }))
-      const heights = params.heights.map(({ t, altitudeM }) => ({ t, value: altitudeM }))
+      const speeds = params.speeds.map(({ t, kmh, step }) => ({ t, value: kmh / 3.6, step }))
+      const heights = params.heights.map(({ t, altitudeM, step }) => ({ t, value: altitudeM, step }))
       // How far it has flown from `at.t` to `t`, m: the speeds integrated, either way in time.
       const flown = (t: number) => {
         const step = Math.sign(t - params.at.t) * RecordingEvents.FLY_STEP_MS

@@ -128,8 +128,8 @@ export class DriveExpansion {
 
   /** The speed at `t`, m/s: the stated speeds, divided by the divisors stated. */
   private speedAt(t: number): number {
-    const divisor = this.params.speedDivisors ? DriveExpansion.linear(this.params.speedDivisors.map(({ t, divisor }) => ({ t, value: divisor })), t) : 1
-    return DriveExpansion.linear(this.params.speeds.map(({ t, kmh }) => ({ t, value: kmh })), t) / 3.6 / divisor
+    const divisor = this.params.speedDivisors ? DriveExpansion.linear(this.params.speedDivisors.map(({ t, divisor, step }) => ({ t, value: divisor, step })), t) : 1
+    return DriveExpansion.linear(this.params.speeds.map(({ t, kmh, step }) => ({ t, value: kmh, step })), t) / 3.6 / divisor
   }
 
   private local(place: EventPlace): Local {
@@ -166,10 +166,12 @@ export class DriveExpansion {
   }
 
   /** A value stated at instants, linear between them and held beyond them. */
-  static linear(points: { t: number, value: number }[], t: number): number {
+  /** A table of instants read at `t`: linear between two rows, at once at a row that says so (`step`), held before the first and after the last. */
+  static linear(points: { t: number, value: number, step?: boolean }[], t: number): number {
     if (t <= points[0].t) return points[0].value
     for (let i = 0; i < points.length - 1; i++) {
       const a = points[i], b = points[i + 1]
+      if (b.step && t < b.t) return a.value
       if (t <= b.t) return a.value + (b.value - a.value) * (t - a.t) / (b.t - a.t)
     }
     return points[points.length - 1].value

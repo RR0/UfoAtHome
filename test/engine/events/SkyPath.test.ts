@@ -67,3 +67,21 @@ describe("SkyPath", () => {
     expect(told.timeline.getInterpolatedShapeAt(4900, "rim")!.transparency).toBeLessThan(1)
   })
 })
+
+describe("a table of instants", () => {
+  it("goes from one row to the next gradually, or at once at a row that says so", async () => {
+    const { DriveExpansion } = await import("../../../src/engine/events/DriveExpansion.js")
+    const rows = [{ t: 0, value: 10 }, { t: 1000, value: 20 }, { t: 2000, value: 5, step: true }]
+    expect(DriveExpansion.linear(rows, 500)).toBe(15)
+    expect(DriveExpansion.linear(rows, 1999)).toBe(20)
+    expect(DriveExpansion.linear(rows, 2000)).toBe(5)
+    expect(DriveExpansion.linear(rows, 3000)).toBe(5)
+  })
+
+  it("has Saint-Lô slow down at once as it starts spiralling, in one row", () => {
+    const travel = saintLo.events.find(event => event.eventType === "travel")!
+    const speeds = (travel.params as unknown as { speeds: { value: { t: number, step?: boolean }[] } }).speeds.value
+    expect(speeds.map(row => row.t)).toEqual([0, 500, 1100, 4300])
+    expect(speeds[3].step).toBe(true)
+  })
+})

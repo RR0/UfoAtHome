@@ -58,9 +58,9 @@ def events(observer):
                          "call of 2026-10-13: from the north-north-east, about 25 degrees east of north, at \"20-30 degrés\" when first caught"),
             "towards": wrap({"azimuthDeg": b.START_AZ, "altitudeDeg": 90}, "stated", "Straight to the zenith, where it was when his eyes got there"),
             "speeds": wrap([{"t": 0, "degPerS": b.UP_SPEED}, {"t": b.ZENITH_MS, "degPerS": b.UP_SPEED}, {"t": b.ZENITH_MS + 600, "degPerS": down},
-                            {"t": b.SPIRAL_FROM_MS - 1, "degPerS": down}, {"t": b.SPIRAL_FROM_MS, "degPerS": round(down * 0.7, 4)}], "derived",
+                            {"t": b.SPIRAL_FROM_MS, "degPerS": round(down * 0.7, 4), "step": True}], "derived",
                            "60 degrees in 0.5 s to the zenith (\"dans les 500 millisecondes\"), then much slower: how much slower, so that it is at the tree "
-                           "tops due south when the spiral starts"),
+                           "tops due south when the spiral starts; slower at once as it starts spiralling"),
             "sizeDeg": wrap(b.ACROSS, "stated", "One and a half 1 euro coins at arm's length at its closest, across"),
             "sizeBy": wrap("altitude", "assumed", "Small as a shooting star, whole at the zenith, \"beaucoup plus petit\" near the horizon: he said it did "
                                                   "not fly at a constant height, and no law; the sine of its altitude has those three sizes")}},

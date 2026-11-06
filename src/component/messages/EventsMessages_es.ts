@@ -29,5 +29,9 @@ export const eventsMessages_es: EventsMessages = {
   to: "a",
   points: "{n} puntos",
   at: "a",
+  atOnce: "de golpe",
+  atOnceHint: "El valor cambia de golpe en este instante, en lugar de llegar poco a poco desde la fila anterior",
+  addRow: "Añadir una fila",
+  removeRow: "Quitar esta fila",
   basis: { stated: "declarado", derived: "deducido", assumed: "supuesto", measured: "medido" }
 }

@@ -52,10 +52,10 @@ export interface DriveParams {
   vehicle?: string
   /** The way it followed, from its first point on (a carriageway as a survey draws it). */
   path: EventPlace[]
-  /** Its speed, km/h, at instants of the recording: linear between them, held before the first and after the last. */
-  speeds: { t: number, kmh: number }[]
+  /** Its speed, km/h, at instants of the recording: linear between them (at once at a row whose `step` says so), held before the first and after the last. */
+  speeds: { t: number, kmh: number, step?: boolean }[]
   /** Factors its speeds are divided by, at instants of the recording, linear between them: a reading of the same driving at another pace. */
-  speedDivisors?: { t: number, divisor: number }[]
+  speedDivisors?: { t: number, divisor: number, step?: boolean }[]
   /** A place on the path it went through, and when: the rest of the drive is placed from it. */
   through: EventPlace & { t: number }
   /** Where the driver's eye is in the vehicle's model. */
@@ -75,11 +75,11 @@ export interface FlyParams {
   /** Which way it flies, degrees from north. */
   headingDeg: number
   /** Its ground speed, km/h, at instants of the recording: linear between them, held beyond. */
-  speeds: { t: number, kmh: number }[]
+  speeds: { t: number, kmh: number, step?: boolean }[]
   /** How far before `from` it is at one instant. */
   at: { t: number, metresBefore: number }
   /** How high above the observer's eye, m, at instants of the recording: linear between them, held beyond. */
-  heights: { t: number, altitudeM: number }[]
+  heights: { t: number, altitudeM: number, step?: boolean }[]
 }
 
 /** The observer holds a look (`look` with `who` the observer): where they look, from the event's start on (until another look or a follow turns them). */
@@ -160,7 +160,7 @@ export interface RideParams {
 export interface StandParams {
   place: EventPlace
   /** Its width and its height above the eye, m, at instants of the recording: linear between them, held beyond. */
-  metres: { t: number, widthM: number, heightM: number }[]
+  metres: { t: number, widthM: number, heightM: number, step?: boolean }[]
 }
 
 /**

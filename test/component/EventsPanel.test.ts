@@ -106,7 +106,7 @@ describe("EventsPanel of the phenomenon", () => {
     expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.derivedShapesNote)
     const before = sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg
     // Its width at 36.6 s (the third row: an instant, a width, a height each), doubled.
-    const width = root.querySelectorAll<HTMLInputElement>(".events-fields .event-rows input")[7]
+    const width = root.querySelectorAll<HTMLInputElement>(".events-fields .event-rows input[type=number]")[7]
     width.value = String(Number(width.value) * 2)
     width.dispatchEvent(new Event("change"))
     expect(sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg).toBeGreaterThan(before)
@@ -142,5 +142,28 @@ describe("TimelineTracks", () => {
     const bars = [...host.querySelectorAll<HTMLElement>(".track-lane .span")]
     expect(bars.map(bar => [bar.textContent, bar.style.top])).toEqual([["Conduit", "0%"], ["Regarde la route", "50%"], ["Regarde dans le rétroviseur", "50%"]])
     expect(host.querySelectorAll(".track-lane .kf")).toHaveLength(0)
+  })
+})
+
+describe("EventsPanel's tables of instants", () => {
+  it("adds a row after the last, removes one, keeps them in the order of their instants, and says a row comes at once", () => {
+    const { sighting, root } = mounted("phenomenon")
+    const metres = () => (sighting.events!.find(event => Array.isArray((event.params as Record<string, unknown> | undefined)?.metres))!.params!.metres as { t: number, step?: boolean }[])
+    const count = metres().length
+    root.querySelector<HTMLButtonElement>(".events-fields .event-row-add")!.click()
+    expect(metres().length).toBe(count + 1)
+    expect(metres()[count].t).toBe(metres()[count - 1].t + 1000)
+    // The new row's instant typed before the first: it goes first.
+    const instants = () => [...root.querySelectorAll<HTMLInputElement>(".events-fields .event-rows input[type=number]")].filter((_, index) => index % 3 === 0)
+    const last = instants()[count]
+    last.value = String(metres()[0].t / 1000 - 1)
+    last.dispatchEvent(new Event("change"))
+    expect(metres().map(row => row.t)).toEqual([...metres().map(row => row.t)].sort((a, b) => a - b))
+    const step = root.querySelector<HTMLInputElement>(".events-fields .event-row-step input")!
+    step.checked = true
+    step.dispatchEvent(new Event("change"))
+    expect(metres()[1].step).toBe(true)
+    root.querySelectorAll<HTMLButtonElement>(".events-fields .event-row-remove")[0].click()
+    expect(metres().length).toBe(count)
   })
 })

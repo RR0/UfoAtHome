@@ -29,5 +29,9 @@ export const eventsMessages_fr: EventsMessages = {
   to: "à",
   points: "{n} points",
   at: "à",
+  atOnce: "d'un coup",
+  atOnceHint: "La valeur change d'un coup à cet instant, au lieu de venir progressivement de la ligne précédente",
+  addRow: "Ajouter une ligne",
+  removeRow: "Retirer cette ligne",
   basis: { stated: "énoncé", derived: "dérivé", assumed: "supposé", measured: "mesuré" }
 }

@@ -9,13 +9,13 @@ export interface SkyDirection {
 /**
  * The phenomenon goes across the observer's sky (`travel`, `who` it, or the group of its shapes), with no place of its own: an account of
  * directions only, as one seen at night with nothing to tell how far it was. From `from`, heading for `towards` along the great circle
- * between them, at `speeds` (degrees of sky a second, from still between two of them as anything speeds up and slows down), turned by its
+ * between them, at `speeds` (degrees of sky a second, from still between two of them as anything speeds up and slows down, or at once at a row that says so: `step`), turned by its
  * `turn`s, until the event's end.
  */
 export interface TravelParams {
   from: SkyDirection
   towards: SkyDirection
-  speeds: { t: number, degPerS: number }[]
+  speeds: { t: number, degPerS: number, step?: boolean }[]
   /** How wide it appears at the zenith, degrees: what its parts' shares are of. */
   sizeDeg: number
   /**
@@ -91,6 +91,8 @@ export class SkyPath {
     if (ms <= speeds[0].t) return speeds[0].degPerS
     for (let index = 1; index < speeds.length; index++) {
       const a = speeds[index - 1], b = speeds[index]
+      // At once at a row that says so: until then, the speed it had.
+      if (b.step && ms < b.t) return a.degPerS
       if (ms < b.t) return a.degPerS + (b.degPerS - a.degPerS) * SkyPath.smooth((ms - a.t) / (b.t - a.t))
     }
     return speeds[speeds.length - 1].degPerS
