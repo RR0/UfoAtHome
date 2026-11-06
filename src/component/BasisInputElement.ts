@@ -34,14 +34,21 @@ rr0-input-basis { display: inline-block; }
 rr0-input-basis[hidden] { display: none; }
 .basis-mark {
   display: inline-block; margin-left: 8px; padding: 0 8px; border: 1px solid var(--glow-dim); border-radius: 999px;
-  font: 600 11px/1.6 var(--sans); color: var(--glow); cursor: pointer; visibility: hidden; vertical-align: .05em; user-select: none;
+  font: 600 11px/1.6 var(--sans); color: var(--glow); cursor: pointer; vertical-align: .05em; user-select: none;
 }
-:is(label, .field):is(:hover, :focus-within) .basis-mark, rr0-input-basis:focus-within .basis-mark, .basis-mark:not([data-basis="stated"]) { visibility: visible; }
+/* Always there, so that nothing moves when it shows: "stated", the default, said quietly, and fully on the hover of its field. */
+.basis-mark[data-basis="stated"] { border-style: dashed; opacity: .55; }
+:is(label, .field, .event-param-label):is(:hover, :focus-within) .basis-mark, .basis-mark:is(:hover, :focus-visible) { opacity: 1; }
 .basis-mark[data-basis="assumed"], .basis-mark[data-basis="derived"] { font-style: italic; }
 .basis-window { width: min(26em, 92vw); padding: 18px 20px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--ground-raised); color: var(--ink); box-shadow: 0 12px 32px rgba(0, 0, 0, .3); }
 .basis-window h3 { margin: 0 0 12px; font: 600 19px/1.3 var(--serif); }
 .basis-window label { display: flex; flex-direction: column; gap: 5px; margin: 0 0 12px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .basis-window :is(select, textarea) { box-sizing: border-box; width: 100%; font-weight: 400; }
+/* Beside its pill, under it or above it where there is room (anchored, see open); centred where anchors are not known. Fixed, against a
+   window's own rule (WindowClose), which makes a popover with a ✕ relative, and so drawn at the top of the page. */
+.basis-window.basis-window:popover-open { position: fixed; inset: auto; margin: 6px 0; max-height: calc(100vh - 24px); overflow: auto;
+  position-area: bottom span-right; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; }
+@supports not (position-area: bottom) { .basis-window.basis-window:popover-open { inset: 0; margin: auto; height: fit-content; } }
 .basis-window textarea { min-height: 8em; font: 400 14px/1.45 var(--sans, sans-serif); resize: vertical; }
 `
 
@@ -52,6 +59,18 @@ rr0-input-basis[hidden] { display: none; }
   private shown?: BasisEntry
   private mark?: HTMLElement
   private window?: HTMLElement
+  private static count = 0
+  /** The name its window is anchored to its pill by. */
+  private anchor = `--rr0-basis-${++BasisInputElement.count}`
+
+  /**
+   * Names its anchor after what it is about (the value's path), before it is built: a host that draws its fields anew after a change makes
+   * a new pill of the same name, which the window still open stays beside.
+   */
+  set anchorKey(key: string) {
+    this.anchor = `--rr0-basis-${key.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+    this.mark?.style.setProperty("anchor-name", this.anchor)
+  }
 
   /** Builds it, once: a host may need its pill before it is in the page. */
   build(): void {
@@ -61,6 +80,7 @@ rr0-input-basis[hidden] { display: none; }
     // A role and not a <button>: a button before a field in its label would become what the label labels.
     mark.setAttribute("role", "button")
     mark.tabIndex = 0
+    mark.style.setProperty("anchor-name", this.anchor)
     const open = (event: Event) => {
       event.preventDefault()
       event.stopPropagation()
@@ -153,6 +173,7 @@ rr0-input-basis[hidden] { display: none; }
     window.className = "basis-window"
     window.setAttribute("popover", "")
     window.setAttribute("role", "dialog")
+    window.style.setProperty("position-anchor", this.anchor)
     window.addEventListener("toggle", event => {
       if ((event as ToggleEvent).newState !== "closed") return
       window.remove()

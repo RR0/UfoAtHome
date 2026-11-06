@@ -70,7 +70,7 @@ export class EventsPanel {
 .event-params { display: grid; grid-template-columns: fit-content(33%) minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
 .event-param { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; min-width: 0; }
 .event-param-label .basis-mark { margin-left: 6px; }
-.event-param-label:is(:hover, :focus-within, :has(+ .event-param:is(:hover, :focus-within))) .basis-mark { visibility: visible; }
+.event-param-label:has(+ .event-param:is(:hover, :focus-within)) .basis-mark { opacity: 1; }
 .event-params input[type="number"] { width: 6em; }
 .event-params input[type="text"] { width: 10em; }
 .event-table { display: grid; justify-items: start; gap: 4px; }
@@ -672,6 +672,7 @@ export class EventsPanel {
   private basis(path: string): HTMLElement {
     registerBasisInput()
     const element = document.createElement(BasisInputElement.TAG) as BasisInputElement
+    element.anchorKey = path
     element.messages = { title: this.messages.basisTitle, basis: this.messages.basis, basisField: this.messages.basisField, howField: this.messages.howField,
       rationaleField: this.messages.rationaleField }
     element.entry = this.host.sighting().provenance.at(path)
