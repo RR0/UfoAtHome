@@ -29,8 +29,12 @@ export const eventsMessages_en: EventsMessages = {
   to: "to",
   points: "{n} points",
   at: "at",
+  choices: { "sizeBy.": "always the same", "sizeBy.altitude": "its altitude (smaller towards the horizon)", "side.left": "left", "side.right": "right", "seenFrom.": "the ground (as the observer sees it)", "seenFrom.craft": "the craft (as its pilot would say it)" },
+  zenith: "zenith",
+  lookedAt: "Where they look",
+  lookedAtHint: "Takes the direction the observer looks at the playhead",
   atOnce: "at once",
-  atOnceHint: "The value changes at once at this instant, instead of gradually from the row before",
+  atOnceHint: "Ticked: the value stays the previous row's until this instant, then becomes this row's at once (braking, a sudden start). Unticked: it gets there gradually from the previous row.",
   addRow: "Add a row",
   removeRow: "Remove this row",
   basis: { stated: "stated", derived: "derived", assumed: "assumed", measured: "measured" }

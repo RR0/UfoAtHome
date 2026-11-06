@@ -167,3 +167,20 @@ describe("EventsPanel's tables of instants", () => {
     expect(metres().length).toBe(count)
   })
 })
+
+describe("EventsPanel's choices", () => {
+  it("picks a value the player knows among the others, and says what one the file leaves out then is", async () => {
+    const saintLo = (await import("../../public/demo-data/observer-saint-lo.json")).default
+    const { sighting, root, pick, picker } = mounted("phenomenon", saintLo)
+    pick([...picker().options].findIndex(option => option.text.includes("Parcourt")))
+    const travel = sighting.events!.find(event => event.eventType === "travel")!
+    const sizeBy = [...root.querySelectorAll<HTMLSelectElement>(".events-fields .event-params select")].find(select => [...select.options].some(option => option.value === "altitude"))!
+    expect(sizeBy.value).toBe("altitude")
+    sizeBy.value = ""
+    sizeBy.dispatchEvent(new Event("change"))
+    expect(travel.params!.sizeBy).toBeUndefined()
+    pick([...picker().options].findIndex(option => option.text.includes("Se tourne")))
+    const seenFrom = [...root.querySelectorAll<HTMLSelectElement>(".events-fields .event-params select")].find(select => [...select.options].some(option => option.value === "craft"))!
+    expect(seenFrom.value).toBe("craft")
+  })
+})

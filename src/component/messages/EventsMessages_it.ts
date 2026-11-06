@@ -29,8 +29,12 @@ export const eventsMessages_it: EventsMessages = {
   to: "a",
   points: "{n} punti",
   at: "a",
+  choices: { "sizeBy.": "sempre la stessa", "sizeBy.altitude": "la sua altezza (più piccolo verso l'orizzonte)", "side.left": "sinistra", "side.right": "destra", "seenFrom.": "il suolo (come lo vede l'osservatore)", "seenFrom.craft": "il velivolo (come lo direbbe il pilota)" },
+  zenith: "zenit",
+  lookedAt: "Dove guarda",
+  lookedAtHint: "Prende la direzione in cui guarda l'osservatore alla testina di lettura",
   atOnce: "di colpo",
-  atOnceHint: "Il valore cambia di colpo in questo istante, invece di arrivare gradualmente dalla riga precedente",
+  atOnceHint: "Spuntato: il valore resta quello della riga precedente fino a questo istante, poi passa di colpo a quello di questa riga (una frenata, una partenza brusca). Non spuntato: ci arriva gradualmente dalla riga precedente.",
   addRow: "Aggiungi una riga",
   removeRow: "Rimuovi questa riga",
   basis: { stated: "dichiarato", derived: "dedotto", assumed: "supposto", measured: "misurato" }

@@ -1,7 +1,7 @@
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import { RecordingEvents } from "../engine/events/RecordingEvents.js"
-import { RecordingActors } from "../engine/events/RecordingActors.js"
+import { RecordingActors, type ActorKind } from "../engine/events/RecordingActors.js"
 import type { EventsMessages } from "./messages/EventsMessages.js"
 import { ElementList } from "./ElementList.js"
 import { Icons } from "./Icons.js"
@@ -35,7 +35,14 @@ export interface EventsPanelHost {
   /** What a place can be said from (see PositionFrame): with it, a place is said as every position of the editor is, relative or absolute. */
   positionFrame?(): PositionFrame
   positionMessages?(): PositionInputMessages
+  /** The compass point an azimuth falls in, in the editor's language ("NNE"). */
+  compassPoint?(azimuthDeg: number): string
+  /** Where the observer looks at the playhead: a direction in the sky an event can be said to start from or go towards. */
+  lookedAt?(): { azimuthDeg: number, altitudeDeg: number } | undefined
 }
+
+/** A direction in the sky: its azimuth from north, and its altitude above the horizon, degrees. */
+type SkyDirection = { azimuthDeg: number, altitudeDeg: number }
 
 /** A row of a table of instants: when, its numbers, and whether it comes at once rather than from the row before. */
 type InstantRow = { t: number, step?: boolean } & Record<string, number | boolean | undefined>
@@ -63,6 +70,8 @@ export class EventsPanel {
 .event-table { display: grid; justify-items: start; gap: 4px; }
 .event-rows { display: grid; grid-template-columns: repeat(var(--columns, 2), max-content); gap: 2px 8px; align-items: center; }
 .event-row-step { font-size: 13px; white-space: nowrap; }
+.event-direction-point { font-size: 13px; color: var(--ink-dim); }
+.event-direction-look { font-size: 13px; }
 .event-basis { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--ink-dim); }
 `
 
@@ -71,6 +80,24 @@ export class EventsPanel {
     observer: ["look", "walk", "follow"],
     phenomenon: ["stand", "blink", "turn", "roll", "vibrate", "spiral", "vanish"],
     bodies: ["motion", "spin", "rise", "turn", "ride", "light", "blink", "vanish"]
+  }
+
+  /**
+   * The parameters whose values the player knows, by name: picked among them, in the editor's words (EventsMessages.choices,
+   * `key.value`). One the file may leave out says what it then is (`absent`, its first value), and is shown when the event has the
+   * parameters it goes `with`.
+   */
+  private static readonly CHOICES: Record<string, { values: string[], absent?: string, with: string[] }> = {
+    sizeBy: { values: ["", "altitude"], absent: "", with: ["sizeDeg"] },
+    side: { values: ["left", "right"], with: [] },
+    seenFrom: { values: ["", "craft"], absent: "", with: ["side", "byDeg"] }
+  }
+
+  /** The parameters that name another thing of the recording, by name: what kinds of things they can name. */
+  private static readonly AMONG: Record<string, ActorKind[]> = {
+    target: ["shape", "group", "body", "decor"],
+    in: ["body", "decor"],
+    vehicle: ["decor"]
   }
 
   private messages: EventsMessages
@@ -302,7 +329,14 @@ export class EventsPanel {
       label.textContent = this.messages.part
       params.append(label, this.part(event))
     }
-    for (const [key, value] of Object.entries(event.params ?? {})) {
+    const entries = Object.entries(event.params ?? {})
+    // A choice the file may leave out (its first, then), shown all the same: what it then is can be picked.
+    for (const [key, choice] of Object.entries(EventsPanel.CHOICES)) {
+      if (choice.absent !== undefined && choice.with.every(sibling => event.params?.[sibling] !== undefined) && event.params?.[key] === undefined) {
+        entries.push([key, choice.absent])
+      }
+    }
+    for (const [key, value] of entries) {
       const label = document.createElement("span")
       label.textContent = this.messages.params[key] ?? key
       const cell = document.createElement("span")
@@ -361,7 +395,16 @@ export class EventsPanel {
   /** A parameter: edited where it is a number or a list of instants and numbers, shown otherwise. */
   private value(event: RecordingEventJson, key: string, value: unknown, path: string): Node {
     const params = event.params!
-    // A name (a body, a movement of a model): typed as it is.
+    // One of the values the player knows: picked among them.
+    const choice = EventsPanel.CHOICES[key]
+    if (choice && (typeof value === "string")) return this.choice(key, value, choice, picked => {
+      if (picked === choice.absent) delete params[key]
+      else params[key] = picked
+    }, path)
+    // Another thing of the recording, by its id: picked among them.
+    const among = EventsPanel.AMONG[key]
+    if (among && typeof value === "string") return this.actorChoice(value, among, picked => { params[key] = picked }, path)
+    // A name (a movement of a model): typed as it is.
     if (typeof value === "string") return this.text(value, typed => { params[key] = typed }, path)
     if (typeof value === "boolean") return this.check(value, ticked => { params[key] = ticked }, path)
     if (typeof value === "number") {
@@ -392,19 +435,78 @@ export class EventsPanel {
         return span
       }
       if (typeof place.x === "number") return document.createTextNode(`${place.x}, ${place.y}, ${place.z} m`)
-      if (typeof place.azimuthDeg === "number" && typeof place.altitudeDeg === "number") {
-        // A direction in the sky (where a travel starts, where it goes): its azimuth and its altitude, edited where they stand.
-        const span = document.createElement("span")
-        span.className = "event-direction"
-        for (const field of ["azimuthDeg", "altitudeDeg"]) {
-          span.append(`${this.messages.params[field] ?? field} `, this.number(place[field], typed => { place[field] = typed }, path, "°", 0.1), " ")
-        }
-        return span
-      }
+      if (typeof place.azimuthDeg === "number" && typeof place.altitudeDeg === "number") return this.direction(place as SkyDirection, path)
       // What a blinking part is when off: its fields, as the file says them (a colour shows as itself).
       return document.createTextNode(Object.entries(place).map(([field, said]) => `${field} ${said ?? "∅"}`).join(", "))
     }
     return document.createTextNode(String(value))
+  }
+
+  /** A value the player knows, picked among the others it knows. */
+  private choice(key: string, value: string, choice: { values: string[] }, set: (value: string) => void, path: string): Node {
+    const select = document.createElement("select")
+    for (const known of choice.values) {
+      const option = document.createElement("option")
+      option.value = known
+      option.textContent = this.messages.choices[`${key}.${known}`] ?? known
+      select.append(option)
+    }
+    // A value the file says that the editor does not know: kept, and shown as it is.
+    if (!choice.values.includes(value)) select.prepend(new Option(value, value))
+    select.value = value
+    select.addEventListener("change", () => this.edited(() => set(select.value), path))
+    return select
+  }
+
+  /** Another thing of the recording, picked among those of the kinds it can be, by what each is called. */
+  private actorChoice(value: string, kinds: ActorKind[], set: (value: string) => void, path: string): Node {
+    const select = document.createElement("select")
+    const ids = [...RecordingActors.ids(this.host.sighting())].filter(([, said]) => said.some(kind => kinds.includes(kind))).map(([id]) => id)
+    if (!ids.includes(value)) ids.unshift(value)
+    for (const id of ids) {
+      const kind = RecordingActors.kindOf(this.host.sighting(), id)
+      const label = kind === "body" ? this.host.bodyLabel?.(id) : kind === "shape" || kind === "group" ? this.host.shapesLabel?.(id) : undefined
+      select.append(new Option(label ?? id, id))
+    }
+    select.value = value
+    select.addEventListener("change", () => this.edited(() => set(select.value), path))
+    return select
+  }
+
+  /**
+   * A direction in the sky (where a travel starts, where it goes): its azimuth, with the compass point it falls in, and its altitude, edited
+   * where they stand; or, in one click, where the observer looks at the playhead.
+   */
+  private direction(direction: SkyDirection, path: string): Node {
+    const span = document.createElement("span")
+    span.className = "event-direction"
+    span.append(`${this.messages.params.azimuthDeg ?? "azimuthDeg"} `, this.number(direction.azimuthDeg, typed => { direction.azimuthDeg = ((typed % 360) + 360) % 360 }, path, "°", 0.1))
+    const point = this.host.compassPoint?.(direction.azimuthDeg)
+    if (point) {
+      const said = document.createElement("span")
+      said.className = "event-direction-point"
+      said.textContent = point
+      span.append(" ", said)
+    }
+    span.append(` ${this.messages.params.altitudeDeg ?? "altitudeDeg"} `, this.number(direction.altitudeDeg, typed => { direction.altitudeDeg = Math.max(-90, Math.min(90, typed)) }, path, "°", 0.1))
+    if (direction.altitudeDeg === 90) span.append(` (${this.messages.zenith})`)
+    if (this.host.lookedAt) {
+      const look = document.createElement("button")
+      look.type = "button"
+      look.className = "event-direction-look"
+      look.textContent = this.messages.lookedAt
+      look.title = this.messages.lookedAtHint
+      look.addEventListener("click", () => {
+        const looked = this.host.lookedAt?.()
+        if (!looked) return
+        this.edited(() => {
+          direction.azimuthDeg = Math.round((((looked.azimuthDeg % 360) + 360) % 360) * 10) / 10
+          direction.altitudeDeg = Math.round(looked.altitudeDeg * 10) / 10
+        }, path)
+      })
+      span.append(" ", look)
+    }
+    return span
   }
 
   /**
@@ -430,10 +532,12 @@ export class EventsPanel {
         const step = document.createElement("label")
         step.className = "event-row-step"
         step.title = this.messages.atOnceHint
-        step.append(this.check(row.step === true, ticked => {
+        const box = this.check(row.step === true, ticked => {
           if (ticked) row.step = true
           else delete row.step
-        }, path), ` ${this.messages.atOnce}`)
+        }, path) as HTMLInputElement
+        box.title = this.messages.atOnceHint
+        step.append(box, ` ${this.messages.atOnce}`)
         table.append(step)
       }
       const remove = document.createElement("button")

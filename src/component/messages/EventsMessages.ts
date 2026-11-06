@@ -32,6 +32,13 @@ export interface EventsMessages {
   kinds: Record<string, string>
   /** The parameters, by their key. */
   params: Record<string, string>
+  /** The values the player knows of a parameter, by `key.value` (the empty value: what it is when the file says none). */
+  choices: Record<string, string>
+  /** Said after a direction straight up. */
+  zenith: string
+  /** Takes a direction from where the observer looks at the playhead; and what it does. */
+  lookedAt: string
+  lookedAtHint: string
   /** "from … to …", around the event's times. */
   from: string
   to: string

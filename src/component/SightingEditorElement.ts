@@ -1544,6 +1544,11 @@ export class SightingEditorElement extends HTMLElement {
       picked: () => this.refreshTracks(),
       positionFrame: () => this.positionFrame(),
       positionMessages: () => this.messages,
+      compassPoint: (azimuthDeg: number) => this.naming.point(azimuthDeg),
+      lookedAt: () => {
+        const pose = this.ufoElement.sighting.observerTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)
+        return pose?.headingDeg === undefined || pose.pitchDeg === undefined ? undefined : { azimuthDeg: pose.headingDeg, altitudeDeg: pose.pitchDeg }
+      },
       bodyLabel: (id: string) => {
         const body = this.ufoElement.sighting.interpretation?.bodies.find(candidate => candidate.id === id)
         return this.said.read(body?.title) ?? id

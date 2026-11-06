@@ -29,8 +29,12 @@ export const eventsMessages_es: EventsMessages = {
   to: "a",
   points: "{n} puntos",
   at: "a",
+  choices: { "sizeBy.": "siempre la misma", "sizeBy.altitude": "su altura (más pequeño hacia el horizonte)", "side.left": "izquierda", "side.right": "derecha", "seenFrom.": "el suelo (como lo ve el observador)", "seenFrom.craft": "el aparato (como lo diría su piloto)" },
+  zenith: "cénit",
+  lookedAt: "Donde mira",
+  lookedAtHint: "Toma la dirección que mira el observador en el cabezal de lectura",
   atOnce: "de golpe",
-  atOnceHint: "El valor cambia de golpe en este instante, en lugar de llegar poco a poco desde la fila anterior",
+  atOnceHint: "Marcado: el valor sigue siendo el de la fila anterior hasta este instante, y pasa de golpe al de esta fila (un frenazo, un arranque brusco). Sin marcar: llega poco a poco desde la fila anterior.",
   addRow: "Añadir una fila",
   removeRow: "Quitar esta fila",
   basis: { stated: "declarado", derived: "deducido", assumed: "supuesto", measured: "medido" }

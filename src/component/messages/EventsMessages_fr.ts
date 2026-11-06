@@ -29,8 +29,12 @@ export const eventsMessages_fr: EventsMessages = {
   to: "à",
   points: "{n} points",
   at: "à",
+  choices: { "sizeBy.": "toujours la même", "sizeBy.altitude": "son altitude (plus petit vers l'horizon)", "side.left": "gauche", "side.right": "droite", "seenFrom.": "le sol (comme l'observateur le voit)", "seenFrom.craft": "l'engin (comme son pilote le dirait)" },
+  zenith: "zénith",
+  lookedAt: "Là où il regarde",
+  lookedAtHint: "Prend la direction que l'observateur regarde à la tête de lecture",
   atOnce: "d'un coup",
-  atOnceHint: "La valeur change d'un coup à cet instant, au lieu de venir progressivement de la ligne précédente",
+  atOnceHint: "Coché : la valeur reste celle de la ligne précédente jusqu'à cet instant, puis passe d'un coup à celle de cette ligne (un freinage, un départ brusque). Décoché : elle y arrive progressivement depuis la ligne précédente.",
   addRow: "Ajouter une ligne",
   removeRow: "Retirer cette ligne",
   basis: { stated: "énoncé", derived: "dérivé", assumed: "supposé", measured: "mesuré" }
