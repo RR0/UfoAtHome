@@ -46,15 +46,16 @@ export interface WitnessField {
 export class WitnessErrorView {
   static readonly CSS = `${BasisInputElement.CSS}
 :is(label, .field)[data-basis="assumed"] :is(input, .edtf-field input) { font-style: italic; }
-/* A field with its basis: its name and the mark on the first line, the value and its unit on the next, the law under them. Left to
+/* ("> .basis-mark" in :has keeps the weight the rule had when the mark was the label's own child, over the form's flex labels.)
+   A field with its basis: its name and the mark on the first line, the value and its unit on the next, the law under them. Left to
    the field's own flow, the mark (hidden but for the hover) opened the second line and pushed the value aside. */
-.app .form-section > :is(label, .field):has(> rr0-input-basis) {
+.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) {
   display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 6px;
 }
-.app .form-section > :is(label, .field):has(> rr0-input-basis) > :first-child { grid-column: 1; }
-.app .form-section > :is(label, .field):has(> rr0-input-basis) > rr0-input-basis { grid-column: 2 / -1; justify-self: start; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > :first-child { grid-column: 1; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > rr0-input-basis { grid-column: 2 / -1; justify-self: start; }
 .app .form-section > :is(label, .field) > rr0-input-basis .basis-mark { margin-left: 0; }
-.app .form-section > :is(label, .field):has(> rr0-input-basis) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
 .law { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font: 400 12px/1.4 var(--sans); color: var(--ink-dim); }
 .law-symbol { color: var(--glow-dim); font-weight: 700; }
 .law-reset { color: var(--glow); }

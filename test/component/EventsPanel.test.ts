@@ -204,7 +204,7 @@ describe("EventsPanel's bases", () => {
     const { root, pick, picker } = mounted("phenomenon")
     pick([...picker().options].findIndex(option => option.text.includes("Se tient")))
     const label = [...root.querySelectorAll(".events-fields .event-param-label")].find(candidate => candidate.querySelector("rr0-hint"))!
-    expect(label.firstChild!.textContent).toBe("Taille")
+    expect(label.querySelector(".event-param-name")!.firstChild!.textContent).toBe("Taille")
     expect(label.querySelector("rr0-hint button")!.getAttribute("title")).toContain("hauteur au-dessus de l'œil")
   })
 })

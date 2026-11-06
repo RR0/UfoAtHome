@@ -69,7 +69,8 @@ export class EventsPanel {
 /* A label wraps rather than push its field aside: no wider than a third of the panel. */
 .event-params { display: grid; grid-template-columns: fit-content(33%) minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
 .event-param { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; min-width: 0; }
-.event-param-label .basis-mark { margin-left: 6px; }
+.event-param-label { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.event-param-label .basis-mark { margin-left: 0; }
 .event-param-label:has(+ .event-param:is(:hover, :focus-within)) .basis-mark { opacity: 1; }
 .event-params input[type="number"] { width: 6em; }
 .event-params input[type="text"] { width: 10em; }
@@ -344,11 +345,13 @@ export class EventsPanel {
     for (const [key, value] of entries) {
       const label = document.createElement("span")
       label.className = "event-param-label"
-      label.textContent = this.messages.params[key] ?? key
+      const name = document.createElement("span")
+      name.className = "event-param-name"
+      name.textContent = this.messages.params[key] ?? key
       const hint = this.messages.paramHints[key]
-      if (hint) label.append(HintElement.of(hint))
-      // What it stands on after its name, as every value of the editor says it (see WitnessErrorView): not in the way of the value.
-      label.append(this.basis(`events.${index}.params.${key}`))
+      if (hint) name.append(HintElement.of(hint))
+      // What it stands on under its name: the field beside them is as tall as both, and the name keeps its width.
+      label.append(name, this.basis(`events.${index}.params.${key}`))
       const cell = document.createElement("span")
       cell.className = "event-param"
       cell.append(this.value(event, key, value, `events.${index}.params.${key}`))
