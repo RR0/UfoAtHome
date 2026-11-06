@@ -363,13 +363,13 @@ export class EventsPanel {
       if (key === "glancesUntil") return this.seconds(value, typed => { params[key] = typed }, path)
       // By the parameter's name: degrees, seconds (glanceS, but not turnsPerS, a rate), metres.
       const seconds = key.endsWith("S") && !key.endsWith("PerS")
-      const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : key === "cdM2" ? "cd/m²" : ""
+      const unit = key.endsWith("Deg") ? "°" : seconds ? "s" : key.endsWith("M") ? "m" : key === "cdM2" ? "cd/m²" : key === "hz" ? "Hz" : ""
       return this.number(value, typed => { params[key] = typed }, path, unit, key === "pitchShare" || seconds || key.endsWith("PerS") ? 0.05 : key.endsWith("M") ? 0.01 : 1)
     }
     if (Array.isArray(value) && value.every(row => typeof row === "object" && row !== null && typeof row.t === "number")) {
       // A table of instants: each row's instant and its numbers (a speed, a divisor, a width and a height), edited where they stand.
       const fields = Object.keys(value[0] ?? {}).filter(field => field !== "t" && typeof value[0][field] === "number")
-      const units: Record<string, string> = { kmh: "km/h", widthM: "m", heightM: "m", altitudeM: "m" }
+      const units: Record<string, string> = { kmh: "km/h", degPerS: "°/s", widthM: "m", heightM: "m", altitudeM: "m" }
       const rows = document.createElement("span")
       rows.className = "event-rows"
       rows.style.setProperty("--columns", String(1 + fields.length))
@@ -396,6 +396,15 @@ export class EventsPanel {
         return span
       }
       if (typeof place.x === "number") return document.createTextNode(`${place.x}, ${place.y}, ${place.z} m`)
+      if (typeof place.azimuthDeg === "number" && typeof place.altitudeDeg === "number") {
+        // A direction in the sky (where a travel starts, where it goes): its azimuth and its altitude, edited where they stand.
+        const span = document.createElement("span")
+        span.className = "event-direction"
+        for (const field of ["azimuthDeg", "altitudeDeg"]) {
+          span.append(`${this.messages.params[field] ?? field} `, this.number(place[field], typed => { place[field] = typed }, path, "°", 0.1), " ")
+        }
+        return span
+      }
       // What a blinking part is when off: its fields, as the file says them (a colour shows as itself).
       return document.createTextNode(Object.entries(place).map(([field, said]) => `${field} ${said ?? "∅"}`).join(", "))
     }

@@ -74,6 +74,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   notGrouped: "Cette forme ne fait pas partie d'un groupe",
   multipleShapesSelected: "Plusieurs formes sélectionnées — sélectionnez-en une seule pour modifier ceci",
   samplingRate: "Échantillonnage",
+  samplingRateHint: "Vide : chaque événement à son pas propre (25 ms pour un mouvement dans le ciel), l'enregistreur toutes les {n} ms",
   currentPosition: "Position actuelle",
   switchToElapsed: "cliquer pour afficher la durée écoulée",
   switchToClockTime: "cliquer pour afficher l'heure de l'observation",

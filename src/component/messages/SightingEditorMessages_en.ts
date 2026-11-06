@@ -74,6 +74,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   notGrouped: "This shape isn't part of a group",
   multipleShapesSelected: "Multiple shapes selected — select just one to edit this",
   samplingRate: "Sampling rate",
+  samplingRateHint: "Empty: each event at its own step (25 ms for a motion across the sky), the recorder every {n} ms",
   currentPosition: "Current position",
   switchToElapsed: "click to show elapsed time",
   switchToClockTime: "click to show the time of day",

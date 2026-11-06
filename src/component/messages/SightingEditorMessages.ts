@@ -142,6 +142,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * more than one shape is selected — see updateAppearanceFieldsDisabledState(). */
   multipleShapesSelected: string
   samplingRate: string
+  /** The sampling field left empty: what the recording then does. {n}: the recorder's own pace. */
+  samplingRateHint: string
   /** The playback counters' own titles. They name what each value is, and — when the observation
    * has a start time, so there are two readings to choose between — what clicking one does. */
   currentPosition: string

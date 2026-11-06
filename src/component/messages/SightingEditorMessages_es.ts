@@ -74,6 +74,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   notGrouped: "Esta forma no forma parte de un grupo",
   multipleShapesSelected: "Varias formas seleccionadas — selecciona solo una para editar esto",
   samplingRate: "Frecuencia de muestreo",
+  samplingRateHint: "Vacío: cada evento a su propio paso (25 ms para un movimiento en el cielo), la grabadora cada {n} ms",
   currentPosition: "Posición actual",
   switchToElapsed: "haz clic para mostrar el tiempo transcurrido",
   switchToClockTime: "haz clic para mostrar la hora del día",

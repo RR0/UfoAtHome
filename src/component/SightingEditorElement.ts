@@ -7777,7 +7777,8 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshInstrumentOptions()
     this.refreshFilterOptions()
     this.syncOpticsFromInstrument()
-    if (this.samplingRateInput !== this.shadow.activeElement) this.samplingRateInput.value = String(this.samplingRate)
+    // What the file says; empty when it says nothing, the events then at their own steps (see Sighting.sampleMs).
+    if (this.samplingRateInput !== this.shadow.activeElement) this.samplingRateInput.value = this.ufoElement.sighting.sampleMs === undefined ? "" : String(this.ufoElement.sighting.sampleMs)
     this.ufoElement.selectedSourceIds = this.selectedSourceIds
     // Disabled once deleting the whole selection would leave nothing behind (a recording always
     // needs at least one shape — see deleteShape()'s own doc comment), for a source that's only a
@@ -11038,6 +11039,8 @@ export class SightingEditorElement extends HTMLElement {
     // assigned, so switching language refreshes the numbers already shown.
     this.refreshApparentSize()
     this.labelSamplingRate.textContent = messages.samplingRate
+    this.samplingRateInput.placeholder = String(SightingEditorElement.DEFAULT_SAMPLE_MS)
+    this.samplingRateInput.title = messages.samplingRateHint.replace("{n}", String(SightingEditorElement.DEFAULT_SAMPLE_MS))
     this.labelDuration.textContent = messages.duration
     this.shadow.getElementById("label-account-view")!.textContent = messages.accountView
     this.accountViewSelect.options[0].textContent = messages.accountView2d
