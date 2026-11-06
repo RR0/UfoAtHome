@@ -547,6 +547,66 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   accountSourceSocialMedia: "publié en ligne par l'observateur",
   accountSourcePress: "presse ou radiodiffusion",
   accountFollowedUp: "Recontacté",
+  accountEvaluation: {
+    "occupationKind": "Catégorie",
+    "occupationKindHint": "Ce que les méthodes d'évaluation classent ; pour un retraité, le métier qu'il exerçait",
+    "occupationKinds": {
+      "student": "élève, avant l'université",
+      "worker": "ouvrier",
+      "farmer": "agriculteur",
+      "homemaker": "au foyer",
+      "merchant": "commerçant",
+      "business": "chef d'entreprise",
+      "employee": "employé",
+      "artist": "artiste",
+      "technician": "technicien",
+      "police": "policier, gendarme",
+      "pilot": "pilote",
+      "military": "militaire"
+    },
+    "graduate": "Diplômé du supérieur",
+    "enquiryMinutes": "Durée de l'enquête",
+    "enquiryMinutesHint": "Temps passé par l'enquêteur avec l'observateur : sur place, en personne ou au téléphone",
+    "relation": "Liens entre observateurs",
+    "relations": {
+      "friends": "amis",
+      "family": "famille",
+      "professional": "collègues",
+      "none": "aucun"
+    },
+    "activity": "Activité",
+    "activities": {
+      "leisure": "loisir, repos",
+      "travelling": "en déplacement",
+      "cultural": "culturelle ou intellectuelle",
+      "working": "au travail ou en trajet de travail"
+    },
+    "strangenessSection": "Étrangeté",
+    "strangenessIntro": "Ce qui reste inexpliqué une fois le récit examiné, selon les enquêteurs : les sept facteurs de Ballester-Olmos et Guasp.",
+    "factors": {
+      "appearance": "Apparence anormale",
+      "movement": "Mouvements anormaux",
+      "incongruity": "Incongruités physico-spatiales",
+      "detection": "Détection technologique",
+      "close": "Rencontre rapprochée",
+      "beings": "Êtres associés",
+      "traces": "Traces ou effets"
+    },
+    "factorHints": {
+      "appearance": "Forme ou taille d'aucun aéronef identifiable, ou lumières que leur intensité ou leur disposition distinguent des lumières habituelles",
+      "movement": "Vitesses ou accélérations au-delà des avions les plus rapides, trajectoire brisée ou hélicoïdale, descente en feuille morte",
+      "incongruity": "Apparition ou disparition sur place, deux objets qui n'en font qu'un, objet qui se déforme, « lumière solide »",
+      "detection": "Vu ou enregistré par un instrument : radar, télescope, théodolite, photo, film, vidéo, spectre, son. Laissé vide, d'après l'instrument de l'enregistrement",
+      "close": "À moins de 150 m environ. Laissé vide, d'après la distance que la scène déduit",
+      "beings": "Êtres vus avec un objet anormal par son apparence, ses mouvements ou une incongruité. Laissé vide, d'après les êtres que la scène place",
+      "traces": "Traces physiques ou chimiques laissées, effets sur des personnes, des machines ou des circuits électriques"
+    },
+    "fromRecording": "déduit",
+    "unknown": "on ne sait pas",
+    "yes": "oui",
+    "no": "non",
+    "minutes": "min"
+  },
   accountUnknown: "on ne sait pas",
   accountYes: "oui",
   accountNo: "non",

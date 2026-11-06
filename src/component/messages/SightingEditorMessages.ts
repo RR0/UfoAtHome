@@ -1,3 +1,4 @@
+import type { AccountEvaluationMessages } from "../AccountEvaluationFields.js"
 import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
 import type { EventsMessages } from "./EventsMessages.js"
 import type { TimelineTracksMessages } from "../TimelineTracks.js"
@@ -976,6 +977,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** Whether the observer was gone back to after the first account. Three states: a report silent
    * about follow-up is not a report saying none happened. */
   accountFollowedUp: string
+  /** What the evaluation methods read of the account beyond the fields above — see AccountEvaluationFields. */
+  accountEvaluation: AccountEvaluationMessages
   accountUnknown: string
   accountYes: string
   accountNo: string

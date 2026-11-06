@@ -542,6 +542,66 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   accountSourceSocialMedia: "the observer posted it online",
   accountSourcePress: "press or broadcast",
   accountFollowedUp: "Followed up",
+  accountEvaluation: {
+    "occupationKind": "Kind of work",
+    "occupationKindHint": "What evaluation methods band; for a retired observer, the work they retired from",
+    "occupationKinds": {
+      "student": "pupil, before university",
+      "worker": "worker",
+      "farmer": "farmer",
+      "homemaker": "homemaker",
+      "merchant": "shopkeeper",
+      "business": "business owner",
+      "employee": "employee",
+      "artist": "artist",
+      "technician": "technician",
+      "police": "police",
+      "pilot": "pilot",
+      "military": "military"
+    },
+    "graduate": "University degree",
+    "enquiryMinutes": "Enquiry length",
+    "enquiryMinutesHint": "Time the investigator spent with the observer: on the spot, in person or on the phone",
+    "relation": "Tie between observers",
+    "relations": {
+      "friends": "friends",
+      "family": "family",
+      "professional": "colleagues",
+      "none": "none"
+    },
+    "activity": "Activity",
+    "activities": {
+      "leisure": "leisure, rest",
+      "travelling": "travelling",
+      "cultural": "cultural or intellectual",
+      "working": "at work or commuting"
+    },
+    "strangenessSection": "Strangeness",
+    "strangenessIntro": "What remains unexplained once the account has been examined, as the investigators judge it: Ballester-Olmos and Guasp's seven factors.",
+    "factors": {
+      "appearance": "Anomalous appearance",
+      "movement": "Anomalous movements",
+      "incongruity": "Physical-spatial incongruities",
+      "detection": "Technological detection",
+      "close": "Close encounter",
+      "beings": "Associated beings",
+      "traces": "Traces or effects"
+    },
+    "factorHints": {
+      "appearance": "A shape or size no identifiable aircraft has, or lights whose intensity or layout set them apart from usual ones",
+      "movement": "Speeds or accelerations beyond the fastest aircraft, a broken or helical path, a falling-leaf descent",
+      "incongruity": "Appearing or vanishing on the spot, two objects merging into one, an object deforming, \"solid light\"",
+      "detection": "Seen or recorded through an instrument: radar, telescope, theodolite, photograph, film, video, spectrum, sound. Left blank, read from the recording's instrument",
+      "close": "Within about 150 m. Left blank, read from the distance the scene works out",
+      "beings": "Beings seen with an object anomalous by its appearance, movements or an incongruity. Left blank, read from the beings the scene places",
+      "traces": "Physical or chemical traces left, effects on people, machines or electrical circuits"
+    },
+    "fromRecording": "worked out",
+    "unknown": "unknown",
+    "yes": "yes",
+    "no": "no",
+    "minutes": "min"
+  },
   accountUnknown: "unknown",
   accountYes: "yes",
   accountNo: "no",

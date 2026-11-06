@@ -68,10 +68,17 @@ export class SightingAssessments {
         fromSource: false,
         // What this reading is about, so a chip can lead somewhere for a host that has somewhere
         // to lead to. A player states it and stops there.
-        about: source.create().about
+        about: source.create().about,
+        ...(assessment.factors ? { detail: SightingAssessments.factorsText(assessment.factors) } : {})
       })
     }
     return { entries, unanswered }
+  }
+
+  /** The figures a score is made of, by their symbols: Ballester-Guasp's q, sigma and pi are Q, Σ and Π in every language. */
+  private static factorsText(factors: Record<string, number>): string {
+    const symbols: Record<string, string> = { q: "Q", sigma: "Σ", pi: "Π" }
+    return Object.entries(factors).map(([id, value]) => `${symbols[id] ?? id} ${value.toFixed(2)}`).join(" × ")
   }
 
   /** A classifying assessor's conclusion in the reader's own words — a class id like "nl" means

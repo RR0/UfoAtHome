@@ -44,5 +44,18 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
         return new HynekAssessor().assess(sighting)
       }
     })
+  },
+  {
+    id: "ballester-guasp",
+    name: "Ballester-Guasp",
+    credit: "V.-J. Ballester-Olmos & M. Guasp",
+    creditUrl: "https://rr0.org/science/crypto/ufo/enquete/methode/Ballester-Guasp.html",
+    create: () => ({
+      about: "observer",
+      assess: async (sighting: Sighting): Promise<Assessment> => {
+        const { BallesterGuaspAssessor } = await import("./assessors/BallesterGuaspAssessor.js")
+        return new BallesterGuaspAssessor().assess(sighting)
+      }
+    })
   }
 ]

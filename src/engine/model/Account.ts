@@ -93,11 +93,74 @@ export interface Account {
    */
   followedUp?: boolean
   /**
+   * What kind of work the main observer did, beside the prose of `observerOccupation`: what an evaluation method bands. Kinds and not a
+   * method's levels, so that each method bands them its own way (see BallesterGuaspAssessor). A retired observer is given the work they
+   * retired from: "retired" is not an occupation, as Ballester-Guasp insist.
+   */
+  observerOccupationKind?: OccupationKind
+  /** Whether the main observer holds a university degree, whatever they worked as: Ballester-Guasp rate a graduate homemaker as a graduate. */
+  observerGraduate?: boolean
+  /** How long the investigator spent with the observer, minutes: on the place, face to face or on the phone (see `source`). */
+  enquiryMinutes?: number
+  /** What ties the observers this account places together, when it places more than one. */
+  observersRelation?: ObserversRelation
+  /** What the main observer was doing when the sighting began. */
+  activity?: ObserverActivity
+  /**
+   * What the investigators found anomalous in this account once they had examined it: each of Ballester-Guasp's seven strangeness factors
+   * that is still unexplained (true), or that is not there or was explained (false). Absent means not judged, and for the three a recording
+   * can say itself (`detection`, `close`, `beings`), the recording is read instead.
+   *
+   * The investigators' judgment and not the observer's words: Ballester-Guasp count the factors left after analysis, "not only the
+   * witnesses' first statements". Its provenance says how it was reached.
+   */
+  strangeness?: Partial<Record<StrangenessFactor, boolean>>
+  /**
    * The conditions of this account and of the sighting as the observer lived it: what the error laws of the values they give read
    * (see docs/witness-error-model.md and WitnessError). Each absent means unknown.
    */
   conditions?: WitnessConditions
 }
+
+/** What kind of work an observer did, as evaluation methods tell occupations apart (see Account.observerOccupationKind). */
+export type OccupationKind =
+  | "student" | "worker" | "farmer" | "homemaker"
+  | "merchant" | "business" | "employee" | "artist"
+  | "technician" | "police" | "pilot" | "military"
+
+/** What ties the observers of one account together: the more remote the tie, the less likely a hoax made together. */
+export type ObserversRelation = "friends" | "family" | "professional" | "none"
+
+/** What an observer was doing when the sighting began: what says how likely a hoax was. */
+export type ObserverActivity =
+  /** Walking, resting, out, hunting, at sport, at home, on holiday. */
+  | "leisure"
+  /** On the move, by whatever means, other than to or from work. */
+  | "travelling"
+  /** A cultural or intellectual activity. */
+  | "cultural"
+  /** At work, or on the way to or from it. */
+  | "working"
+
+/** Ballester-Guasp's seven strangeness factors, in their own order (see Account.strangeness). */
+export const STRANGENESS_FACTORS: readonly StrangenessFactor[] = ["appearance", "movement", "incongruity", "detection", "close", "beings", "traces"]
+
+/** Ballester-Guasp's seven strangeness factors (see Account.strangeness). */
+export type StrangenessFactor =
+  /** A shape or size no identifiable aircraft has, or lights whose intensity or layout rules out conventional ones. */
+  | "appearance"
+  /** Speeds or accelerations beyond the fastest aircraft, broken or helical paths, a "falling leaf". */
+  | "movement"
+  /** Appearing or vanishing on the spot, two objects merging into one, an object deforming, "solid light". */
+  | "incongruity"
+  /** Seen or recorded through a calibrated instrument: radar, telescope, theodolite, photograph, film, video, spectrum, sound. */
+  | "detection"
+  /** Seen from within about 150 m (Hynek's 500 feet). */
+  | "close"
+  /** Beings seen with an object that has an anomalous appearance, movement or incongruity. */
+  | "beings"
+  /** Physical or chemical traces left, or effects on people, machines or electrical circuits. */
+  | "traces"
 
 /** What the word an observer used for the phenomenon was: it predicts what metric detail they volunteer, not how wrong it is. */
 export type WitnessWord = "light" | "object" | "craft" | "ufo" | "other"

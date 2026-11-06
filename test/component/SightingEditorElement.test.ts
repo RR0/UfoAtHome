@@ -6829,6 +6829,25 @@ describe("SightingEditorElement assessment", () => {
     expect(chips[chips.length - 1]).toBe(nest(element))
   })
 
+  it("scores the account the way Ballester-Guasp do once it says how it was obtained, Q, Σ and Π in its tooltip", async () => {
+    const element = mount()
+    const select = (id: string) => element.shadowRoot!.getElementById(id) as HTMLSelectElement
+    const chip = () => nest(element)?.querySelector<HTMLElement>('.param-chip[data-field="ballester-guasp"]') ?? null
+    await waitFor(() => nest(element) !== null)
+    // No score while the account does not say how it was obtained.
+    expect(chip()).toBeNull()
+    for (const [id, value] of [["accountSource", "interview"], ["strangeness-appearance", "yes"]]) {
+      select(id).value = value
+      select(id).dispatchEvent(new Event("change"))
+    }
+    // Read again after each change: waited for until it has read the last.
+    await waitFor(() => /Σ 0\.14/.test(chip()?.title ?? ""))
+    expect(chip()!.title).toMatch(/^Q 0\.80 × Σ 0\.14 × Π 0\.\d\d$/)
+    expect(element.sightingData.account).toMatchObject({ source: "interview", strangeness: { appearance: true } })
+    // What it still counts as 0 is marked as a field an author can fill.
+    expect(select("strangeness-movement").classList.contains("wanted")).toBe(true)
+  })
+
   it("says, in one line, what share of the questions the observer answered", async () => {
     // A chip is one line and half its value is the shape of it. What the figure cannot say — WHICH
     // questions went unanswered — is said by the marks on the fields that would answer them.

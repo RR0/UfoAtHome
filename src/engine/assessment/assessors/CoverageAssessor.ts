@@ -91,7 +91,7 @@ export class CoverageAssessor implements Assessor {
   }
 
   /** What is said of the value at `path`, or of the nearest value holding it: a place stated with its basis holds its coordinates. */
-  private static basisAt(path: string, sighting: Sighting): Basis | undefined {
+  static basisAt(path: string, sighting: Sighting): Basis | undefined {
     const steps = path.split(".")
     for (let length = steps.length; length > 0; length--) {
       const basis = sighting.provenance.at(steps.slice(0, length).join("."))?.basis

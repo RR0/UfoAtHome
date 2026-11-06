@@ -547,6 +547,66 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   accountSourceSocialMedia: "lo publicó el observador en internet",
   accountSourcePress: "prensa o radiodifusión",
   accountFollowedUp: "Recontactado",
+  accountEvaluation: {
+    "occupationKind": "Categoría",
+    "occupationKindHint": "Lo que clasifican los métodos de evaluación; para un jubilado, el oficio que ejercía",
+    "occupationKinds": {
+      "student": "alumno, antes de la universidad",
+      "worker": "obrero",
+      "farmer": "agricultor",
+      "homemaker": "ama de casa",
+      "merchant": "comerciante",
+      "business": "empresario",
+      "employee": "empleado",
+      "artist": "artista",
+      "technician": "técnico",
+      "police": "policía, guardia civil",
+      "pilot": "piloto",
+      "military": "militar"
+    },
+    "graduate": "Titulado superior",
+    "enquiryMinutes": "Duración de la encuesta",
+    "enquiryMinutesHint": "Tiempo que el encuestador pasó con el observador: en el lugar, en persona o por teléfono",
+    "relation": "Vínculo entre observadores",
+    "relations": {
+      "friends": "amigos",
+      "family": "familia",
+      "professional": "compañeros de trabajo",
+      "none": "ninguno"
+    },
+    "activity": "Actividad",
+    "activities": {
+      "leisure": "ocio, descanso",
+      "travelling": "de viaje",
+      "cultural": "cultural o intelectual",
+      "working": "trabajando o yendo al trabajo"
+    },
+    "strangenessSection": "Extrañeza",
+    "strangenessIntro": "Lo que sigue sin explicación una vez examinado el relato, a juicio de los encuestadores: los siete factores de Ballester-Olmos y Guasp.",
+    "factors": {
+      "appearance": "Apariencia anómala",
+      "movement": "Movimientos anómalos",
+      "incongruity": "Incongruencias físico-espaciales",
+      "detection": "Detección tecnológica",
+      "close": "Encuentro cercano",
+      "beings": "Seres asociados",
+      "traces": "Huellas o efectos"
+    },
+    "factorHints": {
+      "appearance": "Forma o tamaño de ninguna aeronave identificable, o luces cuya intensidad o disposición las distinguen de las habituales",
+      "movement": "Velocidades o aceleraciones superiores a las de los aviones más rápidos, trayectoria quebrada o helicoidal, descenso en hoja muerta",
+      "incongruity": "Aparición o desaparición in situ, dos objetos que se funden en uno, objeto que se deforma, «luz sólida»",
+      "detection": "Visto o registrado por un instrumento: radar, telescopio, teodolito, foto, película, vídeo, espectro, sonido. En blanco, según el instrumento de la grabación",
+      "close": "A menos de unos 150 m. En blanco, según la distancia que deduce la escena",
+      "beings": "Seres vistos con un objeto anómalo por su apariencia, sus movimientos o una incongruencia. En blanco, según los seres que sitúa la escena",
+      "traces": "Huellas físicas o químicas, efectos sobre personas, máquinas o circuitos eléctricos"
+    },
+    "fromRecording": "deducido",
+    "unknown": "no se sabe",
+    "yes": "sí",
+    "no": "no",
+    "minutes": "min"
+  },
   accountUnknown: "desconocido",
   accountYes: "sí",
   accountNo: "no",

@@ -51,6 +51,8 @@ export interface SummaryEntry {
    * the observer's own account sits in the Assessment box and leads to the Observer panel. Only a
    * host with somewhere to lead uses it (see Assessor.about). */
   about?: string
+  /** What the value is made of, as its tooltip: an assessment's factors (Ballester-Guasp's "Q 0.90 × Σ 0.43 × Π 0.68"). */
+  detail?: string
 }
 
 /** What the caller knows that the file itself does not.

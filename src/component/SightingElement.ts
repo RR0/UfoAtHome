@@ -1427,6 +1427,7 @@ export class SightingElement extends HTMLElement {
   private paramItem(entry: SummaryEntry): HTMLElement {
     const item = document.createElement("span")
     item.className = entry.fromSource ? "param-label from-source" : "param-label"
+    if (entry.detail) item.title = entry.detail
     if (entry.full !== undefined) {
       item.classList.add("describable")
       item.tabIndex = 0

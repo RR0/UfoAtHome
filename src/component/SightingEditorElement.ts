@@ -198,6 +198,7 @@ import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
 import { loadSceneNames, loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import { HintElement } from "./HintElement.js"
+import { AccountEvaluationFields } from "./AccountEvaluationFields.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -591,6 +592,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly observerAgeInput: HTMLInputElement
   private readonly observerOccupationInput: HTMLInputElement
   private readonly accountSourceSelect: HTMLSelectElement
+  /** What the evaluation methods read of the account beyond the fields above — see AccountEvaluationFields. */
+  private readonly evaluationFields: AccountEvaluationFields
   private readonly accountUrlInput: HTMLInputElement
   private readonly labelAccountUrl: HTMLElement
   private readonly accountFollowedUpSelect: HTMLSelectElement
@@ -1348,6 +1351,8 @@ export class SightingEditorElement extends HTMLElement {
     this.accountUrlInput = this.shadow.getElementById("accountUrl") as HTMLInputElement
     this.labelAccountUrl = this.shadow.getElementById("label-account-url")!
     this.accountFollowedUpSelect = this.shadow.getElementById("accountFollowedUp") as HTMLSelectElement
+    this.evaluationFields = new AccountEvaluationFields(this.shadow.getElementById("profile-section")!, this.shadow.getElementById("testimony-section")!,
+      this.shadow.getElementById("strangeness-section")!, () => this.updateObserverMetadata())
     this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
@@ -4231,6 +4236,7 @@ export class SightingEditorElement extends HTMLElement {
         : this.said.write(sighting.account?.observerOccupation, this.observerOccupationInput.value, this.writingLanguage),
       source: (this.stringOrUndefined(this.accountSourceSelect.value) as Account["source"]),
       followedUp: followedUp === "" ? undefined : followedUp === "yes",
+      ...this.evaluationFields.values(),
       // Kept by the witness's own sections (see WitnessErrorView), not by these fields.
       conditions: sighting.account?.conditions
     }
@@ -6014,6 +6020,7 @@ export class SightingEditorElement extends HTMLElement {
     this.accountUrlInput.value = sighting.sources?.[0]?.url ?? ""
     this.accountFollowedUpSelect.value =
       sighting.account?.followedUp === undefined ? "" : sighting.account.followedUp ? "yes" : "no"
+    this.evaluationFields.show(sighting.account)
     this.descriptionInput.value = this.said.read(sighting.event.description) ?? ""
     this.showTags()
     this.instrumentSelect.value = sighting.instrument.id
@@ -7362,9 +7369,16 @@ export class SightingEditorElement extends HTMLElement {
     // there is currently no pair of them that can produce one.
     const chips = entries.map(entry => ({ ...entry, panel: this.summaryPanelIndex(entry.group) }))
     const signature = chips.map(chip => `${chip.field}=${chip.label}=${chip.value}${chip.unit}${chip.full ?? ""}${chip.fromSource ? "*" : ""}`).join("|")
+    // What the assessors read beyond the strip: the account (how it was obtained, the strangeness judged), which no chip shows.
+    const account = JSON.stringify(this.ufoElement.sighting.account ?? null)
     if (signature === this.paramSummarySignature) {
+      if (account !== this.assessedAccount) {
+        this.assessedAccount = account
+        void this.runAssessments()
+      }
       return
     }
+    this.assessedAccount = account
     this.paramSummarySignature = signature
     this.paramChips = chips
     this.renderParamSummary()
@@ -7468,7 +7482,18 @@ export class SightingEditorElement extends HTMLElement {
     appearance: { panel: "shape", fields: ["shapeTitle", "color"] },
     movement: { panel: "shape", fields: [] },
     sound: { panel: "sound", fields: ["soundKind"] },
-    conditions: { panel: "weather", fields: ["cloudCover"] }
+    conditions: { panel: "weather", fields: ["cloudCover"] },
+    // Ballester-Guasp's (see BallesterGuaspAssessor): what its formula counts as 0 until it is said.
+    "bg-information": { panel: "observer", fields: ["accountSource"] },
+    "bg-occupation": { panel: "observer", fields: ["observerOccupationKind"] },
+    "bg-relation": { panel: "observer", fields: ["observersRelation"] },
+    "bg-activity": { panel: "observer", fields: ["observerActivity"] },
+    "bg-age": { panel: "observer", fields: ["observerAge"] },
+    "bg-appearance": { panel: "observer", fields: ["strangeness-appearance"] },
+    "bg-movement": { panel: "observer", fields: ["strangeness-movement"] },
+    "bg-incongruity": { panel: "observer", fields: ["strangeness-incongruity"] },
+    "bg-close": { panel: "observer", fields: ["strangeness-close"] },
+    "bg-traces": { panel: "observer", fields: ["strangeness-traces"] }
   }
 
   /** Chips for what the assessors made of the recording, kept between renders because they arrive
@@ -7477,6 +7502,8 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Drops a result that resolved after the recording it described was already replaced. */
   private assessmentToken = 0
+  /** The account as the assessors last read it, to read it again when only it changed (see refreshParamSummary). */
+  private assessedAccount = ""
 
   /**
    * Asks every registered assessor what it makes of the recording, and puts each answer on the
@@ -7667,6 +7694,7 @@ export class SightingEditorElement extends HTMLElement {
     button.className = chip.fromSource ? "param-chip from-source" : "param-chip"
     button.dataset.panel = String(chip.panel)
     button.dataset.field = chip.field
+    if (chip.detail) button.title = chip.detail
     const label = document.createElement("span")
     label.className = "param-chip-label"
     label.textContent = `${chip.label} `
@@ -11093,6 +11121,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelAccountSource.textContent = messages.accountSource
     HintElement.say(this.labelAccountUrl, messages.accountUrl, messages.accountUrlHint)
     this.labelAccountFollowedUp.textContent = messages.accountFollowedUp
+    this.evaluationFields.messages = messages.accountEvaluation
     for (const [id, text] of [
       ["option-source-unknown", messages.accountSourceUnknown],
       ["option-source-on-site", messages.accountSourceOnSite],

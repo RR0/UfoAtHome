@@ -36,6 +36,8 @@ export interface AssessmentCriterion {
    * about the format, and quietly dropping the criterion would lose it.
    */
   unsupported?: boolean
+  /** What the criterion is worth in the assessor's own scale, for one that scores each of them (see BallesterGuaspAssessor). */
+  value?: number
 }
 
 /** What an assessor made of a recording. */
@@ -59,6 +61,8 @@ export interface Assessment {
    * figure; the profile goes where there is room for it.
    */
   score?: number
+  /** The figures the score is made of, by id, for an assessor whose score is a formula over them (Ballester-Guasp's Q, Σ and Π). */
+  factors?: Record<string, number>
   /** Every criterion, in the order the assessor means them to be read. */
   criteria: AssessmentCriterion[]
 }

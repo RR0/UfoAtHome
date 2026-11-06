@@ -547,6 +547,66 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   accountSourceSocialMedia: "l'ha pubblicato l'osservatore in rete",
   accountSourcePress: "stampa o radiotelevisione",
   accountFollowedUp: "Ricontattato",
+  accountEvaluation: {
+    "occupationKind": "Categoria",
+    "occupationKindHint": "Ciò che i metodi di valutazione classificano; per un pensionato, il mestiere che svolgeva",
+    "occupationKinds": {
+      "student": "alunno, prima dell'università",
+      "worker": "operaio",
+      "farmer": "agricoltore",
+      "homemaker": "casalinga",
+      "merchant": "commerciante",
+      "business": "imprenditore",
+      "employee": "impiegato",
+      "artist": "artista",
+      "technician": "tecnico",
+      "police": "poliziotto, carabiniere",
+      "pilot": "pilota",
+      "military": "militare"
+    },
+    "graduate": "Laureato",
+    "enquiryMinutes": "Durata dell'inchiesta",
+    "enquiryMinutesHint": "Tempo passato dall'inquirente con l'osservatore: sul posto, di persona o al telefono",
+    "relation": "Legame tra osservatori",
+    "relations": {
+      "friends": "amici",
+      "family": "famiglia",
+      "professional": "colleghi",
+      "none": "nessuno"
+    },
+    "activity": "Attività",
+    "activities": {
+      "leisure": "svago, riposo",
+      "travelling": "in viaggio",
+      "cultural": "culturale o intellettuale",
+      "working": "al lavoro o nel tragitto di lavoro"
+    },
+    "strangenessSection": "Stranezza",
+    "strangenessIntro": "Ciò che resta inspiegato una volta esaminato il racconto, a giudizio degli inquirenti: i sette fattori di Ballester-Olmos e Guasp.",
+    "factors": {
+      "appearance": "Aspetto anomalo",
+      "movement": "Movimenti anomali",
+      "incongruity": "Incongruenze fisico-spaziali",
+      "detection": "Rilevamento tecnologico",
+      "close": "Incontro ravvicinato",
+      "beings": "Esseri associati",
+      "traces": "Tracce o effetti"
+    },
+    "factorHints": {
+      "appearance": "Forma o dimensione di nessun aeromobile identificabile, o luci la cui intensità o disposizione le distinguono da quelle consuete",
+      "movement": "Velocità o accelerazioni oltre quelle degli aerei più veloci, traiettoria spezzata o elicoidale, discesa a foglia morta",
+      "incongruity": "Comparsa o scomparsa sul posto, due oggetti che si fondono in uno, oggetto che si deforma, «luce solida»",
+      "detection": "Visto o registrato da uno strumento: radar, telescopio, teodolite, foto, film, video, spettro, suono. Vuoto, secondo lo strumento della registrazione",
+      "close": "Entro circa 150 m. Vuoto, secondo la distanza che la scena ricava",
+      "beings": "Esseri visti con un oggetto anomalo per aspetto, movimenti o un'incongruenza. Vuoto, secondo gli esseri che la scena colloca",
+      "traces": "Tracce fisiche o chimiche lasciate, effetti su persone, macchine o circuiti elettrici"
+    },
+    "fromRecording": "dedotto",
+    "unknown": "non si sa",
+    "yes": "sì",
+    "no": "no",
+    "minutes": "min"
+  },
   accountUnknown: "sconosciuto",
   accountYes: "sì",
   accountNo: "no",

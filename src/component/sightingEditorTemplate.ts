@@ -148,13 +148,13 @@ export const html = `
          count belongs to the case that gathers them. Blank means unknown. -->
     <p id="observer-identity-hint" class="file-note"></p>
     </div>
-    <div class="form-section">
+    <div id="profile-section" class="form-section">
     <h3 class="section-title"><span id="label-section-profile">Profile</span></h3>
     <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
     <label class="adv"><span id="label-observer-birth">Born</span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
     <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
     </div>
-    <div class="form-section">
+    <div id="testimony-section" class="form-section">
     <h3 class="section-title"><span id="label-section-testimony">Testimony</span></h3>
     <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
       <option id="option-source-unknown" value="">unknown</option>
@@ -178,6 +178,8 @@ export const html = `
          the filter in front of it and the settings of the device (see below). Which of them show, and
          which are read-only, follows the instrument chosen. -->
     </div>
+    <!-- Ballester-Guasp's strangeness factors as the investigators judged them, filled by AccountEvaluationFields. -->
+    <div id="strangeness-section" class="form-section"></div>
     <div id="instrument-group" class="instrument-group form-section" role="group" aria-labelledby="label-section-vision">
       <h3 class="section-title"><span id="label-section-vision">Vision</span></h3>
       <div class="field"><span id="label-instrument">Observed through</span> <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker></div>
