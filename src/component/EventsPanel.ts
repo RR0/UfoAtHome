@@ -63,7 +63,7 @@ export class EventsPanel {
   /** What an author can add by hand, by actor: the kinds whose parameters this panel edits (a drive's route comes from a survey). */
   private static readonly ADDABLE: Record<EventsActor, string[]> = {
     observer: ["look", "walk", "follow"],
-    phenomenon: ["stand", "blink", "vanish"],
+    phenomenon: ["stand", "blink", "turn", "roll", "vibrate", "spiral", "vanish"],
     bodies: ["motion", "spin", "rise", "turn", "ride", "light", "blink", "vanish"]
   }
 
@@ -233,6 +233,13 @@ export class EventsPanel {
       ride: { params: { in: firstBody, aboveM: 0 } },
       turn: { until: t + 1000, params: { headingDeg: 0 } }
     }
+    // About a phenomenon going across the sky (see TravelParams): its turn is by some degrees to one side, and it banks, vibrates, spirals.
+    if (this.actor === "phenomenon") Object.assign(drafts, {
+      turn: { until: t + 1000, params: { byDeg: 15, side: "left" } },
+      roll: { until: t + 500, params: { toDeg: 20 } },
+      vibrate: { until: t + 1000, params: { hz: 10, amplitudeShare: 0.1, riseS: 0.3 } },
+      spiral: { until: t + 1000, params: { turns: 1, radiusDeg: 2, shrink: 0.5, clockwise: true, rollDeg: 360 } }
+    })
     // A body's blink is one of its lights': lit at a luminance while on, dark while off.
     if (this.actor === "bodies") Object.assign(drafts, { blink: { until: t + 5000, params: { onS: 0.5, offS: 0.5, cdM2: 500 } }, light: { params: { cdM2: 500 } } })
     const draft = drafts[kind] ?? {}

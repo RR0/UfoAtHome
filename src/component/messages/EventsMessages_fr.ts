@@ -17,13 +17,13 @@ export const eventsMessages_fr: EventsMessages = {
   overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
   add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement",
   resetToEvents: "Revenir aux événements",
-  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne", light: "Feu", travel: "Parcourt le ciel" },
+  kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne", light: "Feu", travel: "Parcourt le ciel", roll: "S'incline", vibrate: "Vibre", spiral: "Spirale" },
   params: {
     vehicle: "Véhicule", path: "Trajet", speeds: "Vitesses", speedDivisors: "Vitesses divisées par", through: "Passe par", eye: "Œil dans le véhicule",
     fovDeg: "Champ de vision", target: "Regarde", pitchShare: "Lève les yeux jusqu'à (part de sa hauteur)", keepDeg: "Le garde à moins de", glanceBeyondDeg: "Coups d'œil au-delà de",
     glanceS: "Coup d'œil", roadS: "Retour sur la route", offsetM: "Déplace l'œil de", holdS: "Pendant", turnS: "En", mirror: "Rétroviseur", firstS: "D'abord",
     mirrorS: "Dans le rétroviseur", glancesUntil: "Coups d'œil directs jusqu'à",
-    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", motion: "Mouvement", turnsPerS: "Tours par seconde", distanceM: "Distance", angleDeg: "Écart à la verticale", stops: "S'arrête", in: "Dans", aboveM: "Au-dessus", headingDeg: "Cap", pitchDeg: "Inclinaison", cdM2: "Luminance", towards: "Vers", sizeDeg: "Taille au zénith", sizeBy: "Taille selon", byDeg: "De", side: "Côté", seenFrom: "Vu depuis", reactionS: "Réagit après", lagS: "En retard de"
+    place: "Où", metres: "Taille (largeur, hauteur au-dessus de l'œil)", parts: "Parties", from: "De", to: "À", onS: "Allumé", offS: "Éteint", off: "Éteint, il est", motion: "Mouvement", turnsPerS: "Tours par seconde", distanceM: "Distance", angleDeg: "Écart à la verticale", stops: "S'arrête", in: "Dans", aboveM: "Au-dessus", headingDeg: "Cap", pitchDeg: "Inclinaison", cdM2: "Luminance", towards: "Vers", sizeDeg: "Taille au zénith", sizeBy: "Taille selon", byDeg: "De", side: "Côté", seenFrom: "Vu depuis", reactionS: "Réagit après", lagS: "En retard de", toDeg: "Jusqu'à", andBack: "Et retour", hz: "Fois par seconde", amplitudeShare: "Amplitude (part de sa taille)", riseS: "Monte en", turns: "Tours", radiusDeg: "Rayon", shrink: "Se resserre de", clockwise: "Sens horaire", rollDeg: "Tonneau"
   },
   from: "de",
   to: "à",

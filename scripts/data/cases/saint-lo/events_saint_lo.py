@@ -3,7 +3,8 @@
 the sky and its turns, how it looked. The player works the shapes and the poses out of them (src/engine/events: SkyPath, PhenomenonExpansion,
 FootExpansion), by the same laws as the generator.
 
-    python3 events_saint_lo.py --print     the events and the groups, as JSON
+    python3 events_saint_lo.py [recording]   writes them into it (public/demo-data/observer-saint-lo.json), after build_saint_lo.py
+    python3 events_saint_lo.py --print       the events and the groups, as JSON
 """
 import json
 import pathlib
@@ -72,6 +73,22 @@ def events(observer):
         {"type": "event", "eventType": "turn", "who": PHENOMENON, "t": b.TURN_3_FROM, "until": b.TURN_3_TO, "params": {
             "byDeg": wrap(b.TURN_3_DEG, "derived", "The last, to the left, \"5 degrés, 5-10 max\": as much as ends it due south"),
             "side": b.TURN_3_SIDE, "seenFrom": "craft"}},
+        {"type": "event", "eventType": "roll", "who": PHENOMENON, "t": t1[0], "until": t1[1], "params": {
+            "toDeg": wrap(b.BANK_DEG, "assumed", "Banked into its first turn and out of it, as the second (\"environ 20 degrés\")"), "andBack": True}},
+        {"type": "event", "eventType": "roll", "who": PHENOMENON, "t": t2[0], "until": t2[0] + 400, "params": {
+            "toDeg": wrap(b.BANK_DEG, "stated", "\"L'engin se cambrant dans le virage\", \"environ 20 degrés sur la droite\"")}},
+        {"type": "event", "eventType": "roll", "who": PHENOMENON, "t": b.TURN_3_FROM, "until": b.SPIRAL_FROM_MS, "params": {
+            "toDeg": wrap(90, "stated", "Near the horizon, \"une ligne lumineuse horizontale\": edge on")}},
+        {"type": "event", "eventType": "vibrate", "who": PHENOMENON, "t": b.VIBRATION_FROM_MS, "until": b.VIBRATION_FROM_MS + b.VIBRATION_LASTS_MS, "params": {
+            "hz": wrap(b.VIBRATION_HZ, "stated", "\"Au moins une dizaine de fois\" a second, \"comme une voile dans le vent\""),
+            "amplitudeShare": wrap(round(b.VIBRATION_AMP_DEG / b.ACROSS, 6), "assumed", "Slightly: nobody measured how far"),
+            "riseS": wrap(0.3, "stated", "About a second, strong at the start, gradually less visible")}},
+        {"type": "event", "eventType": "spiral", "who": PHENOMENON, "t": b.SPIRAL_FROM_MS, "until": END_MS, "params": {
+            "turns": wrap(b.SPIRAL_TURNS, "stated", "\"340 degrés, et les 20 degrés qui manquent, je ne les ai pas vus\" (behind the trees)"),
+            "radiusDeg": wrap(b.SPIRAL_RADIUS_DEG, "stated", "\"4-5 degrés max\" across"),
+            "shrink": wrap(b.SPIRAL_SHRINK, "stated", "\"Large puis se rétrécit\"; by how much, SUPPOSED"),
+            "clockwise": wrap(b.SPIRAL_SIGN == 1, "stated", "Clockwise, as he says"),
+            "rollDeg": wrap(b.SPIRAL_ROLL_DEG, "stated", "A barrel roll of 340 degrees, the last 20 behind the trees")}},
         {"type": "event", "eventType": "appearance", "who": PHENOMENON, "t": 0, "until": GONE_MS, "params": {
             "parts": wrap([part(spec) for spec in b.SHAPES], "stated", "His drawing of the wing seen flat (call-2026-10-13/vue-a-plat-4k.png)")}},
         {"type": "event", "eventType": "vanish", "who": PHENOMENON, "t": GONE_MS},
@@ -81,6 +98,19 @@ def events(observer):
 GROUPS = [{"id": PHENOMENON, "title": {"fr": "L'aile", "en": "The wing"}, "members": b.IDS}]
 
 
+def main(path):
+    """Writes the events into the recording, in place of the shapes and the poses they give; the rest of it as it is."""
+    recording = json.loads(path.read_text())
+    observer = (recording.get("observer") or {}).get("id", "observer")
+    recording["events"] = events(observer)
+    recording["timeline"] = {"keyframes": [], "groups": GROUPS}
+    recording["observerTrack"] = {"keyframes": []}
+    path.write_text(json.dumps(recording, ensure_ascii=False, indent=1) + "\n")
+    print(f"{path}: {len(recording['events'])} events, {path.stat().st_size} bytes")
+
+
 if __name__ == "__main__":
     if "--print" in sys.argv:
         print(json.dumps({"events": events("observer"), "groups": GROUPS}, ensure_ascii=False, indent=1))
+    else:
+        main(pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else b.OUT)

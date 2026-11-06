@@ -1,17 +1,13 @@
 import { describe, expect, it } from "vitest"
 import saintLo from "../../../public/demo-data/observer-saint-lo.json"
 import valensole from "../../../public/demo-data/observer-valensole.json"
-import stated from "./saint-lo-events.json"
 import { KeyframeRuns } from "../../../src/engine/events/KeyframeRuns.js"
 import { ObserverTrack } from "../../../src/engine/model/ObserverTrack.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 
 const told = (sampleMs?: number) => fromSightingJson({
   ...(structuredClone(saintLo) as unknown as SightingRecordingJson),
-  ...(sampleMs === undefined ? {} : { sampleMs }),
-  events: structuredClone(stated.events),
-  timeline: { keyframes: [], groups: structuredClone(stated.groups) },
-  observerTrack: { keyframes: [] }
+  ...(sampleMs === undefined ? {} : { sampleMs })
 } as unknown as SightingRecordingJson)
 
 describe("KeyframeRuns", () => {

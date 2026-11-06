@@ -4,15 +4,17 @@ import { RecordingText } from "../../src/engine/persistence/RecordingText.js"
 import { SightingShapes } from "../../src/engine/persistence/SightingShapes.js"
 import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
 describe("RecordingText thin, on a recording of outlines over many keyframes", () => {
+  // Saint-Lô seen from the west-north-west, the variant that keeps the keyframes its generator wrote (the recording itself states its events).
   it("writes Saint-Lô about as small as its file, and reads back the boxes and outlines it held", () => {
-    const file = readFileSync("public/demo-data/observer-saint-lo.json", "utf8")
+    const file = readFileSync("public/demo-data/observer-saint-lo-wnw.json", "utf8")
     const sighting = fromSightingJson(JSON.parse(file))
     const json = toSightingJson(sighting)
     const whole = RecordingText.of(json, "whole")
     const thin = RecordingText.of(json, "thin", SightingShapes.derivable(sighting))
     // Half a million lines whole; thin, about what the file itself is.
     expect(thin.split("\n").length).toBeLessThan(file.split("\n").length * 1.5)
-    expect(whole.length).toBeGreaterThan(thin.length * 10)
+    // Its half-moon and filaments have far fewer points than the flat wing's comb: a share of the whole near 1/2.7, not 1/10.
+    expect(whole.length).toBeGreaterThan(thin.length * 2.5)
     const again = fromSightingJson(JSON.parse(thin))
     const close = (a: number, b: number) => Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b))
     sighting.timeline.allKeyframes.forEach((keyframe, i) => {

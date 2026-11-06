@@ -4,6 +4,7 @@ import type { TimelineJson } from "../model/Timeline.js"
 import { DriveExpansion } from "./DriveExpansion.js"
 import type { BlinkParams, EventPlace, AppearanceParams, LookPart, RecordingEventJson, StandParams } from "./RecordingEvent.js"
 import { SkyPath } from "./SkyPath.js"
+import { SkyMotion } from "./SkyMotion.js"
 
 /** A look and when it lasts. */
 interface Look {
@@ -30,6 +31,8 @@ export class PhenomenonExpansion {
   private static readonly TRAVEL_SAMPLE_MS = 25
   /** Either side of an instant, the way it goes there is read from where it is, ms. */
   private static readonly MOTION_MS = 40
+  /** In a spiral, the way it goes is read from where it is and where it will be this much later, ms. */
+  private static readonly SPIRAL_AHEAD_MS = 20
   private static readonly R = 6371008.8
 
   private readonly looks: Look[]
@@ -37,12 +40,15 @@ export class PhenomenonExpansion {
   private readonly vanishAt: number | undefined
   /** Its way across the sky, when it has no place (see TravelParams). */
   private readonly path: SkyPath | undefined
+  /** How it banks, vibrates and spirals on that way (see SkyMotion). */
+  private readonly motion: SkyMotion | undefined
 
   constructor(private readonly sighting: Sighting, private readonly stand: RecordingEventJson, events: RecordingEventJson[], end: number) {
     const looks = events.filter(event => event.eventType === "appearance").sort((a, b) => a.t - b.t)
     this.vanishAt = events.find(event => event.eventType === "vanish")?.t
     const last = this.vanishAt ?? end
     this.path = stand.eventType === "travel" ? new SkyPath(stand, events.filter(event => event.eventType === "turn"), end) : undefined
+    this.motion = this.path ? new SkyMotion(events, stand.until ?? end) : undefined
     this.looks = looks.map((event, k) => ({ t: event.t, until: event.until ?? looks[k + 1]?.t ?? last, parts: (event.params as unknown as AppearanceParams).parts }))
     this.blinks = events.filter(event => event.eventType === "blink")
       .map(event => ({ t: event.t, until: event.until ?? last, parts: event.who === undefined ? [] : sighting.timeline.leavesOf(event.who), params: event.params as unknown as BlinkParams }))
@@ -143,16 +149,33 @@ export class PhenomenonExpansion {
     const path = this.path!
     const pose = this.sighting.observerTrack.getInterpolatedPoseAt(t) ?? this.sighting.observerTrack.getLatestPoseAt(t)
     const heading = pose?.headingDeg ?? 0, pitch = pose?.pitchDeg ?? 0
-    const here = SkyPath.toScreen(path.at(t), heading, pitch)
-    const a = SkyPath.toScreen(path.at(t - PhenomenonExpansion.MOTION_MS), heading, pitch)
-    const b = SkyPath.toScreen(path.at(t + PhenomenonExpansion.MOTION_MS), heading, pitch)
-    const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
-    const mx = (b[0] - a[0]) / length, my = (b[1] - a[1]) / length
+    const motion = this.motion!
+    const onScreen = (at: number) => SkyPath.toScreen(path.at(at), heading, pitch)
+    const unit = (a: [number, number], b: [number, number]): [number, number] => {
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1
+      return [(b[0] - a[0]) / length, (b[1] - a[1]) / length]
+    }
+    let here = onScreen(t)
+    let [mx, my] = unit(onScreen(t - PhenomenonExpansion.MOTION_MS), onScreen(t + PhenomenonExpansion.MOTION_MS))
     const size = path.sizeAt(t)
-    const along = Math.tan(size * (part.alongShare ?? 0) * Math.PI / 180)
-    const left = Math.tan(size * (part.upShare ?? 0) * Math.PI / 180)
+    // Its vibration, across its way.
+    const sideways = Math.tan(motion.sidewaysAt(t, size) * Math.PI / 180)
+    here = [here[0] - sideways * my, here[1] + sideways * mx]
+    // Its spiral, beside its way: which it then goes along, ahead of where it is.
+    const spiral = motion.spiralAt(t)
+    if (spiral) {
+      const ahead = motion.spiralAt(t + PhenomenonExpansion.SPIRAL_AHEAD_MS)!
+      const from = onScreen(t), to = onScreen(t + PhenomenonExpansion.SPIRAL_AHEAD_MS)
+      here = [here[0] + spiral[0], here[1] + spiral[1]]
+      ;[mx, my] = unit([from[0] + spiral[0], from[1] + spiral[1]], [to[0] + ahead[0], to[1] + ahead[1]])
+    }
+    // Banked, it is narrower across its way.
+    const across = motion.acrossShareAt(t)
+    const banked: LookPart = { ...part, heightShare: (part.heightShare ?? part.widthShare) * across, ...(part.upShare === undefined ? {} : { upShare: part.upShare * across }) }
+    const along = Math.tan(size * (banked.alongShare ?? 0) * Math.PI / 180)
+    const left = Math.tan(size * (banked.upShare ?? 0) * Math.PI / 180)
     const aim = SkyPath.fromScreen(here[0] + along * mx - left * my, here[1] + along * my + left * mx, heading, pitch)
-    const shape = PhenomenonExpansion.shape(part, { ...aim, sizeDeg: size }, off, hidden, true) as unknown as Record<string, unknown>
+    const shape = PhenomenonExpansion.shape(banked, { ...aim, sizeDeg: size }, off, hidden, true) as unknown as Record<string, unknown>
     shape.angle = Math.atan2(-my, mx)
     return shape as unknown as ShapeState["shape"]
   }
