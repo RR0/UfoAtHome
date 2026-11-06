@@ -1283,7 +1283,7 @@ export class SightingEditorElement extends HTMLElement {
         this.sceneElement.confrontationTolerance = BodyConfrontation.lawsOf(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions)
         this.refreshCandidatesSoon()
       }
-    }, this.shadow.querySelector<HTMLElement>(".app")!)
+    })
     this.timelineTracks = new TimelineTracks(this.shadow.getElementById("timeline-tracks")!, t => this.goToMark(t), this.messages)
     this.tracksToggle = this.shadow.getElementById("toggle-tracks") as HTMLButtonElement
     this.tracksToggle.addEventListener("click", () => this.setTracksShown(this.tracksToggle.getAttribute("aria-expanded") !== "true"))

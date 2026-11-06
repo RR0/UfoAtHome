@@ -5,6 +5,8 @@ import { RecordingActors, type ActorKind } from "../engine/events/RecordingActor
 import type { EventsMessages } from "./messages/EventsMessages.js"
 import { ElementList } from "./ElementList.js"
 import { Icons } from "./Icons.js"
+import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
+import { HintElement } from "./HintElement.js"
 import type { ProvenanceEntry } from "../engine/persistence/Provenance.js"
 import type { GeoPoint, PositionFrame, SaidPosition } from "../engine/model/SaidPosition.js"
 import { register as registerPositionInput } from "./PositionInputElement.js"
@@ -58,13 +60,17 @@ export type EventsActor = "observer" | "phenomenon" | "bodies"
  * events (they moved the observer by hand), it says so, and offers the events back.
  */
 export class EventsPanel {
-  static readonly CSS = `
+  static readonly CSS = `${BasisInputElement.CSS}${HintElement.CSS}
 .events-section[hidden] { display: none; }
 .events-note { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--ink-dim); }
 .events-row, .events-fields { grid-column: 1 / -1; min-width: 0; }
 .events-fields { display: grid; gap: 6px; }
 .event-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
-.event-params { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
+/* A label wraps rather than push its field aside: no wider than a third of the panel. */
+.event-params { display: grid; grid-template-columns: fit-content(33%) minmax(0, 1fr); gap: 4px 12px; align-items: baseline; font-size: 14px; }
+.event-param { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; min-width: 0; }
+.event-param-label .basis-mark { margin-left: 6px; }
+.event-param-label:is(:hover, :focus-within, :has(+ .event-param:is(:hover, :focus-within))) .basis-mark { visibility: visible; }
 .event-params input[type="number"] { width: 6em; }
 .event-params input[type="text"] { width: 10em; }
 .event-table { display: grid; justify-items: start; gap: 4px; }
@@ -72,7 +78,6 @@ export class EventsPanel {
 .event-row-step { font-size: 13px; white-space: nowrap; }
 .event-direction-point { font-size: 13px; color: var(--ink-dim); }
 .event-direction-look { font-size: 13px; }
-.event-basis { margin-left: 6px; font-size: 12px; font-style: italic; color: var(--ink-dim); }
 `
 
   /** What an author can add by hand, by actor: the kinds whose parameters this panel edits (a drive's route comes from a survey). */
@@ -338,11 +343,15 @@ export class EventsPanel {
     }
     for (const [key, value] of entries) {
       const label = document.createElement("span")
+      label.className = "event-param-label"
       label.textContent = this.messages.params[key] ?? key
+      const hint = this.messages.paramHints[key]
+      if (hint) label.append(HintElement.of(hint))
+      // What it stands on after its name, as every value of the editor says it (see WitnessErrorView): not in the way of the value.
+      label.append(this.basis(`events.${index}.params.${key}`))
       const cell = document.createElement("span")
+      cell.className = "event-param"
       cell.append(this.value(event, key, value, `events.${index}.params.${key}`))
-      const basis = this.basis(`events.${index}.params.${key}`)
-      if (basis) cell.append(basis)
       params.append(label, cell)
     }
     return [head, params]
@@ -659,15 +668,22 @@ export class EventsPanel {
     return label
   }
 
-  /** What the recording says of where a parameter came from, when it says something other than that the observer stated it. */
-  private basis(path: string): HTMLElement | undefined {
-    const entry = this.host.sighting().provenance.at(path)
-    if (!entry) return undefined
-    const mark = document.createElement("span")
-    mark.className = "event-basis"
-    mark.dataset.basis = entry.basis
-    mark.textContent = this.messages.basis[entry.basis as keyof EventsMessages["basis"]] ?? entry.basis
-    if (entry.rationale) mark.title = entry.rationale
-    return mark
+  /** What a parameter stands on (see BasisInputElement): said, and edited, beside it. */
+  private basis(path: string): HTMLElement {
+    registerBasisInput()
+    const element = document.createElement(BasisInputElement.TAG) as BasisInputElement
+    element.messages = { title: this.messages.basisTitle, basis: this.messages.basis, basisField: this.messages.basisField, howField: this.messages.howField,
+      rationaleField: this.messages.rationaleField }
+    element.entry = this.host.sighting().provenance.at(path)
+    // What it stands on is said of the value as it is: no typing, nothing worked out again.
+    element.addEventListener("basischange", event => {
+      const entry = (event as CustomEvent<{ entry?: BasisEntry }>).detail.entry
+      this.host.editing()
+      if (entry) this.host.sighting().provenance.set(path, entry)
+      else this.host.sighting().provenance.clear(path)
+      this.host.changed()
+    })
+    return element
   }
+
 }

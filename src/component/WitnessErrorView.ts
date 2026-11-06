@@ -1,4 +1,4 @@
-import { WindowClose } from "./WindowClose.js"
+import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
 import type { WitnessErrorMessages } from "./messages/WitnessErrorMessages.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { WitnessConditions, WitnessExposure, WitnessWord } from "../engine/model/Account.js"
@@ -44,22 +44,17 @@ export interface WitnessField {
  * - for the observer, the conditions of their account and of their seeing, the Moon gauge and the parameters tying their errors.
  */
 export class WitnessErrorView {
-  static readonly CSS = `
-.basis-mark {
-  display: inline-block; margin-left: 8px; padding: 0 8px; border: 1px solid var(--glow-dim); border-radius: 999px;
-  font: 600 11px/1.6 var(--sans); color: var(--glow); cursor: pointer; visibility: hidden; vertical-align: .05em; user-select: none;
-}
-:is(label, .field):is(:hover, :focus-within) .basis-mark, .basis-mark:not([data-basis="stated"]) { visibility: visible; }
-.basis-mark[data-basis="assumed"], .basis-mark[data-basis="derived"] { font-style: italic; }
+  static readonly CSS = `${BasisInputElement.CSS}
 :is(label, .field)[data-basis="assumed"] :is(input, .edtf-field input) { font-style: italic; }
 /* A field with its basis: its name and the mark on the first line, the value and its unit on the next, the law under them. Left to
    the field's own flow, the mark (hidden but for the hover) opened the second line and pushed the value aside. */
-.app .form-section > :is(label, .field):has(> .basis-mark) {
+.app .form-section > :is(label, .field):has(> rr0-input-basis) {
   display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 6px;
 }
-.app .form-section > :is(label, .field):has(> .basis-mark) > :first-child { grid-column: 1; }
-.app .form-section > :is(label, .field):has(> .basis-mark) > .basis-mark { grid-column: 2 / -1; justify-self: start; margin-left: 0; }
-.app .form-section > :is(label, .field):has(> .basis-mark) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis) > :first-child { grid-column: 1; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis) > rr0-input-basis { grid-column: 2 / -1; justify-self: start; }
+.app .form-section > :is(label, .field) > rr0-input-basis .basis-mark { margin-left: 0; }
+.app .form-section > :is(label, .field):has(> rr0-input-basis) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
 .law { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font: 400 12px/1.4 var(--sans); color: var(--ink-dim); }
 .law-symbol { color: var(--glow-dim); font-weight: 700; }
 .law-reset { color: var(--glow); }
@@ -67,11 +62,6 @@ export class WitnessErrorView {
 .lead-status[data-status="individual"] { background: light-dark(rgba(31, 122, 68, .14), rgba(143, 215, 164, .16)); }
 .lead-status:is([data-status="argued"], [data-status="single"]) { background: var(--warn-bg); }
 .lead-status[data-status="contested"] { background: var(--error-bg); }
-.basis-window { width: min(26em, 92vw); padding: 18px 20px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--ground-raised); color: var(--ink); box-shadow: 0 12px 32px rgba(0, 0, 0, .3); }
-.basis-window h3 { margin: 0 0 12px; font: 600 19px/1.3 var(--serif); }
-.basis-window label { display: flex; flex-direction: column; gap: 5px; margin: 0 0 12px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
-.basis-window :is(select, textarea) { box-sizing: border-box; width: 100%; font-weight: 400; }
-.basis-window textarea { min-height: 4em; }
 .moon-gauge { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: start; grid-column: 1 / -1; }
 .moon-picture { position: relative; width: 150px; height: 150px; border-radius: 10px; background: #0b1020; }
 .moon-picture svg { display: block; }
@@ -94,17 +84,12 @@ export class WitnessErrorView {
 
   private readonly fields: WitnessField[] = []
   private model: ErrorModel = WitnessError.MODELS[0]
-  private readonly window: HTMLElement
   private readonly sections: HTMLElement[] = []
   /** What the observer's sections were last made from (see renderObserver). */
   private observerShown?: { messages: unknown, model: unknown, conditions: string }
 
-  constructor(private readonly host: WitnessErrorHost, windowParent: HTMLElement) {
-    this.window = document.createElement("div")
-    this.window.className = "basis-window"
-    this.window.setAttribute("popover", "")
-    this.window.setAttribute("role", "dialog")
-    windowParent.append(this.window)
+  constructor(private readonly host: WitnessErrorHost) {
+    registerBasisInput()
   }
 
   // -- Fields -----------------------------------------------------------------------------------------------------------------------
@@ -112,18 +97,9 @@ export class WitnessErrorView {
   /** Puts the basis mark and the law on `field`. */
   attach(field: WitnessField): void {
     this.fields.push(field)
-    const mark = document.createElement("span")
-    mark.className = "basis-mark"
-    // A role and not a <button>: a button before the field in its label would become what the label labels.
-    mark.setAttribute("role", "button")
-    mark.tabIndex = 0
-    const open = (event: Event) => {
-      event.preventDefault()
-      event.stopPropagation()
-      this.openWindow(field)
-    }
-    mark.addEventListener("click", open)
-    mark.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") open(event) })
+    const mark = document.createElement(BasisInputElement.TAG) as BasisInputElement
+    mark.hows = WitnessError.HOW[field.kind].map(value => ({ value, label: this.host.messages().how[value] ?? value }))
+    mark.addEventListener("basischange", event => this.said(field, (event as CustomEvent<{ entry?: BasisEntry }>).detail.entry))
     const name = field.label.firstElementChild
     if (name) name.after(mark)
     else field.label.prepend(mark)
@@ -161,12 +137,9 @@ export class WitnessErrorView {
     const m = this.host.messages()
     const entry = this.entryOf(field)
     const basis: Basis = entry?.basis ?? "stated"
-    const mark = field.label.querySelector<HTMLElement>(".basis-mark")!
-    mark.dataset.basis = basis
-    // Written only when it changes: every field is said again at each refresh, and a text set anew is a node inserted anew.
-    if (mark.textContent !== m.basis[basis]) mark.textContent = m.basis[basis]
-    mark.title = m.basisTitle
-    mark.setAttribute("aria-label", `${m.basisTitle} : ${m.basis[basis]}`)
+    const mark = field.label.querySelector<BasisInputElement>(BasisInputElement.TAG)!
+    mark.messages = { title: m.basisTitle, basis: m.basis, basisField: m.basisField, howField: m.howField, rationaleField: m.rationaleField }
+    mark.entry = entry
     mark.hidden = field.path() === undefined
     field.label.dataset.basis = basis
     const law = field.label.querySelector<HTMLElement>(".law")!
@@ -229,40 +202,14 @@ export class WitnessErrorView {
     setTimeout(() => this.refreshField(field), 4000)
   }
 
-  /** The window where how a value was obtained is said: its basis, how (from the list for its kind), and why. */
-  private openWindow(field: WitnessField): void {
+  /** What `field`'s value stands on was said (see BasisInputElement): kept, about the value as it is, for it to expire when it changes. */
+  private said(field: WitnessField, entry: BasisEntry | undefined): void {
     const path = field.path()
     if (path === undefined) return
-    const m = this.host.messages()
-    const entry = this.host.sighting.provenance.at(path)
-    const heading = Object.assign(document.createElement("h3"), { textContent: m.basisTitle })
-    const basis = document.createElement("select")
-    for (const value of ["measured", "stated", "derived", "assumed"] as const) basis.append(new Option(m.basis[value], value))
-    basis.value = entry?.basis ?? "stated"
-    const how = document.createElement("select")
-    how.append(new Option("—", ""))
-    for (const value of WitnessError.HOW[field.kind]) how.append(new Option(m.how[value] ?? value, value))
-    how.value = entry?.how ?? ""
-    const rationale = document.createElement("textarea")
-    rationale.value = entry?.rationale ?? ""
-    const write = () => {
-      const value = field.value()
-      const next = { basis: basis.value as Basis, ...(how.value ? { how: how.value } : {}), ...(rationale.value.trim() ? { rationale: rationale.value.trim() } : {}) }
-      if (next.basis === "stated" && !("how" in next) && !("rationale" in next)) this.host.sighting.provenance.clear(path)
-      else this.host.sighting.provenance.set(path, { ...next, ...(value !== undefined ? { of: this.valueAt(path) } : {}) })
-      this.host.changed()
-      this.refreshField(field)
-    }
-    for (const control of [basis, how]) control.addEventListener("change", write)
-    rationale.addEventListener("change", write)
-    const labelled = (text: string, control: HTMLElement) => {
-      const label = document.createElement("label")
-      label.append(Object.assign(document.createElement("span"), { textContent: text }), control)
-      return label
-    }
-    this.window.replaceChildren(heading, labelled(m.basisField, basis), labelled(m.howField, how), labelled(m.rationaleField, rationale))
-    WindowClose.popover(this.window, this.host.messages().basisTitle)
-    if (typeof this.window.showPopover === "function") this.window.showPopover()
+    if (!entry) this.host.sighting.provenance.clear(path)
+    else this.host.sighting.provenance.set(path, { ...entry, ...(field.value() !== undefined ? { of: this.valueAt(path) } : {}) })
+    this.host.changed()
+    this.refreshField(field)
   }
 
   /** The value at `path` as the recording holds it, for its provenance to expire when it changes (see ProvenanceEntry.of). */

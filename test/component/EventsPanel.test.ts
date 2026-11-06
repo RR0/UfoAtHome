@@ -42,7 +42,7 @@ describe("EventsPanel", () => {
     expect([...picker().options].map(option => option.text)).toEqual(["0:00 · Conduit", "0:00 · Regarde la route", "1:33.8 · Se penche", "1:33.8 · Regarde dans le rétroviseur"])
     // One event's fields at a time.
     expect(root.querySelector(".events-fields")!.textContent).toContain("Vitesses")
-    expect(root.querySelector(".events-fields .event-basis[data-basis='derived']")).not.toBeNull()
+    expect(root.querySelector(".events-fields .basis-mark[data-basis='derived']")).not.toBeNull()
     pick(2)
     expect(calls.seek).toEqual([93800])
     expect(root.querySelector(".events-fields")!.textContent).toContain("Déplace l'œil de")
@@ -182,5 +182,29 @@ describe("EventsPanel's choices", () => {
     pick([...picker().options].findIndex(option => option.text.includes("Se tourne")))
     const seenFrom = [...root.querySelectorAll<HTMLSelectElement>(".events-fields .event-params select")].find(select => [...select.options].some(option => option.value === "craft"))!
     expect(seenFrom.value).toBe("craft")
+  })
+})
+
+describe("EventsPanel's bases", () => {
+  it("says what each parameter stands on, and keeps what the author says of it, without forgetting the value", () => {
+    const { sighting, root } = mounted("phenomenon")
+    const basis = root.querySelector<HTMLElement & { pill: HTMLElement, openWindow?: HTMLElement }>(".events-fields rr0-input-basis")!
+    const path = [...sighting.provenance.paths()].find(candidate => /^events\.\d+\.params\./.test(candidate))
+    basis.pill.click()
+    const select = basis.openWindow!.querySelector("select")!
+    select.value = "measured"
+    select.dispatchEvent(new Event("change"))
+    const edited = [...sighting.provenance.paths()].filter(candidate => sighting.provenance.at(candidate)!.basis === "measured")
+    expect(edited.length).toBe(1)
+    expect(edited[0]).toMatch(/^events\.\d+\.params\./)
+    expect(path).toBeDefined()
+  })
+
+  it("keeps a label short, its details in a (?)", () => {
+    const { root, pick, picker } = mounted("phenomenon")
+    pick([...picker().options].findIndex(option => option.text.includes("Se tient")))
+    const label = [...root.querySelectorAll(".events-fields .event-param-label")].find(candidate => candidate.querySelector("rr0-hint"))!
+    expect(label.firstChild!.textContent).toBe("Taille")
+    expect(label.querySelector("rr0-hint button")!.getAttribute("title")).toContain("hauteur au-dessus de l'œil")
   })
 })

@@ -20,15 +20,20 @@ export const eventsMessages_it: EventsMessages = {
   kinds: { drive: "Guida", lookAhead: "Guarda la strada", lean: "Si sporge", watch: "Guarda nello specchietto", stand: "Si trova", look: "Guarda", appearance: "Aspetto", walk: "Cammina", follow: "Segue con lo sguardo", blink: "Lampeggia", vanish: "Scompare", motion: "Si muove", spin: "Gira", rise: "Si alza", ride: "Viaggia in", turn: "Si gira", light: "Luce", travel: "Attraversa il cielo", roll: "S'inclina", vibrate: "Vibra", spiral: "Spirale" },
   params: {
     vehicle: "Veicolo", path: "Percorso", speeds: "Velocità", speedDivisors: "Velocità divise per", through: "Passa per", eye: "Occhio nel veicolo",
-    fovDeg: "Campo visivo", target: "Guarda", pitchShare: "Alza lo sguardo fino a (parte della sua altezza)", keepDeg: "Lo tiene entro", glanceBeyondDeg: "Occhiate oltre",
+    fovDeg: "Campo visivo", target: "Guarda", pitchShare: "Alza lo sguardo fino a", keepDeg: "Lo tiene entro", glanceBeyondDeg: "Occhiate oltre",
     glanceS: "Occhiata", roadS: "Di nuovo sulla strada", offsetM: "Sposta l'occhio di", holdS: "Per", turnS: "In", mirror: "Specchietto", firstS: "Prima",
     mirrorS: "Nello specchietto", glancesUntil: "Occhiate dirette fino a",
-    place: "Dove", metres: "Dimensione (larghezza, altezza sopra l'occhio)", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", motion: "Movimento", turnsPerS: "Giri al secondo", distanceM: "Distanza", angleDeg: "Scarto dalla verticale", stops: "Si ferma", in: "In", aboveM: "Sopra", from: "Da", to: "A", headingDeg: "Rotta", pitchDeg: "Inclinazione", cdM2: "Luminanza", towards: "Verso", sizeDeg: "Dimensione allo zenit", sizeBy: "Dimensione secondo", byDeg: "Di", side: "Lato", seenFrom: "Visto da", reactionS: "Reagisce dopo", lagS: "In ritardo di", toDeg: "Fino a", andBack: "E ritorno", hz: "Volte al secondo", amplitudeShare: "Ampiezza (parte della dimensione)", riseS: "Sale in", turns: "Giri", radiusDeg: "Raggio", shrink: "Si restringe di", clockwise: "Senso orario", rollDeg: "Tonneau", azimuthDeg: "Azimut", altitudeDeg: "Altezza"
+    place: "Dove", metres: "Dimensione", parts: "Parti", onS: "Acceso", offS: "Spento", off: "Spento, è", motion: "Movimento", turnsPerS: "Giri al secondo", distanceM: "Distanza", angleDeg: "Scarto dalla verticale", stops: "Si ferma", in: "In", aboveM: "Sopra", from: "Da", to: "A", headingDeg: "Rotta", pitchDeg: "Inclinazione", cdM2: "Luminanza", towards: "Verso", sizeDeg: "Dimensione allo zenit", sizeBy: "Dimensione secondo", byDeg: "Di", side: "Lato", seenFrom: "Visto da", reactionS: "Reagisce dopo", lagS: "In ritardo di", toDeg: "Fino a", andBack: "E ritorno", hz: "Volte al secondo", amplitudeShare: "Ampiezza", riseS: "Sale in", turns: "Giri", radiusDeg: "Raggio", shrink: "Si restringe di", clockwise: "Senso orario", rollDeg: "Tonneau", azimuthDeg: "Azimut", altitudeDeg: "Altezza"
   },
   from: "da",
   to: "a",
   points: "{n} punti",
   at: "a",
+  paramHints: { pitchShare: "parte della sua altezza", metres: "larghezza, e altezza sopra l'occhio", amplitudeShare: "parte della dimensione" },
+  basisTitle: "Come è stato ottenuto questo valore",
+  basisField: "Base",
+  howField: "Come",
+  rationaleField: "Motivazione",
   choices: { "sizeBy.": "sempre la stessa", "sizeBy.altitude": "la sua altezza (più piccolo verso l'orizzonte)", "side.left": "sinistra", "side.right": "destra", "seenFrom.": "il suolo (come lo vede l'osservatore)", "seenFrom.craft": "il velivolo (come lo direbbe il pilota)" },
   zenith: "zenit",
   lookedAt: "Dove guarda",

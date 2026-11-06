@@ -32,6 +32,13 @@ export interface EventsMessages {
   kinds: Record<string, string>
   /** The parameters, by their key. */
   params: Record<string, string>
+  /** What a parameter's short name leaves out (what its parts are, what it is a share of), said in its (?). */
+  paramHints: Record<string, string>
+  /** The window where what a value stands on is said (see BasisInputElement): its title and its fields. */
+  basisTitle: string
+  basisField: string
+  howField: string
+  rationaleField: string
   /** The values the player knows of a parameter, by `key.value` (the empty value: what it is when the file says none). */
   choices: Record<string, string>
   /** Said after a direction straight up. */
