@@ -64,7 +64,13 @@ export const sightingLabels_it: SightingLabels = {
     "hynek.ce1": "IR1 — incontro ravvicinato",
     "hynek.ce2": "IR2 — con traccia fisica",
     "hynek.ce3": "IR3 — con entità",
-    "ballester-guasp.pending": "da valutare"
+    "ballester-guasp.pending": "da valutare",
+    "poher.0": "0/5 · per nulla strano, o non classificabile",
+    "poher.1": "1/5 · punto in linea retta",
+    "poher.2": "2/5 · traiettoria anomala",
+    "poher.3": "3/5 · strano: erratico, posato o scomparso",
+    "poher.4": "4/5 · atterraggio con tracce",
+    "poher.5": "5/5 · atterraggio con occupanti"
   },
   timeQualifierApproximate: "Approssimativa",
   timeQualifierUncertain: "Incerta",

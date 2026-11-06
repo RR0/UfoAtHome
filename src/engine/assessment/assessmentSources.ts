@@ -5,7 +5,7 @@ import type { Sighting } from "../model/Sighting.js"
 /**
  * Every way this project can be asked what to make of a finished recording.
  *
- * One entry today, and the registry exists anyway for the reason DataSource's own doc comment
+ * A few entries, and the registry exists anyway for the reason DataSource's own doc comment
  * gives, with a second reason of its own: the published schemes disagree by construction. Hynek
  * classifies by what was seen, Vallée by what it did, Poher and Ballester-Guasp score the observer
  * and the enquiry rather than the sighting. A registry says out loud that reading a recording is a
@@ -55,6 +55,19 @@ export const ASSESSMENT_SOURCES: DataSource<Assessor>[] = [
       assess: async (sighting: Sighting): Promise<Assessment> => {
         const { BallesterGuaspAssessor } = await import("./assessors/BallesterGuaspAssessor.js")
         return new BallesterGuaspAssessor().assess(sighting)
+      }
+    })
+  },
+  {
+    id: "poher",
+    name: "Poher",
+    credit: "Claude Poher",
+    creditUrl: "https://rr0.org/science/crypto/ufo/enquete/methode/Poher-Criteres.html",
+    create: () => ({
+      about: "shape",
+      assess: async (sighting: Sighting): Promise<Assessment> => {
+        const { PoherAssessor } = await import("./assessors/PoherAssessor.js")
+        return new PoherAssessor().assess(sighting)
       }
     })
   }

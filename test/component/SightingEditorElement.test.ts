@@ -6824,8 +6824,8 @@ describe("SightingEditorElement assessment", () => {
 
     expect(nest(element)!.querySelector(".param-nest-label")!.textContent)
       .toBe(sightingEditorMessages_en.assessmentGroup)
-    // Coverage's score, and Ballester-Guasp's "to be assessed" while the account says nothing of how it was obtained.
-    expect([...nest(element)!.querySelectorAll<HTMLElement>(".param-chip")].map(chip => chip.dataset.field)).toEqual(["coverage", "ballester-guasp"])
+    // Coverage's score, Ballester-Guasp's "to be assessed" while the account says nothing of how it was obtained, and Poher's note.
+    expect([...nest(element)!.querySelectorAll<HTMLElement>(".param-chip")].map(chip => chip.dataset.field)).toEqual(["coverage", "ballester-guasp", "poher"])
     // Last, which is both its own run of the group and the right place to read it.
     const chips = [...element.shadowRoot!.getElementById("param-summary")!.children]
     expect(chips[chips.length - 1]).toBe(nest(element))

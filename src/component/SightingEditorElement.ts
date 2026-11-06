@@ -7493,7 +7493,9 @@ export class SightingEditorElement extends HTMLElement {
     "bg-movement": { panel: "observer", fields: ["strangeness-movement"] },
     "bg-incongruity": { panel: "observer", fields: ["strangeness-incongruity"] },
     "bg-close": { panel: "observer", fields: ["strangeness-close"] },
-    "bg-traces": { panel: "observer", fields: ["strangeness-traces"] }
+    "bg-traces": { panel: "observer", fields: ["strangeness-traces"] },
+    "poher-traces": { panel: "observer", fields: ["strangeness-traces"] },
+    "poher-occupants": { panel: "observer", fields: ["strangeness-beings"] }
   }
 
   /** Chips for what the assessors made of the recording, kept between renders because they arrive

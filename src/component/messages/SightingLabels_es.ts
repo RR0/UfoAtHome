@@ -64,7 +64,13 @@ export const sightingLabels_es: SightingLabels = {
     "hynek.ce1": "EC1 — encuentro cercano",
     "hynek.ce2": "EC2 — con huella física",
     "hynek.ce3": "EC3 — con entidades",
-    "ballester-guasp.pending": "por evaluar"
+    "ballester-guasp.pending": "por evaluar",
+    "poher.0": "0/5 · nada extraño, o inclasificable",
+    "poher.1": "1/5 · punto en línea recta",
+    "poher.2": "2/5 · trayectoria anormal",
+    "poher.3": "3/5 · extraño: errático, posado o desaparecido",
+    "poher.4": "4/5 · aterrizaje con huellas",
+    "poher.5": "5/5 · aterrizaje con ocupantes"
   },
   timeQualifierApproximate: "Aproximada",
   timeQualifierUncertain: "Incierta",
