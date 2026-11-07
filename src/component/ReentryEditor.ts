@@ -54,7 +54,8 @@ export class ReentryEditor {
   private timeline?: TimelineTracks
   private placeForm?: ParameterForm
   private placeIndex = 0
-  private fragments?: ElementList
+  /** The row of the timeline whose details are shown under it: the path, or the piece at fragmentIndex. */
+  private row: "path" | "fragment" = "path"
   private fragmentForm?: ParameterForm
   private fragmentIndex = 0
   private curveForm?: ParameterForm
@@ -136,6 +137,7 @@ export class ReentryEditor {
   /** Shows a re-entry by its id. */
   show(id: string): void {
     this.currentId = id
+    this.row = "path"
     this.placeIndex = 0
     this.fragmentIndex = 0
     this.curveIndex = 0
@@ -151,6 +153,7 @@ export class ReentryEditor {
       <div id="reentry-fields" class="launch-fields">
         <div id="reentry-parameters" class="launch-parameters"></div>
         <div id="reentry-timeline"></div>
+        <button id="reentry-fragment-add" type="button" title="${m.addFragment}">${Icons.PLUS} ${m.fragment}</button>
         <p class="launch-intro">${m.timelineNote}</p>
         <fieldset id="reentry-path" class="launch-path">
           <legend>${m.path}</legend>
@@ -158,17 +161,15 @@ export class ReentryEditor {
           <button id="reentry-place-delete" class="icon-btn" type="button" title="${m.deletePlace}" aria-label="${m.deletePlace}">${Icons.TRASH}</button>
         </fieldset>
         <fieldset id="reentry-fragments" class="launch-path">
-          <legend>${m.fragments}</legend>
-          <div id="reentry-fragment-list"></div>
-          <div id="reentry-fragment-body" class="launch-parameters">
-            <div id="reentry-fragment-parameters" class="launch-parameters"></div>
-            <fieldset id="reentry-curve" class="launch-path">
-              <legend>${m.curve}</legend>
-              <p id="reentry-curve-empty" class="launch-intro">${m.noCurve}</p>
-              <div id="reentry-curve-parameters" class="launch-parameters"></div>
-              <button id="reentry-curve-delete" class="icon-btn" type="button" title="${m.deleteCurvePoint}" aria-label="${m.deleteCurvePoint}">${Icons.TRASH}</button>
-            </fieldset>
-          </div>
+          <legend id="reentry-fragment-legend">${m.fragment}</legend>
+          <div id="reentry-fragment-parameters" class="launch-parameters"></div>
+          <button id="reentry-fragment-delete" class="icon-btn" type="button" title="${m.deleteFragment}" aria-label="${m.deleteFragment}">${Icons.TRASH}</button>
+          <fieldset id="reentry-curve" class="launch-path">
+            <legend>${m.curve}</legend>
+            <p id="reentry-curve-empty" class="launch-intro">${m.noCurve}</p>
+            <div id="reentry-curve-parameters" class="launch-parameters"></div>
+            <button id="reentry-curve-delete" class="icon-btn" type="button" title="${m.deleteCurvePoint}" aria-label="${m.deleteCurvePoint}">${Icons.TRASH}</button>
+          </fieldset>
         </fieldset>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
@@ -186,14 +187,8 @@ export class ReentryEditor {
     this.element("reentry-place-delete").addEventListener("click", () => this.removePlace())
     this.element("reentry-curve-delete").addEventListener("click", () => this.removeCurvePoint())
     this.placeForm = undefined
-    this.fragments = new ElementList({
-      header: this.element("reentry-fragment-list"), body: this.element("reentry-fragment-body"),
-      ids: { list: "reentry-fragment", remove: "reentry-fragment-delete", add: "reentry-fragment-add" },
-      onSelect: id => this.selectFragment(Number(id)),
-      onAdd: () => this.addFragment(),
-      onRemove: () => this.removeFragment()
-    })
-    this.fragments.setLabels({ list: m.fragment, remove: m.deleteFragment, add: m.addFragment })
+    this.element("reentry-fragment-add").addEventListener("click", () => this.addFragment())
+    this.element("reentry-fragment-delete").addEventListener("click", () => this.removeFragment())
     this.fragmentForm = undefined
     this.curveForm = undefined
   }
@@ -219,11 +214,12 @@ export class ReentryEditor {
     const path: TimelineTrack = {
       id: "path", label: m.path, color: ReentryEditor.PATH_COLOR,
       times: reentry.track.map(place => place.t),
-      selectedTime: reentry.track[this.placeIndex]?.t,
-      open: () => this.element("reentry-path").scrollIntoView?.({ block: "nearest" }),
+      active: this.row === "path",
+      selectedTime: this.row === "path" ? reentry.track[this.placeIndex]?.t : undefined,
+      open: () => this.selectPlace(this.placeIndex),
       pressed: (_t, key) => {
         const index = key === undefined ? -1 : (this.current?.track ?? []).findIndex(place => place.t === key)
-        if (index >= 0) this.selectPlace(index)
+        this.selectPlace(index >= 0 ? index : this.placeIndex)
       },
       move: (from, to) => this.movePlace(from, to),
       add: () => this.addPlaceAt(this.host.currentTime())
@@ -235,7 +231,8 @@ export class ReentryEditor {
         id: `fragment-${i}`, label: this.fragmentLabel(fragment, i), color: ReentryEditor.PIECE_COLOR,
         times: curve.map(point => point.t),
         spans: [{ t: fragment.fromT ?? first, until: fragment.untilT ?? last, label: "" }],
-        selectedTime: i === this.fragmentIndex ? curve[this.curveIndex]?.t : undefined,
+        active: this.row === "fragment" && i === this.fragmentIndex,
+        selectedTime: this.row === "fragment" && i === this.fragmentIndex ? curve[this.curveIndex]?.t : undefined,
         open: () => this.selectFragment(i),
         pressed: (_t, key) => {
           const index = key === undefined ? -1 : (this.current?.fragments[i]?.lightCurve ?? []).findIndex(point => point.t === key)
@@ -282,8 +279,18 @@ export class ReentryEditor {
   }
 
   private selectPlace(index: number): void {
+    this.row = "path"
     this.placeIndex = index
+    this.syncDetail()
     this.syncPlace(true)
+  }
+
+  /** Under the timeline, the details of its row picked alone: the path's point, or the piece and its light curve. */
+  private syncDetail(): void {
+    this.element("reentry-path").hidden = this.row !== "path"
+    this.element("reentry-fragments").hidden = this.row !== "fragment"
+    const fragment = this.currentFragment
+    this.element("reentry-fragment-legend").textContent = fragment ? `${this.messages.fragment} ${this.fragmentLabel(fragment, this.fragmentIndex)}` : this.messages.fragment
   }
 
   /** One field of the place at `index` was edited: the path is put back in order of the instants, the place followed to where it now stands. */
@@ -343,8 +350,8 @@ export class ReentryEditor {
   private syncFragments(reentry: ReentryJson, force = false): void {
     const fragments = reentry.fragments
     this.fragmentIndex = Math.max(0, Math.min(this.fragmentIndex, fragments.length - 1))
-    this.fragments?.setItems(fragments.map((fragment, i) => ({ id: String(i), label: this.fragmentLabel(fragment, i) })), String(this.fragmentIndex))
-    this.fragments?.setRemoveEnabled(fragments.length > ReentryEditor.MIN_FRAGMENTS)
+    ;(this.element("reentry-fragment-delete") as HTMLButtonElement).disabled = fragments.length <= ReentryEditor.MIN_FRAGMENTS
+    this.syncDetail()
     if (!this.fragmentForm) {
       this.fragmentForm = new ParameterForm(this.element("reentry-fragment-parameters"), this.language, "reentryFragment.")
       this.fragmentForm.show(ReentryParameters.FRAGMENT, new ParameterTarget(
@@ -361,6 +368,7 @@ export class ReentryEditor {
   /** Picks the piece at `index`, and the point of its light curve at `curveIndex` when one is said. */
   private selectFragment(index: number, curveIndex?: number): void {
     const changed = index !== this.fragmentIndex
+    this.row = "fragment"
     this.fragmentIndex = index
     if (curveIndex !== undefined) this.curveIndex = curveIndex
     else if (changed) this.curveIndex = 0
@@ -379,8 +387,7 @@ export class ReentryEditor {
       apply(fragment)
       reentry.fragments = reentry.fragments.map((other, i) => i === index ? fragment : other)
     })
-    const fragment = this.current?.fragments[index]
-    if (fragment) this.fragments?.rename(String(index), this.fragmentLabel(fragment, index))
+    this.syncDetail()
     this.syncTimeline()
   }
 
@@ -405,7 +412,7 @@ export class ReentryEditor {
       reentry.fragments = reentry.fragments.filter((_, i) => i !== index)
     })
     this.curveIndex = 0
-    this.syncFragments(this.current!, true)
+    this.selectFragment(Math.min(index, (this.current?.fragments.length ?? 1) - 1))
   }
 
   // The light curve of the piece on show.

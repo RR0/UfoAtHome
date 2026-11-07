@@ -114,6 +114,27 @@ describe("ReentryEditor", () => {
     expect(time.seeks.at(-1)).toBe(0)
   })
 
+  test("shows under the timeline the details of its row picked alone, and marks that row", () => {
+    build({ reentries: [chelyabinsk()] })
+    const shown = (id: string) => !container.querySelector<HTMLElement>(`#${id}`)!.hidden
+    const rows = () => [...container.querySelectorAll<HTMLElement>("#reentry-timeline .track-row")].map(row => row.dataset.active)
+    expect(shown("reentry-path")).toBe(true)
+    expect(shown("reentry-fragments")).toBe(false)
+    expect(rows()).toEqual(["true", "false"])
+    // A press on the piece's row, away from its diamonds: 140 px is about 6 s.
+    const piece = laidOut(lanes()[1])
+    pointer(piece, "pointerdown", 140)
+    pointer(piece, "pointerup", 140)
+    expect(shown("reentry-path")).toBe(false)
+    expect(shown("reentry-fragments")).toBe(true)
+    expect(container.querySelector("#reentry-fragment-legend")!.textContent).toBe("Piece main")
+    expect(rows()).toEqual(["false", "true"])
+    // Its name picks it too, and the path's picks the path again.
+    container.querySelector<HTMLButtonElement>("#reentry-timeline .track-name")!.click()
+    expect(shown("reentry-path")).toBe(true)
+    expect(rows()).toEqual(["true", "false"])
+  })
+
   test("edits a piece's brightness and its light curve, keeping one piece at least", () => {
     const { sighting } = build({ reentries: [chelyabinsk()] })
     typed(container.querySelector('#reentry-fragment-parameters [data-key="absoluteMagnitude"]')!, "-27")

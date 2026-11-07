@@ -17,6 +17,8 @@ export interface TimelineTrack {
   selected?: string
   /** Picks a span pressed in the lane, by its id: the section shows its details. */
   select?(id: string): void
+  /** Whether this track is the one whose details the section shows, among others that could be: marked on its row. */
+  active?: boolean
   /** The keyframe whose fields the section shows, marked as picked whether or not the playhead is on it. */
   selectedTime?: number
   /** The lane was pressed at `t`, on the keyframe `key` when within its reach: the section shows what was pressed. */
@@ -69,6 +71,9 @@ export class TimelineTracks {
 /* The tracks' names are the words the marks of the seek bar use inside a sentence ("Keyframe (shapes)"): capitalised here, where they stand alone. */
 .track-name::first-letter { text-transform: uppercase; }
 .track-name:hover { color: var(--ink, inherit); text-decoration: underline; background: none; }
+/* The track whose details are shown below, among several that could be: its name stands out, and its lane is outlined. */
+.track-row[data-active="true"] .track-name { color: var(--ink, inherit); text-decoration: underline; text-decoration-thickness: 2px; }
+.track-row[data-active="true"] .track-lane { box-shadow: inset 0 0 0 2px var(--track); }
 .track-row { display: contents; }
 .track-lane { position: relative; height: 24px; border-radius: 6px; background: var(--ground-sunken, rgba(127, 127, 127, .12)); cursor: pointer; transition: height .15s ease; touch-action: pan-y; }
 .track-lane:focus-visible { outline: 2px solid var(--track); outline-offset: 1px; }
@@ -408,6 +413,15 @@ export class TimelineTracks {
       const lane = this.lanes.get(track.id)
       const add = this.adds.get(track.id)
       if (!lane || !add) continue
+      const row = lane.parentElement!
+      const name = row.querySelector<HTMLElement>(".track-name")
+      if (track.active === undefined) {
+        delete row.dataset.active
+        name?.removeAttribute("aria-pressed")
+      } else {
+        row.dataset.active = String(track.active)
+        name?.setAttribute("aria-pressed", String(track.active))
+      }
       const here = track.times.some(t => Math.abs(t - currentTime) < 1)
       for (const diamond of lane.querySelectorAll<HTMLElement>(".kf")) {
         const t = Number(diamond.dataset.t)
