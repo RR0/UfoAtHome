@@ -6346,9 +6346,34 @@ export class SightingEditorElement extends HTMLElement {
     MessageStyle.show(this.fileNote, text, kind)
   }
 
-  /** What the file would be if saved now — the same text Export writes. */
+  /**
+   * What the file would be if saved now — the same text Export writes: the recording's own file, without what it keeps in annexes beside
+   * it (its surveyed scenery, say), which the scene reads from there and this text does not hold (see RecordingSections).
+   */
   private fileText(): string {
-    return this.writtenText(this.sightingData)
+    return this.writtenText(this.ownJson(this.sightingData))
+  }
+
+  /** `json` as the recording's own file holds it: what its sections kept in annexes hold taken out (see RecordingSections.strip). */
+  private ownJson(json: SightingRecordingJson): SightingRecordingJson {
+    const own = { ...json } as unknown as Record<string, unknown>
+    for (const name of RecordingSections.NAMES) {
+      if (this.ufoElement.sighting.frozen?.[name]?.src !== undefined) RecordingSections.strip(name, own)
+    }
+    return own as unknown as SightingRecordingJson
+  }
+
+  /** The recording's own file `json`, with what its annexes hold put back from the recording in memory: what the scene plays. */
+  private withAnnexed(json: Record<string, unknown>): Record<string, unknown> {
+    const frozen = json.frozen as Record<string, { src?: string } | undefined> | undefined
+    const current = this.sightingData as unknown as Record<string, unknown>
+    for (const name of RecordingSections.NAMES) {
+      // A text that holds them itself (one given whole, an older text of the history) says them.
+      const given = RecordingSections.taken(name, json)
+      if (frozen?.[name]?.src === undefined || Object.values(given).some(value => !Array.isArray(value) || value.length > 0)) continue
+      RecordingSections.put(name, json, RecordingSections.taken(name, current))
+    }
+    return json
   }
 
   /** `json`, this recording's (its keyframes in step with the timeline in memory), as its file is written: see keyframesWritten. */
@@ -6380,7 +6405,7 @@ export class SightingEditorElement extends HTMLElement {
       // Loaded as the recording itself was, so that it is written as it is: thin, what loading draws again is left out of it too.
       const saved = fromSightingJson(JSON.parse(this.baseline) as SightingRecordingJson)
       const written = this.keyframesWritten()
-      this.baseline = RecordingText.of(toSightingJson(saved), written, written === "thin" ? SightingShapes.derivable(saved) : undefined)
+      this.baseline = RecordingText.of(this.ownJson(toSightingJson(saved)), written, written === "thin" ? SightingShapes.derivable(saved) : undefined)
       this.savedFileText = this.baseline
     }
     this.resetHistory()
@@ -6440,6 +6465,9 @@ export class SightingEditorElement extends HTMLElement {
       return
     }
     if (typeof json !== "object" || json === null || Array.isArray(json)) return
+    // The weather the text says, before what the annexes hold is put back: what the text said the last time is the file's too.
+    const typedWeather = JSON.stringify((json as SightingRecordingJson).weatherTrack)
+    json = this.withAnnexed(json as Record<string, unknown>)
     // What the author typed may say again what the form says. A step of the history never does: it gives back another text, and
     // two writes of fourteen million characters were not spent to be told so.
     if (!history && JSON.stringify(json) === JSON.stringify(this.sightingData)) return
@@ -6448,7 +6476,7 @@ export class SightingEditorElement extends HTMLElement {
     // form: compared with the form's own, it differed for reasons that were not theirs (a lookup answered while they typed,
     // a figure the form spells another way), and each of those asked what they meant by an edit of something else.
     const weatherEdited = !history && this.fileTextApplied !== undefined
-      && JSON.stringify((json as SightingRecordingJson).weatherTrack) !== JSON.stringify(SightingEditorElement.weatherOf(this.fileTextApplied))
+      && typedWeather !== JSON.stringify(SightingEditorElement.weatherOf(this.fileTextApplied))
     const previousWeather = { track: this.sightingData.weatherTrack, source: this.sightingData.weatherSource }
     // The text edited is not a recording loaded: what the recording was when it was loaded or exported stays what the
     // changes are changed from, and the author has done something.
