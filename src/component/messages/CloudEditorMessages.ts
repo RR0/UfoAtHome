@@ -1,8 +1,4 @@
-/**
- * The cloud editor's texts (see CloudEditor and cloudEditorTemplate). English is not a module: it
- * is the template's own text, what every reader sees until their language's module has arrived
- * (see loadCloudEditorMessages) and all an English reader ever downloads.
- */
+/** The cloud editor's texts (see CloudEditor and cloudEditorTemplate), one module per language, loaded only in the reader's. */
 export interface CloudEditorMessages {
   intro: string
   editScope: string

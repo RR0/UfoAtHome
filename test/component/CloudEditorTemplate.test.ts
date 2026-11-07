@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { CloudEditorTemplate, cloudEditorMessages_en } from "../../src/component/cloudEditorTemplate.js"
+import { CloudEditorTemplate } from "../../src/component/cloudEditorTemplate.js"
+import { cloudEditorMessages_en } from "../../src/component/messages/CloudEditorMessages_en.js"
 import { cloudEditorMessages_fr } from "../../src/component/messages/CloudEditorMessages_fr.js"
 import { cloudEditorMessages_es } from "../../src/component/messages/CloudEditorMessages_es.js"
 import { cloudEditorMessages_it } from "../../src/component/messages/CloudEditorMessages_it.js"
@@ -11,8 +12,9 @@ describe("CloudEditorTemplate", () => {
     return root
   }
 
-  it("is written in English, the language every reader has until theirs arrives", () => {
+  it("is built with no word, every reader's language put in once it has come", () => {
     const root = built()
+    expect([...root.querySelectorAll("[data-text]")].every(element => element.textContent === "")).toBe(true)
     // The pickers of the layers and of the clouds are drawn by ElementList into these hosts.
     expect(root.querySelector("#cloud-layer-list")).not.toBeNull()
     expect(root.querySelector("#cloud-instance-list")).not.toBeNull()

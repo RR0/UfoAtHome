@@ -37,7 +37,7 @@ const INLINE_STILL = new Map<string, string>([
 
 /** Components that still import English up front. */
 const ENGLISH_UP_FRONT_STILL = new Set([
-  "component/BodyEditor.ts", "component/CaseEditorElement.ts", "component/CloudEditor.ts", "component/SightingEditorElement.ts",
+  "component/CaseEditorElement.ts", "component/SightingEditorElement.ts",
   "component/SightingElement.ts", "component/UfoElement.ts"
 ])
 

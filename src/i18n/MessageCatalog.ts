@@ -39,6 +39,14 @@ export class Messages {
     }
   }
 
+  /**
+   * What stands for flat texts that have not come yet: every one of them empty. For an interface built before its words arrive and filled
+   * in by them (see CloudEditorTemplate), never for words to show.
+   */
+  static none<T extends object>(): T {
+    return new Proxy({}, { get: () => "" }) as T
+  }
+
   /** The interface language for a language tag: its base ("fr" of "fr-CA") when the interface is written in it, English otherwise. */
   static languageOf(language: string): UfoInterfaceLanguage {
     const base = language.toLowerCase().split("-")[0]

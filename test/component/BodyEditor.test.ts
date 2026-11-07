@@ -24,6 +24,13 @@ const provider: DecorModelProvider = {
 }
 
 class Fixture {
+  /** A fixture whose editor has its words (see BodyEditor.ready). */
+  static async made(stated?: InterpretationJson | null): Promise<Fixture> {
+    const fixture = new Fixture(stated)
+    await fixture.editor.ready
+    return fixture
+  }
+
   readonly container = document.createElement("div")
   readonly sighting: Sighting
   changes = 0
@@ -79,8 +86,8 @@ class Fixture {
 }
 
 describe("The Bodies part of the editor", () => {
-  it("lays the keyframes out on a timeline outside the fieldset of the instant, in place of a picker of instants", () => {
-    const fixture = new Fixture()
+  it("lays the keyframes out on a timeline outside the fieldset of the instant, in place of a picker of instants", async () => {
+    const fixture = await Fixture.made()
     expect(fixture.container.querySelector("#body-key")).toBeNull()
     const lane = fixture.container.querySelector("#body-keys .track-lane")!
     expect(lane.closest("fieldset")).toBeNull()
@@ -89,7 +96,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("shows what a loaded recording states of its bodies", async () => {
-    const fixture = new Fixture()
+    const fixture = await Fixture.made()
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.field("body-interpretation-title").value).toBe("A craft on its legs")
     expect([...fixture.container.querySelectorAll<HTMLOptionElement>("#body-select option")].map(option => option.value)).toEqual(["craft", "figure-1"])
@@ -102,16 +109,16 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.container.querySelectorAll("#body-keys .kf")).toHaveLength(2)
   })
 
-  it("shows a model given by address, with its credit", () => {
-    const fixture = new Fixture()
+  it("shows a model given by address, with its credit", async () => {
+    const fixture = await Fixture.made()
     fixture.type("body-select", "figure-1")
     expect(fixture.field("body-model-url").value).toBe("figure.gltf")
     expect(fixture.field("body-model-title").value).toBe("A figure")
     expect(fixture.field("body-model-license").value).toBe("CC0 1.0")
   })
 
-  it("keeps a credit being typed field by field, and stores it once complete", () => {
-    const fixture = new Fixture()
+  it("keeps a credit being typed field by field, and stores it once complete", async () => {
+    const fixture = await Fixture.made()
     fixture.type("body-model-url", "craft.gltf")
     fixture.type("body-model-title", "Socorro craft")
     // Not stored yet (no licence), but not erased from the form either.
@@ -123,8 +130,8 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.changes).toBeGreaterThan(0)
   })
 
-  it("refuses an id another body already has", () => {
-    const fixture = new Fixture()
+  it("refuses an id another body already has", async () => {
+    const fixture = await Fixture.made()
     fixture.type("body.id", "figure-1")
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["craft", "figure-1"])
     expect(fixture.field("body.id").value).toBe("craft")
@@ -132,15 +139,15 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["engin", "figure-1"])
   })
 
-  it("deletes a body", () => {
-    const fixture = new Fixture()
+  it("deletes a body", async () => {
+    const fixture = await Fixture.made()
     fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["figure-1"])
     expect(fixture.field("body.id").value).toBe("figure-1")
   })
 
   it("adds a body standing for the selected shape, creating the interpretation a recording lacks", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     expect(fixture.container.querySelector<HTMLElement>("#body-list .element-list-empty")!.hidden).toBe(false)
     await fixture.add()
     expect(fixture.sighting.interpretation).toEqual({
@@ -153,14 +160,14 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies.map(body => body.id)).toEqual(["body-1", "body-2"])
   })
 
-  it("drops an interpretation left with no body and no title", () => {
-    const fixture = new Fixture({ bodies: [interpretation.bodies[0]] })
+  it("drops an interpretation left with no body and no title", async () => {
+    const fixture = await Fixture.made({ bodies: [interpretation.bodies[0]] })
     fixture.container.querySelector<HTMLButtonElement>("#body-delete")!.click()
     expect(fixture.sighting.interpretation).toBeUndefined()
   })
 
-  it("offers the interpretation's title before there is any body, and typing one creates the interpretation", () => {
-    const fixture = new Fixture(null)
+  it("offers the interpretation's title before there is any body, and typing one creates the interpretation", async () => {
+    const fixture = await Fixture.made(null)
     const field = fixture.field("body-interpretation-title")
     expect(field.closest("label")!.hidden).toBe(false)
     field.value = "A hubcap"
@@ -169,30 +176,30 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("adds a body where the observer is looking when no shape is drawn", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true } }
     await fixture.add()
     expect(fixture.sighting.interpretation!.bodies[0].explains).toBeUndefined()
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: -2, onGround: true }])
   })
 
-  it("turns the observer towards the body on show", () => {
-    const fixture = new Fixture()
+  it("turns the observer towards the body on show", async () => {
+    const fixture = await Fixture.made()
     fixture.type("body-select", "figure-1")
     fixture.container.querySelector<HTMLButtonElement>("#body-look")!.click()
     expect(fixture.lookedAt).toBe("figure-1")
   })
 
   it("gives a body a catalogue model's real size, farther along its line of sight so it spans the same angle", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 5, sizeM: { widthM: 0.7, lengthM: 0.7, heightM: 0.4 } } }
     await fixture.add("catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
     expect(fixture.sighting.interpretation!.bodies[0].track).toEqual([{ t: 0, azimuthDeg: 90, altitudeDeg: 10, distanceM: 250, sizeM: { widthM: 35, lengthM: 37, heightM: 12 } }])
   })
 
-  it("shows the body at the playhead in the form its keyframes use", () => {
-    const fixture = new Fixture()
+  it("shows the body at the playhead in the form its keyframes use", async () => {
+    const fixture = await Fixture.made()
     fixture.time = 2500
     fixture.editor.syncKeyframe()
     expect(fixture.container.querySelector("#body-key-legend")!.textContent).toBe("At 2.5 s")
@@ -204,8 +211,8 @@ describe("The Bodies part of the editor", () => {
     expect((fixture.container.querySelector("#body-key-delete") as HTMLButtonElement).disabled).toBe(true)
   })
 
-  it("says a body in the world from a decor object, and keeps how it was said in its keyframe", () => {
-    const fixture = new Fixture()
+  it("says a body in the world from a decor object, and keeps how it was said in its keyframe", async () => {
+    const fixture = await Fixture.made()
     fixture.time = 2500
     fixture.editor.syncKeyframe()
     const from = fixture.container.querySelector<HTMLSelectElement>("[id='bodyKey.eastM-from']")!
@@ -235,8 +242,8 @@ describe("The Bodies part of the editor", () => {
     lane.dispatchEvent(new MouseEvent("pointerup", { clientX: to, bubbles: true }))
   }
 
-  it("marks the keyframe at the playhead, and goes to the one pressed", () => {
-    const fixture = new Fixture()
+  it("marks the keyframe at the playhead, and goes to the one pressed", async () => {
+    const fixture = await Fixture.made()
     const selected = () => fixture.container.querySelector<HTMLElement>('#body-keys .kf[data-selected="true"]')?.dataset.t
     expect(selected()).toBe("0")
     fixture.time = 2500
@@ -247,8 +254,8 @@ describe("The Bodies part of the editor", () => {
     expect(selected()).toBe("5000")
   })
 
-  it("moves a keyframe in time when its diamond is dragged, the playhead with it", () => {
-    const fixture = new Fixture()
+  it("moves a keyframe in time when its diamond is dragged, the playhead with it", async () => {
+    const fixture = await Fixture.made()
     // 5 s is at 91.7 px; 67 px is 3.52 s, put at the tenth of a second.
     press(laidOut(fixture), 92, 67)
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 3500])
@@ -256,7 +263,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("leaves the options of the model picker alone while a body is moved: they are rebuilt only when what they list changes", async () => {
-    const fixture = new Fixture()
+    const fixture = await Fixture.made()
     await new Promise(resolve => setTimeout(resolve))
     const select = fixture.container.querySelector<HTMLSelectElement>("#body-model")!
     const first = select.firstElementChild
@@ -268,8 +275,8 @@ describe("The Bodies part of the editor", () => {
     expect(select.firstElementChild).toBe(first)
   })
 
-  it("adds a keyframe at the playhead where there is none, and only there", () => {
-    const fixture = new Fixture()
+  it("adds a keyframe at the playhead where there is none, and only there", async () => {
+    const fixture = await Fixture.made()
     const add = () => fixture.container.querySelector<HTMLButtonElement>("#body-keys .track-add")!
     add().click()
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 5000])
@@ -279,8 +286,8 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500, 5000])
   })
 
-  it("writes an edit at the playhead as a keyframe of position, size and attitude only", () => {
-    const fixture = new Fixture()
+  it("writes an edit at the playhead as a keyframe of position, size and attitude only", async () => {
+    const fixture = await Fixture.made()
     fixture.sighting.interpretation!.bodies[0].track[1] = { t: 5000, eastM: 0, northM: 90, motions: { legs: 1 }, appearance: { color: "#fff" } }
     fixture.time = 2500
     fixture.editor.sync()
@@ -300,7 +307,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("states a position from the observer in the observer's terms", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     await fixture.add()
     fixture.time = 2000
     fixture.editor.syncKeyframe()
@@ -310,7 +317,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("shows a picked catalogue model's address and credit, and keeps naming it by its id", async () => {
-    const fixture = new Fixture()
+    const fixture = await Fixture.made()
     await new Promise(resolve => setTimeout(resolve))
     fixture.type("body-model", "catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
@@ -331,7 +338,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("gives a catalogue model's real size to a body that had none", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 90, altitudeDeg: 0, distanceM: 100 } }
     await fixture.add("catalogue-airliner")
     await new Promise(resolve => setTimeout(resolve))
@@ -339,7 +346,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("moves a body stated from the observer to the direction it is dragged to, keeping its distance", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
     await fixture.add()
     fixture.editor.dragTo(25, 7)
@@ -347,7 +354,7 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("slides a body on the ground over the relief, to where the line of sight meets it", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: -1, distanceM: 100, onGround: true } }
     await fixture.add()
     fixture.groundM = 64
@@ -355,8 +362,8 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 12, altitudeDeg: -2, distanceM: 64, onGround: true })
   })
 
-  it("moves a body stated in the world by as much as its direction turns, at the same level distance", () => {
-    const fixture = new Fixture()
+  it("moves a body stated in the world by as much as its direction turns, at the same level distance", async () => {
+    const fixture = await Fixture.made()
     // The reading: 100 m away at azimuth 10°, elevation 2°, standing at 17.36 E, 98.48 N.
     fixture.editor.dragTo(100, 2)
     const key = fixture.sighting.interpretation!.bodies[0].track.find(k => k.t === 0)!
@@ -368,15 +375,15 @@ describe("The Bodies part of the editor", () => {
   })
 
   it("takes a body nearer or further along its line of sight", async () => {
-    const fixture = new Fixture(null)
+    const fixture = await Fixture.made(null)
     fixture.start = { keyframe: { t: 0, azimuthDeg: 10, altitudeDeg: 2, distanceM: 100 } }
     await fixture.add()
     fixture.editor.scaleDistance(1.5)
     expect(fixture.sighting.interpretation!.bodies[0].track[0]).toMatchObject({ azimuthDeg: 10, altitudeDeg: 2, distanceM: 150 })
   })
 
-  it("paints a built-in shape at the playhead", () => {
-    const fixture = new Fixture()
+  it("paints a built-in shape at the playhead", async () => {
+    const fixture = await Fixture.made()
     fixture.time = 0
     fixture.editor.syncKeyframe()
     expect(fixture.field("bodyKey.color").value).toBe("#c8c8c8")

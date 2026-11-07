@@ -17,9 +17,7 @@ import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyP
 import type { BodyContext, BodyKeyframeContext, BodyKeyframeView } from "../engine/interpretation/BodyParameterSets.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
-import { bodyEditorMessages_en } from "./messages/BodyEditorMessages_en.js"
-import type { UfoLanguage } from "./messages/index.js"
-import { loadBodyEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { BODY_EDITOR_MESSAGES } from "./messages/index.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
 
@@ -73,7 +71,10 @@ export class BodyEditor {
   /** The fields of the look of an instant: an edit of one of them is this keyframe's own statement of its look. */
   private static readonly APPEARANCE_KEYS: readonly string[] = ["color", "albedo", "luminanceCdM2", "transparency", "haloScale"]
   /** English, the fallback baked in, until the chosen language's module has loaded. */
-  private messages: BodyEditorMessages = bodyEditorMessages_en
+  /** Its words, once they have come (see ready). */
+  private messages!: BodyEditorMessages
+  /** Settles once the part has its words and is drawn: nothing of it shows before, in no language. */
+  readonly ready: Promise<void>
   /** The language last asked for, so a slower load cannot overwrite a later choice. */
   private languageToken = 0
   private currentId?: string
@@ -88,17 +89,14 @@ export class BodyEditor {
   private keyForm?: ParameterForm
 
   constructor(private readonly container: HTMLElement, private readonly host: BodyEditorHost, private language: string) {
-    this.render()
-    void this.setLanguage(language)
+    this.ready = this.setLanguage(language)
   }
 
-  /** Rebuilds the part in another language, keeping the body on show. Only that language's
-   * messages are fetched; English is shown meanwhile. */
+  /** Rebuilds the part in another language, keeping the body on show. Only that language's messages are fetched. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? bodyEditorMessages_en : await loadBodyEditorMessages(supported)
+    const messages = await BODY_EDITOR_MESSAGES.load(language)
     // Superseded by a later choice made while this one was loading.
     if (token !== this.languageToken) return
     if (messages === this.messages) return
@@ -113,6 +111,7 @@ export class BodyEditor {
 
   /** Shows what the recording states now: after a recording is loaded, or a shape renamed. */
   sync(): void {
+    if (!this.messages) return
     const bodies = this.bodies
     if (!bodies.some(body => body.id === this.currentId)) this.currentId = bodies[0]?.id
     this.input("body-interpretation-title").value = this.host.said().read(this.interpretation?.title) ?? ""
@@ -146,6 +145,7 @@ export class BodyEditor {
    * keyframes), in the form its own keyframes use. Called as the playhead moves; a field being
    * typed in is left alone. */
   syncKeyframe(force = false): void {
+    if (!this.messages) return
     const body = this.current
     if (!body) return
     const t = this.host.currentTime()
@@ -218,6 +218,7 @@ export class BodyEditor {
   }
 
   private render(): void {
+    if (!this.messages) return
     const m = this.messages
     // The unit stands AFTER the field, never in the label before it, and a field is as wide as the
     // values it takes (see the CSS) — the user's own rules for every form field here.
@@ -543,6 +544,7 @@ export class BodyEditor {
 
   /** Puts a body on show in the fields, as a press on it in the picture does. */
   show(id: string): void {
+    if (!this.messages) return
     if (!this.bodies.some(body => body.id === id) || id === this.currentId) return
     this.currentId = id
     this.sync()

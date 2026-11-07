@@ -1,3 +1,4 @@
+import { Messages } from "../i18n/MessageCatalog.js"
 import type { SceneElement } from "./SceneElement.js"
 import type { CloudInstance, CloudLayer } from "../engine/model/CloudLayer.js"
 import { resolveCloudLayers } from "../engine/model/CloudLayer.js"
@@ -6,8 +7,9 @@ import { cloudOffsetAt } from "../render3d/CloudMotion.js"
 import { resolveObserverPoseAt, resolveWeatherAt } from "../engine/model/Sighting.js"
 import { cloudDragDelta } from "../render3d/CloudManipulation.js"
 import type { CloudPoint } from "../render3d/CloudManipulation.js"
-import { CloudEditorTemplate, cloudEditorMessages_en } from "./cloudEditorTemplate.js"
-import { loadCloudEditorMessages } from "./messages/index.js"
+import { CloudEditorTemplate } from "./cloudEditorTemplate.js"
+import { CLOUD_EDITOR_MESSAGES } from "./messages/index.js"
+import type { CloudEditorMessages } from "./messages/CloudEditorMessages.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
@@ -18,13 +20,14 @@ import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 
 /** Weather authoring shared with the editor's recording, projection and playback clock.
  *
- * Built in English, and put in the reader's `language` once its messages have arrived: only that
- * language's module is ever downloaded, and none at all for English (see CloudEditorMessages). */
+ * Built with no word, and put in the reader's `language` once its messages have arrived: only that language's module is ever
+ * downloaded, English like any other (see CloudEditorMessages). */
 export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, beforeEdit: (detachWeatherSource?: boolean) => void, pointAt: (headingDeg: number, pitchDeg: number) => void, language: UfoLanguage = "en",
   /** What a cloud's place is said from (see PositionPlace); without it, only as metres from the observer. */
   positionPlace?: PositionPlace) {
-  let messages = cloudEditorMessages_en
-  controls.innerHTML = CloudEditorTemplate.html(messages)
+  // No word before the reader's have come: an empty one stands for each meanwhile.
+  let messages = Messages.none<CloudEditorMessages>()
+  controls.innerHTML = CloudEditorTemplate.html()
   const input = (id: string) => controls.querySelector<HTMLElement>("#" + id) as HTMLInputElement
   // The layers, and the individual clouds of the layer picked: pickers with what is done with them (see ElementList). Their
   // actions are the editor's own, which come further down.
@@ -231,9 +234,8 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     if (horizontal === 0 && up === 0) return
     pointAt((Math.atan2(east, north) * 180 / Math.PI + 360) % 360, Math.atan2(up, horizontal) * 180 / Math.PI)
   }
-  if (language !== "en") {
-    void loadCloudEditorMessages(language).then(loaded => {
-      if (!loaded) return
+  {
+    void CLOUD_EDITOR_MESSAGES.load(language).then(loaded => {
       messages = loaded
       CloudEditorTemplate.localize(controls, messages)
       label()

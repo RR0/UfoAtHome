@@ -149,14 +149,11 @@ export function loadSceneNames(language: UfoLanguage): Promise<SceneNames | unde
   }
 }
 
-/** The cloud editor's texts in `language` — undefined for English, which is the template's own
- * text (see CloudEditorMessages). */
-export function loadCloudEditorMessages(language: UfoLanguage): Promise<CloudEditorMessages | undefined> {
-  switch (language) {
-    case "fr": return import("./CloudEditorMessages_fr.js").then(m => m.cloudEditorMessages_fr)
-    case "es": return import("./CloudEditorMessages_es.js").then(m => m.cloudEditorMessages_es)
-    case "it": return import("./CloudEditorMessages_it.js").then(m => m.cloudEditorMessages_it)
-    default: return Promise.resolve(undefined)
-  }
-}
+/** The cloud editor's texts, one chunk per language (see MessageCatalog). */
+export const CLOUD_EDITOR_MESSAGES = Messages.catalog<CloudEditorMessages>({
+  en: () => import("./CloudEditorMessages_en.js").then(m => m.cloudEditorMessages_en),
+  fr: () => import("./CloudEditorMessages_fr.js").then(m => m.cloudEditorMessages_fr),
+  es: () => import("./CloudEditorMessages_es.js").then(m => m.cloudEditorMessages_es),
+  it: () => import("./CloudEditorMessages_it.js").then(m => m.cloudEditorMessages_it)
+})
 
