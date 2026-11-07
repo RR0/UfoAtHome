@@ -2724,7 +2724,12 @@ export class SceneRenderer {
       relativeScale: this.relativeScale,
       air: this.air,
       transmittanceTo: (x, y, z) => this.transmittanceTo(x, y, z),
-      groundYAt: (x, z) => this.groundYUnder(x, z)
+      groundYAt: (x, z) => this.groundYUnder(x, z),
+      // Towards where it blows (see Weather.windDirectionDeg).
+      wind: {
+        eastMS: Math.sin(this.weather.windDirectionDeg * DEG_TO_RAD) * this.weather.windSpeed,
+        northMS: Math.cos(this.weather.windDirectionDeg * DEG_TO_RAD) * this.weather.windSpeed
+      }
     })
   }
 

@@ -90,11 +90,11 @@ export class TerrainReach {
     return eyeAboveLowestM >= TerrainReach.OVERLOOK_M || beamReachM > nearRadiusM
   }
 
-  /** How far from `centre` the beams of light a recording claims go (see BeamJson): the farthest point of their paths, metres. */
+  /** How far from `centre` the beams of light a recording claims go (see BeamJson): the farthest point of their paths, metres, wherever they move. */
   static beamReachFor(beams: readonly BeamJson[], centre: { lat: number; lng: number }): number {
     let reach = 0
     for (const beam of beams) {
-      for (const point of beam.path) {
+      for (const point of [...beam.path, ...(beam.moves ?? []).flatMap(key => key.path)]) {
         const offset = geoToLocalMeters(point.lat, point.lng, centre.lat, centre.lng)
         reach = Math.max(reach, Math.hypot(offset.x, offset.z))
       }

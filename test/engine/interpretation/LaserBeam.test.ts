@@ -93,3 +93,45 @@ describe("LaserBeamSighting", () => {
     expect(luminance).toBeLessThan(50)
   })
 })
+
+describe("a beam that changes in time", () => {
+  const path = [{ lat: 48.8, lng: 2.23, altitudeM: 170 }, { lat: 48.84, lng: 2.34, altitudeM: 90 }]
+  const beam: BeamJson = { id: "b", path, wavelengthNm: 532, powerW: 10 }
+
+  test("is the beam itself where nothing of it changes, so that what was worked out of it can be kept", () => {
+    expect(LaserBeamSighting.stateAt(beam, 1000)).toBe(beam)
+    expect(LaserBeamSighting.onAt([beam], 1000)[0]).toBe(beam)
+  })
+
+  test("joins its light between its keys, holds it past either end, and takes the beam's own where a key says nothing", () => {
+    const shifting: BeamJson = { ...beam, light: [{ t: 0, wavelengthNm: 532 }, { t: 10000, wavelengthNm: 638, powerW: 20 }] }
+    expect(LaserBeamSighting.stateAt(shifting, 5000)).toMatchObject({ wavelengthNm: 585, powerW: 20 })
+    expect(LaserBeamSighting.stateAt(shifting, -1000).wavelengthNm).toBe(532)
+    expect(LaserBeamSighting.stateAt(shifting, 20000).wavelengthNm).toBe(638)
+    expect(LaserBeamSighting.stateAt({ ...beam, light: [{ t: 0, powerW: 4 }] }, 0)).toMatchObject({ wavelengthNm: 532, powerW: 4 })
+  })
+
+  test("moves each point of its path to the same point of the next key, and holds a path of another number of points", () => {
+    const swept: BeamJson = { ...beam, moves: [{ t: 0, path }, { t: 2000, path: [path[0], { lat: 48.86, lng: 2.34, altitudeM: 290 }] }] }
+    const halfway = LaserBeamSighting.stateAt(swept, 1000).path
+    expect(halfway[0]).toEqual({ lat: 48.8, lng: 2.23, altitudeM: 170 })
+    expect(halfway[1].lat).toBeCloseTo(48.85, 6)
+    expect(halfway[1].altitudeM).toBeCloseTo(190, 6)
+    const mirrored: BeamJson = { ...beam, moves: [{ t: 0, path }, { t: 2000, path: [...path, { lat: 48.9, lng: 2.4, altitudeM: 50 }] }] }
+    expect(LaserBeamSighting.stateAt(mirrored, 1000).path).toHaveLength(2)
+    expect(LaserBeamSighting.stateAt(mirrored, 2000).path).toHaveLength(3)
+  })
+
+  test("crosses haze as dense as its mean on average, unevenly within its patchiness, drifting with the wind", () => {
+    const air = { windAlongMS: 5, windAcrossMS: 2, patchiness: 0.35 }
+    const values = Array.from({ length: 400 }, (_, i) => LaserBeamSighting.patchAt(i * 25, 0, air))
+    expect(Math.min(...values)).toBeGreaterThanOrEqual(0.65)
+    expect(Math.max(...values)).toBeLessThanOrEqual(1.35)
+    expect(Math.max(...values) - Math.min(...values)).toBeGreaterThan(0.2)
+    expect(values.reduce((sum, value) => sum + value, 0) / values.length).toBeCloseTo(1, 1)
+    // Carried along the beam: what is at 500 m now is near 550 m ten seconds later, with the wind along it at 5 m/s.
+    const now = LaserBeamSighting.patchAt(500, 0, { ...air, windAcrossMS: 0 })
+    expect(LaserBeamSighting.patchAt(550, 10000, { ...air, windAcrossMS: 0 })).toBeCloseTo(now, 1)
+    expect(LaserBeamSighting.patchAt(500, 0, { ...air, patchiness: 0 })).toBe(1)
+  })
+})

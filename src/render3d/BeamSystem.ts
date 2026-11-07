@@ -23,6 +23,8 @@ export interface BeamFrame {
   transmittanceTo: (x: number, y: number, z: number) => Rgb
   /** The ground under a point of the scene: a beam stops where it meets it. */
   groundYAt: (x: number, z: number) => number
+  /** The wind, metres a second towards the east and towards the north: what drifts the patches of haze along a beam (see LaserBeamSighting.patchAt). */
+  wind?: { eastMS: number; northMS: number }
 }
 
 interface Placed {
@@ -32,6 +34,8 @@ interface Placed {
   altitudeM: number
   widthM: number
   powerW: number
+  /** How much denser than its mean the haze is there, now (see LaserBeamSighting.patchAt). */
+  haze: number
 }
 
 /**
@@ -98,7 +102,7 @@ export class BeamSystem {
     this.drawn = []
     for (const view of views) {
       const colour = LaserBeamSighting.colourOf(view.wavelengthNm)
-      const placed = this.place(view, frame)
+      const placed = this.place(view, t, frame)
       this.drawn.push({ id: view.id, points: placed })
       for (let i = 0; i + 1 < placed.length; i++) {
         if (this.segments >= BeamSystem.MAX_SEGMENTS) break
@@ -121,24 +125,31 @@ export class BeamSystem {
     const { lat, lng } = frame.reference
     if (!this.cut || this.cut.lat !== lat || this.cut.lng !== lng || this.cut.air !== frame.air) this.cut = { lat, lng, air: frame.air, views: new Map() }
     const views = this.cut.views
-    // A beam's points do not depend on the instant, only whether it is on does.
+    const stated = new Set(beams)
+    // A beam whose light and path do not change has its points kept: only whether it is on depends on the instant. One that moves, or whose
+    // light changes, is a new beam at every instant (see LaserBeamSighting.stateAt), cut anew and not kept.
     return LaserBeamSighting.onAt(beams, t).map(beam => {
+      if (!stated.has(beam)) return LaserBeamSighting.viewOf(beam, frame.reference, frame.air)
       let view = views.get(beam)
-      if (!view) views.set(beam, view = { id: beam.id, wavelengthNm: beam.wavelengthNm, samples: LaserBeamSighting.samplesOf(beam, frame.reference, frame.air) })
+      if (!view) views.set(beam, view = LaserBeamSighting.viewOf(beam, frame.reference, frame.air))
       return view
     })
   }
 
-  /** The points of a beam in the scene, up to where it first meets the ground. */
-  private place(view: BeamView, frame: BeamFrame): Placed[] {
+  /** The points of a beam in the scene, up to where it first meets the ground, each with the haze it crosses there at `t`. */
+  private place(view: BeamView, t: number, frame: BeamFrame): Placed[] {
     const placed: Placed[] = []
+    const wind = frame.wind ?? { eastMS: 0, northMS: 0 }
     for (const sample of view.samples) {
       const x = frame.origin.x + sample.eastM * frame.eastScale
       const z = frame.origin.z - sample.northM
       const y = sample.upM - frame.siteElevationM
       // The first point is where it leaves the emitter, which may stand on the ground: only what comes after is stopped by it.
       if (placed.length > 0 && y < frame.groundYAt(x, z)) break
-      placed.push({ x, y, z, altitudeM: sample.altitudeM, widthM: sample.widthM, powerW: sample.powerW })
+      const windAlongMS = wind.eastMS * sample.dirEast + wind.northMS * sample.dirNorth
+      const windAcrossMS = wind.eastMS * sample.dirNorth - wind.northMS * sample.dirEast
+      const haze = LaserBeamSighting.patchAt(sample.fromSourceM, t, { windAlongMS, windAcrossMS, patchiness: view.patchiness })
+      placed.push({ x, y, z, altitudeM: sample.altitudeM, widthM: sample.widthM, powerW: sample.powerW, haze })
     }
     return placed
   }
@@ -164,7 +175,9 @@ export class BeamSystem {
       // The angle the light has to turn by, from the way the beam goes to the way to the eye.
       const cosTurn = (direction.x * toEye.x + direction.y * toEye.y + direction.z * toEye.z) / distance
       const sinTurn = Math.sqrt(Math.max(0, 1 - cosTurn * cosTurn))
-      const scattered = LaserBeamSighting.phasedScattering(LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, point.altitudeM), cosTurn)
+      // The haze's share as uneven as the haze is there (see LaserBeamSighting.patchAt); the air's own, even.
+      const coefficients = LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, point.altitudeM)
+      const scattered = LaserBeamSighting.phasedScattering({ ...coefficients, aerosolPerM: coefficients.aerosolPerM * point.haze }, cosTurn)
       return { sinTurn, scattered, through: frame.transmittanceTo(point.x, point.y, point.z) }
     }
     const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
@@ -196,7 +209,7 @@ export class BeamSystem {
     if (halvings < BeamSystem.MAX_HALVINGS && Math.max(lineA, lineB) > BeamSystem.SMOOTH_RATIO * Math.max(Math.min(lineA, lineB), 1e-12)) {
       const middle: Placed = {
         x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2, altitudeM: (a.altitudeM + b.altitudeM) / 2,
-        widthM: (a.widthM + b.widthM) / 2, powerW: Math.sqrt(a.powerW * b.powerW)
+        widthM: (a.widthM + b.widthM) / 2, powerW: Math.sqrt(a.powerW * b.powerW), haze: (a.haze + b.haze) / 2
       }
       return this.pushSegment(this.pushSegment(vertex, a, middle, wavelengthNm, colour, frame, halvings + 1), middle, b, wavelengthNm, colour, frame, halvings + 1)
     }
