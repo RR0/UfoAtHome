@@ -994,4 +994,20 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The observer list of the Observer group: the observer of this account, and the removal of another. */
   principalObserver: string
   deleteObserver: string
+  /** What the observer fields hold, by example: the unit of an age, and occupations as one would write them. */
+  observerAgeUnit: string
+  observerOccupationExample: string
+  /** What a few fields mean, said over them. */
+  rollHint: string
+  utcOffsetHint: string
+  highCloudCoverHint: string
+  cloudBaseHint: string
+  windDirectionHint: string
+  soundPitchHint: string
+  brightnessHint: string
+  blurHint: string
+  apparentWidthHint: string
+  realWidthHint: string
+  objectDistanceHint: string
+  sizeLockHint: string
 }

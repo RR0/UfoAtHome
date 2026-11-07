@@ -603,4 +603,18 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   addReference: "Aggiungi una foto",
   principalObserver: "Testimone di questo resoconto",
   deleteObserver: "Elimina il testimone",
+  observerAgeUnit: "anni",
+  observerOccupationExample: "fornaio, pilota di linea…",
+  rollHint: "Di quanto lo strumento era inclinato attorno alla propria linea di mira, positivo in senso orario, come lo vedeva il testimone",
+  utcOffsetHint: "Ore di anticipo su UTC all'orologio del testimone: l'ora legale, che la longitudine non può conoscere (la Francia era a UTC+1 nel 1965)",
+  highCloudCoverHint: "Quanta parte del cielo copriva lo strato alto e ghiacciato: ciò che rifrange un alone o una coppia di pareli",
+  cloudBaseHint: "Altezza della base dello strato nuvoloso sopra il suolo: decide se il testimone è sotto lo strato o sopra",
+  windDirectionHint: "La direzione VERSO cui soffia il vento, in senso orario dal nord vero: l'opposto della convenzione meteorologica delle previsioni",
+  soundPitchHint: "Quanto il suono era grave o acuto: la nota stessa per un ronzio o un fischio, quanto è basso il rumore per un rombo o un crepitio",
+  brightnessHint: "Quanto il testimone l'ha detto abbagliante: una luce che non si può guardare fa tre cose che un alone non fa mai",
+  blurHint: "Quanto il testimone ha detto indistinti i suoi bordi: non la profondità di campo dell'obiettivo, che qui non tocca mai l'oggetto",
+  apparentWidthHint: "Quanto sembrava largo, in gradi: ciò che la registrazione afferma della sua dimensione",
+  realWidthHint: "Quanto misura quell'angolo in metri alla distanza accanto. Dedotto, mai salvato",
+  objectDistanceHint: "A quale distanza lungo la sua linea di mira è disegnata la forma: ciò che decide cosa ne nasconde lo scenario. Un'ipotesi, mai ciò che dice il testimone",
+  sizeLockHint: "Quale delle tre resta fissa mentre se ne modifica un'altra"
 }

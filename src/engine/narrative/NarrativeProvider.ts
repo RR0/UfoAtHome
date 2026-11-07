@@ -124,9 +124,8 @@ export interface NarrativeProvider {
   /** What this provider needs from the reader before it can draft — see NarrativeSetting. */
   readonly settings: ReadonlyArray<NarrativeSetting>
 
-  /** Puts the settings' texts in `language` (a tag such as "fr"), when the provider speaks it —
-   * downloading that language's texts alone. Until then, and without this method, they are in
-   * whatever the provider declared them in. */
+  /** Puts the settings' texts in `language` (a tag such as "fr") — downloading that language's texts alone (see MessageCatalog). A
+   * provider whose settings say anything has this method, and states no setting before it has been called. */
   localize?(language: string): Promise<void>
 
   /** Reads `request` and proposes a recording — never its `description`, which is the account it

@@ -212,7 +212,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -227,11 +227,12 @@ beforeAll(() => {
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
 /** An editor holding one shape, as an author would add it with +. */
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
   ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
+  await element.ready
   return element
 }
 
@@ -265,8 +266,8 @@ function openGroups(element: SightingEditorElement): string[] {
     .filter(tab => tab.getAttribute("aria-expanded") === "true").map(tab => tab.getAttribute("aria-controls")!)
 }
 
-function twoBuildings(): SightingEditorElement {
-  const element = mount()
+async function twoBuildings(): Promise<SightingEditorElement> {
+  const element = await mount()
   const add = element.shadowRoot!.getElementById("option-decor-building") as HTMLButtonElement
   add.click()
   add.click()
@@ -278,9 +279,9 @@ function twoBuildings(): SightingEditorElement {
 }
 
 describe("picking scenery on the picture", () => {
-  it("selects it with a plain click, and opens the Environment group where it is framed, without the author going there first", () => {
+  it("selects it with a plain click, and opens the Environment group where it is framed, without the author going there first", async () => {
     pickedDecor = "decor-1"
-    const element = twoBuildings()
+    const element = await twoBuildings()
     expect(openGroups(element)).toEqual([])
     expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
 
@@ -294,7 +295,7 @@ describe("picking scenery on the picture", () => {
     pickedDecor = "decor-1"
     pickedBody = "craft"
     try {
-      const element = twoBuildings()
+      const element = await twoBuildings()
       const json = element.sightingData
       element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
 
@@ -322,7 +323,7 @@ describe("picking scenery on the picture", () => {
     pickedDecor = "decor-1"
     pickedBody = "craft"
     try {
-      const element = twoBuildings()
+      const element = await twoBuildings()
       const json = element.sightingData
       element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
       const view = element.shadowRoot!.getElementById("account-view") as HTMLSelectElement
@@ -346,28 +347,28 @@ describe("picking scenery on the picture", () => {
     }
   })
 
-  it("leaves it alone when a key is held with the press, so that the press turns the view as over bare ground", () => {
+  it("leaves it alone when a key is held with the press, so that the press turns the view as over bare ground", async () => {
     for (const modifier of ["shiftKey", "ctrlKey", "altKey", "metaKey"] as const) {
       pickedDecor = "decor-1"
-      const element = twoBuildings()
+      const element = await twoBuildings()
       press(nestedCanvas(element), { [modifier]: true })
       expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value, modifier).toBe("decor-2")
       expect(openGroups(element), modifier).toEqual([])
     }
   })
 
-  it("selects nothing where nothing stands", () => {
+  it("selects nothing where nothing stands", async () => {
     pickedDecor = undefined
-    const element = twoBuildings()
+    const element = await twoBuildings()
     press(nestedCanvas(element))
     expect((element.shadowRoot!.getElementById("decor") as HTMLSelectElement).value).toBe("decor-2")
     expect(openGroups(element)).toEqual([])
   })
 
-  it("carries the selected object from anywhere in its frame, even where the picture shows only the ground behind it", () => {
+  it("carries the selected object from anywhere in its frame, even where the picture shows only the ground behind it", async () => {
     // Pressed in the frame away from the shape the recording holds at the middle, which a press on would select instead.
     pickedDecor = undefined
-    const element = twoBuildings()
+    const element = await twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
     const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const before = east.value
@@ -380,9 +381,9 @@ describe("picking scenery on the picture", () => {
     expect(east.value).not.toBe(before)
   })
 
-  it("selects a shape painted in front of the selected object, rather than carrying the object behind it", () => {
+  it("selects a shape painted in front of the selected object, rather than carrying the object behind it", async () => {
     pickedDecor = undefined
-    const element = twoBuildings()
+    const element = await twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
     const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const before = east.value
@@ -394,8 +395,8 @@ describe("picking scenery on the picture", () => {
     expect(openGroups(element)).toEqual(["group-shape"])
   })
 
-  it("does not carry it when another object stands in front of that point, nor when Cmd is held", () => {
-    const element = twoBuildings()
+  it("does not carry it when another object stands in front of that point, nor when Cmd is held", async () => {
+    const element = await twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
     const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const before = east.value
@@ -415,9 +416,9 @@ describe("picking scenery on the picture", () => {
     expect(east.value).toBe(before)
   })
 
-  it("restricts the carry to one axis with Shift (east-west) or Alt (north-south)", () => {
+  it("restricts the carry to one axis with Shift (east-west) or Alt (north-south)", async () => {
     pickedDecor = undefined
-    const element = twoBuildings()
+    const element = await twoBuildings()
     ;[...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(".group-tab")].find(tab => tab.getAttribute("aria-controls") === "group-decor")!.click()
     const east = element.shadowRoot!.getElementById("decorBase.eastM") as HTMLInputElement
     const north = element.shadowRoot!.getElementById("decorBase.northM") as HTMLInputElement

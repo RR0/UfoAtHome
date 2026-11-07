@@ -23,7 +23,7 @@ import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
-import type { MessageCatalog } from "../i18n/MessageCatalog.js"
+import { Messages, type MessageCatalog } from "../i18n/MessageCatalog.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
@@ -198,12 +198,11 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { TIME_ZONE_SOURCES } from "../modules/providers/time-zone/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
-import { loadSceneNames, loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSceneNames, loadTagNames, SIGHTING_EDITOR_MESSAGES, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import { HintElement } from "./HintElement.js"
 import { AccountEvaluationFields } from "./AccountEvaluationFields.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
@@ -778,7 +777,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly groupPanels: HTMLElement[]
   private readonly paramSummary: HTMLElement
   /** Rebuilt on a language change, since the labels it holds are the ones it was made with. */
-  private paramSummaryBuilder: SightingSummary
+  /** What the summary's chips say, once the editor's words have come (see applyMessages): none before. */
+  private paramSummaryBuilder?: SightingSummary
   /** What the summary last rendered, so the rebuild can be skipped when nothing it shows has
    * changed. onSelectionOrTimeChanged — where the refresh hangs — also runs on every playhead
    * tick during playback, and a summary is 75 fields wide: reading them is cheap, replacing the
@@ -888,9 +888,15 @@ export class SightingEditorElement extends HTMLElement {
 
   private recorder?: Recorder
   private isRecording = false
-  /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
-   * resolves a better match — see its doc comment. */
-  private messages: SightingEditorMessages = sightingEditorMessages_en
+  /** Blank texts until the reader's come (see Messages.blank and loadLocaleMessages): nothing is written before them, and English is
+   * never fetched for a reader of another language. */
+  private messages: SightingEditorMessages = Messages.blank<SightingEditorMessages>()
+  /** Settled once the editor's words, in its reader's language, are on show. */
+  ready: Promise<void> = Promise.resolve()
+  /** Whether the editor's words have come (see applyMessages): what is drawn from them waits until they have. */
+  private worded = false
+  /** What a field says over it when nothing else is said there (a question unanswered, the weather held while playing), by its id. */
+  private readonly fieldHints = new Map<string, string>()
   private currentAppearance: Appearance = { ...DEFAULT_APPEARANCE }
   /** Which source/shape the appearance toolbar (Name/Color/Transparency/Halo/source dropdown) and
    * Record button currently target — the selection "anchor"/last-interacted shape. Always a member
@@ -1265,7 +1271,7 @@ export class SightingEditorElement extends HTMLElement {
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
       get sighting() { return editor.ufoElement.sighting },
-      messages: () => this.messages.witnessError,
+      messages: () => this.worded ? this.messages.witnessError : undefined,
       changed: () => {
         this.touch()
         this.armHistory()
@@ -1349,9 +1355,6 @@ export class SightingEditorElement extends HTMLElement {
     this.accountFollowedUpSelect = this.shadow.getElementById("accountFollowedUp") as HTMLSelectElement
     this.evaluationFields = new AccountEvaluationFields(this.shadow.getElementById("profile-section")!, this.shadow.getElementById("testimony-section")!,
       this.shadow.getElementById("strangeness-section")!, () => this.updateObserverMetadata())
-    // Built here and not in the template, so the template's English does not name them: an English reader's locale load finds the
-    // messages it already has and skips applyMessages, which left their labels and blank choices empty.
-    this.evaluationFields.messages = this.messages.accountEvaluation
     this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
@@ -1523,7 +1526,6 @@ export class SightingEditorElement extends HTMLElement {
         this.refreshFileItems()
       }
     })
-    this.sectionFilePanel.localize(this.messages)
     const eventsHost = {
       sighting: () => this.ufoElement.sighting,
       editing: () => this.armHistory(),
@@ -1559,9 +1561,9 @@ export class SightingEditorElement extends HTMLElement {
         return this.said.read(body?.title) ?? id
       }
     }
-    this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, this.messages.events)
-    this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, this.messages.events, "phenomenon")
-    this.bodiesEventsPanel = new EventsPanel(this.shadow.getElementById("bodies-events-section")!, eventsHost, this.messages.events, "bodies")
+    this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, undefined)
+    this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, undefined, "phenomenon")
+    this.bodiesEventsPanel = new EventsPanel(this.shadow.getElementById("bodies-events-section")!, eventsHost, undefined, "bodies")
     // How often a keyframe is taken is the recording's (see Sighting.sampleMs): what the events give is worked out again at that pace.
     this.samplingRateInput.addEventListener("change", () => {
       const ms = Number(this.samplingRateInput.value)
@@ -1572,8 +1574,9 @@ export class SightingEditorElement extends HTMLElement {
     })
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
-    // In the language the editor starts in: the others come with their locale, if one is asked (see applyMessages).
+    // Blank until the editor's words come (see applyMessages), as the rest of the editor is.
     this.frozenPanel.localize(this.messages)
+    this.sectionFilePanel.localize(this.messages)
     this.refreshFileItems()
     this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
     this.identityAsk = this.shadow.getElementById("identity-ask") as HTMLDialogElement
@@ -1667,7 +1670,7 @@ export class SightingEditorElement extends HTMLElement {
       track: () => this.ufoElement.sighting.observerTrack.toJSON().keyframes
         .map(keyframe => ({ lat: keyframe.pose.lat, lng: keyframe.pose.lng }))
         .filter((point): point is { lat: number, lng: number } => typeof point.lat === "number" && typeof point.lng === "number")
-    }, sightingEditorMessages_en,
+    }, this.messages,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
       : (await import("../modules/providers/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng),
@@ -2102,9 +2105,6 @@ export class SightingEditorElement extends HTMLElement {
     this.perceptionSettings.providers = ObserverProviders.ALL
     this.applyPerceptionLabels()
     this.perceptionSettings.addEventListener("settingschange", () => this.updateObserverMetadata())
-    this.startDate.messages = this.messages
-    this.endDate.messages = this.messages
-    this.birthDate.messages = this.messages
     // The picker says nothing through "datechange" while a segment is missing, so the weather has to hear of it here.
     for (const type of ["input", "change"]) {
       this.shadow.getElementById("obs-time-native")?.addEventListener(type, () => {
@@ -2186,7 +2186,6 @@ export class SightingEditorElement extends HTMLElement {
     // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
     NumberFields.fit(this.shadow)
     this.paramSummary = this.shadow.getElementById("param-summary")!
-    this.paramSummaryBuilder = new SightingSummary(this.messages, this.naming, this.said, this.tagNames, { messages: this.messages, locale: this.language })
     // One listener on the strip rather than one per chip: the chips are rebuilt from scratch on
     // every refresh, and re-binding 37 handlers each time is how a summary meant to be cheap stops
     // being cheap.
@@ -2198,8 +2197,6 @@ export class SightingEditorElement extends HTMLElement {
     this.sectionChosen = false
     this.opensMostLacking = true
     this.attachWitnessErrors()
-    // Named from the start, in the language the template is written in, until the visitor's own is loaded.
-    this.labelPanels(this.messages)
     this.fileEditorHost.addEventListener("focusout", () => this.leaveFileEditor())
 
     this.setRecordButtonLabel(false)
@@ -2241,7 +2238,7 @@ export class SightingEditorElement extends HTMLElement {
     // itself starts the moment those fields say enough (see scheduleWeatherLookup's callers).
     this.syncWeatherSourceState()
     // Only when already in the page — see SightingElement's constructor for why.
-    if (this.isConnected) void this.loadLocaleMessages()
+    if (this.isConnected) this.ready = this.loadLocaleMessages()
   }
 
   /** `src` loads an existing recording straight into the editor, the same attribute every other
@@ -2263,7 +2260,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!this.hasAttribute("tabindex")) this.tabIndex = -1
     // The constructor could only read the browser's list if this editor was created before being put
     // anywhere; the page it now stands in may declare a language (see HostLocale).
-    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
+    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) this.ready = this.loadLocaleMessages()
     // What the author does to the form, told from what the editor derives by itself: see `touched`.
     this.shadow.addEventListener("pointerdown", this.armHistory, true)
     this.shadow.addEventListener("keydown", this.armHistory as EventListener, true)
@@ -2770,7 +2767,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private refreshFileItems(): void {
     const select = this.fileItemSelect
-    if (!select) return
+    if (!select || !this.worded) return
     this.syncFilePickers()
     const picked = select.value || "recording"
     // What each holds: where it is, its source says.
@@ -3133,7 +3130,7 @@ export class SightingEditorElement extends HTMLElement {
       const draft = await this.narrativeProvider.draft({
         ask,
         current: this.sightingData,
-        language: SightingEditorElement.LANGUAGE_NAMES[this.showerLanguage()],
+        language: SightingEditorElement.LANGUAGE_NAMES.of(this.showerLanguage()) ?? "English",
         settings: this.narrativeSettingValues()
       }, abort.signal)
       this.applyNarrativeDraft(draft)
@@ -5613,7 +5610,7 @@ export class SightingEditorElement extends HTMLElement {
       if (this.ufoElement.playbackState === "playing") {
         field.title = this.messages.weatherWhilePlaying
       } else if (field.title === this.messages.weatherWhilePlaying) {
-        field.title = ""
+        field.title = this.fieldHints.get(field.id) ?? ""
       }
     }
     // With no date or no place stated, there is no question to ask a record — so the control that
@@ -7490,6 +7487,7 @@ export class SightingEditorElement extends HTMLElement {
    * better by the marks on the nine values that record supplied.
    */
   private refreshParamSummary(): void {
+    if (!this.paramSummaryBuilder) return
     const entries = this.paramSummaryBuilder.entriesFor(this.ufoElement.sighting, this.ufoElement.currentTime, {
       decorId: this.currentDecorId,
       // A chip naming a decor object opens that object here, so the list of them is worth its
@@ -7819,7 +7817,7 @@ export class SightingEditorElement extends HTMLElement {
         const wanted = dashed.has(fieldId) && !field.classList.contains("missing-required")
         field.classList.toggle("wanted", wanted)
         if (wanted || field.title === this.messages.questionUnanswered) {
-          field.title = wanted ? this.messages.questionUnanswered : ""
+          field.title = wanted ? this.messages.questionUnanswered : this.fieldHints.get(fieldId) ?? ""
         }
       }
     }
@@ -10222,8 +10220,8 @@ export class SightingEditorElement extends HTMLElement {
    * called in that language — English until its names have arrived with its messages. */
   private naming = new SceneNaming()
 
-  /** The language a draft's gaps are to be written in, as a language model is asked for it. */
-  private static readonly LANGUAGE_NAMES: Record<UfoLanguage, string> = { en: "English", fr: "French", es: "Spanish", it: "Italian" }
+  /** The language a draft's gaps are to be written in, named in English as a language model is asked for it ("French"). */
+  private static readonly LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language" })
 
   /**
    * Reads the text an author wrote into the recording — see SaidText.
@@ -11217,9 +11215,8 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The provider's own settings too, alongside: applyMessages renders them.
     const localizing = this.narrativeProvider.localize?.(language)
-    const [messages, tagNames, sceneNames] = language === "en"
-      ? [sightingEditorMessages_en, {}, undefined]
-      : await Promise.all([loadSightingEditorMessages(language), loadTagNames(language), loadSceneNames(language)])
+    const [messages, tagNames, sceneNames] = await Promise.all([SIGHTING_EDITOR_MESSAGES.load(language),
+      language === "en" ? {} : loadTagNames(language), language === "en" ? undefined : loadSceneNames(language)])
     await localizing
     // Superseded by a later decision (the editor was connected while this one was loading).
     if (token !== this.localeToken) return
@@ -11274,6 +11271,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private applyMessages(messages: SightingEditorMessages): void {
+    this.worded = true
     // The constructor's very first shape gets its auto-generated title (see shapeLabel/
     // shapeTitleInput's own doc comments) synchronously, before this async locale load can ever
     // resolve — English's baked-in default, same as every other label here, EXCEPT this one gets
@@ -11304,6 +11302,24 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapeTitle.textContent = messages.shapeTitle
     this.labelUtcOffset.textContent = messages.utcOffset
     this.utcOffsetInput.placeholder = messages.utcOffsetPlaceholder
+    const say = (id: string, attribute: "title" | "placeholder", text: string): void => {
+      this.shadow.getElementById(id)!.setAttribute(attribute, text)
+      if (attribute === "title") this.fieldHints.set(id, text)
+    }
+    say("observerAge", "placeholder", messages.observerAgeUnit)
+    say("observerOccupation", "placeholder", messages.observerOccupationExample)
+    say("roll", "title", messages.rollHint)
+    say("utcOffsetHours", "title", messages.utcOffsetHint)
+    say("highCloudCover", "title", messages.highCloudCoverHint)
+    say("cloudBase", "title", messages.cloudBaseHint)
+    say("windDirection", "title", messages.windDirectionHint)
+    say("soundPitch", "title", messages.soundPitchHint)
+    say("brightness", "title", messages.brightnessHint)
+    say("blur", "title", messages.blurHint)
+    say("apparentWidth", "title", messages.apparentWidthHint)
+    say("realWidth", "title", messages.realWidthHint)
+    say("objectDistance", "title", messages.objectDistanceHint)
+    say("sizeLock", "title", messages.sizeLockHint)
     this.labelApparentWidth.textContent = messages.apparentWidth
     this.labelRealWidth.textContent = messages.realWidth
     this.labelObjectDistance.textContent = messages.distance
@@ -11618,6 +11634,7 @@ export class SightingEditorElement extends HTMLElement {
     // Refreshes the Play/Pause button's own title/aria-label, which depends on this.messages.
     this.syncPlaybackControls()
     this.labelPanels(messages)
+    this.refreshFileItems()
   }
 
   /** The header's own labels, and each section's title and the sentence under it, in `messages`. */

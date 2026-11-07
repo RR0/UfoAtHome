@@ -204,7 +204,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -219,10 +219,11 @@ beforeAll(() => {
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
 /** An editor holding one shape, as an author would add it with +. */
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
+  await element.ready
   return element
 }
 
@@ -249,7 +250,7 @@ describe("a model of a module's catalogue", () => {
     const catalogue = { attribution: "", entries: async () => [], entry: async (id: string) => id === "acme-saucer" ? { id, kind: "entity", name: "Saucer", url: "https://acme.example/s.glb", credit: { title: "S", license: "CC0" } } as never : undefined }
     ModuleRegistry.install({ id: "acme", name: "ACME", url, contributes: { decorModels: [{ id: "acme-models", name: "ACME", credit: "©", creditUrl: url, create: () => catalogue }] } })
     try {
-      const element = mount()
+      const element = await mount()
       element.sightingData = { version: 3, timeline: { keyframes: [] }, decor: [{ id: "s", kind: "entity", eastM: 0, northM: 10, model: { id: "acme-saucer" } }] } as never
       await new Promise(resolve => setTimeout(resolve, 600))
       expect(element.sightingData.modules).toBeUndefined()
@@ -266,7 +267,7 @@ describe("a model of a module's catalogue", () => {
 describe("a kind of event of the sky a module brings", () => {
   it("gets a part of the Sky group beside the beams, and its editor when the part is opened", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })
-    const element = mount()
+    const element = await mount()
     element.sightingData = { version: 3, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }, { id: "b2" }] } }
     const shadow = element.shadowRoot!
     const tabs = [...shadow.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
@@ -290,14 +291,14 @@ describe("a kind of event of the sky a module brings", () => {
         editor: async () => () => ({ sync: () => undefined, refresh: () => undefined, setLanguage: async () => undefined })
       }) }]
     } })
-    const element = mount()
+    const element = await mount()
     const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
     expect(tabs.slice(-6)).toEqual(["interpretation-lanterns", "interpretation-balloons", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
   })
 
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })
-    const element = mount()
+    const element = await mount()
     element.sightingData = { version: 3, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }] } }
     expect(element.shadowRoot!.getElementById("sky-event-ballLightning")).not.toBeNull()
 

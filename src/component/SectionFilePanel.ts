@@ -33,7 +33,8 @@ export interface SectionFileHost {
  * Its text is the recording's own: the recording is edited as one text, whichever way its parts are kept.
  */
 export class SectionFilePanel {
-  private messages!: SightingEditorMessages
+  /** None until the editor's words have come (see localize): what it says is empty before. */
+  private messages?: SightingEditorMessages
   /** The section shown. */
   private shown: RecordingSectionName = "weather"
 
@@ -73,16 +74,17 @@ export class SectionFilePanel {
 
   /** What the Files group's picker says of a section: what it is. Where it is is its source's to say. */
   itemLabel(name: RecordingSectionName): string {
+    const m = this.messages
+    if (!m) return ""
     const labels: Record<RecordingSectionName, string> = {
-      weather: this.messages.fileItemWeather, place: this.messages.fileItemPlace, lightPollution: this.messages.fileItemLightPollution,
-      decor: this.messages.fileItemDecor
+      weather: m.fileItemWeather, place: m.fileItemPlace, lightPollution: m.fileItemLightPollution, decor: m.fileItemDecor
     }
     return labels[name]
   }
 
   /** Where a section is, in words. */
   where(name: RecordingSectionName): string {
-    return this.srcOf(name) ?? this.messages.annexStorageInline
+    return this.srcOf(name) ?? this.messages?.annexStorageInline ?? ""
   }
 
   /** Whether a section is kept inside the recording. */
@@ -108,7 +110,7 @@ export class SectionFilePanel {
     const sighting = this.host.sighting()
     switch (name) {
       case "weather":
-        return sighting.weatherSource?.name ?? this.messages.weatherStatedByObserver
+        return sighting.weatherSource?.name ?? this.messages!.weatherStatedByObserver
       case "place":
         return sighting.event.place?.[0]?.name ?? ""
       case "lightPollution":
@@ -180,7 +182,7 @@ export class SectionFilePanel {
       given = SightingMigration.toCurrent(JSON.parse(new TextDecoder().decode(bytes)))
       if (typeof given !== "object" || given === null || RecordingSections.KEYS[name].every(key => given[key] === undefined)) throw new Error("Not this section")
     } catch {
-      MessageStyle.show(this.note, this.messages.annexUnreadable, "warning")
+      MessageStyle.show(this.note, this.messages!.annexUnreadable, "warning")
       return
     }
     // Read as a recording would be, provenance and all, then put into this one.

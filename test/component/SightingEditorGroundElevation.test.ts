@@ -228,12 +228,13 @@ beforeAll(() => {
   } as unknown as typeof ResizeObserver
 })
 
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = RECORD_PROVIDER
   document.body.appendChild(element)
   elevationLookups = 0
   weatherLookups = 0
+  await element.ready
   return element
 }
 
@@ -258,7 +259,7 @@ describe("SightingEditorElement ground elevation", () => {
   })
 
   it("asks for the ground under a place once, and stays quiet afterwards", async () => {
-    const element = mount()
+    const element = await mount()
     stateDateAndPlace(element)
     // Long enough for the debounced lookup, the write-back it triggers, and two more turns of the
     // loop this guards against (its period was the ~900 ms elevation debounce).
@@ -273,7 +274,7 @@ describe("SightingEditorElement ground elevation", () => {
   })
 
   it("asks again when the observer is somewhere else", async () => {
-    const element = mount()
+    const element = await mount()
     stateDateAndPlace(element)
     await settle(1600)
     expect(elevationLookups).toBe(1)

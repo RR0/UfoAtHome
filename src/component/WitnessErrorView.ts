@@ -11,7 +11,8 @@ import { computeBodyPosition, sightingTimeToDate } from "../engine/astronomy/Cel
 /** What the view needs of the editor that holds it. */
 export interface WitnessErrorHost {
   readonly sighting: Sighting
-  messages(): WitnessErrorMessages
+  /** The view's words, none before the editor's have come: nothing is drawn until then. */
+  messages(): WitnessErrorMessages | undefined
   /** Something the author did changed the recording: it is touched, and goes into the history. */
   changed(): void
   /** The observer's conditions were edited: the account is to keep them (see Account.conditions). */
@@ -102,7 +103,6 @@ export class WitnessErrorView {
   attach(field: WitnessField): void {
     this.fields.push(field)
     const mark = document.createElement(BasisInputElement.TAG) as BasisInputElement
-    mark.hows = WitnessError.HOW[field.kind].map(value => ({ value, label: this.host.messages().how[value] ?? value }))
     mark.addEventListener("basischange", event => this.said(field, (event as CustomEvent<{ entry?: BasisEntry }>).detail.entry))
     const name = field.label.firstElementChild
     if (name) name.after(mark)
@@ -139,9 +139,12 @@ export class WitnessErrorView {
 
   private refreshField(field: WitnessField, reset?: Basis): void {
     const m = this.host.messages()
+    if (!m) return
     const entry = this.entryOf(field)
     const basis: Basis = entry?.basis ?? "stated"
     const mark = field.label.querySelector<BasisInputElement>(BasisInputElement.TAG)!
+    // Said again in the words of the moment, as the rest of the mark is.
+    mark.hows = WitnessError.HOW[field.kind].map(value => ({ value, label: m.how[value] ?? value }))
     mark.messages = { title: m.basisTitle, basis: m.basis, basisField: m.basisField, howField: m.howField, rationaleField: m.rationaleField }
     mark.entry = entry
     mark.hidden = field.path() === undefined
@@ -165,7 +168,7 @@ export class WitnessErrorView {
 
   /** A law as it reads under its field: ≈ or ∅, what it says in the field's unit, and the status of its lead. */
   private lawNodes(law: ErrorLaw, kind: ErrorKind): Node[] {
-    const m = this.host.messages()
+    const m = this.host.messages()!
     const symbol = Object.assign(document.createElement("span"), { className: "law-symbol", textContent: law.shape === "uninformative" ? "∅" : "≈" })
     let text = m.laws[law.note]
     for (const [name, figure] of Object.entries(law.params ?? {})) text = text.replaceAll(`{${name}}`, this.number(WitnessError.rounded(figure)))
@@ -260,6 +263,7 @@ export class WitnessErrorView {
   private renderObserver(): void {
     if (this.sections.length === 0) return
     const m = this.host.messages()
+    if (!m) return
     const c = this.conditions ?? {}
     // Made again only when what they show changed: rebuilt at every refresh, the four sections were most of what a refresh cost.
     const shown = { messages: m, model: this.model, conditions: JSON.stringify([c, this.host.sighting.provenance.at("time")?.how, this.daylight()]) }
@@ -321,7 +325,7 @@ export class WitnessErrorView {
 
   /** The real full Moon beside the Moon as the observer showed it, the field to say how wide they showed it, and what it makes of their sizes. */
   private moonGauge(c: WitnessConditions): HTMLElement {
-    const m = this.host.messages()
+    const m = this.host.messages()!
     const k = WitnessError.moonFactor(c)
     const gauge = document.createElement("div")
     gauge.className = "moon-gauge"
@@ -357,7 +361,7 @@ export class WitnessErrorView {
 
   /** The parameters that tie the observer's errors, as the model picked reads them, and whether the laws are stretched to a daylight sighting. */
   private renderParameters(section: HTMLElement, c: WitnessConditions): void {
-    const m = this.host.messages()
+    const m = this.host.messages()!
     const head = document.createElement("div")
     head.className = "section-head"
     const pick = document.createElement("label")

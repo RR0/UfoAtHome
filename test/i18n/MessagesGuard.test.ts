@@ -24,8 +24,6 @@ const SOURCES = Object.fromEntries(Object.entries(import.meta.glob("../../src/**
 
 /** Texts in several languages written in code. */
 const INLINE_STILL = new Map<string, string>([
-  ["component/SightingEditorElement.ts", "to move to catalogs with the components (step 2)"],
-  ["component/SightingElement.ts", "to move to catalogs with the components (step 2)"],
   ["engine/interpretation/BodyParameterSets.ts", "the core's sets of parameters (step 3)"],
   ["engine/model/CloudParameterSets.ts", "the core's sets of parameters (step 3)"],
   ["engine/model/DecorBaseParameterSets.ts", "the core's sets of parameters (step 3)"],
@@ -35,10 +33,8 @@ const INLINE_STILL = new Map<string, string>([
   ["modules/interpretations/lanterns/SkyLantern.ts", "content: the computed bodies' title"]
 ])
 
-/** Components that still import English up front. */
-const ENGLISH_UP_FRONT_STILL = new Set([
-  "component/SightingEditorElement.ts"
-])
+/** Components that still import English up front: none any more, and none to come. */
+const ENGLISH_UP_FRONT_STILL = new Set<string>()
 
 const code = Object.entries(SOURCES).map(([file, text]) => ({ file, text }))
   .filter(({ file }) => !file.includes("/messages/") && !file.startsWith("generated/") && !file.startsWith("i18n/"))

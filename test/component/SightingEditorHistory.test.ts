@@ -197,7 +197,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -212,11 +212,12 @@ beforeAll(() => {
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
 /** An editor holding one shape, as an author would add it with +. */
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
   ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
+  await element.ready
   return element
 }
 
@@ -240,7 +241,7 @@ function openEnvironment(element: SightingEditorElement): void {
 
 describe("deleting scenery", () => {
   it("deletes at once from the bin, with nothing asked, and undo puts it back", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 2)
     const shadow = element.shadowRoot!
     const bin = shadow.getElementById("delete-decor") as HTMLButtonElement
@@ -254,9 +255,9 @@ describe("deleting scenery", () => {
     expect(element.sightingData.decor ?? []).toHaveLength(2)
   })
 
-  it("is deleted by the Delete key and by Backspace when it is the scenery being edited", () => {
+  it("is deleted by the Delete key and by Backspace when it is the scenery being edited", async () => {
     for (const key of ["Delete", "Backspace"]) {
-      const element = mount()
+      const element = await mount()
       addBuildings(element, 2)
       openEnvironment(element)
       element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
@@ -264,8 +265,8 @@ describe("deleting scenery", () => {
     }
   })
 
-  it("leaves the shapes alone when the key is pressed over the scenery", () => {
-    const element = mount()
+  it("leaves the shapes alone when the key is pressed over the scenery", async () => {
+    const element = await mount()
     addBuildings(element, 1)
     openEnvironment(element)
     element.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
@@ -273,8 +274,8 @@ describe("deleting scenery", () => {
     expect(element.sightingData.timeline.keyframes.length).toBeGreaterThan(0)
   })
 
-  it("leaves the scenery alone when the key is pressed over a shape", () => {
-    const element = mount()
+  it("leaves the scenery alone when the key is pressed over a shape", async () => {
+    const element = await mount()
     addBuildings(element, 1)
     element.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", bubbles: true, composed: true }))
     expect(element.sightingData.decor ?? []).toHaveLength(1)
@@ -294,7 +295,7 @@ describe("undo and redo", () => {
   }
 
   it("starts with nothing to take back, and takes back the last change, then puts it back", async () => {
-    const element = mount()
+    const element = await mount()
     const shadow = element.shadowRoot!
     const undo = shadow.getElementById("undo") as HTMLButtonElement
     const redo = shadow.getElementById("redo") as HTMLButtonElement
@@ -312,7 +313,7 @@ describe("undo and redo", () => {
   })
 
   it("answers Ctrl+Z and Ctrl+Shift+Z on the editor, but leaves the keys to a field that has its own", async () => {
-    const element = mount()
+    const element = await mount()
     await edited(element, () => addBuildings(element, 1))
     const key = (init: KeyboardEventInit, target: EventTarget = element) =>
       target.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, composed: true, ...init }))
@@ -326,7 +327,7 @@ describe("undo and redo", () => {
   })
 
   it("forgets the history when another recording is loaded", async () => {
-    const element = mount()
+    const element = await mount()
     const undo = element.shadowRoot!.getElementById("undo") as HTMLButtonElement
     await edited(element, () => addBuildings(element, 1))
     expect(undo.disabled).toBe(false)
@@ -363,7 +364,7 @@ describe("the scenery taken from a survey of the place", () => {
   )
 
   it("puts the trees and buildings of the place into the scenery when the author gives the recording a place, without being asked, and undo takes them away", async () => {
-    const element = mount()
+    const element = await mount()
     const shadow = element.shadowRoot!
     element.surroundingsProvider = surveyOf(FOUND)
     // The author's hand is on the field: the history is armed, as it is by any pointer or key that edits the form.
@@ -383,7 +384,7 @@ describe("the scenery taken from a survey of the place", () => {
   })
 
   it("leaves a place alone that is not an author's doing: no survey is asked for a recording that is loaded", async () => {
-    const element = mount()
+    const element = await mount()
     element.surroundingsProvider = surveyOf(FOUND)
     // A recording is loaded where it stands: its own scenery, whatever it is, is its own.
     element.sightingData = { ...element.sightingData, place: { locations: [{ lat: 49.1049, lng: -1.0754 }] } }
@@ -395,7 +396,7 @@ describe("the scenery taken from a survey of the place", () => {
     const KEY = "rr0-sighting-editor.surroundings"
     localStorage.removeItem(KEY)
     try {
-      const element = mount()
+      const element = await mount()
       const select = element.shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
       // The registry is loaded in the background: the choice is there a moment after the editor.
       await waitFor(() => select.options.length > 1)
@@ -410,7 +411,7 @@ describe("the scenery taken from a survey of the place", () => {
       await new Promise(resolve => setTimeout(resolve, 1200))
       expect(element.sightingData.decor ?? []).toHaveLength(0)
       // A page opened later finds it as it was left.
-      const later = mount().shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
+      const later = (await mount()).shadowRoot!.getElementById("scenery-source") as HTMLSelectElement
       await waitFor(() => later.options.length > 1)
       expect(later.value).toBe("none")
       // Another survey than none is asked at once for the place the recording stands at.
@@ -427,7 +428,7 @@ describe("the scenery taken from a survey of the place", () => {
     const KEY = "rr0-sighting-editor.surroundings"
     localStorage.removeItem(KEY)
     try {
-      const element = mount()
+      const element = await mount()
       const shadow = element.shadowRoot!
       const select = shadow.getElementById("scenery-source") as HTMLSelectElement
       await waitFor(() => select.options.length > 1)
@@ -453,7 +454,7 @@ describe("the scenery taken from a survey of the place", () => {
     const KEY = "rr0-sighting-editor.surroundings"
     localStorage.removeItem(KEY)
     try {
-      const element = mount()
+      const element = await mount()
       const shadow = element.shadowRoot!
       const select = shadow.getElementById("scenery-source") as HTMLSelectElement
       await waitFor(() => select.options.length > 1)
@@ -477,7 +478,7 @@ describe("the scenery taken from a survey of the place", () => {
   })
 
   it("says nothing and plants nothing where no survey covers the place", async () => {
-    const element = mount()
+    const element = await mount()
     element.surroundingsProvider = { ...surveyOf(FOUND), covers: () => false, getSurroundings: async () => { throw new Error("must not be asked") } }
     placeAt(element, "40.4", "-3.7")
     await new Promise(resolve => setTimeout(resolve, 1200))
@@ -488,7 +489,7 @@ describe("the scenery taken from a survey of the place", () => {
 
 describe("undo after typing in the File group", () => {
   it("is available as soon as the text has been edited, without the form being touched", async () => {
-    const element = mount()
+    const element = await mount()
     const shadow = element.shadowRoot!
     const undo = shadow.getElementById("undo") as HTMLButtonElement
     const inside = element as unknown as { fileEditor?: { view: { state: { doc: { length: number } }, dispatch(spec: unknown): void } } }

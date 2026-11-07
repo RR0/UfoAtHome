@@ -598,4 +598,18 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   addReference: "Add a picture",
   principalObserver: "Witness of this account",
   deleteObserver: "Delete witness",
+  observerAgeUnit: "years",
+  observerOccupationExample: "baker, airline pilot…",
+  rollHint: "How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it",
+  utcOffsetHint: "Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)",
+  highCloudCoverHint: "How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being",
+  cloudBaseHint: "Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it",
+  windDirectionHint: "The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses",
+  soundPitchHint: "How deep or how sharp the sound was — the tone itself for a hum or a whistle, how low the noise sits for a rumble or a crackle",
+  brightnessHint: "How dazzling the witness said it was — a light you cannot look at does three things a halo never does",
+  blurHint: "How indistinct the witness said its edges were — not the lens's own depth of field, which never touches the object here",
+  apparentWidthHint: "How wide it looked, in degrees — the recording's own statement of size",
+  realWidthHint: "What that angle is in metres at the distance beside it. Derived, never stored",
+  objectDistanceHint: "How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement",
+  sizeLockHint: "Which of the three stays put while another is edited"
 }

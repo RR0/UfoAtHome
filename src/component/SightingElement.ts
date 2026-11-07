@@ -925,8 +925,6 @@ export class SightingElement extends HTMLElement {
     this.compareButton.setAttribute("aria-label", label)
   }
 
-  /** The locale a date is written in, for each interface language. */
-  private static readonly DATE_LOCALES: Record<UfoLanguage, string> = { en: "en-US", fr: "fr-FR", es: "es-ES", it: "it-IT" }
 
   /** A colon as the reader's language writes one: French puts a no-break space before it, and
    * Spanish and Italian write it as English does. */
@@ -1177,7 +1175,7 @@ export class SightingElement extends HTMLElement {
     const localMs = date.getTime() + this.utcOffsetHoursOf(sighting, place?.lng ?? 0) * 3_600_000
     // A date the file states wrongly is one missing line, not an empty panel: formatting throws on it.
     if (!Number.isFinite(localMs)) return undefined
-    return new Intl.DateTimeFormat(SightingElement.DATE_LOCALES[this.language], {
+    return new Intl.DateTimeFormat(this.language, {
       dateStyle: "long",
       timeStyle: "short",
       timeZone: "UTC"

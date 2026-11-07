@@ -214,10 +214,11 @@ beforeAll(() => {
     disconnect(): void {}
   } as unknown as typeof ResizeObserver
 })
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   document.body.appendChild(element)
   asked = []
+  await element.ready
   return element
 }
 
@@ -252,7 +253,7 @@ afterEach(() => {
 
 describe("SightingEditorElement drafting from an account", () => {
   it("writes what a first draft states into the editor", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { id: "valensole", durationSeconds: 270, time: "1965-07-01" },
       claims: [{ path: "time", basis: "stated" as const, rationale: "le 1er juillet 1965" }],
@@ -270,7 +271,7 @@ describe("SightingEditorElement drafting from an account", () => {
   it("never writes the account back over itself", async () => {
     // The field the reader typed into is the one field a draft may not touch: it is what the observer
     // said, and it does not change because somebody read it. Stripped rather than trusted absent.
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { id: "valensole", description: "A summary of the reconstruction." },
       claims: [],
@@ -286,7 +287,7 @@ describe("SightingEditorElement drafting from an account", () => {
 
   it("leaves alone what the account is silent about", async () => {
     // A place geocoded by hand is not in a account, so no reading of one may take it away.
-    const element = mount()
+    const element = await mount()
     type(element, "lat", "43.837")
     type(element, "lng", "5.993")
     answer = () => Promise.resolve({ recording: { id: "valensole" }, claims: [], gaps: [] })
@@ -298,7 +299,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("reads the account whole every time, with no conversation behind it", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
     await draft(element, "The account.")
     answer = () => Promise.resolve({ recording: { id: "b" }, claims: [], gaps: [] })
@@ -313,7 +314,7 @@ describe("SightingEditorElement drafting from an account", () => {
   it("groups the report by basis, guesses first, and marks what nothing could settle", async () => {
     // What was guessed is what an author has to go and check; burying it among forty quoted values
     // is how it stops being checked.
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { time: "1974", durationSeconds: 120, utcOffsetHours: 1 },
       claims: [
@@ -343,7 +344,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("writes each basis into the recording, so the file says which values were guessed", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { durationSeconds: 120, utcOffsetHours: 1, id: "landevennec" },
       claims: [
@@ -369,7 +370,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("lets a guess expire the moment the author types over it", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { durationSeconds: 120 },
       claims: [{ path: "durationSeconds", basis: "assumed" as const, rationale: "no number given" }],
@@ -388,7 +389,7 @@ describe("SightingEditorElement drafting from an account", () => {
     // Not account and not a reading of one: it is what that zone's own rules give at that date,
     // and the editor reads them out of the platform's IANA database. France ran no summer time
     // between 1945 and 1976, so May 1974 in Brittany is +1 however confidently a draft says +2.
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: {
         time: "1974-05-20T19:00",
@@ -408,7 +409,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("keeps an offset a draft states when it named no zone to derive one from", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({
       recording: { time: "1974", utcOffsetHours: 2 },
       claims: [],
@@ -421,7 +422,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("says when the account yielded nothing, rather than leaving the reader guessing", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({ recording: {}, claims: [], gaps: ["nothing datable here"] })
 
     await draft(element, "Something went past.")
@@ -430,7 +431,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("says which of the failures happened, since their remedies differ", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.reject(new NarrativeError("credential"))
     await draft(element, "The account.")
     expect(field(element, "narrative-status").textContent)
@@ -443,7 +444,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("says nothing when the reader stopped it themselves", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.reject(new NarrativeError("cancelled"))
 
     await draft(element, "The account.")
@@ -452,7 +453,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("does nothing at all on an empty account", async () => {
-    const element = mount()
+    const element = await mount()
 
     await draft(element, "   ")
 
@@ -462,7 +463,7 @@ describe("SightingEditorElement drafting from an account", () => {
   it("offers the button only when pressing it would do something, and says what is missing", async () => {
     // A button that silently does nothing is worse than a disabled one: a reader who forgot the key
     // cannot tell a missing field from a broken feature.
-    const element = mount()
+    const element = await mount()
     const button = field<HTMLButtonElement>(element, "narrative-draft")
 
     expect(button.disabled).toBe(true)
@@ -479,7 +480,7 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("renders the settings the provider declares, and sends what the reader gave them", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
 
     expect(field<HTMLSelectElement>(element, "narrative-model").value).toBe("small")
@@ -492,17 +493,17 @@ describe("SightingEditorElement drafting from an account", () => {
   })
 
   it("keeps a preference without being asked, and restores it", async () => {
-    const element = mount()
+    const element = await mount()
     const model = field<HTMLSelectElement>(element, "narrative-model")
     model.value = "large"
     model.dispatchEvent(new Event("change"))
 
     expect(localStorage.getItem("rr0-sighting-editor.narrative.test-narrative.model")).toBe("large")
-    expect(field<HTMLSelectElement>(mount(), "narrative-model").value).toBe("large")
+    expect(field<HTMLSelectElement>(await mount(), "narrative-model").value).toBe("large")
   })
 
   it("stays available after a draft, since the account is still there to be reworded", async () => {
-    const element = mount()
+    const element = await mount()
     answer = () => Promise.resolve({ recording: { id: "a" }, claims: [], gaps: [] })
 
     await draft(element, "The account.")
@@ -515,7 +516,7 @@ describe("SightingEditorElement drafting from an account", () => {
     const stored = "rr0-sighting-editor.narrative.test-narrative.key"
     localStorage.setItem(stored, "sk-old")
     localStorage.setItem("rr0-sighting-editor.narrative-key", "sk-older")
-    const element = mount()
+    const element = await mount()
 
     expect(field<HTMLInputElement>(element, "narrative-key").value).toBe("")
     expect(localStorage.getItem(stored)).toBeNull()
@@ -523,11 +524,11 @@ describe("SightingEditorElement drafting from an account", () => {
 
     type(element, "narrative-key", "sk-test")
     expect(localStorage.getItem(stored)).toBeNull()
-    expect(field<HTMLInputElement>(mount(), "narrative-key").value).toBe("sk-test")
+    expect(field<HTMLInputElement>(await mount(), "narrative-key").value).toBe("sk-test")
   })
 
   it("credits the provider it drafts with, on the picker that names it", async () => {
-    const element = mount()
+    const element = await mount()
     const row = field(element, "narrative-source-row")
 
     expect(row.querySelector("select")?.value).toBe("test-narrative")

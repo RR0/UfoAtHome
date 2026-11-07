@@ -47,6 +47,27 @@ export class Messages {
     return new Proxy({}, { get: () => "" }) as T
   }
 
+  /**
+   * What stands for texts of any depth that have not come yet (objects of texts, lists, texts with placeholders): every text in them
+   * empty, every object or list in them blank too, so that an interface built before its words arrive draws nothing rather than failing.
+   * For a component that redraws all it shows once its words have come (see SightingEditorElement.applyMessages, and the audits of
+   * test/i18n that check it does), never for words to show. Unlike `none`, a blank text is no string: compare nothing to it.
+   */
+  static blank<T extends object>(): T {
+    const blank: object = new Proxy(() => blank, {
+      get: (_, key) => key === Symbol.toPrimitive ? () => ""
+        : key === Symbol.iterator ? function* () {}
+          : key === "toString" || key === "valueOf" ? () => ""
+            : key === "then" ? undefined
+              : blank,
+      apply: () => blank,
+      has: () => false,
+      ownKeys: () => [],
+      getOwnPropertyDescriptor: () => undefined
+    })
+    return blank as T
+  }
+
   /** The interface language for a language tag: its base ("fr" of "fr-CA") when the interface is written in it, English otherwise. */
   static languageOf(language: string): UfoInterfaceLanguage {
     const base = language.toLowerCase().split("-")[0]

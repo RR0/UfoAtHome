@@ -603,4 +603,18 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   addReference: "Ajouter une photo",
   principalObserver: "Témoin de ce compte rendu",
   deleteObserver: "Supprimer le témoin",
+  observerAgeUnit: "ans",
+  observerOccupationExample: "boulanger, pilote de ligne…",
+  rollHint: "De combien l'instrument était incliné autour de sa propre ligne de visée, positif dans le sens horaire, tel que le témoin le voyait",
+  utcOffsetHint: "Heures d'avance sur UTC à l'horloge du témoin : l'heure légale, que la longitude ne peut pas connaître (la France était à UTC+1 en 1965)",
+  highCloudCoverHint: "Part du ciel couverte par la couche haute et glacée : ce qui réfracte un halo ou une paire de parhélies",
+  cloudBaseHint: "Hauteur de la base de la couche nuageuse au-dessus du sol : décide si le témoin est sous la couche ou au-dessus",
+  windDirectionHint: "La direction VERS laquelle souffle le vent, dans le sens horaire depuis le nord vrai : l'inverse de la convention météorologique des prévisions",
+  soundPitchHint: "À quel point le son était grave ou aigu : la note elle-même pour un bourdonnement ou un sifflement, la hauteur du bruit pour un grondement ou un crépitement",
+  brightnessHint: "À quel point le témoin l'a dit éblouissant : une lumière qu'on ne peut pas regarder fait trois choses qu'un halo ne fait jamais",
+  blurHint: "À quel point le témoin a dit ses bords indistincts : pas la profondeur de champ de l'objectif, qui ne touche jamais l'objet ici",
+  apparentWidthHint: "La largeur qu'il semblait avoir, en degrés : ce que l'enregistrement énonce de sa taille",
+  realWidthHint: "Ce que fait cet angle en mètres à la distance d'à côté. Déduit, jamais enregistré",
+  objectDistanceHint: "À quelle distance sur sa ligne de visée la forme est dessinée : ce qui décide de ce que le décor en cache. Une hypothèse, jamais ce que dit le témoin",
+  sizeLockHint: "Laquelle des trois reste fixe quand on modifie une autre"
 }

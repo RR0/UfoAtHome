@@ -603,4 +603,18 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   addReference: "Añadir una foto",
   principalObserver: "Testigo de este relato",
   deleteObserver: "Eliminar el testigo",
+  observerAgeUnit: "años",
+  observerOccupationExample: "panadero, piloto de línea…",
+  rollHint: "Cuánto estaba inclinado el instrumento alrededor de su propia línea de mira, positivo en sentido horario, tal como lo veía el testigo",
+  utcOffsetHint: "Horas de adelanto sobre UTC en el reloj del testigo: la hora legal, que la longitud no puede conocer (Francia estaba en UTC+1 en 1965)",
+  highCloudCoverHint: "Qué parte del cielo cubría la capa alta y helada: lo que refracta un halo o un par de parhelios",
+  cloudBaseHint: "Altura de la base de la capa de nubes sobre el suelo: decide si el testigo está bajo la capa o por encima",
+  windDirectionHint: "La dirección HACIA la que sopla el viento, en sentido horario desde el norte verdadero: lo contrario de la convención meteorológica de los pronósticos",
+  soundPitchHint: "Lo grave o agudo que era el sonido: la nota misma para un zumbido o un silbido, lo bajo del ruido para un retumbo o un chisporroteo",
+  brightnessHint: "Lo deslumbrante que el testigo dijo que era: una luz que no se puede mirar hace tres cosas que un halo nunca hace",
+  blurHint: "Lo indistintos que el testigo dijo que eran sus bordes: no la profundidad de campo del objetivo, que aquí nunca afecta al objeto",
+  apparentWidthHint: "Lo ancho que parecía, en grados: lo que la grabación afirma de su tamaño",
+  realWidthHint: "Lo que ese ángulo mide en metros a la distancia de al lado. Deducido, nunca guardado",
+  objectDistanceHint: "A qué distancia sobre su línea de mira se dibuja la forma: lo que decide qué oculta de ella el decorado. Una hipótesis, nunca lo que dice el testigo",
+  sizeLockHint: "Cuál de las tres queda fija mientras se edita otra"
 }

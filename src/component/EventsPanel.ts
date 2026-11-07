@@ -115,7 +115,12 @@ export class EventsPanel {
     vehicle: ["decor"]
   }
 
-  private messages: EventsMessages
+  /** None until the editor's words have come (see localize): the panel shows nothing before. */
+  private words?: EventsMessages
+  /** The words, read only once there are some: render draws nothing before. */
+  private get messages(): EventsMessages {
+    return this.words!
+  }
   private readonly note: HTMLElement
   private readonly reset: HTMLButtonElement
   private readonly fields: HTMLElement
@@ -129,8 +134,8 @@ export class EventsPanel {
   /** The picked event, by its place among the recording's events. */
   private picked?: number
 
-  constructor(private readonly root: HTMLElement, private readonly host: EventsPanelHost, messages: EventsMessages, private readonly actor: EventsActor = "observer") {
-    this.messages = messages
+  constructor(private readonly root: HTMLElement, private readonly host: EventsPanelHost, messages: EventsMessages | undefined, private readonly actor: EventsActor = "observer") {
+    this.words = messages
     const body = root.querySelector<HTMLElement>(".events-body")!
     this.note = document.createElement("p")
     this.note.className = "events-note"
@@ -159,18 +164,18 @@ export class EventsPanel {
     row.append(timeline, this.empty, this.addButton)
     this.addMenu = new AddMenu(this.addButton, `${actor}-event-kinds`, kind => this.add(kind), kind => `${actor}-event-kind-${kind}`)
     this.timelineHost = timeline
-    this.timeline = new TimelineTracks(timeline, t => this.host.seek(t), { addKeyframeHere: messages.add, keyframeHere: messages.add, zoomHint: messages.zoomHint })
+    this.timeline = new TimelineTracks(timeline, t => this.host.seek(t), { addKeyframeHere: messages?.add ?? "", keyframeHere: messages?.add ?? "", zoomHint: messages?.zoomHint ?? "" })
     this.deleteButton = document.createElement("button")
     this.deleteButton.type = "button"
     this.deleteButton.id = `${actor}-event-delete`
     this.deleteButton.className = "icon-btn events-delete"
     this.deleteButton.innerHTML = Icons.TRASH
     this.deleteButton.addEventListener("click", () => this.remove())
-    this.localizeList()
+    if (messages) this.localizeList()
   }
 
   localize(messages: EventsMessages): void {
-    this.messages = messages
+    this.words = messages
     this.localizeList()
     this.render()
   }
@@ -290,6 +295,7 @@ export class EventsPanel {
 
   /** Shows the actor's events as they now stand, and the picked one's fields. */
   render(): void {
+    if (!this.words) return
     this.shownTheirs = this.theirs()
     // Whose events these are, said in the title: the list under it is theirs, not that of the shapes or the bodies above.
     this.root.querySelector<HTMLElement>(".events-title")!.textContent = this.titleText()

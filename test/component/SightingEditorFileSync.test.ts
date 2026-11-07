@@ -198,7 +198,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -213,11 +213,12 @@ beforeAll(() => {
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
 /** An editor holding one shape, as an author would add it with +. */
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
   ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
+  await element.ready
   return element
 }
 
@@ -261,7 +262,7 @@ async function fileOpened(element: SightingEditorElement): Promise<Private> {
 
 describe("the text and the picture", () => {
   it("frames on the picture what the text's caret is in, and nothing when it is in something else", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 2)
     const inside = await fileOpened(element)
 
@@ -275,7 +276,7 @@ describe("the text and the picture", () => {
   })
 
   it("shows in the text what is selected on the picture, and leaves the group it is in", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 2)
     const inside = await fileOpened(element)
     const first = element.sightingData.decor![0].id
@@ -291,7 +292,7 @@ describe("the text and the picture", () => {
   })
 
   it("does nothing of the kind while the text is not on show", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 2)
     const inside = await fileOpened(element)
     openGroup(element, "group-decor")
@@ -307,7 +308,7 @@ describe("the lines changed since the last save", () => {
     // Exporting downloads a file: there is no object URL in jsdom, and nothing to download to.
     URL.createObjectURL = () => "blob:test"
     URL.revokeObjectURL = () => undefined
-    const element = mount()
+    const element = await mount()
     const inside = await fileOpened(element)
     // Read from the editor rather than from its lines on show: it draws only the ones in view, and the scenery is at the end.
     const editor = inside.fileEditor!
@@ -323,7 +324,7 @@ describe("the lines changed since the last save", () => {
 
 describe("undo and redo with the text on show", () => {
   it("shows where the step changed the text", async () => {
-    const element = mount()
+    const element = await mount()
     const inside = await fileOpened(element)
     const shadow = element.shadowRoot!
     shadow.getElementById("add-decor-building")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
@@ -341,7 +342,7 @@ describe("undo and redo with the text on show", () => {
   })
 
   it("shows nothing when the text is not on show", async () => {
-    const element = mount()
+    const element = await mount()
     const inside = await fileOpened(element)
     const shadow = element.shadowRoot!
     shadow.getElementById("add-decor-building")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
@@ -360,7 +361,7 @@ describe("undo and redo with the text on show", () => {
 
 describe("editing with the text on show", () => {
   it("shows where the edit was written, once the form has put it in the text", async () => {
-    const element = mount()
+    const element = await mount()
     const inside = await fileOpened(element)
     expect(inside.fileEditor!.revealedText).toBeUndefined()
 
@@ -404,7 +405,7 @@ describe("going from one changed zone to the next", () => {
 
 describe("a body of the interpretation clicked on the picture", () => {
   it("is shown in the text, where it is written, when the text is on show", async () => {
-    const element = mount()
+    const element = await mount()
     const json = element.sightingData
     element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", title: "The craft", model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof json
     const inside = await fileOpened(element)
@@ -450,7 +451,7 @@ describe("lines taken away", () => {
 
 describe("editing an object that is named in several languages", () => {
   it("keeps the other languages of its name when something else about it is edited", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 1)
     const json = element.sightingData
     element.sightingData = { ...json, decor: json.decor!.map(decor => ({ ...decor, title: { fr: "Arbre", en: "Tree", es: "Árbol" } })) }
@@ -477,7 +478,7 @@ describe("a place said from something else", () => {
   }
 
   it("keeps an object said from another, and what it stands on", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 2)
     const json = element.sightingData
     element.sightingData = { ...json, place: { locations: [{ lat: 44, lng: 5 }] }, decor: json.decor!.map((decor, i) => ({ ...decor, eastM: i * 100, northM: 0 })) }
@@ -502,7 +503,7 @@ describe("a place said from something else", () => {
   })
 
   it("puts the observer 30 m east of a house, which stays where it stands", async () => {
-    const element = mount()
+    const element = await mount()
     addBuildings(element, 1)
     const json = element.sightingData
     element.sightingData = { ...json, place: { locations: [{ lat: 44, lng: 5 }] }, decor: json.decor!.map(decor => ({ ...decor, eastM: 100, northM: 0 })) }
@@ -555,6 +556,7 @@ describe("the weather of a recording", () => {
     const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
     element.weatherProvider = record
     document.body.appendChild(element)
+    await element.ready
     element.sightingData = { ...station, weatherSource: { id: "era5", name: "Open-Meteo" } } as unknown as typeof element.sightingData
     const edited = JSON.parse(JSON.stringify(element.sightingData))
     edited.weatherTrack.keyframes[0].weather.cloudCover = 0.8
@@ -654,8 +656,8 @@ describe("the weather of a recording", () => {
 })
 
 describe("the text written of the recording", () => {
-  it("is what a whole write gives, through edits of the form, its keyframes frozen so that none is changed in place", () => {
-    const element = mount()
+  it("is what a whole write gives, through edits of the form, its keyframes frozen so that none is changed in place", async () => {
+    const element = await mount()
     const inside = element as unknown as { fileText(): string, sightingData: unknown, ufoElement: { sighting: { timeline: { allKeyframes: readonly object[] } } } }
     const deepFreeze = (value: unknown): void => {
       if (typeof value !== "object" || value === null || Object.isFrozen(value)) return
@@ -691,7 +693,7 @@ describe("the text written of the recording", () => {
 describe("how the keyframes are written", () => {
   it("writes them thin by default, whole when asked, and either reads back as the same recording", async () => {
     const { KeyframeCompletion } = await import("../../src/engine/model/KeyframeCompletion.js")
-    const element = mount()
+    const element = await mount()
     const outline = Array.from({ length: 60 }, (_, i) => ({ x: i, y: i % 7 }))
     const polygon = (x: number) => ({ kind: "polygon", bounds: { x, y: 0, width: 60, height: 7 }, points: outline, color: "#ffffff", angle: 0, transparency: 0, haloScale: 1.5, selected: false })
     element.sightingData = {

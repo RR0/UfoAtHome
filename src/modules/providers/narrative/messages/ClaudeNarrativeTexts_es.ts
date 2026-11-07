@@ -1,6 +1,6 @@
 import type { ClaudeNarrativeTexts } from "./ClaudeNarrativeTexts.js"
 
-export const claudeNarrativeTexts_es: ClaudeNarrativeTexts = {
+export const claudeNarrativeTexts_es = {
   keyLabel: "Clave de API de Claude",
   keySuspect: "Esto no parece una clave de API de Claude: empiezan por sk-ant-",
   workspaceLabel: "ID del espacio de trabajo",
@@ -10,4 +10,4 @@ export const claudeNarrativeTexts_es: ClaudeNarrativeTexts = {
   fableChoice: "Claude Fable 5.1 (el más capaz, más caro)",
   sonnetChoice: "Claude Sonnet 5.5 (más barato)",
   haikuChoice: "Claude Haiku 4.5 (el más barato)"
-}
+} satisfies ClaudeNarrativeTexts

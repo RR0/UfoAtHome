@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk"
 import { NarrativeError } from "../../../engine/narrative/NarrativeError.js"
 import { RecordingRules } from "../../../engine/narrative/RecordingRules.js"
 import { RecordingDigest } from "../../../engine/narrative/RecordingDigest.js"
-import type { ClaudeNarrativeTexts } from "./ClaudeNarrativeTexts.js"
+import { CLAUDE_NARRATIVE_TEXTS, type ClaudeNarrativeTexts } from "./messages/ClaudeNarrativeTexts.js"
 import type { Basis } from "../../../engine/persistence/Provenance.js"
 import type {
   NarrativeDraft, NarrativeImage, NarrativeProvider, NarrativeRequest, NarrativeSetting
@@ -122,63 +122,49 @@ export class ClaudeNarrativeProvider implements NarrativeProvider {
    */
   static readonly DEFAULT_MODEL = "claude-opus-5-5"
 
-  /** The settings, in English until localize has put them in the reader's language. */
+  /** The settings, none until localize has said them in the reader's language. */
   get settings(): ReadonlyArray<NarrativeSetting> {
     return this.localizedSettings
   }
 
-  private localizedSettings = ClaudeNarrativeProvider.settingsIn()
+  private localizedSettings: ReadonlyArray<NarrativeSetting> = []
 
-  /**
-   * Puts the settings in `language`. Only that language's texts are downloaded, and none for
-   * English, which is this class's own; a language it has no texts for keeps English.
-   */
+  /** Puts the settings in `language`: only that language's texts are downloaded (see CLAUDE_NARRATIVE_TEXTS). */
   async localize(language: string): Promise<void> {
-    const texts = await ClaudeNarrativeProvider.textsIn(language)
-    this.localizedSettings = ClaudeNarrativeProvider.settingsIn(texts)
+    this.localizedSettings = ClaudeNarrativeProvider.settingsIn(await CLAUDE_NARRATIVE_TEXTS.load(language))
   }
 
-  private static textsIn(language: string): Promise<ClaudeNarrativeTexts | undefined> {
-    switch (language) {
-      case "fr": return import("./ClaudeNarrativeTexts_fr.js").then(m => m.claudeNarrativeTexts_fr)
-      case "es": return import("./ClaudeNarrativeTexts_es.js").then(m => m.claudeNarrativeTexts_es)
-      case "it": return import("./ClaudeNarrativeTexts_it.js").then(m => m.claudeNarrativeTexts_it)
-      default: return Promise.resolve(undefined)
-    }
-  }
-
-  private static settingsIn(texts?: ClaudeNarrativeTexts): ReadonlyArray<NarrativeSetting> {
+  private static settingsIn(texts: ClaudeNarrativeTexts): ReadonlyArray<NarrativeSetting> {
     return [
       {
         id: "key",
         kind: "secret",
-        label: texts?.keyLabel ?? "Claude API key",
+        label: texts.keyLabel,
         required: true,
         remembered: "credential",
         // Every Anthropic key has begun with this prefix. Marked, never blocked: see NarrativeSetting.
         suspect: value => value.startsWith("sk-ant-") ? undefined
-          : texts?.keySuspect ?? "This does not look like a Claude API key: they begin with sk-ant-"
+          : texts.keySuspect
       },
       {
         // A personal or service-account key can reach several workspaces, and the API refuses such a
         // key outright unless the request names one.
         id: "workspace",
         kind: "text",
-        label: texts?.workspaceLabel ?? "Workspace ID",
-        placeholder: texts?.workspacePlaceholder ?? "only if your key spans several",
-        hint: texts?.workspaceHint
-          ?? "Only for a key whose scope is the whole organisation. Simpler: leave this empty and create a key scoped to one workspace instead.",
+        label: texts.workspaceLabel,
+        placeholder: texts.workspacePlaceholder,
+        hint: texts.workspaceHint,
         remembered: "credential"
       },
       {
         id: "model",
         kind: "choice",
-        label: texts?.modelLabel ?? "Model",
+        label: texts.modelLabel,
         choices: [
           { value: ClaudeNarrativeProvider.DEFAULT_MODEL, label: "Claude Opus 5.5" },
-          { value: "claude-fable-5-1", label: texts?.fableChoice ?? "Claude Fable 5.1 (most capable, dearer)" },
-          { value: "claude-sonnet-5-5", label: texts?.sonnetChoice ?? "Claude Sonnet 5.5 (cheaper)" },
-          { value: "claude-haiku-4-5", label: texts?.haikuChoice ?? "Claude Haiku 4.5 (cheapest)" }
+          { value: "claude-fable-5-1", label: texts.fableChoice },
+          { value: "claude-sonnet-5-5", label: texts.sonnetChoice },
+          { value: "claude-haiku-4-5", label: texts.haikuChoice }
         ],
         remembered: "preference"
       }

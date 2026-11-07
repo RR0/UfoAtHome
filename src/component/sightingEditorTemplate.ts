@@ -18,20 +18,20 @@ export const html = `
 <div class="app">
 <header class="editor-head" id="editor-head">
   <div class="head-text">
-    <span id="label-editor-kicker" class="kicker">Sighting editor</span>
+    <span id="label-editor-kicker" class="kicker"></span>
     <h1 id="editor-title" class="editor-title"></h1>
   </div>
   <div class="head-actions">
     <!-- Step back and forward through what was edited, whichever section it was edited in: the File section's text editor keeps the history (see SightingEditorElement.undo). -->
     <span class="history" role="group">
-      <button id="undo" type="button" class="icon-btn" title="Undo" aria-label="Undo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 3 7l3 3"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8"/></svg></button>
-      <button id="redo" type="button" class="icon-btn" title="Redo" aria-label="Redo" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4 3 3-3 3"/><path d="M13 7H6.5a3.5 3.5 0 0 0 0 7H8"/></svg></button>
+      <button id="undo" type="button" class="icon-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 3 7l3 3"/><path d="M3 7h6.5a3.5 3.5 0 0 1 0 7H8"/></svg></button>
+      <button id="redo" type="button" class="icon-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4 3 3-3 3"/><path d="M13 7H6.5a3.5 3.5 0 0 0 0 7H8"/></svg></button>
     </span>
     <!-- The editor on this recording, for somebody else: a link to it, or its element for another page (see ShareDialogElement). Off while
          the recording has no address to give. -->
-    <button id="share" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share">Share</span></button>
+    <button id="share" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share"></span></button>
     <!-- The one way to keep what was done: the file, downloaded. Nothing is kept in the browser. -->
-    <button id="save" type="button" class="pill-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save">Save</span></button>
+    <button id="save" type="button" class="pill-btn" disabled><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save"></span></button>
   </div>
 </header>
 <!-- Why the recording was not saved, when it would be read back as something else than what is meant (see RecordingActors). -->
@@ -48,33 +48,33 @@ export const html = `
 </div>
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
-  <button id="play-pause" type="button" class="icon-btn" title="Play" aria-label="Play" data-icon="▶">${Icons.PLAY}</button>
+  <button id="play-pause" type="button" class="icon-btn" data-icon="▶">${Icons.PLAY}</button>
   <span id="time-start" class="time-label">0:00</span>
-  <button id="previous-mark" type="button" class="icon-btn" title="Previous keyframe" aria-label="Previous keyframe">${Icons.PREVIOUS_MARK}</button>
+  <button id="previous-mark" type="button" class="icon-btn">${Icons.PREVIOUS_MARK}</button>
   <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
   <div class="seek-track">
     <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
     <div id="timeline-marks" class="timeline-marks"></div>
   </div>
-  <button id="next-mark" type="button" class="icon-btn" title="Next keyframe" aria-label="Next keyframe">${Icons.NEXT_MARK}</button>
+  <button id="next-mark" type="button" class="icon-btn">${Icons.NEXT_MARK}</button>
   <span id="time-end" class="time-label">0:00</span>
   <!-- Lays the tracks out after the sections' chips (see TimelineTracks): the timeline then leaves the picture and stays in view. -->
-  <button id="toggle-tracks" type="button" class="icon-btn" aria-expanded="false" aria-controls="timeline-tracks" title="Expand the tracks" aria-label="Expand the tracks"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
+  <button id="toggle-tracks" type="button" class="icon-btn" aria-expanded="false" aria-controls="timeline-tracks"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg></button>
 </div>
 </div>
 <!-- Drags the scene taller or shorter, which gives the form under it the height it leaves (see SightingEditorElement.resizeScene). -->
 <div id="scene-resize" class="scene-resize" role="separator" aria-orientation="horizontal" tabindex="0"></div>
 <nav id="group-tabs" class="section-chips">
-  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false">${Icons.SUMMARY}<span id="label-observation-group">Summary</span></button>
-  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false">${Icons.WITNESS}<span id="label-observer-group">Witness</span></button>
-  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false">${Icons.LOCATION}<span id="label-location-group">Location</span></button>
-  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false">${Icons.DATE}<span id="label-temporal-group">Date</span></button>
-  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false">${Icons.ENVIRONMENT}<span id="label-decor-group">Environment</span></button>
-  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false">${Icons.SKY}<span id="label-weather-group">Sky</span></button>
-  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false">${Icons.PHENOMENON}<span id="label-shape-group">Phenomenon</span></button>
-  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false">${Icons.SOUND}<span id="label-sound-group">Sound</span></button>
-  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false">${Icons.PICTURES}<span id="label-reference-group">Pictures</span></button>
-  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false">${Icons.FILES}<span id="label-file-group">Files</span></button>
+  <button class="group-tab" type="button" aria-controls="group-observation" aria-expanded="false">${Icons.SUMMARY}<span id="label-observation-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-observer" aria-expanded="false">${Icons.WITNESS}<span id="label-observer-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-location" aria-expanded="false">${Icons.LOCATION}<span id="label-location-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-temporal" aria-expanded="false">${Icons.DATE}<span id="label-temporal-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-decor" aria-expanded="false">${Icons.ENVIRONMENT}<span id="label-decor-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-weather" aria-expanded="false">${Icons.SKY}<span id="label-weather-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-shape" aria-expanded="false">${Icons.PHENOMENON}<span id="label-shape-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-sound" aria-expanded="false">${Icons.SOUND}<span id="label-sound-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-reference" aria-expanded="false">${Icons.PICTURES}<span id="label-reference-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-file" aria-expanded="false">${Icons.FILES}<span id="label-file-group"></span></button>
   <!-- What an element that holds this editor puts after the last tab (see CaseEditorElement): a mark of its own, which takes its room whether it shows or not. -->
   <slot name="tab-status"></slot>
 </nav>
@@ -86,8 +86,8 @@ export const html = `
   <div class="toolbar">
     <!-- The observation's own id, not the observer's nor the case's: what a case and the
          interpretations filed in it name this account by (see Sighting.id). -->
-    <label class="adv"><span id="label-sighting-id">ID</span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
-    <label><span id="label-tags">Tags</span> <input id="tags" type="text" placeholder="comma-separated"/></label>
+    <label class="adv"><span id="label-sighting-id"></span> <input id="sightingId" type="text" placeholder="1964-04-24-ZamoraLonnie"/></label>
+    <label><span id="label-tags"></span> <input id="tags" type="text"/></label>
   </div>
   <!-- The account, and the button that reads it.
        One field, not two. The description IS the account: a paragraph in the observer's own words,
@@ -99,14 +99,14 @@ export const html = `
        Its own row, pulled out of the one-line fields above, because a paragraph among a row of
        one-line fields makes both harder to read. See SightingEditorElement.draftFromDescription. -->
   <div class="toolbar narrative">
-    <label class="wide"><span id="label-description">Description</span>
-      <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
+    <label class="wide"><span id="label-description"></span>
+      <textarea id="description" rows="4"></textarea></label>
     <!-- Which provider drafts, and the settings it declares (a key, a model…), rendered from the
          provider itself: see NarrativeSetting, and SightingEditorElement.renderNarrativeSettings. -->
-    <span class="narrative-source"><span id="label-narrative-source">Drafted by</span> <span id="narrative-source-row"></span></span>
+    <span class="narrative-source"><span id="label-narrative-source"></span> <span id="narrative-source-row"></span></span>
     <span id="narrative-settings" class="narrative-settings"></span>
-    <button id="narrative-draft" type="button">Generate reconstruction</button>
-    <button id="narrative-stop" type="button" hidden>Stop</button>
+    <button id="narrative-draft" type="button"></button>
+    <button id="narrative-stop" type="button" hidden></button>
     <output id="narrative-status" for="description"></output>
   </div>
   </div>
@@ -121,7 +121,7 @@ export const html = `
        rather than the author is marked, which is the one thing the form itself never showed at a glance. -->
   <!-- Folded by default: the form says the same field by field, and the room is the scene's and the form's (see the chips' count). -->
   <details id="param-summary-fold" class="param-summary-fold">
-    <summary id="label-param-summary">What the recording states</summary>
+    <summary id="label-param-summary"></summary>
     <div id="param-summary" class="param-summary"></div>
   </details>
 </section>
@@ -135,11 +135,11 @@ export const html = `
     <div id="observer-item">
     <div id="observer-principal">
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-identity">Identity</span></h3>
-    <label class="adv"><span id="label-observer-id">ID</span> <input id="observerId" type="text"/></label>
-    <label><span id="label-observer-title">Title</span> <input id="observerTitle" type="text"/></label>
-    <label><span id="label-observer-last-name">Last name</span> <input id="observerLastName" type="text"/></label>
-    <label><span id="label-observer-first-names">First names</span> <input id="observerFirstNames" type="text" placeholder="comma-separated"/></label>
+    <h3 class="section-title"><span id="label-section-identity"></span></h3>
+    <label class="adv"><span id="label-observer-id"></span> <input id="observerId" type="text"/></label>
+    <label><span id="label-observer-title"></span> <input id="observerTitle" type="text"/></label>
+    <label><span id="label-observer-last-name"></span> <input id="observerLastName" type="text"/></label>
+    <label><span id="label-observer-first-names"></span> <input id="observerFirstNames" type="text"/></label>
     <!-- Who this observer is and how their account travelled — see Account. None of it is about
          the phenomenon, which is why it sits here and not with the shape, and why it had to exist:
          Poher's credibility criteria read these and a recording could state none of them. How MANY
@@ -148,30 +148,30 @@ export const html = `
     <p id="observer-identity-hint" class="file-note"></p>
     </div>
     <div id="profile-section" class="form-section">
-    <h3 class="section-title"><span id="label-section-profile">Profile</span></h3>
-    <label><span id="label-observer-age">Age then</span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4" placeholder="years"/></label>
-    <label class="adv"><span id="label-observer-birth">Born</span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
-    <label><span id="label-observer-occupation">Occupation</span> <input id="observerOccupation" type="text" placeholder="baker, airline pilot…"/></label>
+    <h3 class="section-title"><span id="label-section-profile"></span></h3>
+    <label><span id="label-observer-age"></span> <input id="observerAge" type="number" min="0" max="120" step="1" size="4"/></label>
+    <label class="adv"><span id="label-observer-birth"></span> <rr0-date-input name="observer-birth" date-only></rr0-date-input></label>
+    <label><span id="label-observer-occupation"></span> <input id="observerOccupation" type="text"/></label>
     </div>
     <div id="testimony-section" class="form-section">
-    <h3 class="section-title"><span id="label-section-testimony">Testimony</span></h3>
-    <label><span id="label-account-source">Account obtained</span> <select id="accountSource">
-      <option id="option-source-unknown" value="">unknown</option>
-      <option id="option-source-on-site" value="on-site">on-site investigation</option>
-      <option id="option-source-interview" value="interview">interview in person</option>
-      <option id="option-source-telephone" value="telephone">by telephone</option>
-      <option id="option-source-questionnaire" value="questionnaire">questionnaire</option>
-      <option id="option-source-letter" value="letter">the witness wrote it</option>
-      <option id="option-source-social-media" value="social-media">the witness posted it online</option>
-      <option id="option-source-press" value="press">press or broadcast</option>
+    <h3 class="section-title"><span id="label-section-testimony"></span></h3>
+    <label><span id="label-account-source"></span> <select id="accountSource">
+      <option id="option-source-unknown" value=""></option>
+      <option id="option-source-on-site" value="on-site"></option>
+      <option id="option-source-interview" value="interview"></option>
+      <option id="option-source-telephone" value="telephone"></option>
+      <option id="option-source-questionnaire" value="questionnaire"></option>
+      <option id="option-source-letter" value="letter"></option>
+      <option id="option-source-social-media" value="social-media"></option>
+      <option id="option-source-press" value="press"></option>
     </select></label>
-    <label><span id="label-account-url">Source (URL)</span> <input id="accountUrl" type="url" placeholder="https://…"/></label>
+    <label><span id="label-account-url"></span> <input id="accountUrl" type="url" placeholder="https://…"/></label>
     <!-- Three states and not a checkbox: a report that says nothing about follow-up is not a report
          that says none happened, and the methods reading this score the two differently. -->
-    <label><span id="label-account-followed-up">Followed up</span> <select id="accountFollowedUp">
-      <option id="option-followed-unknown" value="">unknown</option>
-      <option id="option-followed-yes" value="yes">yes</option>
-      <option id="option-followed-no" value="no">no</option>
+    <label><span id="label-account-followed-up"></span> <select id="accountFollowedUp">
+      <option id="option-followed-unknown" value=""></option>
+      <option id="option-followed-yes" value="yes"></option>
+      <option id="option-followed-no" value="no"></option>
     </select></label>
     <!-- Everything that is about WHAT THE OBSERVER LOOKED THROUGH, grouped with the picker that names it:
          the filter in front of it and the settings of the device (see below). Which of them show, and
@@ -180,46 +180,46 @@ export const html = `
     <!-- Ballester-Guasp's strangeness factors as the investigators judged them, filled by AccountEvaluationFields. -->
     <div id="strangeness-section" class="form-section"></div>
     <div id="instrument-group" class="instrument-group form-section" role="group" aria-labelledby="label-section-vision">
-      <h3 class="section-title"><span id="label-section-vision">Vision</span></h3>
-      <div class="field"><span id="label-instrument">Observed through</span> <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker></div>
+      <h3 class="section-title"><span id="label-section-vision"></span></h3>
+      <div class="field"><span id="label-instrument"></span> <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker></div>
       <!-- Beside the device, and the device's own: a solar filter is for an eye or a telescope, a solar film for a
            camera, so which ones are offered follows the device (see Filter.usableWith). -->
-      <label><span id="label-filter">In front of it</span> <select id="filter"></select></label>
+      <label><span id="label-filter"></span> <select id="filter"></select></label>
       <!-- What the device was SET to, when it could be set at all: the lens's focal length (shown as
            the field of view for an eye, which has no focal length), how far it was stopped down, and
            how long its shutter stayed open. Each falls back to the instrument's own value and each is
            disabled when the device fixes it — an Instamatic's owner had nothing to choose. See
            Instrument.ts and ObserverPose.fNumber/exposureSeconds. -->
-      <label><span id="label-focal-length">Focal length</span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length">mm</span>
+      <label><span id="label-focal-length"></span> <input id="focalLength" type="number" min="1" max="2000" step="0.1"/> <span id="unit-focal-length"></span>
         <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
-      <label class="adv"><span id="label-f-number">Aperture</span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
-      <label class="adv"><span id="label-exposure">Exposure</span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
-      <label class="adv"><span id="label-iso">Sensitivity</span> ISO <input id="iso" type="number" min="1" max="409600" step="1"/></label>
-      <label class="adv"><span id="label-metering">Metering</span> <select id="metering">
-        <option value="" id="metering-device">the device's own</option><option value="average" id="metering-average">the whole frame (older phones, camcorders)</option>
-        <option value="highlights" id="metering-highlights">keeping highlights (recent phones)</option></select></label>
-      <label class="adv"><span id="label-focus-distance">Focused at</span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
+      <label class="adv"><span id="label-f-number"></span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
+      <label class="adv"><span id="label-exposure"></span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
+      <label class="adv"><span id="label-iso"></span> ISO <input id="iso" type="number" min="1" max="409600" step="1"/></label>
+      <label class="adv"><span id="label-metering"></span> <select id="metering">
+        <option value="" id="metering-device"></option><option value="average" id="metering-average"></option>
+        <option value="highlights" id="metering-highlights"></option></select></label>
+      <label class="adv"><span id="label-focus-distance"></span> <input id="focusDistance" type="number" min="0.1" max="30000" step="0.1" placeholder="&#8734;"/> m</label>
       <!-- With the instrument and not with the place: latitude and heading say where the observer
            stood and which way they faced, and this says nothing about either. It is how the device
            was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
            length and the aperture whose own spikes it turns. -->
-      <label class="adv"><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it"/> &deg;</label>
+      <label class="adv"><span id="label-roll"></span> <input id="roll" type="number" min="-180" max="180" step="1" value="0"/> &deg;</label>
       <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
            tripod. Blank is the default (1, or 0 for a paralysed observer). -->
-      <label class="adv"><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
+      <label class="adv"><span id="label-sway"></span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
       <!-- What the picture was taken through besides the lens, and what was on that glass: what lays more ghosts and halos over every light
            of it (see LensStateJson). Shown for an instrument that records a picture only: an eye has no glass of its own. -->
-      <label class="adv lens-row"><span id="label-lens-glass">Taken through</span> <select id="lens-glass">
-        <option value="" id="lens-glass-none">the lens alone</option><option value="filter" id="lens-glass-filter">a filter</option>
-        <option value="window" id="lens-glass-window">a window</option><option value="windscreen" id="lens-glass-windscreen">a windscreen</option>
+      <label class="adv lens-row"><span id="label-lens-glass"></span> <select id="lens-glass">
+        <option value="" id="lens-glass-none"></option><option value="filter" id="lens-glass-filter"></option>
+        <option value="window" id="lens-glass-window"></option><option value="windscreen" id="lens-glass-windscreen"></option>
       </select></label>
-      <label class="adv lens-row"><span id="label-lens-drops">Drops on the glass</span> <input id="lens-drops" type="number" min="0" max="1" step="0.1"/></label>
-      <label class="adv lens-row"><span id="label-lens-condensation">Condensation</span> <input id="lens-condensation" type="number" min="0" max="1" step="0.1"/></label>
-      <label class="adv lens-row"><span id="label-lens-dirt">Dirt</span> <input id="lens-dirt" type="number" min="0" max="1" step="0.1"/></label>
-      <label class="adv lens-row"><input id="lens-sheltered" type="checkbox"/> <span id="label-lens-sheltered">Sheltered from the rain</span></label>
+      <label class="adv lens-row"><span id="label-lens-drops"></span> <input id="lens-drops" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><span id="label-lens-condensation"></span> <input id="lens-condensation" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><span id="label-lens-dirt"></span> <input id="lens-dirt" type="number" min="0" max="1" step="0.1"/></label>
+      <label class="adv lens-row"><input id="lens-sheltered" type="checkbox"/> <span id="label-lens-sheltered"></span></label>
     </div>
     <div class="form-section" data-fold="all">
-    <h3 class="section-title"><span id="label-section-perception">Perception</span></h3>
+    <h3 class="section-title"><span id="label-section-perception"></span></h3>
     <rr0-provider-settings id="observerPerception"></rr0-provider-settings>
     </div>
     </div>
@@ -232,7 +232,7 @@ export const html = `
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="location-settings-button" popovertarget="location-settings" style="anchor-name: --location-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
   <div class="group-settings-panel" id="location-settings" popover style="position-anchor: --location-settings" role="dialog" aria-labelledby="label-location-settings">
-    <div class="group-settings-title" id="label-location-settings">Data sources</div>
+    <div class="group-settings-title" id="label-location-settings"></div>
     <div id="terrain-source-rows" class="terrain-source-rows"></div>
   </div>
   <div class="toolbar">
@@ -241,26 +241,26 @@ export const html = `
          longitude below are what answering it produces. Searched only on Enter or the button, never
          per keystroke: see NominatimPlaceProvider's own doc comment on why that restraint matters. -->
     <div class="place-search-row">
-      <label><span id="label-place-name">Place</span>
-        <input id="placeName" type="text" placeholder="Valensole, France" autocomplete="off" class="place-name"/></label>
-      <button id="search-place" type="button">Locate</button>
-      <label id="place-match-row" hidden><span id="label-place-match">Matches</span> <select id="placeMatch"></select></label>
+      <label><span id="label-place-name"></span>
+        <input id="placeName" type="text" autocomplete="off" class="place-name"/></label>
+      <button id="search-place" type="button"></button>
+      <label id="place-match-row" hidden><span id="label-place-match"></span> <select id="placeMatch"></select></label>
       <!-- "2 lieux trouvés selon [Nominatim]" — the picker sits where the count is reported, not in
            a settings drawer: who answered is part of the answer. See DataSource.ts. -->
       <output id="place-status" class="place-status" for="placeName"><span id="place-status-text"></span><span id="place-source-row" class="inline-source" hidden></span></output>
     </div>
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-coordinates">Coordinates</span></h3>
+    <h3 class="section-title"><span id="label-section-coordinates"></span></h3>
     <!-- As degrees, or from a decor object ("20 m south of the house"): see PositionInputElement. The fields keep the ids lat and lng. -->
-    <div class="observer-position"><span id="label-position">Position</span> <rr0-input-position name="observer" native="geo" lat-id="lat" lng-id="lng"></rr0-input-position></div>
-    <label><span id="label-elevation">Altitude</span>
+    <div class="observer-position"><span id="label-position"></span> <rr0-input-position name="observer" native="geo" lat-id="lat" lng-id="lng"></rr0-input-position></div>
+    <label><span id="label-elevation"></span>
       <input id="elevation" type="number" min="-500" max="9000" step="1" value="0"/> m</label>
     <output id="ground-elevation" class="ground-elevation" for="lat lng"></output>
     </div>
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-gaze">Gaze</span></h3>
-    <label><span id="label-heading">Heading</span> <input id="heading" type="number" min="0" max="360" step="1" placeholder="unknown"/> <span id="heading-unit">&deg;</span></label>
-    <label><span id="label-pitch">Tilt</span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
+    <h3 class="section-title"><span id="label-section-gaze"></span></h3>
+    <label><span id="label-heading"></span> <input id="heading" type="number" min="0" max="360" step="1"/> <span id="heading-unit">&deg;</span></label>
+    <label><span id="label-pitch"></span> <input id="pitch" type="number" min="-90" max="90" step="1" value="0"/> &deg;</label>
     <!-- Above SEA LEVEL, not above the ground: "0 m" is simply false for an observer in the Alps, and
          an editor that offers it invites a recording that says so. The ground's own height at the
          location becomes the field's floor and its default the moment the location is known — see
@@ -270,12 +270,12 @@ export const html = `
     </div>
     <!-- What the observer did, as events whose values the player works out (see EventsPanel): absent from a recording that states none. -->
     <div class="form-section events-section" id="events-section" hidden>
-    <h3 class="section-title"><span id="label-section-events" class="events-title">Events</span></h3>
+    <h3 class="section-title"><span id="label-section-events" class="events-title"></span></h3>
     <div class="events-body"></div>
     </div>
     <div class="form-section" data-fold="all">
-    <h3 class="section-title"><span id="label-section-night-sky">Night sky</span></h3>
-    <label><span id="label-light-pollution">Night sky</span> <input id="lightPollution" type="number" min="15" max="22" step="0.01" placeholder="22"/> mag/arcsec&sup2;</label>
+    <h3 class="section-title"><span id="label-section-night-sky"></span></h3>
+    <label><span id="label-light-pollution"></span> <input id="lightPollution" type="number" min="15" max="22" step="0.01" placeholder="22"/> mag/arcsec&sup2;</label>
     <!-- Where that figure came from: "18.79 according to [World Atlas 2015]" while the atlas owns it,
          nothing once the author has typed their own (see SightingEditorElement.lookUpLightPollution). -->
     <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
@@ -292,7 +292,7 @@ export const html = `
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="decor-settings-button" popovertarget="decor-settings" style="anchor-name: --decor-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
   <div class="group-settings-panel" id="decor-settings" popover style="position-anchor: --decor-settings" role="dialog" aria-labelledby="label-decor-settings">
-    <div class="group-settings-title" id="label-decor-settings">Data sources</div>
+    <div class="group-settings-title" id="label-decor-settings"></div>
     <div id="decor-source-rows" class="terrain-source-rows"></div>
   </div>
   <div class="toolbar">
@@ -315,9 +315,9 @@ export const html = `
          and lines, or that the survey could not be reached. Empty where no survey covers the place, which is most of the world. It sits
          on a line of its own, below what the list of the decor draws, and is read out by whoever listens to the page. -->
     <div id="scenery" class="decor-scenery form-section">
-      <h3 class="section-title"><span id="label-section-survey">Scenery from a survey</span></h3>
-      <span id="scenery-picker"><span id="label-scenery-source" hidden>Scenery survey</span><select id="scenery-source"><option value="none" id="option-scenery-none">None (all by hand)</option></select>
-      <label id="scenery-radius-row"><span id="label-scenery-radius">Radius</span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
+      <h3 class="section-title"><span id="label-section-survey"></span></h3>
+      <span id="scenery-picker"><span id="label-scenery-source" hidden></span><select id="scenery-source"><option value="none" id="option-scenery-none"></option></select>
+      <label id="scenery-radius-row"><span id="label-scenery-radius"></span> <input type="number" id="scenery-radius" min="20" max="3000" step="10" value="100"/> m</label>
       <button id="scenery-file-link" type="button" class="source-file-link" hidden></button></span>
       <span id="scenery-status" role="status" aria-live="polite"></span>
       <span id="scenery-warning" class="scenery-warning" role="alert" hidden></span>
@@ -339,22 +339,22 @@ export const html = `
          canonical whichever control produced it, which matters because formatEdtfTime returns it
          verbatim and would otherwise display a stale string over fresh numbers. -->
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-period">Period</span></h3>
-    <label><span id="label-observation-time">Observation start</span>
+    <h3 class="section-title"><span id="label-section-period"></span></h3>
+    <label><span id="label-observation-time"></span>
       <!-- A date is precise (a picker) or said in EDTF (a text: a year, a month, a time with no date, or a doubt: [?~%] at the
            end of the value, or before one of its parts, as @rr0/time reads it: see parseEdtfTime). See DateInputElement
            for the controls it makes (obs-time-native, obs-time) and the button that swaps them. -->
       <rr0-date-input name="obs-time"></rr0-date-input></label>
-    <label><span id="label-observation-end-time">Observation end</span>
+    <label><span id="label-observation-end-time"></span>
       <rr0-date-input name="obs-end-time"></rr0-date-input></label>
     <!-- Beside the dates it reads, not after the duration, and never held back: a time read in the wrong zone is hours off.
          The zone is the RULE, the number is what that rule produced for this sighting's own date —
          summer time included, and as it was then (see engine/time/TimeZones.ts). Pick a zone and
          the number is derived and read-only; leave it on the manual entry and type the number
          yourself, which is all a recording used to be able to say. -->
-    <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
-      <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
-    <label><span id="label-duration">Duration</span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
+    <label><span id="label-utc-offset"></span> <select id="timeZone"></select>
+      <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5"/> UTC&plusmn;h</label>
+    <label><span id="label-duration"></span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
     </div>
     <div class="form-section">
     <!-- The named moments of the account (see Milestone) — in the Moment group, because they are
@@ -362,19 +362,19 @@ export const html = `
          the playhead, which is the only instant a reader has in mind when they name one. -->
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🎯, 🗑, "+", then the frame of the picked moment.
          Titled, since this tab is not only its moments. -->
-    <h3 class="section-title"><span id="label-milestones">Moments</span></h3>
+    <h3 class="section-title"><span id="label-milestones"></span></h3>
     <div class="element-list-row" id="milestone-row">
       <label class="element-list-picker"><select id="milestone" aria-labelledby="label-milestones"></select></label>
       <!-- A select says nothing when the moment already shown is picked again, which is the one to go
            back to after playing on past it: this goes there whatever the list shows. -->
-      <button id="go-to-milestone" type="button" class="icon-btn" title="Go to this moment" aria-label="Go to this moment">${Icons.TARGET}</button>
-      <button id="delete-milestone" type="button" class="icon-btn" title="Delete moment" aria-label="Delete moment">${Icons.TRASH}</button>
-      <span id="milestone-empty" class="element-list-empty">No moment</span>
-      <button id="add-milestone" type="button" class="icon-btn element-list-add" title="Add" aria-label="Add">${Icons.PLUS}</button>
+      <button id="go-to-milestone" type="button" class="icon-btn">${Icons.TARGET}</button>
+      <button id="delete-milestone" type="button" class="icon-btn">${Icons.TRASH}</button>
+      <span id="milestone-empty" class="element-list-empty"></span>
+      <button id="add-milestone" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="milestone-item">
-      <label><span id="label-milestone-label">Label</span> <input id="milestoneLabel" type="text" size="4"/></label>
-      <label><span id="label-milestone-note">What happens</span> <input id="milestoneNote" type="text"/></label>
+      <label><span id="label-milestone-label"></span> <input id="milestoneLabel" type="text" size="4"/></label>
+      <label><span id="label-milestone-note"></span> <input id="milestoneNote" type="text"/></label>
     </div>
     <!-- What the interviews of a case say of this observation's moments, given by the case that holds both (see passages): each its moment,
          which the playhead goes to, and its quotation, which opens the passage. None outside a case. -->
@@ -397,10 +397,10 @@ export const html = `
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div class="element-list-body" id="file-recording">
     <div class="toolbar">
-      <span class="input-file-row"><span id="label-import-file">Load sighting file</span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
-      <button id="export" type="button">Save</button>
+      <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
+      <button id="export" type="button"></button>
       <!-- How the keyframes are written, in the text below and in the file saved: see RecordingText.of. -->
-      <label class="check"><input id="whole-keyframes" type="checkbox"/> <span id="label-whole-keyframes">Every keyframe whole</span></label>
+      <label class="check"><input id="whole-keyframes" type="checkbox"/> <span id="label-whole-keyframes"></span></label>
     </div>
   <!-- A question about what an edit of the text just touched: data the editor reads dynamically (see SightingEditorElement.askAboutWeather). Modal: the author has to say what they mean before anything else is done, and the edit stands meanwhile. Escape is the safe answer, which puts back what was read. -->
   <dialog id="file-ask" class="file-ask" aria-labelledby="file-ask-text">
@@ -425,10 +425,10 @@ export const html = `
        when it is one. -->
   <div class="element-list-body frozen-data" id="frozen-data" hidden>
     <div class="toolbar">
-      <span class="input-file-row"><span id="label-annex-source">File</span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
-      <button id="annex-export" type="button">Save</button>
+      <span class="input-file-row"><span id="label-annex-source"></span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
+      <button id="annex-export" type="button"></button>
     </div>
-    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button">Refresh</button></p>
+    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button"></button></p>
     <p id="frozen-note" class="frozen-note" hidden role="status"></p>
     <div id="annex-editor" class="file-editor" hidden></div>
   </div>
@@ -436,8 +436,8 @@ export const html = `
        SectionFilePanel). Its text is the recording's own. -->
   <div class="element-list-body frozen-data" id="file-section" hidden>
     <div class="toolbar">
-      <span class="input-file-row"><span id="label-section-annex-source">File</span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
-      <button id="section-annex-export" type="button">Save</button>
+      <span class="input-file-row"><span id="label-section-annex-source"></span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
+      <button id="section-annex-export" type="button"></button>
     </div>
     <p id="section-annex-state" class="frozen-group-state"></p>
     <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
@@ -454,7 +454,7 @@ export const html = `
        the group edits, behind the gear at its top right. Who answered is still said where the answer is reported. -->
   <button class="group-settings" type="button" id="weather-settings-button" popovertarget="weather-settings" style="anchor-name: --weather-settings" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg></button>
   <div class="group-settings-panel" id="weather-settings" popover style="position-anchor: --weather-settings" role="dialog" aria-labelledby="label-weather-settings">
-    <div class="group-settings-title" id="label-weather-settings">Data sources</div>
+    <div class="group-settings-title" id="label-weather-settings"></div>
     <div id="weather-source-rows" class="terrain-source-rows"></div>
   </div>
   <div class="toolbar">
@@ -468,7 +468,7 @@ export const html = `
       <!-- Where the weather is read from: a record, asked again whenever the date or the place change, or the recording's own file,
            where the observer's account or a record asked once is kept and never asked again. The box under it is what the editor
            reasons on (see onWeatherInferredToggled): the picker ticks it for a record and unticks it for the file. -->
-      <span id="weather-picker"><span id="label-weather-inferred" hidden>Source</span><select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a><button id="weather-file-link" type="button" class="source-file-link" hidden></button></span>
+      <span id="weather-picker"><span id="label-weather-inferred" hidden></span><select id="weatherSource"></select> <a id="weather-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a><button id="weather-file-link" type="button" class="source-file-link" hidden></button></span>
       <input id="weatherInferred" type="checkbox" checked hidden/>
       <!-- Clamped to one line unless the reader asks for the rest (see #sky-details below). What
            these two lines say is worth saying — which record answered, and what else was up there
@@ -485,11 +485,11 @@ export const html = `
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->
-    <button id="show-meteor" type="button" class="icon-btn" title="No meteor visible" aria-label="No meteor visible" disabled>${Icons.METEOR}</button>
-    <button id="show-comet" type="button" class="icon-btn" title="No comet visible" aria-label="No comet visible" disabled>${Icons.COMET}</button>
-    <button id="show-nova" type="button" class="icon-btn" title="No new star visible" aria-label="No new star visible" disabled>${Icons.STAR}</button>
-    <button id="show-satellite" type="button" class="icon-btn" title="No satellite visible" aria-label="No satellite visible" disabled>${Icons.SATELLITE}</button>
-    <button id="show-fireball" type="button" class="icon-btn" title="No fireball visible" aria-label="No fireball visible" disabled>${Icons.FIREBALL}</button>
+    <button id="show-meteor" type="button" class="icon-btn" disabled>${Icons.METEOR}</button>
+    <button id="show-comet" type="button" class="icon-btn" disabled>${Icons.COMET}</button>
+    <button id="show-nova" type="button" class="icon-btn" disabled>${Icons.STAR}</button>
+    <button id="show-satellite" type="button" class="icon-btn" disabled>${Icons.SATELLITE}</button>
+    <button id="show-fireball" type="button" class="icon-btn" disabled>${Icons.FIREBALL}</button>
   </div>
   <!-- The weather in three parts — what falls (first, and open on arrival: the user's own order), the
        clouds, and what blows — as a strip of handles
@@ -499,48 +499,48 @@ export const html = `
        (Open-Meteo's, where the provider reads it from; METAR's TS beside RA and GR), a discrete
        present-weather event like hail, where a cloud layer is a continuous thing with a height. -->
   <div class="group-tabs" id="weather-tabs">
-    <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group">Precipitation</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group">Clouds</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group"></span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group"></span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group"></span></button>
   </div>
   <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
     <div class="toolbar">
-      <label><span id="label-precipitation-type">Precipitation</span>
+      <label><span id="label-precipitation-type"></span>
         <select id="precipitationType" class="weather-field">
-          <option id="option-precipitation-none" value="none">None</option>
-          <option id="option-precipitation-rain" value="rain">Rain</option>
-          <option id="option-precipitation-snow" value="snow">Snow</option>
-          <option id="option-precipitation-hail" value="hail">Hail</option>
+          <option id="option-precipitation-none" value="none"></option>
+          <option id="option-precipitation-rain" value="rain"></option>
+          <option id="option-precipitation-snow" value="snow"></option>
+          <option id="option-precipitation-hail" value="hail"></option>
         </select>
       </label>
-      <label><span id="label-precipitation-intensity">Intensity</span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-      <label><span id="label-storm">Storm</span> <input id="storm" class="weather-field" type="checkbox"/></label>
+      <label><span id="label-precipitation-intensity"></span> <input id="precipitationIntensity" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label><span id="label-storm"></span> <input id="storm" class="weather-field" type="checkbox"/></label>
     </div>
   </section>
   <section class="subgroup-panel" id="weather-clouds" aria-labelledby="label-clouds-group" hidden>
     <div class="toolbar">
       <style>#cloud-editor { flex-basis: 100%; min-width: 0; } #cloud-editor .cloud-panel { min-width: 0; } #cloud-editor .cloud-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-list { grid-column: 1 / -1; min-width: 0; } #cloud-editor button:not(.icon-btn) { width: auto; min-height: 2em; padding: .25em .65em; } #cloud-editor label { display: flex; flex-direction: column; align-items: start; } #cloud-editor label[hidden] { display: none !important; } #cloud-editor input, #cloud-editor select { max-width: 100%; box-sizing: border-box; } #cloud-editor p { font-size: .85em; } #cloud-editor .cloud-parameters { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; } #cloud-editor .cloud-parameters .parameter-group { display: contents; border: 0; padding: 0; margin: 0; } #cloud-editor .cloud-parameters[hidden] { display: none; } #cloud-editor .cloud-parameters label { display: block; } #cloud-editor .cloud-parameters label > span { display: block; } #cloud-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="cloud-editor"></div>
-      <label hidden><span id="label-cloud-cover">Cloud cover</span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label hidden><span id="label-cloud-cover"></span> <input id="cloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <!-- The HIGH deck, kept apart from the total: it is not about how much sky was hidden but about
            whether there were ICE CRYSTALS in it, which is what halos and sundogs need. See
            IceHalos.ts. -->
-      <label hidden><span id="label-high-cloud">Ice cloud (cirrus)</span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0" title="How much of the sky the high, icy deck covered — what refracts a halo or a pair of sundogs into being"/></label>
+      <label hidden><span id="label-high-cloud"></span> <input id="highCloudCover" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <!-- The one weather control that stays live even when a record owns every other one, because no
            record holds it: what the crystals were doing up there was never measured. See
            Weather.iceCrystalAlignment. -->
-      <label hidden><span id="label-ice-alignment">Crystal alignment</span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
+      <label hidden><span id="label-ice-alignment"></span> <input id="iceCrystalAlignment" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.65"/></label>
       <!-- Stated like the alignment, and for the same reason: nobody counted the crystals. See
            Weather.rareIceCrystals. -->
-      <label hidden><span id="label-rare-ice">Rare crystals</span> <input id="rareIceCrystals" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.05"/></label>
-      <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-      <label hidden><span id="label-cloud-base">Cloud base</span>
-        <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
+      <label hidden><span id="label-rare-ice"></span> <input id="rareIceCrystals" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.05"/></label>
+      <label hidden><span id="label-cloud-darkness"></span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+      <label hidden><span id="label-cloud-base"></span>
+        <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000"/> m</label>
     </div>
   </section>
   <section class="subgroup-panel" id="weather-wind" aria-labelledby="label-wind-group" hidden>
     <div class="toolbar">
-      <label><span id="label-wind-direction">Wind direction</span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0" title="The direction the wind blows TOWARD, clockwise from true north — the opposite of the meteorological convention a forecast uses (see Weather.windDirectionDeg)"/> &deg;</label>
-      <label><span id="label-wind-speed">Wind speed</span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
+      <label><span id="label-wind-direction"></span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
+      <label><span id="label-wind-speed"></span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
     </div>
   </section>
   <!-- What happened in that sky as facts (see SkyEventsJson), beside the state it was in: neither the decor, which outlasts the
@@ -556,19 +556,19 @@ export const html = `
 <section class="group-panel" id="group-sound" aria-labelledby="label-sound-group" hidden>
   <div class="toolbar">
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-heard">What was heard</span></h3>
-    <label><span id="label-sound-kind">Sound</span> <select id="soundKind" class="sound-field"></select></label>
-    <label><span id="label-sound-volume">Loudness</span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-sound-pitch">Pitch</span>
-      <input id="soundPitch" class="sound-field" type="range" min="30" max="4000" step="10" value="100" title="How deep or how sharp the sound was — the tone itself for a hum or a whistle, how low the noise sits for a rumble or a crackle"/>
+    <h3 class="section-title"><span id="label-section-heard"></span></h3>
+    <label><span id="label-sound-kind"></span> <select id="soundKind" class="sound-field"></select></label>
+    <label><span id="label-sound-volume"></span> <input id="soundVolume" class="sound-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-sound-pitch"></span>
+      <input id="soundPitch" class="sound-field" type="range" min="30" max="4000" step="10" value="100"/>
       <output id="sound-pitch-value" class="apparent-size" for="soundPitch"></output></label>
     </div>
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-sound-recording">Recording</span></h3>
+    <h3 class="section-title"><span id="label-section-sound-recording"></span></h3>
     <!-- The rare case where the sound was actually captured: it then plays instead of the
          synthesized description (see SightingSound.src), and the embed stops being self-contained,
          which is why nothing defaults to it. -->
-    <label><span id="label-sound-src">Recording</span> <input id="soundSrc" class="sound-field" type="url" placeholder="URL of a real recording"/></label>
+    <label><span id="label-sound-src"></span> <input id="soundSrc" class="sound-field" type="url"/></label>
     </div>
   </div>
 </section>
@@ -584,70 +584,70 @@ export const html = `
          address, a file from the author's own disk, embedded in the recording, or street-level pictures near the spot) and "+";
          under it, the frame of the picked picture. -->
     <div class="element-list-row" id="reference-row">
-      <label class="element-list-picker"><select id="reference" aria-label="Picture"></select></label>
-      <button id="delete-reference" type="button" class="icon-btn" title="Delete picture" aria-label="Delete picture">${Icons.TRASH}</button>
-      <span id="reference-empty" class="element-list-empty">No picture</span>
-      <button id="add-reference" type="button" class="icon-btn element-list-add" title="Add a picture" aria-label="Add a picture">${Icons.PLUS}</button>
+      <label class="element-list-picker"><select id="reference"></select></label>
+      <button id="delete-reference" type="button" class="icon-btn">${Icons.TRASH}</button>
+      <span id="reference-empty" class="element-list-empty"></span>
+      <button id="add-reference" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <!-- Street-level pictures somebody took near the observer's spot — see PanoramaxPictures. Each
          comes with where it was taken from and which way it looked, a registration already made. -->
     <div class="decor-add-row">
       <select id="reference-street" hidden></select>
-      <button id="reference-street-add" type="button" hidden>Add</button>
+      <button id="reference-street-add" type="button" hidden></button>
     </div>
     <div class="element-list-body" id="reference-item">
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-picture">Picture</span></h3>
-    <label><span id="label-reference-title">Name</span> <input id="referenceTitle" class="reference-field" type="text"/></label>
-    <span class="input-file-row"><span id="label-reference-src">Picture</span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
+    <h3 class="section-title"><span id="label-section-picture"></span></h3>
+    <label><span id="label-reference-title"></span> <input id="referenceTitle" class="reference-field" type="text"/></label>
+    <span class="input-file-row"><span id="label-reference-src"></span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
     <!-- Why the picture could not be read, right under where it was asked for (see PictureFailure). -->
     <span id="reference-failure" class="reference-failure" role="alert" hidden></span>
-    <label><span id="label-reference-kind">Kind</span>
+    <label><span id="label-reference-kind"></span>
       <select id="referenceKind" class="reference-field">
-        <option value="photo" id="reference-kind-photo">Photo</option>
-        <option value="panorama" id="reference-kind-panorama">Panorama (360°)</option>
+        <option value="photo" id="reference-kind-photo"></option>
+        <option value="panorama" id="reference-kind-panorama"></option>
       </select></label>
-    <label><span id="label-reference-credit">Credit</span> <input id="referenceCredit" class="reference-field" type="text"/></label>
-    <label class="adv"><span id="label-reference-credit-url">Credit link</span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
-    <label><span id="label-reference-t">Taken at</span> <input id="referenceT" class="reference-field" type="number" min="0" max="86400" step="0.1" placeholder="—"/> s</label>
-    <label><span id="label-reference-drawing">Drawn on</span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
-    <label><span id="label-reference-opacity">Opacity</span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
+    <label><span id="label-reference-credit"></span> <input id="referenceCredit" class="reference-field" type="text"/></label>
+    <label class="adv"><span id="label-reference-credit-url"></span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
+    <label><span id="label-reference-t"></span> <input id="referenceT" class="reference-field" type="number" min="0" max="86400" step="0.1" placeholder="—"/> s</label>
+    <label><span id="label-reference-drawing"></span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
+    <label><span id="label-reference-opacity"></span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
     </div>
     <div class="form-section" data-fold="all">
-    <h3 class="section-title"><span id="label-section-pose">Pose</span></h3>
-    <label><span id="label-reference-heading">Heading</span> <input id="referenceHeading" class="reference-field" type="number" min="0" max="360" step="0.1"/> &deg;</label>
-    <label><span id="label-reference-pitch">Pitch</span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
-    <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
-    <label><span id="label-reference-fov">Vertical field</span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
-    <button id="reference-use-pose" type="button">Use the witness's pose</button>
+    <h3 class="section-title"><span id="label-section-pose"></span></h3>
+    <label><span id="label-reference-heading"></span> <input id="referenceHeading" class="reference-field" type="number" min="0" max="360" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-pitch"></span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-roll"></span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
+    <label><span id="label-reference-fov"></span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
+    <button id="reference-use-pose" type="button"></button>
     <!-- Lining the picture up on the rendered scene, by hand and by landmarks — see
          SightingEditorElement.canvasMode and PictureRegistration. While this group is open the
          canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and
          a click names a landmark on it, then the same landmark in the render. -->
-    <button id="reference-adopt-pose" type="button">Adopt as the witness's pose</button>
+    <button id="reference-adopt-pose" type="button"></button>
     <span id="reference-status" class="apparent-size"></span>
     </div>
     <div class="form-section">
     <!-- The details the picture is lined up on (see PictureLandmark), a list of the picture laid out as every list is: one row
          each in the dropdown with how far it still is from fitting, the selected one bolder on the canvas, its name editable,
          and a "+" that arms the next two clicks to name a new one. -->
-    <h3 class="section-title"><span id="label-reference-landmarks">Landmarks</span></h3>
+    <h3 class="section-title"><span id="label-reference-landmarks"></span></h3>
     <div class="element-list-row" id="reference-landmark-row">
       <label class="element-list-picker"><select id="reference-landmarks" aria-labelledby="label-reference-landmarks"></select></label>
-      <button id="delete-reference-landmark" type="button" class="icon-btn" title="Delete landmark" aria-label="Delete landmark">${Icons.TRASH}</button>
-      <span id="reference-landmark-empty" class="element-list-empty">No landmark</span>
-      <button id="add-reference-landmark" type="button" class="icon-btn element-list-add" title="Add a landmark" aria-label="Add a landmark">${Icons.PLUS}</button>
+      <button id="delete-reference-landmark" type="button" class="icon-btn">${Icons.TRASH}</button>
+      <span id="reference-landmark-empty" class="element-list-empty"></span>
+      <button id="add-reference-landmark" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="reference-landmark-item">
-      <label><span id="label-reference-landmark-label">Name</span> <input id="referenceLandmarkLabel" type="text" placeholder="Masking tree, fence…"/></label>
+      <label><span id="label-reference-landmark-label"></span> <input id="referenceLandmarkLabel" type="text"/></label>
     </div>
     </div>
     <div class="form-section">
     <!-- The ghosts of the lens in the picture (see GhostFinder): looked for on demand, shown on the picture itself with what each is the
          ghost of and the lens's axis they lie across. Loaded only when asked for (see GhostSearchView). -->
-    <h3 class="section-title"><span id="label-reference-ghosts">Ghosts in the picture</span></h3>
-    <button id="reference-find-ghosts" type="button">Look for ghosts</button>
-    <button id="reference-ghosts-shown" type="button" aria-pressed="true" hidden>Hide ghosts</button>
+    <h3 class="section-title"><span id="label-reference-ghosts"></span></h3>
+    <button id="reference-find-ghosts" type="button"></button>
+    <button id="reference-ghosts-shown" type="button" aria-pressed="true" hidden></button>
     <span id="reference-ghosts-status" class="apparent-size"></span>
     </div>
     </div>
@@ -655,19 +655,19 @@ export const html = `
     <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
          of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. A list of its own, laid out
          as every list is; its "+" reads a KML or KMZ file. -->
-    <h3 class="section-title"><span id="label-trace-import">Investigator's lines (KML, KMZ)</span></h3>
+    <h3 class="section-title"><span id="label-trace-import"></span></h3>
     <div class="element-list-row" id="trace-row">
       <label class="element-list-picker"><select id="trace" aria-labelledby="label-trace-import"></select></label>
-      <button id="delete-trace" type="button" class="icon-btn" title="Delete trace" aria-label="Delete trace">${Icons.TRASH}</button>
-      <span id="trace-empty" class="element-list-empty">No investigator's line</span>
-      <button id="add-trace" type="button" class="icon-btn element-list-add" title="Investigator's lines (KML, KMZ)" aria-label="Investigator's lines (KML, KMZ)">${Icons.PLUS}</button>
+      <button id="delete-trace" type="button" class="icon-btn">${Icons.TRASH}</button>
+      <span id="trace-empty" class="element-list-empty"></span>
+      <button id="add-trace" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <!-- Where the lines added by "+" are read from: a file of the author's, or an address. -->
     <span id="trace-import-row" class="input-file-row" hidden><rr0-input-file id="trace-import" name="trace-import" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" placeholder="https://…/lines.kmz"></rr0-input-file></span>
     <span id="trace-status" class="apparent-size"></span>
     <div class="element-list-body" id="trace-item">
-      <label><span id="label-trace-title">Name</span> <input id="traceTitle" class="trace-field" type="text"/></label>
-      <label><span id="label-trace-source">Source</span> <input id="traceSource" class="trace-field" type="text"/></label>
+      <label><span id="label-trace-title"></span> <input id="traceTitle" class="trace-field" type="text"/></label>
+      <label><span id="label-trace-source"></span> <input id="traceSource" class="trace-field" type="text"/></label>
     </div>
     </div>
   </div>
@@ -678,33 +678,33 @@ export const html = `
        come first and open on arrival: they are what the rest of this editor draws and records. -->
   <div class="subtabs-row">
   <div class="group-tabs" id="shape-tabs">
-    <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup">Shapes</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup">Bodies</span></button>
+    <button class="subgroup-tab" type="button" aria-controls="shape-shapes" aria-expanded="true"><span id="label-shapes-subgroup"></span></button>
+    <button class="subgroup-tab" type="button" aria-controls="shape-bodies" aria-expanded="false"><span id="label-bodies-subgroup"></span></button>
   </div>
   <!-- How the account is drawn, and which part of the Phenomenon group edits it: the angles the observer drew (2D, the shapes) or what
        they said those were, in 3D (the bodies). Follows the panels as they are opened, and opens them when chosen. -->
-  <label id="account-view-row" class="account-view"><span id="label-account-view">Account</span>
-    <select id="account-view"><option value="shapes">2D · shapes</option><option value="bodies">3D · bodies</option></select></label>
+  <label id="account-view-row" class="account-view"><span id="label-account-view"></span>
+    <select id="account-view"><option value="shapes"></option><option value="bodies"></option></select></label>
   <!-- The shapes beside the bodies as outlines (see SceneElement.compareAccount), or the bodies alone: the player's own choice. -->
-  <label id="account-compare-row" class="account-view" hidden><input id="account-compare" type="checkbox" checked/> <span id="label-account-compare">Compare with the account</span></label>
+  <label id="account-compare-row" class="account-view" hidden><input id="account-compare" type="checkbox" checked/> <span id="label-account-compare"></span></label>
   </div>
   <section class="subgroup-panel" id="shape-shapes" aria-labelledby="label-shapes-subgroup">
   <div class="toolbar">
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of what is set on the
          picked shape, gone while there is none. -->
     <div class="element-list-row" id="shape-row">
-      <label class="element-list-picker"><select id="source" aria-label="Shape"></select></label>
-      <button id="delete-shape" type="button" class="icon-btn" title="Delete shape" aria-label="Delete shape">${Icons.TRASH}</button>
-      <span id="shape-empty" class="element-list-empty">No shape</span>
-      <button id="add-shape" type="button" class="icon-btn element-list-add" title="Add shape" aria-label="Add shape">${Icons.PLUS}</button>
+      <label class="element-list-picker"><select id="source"></select></label>
+      <button id="delete-shape" type="button" class="icon-btn">${Icons.TRASH}</button>
+      <span id="shape-empty" class="element-list-empty"></span>
+      <button id="add-shape" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <div class="element-list-body" id="shape-item">
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-appearance">Appearance</span></h3>
-    <label><span id="label-shape-title">Name</span> <input id="shapeTitle" type="text"/></label>
-    <label><span id="label-color">Color</span> <input id="color" type="color" value="#39ff14"/></label>
-    <label><span id="label-transparency">Transparency</span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
-    <label><span id="label-halo">Halo</span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
+    <h3 class="section-title"><span id="label-section-appearance"></span></h3>
+    <label><span id="label-shape-title"></span> <input id="shapeTitle" type="text"/></label>
+    <label><span id="label-color"></span> <input id="color" type="color" value="#39ff14"/></label>
+    <label><span id="label-transparency"></span> <input id="transparency" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label><span id="label-halo"></span> <input id="haloScale" type="range" min="0" max="3" step="0.1" value="1.5"/></label>
     <!-- Next to the halo, which it will be confused with, and named for the edge rather than for
          the light: a halo is a glow AROUND the shape, this is the outline itself losing its
          position. What it is worth as a distance, through the instrument the recording states, is
@@ -712,11 +712,11 @@ export const html = `
     <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
          the light's own behaviour — a veil that washes out the field around it, the spikes its
          aperture throws, and a core clipped to white. See BaseShape.brightness. -->
-    <label class="adv"><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the witness said it was — a light you cannot look at does three things a halo never does"/></label>
-    <label class="adv"><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the witness said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
+    <label class="adv"><span id="label-brightness"></span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0"/></label>
+    <label class="adv"><span id="label-blur"></span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0"/></label>
     </div>
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-size">Size and distance</span></h3>
+    <h3 class="section-title"><span id="label-section-size"></span></h3>
     <!-- Three readings of ONE relation, apparent width = f(real width, distance), kept in step.
          Only the apparent width is the recording's (BaseShape.angular); the real width is derived
          from it, and the distance is where the scene DRAWS the shape (see PhenomenonDepth), never a
@@ -724,26 +724,26 @@ export const html = `
          with nothing held the real width is what a thing keeps: a distance edit changes how big it
          looks, and a width edit changes the other width at the distance it stands (the shape is
          resized on the canvas, which is what "try a size at a distance" always did). -->
-    <label><span id="label-apparent-width">Apparent width</span>
-      <input id="apparentWidth" type="number" min="0" max="180" step="0.1" title="How wide it looked, in degrees — the recording's own statement of size"/>°
+    <label><span id="label-apparent-width"></span>
+      <input id="apparentWidth" type="number" min="0" max="180" step="0.1"/>°
       <output id="apparent-size" class="apparent-size inline" for="apparentWidth"></output></label>
-    <label><span id="label-real-width">Real width</span>
-      <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
-    <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m</label>
+    <label><span id="label-real-width"></span>
+      <input id="realWidth" type="number" min="0" max="30000" step="0.1"/> m</label>
+    <label><span id="label-object-distance"></span>
+      <input id="objectDistance" type="number" min="0" max="30000" step="1"/> m</label>
     <!-- The shape's turn on the drawing (BaseShape.angle), as its handle sets it: clockwise on screen, in degrees. -->
-    <label><span id="label-shape-rotation">Rotation</span>
+    <label><span id="label-shape-rotation"></span>
       <input id="shapeRotation" type="number" min="-180" max="180" step="1"/> &deg;</label>
-    <label><span id="label-size-lock">Hold</span>
-      <select id="sizeLock" title="Which of the three stays put while another is edited">
-        <option id="option-lock-none" value="none">nothing</option>
-        <option id="option-lock-apparent" value="apparent">the apparent width</option>
-        <option id="option-lock-real" value="real">the real width</option>
-        <option id="option-lock-distance" value="distance">the distance</option>
+    <label><span id="label-size-lock"></span>
+      <select id="sizeLock">
+        <option id="option-lock-none" value="none"></option>
+        <option id="option-lock-apparent" value="apparent"></option>
+        <option id="option-lock-real" value="real"></option>
+        <option id="option-lock-distance" value="distance"></option>
       </select></label>
     <!-- Shown only while a distance of the reader's own is in force — whichever field put it there:
          the distance itself, or the real width with the apparent width held. -->
-    <button id="clear-distance-hypothesis" type="button" title="Back to what the recording establishes">Withdraw the distance hypothesis</button>
+    <button id="clear-distance-hypothesis" type="button"></button>
     <output id="real-size" class="apparent-size" for="realWidth"></output>
     <output id="depth-basis" class="apparent-size" for="objectDistance"></output>
     <!-- The depth of field, read backwards. The scene blurs the WORLD from its distance and leaves
@@ -753,17 +753,17 @@ export const html = `
     <output id="blur-bound" class="apparent-size" for="blur"></output>
     </div>
     <div class="form-section">
-    <h3 class="section-title"><span id="label-section-path">Path</span></h3>
+    <h3 class="section-title"><span id="label-section-path"></span></h3>
     <div class="record-row">
       <button id="record" type="button" class="record-btn"></button>
-      <label class="adv"><span id="label-sampling-rate">Sampling rate</span> <input id="samplingRate" type="number" min="1" max="1000" step="1"/> ms</label>
+      <label class="adv"><span id="label-sampling-rate"></span> <input id="samplingRate" type="number" min="1" max="1000" step="1"/> ms</label>
     </div>
     </div>
     </div>
   </div>
   <!-- What the phenomenon did, as events whose shapes the player works out (see EventsPanel): after the shapes, whose list it is not. -->
   <div class="form-section events-section" id="phenomenon-events-section" hidden>
-  <h3 class="section-title"><span id="label-section-phenomenon-events" class="events-title">Events</span></h3>
+  <h3 class="section-title"><span id="label-section-phenomenon-events" class="events-title"></span></h3>
   <div class="events-body"></div>
   </div>
   </section>
@@ -773,29 +773,29 @@ export const html = `
     </div>
     <!-- What the bodies did, as events whose keyframes the player works out (see EventsPanel): the picked body's, after its fields. -->
     <div class="form-section events-section" id="bodies-events-section" hidden>
-    <h3 class="section-title"><span id="label-section-bodies-events" class="events-title">Events</span></h3>
+    <h3 class="section-title"><span id="label-section-bodies-events" class="events-title"></span></h3>
     <div class="events-body"></div>
     </div>
   </section>
 </section>
 </div>
 <div id="context-menu" class="context-menu" hidden role="menu">
-  <button id="context-group" type="button" role="menuitem">Group</button>
-  <button id="context-ungroup" type="button" role="menuitem">Ungroup</button>
-  <button id="context-duplicate" type="button" role="menuitem">Duplicate</button>
+  <button id="context-group" type="button" role="menuitem"></button>
+  <button id="context-ungroup" type="button" role="menuitem"></button>
+  <button id="context-duplicate" type="button" role="menuitem"></button>
   <hr/>
-  <button id="context-bring-to-front" type="button" role="menuitem">Bring to front</button>
-  <button id="context-send-to-back" type="button" role="menuitem">Send to back</button>
+  <button id="context-bring-to-front" type="button" role="menuitem"></button>
+  <button id="context-send-to-back" type="button" role="menuitem"></button>
   <hr/>
-  <button id="context-add-vertex" type="button" role="menuitem">Add vertex</button>
-  <button id="context-delete-vertex" type="button" role="menuitem">Delete vertex</button>
+  <button id="context-add-vertex" type="button" role="menuitem"></button>
+  <button id="context-delete-vertex" type="button" role="menuitem"></button>
   <hr/>
-  <button id="context-delete" type="button" role="menuitem" class="context-delete">Delete</button>
+  <button id="context-delete" type="button" role="menuitem" class="context-delete"></button>
 </div>
 <div id="decor-context-menu" class="context-menu" hidden role="menu">
-  <button id="context-view-account" type="button" role="menuitem">View account</button>
+  <button id="context-view-account" type="button" role="menuitem"></button>
   <div class="submenu-trigger">
-    <span id="label-context-masks" class="submenu-label" role="menuitem" aria-haspopup="true">Masks &#9656;</span>
+    <span id="label-context-masks" class="submenu-label" role="menuitem" aria-haspopup="true"></span>
     <div id="context-masks-submenu" class="submenu" role="menu"></div>
   </div>
 </div>

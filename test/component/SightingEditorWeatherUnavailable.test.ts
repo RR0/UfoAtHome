@@ -201,7 +201,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -215,11 +215,12 @@ beforeAll(() => {
 /** No meteorological record: the suite never reaches the network. */
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
-function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): SightingEditorElement {
+async function mount(weatherProvider: WeatherProvider = NO_RECORD_PROVIDER): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = weatherProvider
   document.body.appendChild(element)
   ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
+  await element.ready
   return element
 }
 
@@ -256,8 +257,8 @@ describe("moving a shape", () => {
     document.body.innerHTML = ""
   })
 
-  it("a moved shape drops the direction it carried when the pose gives none to state, so the scene follows its box", () => {
-    const element = mount()
+  it("a moved shape drops the direction it carried when the pose gives none to state, so the scene follows its box", async () => {
+    const element = await mount()
     const json = oneShapeJson()
     Object.assign(json.timeline.keyframes[0].shapes[0].shape, { aim: { azimuthDeg: 10, altitudeDeg: 5 } })
     element.sightingData = json
@@ -308,8 +309,8 @@ describe("weather records that cannot be asked", () => {
     setInput(shadow, "obs-time", "1965-07-01T05:00")
   }
 
-  it("says beside the greyed box which half is lacking, not only in a tooltip", () => {
-    const element = mount(recordProvider())
+  it("says beside the greyed box which half is lacking, not only in a tooltip", async () => {
+    const element = await mount(recordProvider())
     const shadow = element.shadowRoot!
     const said = () => shadow.getElementById("weather-source-text")!.textContent!.trim()
     setInput(shadow, "obs-time", "1965-07-01T05:00")
@@ -321,7 +322,7 @@ describe("weather records that cannot be asked", () => {
   })
 
   it("forgets the record it asked when the date is taken away, and says why the box is unavailable", async () => {
-    const element = mount(recordProvider())
+    const element = await mount(recordProvider())
     const shadow = element.shadowRoot!
     stateDateAndPlace(element)
     await waitFor(() => element.sightingData.weatherSource !== undefined)
@@ -334,7 +335,7 @@ describe("weather records that cannot be asked", () => {
   })
 
   it("forgets the record when a segment of the date is taken out of the picker, though the field writes nothing for it", async () => {
-    const element = mount(recordProvider())
+    const element = await mount(recordProvider())
     const shadow = element.shadowRoot!
     stateDateAndPlace(element)
     await waitFor(() => element.sightingData.weatherSource !== undefined)
@@ -352,7 +353,7 @@ describe("weather records that cannot be asked", () => {
     const provider: WeatherProvider = {
       getWeather: query => Promise.resolve({ source: { ...SOURCE, id: "open-meteo-forecast" }, samples: query.points.map(point => ({ time: point.time, weather: ON_RECORD })) })
     }
-    const element = mount(provider)
+    const element = await mount(provider)
     const shadow = element.shadowRoot!
     stateDateAndPlace(element)
     await waitFor(() => element.sightingData.weatherSource !== undefined)

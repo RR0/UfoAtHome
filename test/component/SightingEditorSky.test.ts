@@ -201,7 +201,7 @@ beforeAll(() => {
   // resolve a relative URL against a real page origin anyway). Plain assignment, not
   // vi.stubGlobal: the "export button" describe block below calls vi.unstubAllGlobals() in its
   // own afterEach to clean up its own Blob/URL stubs, which would otherwise also wipe these two
-  // needed by every other describe block's mount().
+  // needed by every other describe block's await mount().
   globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
   // jsdom has no ResizeObserver — SceneElement.connectedCallback() (also nested now) uses one to
   // track its canvas size.
@@ -216,11 +216,12 @@ beforeAll(() => {
 const NO_RECORD_PROVIDER: WeatherProvider = { getWeather: () => Promise.resolve(undefined) }
 
 /** An editor holding one shape, as an author would add it with +. */
-function mount(): SightingEditorElement {
+async function mount(): Promise<SightingEditorElement> {
   const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
   element.weatherProvider = NO_RECORD_PROVIDER
   document.body.appendChild(element)
   ;(element.shadowRoot!.getElementById("add-shape-oval") as HTMLButtonElement).click()
+  await element.ready
   return element
 }
 
@@ -253,7 +254,7 @@ describe("the sky and the instrument for an eclipse, the Moon and a filter", () 
   }
 
   it("puts a solar filter on at the playhead, takes it off later, and says so only where it takes something off", async () => {
-    const element = mount()
+    const element = await mount()
     const select = element.shadowRoot!.getElementById("filter") as HTMLSelectElement
     const choose = (value: string) => {
       select.value = value
@@ -276,7 +277,7 @@ describe("the sky and the instrument for an eclipse, the Moon and a filter", () 
   })
 
   it("names a total eclipse, and its two minutes, without anyone declaring it", async () => {
-    const element = mount()
+    const element = await mount()
     overPlace(element, "1999-08-11 12:23", "2", "49.2583", "4.0317")
     await waitFor(() => /eclipse|éclipse/i.test(skyLine(element)))
     expect(skyLine(element)).toMatch(/Total solar eclipse|Éclipse totale de Soleil/)
@@ -284,14 +285,14 @@ describe("the sky and the instrument for an eclipse, the Moon and a filter", () 
   })
 
   it("says how much of the Sun a partial eclipse hides", async () => {
-    const element = mount()
+    const element = await mount()
     overPlace(element, "1999-08-11 12:23", "2", "48.8566", "2.3522")
     await waitFor(() => /eclipse|éclipse/i.test(skyLine(element)))
     expect(skyLine(element)).toMatch(/hides 99% of the Sun|cache 99 % du Soleil/)
   })
 
   it("calls a perigee full Moon a supermoon, with its width, and does not make the horizon one", async () => {
-    const element = mount()
+    const element = await mount()
     overPlace(element, "2016-11-14 17:50", "1", "48.8566", "2.3522")
     await waitFor(() => /supermoon|super-lune/i.test(skyLine(element)))
     expect(skyLine(element)).toMatch(/0[.,]55\d°/)
@@ -299,7 +300,7 @@ describe("the sky and the instrument for an eclipse, the Moon and a filter", () 
   })
 
   it("names the lune rousse only in the lunation after Easter", async () => {
-    const element = mount()
+    const element = await mount()
     overPlace(element, "2026-05-01 21:40", "2", "48.8566", "2.3522")
     await waitFor(() => /lune rousse/.test(skyLine(element)))
     expect(skyLine(element)).toMatch(/after Easter|suit Pâques/)
