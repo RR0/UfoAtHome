@@ -194,7 +194,6 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   bodiesSubgroup: "Corps",
   sky: "Ciel",
   dataSources: "Sources des données",
-  lanternsSubgroup: "Lanternes",
   soundGroup: "Son",
   close: "Fermer",
   editorKicker: "Éditeur d'observation",

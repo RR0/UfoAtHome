@@ -502,7 +502,6 @@ export const html = `
     <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group">Precipitation</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group">Clouds</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="sky-lanterns" aria-expanded="false"><span id="label-lanterns-subgroup">Lanterns</span></button>
   </div>
   <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
     <div class="toolbar">
@@ -546,14 +545,7 @@ export const html = `
   </section>
   <!-- What happened in that sky as facts (see SkyEventsJson), beside the state it was in: neither the decor, which outlasts the
        observation, nor the interpretation, which reads the account. -->
-  <!-- Sky lanterns, a reading of the account (InterpretationJson.lanterns) rather than a fact of its sky, beside the launches it would
-       otherwise be taken for: built the first time it is opened (see LanternEditor), with the launches' layout. -->
-  <section class="subgroup-panel" id="sky-lanterns" aria-labelledby="label-lanterns-subgroup" hidden>
-    <div class="toolbar">
-      <style>#lantern-editor { flex-basis: 100%; min-width: 0; } #lantern-editor #lantern-list { flex-basis: 100%; min-width: 0; } #lantern-editor .launch-editor, #lantern-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #lantern-editor .launch-fields { flex-basis: 100%; min-width: 0; } #lantern-editor [hidden] { display: none !important; } #lantern-editor select { min-width: 0; width: 100%; } #lantern-editor .launch-intro { flex-basis: 100%; margin: 0; } #lantern-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #lantern-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #lantern-editor input, #lantern-editor select { max-width: 100%; box-sizing: border-box; } #lantern-editor input[type="text"] { width: 12em; } #lantern-editor label { min-width: 0; max-width: 100%; } #lantern-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="lantern-editor"></div>
-    </div>
-  </section>
-  <!-- The parts of the kinds of events of the sky the registry holds (see SkyEventKind, SightingEditorElement.syncSkyEventParts) go here, before this mark: launches, beams, fireballs. -->
+  <!-- The parts of the kinds of events of the sky the registry holds (see SkyEventKind, SightingEditorElement.syncSkyEventParts) go here, before this mark: lanterns, launches, beams, fireballs. -->
   <template id="sky-event-parts"></template>
 </section>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is

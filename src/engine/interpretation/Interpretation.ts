@@ -43,6 +43,8 @@ export interface InterpretationJson {
    * changes: the variant is the transformation, kept so it can be replayed and computed again when the error model changes.
    */
   variant?: VariantJson
+  /** What a kind of interpretation a module brings states, under that kind's key (see InterpretationKind): computed into bodies when shown. */
+  [kind: string]: unknown
 }
 
 /** What makes an interpretation a variant of the account — see InterpretationJson.variant. */
@@ -119,6 +121,8 @@ export interface InterpretationEventJson {
   smoke?: SmokeSource[]
   flares?: FlareSalvoJson[]
   lanterns?: LanternLaunchJson[]
+  /** What a kind of interpretation a module brings states, under that kind's key (see InterpretationKind). */
+  [kind: string]: unknown
 }
 
 /** The shapes this project builds itself. "figure" is a standing human silhouette — the decor's own

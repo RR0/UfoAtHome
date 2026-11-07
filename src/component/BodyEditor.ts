@@ -20,6 +20,8 @@ import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { bodyEditorMessages_en } from "./messages/BodyEditorMessages_en.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { loadBodyEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
+import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
 
 /** What the Bodies part needs of the editor it stands in, read at every use: the recording, its
  * texts reader and its model catalogue are all replaced over an editor's life. */
@@ -662,8 +664,7 @@ export class BodyEditor {
   private write(interpretation: InterpretationJson, refill = false): void {
     // An interpretation left with no body and no title says nothing, and is not kept as an empty
     // statement — unless it still has what the other parts edit: lanterns, decoy flares.
-    const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined
-      && interpretation.flares === undefined && interpretation.lanterns === undefined
+    const empty = InterpretationKinds.saysNothing(interpretation, InterpretationRegistry.kinds())
     this.host.sighting().interpretation = empty ? undefined : interpretation
     this.host.changed()
     if (refill) {

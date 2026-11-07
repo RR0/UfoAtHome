@@ -61,7 +61,7 @@ export default ({ manifestUrl }) => ({
   }]
 })`
 
-  private static readonly POINTS = "weather, place, timeZone, narrative, assessment, lightPollution, aircraft, upperAir, elevation, imagery, surroundings, decorModels, skyEvents"
+  private static readonly POINTS = "weather, place, timeZone, narrative, assessment, lightPollution, aircraft, upperAir, elevation, imagery, surroundings, decorModels, skyEvents, interpretations"
 
   private static readonly SKY_EVENT = `// A kind of event of the sky: stated in recordings under skyEvents.ballLightning.
 export default ({ three }) => ({
@@ -108,6 +108,8 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
     <h2>${t.skyHeading}</h2>
     <p>${t.sky}</p>
     <pre><code>${escape(DocsModulesPage.SKY_EVENT)}</code></pre>
+    <h2>${t.readingHeading}</h2>
+    <p>${t.reading}</p>
     <h2>${t.editorHeading}</h2>
     <p>${t.editor}</p>
     <h2>${t.recordingHeading}</h2>
@@ -122,7 +124,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
 
   private static readonly TEXT: Said<{
     whatHeading: string, what: string, manifestHeading: string, manifest: string, fields: string[], scriptHeading: string, script: string,
-    points: string, trust: string, skyHeading: string, sky: string, editorHeading: string, editor: string, recordingHeading: string, recording: string, prHeading: string, pr: string
+    points: string, trust: string, skyHeading: string, sky: string, readingHeading: string, reading: string, editorHeading: string, editor: string, recordingHeading: string, recording: string, prHeading: string, pr: string
   }> = {
     en: {
       whatHeading: "What a module brings",
@@ -141,6 +143,8 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       trust: "A script runs with everything the page can do. It is run only for a module the person added themself, never for one a recording names.",
       skyHeading: "Simulating a kind of event of the sky",
       sky: "A kind of event of the sky (lightning, a rocket, a flare…) is what a recording states under <code>skyEvents.&lt;key&gt;</code>, drawn in the scene and edited in a part of the Sky group of its own. Its <code>simulation</code> gives the scene a three.js object and places it at every tick, from the instant and the frame the scene is in (where the eye is, the air, the ground, the wind); it never draws itself. The frame also says where the observer really stands, the real instant, the faintest magnitude seen, what the clouds and the air let through, and lets it light the ground (<code>lightFrom</code>) and dazzle the eye (<code>glareFrom</code>). Build it with the <code>three</code> the script is given, never a copy of your own. The launches, the beams and the fireballs of UFO@home are written this way, in <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
+      readingHeading: "A kind of interpretation",
+      reading: "A reading of an account that a few parameters state, computed into bodies when shown (sky lanterns let go from a garden, decoy flares an aircraft dispensed): stated under <code>interpretation.&lt;key&gt;</code>, given to <code>interpretations</code> with a <code>key</code>, a <code>title</code>, <code>bodiesOf(item)</code> returning the bodies it is, and an optional <code>editor</code>. Not a fact of the sky: what somebody claims the account saw.",
       editorHeading: "Adding one in the editor",
       editor: "In the <strong>Files</strong> group, the <strong>Modules</strong> item: type the manifest's address and press <strong>Add</strong>. Your modules are kept in this browser, can be turned off or removed, and saved to a file (<strong>Save my modules</strong>) that loads them elsewhere (<strong>Load modules</strong>).",
       recordingHeading: "A recording that needs one",
@@ -165,6 +169,8 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       trust: "Un script s'exécute avec tous les droits de la page. Il n'est exécuté que pour un module que la personne a ajouté elle-même, jamais pour un module qu'un enregistrement nomme.",
       skyHeading: "Simuler une sorte d'événement du ciel",
       sky: "Une sorte d'événement du ciel (un éclair, une fusée, une fusée éclairante…) est ce qu'un enregistrement énonce sous <code>skyEvents.&lt;clé&gt;</code>, dessiné dans la scène et édité dans une partie à elle du groupe Ciel. Sa <code>simulation</code> donne à la scène un objet three.js et le place à chaque image, d'après l'instant et le cadre où la scène se trouve (où est l'œil, l'air, le sol, le vent) ; elle ne dessine jamais elle-même. Le cadre dit aussi où le témoin se tient vraiment, l'instant réel, la magnitude la plus faible vue, ce que les nuages et l'air laissent passer, et lui permet d'éclairer le sol (<code>lightFrom</code>) et d'éblouir l'œil (<code>glareFrom</code>). Construisez-la avec le <code>three</code> que reçoit le script, jamais une copie à vous. Les lancements, les faisceaux et les bolides d'UFO@home sont écrits ainsi, dans <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
+      readingHeading: "Une sorte d'interprétation",
+      reading: "Une lecture d'un compte rendu qu'énoncent quelques paramètres, calculée en corps quand elle est montrée (des lanternes célestes lâchées d'un jardin, des leurres pyrotechniques largués par un avion) : énoncée sous <code>interpretation.&lt;clé&gt;</code>, donnée à <code>interpretations</code> avec une <code>key</code>, un <code>title</code>, <code>bodiesOf(item)</code> qui renvoie les corps qu'elle est, et un <code>editor</code> facultatif. Pas un fait du ciel : ce que quelqu'un affirme que le compte rendu a vu.",
       editorHeading: "En ajouter un dans l'éditeur",
       editor: "Dans le groupe <strong>Fichiers</strong>, l'élément <strong>Modules</strong> : saisissez l'adresse du manifeste et appuyez sur <strong>Ajouter</strong>. Vos modules sont gardés dans ce navigateur, peuvent être désactivés ou retirés, et enregistrés dans un fichier (<strong>Enregistrer mes modules</strong>) qui les charge ailleurs (<strong>Charger des modules</strong>).",
       recordingHeading: "Un enregistrement qui en a besoin",
@@ -189,6 +195,8 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       trust: "Un script se ejecuta con todos los derechos de la página. Solo se ejecuta para un módulo que la persona añadió, nunca para uno que cita una grabación.",
       skyHeading: "Simular un tipo de evento del cielo",
       sky: "Un tipo de evento del cielo (un rayo, un cohete, una bengala…) es lo que una grabación declara en <code>skyEvents.&lt;clave&gt;</code>, dibujado en la escena y editado en una parte propia del grupo Cielo. Su <code>simulation</code> da a la escena un objeto three.js y lo coloca en cada imagen, según el instante y el marco en que está la escena (dónde está el ojo, el aire, el suelo, el viento); nunca dibuja por sí misma. El marco dice también dónde está realmente el testigo, el instante real, la magnitud más débil visible, lo que dejan pasar las nubes y el aire, y le permite iluminar el suelo (<code>lightFrom</code>) y deslumbrar al ojo (<code>glareFrom</code>). Constrúyala con el <code>three</code> que recibe el script, nunca con una copia propia. Los lanzamientos, los haces y los bólidos de UFO@home están escritos así, en <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
+      readingHeading: "Un tipo de interpretación",
+      reading: "Una lectura de un relato que declaran unos pocos parámetros, calculada en cuerpos cuando se muestra (farolillos soltados desde un jardín, bengalas señuelo que lanzó un avión): declarada en <code>interpretation.&lt;clave&gt;</code>, dada a <code>interpretations</code> con una <code>key</code>, un <code>title</code>, <code>bodiesOf(item)</code> que devuelve los cuerpos que es, y un <code>editor</code> opcional. No es un hecho del cielo: es lo que alguien afirma que el relato vio.",
       editorHeading: "Añadir uno en el editor",
       editor: "En el grupo <strong>Archivos</strong>, el elemento <strong>Módulos</strong>: escriba la dirección del manifiesto y pulse <strong>Añadir</strong>. Sus módulos se guardan en este navegador, pueden desactivarse o quitarse, y guardarse en un archivo (<strong>Guardar mis módulos</strong>) que los carga en otro lugar (<strong>Cargar módulos</strong>).",
       recordingHeading: "Una grabación que lo necesita",
@@ -213,6 +221,8 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       trust: "Uno script viene eseguito con tutti i diritti della pagina. Viene eseguito solo per un modulo che la persona ha aggiunto, mai per uno che una registrazione cita.",
       skyHeading: "Simulare un tipo di evento del cielo",
       sky: "Un tipo di evento del cielo (un fulmine, un razzo, un bengala…) è ciò che una registrazione dichiara sotto <code>skyEvents.&lt;chiave&gt;</code>, disegnato nella scena e modificato in una parte propria del gruppo Cielo. La sua <code>simulation</code> dà alla scena un oggetto three.js e lo colloca a ogni immagine, secondo l'istante e il quadro in cui si trova la scena (dov'è l'occhio, l'aria, il suolo, il vento); non disegna mai da sé. Il quadro dice anche dove si trova davvero il testimone, l'istante reale, la magnitudine più debole visibile, ciò che le nubi e l'aria lasciano passare, e le permette di illuminare il suolo (<code>lightFrom</code>) e di abbagliare l'occhio (<code>glareFrom</code>). Costruiscila con il <code>three</code> che lo script riceve, mai con una copia tua. I lanci, i fasci e i bolidi di UFO@home sono scritti così, in <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
+      readingHeading: "Un tipo di interpretazione",
+      reading: "Una lettura di un resoconto che pochi parametri dichiarano, calcolata in corpi quando viene mostrata (lanterne volanti lasciate da un giardino, bengala esca sganciati da un aereo): dichiarata sotto <code>interpretation.&lt;chiave&gt;</code>, data a <code>interpretations</code> con una <code>key</code>, un <code>title</code>, <code>bodiesOf(item)</code> che restituisce i corpi che è, e un <code>editor</code> facoltativo. Non un fatto del cielo: ciò che qualcuno afferma che il resoconto abbia visto.",
       editorHeading: "Aggiungerne uno nell'editor",
       editor: "Nel gruppo <strong>File</strong>, la voce <strong>Moduli</strong>: scrivi l'indirizzo del manifesto e premi <strong>Aggiungi</strong>. I tuoi moduli sono conservati in questo browser, possono essere disattivati o rimossi, e salvati in un file (<strong>Salva i miei moduli</strong>) che li carica altrove (<strong>Carica moduli</strong>).",
       recordingHeading: "Una registrazione che ne ha bisogno",

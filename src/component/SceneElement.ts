@@ -93,8 +93,6 @@ import { PhenomenonSystem } from "../render3d/PhenomenonSystem.js"
 import type { PlacedPhenomenon } from "../render3d/PhenomenonSystem.js"
 import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
-import { DecoyFlare } from "../modules/interpretations/flares/DecoyFlare.js"
-import { SkyLantern } from "../modules/interpretations/lanterns/SkyLantern.js"
 import { GlassWetting, LensGhosts } from "../engine/instrument/LensGhost.js"
 import { ReentrySighting } from "../modules/sky-events/reentries/Reentry.js"
 import type { GeoPoint, ReentryDetonation, ReentryJson } from "../modules/sky-events/reentries/Reentry.js"
@@ -194,6 +192,8 @@ const AFTERIMAGE_TOOLTIP = {
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
 import type { HeadlightMode } from "../engine/model/Headlights.js"
+import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
+import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
 
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
 /** Fired by a scene when the fireballs on record for its recording have arrived — see fireballState. */
@@ -1678,7 +1678,7 @@ export class SceneElement extends HTMLElement {
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
     // Its salvoes of flares and its lanterns, if it states any, are computed into bodies here (see DecoyFlare, SkyLantern).
-    this.interpretationShown = this.inTheRound ? SkyLantern.expand(DecoyFlare.expand(this.ufoElement.sighting.interpretation)) : undefined
+    this.interpretationShown = this.inTheRound ? InterpretationKinds.expand(this.ufoElement.sighting.interpretation, InterpretationRegistry.kinds()) : undefined
     this.syncAccountHidden()
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
@@ -3167,7 +3167,7 @@ export class SceneElement extends HTMLElement {
   }
 
   set interpretation(interpretation: InterpretationJson | undefined) {
-    this.interpretationShown = SkyLantern.expand(DecoyFlare.expand(interpretation))
+    this.interpretationShown = InterpretationKinds.expand(interpretation, InterpretationRegistry.kinds())
     // What is played is then the interpretation, and is called so.
     this.ufoElement.playerTitle = interpretation?.title
     this.syncAccountHidden()

@@ -1,3 +1,4 @@
+import { SkyEventEditorStyle } from "../../sky-events/SkyEventEditorStyle.js"
 import { LanternParameters } from "./LanternParameters.js"
 import type { LanternContext } from "./LanternParameters.js"
 import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
@@ -14,6 +15,8 @@ import { loadLanternEditorMessages, UFO_SUPPORTED_LANGUAGES } from "../../../com
 import { ElementList } from "../../../component/ElementList.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
 import type { PositionPlace } from "../../../component/ParameterForm.js"
+import { InterpretationKinds } from "../InterpretationKind.js"
+import { InterpretationRegistry } from "../interpretationSources.js"
 
 /** What the Lanterns part needs of the editor it stands in, read at every use. */
 export interface LanternEditorHost {
@@ -46,7 +49,11 @@ export class LanternEditor {
   /** The launches the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly LanternLaunchJson[] = []
 
+  /** The part's layout, given with it (see InterpretationKind.editor). */
+  private static readonly STYLE = `.lantern-editor-part { flex-basis: 100%; min-width: 0; } .lantern-editor-part #lantern-list { flex-basis: 100%; min-width: 0; } .lantern-editor-part .launch-editor, .lantern-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .lantern-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .lantern-editor-part [hidden] { display: none !important; } .lantern-editor-part select { min-width: 0; width: 100%; } .lantern-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .lantern-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .lantern-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .lantern-editor-part input, .lantern-editor-part select { max-width: 100%; box-sizing: border-box; } .lantern-editor-part input[type="text"] { width: 12em; } .lantern-editor-part label { min-width: 0; max-width: 100%; } .lantern-editor-part input.parameter-derived::placeholder { opacity: .65; }`
+
   constructor(private readonly container: HTMLElement, private readonly host: LanternEditorHost, language: string) {
+    SkyEventEditorStyle.attach(container, "lantern-editor-part", LanternEditor.STYLE)
     this.language = language
     if (!ParameterRegistry.of("lantern")) LanternParameters.publish()
     this.render()
@@ -199,8 +206,7 @@ export class LanternEditor {
     const sighting = this.host.sighting()
     const interpretation: InterpretationJson = { ...(sighting.interpretation ?? { bodies: [] }), lanterns: lanterns.length > 0 ? lanterns : undefined }
     if (interpretation.lanterns === undefined) delete interpretation.lanterns
-    const empty = interpretation.bodies.length === 0 && interpretation.title === undefined && interpretation.smoke === undefined
-      && interpretation.flares === undefined && interpretation.lanterns === undefined
+    const empty = InterpretationKinds.saysNothing(interpretation, InterpretationRegistry.kinds())
     sighting.interpretation = empty ? undefined : interpretation
   }
 

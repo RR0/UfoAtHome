@@ -261,6 +261,19 @@ describe("a kind of event of the sky a module brings", () => {
     expect(element.sightingData.skyEvents).toEqual({ ballLightning: [{ id: "b1" }, { id: "b2" }] })
   })
 
+  it("comes after the kinds of interpretation, whose parts are made the same way, a module's among them", async () => {
+    ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: {
+      skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }],
+      interpretations: [{ id: "balloons", name: "Balloons", credit: "©", creditUrl: "https://example.org", create: () => ({
+        key: "balloons", title: { en: "Balloons" }, bodiesOf: () => [],
+        editor: async () => () => ({ sync: () => undefined, refresh: () => undefined, setLanguage: async () => undefined })
+      }) }]
+    } })
+    const element = mount()
+    const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
+    expect(tabs.slice(-6)).toEqual(["interpretation-lanterns", "interpretation-balloons", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
+  })
+
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })
     const element = mount()
