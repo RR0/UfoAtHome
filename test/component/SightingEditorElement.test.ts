@@ -184,7 +184,7 @@ beforeAll(async () => {
     import("../../src/component/SightingFileEditor.js"),
     import("../../src/component/BodyEditor.js"),
     import("../../src/modules/sky-events/beams/BeamEditor.js"),
-    import("../../src/component/LaunchEditor.js"),
+    import("../../src/modules/sky-events/launches/LaunchEditor.js"),
     import("../../src/component/InputFileElement.js"),
     import("../../src/render3d/decor/ModelViewer.js"),
     import("../../src/render3d/decor/ModelThumbnails.js"),

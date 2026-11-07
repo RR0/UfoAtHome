@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { ReentrySighting } from "../../../src/engine/interpretation/Reentry.js"
-import type { ReentryJson } from "../../../src/engine/interpretation/Reentry.js"
+import { ReentrySighting } from "../../../src/modules/sky-events/reentries/Reentry.js"
+import type { ReentryJson } from "../../../src/modules/sky-events/reentries/Reentry.js"
 
 /** Due east along the equator, 1 degree (111 km) every 15 s, at a constant 80 km. Its pieces shed nothing unless they say (the geometry
  * is what most of these tests are about; see the tests of the shedding for what a piece does when it says nothing). */

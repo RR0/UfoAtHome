@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import type { BufferAttribute, Mesh } from "three"
-import type { PlumePuffView } from "../../src/engine/interpretation/LaunchPlume.js"
-import { PlumeSystem } from "../../src/render3d/PlumeSystem.js"
+import type { PlumePuffView } from "../../src/modules/sky-events/launches/LaunchPlume.js"
+import { PlumeSystem } from "../../src/modules/sky-events/launches/PlumeSystem.js"
 import { horizontalToCartesian } from "../../src/render3d/skyColors.js"
 
 const puff = (overrides: Partial<PlumePuffView> = {}): PlumePuffView => ({

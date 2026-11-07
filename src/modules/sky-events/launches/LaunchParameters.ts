@@ -1,8 +1,8 @@
 import { LaunchPlumeSighting } from "./LaunchPlume.js"
 import type { LaunchJetJson, LaunchJson, LaunchPlumeJson, LaunchRelease } from "./LaunchPlume.js"
-import { ParameterRegistry } from "./Parameters.js"
-import type { SaidText } from "../model/SaidText.js"
-import type { NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "./Parameters.js"
+import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
+import type { NumberParameter, ParameterHolder, ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
 
 /**
  * What a rocket launch lets its author set: the engine's thrust and impulse and the propellant, from

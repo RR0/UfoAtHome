@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { LaunchPlumeSighting } from "../../../src/engine/interpretation/LaunchPlume.js"
-import type { LaunchJson } from "../../../src/engine/interpretation/LaunchPlume.js"
+import { LaunchPlumeSighting } from "../../../src/modules/sky-events/launches/LaunchPlume.js"
+import type { LaunchJson } from "../../../src/modules/sky-events/launches/LaunchPlume.js"
 
 /** The Sun along the Earth-fixed x axis: noon on the equator at longitude 0, midnight at 180. */
 const SUN: [number, number, number] = [1, 0, 0]

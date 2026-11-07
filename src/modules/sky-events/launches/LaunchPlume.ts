@@ -1,8 +1,8 @@
 import * as Astronomy from "astronomy-engine"
-import type { SaidText } from "../model/SaidText.js"
-import { ExhaustFlight, ExhaustPath } from "./ExhaustFlight.js"
-import { ReentrySighting } from "./Reentry.js"
-import type { GeoPoint, ReentryKeyframe, SkyPoint } from "./Reentry.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
+import { ExhaustFlight, ExhaustPath } from "../../../engine/interpretation/ExhaustFlight.js"
+import { ReentrySighting } from "../reentries/Reentry.js"
+import type { GeoPoint, ReentryKeyframe, SkyPoint } from "../reentries/Reentry.js"
 
 /**
  * The exhaust a rocket leaves in the sky, which shows when the Sun still lights it and not the ground

@@ -1,5 +1,5 @@
-import type { SaidPosition } from "../model/SaidPosition.js"
-import type { SaidText } from "../model/SaidText.js"
+import type { SaidPosition } from "../../../engine/model/SaidPosition.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
 
 /**
  * An atmospheric re-entry an interpretation claims was what the observer saw: a decaying satellite

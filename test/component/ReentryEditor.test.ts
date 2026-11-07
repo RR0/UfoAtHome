@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { ReentryEditor } from "../../src/component/ReentryEditor.js"
-import type { ReentryJson } from "../../src/engine/interpretation/Reentry.js"
+import { ReentryEditor } from "../../src/modules/sky-events/reentries/ReentryEditor.js"
+import type { ReentryJson } from "../../src/modules/sky-events/reentries/Reentry.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"
 import type { SkyEventsJson } from "../../src/engine/model/SkyEvents.js"

@@ -21,11 +21,11 @@ import { RecordingEvents } from "../engine/events/RecordingEvents.js"
 import { RecordingActors, type ActorIssue, type ActorKind } from "../engine/events/RecordingActors.js"
 import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
-import type { LaunchEditor } from "./LaunchEditor.js"
+import type { LaunchEditor } from "../modules/sky-events/launches/LaunchEditor.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
 import type { SkyEventEditor, SkyEventKind } from "../modules/sky-events/SkyEventKind.js"
-import type { ReentryEditor } from "./ReentryEditor.js"
+import type { ReentryEditor } from "../modules/sky-events/reentries/ReentryEditor.js"
 import type { LanternEditor } from "./LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
@@ -8853,7 +8853,7 @@ export class SightingEditorElement extends HTMLElement {
    * or a re-entry only when somebody has put one in (see ReentryEditor).
    */
   private loadReentryEditor(): Promise<ReentryEditor> {
-    this.reentryEditorLoading ??= import("./ReentryEditor.js").then(({ ReentryEditor }) => {
+    this.reentryEditorLoading ??= import("../modules/sky-events/reentries/ReentryEditor.js").then(({ ReentryEditor }) => {
       this.reentryEditor = new ReentryEditor(this.shadow.getElementById("reentry-editor")!, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
@@ -8878,7 +8878,7 @@ export class SightingEditorElement extends HTMLElement {
    * of its own, since a recording has a launch only when somebody has put one in (see LaunchEditor).
    */
   private loadLaunchEditor(): Promise<LaunchEditor> {
-    this.launchEditorLoading ??= import("./LaunchEditor.js").then(({ LaunchEditor }) => {
+    this.launchEditorLoading ??= import("../modules/sky-events/launches/LaunchEditor.js").then(({ LaunchEditor }) => {
       this.launchEditor = new LaunchEditor(this.shadow.getElementById("launch-editor")!, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,

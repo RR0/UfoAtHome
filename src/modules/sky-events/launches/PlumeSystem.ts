@@ -1,9 +1,9 @@
 import { BufferAttribute, BufferGeometry, Group, Mesh, type MeshBasicMaterial } from "three"
-import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
-import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
-import type { PlumePuffView } from "../engine/interpretation/LaunchPlume.js"
-import { SkyRibbons } from "./SkyRibbons.js"
-import { horizontalToCartesian } from "./skyColors.js"
+import type { HorizontalPosition } from "../../../engine/astronomy/CelestialPositions.js"
+import { LaunchPlumeSighting } from "./LaunchPlume.js"
+import type { PlumePuffView } from "./LaunchPlume.js"
+import { SkyRibbons } from "../../../render3d/SkyRibbons.js"
+import { horizontalToCartesian } from "../../../render3d/skyColors.js"
 
 interface Vector {
   x: number

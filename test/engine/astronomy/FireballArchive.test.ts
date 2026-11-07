@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { FireballArchive } from "../../../src/engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../../../src/engine/astronomy/FireballArchive.js"
-import { ReentrySighting } from "../../../src/engine/interpretation/Reentry.js"
+import { ReentrySighting } from "../../../src/modules/sky-events/reentries/Reentry.js"
 
 /** The Scottish fireball of 27 December 2025, as the archive holds it. */
 const scottish: FireballRecord = {

@@ -1,4 +1,4 @@
-import type { GeoPoint } from "../../../engine/interpretation/Reentry.js"
+import type { GeoPoint } from "../../sky-events/reentries/Reentry.js"
 import type { AircraftDescription, AircraftProvider, AircraftTraffic, AircraftTrack } from "../../../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../../../engine/traffic/AircraftSighting.js"
 import { AircraftCoverage } from "../../../engine/traffic/AircraftCoverage.js"

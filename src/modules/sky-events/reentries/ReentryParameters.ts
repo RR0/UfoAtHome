@@ -1,6 +1,6 @@
 import { ReentrySighting } from "./Reentry.js"
 import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
-import type { ParameterHolder, ParameterSet, ParameterSpec } from "./Parameters.js"
+import type { ParameterHolder, ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
 
 /**
  * What a fireball or a re-entry lets its author set (see ReentryJson): its name and the object that came down, the points of its path,

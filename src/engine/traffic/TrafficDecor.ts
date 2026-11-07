@@ -1,6 +1,6 @@
 import type { DecorObject, DecorPlacementKeyframe } from "../model/Decor.js"
-import type { GeoPoint } from "../interpretation/Reentry.js"
-import { ReentrySighting } from "../interpretation/Reentry.js"
+import type { GeoPoint } from "../../modules/sky-events/reentries/Reentry.js"
+import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 import type { AircraftPoint, AircraftTrack } from "./AircraftProvider.js"
 import type { AircraftModel } from "./AircraftModels.js"
 import { AircraftModels } from "./AircraftModels.js"

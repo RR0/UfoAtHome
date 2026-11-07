@@ -1,5 +1,5 @@
-import type { GeoPoint, ReentryJson, SkyPoint } from "../interpretation/Reentry.js"
-import { ReentrySighting } from "../interpretation/Reentry.js"
+import type { GeoPoint, ReentryJson, SkyPoint } from "../../modules/sky-events/reentries/Reentry.js"
+import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 
 /**
  * The fireballs a camera network actually recorded, fetched by month from the archive built by

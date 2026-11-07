@@ -1,10 +1,10 @@
 import { BufferAttribute, BufferGeometry, Color, Group, Mesh, Points, Vector3, type MeshBasicMaterial, type PointsMaterial } from "three"
-import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
-import type { HorizontalPosition } from "../engine/astronomy/CelestialPositions.js"
-import type { ReentryFragmentView, SkyPoint } from "../engine/interpretation/Reentry.js"
-import { PointSources } from "./PointSources.js"
-import { SkyRibbons } from "./SkyRibbons.js"
-import { horizontalToCartesian, magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex } from "./skyColors.js"
+import { EyeAdaptation } from "../../../engine/atmosphere/EyeAdaptation.js"
+import type { HorizontalPosition } from "../../../engine/astronomy/CelestialPositions.js"
+import type { ReentryFragmentView, SkyPoint } from "./Reentry.js"
+import { PointSources } from "../../../render3d/PointSources.js"
+import { SkyRibbons } from "../../../render3d/SkyRibbons.js"
+import { horizontalToCartesian, magnitudeToBrightness, STAR_BRIGHTNESS_TIERS, starBrightnessTierIndex } from "../../../render3d/skyColors.js"
 
 interface Vector {
   x: number

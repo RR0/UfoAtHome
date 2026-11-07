@@ -1,5 +1,5 @@
-import type { GeoPoint } from "../interpretation/Reentry.js"
-import { ReentrySighting } from "../interpretation/Reentry.js"
+import type { GeoPoint } from "../../modules/sky-events/reentries/Reentry.js"
+import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 import { AircraftModels } from "./AircraftModels.js"
 import type { AircraftKind } from "./AircraftModels.js"
 import { AircraftHearing } from "./AircraftHearing.js"

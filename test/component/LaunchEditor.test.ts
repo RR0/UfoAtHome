@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { LaunchEditor } from "../../src/component/LaunchEditor.js"
+import { LaunchEditor } from "../../src/modules/sky-events/launches/LaunchEditor.js"
 import type { SkyEventsJson } from "../../src/engine/model/SkyEvents.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"
