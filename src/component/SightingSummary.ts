@@ -3,7 +3,7 @@ import { EdtfDateField, type TimeWords } from "./EdtfDateField.js"
 import { formatEdtfTime, resolveObserverPoseAt, resolveSoundAt, resolveWeatherAt, sightingDurationMs } from "../engine/model/Sighting.js"
 import type { DecorKind, DecorObject, DecorSide } from "../engine/model/Decor.js"
 import { DecorParameterSets } from "../engine/model/DecorParameterSets.js"
-import { Parameters } from "../engine/interpretation/Parameters.js"
+import { Parameters, ParameterTexts } from "../engine/interpretation/Parameters.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
 import { resolveDecorLitAt, resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { LIGHT_RIGS } from "../engine/model/LightRig.js"
@@ -138,7 +138,9 @@ export class SightingSummary {
     private readonly tags: SightingTags = new SightingTags({}),
     /** What a stated time is worded with, to read it as the editor's date field does ("11 May 1950, 19:45 — approximate")
      * instead of as raw EDTF. Absent where those words are not loaded: the chip then shows the EDTF. */
-    private readonly timeWords?: { messages: TimeWords, locale: string }
+    private readonly timeWords?: { messages: TimeWords, locale: string },
+    /** The words of the decor's parameters (see DecorParameterSets and ParameterTexts.resolve): its keys shown where they are not loaded. */
+    private readonly decorParameterTexts: object = {}
   ) {
   }
 
@@ -387,7 +389,8 @@ export class SightingSummary {
     this.push(entries, "decor", "decorState.lightRig", this.labels.decorLights, rig?.name)
     this.push(entries, "decor", "decorState.observerSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
     // What its kind publishes (floors, windows, a bridge's railing…), each stated value as a chip that leads to its own field.
-    for (const spec of DecorParameterSets.of(selected)?.parameters ?? []) {
+    const stated = DecorParameterSets.of(selected)
+    for (const spec of (stated && ParameterTexts.resolve(stated, this.decorParameterTexts))?.parameters ?? []) {
       const value = Parameters.read(selected as unknown as ParameterHolder, spec.key)
       if (value === undefined || value === null) continue
       const shown = spec.type === "choice" ? this.said.read(spec.choices.find(choice => choice.value === value)?.label) ?? String(value) : value

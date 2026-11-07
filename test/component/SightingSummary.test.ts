@@ -7,6 +7,8 @@ import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import { SceneNaming } from "../../src/component/messages/SceneNames.js"
 import { sceneNames_fr } from "../../src/component/messages/SceneNames_fr.js"
+import { decorParameterTexts_en } from "../../src/engine/model/messages/DecorParameterTexts_en.js"
+import { decorParameterTexts_fr } from "../../src/engine/model/messages/DecorParameterTexts_fr.js"
 
 /**
  * What the strip of chips under both components is allowed to say.
@@ -268,7 +270,9 @@ describe("SightingSummary", () => {
       sighting.decor = [{ id: "d1", kind: "building", eastM: 0, northM: 0, ...decor } as Sighting["decor"][number]]
       return sighting
     }
-    const entries = (sighting: Sighting) => summary.entriesFor(sighting, 0, { decorId: "d1" })
+    // Given the words of the decor's parameters, as the editor gives them once loaded (see DecorParameterSets).
+    const english = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["en"]), undefined, undefined, decorParameterTexts_en)
+    const entries = (sighting: Sighting) => english.entriesFor(sighting, 0, { decorId: "d1" })
 
     it("states what the object states, each as a chip that leads to its own field, with its unit", () => {
       const sighting = withDecor({ floors: 3, windows: { front: 40 } })
@@ -288,7 +292,7 @@ describe("SightingSummary", () => {
     })
 
     it("reads a label in the language asked for", () => {
-      const french = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["fr", "en"]))
+      const french = new SightingSummary(sightingLabels_en, new SceneNaming(), new SaidTexts(["fr", "en"]), undefined, undefined, decorParameterTexts_fr)
       const found = french.entriesFor(withDecor({ floors: 3 }), 0, { decorId: "d1" }).find(entry => entry.field === "decorParam.floors")
       expect(found?.label).toBe("Étages")
     })

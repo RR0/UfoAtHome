@@ -27,28 +27,26 @@ export class DecorParameterSets {
     return DecorParameterSets.SIDE_LABELS[side]
   }
 
-  private static readonly SIDE_LABELS: Record<DecorSide, SaidText> = {
-    front: { en: "Front", fr: "Avant", es: "Frente", it: "Fronte" },
-    behind: { en: "Behind", fr: "Arrière", es: "Detrás", it: "Dietro" },
-    left: { en: "Left", fr: "Gauche", es: "Izquierda", it: "Sinistra" },
-    right: { en: "Right", fr: "Droite", es: "Derecha", it: "Destra" },
-    "front-left": { en: "Front-left", fr: "Avant gauche", es: "Delantero izquierdo", it: "Anteriore sinistro" },
-    "front-right": { en: "Front-right", fr: "Avant droit", es: "Delantero derecho", it: "Anteriore destro" },
-    "behind-left": { en: "Behind-left", fr: "Arrière gauche", es: "Trasero izquierdo", it: "Posteriore sinistro" },
-    "behind-right": { en: "Behind-right", fr: "Arrière droit", es: "Trasero derecho", it: "Posteriore destro" }
+  private static readonly SIDE_LABELS: Record<DecorSide, string> = {
+    front: "front",
+    behind: "behind",
+    left: "left",
+    right: "right",
+    "front-left": "frontLeft",
+    "front-right": "frontRight",
+    "behind-left": "behindLeft",
+    "behind-right": "behindRight"
   }
 
-  private static readonly WINDOWS: SaidText = { en: "Windows", fr: "Fenêtres", es: "Ventanas", it: "Finestre" }
-  private static readonly BUILDING: SaidText = { en: "Building", fr: "Bâtiment", es: "Edificio", it: "Edificio" }
-  private static readonly BRIDGE: SaidText = { en: "Bridge", fr: "Pont", es: "Puente", it: "Ponte" }
-  private static readonly RAILING: SaidText = { en: "Railing", fr: "Garde-corps", es: "Barandilla", it: "Parapetto" }
-  private static readonly WIRE: SaidText = { en: "Overhead line", fr: "Ligne aérienne", es: "Línea aérea", it: "Linea aerea" }
+  private static readonly WINDOWS = "windows"
+  private static readonly BUILDING = "building"
+  private static readonly BRIDGE = "bridge"
+  private static readonly RAILING = "railing"
+  private static readonly WIRE = "overheadLine"
 
-  /** Two texts as one, language by language ("Windows" and "Front" are "Windows Front", "Fenêtres Avant"). */
-  private static together(first: SaidText, second: SaidText): SaidText {
-    const languages = ["en", "fr", "es", "it"]
-    const part = (text: SaidText, language: string) => typeof text === "string" ? text : (text[language] ?? text.en)
-    return Object.fromEntries(languages.map(language => [language, `${part(first, language)} ${part(second, language)}`]))
+  /** Two keys as one text ("windows" and "front" are "Windows Front", "Fenêtres Avant": see ParameterTexts.resolve). */
+  private static together(first: string, second: string): string {
+    return `${first} ${second}`
   }
 
   /** The parameters of this decor object, or none: the kinds the editor needs nothing more for. */
@@ -65,7 +63,7 @@ export class DecorParameterSets {
     // What the model publishes is written under `modelParameters`, so that no key of its can be taken for one of the object's own.
     if (published?.parameters) parameters.push(...published.parameters.map(spec => ({ ...spec, key: `modelParameters.${spec.key}` })))
     if (parameters.length === 0) return undefined
-    return { kind: `decor-${object.kind}`, title: { en: "Properties", fr: "Propriétés", es: "Propiedades", it: "Proprietà" }, parameters }
+    return { kind: `decor-${object.kind}`, title: "properties", parameters }
   }
 
   /** The floors of a building, and the one the observer is on. */
@@ -74,16 +72,15 @@ export class DecorParameterSets {
     return [
       {
         type: "number", key: "floors", min: 0, max: 20, step: 1, effective: () => DEFAULT_BUILDING_FLOORS,
-        label: { en: "Floors", fr: "Étages", es: "Plantas", it: "Piani" },
-        hint: { en: "Upper stories above the ground floor.", fr: "Étages au-dessus du rez-de-chaussée.", es: "Plantas sobre la planta baja.", it: "Piani sopra il pianterreno." },
+        label: "floors",
+        hint: "upperStoriesAboveTheGround",
         group: DecorParameterSets.BUILDING
       },
       {
         type: "number", key: "occupiedFloor", min: 0, max: 20, step: 1, effective: () => 0,
         bounds: element => ({ max: floorsOf(element) }),
-        label: { en: "Occupied floor", fr: "Étage occupé", es: "Planta ocupada", it: "Piano occupato" },
-        hint: { en: "The floor the witness is on, from 0 (ground floor).", fr: "L'étage où se tient le témoin, à partir de 0 (rez-de-chaussée).",
-          es: "La planta donde está el testigo, desde 0 (planta baja).", it: "Il piano dove si trova il testimone, da 0 (pianterreno)." },
+        label: "occupiedFloor",
+        hint: "theFloorTheWitnessIs",
         group: DecorParameterSets.BUILDING
       }
     ]
@@ -91,29 +88,23 @@ export class DecorParameterSets {
 
   /** The walls of a building: their colour, and the kind of facade they are. Drawn only where all three sizes are stated (see DecorFacade). */
   private static walls(): ParameterSpec[] {
-    const group: SaidText = { en: "Walls", fr: "Murs", es: "Muros", it: "Muri" }
+    const group: SaidText = "walls"
     return [
       {
         type: "colour", key: "facade.color", group, fallback: "#d3cab8",
-        label: { en: "Wall colour", fr: "Couleur des murs", es: "Color de los muros", it: "Colore dei muri" },
-        hint: { en: "The colour of the walls, drawn with the facade of their kind where the width, the length and the height of the building are all stated. Empty: a pale plaster.",
-          fr: "La couleur des murs, dessinés avec la façade de leur type là où la largeur, la longueur et la hauteur du bâtiment sont toutes énoncées. Vide : un enduit pâle.",
-          es: "El color de los muros, dibujados con la fachada de su tipo donde el ancho, el largo y el alto del edificio están todos enunciados. Vacío: un enlucido pálido.",
-          it: "Il colore dei muri, disegnati con la facciata del loro tipo dove larghezza, lunghezza e altezza dell'edificio sono tutte enunciate. Vuoto: un intonaco chiaro." }
+        label: "wallColour",
+        hint: "theColourOfTheWalls"
       },
       {
         type: "choice", key: "facade.openings", group,
-        label: { en: "Facade", fr: "Type de façade", es: "Tipo de fachada", it: "Tipo di facciata" },
-        empty: { en: "A house's", fr: "D'une maison", es: "De una casa", it: "Di una casa" },
-        hint: { en: "A house's: a window every three metres of every floor and a door, from a storey high (lower, a shed's bare wall). The tall windows of an old building, the tall narrow bays of a church, a bare wall (a warehouse, a shed, a monument), or none: the plain box.",
-          fr: "D'une maison : une fenêtre tous les trois mètres de chaque étage et une porte, dès la hauteur d'un étage (plus bas, le mur nu d'un abri). Les hautes fenêtres d'un immeuble ancien, les hautes baies étroites d'une église, un mur nu (un entrepôt, un hangar, un monument), ou aucune : la simple boîte.",
-          es: "De una casa: una ventana cada tres metros de cada planta y una puerta, desde la altura de una planta (más bajo, el muro liso de un cobertizo). Las ventanas altas de un edificio antiguo, los vanos altos y estrechos de una iglesia, un muro liso (un almacén, un cobertizo, un monumento), o ninguna: la caja lisa.",
-          it: "Di una casa: una finestra ogni tre metri di ogni piano e una porta, dall'altezza di un piano (più basso, il muro liscio di un capanno). Le finestre alte di un edificio antico, le alte aperture strette di una chiesa, un muro liscio (un magazzino, un capannone, un monumento), o nessuna: la semplice scatola." },
+        label: "facade",
+        empty: "aHouseS",
+        hint: "aHouseSAWindowEvery",
         choices: [
-          { value: "tall", label: { en: "Old building", fr: "Immeuble ancien", es: "Edificio antiguo", it: "Edificio antico" } },
-          { value: "lancet", label: { en: "Church", fr: "Église", es: "Iglesia", it: "Chiesa" } },
-          { value: "plain", label: { en: "Bare wall", fr: "Mur nu", es: "Muro liso", it: "Muro liscio" } },
-          { value: "none", label: { en: "None", fr: "Aucune", es: "Ninguna", it: "Nessuna" } }
+          { value: "tall", label: "oldBuilding" },
+          { value: "lancet", label: "church" },
+          { value: "plain", label: "bareWall" },
+          { value: "none", label: "noFacade" }
         ]
       }
     ]
@@ -121,41 +112,40 @@ export class DecorParameterSets {
 
   /** The roof of a building: its shape, how far it rises, which way its ridge runs, its colour. */
   private static roof(): ParameterSpec[] {
-    const group: SaidText = { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" }
+    const group: SaidText = "roof"
     const pitched = (element: ParameterHolder): boolean => ["gable", "hip", "dome"].includes(String(Parameters.read(element, "roof.shape")))
     return [
       {
         type: "choice", key: "roof.shape", group,
-        label: { en: "Roof", fr: "Toit", es: "Tejado", it: "Tetto" },
-        empty: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" },
-        hint: { en: "Flat (the box), two slopes to a ridge, four slopes, or a dome.", fr: "Plat (la boîte), deux pentes jusqu'à un faîte, quatre pentes, ou une coupole.", es: "Plano (la caja), dos vertientes hasta una cumbrera, cuatro vertientes, o una cúpula.", it: "Piano (la scatola), due falde fino a un colmo, quattro falde, o una cupola." },
+        label: "roof",
+        empty: "flat",
+        hint: "flatTheBoxTwoSlopes",
         choices: [
-          { value: "flat", label: { en: "Flat", fr: "Plat", es: "Plano", it: "Piano" } },
-          { value: "gable", label: { en: "Two slopes", fr: "Deux pentes", es: "Dos vertientes", it: "Due falde" } },
-          { value: "hip", label: { en: "Four slopes", fr: "Quatre pentes", es: "Cuatro vertientes", it: "Quattro falde" } },
-          { value: "dome", label: { en: "Dome", fr: "Coupole", es: "Cúpula", it: "Cupola" } }
+          { value: "flat", label: "flat" },
+          { value: "gable", label: "twoSlopes" },
+          { value: "hip", label: "fourSlopes" },
+          { value: "dome", label: "dome" }
         ]
       },
       {
         type: "number", key: "roof.riseM", min: 0, max: 15, step: 0.1, unit: "m", group, effective: () => 3,
-        label: { en: "Rise", fr: "Hauteur du toit", es: "Altura del tejado", it: "Altezza del tetto" },
-        hint: { en: "How far the ridge stands above the eaves: the walls are the building's height less this.", fr: "De combien le faîte dépasse l'égout : les murs font la hauteur du bâtiment moins cela.",
-          es: "Cuánto sube la cumbrera sobre el alero: los muros miden la altura del edificio menos esto.", it: "Quanto il colmo sta sopra la gronda: i muri sono l'altezza dell'edificio meno questo." },
+        label: "rise",
+        hint: "howFarTheRidgeStands",
         visibleWhen: pitched
       },
       {
         type: "choice", key: "roof.ridge", group, required: false,
-        label: { en: "Ridge along", fr: "Faîte le long de", es: "Cumbrera a lo largo de", it: "Colmo lungo" },
-        empty: { en: "The width", fr: "La largeur", es: "El ancho", it: "La larghezza" },
+        label: "ridgeAlong",
+        empty: "theWidth",
         choices: [
-          { value: "width", label: { en: "The width", fr: "La largeur", es: "El ancho", it: "La larghezza" } },
-          { value: "depth", label: { en: "The depth", fr: "La profondeur", es: "El largo", it: "La profondità" } }
+          { value: "width", label: "theWidth" },
+          { value: "depth", label: "theDepth" }
         ],
         visibleWhen: element => Parameters.read(element, "roof.shape") === "gable"
       },
       {
         type: "colour", key: "roof.color", group, fallback: "#7a5a4a",
-        label: { en: "Roof colour", fr: "Couleur du toit", es: "Color del tejado", it: "Colore del tetto" }
+        label: "roofColour"
       }
     ]
   }
@@ -167,8 +157,7 @@ export class DecorParameterSets {
       min: isWindowOpenable(kind, side) ? 0 : FIXED_WINDOW_MIN_OPACITY_PERCENT, max: 100,
       label: DecorParameterSets.SIDE_LABELS[side],
       summary: DecorParameterSets.together(DecorParameterSets.WINDOWS, DecorParameterSets.SIDE_LABELS[side]),
-      hint: { en: "Opacity of the window on this side: 0 is open, 100 shut. Empty: no window.", fr: "Opacité de la fenêtre de ce côté : 0 ouverte, 100 fermée. Vide : pas de fenêtre.",
-        es: "Opacidad de la ventana de este lado: 0 abierta, 100 cerrada. Vacío: sin ventana.", it: "Opacità della finestra di questo lato: 0 aperta, 100 chiusa. Vuoto: nessuna finestra." },
+      hint: "opacityOfTheWindowOn",
       group: DecorParameterSets.WINDOWS
     }))
   }
@@ -178,29 +167,25 @@ export class DecorParameterSets {
    * a sound states one, and emptying the choice takes the engine away with its noise.
    */
   private static engine(): ParameterSpec[] {
-    const group: SaidText = { en: "Engine sound", fr: "Bruit du moteur", es: "Sonido del motor", it: "Suono del motore" }
+    const group: SaidText = "engineSound"
     return [
       {
         type: "choice", key: "engine.kind", group,
-        label: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" },
-        hint: { en: "Whether the vehicle is heard running, and what sort of engine: how many cylinders fire, how low they turn, how its gears are spaced.",
-          fr: "Si le véhicule s'entend rouler, et de quel moteur : combien de cylindres tirent, à quel régime bas ils tournent, comment ses vitesses sont étagées.",
-          es: "Si se oye el vehículo en marcha, y qué motor: cuántos cilindros disparan, cuán bajo giran, cómo se escalonan sus marchas.",
-          it: "Se il veicolo si sente in marcia, e di che motore: quanti cilindri sparano, quanto in basso girano, come sono distanziate le marce." },
-        empty: { en: "Silent (parked)", fr: "Silencieux (à l'arrêt)", es: "Silencioso (parado)", it: "Silenzioso (fermo)" },
+        label: "engine",
+        hint: "whetherTheVehicleIsHeard",
+        empty: "silentParked",
         choices: [
-          { value: "car", label: { en: "Car", fr: "Voiture", es: "Coche", it: "Auto" } },
-          { value: "van", label: { en: "Van", fr: "Camionnette", es: "Furgoneta", it: "Furgone" } },
-          { value: "truck", label: { en: "Truck", fr: "Camion", es: "Camión", it: "Camion" } },
-          { value: "motorcycle", label: { en: "Motorcycle", fr: "Moto", es: "Moto", it: "Moto" } },
-          { value: "generic", label: { en: "Unknown", fr: "Inconnu", es: "Desconocido", it: "Sconosciuto" } }
+          { value: "car", label: "car" },
+          { value: "van", label: "van" },
+          { value: "truck", label: "truck" },
+          { value: "motorcycle", label: "motorcycle" },
+          { value: "generic", label: "unknown" }
         ]
       },
       {
         type: "number", key: "engine.noise", min: 0.1, max: 3, step: 0.1, group, effective: () => 1,
-        label: { en: "Loudness", fr: "Volume", es: "Volumen", it: "Volume" },
-        hint: { en: "Against an ordinary one of its kind: 1 by default, 1.5 for a very noisy one.", fr: "Par rapport à un véhicule ordinaire de son genre : 1 par défaut, 1,5 pour un très bruyant.",
-          es: "Frente a uno ordinario de su tipo: 1 por defecto, 1,5 para uno muy ruidoso.", it: "Rispetto a uno ordinario del suo tipo: 1 per impostazione predefinita, 1,5 per uno molto rumoroso." },
+        label: "loudness",
+        hint: "againstAnOrdinaryOneOf",
         visibleWhen: element => Parameters.read(element, "engine.kind") !== undefined || (element as { engine?: unknown }).engine !== undefined
       }
     ]
@@ -210,7 +195,7 @@ export class DecorParameterSets {
   private static observerRecording(): ParameterSpec[] {
     return [{
       type: "text", key: "sightingUrl", placeholder: "https://…/sighting.json",
-      label: { en: "Their own recording URL", fr: "URL de son propre enregistrement", es: "URL de su propia grabación", it: "URL della sua registrazione" }
+      label: "theirOwnRecordingURL"
     }]
   }
 
@@ -219,34 +204,30 @@ export class DecorParameterSets {
    * the time sound takes, and shifted as it comes and goes: the choice is the sort of noise it makes at the source.
    */
   private static aircraftSound(published?: ModelParameters): ParameterSpec[] {
-    const kind = (value: string, en: string, fr: string, es: string, it: string) => ({ value, label: { en, fr, es, it } })
     const modelSays = published?.sound
     return [{
       type: "choice", key: "aircraftSound",
-      group: { en: "Sound", fr: "Bruit", es: "Sonido", it: "Suono" },
-      label: { en: "Noise in flight", fr: "Bruit en vol", es: "Ruido en vuelo", it: "Rumore in volo" },
-      hint: { en: "What it sounds like while it flies: nothing is heard of a machine that flies silent, and the stand-in of a phenomenon says so.",
-        fr: "Ce qu'on entend quand il vole : rien d'une machine qui vole en silence, et la maquette d'un phénomène le dit.",
-        es: "Cómo suena mientras vuela: nada se oye de una máquina que vuela en silencio, y la maqueta de un fenómeno lo dice.",
-        it: "Come suona mentre vola: nulla si sente di una macchina che vola in silenzio, e il modello di un fenomeno lo dice." },
+      group: "sound",
+      label: "noiseInFlight",
+      hint: "whatItSoundsLikeWhile",
       empty: modelSays === "silent"
-        ? { en: "Silent (as the model)", fr: "Silencieux (comme le modèle)", es: "Silencioso (como el modelo)", it: "Silenzioso (come il modello)" }
-        : { en: "As the model", fr: "Selon le modèle", es: "Según el modelo", it: "Secondo il modello" },
+        ? "silentAsTheModel"
+        : "asTheModel",
       choices: [
-        kind("airliner-narrow", "Narrow-body airliner", "Avion de ligne monocouloir", "Avión de pasillo único", "Aereo di linea a fusoliera stretta"),
-        kind("airliner-wide", "Wide-body airliner", "Avion de ligne gros-porteur", "Avión de fuselaje ancho", "Aereo di linea a fusoliera larga"),
-        kind("regional-jet", "Regional jet", "Jet régional", "Jet regional", "Jet regionale"),
-        kind("regional-turboprop", "Turboprop", "Turbopropulseur", "Turbohélice", "Turboelica"),
-        kind("business-jet", "Business jet", "Jet d'affaires", "Jet privado", "Jet privato"),
-        kind("light-piston", "Light piston aircraft", "Avion léger à pistons", "Avioneta de pistones", "Aereo leggero a pistoni"),
-        kind("helicopter-light", "Light helicopter", "Hélicoptère léger", "Helicóptero ligero", "Elicottero leggero"),
-        kind("helicopter-medium", "Medium helicopter", "Hélicoptère moyen", "Helicóptero medio", "Elicottero medio"),
-        kind("helicopter-heavy", "Heavy helicopter", "Hélicoptère lourd", "Helicóptero pesado", "Elicottero pesante"),
-        kind("military-jet", "Military jet", "Avion de combat", "Reactor militar", "Jet militare"),
-        kind("ultralight", "Ultralight", "ULM", "Ultraligero", "Ultraleggero"),
-        kind("unmanned", "Drone", "Drone", "Dron", "Drone"),
-        kind("glider", "Glider", "Planeur", "Planeador", "Aliante"),
-        kind("silent", "Silent", "Silencieux", "Silencioso", "Silenzioso")
+        { value: "airliner-narrow", label: "aircraftNarrowBodyAirliner" },
+        { value: "airliner-wide", label: "aircraftWideBodyAirliner" },
+        { value: "regional-jet", label: "aircraftRegionalJet" },
+        { value: "regional-turboprop", label: "aircraftTurboprop" },
+        { value: "business-jet", label: "aircraftBusinessJet" },
+        { value: "light-piston", label: "aircraftLightPistonAircraft" },
+        { value: "helicopter-light", label: "aircraftLightHelicopter" },
+        { value: "helicopter-medium", label: "aircraftMediumHelicopter" },
+        { value: "helicopter-heavy", label: "aircraftHeavyHelicopter" },
+        { value: "military-jet", label: "aircraftMilitaryJet" },
+        { value: "ultralight", label: "aircraftUltralight" },
+        { value: "unmanned", label: "aircraftDrone" },
+        { value: "glider", label: "aircraftGlider" },
+        { value: "silent", label: "aircraftSilent" }
       ]
     }]
   }
@@ -256,13 +237,12 @@ export class DecorParameterSets {
     const field = (key: string, label: SaidText, min: number, max: number, step: number, unit: string, effective: number | undefined,
       group: SaidText, hint?: SaidText): NumberParameter => ({ type: "number", key, label, min, max, step, unit, group, hint, effective: effective === undefined ? undefined : () => effective })
     return [
-      field("bridge.spanM", { en: "Span", fr: "Portée", es: "Luz", it: "Luce" }, 0.1, 5000, 0.1, "m", undefined, DecorParameterSets.BRIDGE,
-        { en: "Metres of open span under the deck, centred. Empty: the whole length, no embankments.", fr: "Mètres de portée libre sous le tablier, centrés. Vide : toute la longueur, sans remblais.",
-          es: "Metros de luz libre bajo el tablero, centrados. Vacío: toda la longitud, sin terraplenes.", it: "Metri di luce libera sotto l'impalcato, centrati. Vuoto: tutta la lunghezza, senza rilevati." }),
-      field("bridge.deckThicknessM", { en: "Deck thickness", fr: "Épaisseur du tablier", es: "Espesor del tablero", it: "Spessore dell'impalcato" }, 0.1, 20, 0.1, "m", 1.2, DecorParameterSets.BRIDGE),
-      field("bridge.railing.heightM", { en: "Height", fr: "Hauteur", es: "Altura", it: "Altezza" }, 0.1, 5, 0.05, "m", 1.05, DecorParameterSets.RAILING),
-      field("bridge.railing.postSpacingM", { en: "Post spacing", fr: "Espacement des poteaux", es: "Separación de postes", it: "Distanza dei montanti" }, 0.2, 20, 0.1, "m", 1.5, DecorParameterSets.RAILING),
-      field("bridge.railing.rails", { en: "Rails", fr: "Lisses", es: "Barandas", it: "Correnti" }, 0, 8, 1, "", 2, DecorParameterSets.RAILING)
+      field("bridge.spanM", "span", 0.1, 5000, 0.1, "m", undefined, DecorParameterSets.BRIDGE,
+        "metresOfOpenSpanUnder"),
+      field("bridge.deckThicknessM", "deckThickness", 0.1, 20, 0.1, "m", 1.2, DecorParameterSets.BRIDGE),
+      field("bridge.railing.heightM", "height", 0.1, 5, 0.05, "m", 1.05, DecorParameterSets.RAILING),
+      field("bridge.railing.postSpacingM", "postSpacing", 0.2, 20, 0.1, "m", 1.5, DecorParameterSets.RAILING),
+      field("bridge.railing.rails", "rails", 0, 8, 1, "", 2, DecorParameterSets.RAILING)
     ]
   }
 
@@ -270,16 +250,13 @@ export class DecorParameterSets {
   private static wire(): ParameterSpec[] {
     const poles: ChoiceParameter = {
       type: "choice", key: "wire.poles", group: DecorParameterSets.WIRE,
-      label: { en: "Poles", fr: "Poteaux", es: "Postes", it: "Pali" },
-      hint: { en: "Which ends stand on a pole: both, the one the heading points away from, the one it points towards, or none (a line anchored on buildings).",
-        fr: "Quelles extrémités reposent sur un poteau : les deux, celle dont le cap s'éloigne, celle vers laquelle il pointe, ou aucune (une ligne ancrée sur des bâtiments).",
-        es: "Qué extremos se apoyan en un poste: ambos, aquel del que se aleja el rumbo, aquel hacia el que apunta, o ninguno (una línea anclada en edificios).",
-        it: "Quali estremità poggiano su un palo: entrambe, quella da cui si allontana la direzione, quella verso cui punta, o nessuna (una linea ancorata a edifici)." },
+      label: "poles",
+      hint: "whichEndsStandOnA",
       choices: [
-        { value: "both", label: { en: "Both", fr: "Les deux", es: "Ambos", it: "Entrambi" } },
-        { value: "start", label: { en: "Start", fr: "Début", es: "Inicio", it: "Inizio" } },
-        { value: "end", label: { en: "End", fr: "Fin", es: "Fin", it: "Fine" } },
-        { value: "none", label: { en: "None", fr: "Aucun", es: "Ninguno", it: "Nessuno" } }
+        { value: "both", label: "both" },
+        { value: "start", label: "start" },
+        { value: "end", label: "end" },
+        { value: "none", label: "noPoles" }
       ],
       effective: () => "both"
     }
@@ -287,12 +264,12 @@ export class DecorParameterSets {
       poles,
       {
         type: "number", key: "wire.diameterM", min: 0.001, max: 0.2, step: 0.001, unit: "m", effective: () => 0.008, group: DecorParameterSets.WIRE,
-        label: { en: "Strand thickness", fr: "Épaisseur du brin", es: "Grosor del hilo", it: "Spessore del filo" }
+        label: "strandThickness"
       },
       {
         type: "number", key: "wire.poleHeightM", min: 0.5, max: 100, step: 0.1, unit: "m", group: DecorParameterSets.WIRE,
-        label: { en: "Pole height", fr: "Hauteur des poteaux", es: "Altura de los postes", it: "Altezza dei pali" },
-        hint: { en: "Empty: half a metre over the highest strand.", fr: "Vide : un demi-mètre au-dessus du brin le plus haut.", es: "Vacío: medio metro sobre el hilo más alto.", it: "Vuoto: mezzo metro sopra il filo più alto." }
+        label: "poleHeight",
+        hint: "emptyHalfAMetreOver"
       }
     ]
   }

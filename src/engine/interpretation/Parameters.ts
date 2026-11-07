@@ -256,7 +256,13 @@ export class ParameterTexts {
     let resolved = bySet.get(texts)
     if (!resolved) {
       const words = texts as Record<string, unknown>
-      const text = <T>(said: T): T => typeof said === "string" && typeof words[said] === "string" ? words[said] as T : said
+      // A key, or keys said as one ("windows front" is "Windows Front", "Fenêtres Avant"); anything else as it is.
+      const text = <T>(said: T): T => {
+        if (typeof said !== "string") return said
+        if (typeof words[said] === "string") return words[said] as T
+        const keys = said.split(" ")
+        return keys.length > 1 && keys.every(key => typeof words[key] === "string") ? keys.map(key => words[key]).join(" ") as T : said
+      }
       const options = <O extends { label: unknown }>(list: ReadonlyArray<O>): O[] => list.map(option => ({ ...option, label: text(option.label) }))
       resolved = {
         ...set,
@@ -287,7 +293,9 @@ export class ParameterTexts {
   static missing(set: ParameterSet, texts: object): string[] {
     const words = texts as Record<string, unknown>
     const keys = new Set<string>()
-    const see = (said: unknown) => { if (typeof said === "string" && /^[a-z][A-Za-z0-9]*$/.test(said) && words[said] === undefined) keys.add(said) }
+    const see = (said: unknown) => {
+      if (typeof said === "string") for (const key of said.split(" ")) if (/^[a-z][A-Za-z0-9]*$/.test(key) && words[key] === undefined) keys.add(key)
+    }
     see(set.title)
     for (const spec of set.parameters) {
       see(spec.label); see(spec.hint); see(spec.summary); see(spec.group)

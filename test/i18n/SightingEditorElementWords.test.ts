@@ -65,6 +65,21 @@ vi.mock("../../src/component/messages/WitnessErrorMessages_en.js", async origina
   const actual = await original<typeof import("../../src/component/messages/WitnessErrorMessages_en.js")>()
   return { ...actual, witnessErrorMessages_en: WordsAudit.pseudo(actual.witnessErrorMessages_en) }
 })
+vi.mock("../../src/engine/interpretation/messages/BodyParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/interpretation/messages/BodyParameterTexts_en.js")>()
+  return { ...actual, bodyParameterTexts_en: WordsAudit.pseudo(actual.bodyParameterTexts_en) }
+})
+vi.mock("../../src/engine/model/messages/CloudParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/model/messages/CloudParameterTexts_en.js")>()
+  return { ...actual, cloudParameterTexts_en: WordsAudit.pseudo(actual.cloudParameterTexts_en) }
+})
+vi.mock("../../src/engine/model/messages/DecorParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/model/messages/DecorParameterTexts_en.js")>()
+  return { ...actual, decorParameterTexts_en: WordsAudit.pseudo(actual.decorParameterTexts_en) }
+})
 vi.mock("../../src/modules/interpretations/flares/messages/FlareKindMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/modules/interpretations/flares/messages/FlareKindMessages_en.js")>()
@@ -391,7 +406,6 @@ async function mounted(): Promise<HTMLElement> {
  * the instruments' names, and the names and credits of the providers.
  */
 const STEP_3 = Object.values(import.meta.glob([
-  "../../src/engine/model/DecorParameterSets.ts", "../../src/engine/model/DecorBaseParameterSets.ts", "../../src/engine/model/CloudParameterSets.ts",
   "../../src/engine/instrument/Instrument.ts", "../../src/modules/providers/**/*.ts", "../../src/modules/models/*.ts", "../../src/modules/assessors/*.ts"
 ], { query: "?raw", import: "default", eager: true }) as Record<string, string>)
 const STEP_3_TEXTS = new Set([

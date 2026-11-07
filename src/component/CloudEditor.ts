@@ -9,6 +9,7 @@ import { cloudDragDelta } from "../render3d/CloudManipulation.js"
 import type { CloudPoint } from "../render3d/CloudManipulation.js"
 import { CloudEditorTemplate } from "./cloudEditorTemplate.js"
 import { CLOUD_EDITOR_MESSAGES } from "./messages/index.js"
+import { CLOUD_PARAMETER_TEXTS } from "../engine/model/messages/CloudParameterTexts.js"
 import type { CloudEditorMessages } from "./messages/CloudEditorMessages.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
@@ -16,7 +17,7 @@ import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import type { PositionPlace } from "./ParameterForm.js"
 import { CloudParameterSets } from "../engine/model/CloudParameterSets.js"
 import type { CloudLayerContext } from "../engine/model/CloudParameterSets.js"
-import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
+import { ParameterTexts, type ParameterHolder } from "../engine/interpretation/Parameters.js"
 
 /** Weather authoring shared with the editor's recording, projection and playback clock.
  *
@@ -92,29 +93,32 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
   }
   // What is written is the one property edited, applied to the layer as each weather keyframe holds it (or to the layer at the
   // playhead alone): the form gives a copy to change, and editing a layer whole would carry the playhead's values to the other keyframes.
-  layerForm.show(CloudParameterSets.LAYER, new ParameterTarget(
-    () => currentLayer() as unknown as ParameterHolder | undefined,
-    (apply, spec) => edit(layer => {
-      const draft = structuredClone(layer)
-      apply(draft as unknown as ParameterHolder)
-      return draft
-    }, spec.key !== "iceCrystalAlignment"),
-    () => ({ generalDarkness: resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime).cloudDarkness } satisfies CloudLayerContext)
-  ), () => undefined)
-  instanceForm.show(CloudParameterSets.INSTANCE, new ParameterTarget(
-    () => currentInstance() as unknown as ParameterHolder | undefined,
-    apply => {
-      const id = instanceList.value
-      edit(layer => ({ ...layer, instances: layer.instances?.map(i => {
-        if (i.id !== id) return i
-        const draft = structuredClone(i)
+  /** The forms, drawn once the words of their parameters have come (see CloudParameterSets). */
+  const showForms = (texts: object): void => {
+    layerForm.show(ParameterTexts.resolve(CloudParameterSets.LAYER, texts), new ParameterTarget(
+      () => currentLayer() as unknown as ParameterHolder | undefined,
+      (apply, spec) => edit(layer => {
+        const draft = structuredClone(layer)
         apply(draft as unknown as ParameterHolder)
         return draft
-      }) }))
-    },
-    undefined,
-    positionPlace
-  ), () => undefined)
+      }, spec.key !== "iceCrystalAlignment"),
+      () => ({ generalDarkness: resolveWeatherAt(scene.ufoElement.sighting, scene.ufoElement.currentTime).cloudDarkness } satisfies CloudLayerContext)
+    ), () => undefined)
+    instanceForm.show(ParameterTexts.resolve(CloudParameterSets.INSTANCE, texts), new ParameterTarget(
+      () => currentInstance() as unknown as ParameterHolder | undefined,
+      apply => {
+        const id = instanceList.value
+        edit(layer => ({ ...layer, instances: layer.instances?.map(i => {
+          if (i.id !== id) return i
+          const draft = structuredClone(i)
+          apply(draft as unknown as ParameterHolder)
+          return draft
+        }) }))
+      },
+      undefined,
+      positionPlace
+    ), () => undefined)
+  }
   // Pause before any field is edited, so a user's values cannot be committed at a moving playhead.
   controls.addEventListener("focusin", () => scene.ufoElement.pause())
   actions.pickLayer = () => { instanceList.show(""); sync() }
@@ -235,8 +239,9 @@ export function setupCloudEditor(controls: HTMLElement, scene: SceneElement, bef
     pointAt((Math.atan2(east, north) * 180 / Math.PI + 360) % 360, Math.atan2(up, horizontal) * 180 / Math.PI)
   }
   {
-    void CLOUD_EDITOR_MESSAGES.load(language).then(loaded => {
+    void Promise.all([CLOUD_EDITOR_MESSAGES.load(language), CLOUD_PARAMETER_TEXTS.load(language)]).then(([loaded, texts]) => {
       messages = loaded
+      showForms(texts)
       CloudEditorTemplate.localize(controls, messages)
       label()
       // The instance picker's own options are written from the messages, not the template.

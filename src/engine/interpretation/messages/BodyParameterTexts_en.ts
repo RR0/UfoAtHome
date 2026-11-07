@@ -1,0 +1,31 @@
+import type { BodyParameterTexts } from "./BodyParameterTexts.js"
+
+export const bodyParameterTexts_en = {
+  body: "Body",
+  iD: "ID",
+  name: "Name",
+  standsForTheShapes: "Stands for the shapes",
+  noShape: "No shape",
+  partDrawnByTheWitness: "Part drawn by the witness",
+  nodeOfTheModelE: "Node of the model, e.g. hull",
+  atThePlayhead: "At the playhead",
+  position: "Position",
+  fromTheWitness: "From the witness",
+  inTheWorld: "In the world",
+  azimuth: "Azimuth",
+  elevation: "Elevation",
+  distance: "Distance",
+  onTheGround: "On the ground",
+  aboveTheGround: "Above the ground",
+  width: "Width",
+  length: "Length",
+  height: "Height",
+  heading: "Heading",
+  pitch: "Pitch",
+  roll: "Roll",
+  colour: "Colour",
+  albedo: "Albedo",
+  lightOfItsOwn: "Light of its own",
+  transparency: "Transparency",
+  halo: "Halo"
+} satisfies BodyParameterTexts

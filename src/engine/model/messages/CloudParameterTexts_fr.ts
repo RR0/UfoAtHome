@@ -1,0 +1,31 @@
+import type { CloudParameterTexts } from "./CloudParameterTexts.js"
+
+export const cloudParameterTexts_fr = {
+  cloudLayer: "Couche de nuages",
+  cloudType: "Type de nuage",
+  unknown: "Inconnu",
+  base: "Base",
+  thickness: "Épaisseur",
+  coverage: "Couverture",
+  cloudSize: "Taille des nuages",
+  density: "Densité",
+  darkness: "Obscurité",
+  crystalAlignment: "Alignement des cristaux",
+  layerWindDirection: "Direction du vent de la couche",
+  generalWind: "Vent général",
+  layerWindSpeed: "Vitesse du vent de la couche",
+  patternSeed: "Graine du motif",
+  individualCloud: "Nuage individuel",
+  position: "Position",
+  cloudBase: "Base du nuage",
+  cloudThickness: "Épaisseur du nuage",
+  cloudWidth: "Largeur du nuage",
+  cloudDepth: "Profondeur du nuage",
+  cloudRotation: "Rotation du nuage",
+  cloudDensity: "Densité du nuage",
+  layerDarkness: "Obscurité de la couche",
+  cumulus: "Cumulus",
+  stratus: "Stratus",
+  stratocumulus: "Stratocumulus",
+  cirrus: "Cirrus"
+} satisfies CloudParameterTexts

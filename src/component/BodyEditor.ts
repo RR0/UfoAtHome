@@ -15,9 +15,10 @@ import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import type { PositionPlace } from "./ParameterForm.js"
 import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
 import type { BodyContext, BodyKeyframeContext, BodyKeyframeView } from "../engine/interpretation/BodyParameterSets.js"
-import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
+import { ParameterTexts, type ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { BodyEditorMessages } from "./messages/BodyEditorMessages.js"
 import { BODY_EDITOR_MESSAGES } from "./messages/index.js"
+import { BODY_PARAMETER_TEXTS } from "../engine/interpretation/messages/BodyParameterTexts.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
 
@@ -71,6 +72,8 @@ export class BodyEditor {
   /** The fields of the look of an instant: an edit of one of them is this keyframe's own statement of its look. */
   private static readonly APPEARANCE_KEYS: readonly string[] = ["color", "albedo", "luminanceCdM2", "transparency", "haloScale"]
   /** English, the fallback baked in, until the chosen language's module has loaded. */
+  /** The words of a body's parameters (see BodyParameterSets), come with the editor's own. */
+  private parameterTexts: object = {}
   /** Its words, once they have come (see ready). */
   private messages!: BodyEditorMessages
   /** Settles once the part has its words and is drawn: nothing of it shows before, in no language. */
@@ -96,11 +99,12 @@ export class BodyEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const messages = await BODY_EDITOR_MESSAGES.load(language)
+    const [messages, parameterTexts] = await Promise.all([BODY_EDITOR_MESSAGES.load(language), BODY_PARAMETER_TEXTS.load(language)])
     // Superseded by a later choice made while this one was loading.
     if (token !== this.languageToken) return
     if (messages === this.messages) return
     this.messages = messages
+    this.parameterTexts = parameterTexts
     this.render()
   }
 
@@ -311,13 +315,13 @@ export class BodyEditor {
     // The properties of the body and of its instant: drawn from what a body says it has, and written as they are typed.
     const values = { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() }
     this.bodyForm = new ParameterForm(this.element("body-parameters"), this.language, "body.", values)
-    this.bodyForm.show(BodyParameterSets.BODY, new ParameterTarget(
+    this.bodyForm.show(ParameterTexts.resolve(BodyParameterSets.BODY, this.parameterTexts), new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
       apply => this.editBody(apply),
       (): BodyContext => ({ ids: this.bodies.map(body => body.id), shapes: this.host.shapes().map(shape => ({ value: shape.id, label: shape.label })) })
     ), () => undefined)
     this.keyForm = new ParameterForm(this.element("body-key-parameters"), this.language, "bodyKey.")
-    this.keyForm.show(BodyParameterSets.KEYFRAME, new ParameterTarget(
+    this.keyForm.show(ParameterTexts.resolve(BodyParameterSets.KEYFRAME, this.parameterTexts), new ParameterTarget(
       () => this.keyframeView() as unknown as ParameterHolder | undefined,
       (apply, spec) => this.editView(apply, BodyEditor.APPEARANCE_KEYS.includes(spec.key)),
       () => this.keyframeContext(),

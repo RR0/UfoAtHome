@@ -2,6 +2,9 @@ import { describe, expect, test } from "vitest"
 import { BodyKeyframes, BodyParameterSets } from "../../../src/engine/interpretation/BodyParameterSets.js"
 import type { BodyReadingLike } from "../../../src/engine/interpretation/BodyParameterSets.js"
 import type { BodyJson } from "../../../src/engine/interpretation/Interpretation.js"
+import { UFO_LANGUAGES } from "../../../src/i18n/MessageCatalog.js"
+import { ParameterTexts } from "../../../src/engine/interpretation/Parameters.js"
+import { BODY_PARAMETER_TEXTS } from "../../../src/engine/interpretation/messages/BodyParameterTexts.js"
 
 const reading: BodyReadingLike = {
   azimuthDeg: 10.004, altitudeDeg: 2, distanceM: 100, eastM: 17.3601, northM: 98.48, aboveGroundM: 1.5,
@@ -80,11 +83,10 @@ describe("BodyParameterSets", () => {
     expect(colour.visibleWhen!({}, { drawnFromModel: true })).toBe(false)
   })
 
-  test("every label is said in the four languages", () => {
-    for (const set of [BodyParameterSets.BODY, BodyParameterSets.KEYFRAME]) {
-      for (const spec of set.parameters) {
-        expect(Object.keys(spec.label as object).sort(), spec.key).toEqual(["en", "es", "fr", "it"])
-      }
+  test("every label is said in the four languages", async () => {
+    for (const language of UFO_LANGUAGES) {
+      const texts = await BODY_PARAMETER_TEXTS.load(language)
+      for (const set of [BodyParameterSets.BODY, BodyParameterSets.KEYFRAME]) expect(ParameterTexts.missing(set, texts), language).toEqual([])
     }
   })
 })

@@ -4,6 +4,9 @@ import { DecorBaseParameterSets } from "../../../src/engine/model/DecorBaseParam
 import type { DecorObject } from "../../../src/engine/model/Decor.js"
 import type { DecorBaseContext } from "../../../src/engine/model/DecorBase.js"
 import type { NumberParameter } from "../../../src/engine/interpretation/Parameters.js"
+import { UFO_LANGUAGES } from "../../../src/i18n/MessageCatalog.js"
+import { ParameterTexts } from "../../../src/engine/interpretation/Parameters.js"
+import { DECOR_PARAMETER_TEXTS } from "../../../src/engine/model/messages/DecorParameterTexts.js"
 
 const still = (extra: Partial<DecorObject> = {}): DecorObject => ({ id: "d", kind: "building", eastM: 10, northM: 20, headingDeg: 30, ...extra })
 const aircraft = (): DecorObject => ({
@@ -153,9 +156,10 @@ describe("DecorBaseParameterSets", () => {
     expect(DecorBaseParameterSets.seatsFor("vehicle").map(seat => seat.value)).toEqual(["front-left", "front-right", "behind-left", "behind-right"])
   })
 
-  test("every label is said in the four languages", () => {
-    for (const set of [DecorBaseParameterSets.BASE, DecorBaseParameterSets.STATE]) {
-      for (const parameter of set.parameters) expect(Object.keys(parameter.label as object).sort(), parameter.key).toEqual(["en", "es", "fr", "it"])
+  test("every label is said in the four languages", async () => {
+    for (const language of UFO_LANGUAGES) {
+      const texts = await DECOR_PARAMETER_TEXTS.load(language)
+      for (const set of [DecorBaseParameterSets.BASE, DecorBaseParameterSets.STATE]) expect(ParameterTexts.missing(set, texts), language).toEqual([])
     }
   })
 })
@@ -204,13 +208,14 @@ describe("the headlights of a vehicle in the editor", () => {
     expect(lit.visibleWhen({}, { ...context({ headlights: false }), kind: "streetlight" })).toBe(true)
   })
 
-  test("says what each setting is called in the four languages", () => {
-    for (const mode of ["off", "position", "dipped", "main", "fog"] as const) {
-      const label = DecorBaseParameterSets.HEADLIGHT_LABELS[mode] as unknown as Record<string, string>
-      for (const language of ["en", "fr", "es", "it"] as const) expect(label[language]).toBeTruthy()
+  test("says what each setting is called in the four languages", async () => {
+    for (const language of UFO_LANGUAGES) {
+      const texts = await DECOR_PARAMETER_TEXTS.load(language) as unknown as Record<string, string>
+      for (const mode of ["off", "position", "dipped", "main", "fog"] as const) expect(texts[DecorBaseParameterSets.HEADLIGHT_LABELS[mode] as string], mode).toBeTruthy()
     }
-    expect((DecorBaseParameterSets.HEADLIGHT_LABELS.dipped as unknown as Record<string, string>).fr).toBe("Feux de croisement")
-    expect((DecorBaseParameterSets.HEADLIGHT_LABELS.main as unknown as Record<string, string>).fr).toBe("Feux de route")
+    const french = await DECOR_PARAMETER_TEXTS.load("fr") as unknown as Record<string, string>
+    expect(french[DecorBaseParameterSets.HEADLIGHT_LABELS.dipped as string]).toBe("Feux de croisement")
+    expect(french[DecorBaseParameterSets.HEADLIGHT_LABELS.main as string]).toBe("Feux de route")
   })
 })
 

@@ -9,6 +9,14 @@ import { ReentryParameters } from "../../src/modules/sky-events/reentries/Reentr
 import { REENTRY_PARAMETER_TEXTS } from "../../src/modules/sky-events/reentries/messages/ReentryParameterTexts.js"
 import { LanternParameters } from "../../src/modules/interpretations/lanterns/LanternParameters.js"
 import { LANTERN_PARAMETER_TEXTS } from "../../src/modules/interpretations/lanterns/messages/LanternParameterTexts.js"
+import { BodyParameterSets } from "../../src/engine/interpretation/BodyParameterSets.js"
+import { BODY_PARAMETER_TEXTS } from "../../src/engine/interpretation/messages/BodyParameterTexts.js"
+import { CloudParameterSets } from "../../src/engine/model/CloudParameterSets.js"
+import { CLOUD_PARAMETER_TEXTS } from "../../src/engine/model/messages/CloudParameterTexts.js"
+import { DecorBaseParameterSets } from "../../src/engine/model/DecorBaseParameterSets.js"
+import { DecorParameterSets } from "../../src/engine/model/DecorParameterSets.js"
+import { DECOR_PARAMETER_TEXTS } from "../../src/engine/model/messages/DecorParameterTexts.js"
+import type { DecorKind } from "../../src/engine/model/Decor.js"
 
 /*
  * The rule of MessageCatalog, enforced: whatever shows a reader words takes them from a catalog, one module per language, loaded only in
@@ -24,10 +32,6 @@ const SOURCES = Object.fromEntries(Object.entries(import.meta.glob("../../src/**
 
 /** Texts in several languages written in code. */
 const INLINE_STILL = new Map<string, string>([
-  ["engine/interpretation/BodyParameterSets.ts", "the core's sets of parameters (step 3)"],
-  ["engine/model/CloudParameterSets.ts", "the core's sets of parameters (step 3)"],
-  ["engine/model/DecorBaseParameterSets.ts", "the core's sets of parameters (step 3)"],
-  ["engine/model/DecorParameterSets.ts", "the core's sets of parameters (step 3)"],
   // Not words of the interface: the title the bodies computed from a launch carry, as a recording's own bodies carry theirs (SaidText is
   // the content's form), computed synchronously whenever the interpretation is shown.
   ["modules/interpretations/lanterns/SkyLantern.ts", "content: the computed bodies' title"]
@@ -35,6 +39,10 @@ const INLINE_STILL = new Map<string, string>([
 
 /** Components that still import English up front: none any more, and none to come. */
 const ENGLISH_UP_FRONT_STILL = new Set<string>()
+
+/** Every kind of decor object, each with the parameters it publishes (see DecorParameterSets.of). */
+const DECOR_KINDS: DecorKind[] = ["terrace", "wall", "building", "tree", "crop", "mound", "streetlight", "vehicle", "observer", "aircraft",
+  "trafficlight", "crossing", "roadsign", "shrub", "bridge", "wire", "entity"]
 
 const code = Object.entries(SOURCES).map(([file, text]) => ({ file, text }))
   .filter(({ file }) => !file.includes("/messages/") && !file.startsWith("generated/") && !file.startsWith("i18n/"))
@@ -65,7 +73,14 @@ describe("the words of the interface", () => {
       { texts: BEAM_PARAMETER_TEXTS, sets: [BeamParameters.SET, BeamParameters.LIGHT, BeamParameters.LIGHT_KEY, BeamParameters.ON, BeamParameters.MOVE_KEY, BeamParameters.PLACE] },
       { texts: LAUNCH_PARAMETER_TEXTS, sets: [LaunchParameters.SET, LaunchParameters.PLACE, LaunchParameters.JET] },
       { texts: REENTRY_PARAMETER_TEXTS, sets: [ReentryParameters.SET, ReentryParameters.PLACE, ReentryParameters.FRAGMENT, ReentryParameters.CURVE_POINT] },
-      { texts: LANTERN_PARAMETER_TEXTS, sets: [LanternParameters.SET] }
+      { texts: LANTERN_PARAMETER_TEXTS, sets: [LanternParameters.SET] },
+      { texts: BODY_PARAMETER_TEXTS, sets: [BodyParameterSets.BODY, BodyParameterSets.KEYFRAME] },
+      { texts: CLOUD_PARAMETER_TEXTS, sets: [CloudParameterSets.LAYER, CloudParameterSets.INSTANCE] },
+      {
+        texts: DECOR_PARAMETER_TEXTS,
+        sets: [DecorBaseParameterSets.BASE, DecorBaseParameterSets.STATE,
+          ...DECOR_KINDS.flatMap(kind => [DecorParameterSets.of({ kind }), DecorParameterSets.of({ kind, observerSide: "front" })]).filter(set => set !== undefined)]
+      }
     ]
     // The check is one: with no words at all, every key is said to be missing.
     expect(ParameterTexts.missing(BeamParameters.SET, {}).length).toBeGreaterThan(5)

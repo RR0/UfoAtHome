@@ -23,6 +23,7 @@ import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
+import { DECOR_PARAMETER_TEXTS } from "../engine/model/messages/DecorParameterTexts.js"
 import { Messages, type MessageCatalog } from "../i18n/MessageCatalog.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
@@ -38,7 +39,7 @@ import { DecorBase } from "../engine/model/DecorBase.js"
 import type { DecorBaseContext } from "../engine/model/DecorBase.js"
 import { DecorBaseParameterSets } from "../engine/model/DecorBaseParameterSets.js"
 import { ElementList } from "./ElementList.js"
-import type { ChoiceParameter, ParameterHolder } from "../engine/interpretation/Parameters.js"
+import { ParameterTexts, type ChoiceParameter, type ParameterHolder } from "../engine/interpretation/Parameters.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
@@ -893,6 +894,8 @@ export class SightingEditorElement extends HTMLElement {
   private messages: SightingEditorMessages = Messages.blank<SightingEditorMessages>()
   /** Settled once the editor's words, in its reader's language, are on show. */
   ready: Promise<void> = Promise.resolve()
+  /** The words of the decor's parameters (see DecorParameterSets): none until the editor's language is known. */
+  private decorParameterTexts: object = {}
   /** Whether the editor's words have come (see applyMessages): what is drawn from them waits until they have. */
   private worded = false
   /** What a field says over it when nothing else is said there (a question unanswered, the weather held while playing), by its id. */
@@ -9916,8 +9919,8 @@ export class SightingEditorElement extends HTMLElement {
       () => this.decorBaseContext(),
       this.decorPositionPlace()
     )
-    this.decorBaseForm.show(DecorBaseParameterSets.BASE, target(), () => undefined)
-    this.decorStateForm.show(DecorBaseParameterSets.STATE, target(), () => undefined)
+    this.decorBaseForm.show(ParameterTexts.resolve(DecorBaseParameterSets.BASE, this.decorParameterTexts), target(), () => undefined)
+    this.decorStateForm.show(ParameterTexts.resolve(DecorBaseParameterSets.STATE, this.decorParameterTexts), target(), () => undefined)
   }
 
   /**
@@ -10079,7 +10082,8 @@ export class SightingEditorElement extends HTMLElement {
    * another field has since changed.
    */
   private showDecorParameters(decor: DecorObject | undefined): void {
-    const set = decor ? DecorParameterSets.of(decor, this.publishedParametersOf(decor)) : undefined
+    const stated = decor ? DecorParameterSets.of(decor, this.publishedParametersOf(decor)) : undefined
+    const set = stated && ParameterTexts.resolve(stated, this.decorParameterTexts)
     if (!decor || !set) {
       this.decorParametersShownFor = undefined
       this.decorParameterForm.clear()
@@ -11216,13 +11220,14 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The provider's own settings too, alongside: applyMessages renders them.
     const localizing = this.narrativeProvider.localize?.(language)
-    const [messages, tagNames, sceneNames] = await Promise.all([SIGHTING_EDITOR_MESSAGES.load(language),
-      language === "en" ? {} : loadTagNames(language), language === "en" ? undefined : loadSceneNames(language)])
+    const [messages, tagNames, sceneNames, decorParameterTexts] = await Promise.all([SIGHTING_EDITOR_MESSAGES.load(language),
+      language === "en" ? {} : loadTagNames(language), language === "en" ? undefined : loadSceneNames(language), DECOR_PARAMETER_TEXTS.load(language)])
     await localizing
     // Superseded by a later decision (the editor was connected while this one was loading).
     if (token !== this.localeToken) return
     const changed = language !== this.language
     this.language = language
+    this.decorParameterTexts = decorParameterTexts
     this.naming = new SceneNaming(sceneNames)
     this.said = new SaidTexts(preferences)
     // Before the messages, because applyMessages rebuilds the summary with it — see TagNames.
@@ -11232,7 +11237,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       // Same interface language, but perhaps a longer list behind it ("en", then "es"): the
       // summary reads the recording's texts through the new one.
-      this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
+      this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language }, this.decorParameterTexts)
       this.refreshParamSummary()
     }
     // Every field and list showing the recording's own texts showed them through the previous
@@ -11506,6 +11511,11 @@ export class SightingEditorElement extends HTMLElement {
     this.decorParameterForm.setLanguage(this.language)
     this.decorBaseForm.setLanguage(this.language)
     this.decorStateForm.setLanguage(this.language)
+    // Drawn again in the new words of the decor's parameters: what was shown was resolved in the previous ones.
+    this.decorBaseShownFor = undefined
+    this.decorBaseShown = false
+    this.decorParametersShownFor = undefined
+    if (this.isConnected) this.syncDecorVisibility()
     this.refreshDecorList() // decor option labels embed decorKindSelect's own text, just updated above
     this.labelObserverId.textContent = messages.observerId
     this.labelObserverTitle.textContent = messages.observerTitle
@@ -11545,7 +11555,7 @@ export class SightingEditorElement extends HTMLElement {
     this.birthDate.messages = messages
     // The chips hold translated labels, so they are rebuilt with the new ones — and the signature
     // check lets that happen without a diff, since every label changed.
-    this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language })
+    this.paramSummaryBuilder = new SightingSummary(messages, this.naming, this.said, this.tagNames, { messages, locale: this.language }, this.decorParameterTexts)
     this.refreshParamSummary()
     this.labelCloudCover.textContent = messages.cloudCover
     this.labelHighCloud.textContent = messages.highCloudCover

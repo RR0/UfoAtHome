@@ -152,30 +152,30 @@ export class BodyParameterSets {
 
   static readonly BODY: ParameterSet = {
     kind: "body",
-    title: { en: "Body", fr: "Corps", es: "Cuerpo", it: "Corpo" },
+    title: "body",
     parameters: ([
       {
         type: "text", key: "id", required: true,
-        label: { en: "ID", fr: "Identifiant", es: "Identificador", it: "Identificativo" },
+        label: "iD",
         // An id is what the confrontation of the shapes and a case's interpretations name the body by: an empty one, or one another body has, is refused.
         validate: (value, body, context) => !((context as BodyContext | undefined)?.ids ?? []).some(id => id === value && id !== (body as { id?: string }).id)
       },
-      { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" } },
+      { type: "said", key: "title", label: "name" },
       {
         type: "set", key: "explains",
-        label: { en: "Stands for the shapes", fr: "Représente les formes", es: "Representa las formas", it: "Rappresenta le forme" },
+        label: "standsForTheShapes",
         // A shape the body names that the recording no longer holds is still listed: dropping it silently would be an edit nobody made.
         options: (body, context) => {
           const shapes = (context as BodyContext | undefined)?.shapes ?? []
           const named = ((body as { explains?: string[] }).explains ?? []).filter(id => !shapes.some(shape => shape.value === id))
           return [...shapes, ...named.map(value => ({ value, label: value }))]
         },
-        empty: { en: "No shape", fr: "Aucune forme", es: "Ninguna forma", it: "Nessuna forma" }
+        empty: "noShape"
       },
       {
         type: "text", key: "outlineNode",
-        label: { en: "Part drawn by the witness", fr: "Partie dessinée par le témoin", es: "Parte dibujada por el testigo", it: "Parte disegnata dal testimone" },
-        placeholder: { en: "Node of the model, e.g. hull", fr: "Nœud du modèle, par ex. hull", es: "Nodo del modelo, p. ej. hull", it: "Nodo del modello, ad es. hull" }
+        label: "partDrawnByTheWitness",
+        placeholder: "nodeOfTheModelE"
       }
     ] satisfies ParameterSpec[])
   }
@@ -183,44 +183,44 @@ export class BodyParameterSets {
   /** The position, size, attitude and look of a body at the playhead. */
   static readonly KEYFRAME: ParameterSet = {
     kind: "body-keyframe",
-    title: { en: "At the playhead", fr: "À l'instant courant", es: "En el instante actual", it: "All'istante corrente" },
+    title: "atThePlayhead",
     parameters: ([
       {
         type: "choice", key: "mode", required: true,
-        label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" },
+        label: "position",
         choices: [
-          { value: "observer", label: { en: "From the witness", fr: "Depuis le témoin", es: "Desde el testigo", it: "Dal testimone" } },
-          { value: "world", label: { en: "In the world", fr: "Dans le monde", es: "En el mundo", it: "Nel mondo" } }
+          { value: "observer", label: "fromTheWitness" },
+          { value: "world", label: "inTheWorld" }
         ]
       },
-      BodyParameterSets.number("azimuthDeg", { en: "Azimuth", fr: "Azimut", es: "Acimut", it: "Azimut" }, 0, 360, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
-      BodyParameterSets.number("elevationDeg", { en: "Elevation", fr: "Hauteur", es: "Elevación", it: "Elevazione" }, -90, 90, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
-      BodyParameterSets.number("distanceM", { en: "Distance", fr: "Distance", es: "Distancia", it: "Distanza" }, 0.1, 30000, 0.1, "m", { visibleWhen: view => view.mode === "observer" }),
+      BodyParameterSets.number("azimuthDeg", "azimuth", 0, 360, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
+      BodyParameterSets.number("elevationDeg", "elevation", -90, 90, 0.01, "°", { visibleWhen: view => view.mode === "observer" }),
+      BodyParameterSets.number("distanceM", "distance", 0.1, 30000, 0.1, "m", { visibleWhen: view => view.mode === "observer" }),
       // From the observer where the recording sets off, from a decor object, or as degrees: see PositionInputElement.
       {
         type: "position", key: "eastM", secondKey: "northM", saidKey: "saidPosition", native: "local", step: 0.1,
-        label: { en: "In the world", fr: "Dans le monde", es: "En el mundo", it: "Nel mondo" }, visibleWhen: view => view.mode === "world"
+        label: "inTheWorld", visibleWhen: view => view.mode === "world"
       },
-      { type: "boolean", key: "onGround", label: { en: "On the ground", fr: "Au sol", es: "En el suelo", it: "A terra" } },
-      BodyParameterSets.number("aboveGroundM", { en: "Above the ground", fr: "Au-dessus du sol", es: "Sobre el suelo", it: "Sopra il suolo" }, 0, 30000, 0.1, "m",
+      { type: "boolean", key: "onGround", label: "onTheGround" },
+      BodyParameterSets.number("aboveGroundM", "aboveTheGround", 0, 30000, 0.1, "m",
         { visibleWhen: view => view.mode === "world" && view.onGround !== true }),
-      BodyParameterSets.number("widthM", { en: "Width", fr: "Largeur", es: "Ancho", it: "Larghezza" }, 0.01, 1000, 0.01, "m"),
-      BodyParameterSets.number("lengthM", { en: "Length", fr: "Longueur", es: "Largo", it: "Lunghezza" }, 0.01, 1000, 0.01, "m"),
-      BodyParameterSets.number("heightM", { en: "Height", fr: "Hauteur", es: "Alto", it: "Altezza" }, 0.01, 1000, 0.01, "m"),
-      BodyParameterSets.number("headingDeg", { en: "Heading", fr: "Cap", es: "Rumbo", it: "Rotta" }, 0, 360, 0.1, "°"),
-      BodyParameterSets.number("pitchDeg", { en: "Pitch", fr: "Tangage", es: "Cabeceo", it: "Beccheggio" }, -90, 90, 0.1, "°"),
-      BodyParameterSets.number("rollDeg", { en: "Roll", fr: "Roulis", es: "Alabeo", it: "Rollio" }, -180, 180, 0.1, "°"),
+      BodyParameterSets.number("widthM", "width", 0.01, 1000, 0.01, "m"),
+      BodyParameterSets.number("lengthM", "length", 0.01, 1000, 0.01, "m"),
+      BodyParameterSets.number("heightM", "height", 0.01, 1000, 0.01, "m"),
+      BodyParameterSets.number("headingDeg", "heading", 0, 360, 0.1, "°"),
+      BodyParameterSets.number("pitchDeg", "pitch", -90, 90, 0.1, "°"),
+      BodyParameterSets.number("rollDeg", "roll", -180, 180, 0.1, "°"),
       // Only the built-in shapes are painted: a model keeps the materials of its file, so a colour picked for it would change nothing.
       {
-        type: "colour", key: "color", label: { en: "Colour", fr: "Couleur", es: "Color", it: "Colore" },
+        type: "colour", key: "color", label: "colour",
         // What a colour field cannot show (a name, a three-digit form it takes) stands as this grey until the author picks one.
         fallback: "#c8c8c8",
         visibleWhen: (_view, context) => (context as BodyKeyframeContext | undefined)?.drawnFromModel !== true
       },
-      BodyParameterSets.number("albedo", { en: "Albedo", fr: "Albédo", es: "Albedo", it: "Albedo" }, 0, 1, 0.01, undefined),
-      BodyParameterSets.number("luminanceCdM2", { en: "Light of its own", fr: "Lumière propre", es: "Luz propia", it: "Luce propria" }, 0, 1e10, 0.1, "cd/m²"),
-      BodyParameterSets.number("transparency", { en: "Transparency", fr: "Transparence", es: "Transparencia", it: "Trasparenza" }, 0, 1, 0.01, undefined),
-      BodyParameterSets.number("haloScale", { en: "Halo", fr: "Halo", es: "Halo", it: "Alone" }, 0, 20, 0.1, "×")
+      BodyParameterSets.number("albedo", "albedo", 0, 1, 0.01, undefined),
+      BodyParameterSets.number("luminanceCdM2", "lightOfItsOwn", 0, 1e10, 0.1, "cd/m²"),
+      BodyParameterSets.number("transparency", "transparency", 0, 1, 0.01, undefined),
+      BodyParameterSets.number("haloScale", "halo", 0, 20, 0.1, "×")
     ] satisfies ParameterSpec[])
   }
 }

@@ -2,6 +2,9 @@ import { describe, expect, test } from "vitest"
 import { CloudParameterSets } from "../../../src/engine/model/CloudParameterSets.js"
 import type { CloudLayer } from "../../../src/engine/model/CloudLayer.js"
 import type { NumberParameter, ParameterHolder } from "../../../src/engine/interpretation/Parameters.js"
+import { UFO_LANGUAGES } from "../../../src/i18n/MessageCatalog.js"
+import { ParameterTexts } from "../../../src/engine/interpretation/Parameters.js"
+import { CLOUD_PARAMETER_TEXTS } from "../../../src/engine/model/messages/CloudParameterTexts.js"
 
 const layer: CloudLayer = { id: "l", type: "cumulus", baseM: 1500, thicknessM: 800, coverage: 0.5, sizeM: 1400, density: 1 }
 const holder = layer as unknown as ParameterHolder
@@ -42,16 +45,17 @@ describe("CloudParameterSets", () => {
     expect(["darkness", "windDirectionDeg", "windSpeed", "seed"].some(required)).toBe(false)
   })
 
-  test("a layer's own wind, left empty, says it takes the general wind", () => {
+  test("a layer's own wind, left empty, says it takes the general wind", async () => {
     const wind = spec("windSpeed") as NumberParameter
-    expect(wind.placeholder).toMatchObject({ en: "General wind", fr: "Vent général" })
+    const shown = async (language: string) => (ParameterTexts.resolve(CloudParameterSets.LAYER, await CLOUD_PARAMETER_TEXTS.load(language)).parameters
+      .find(candidate => candidate.key === wind.key) as NumberParameter).placeholder
+    expect([await shown("en"), await shown("fr")]).toEqual(["General wind", "Vent général"])
   })
 
-  test("every label is said in the four languages, so none has to fall back", () => {
-    for (const set of [CloudParameterSets.LAYER, CloudParameterSets.INSTANCE]) {
-      for (const parameter of set.parameters) {
-        expect(Object.keys(parameter.label as object).sort(), parameter.key).toEqual(["en", "es", "fr", "it"])
-      }
+  test("every label is said in the four languages, so none has to fall back", async () => {
+    for (const language of UFO_LANGUAGES) {
+      const texts = await CLOUD_PARAMETER_TEXTS.load(language)
+      for (const set of [CloudParameterSets.LAYER, CloudParameterSets.INSTANCE]) expect(ParameterTexts.missing(set, texts), language).toEqual([])
     }
   })
 })
