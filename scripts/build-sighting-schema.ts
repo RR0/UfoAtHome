@@ -322,7 +322,7 @@ interface JsonSchemaOptions {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(scriptDir, "..")
-const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts"), path.join(root, "src", "engine", "persistence", "caseJson.ts"), path.join(root, "src", "engine", "persistence", "interviewJson.ts")], {
+const program = ts.createProgram([path.join(root, "src", "engine", "persistence", "sightingJson.ts"), path.join(root, "src", "engine", "persistence", "caseJson.ts"), path.join(root, "src", "engine", "persistence", "interviewJson.ts"), path.join(root, "src", "modules", "ModuleManifest.ts")], {
   target: ts.ScriptTarget.ES2022,
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -353,6 +353,10 @@ const interviewSchema = builder.fieldsOf(builder.typeNamed("InterviewJson"))
 writeFileSync(path.join(outDir, "interviewSchema.json"), `${JSON.stringify(interviewSchema, null, 2)}\n`)
 writeFileSync(path.join(outDir, "interview.schema.json"), `${JSON.stringify(JsonSchemaExport.of(interviewSchema, JsonSchemaExport.INTERVIEW), null, 2)}\n`)
 
+// And a module's manifest, which the documentation of modules completes from (see DocsModulesPage, ModuleManifest).
+const moduleSchema = builder.fieldsOf(builder.typeNamed("ModuleManifestJson"))
+writeFileSync(path.join(outDir, "moduleSchema.json"), `${JSON.stringify(moduleSchema, null, 2)}\n`)
+
 const count = (fields: Record<string, SchemaField>): number =>
   Object.values(fields).reduce((total, field) => total + 1 + (field.fields ? count(field.fields) : 0), 0)
-console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level; caseSchema.json: ${count(caseSchema)} keys; interviewSchema.json: ${count(interviewSchema)} keys`)
+console.log(`${path.relative(root, outPath)}: ${count(schema)} keys, ${Object.keys(schema).length} at the top level; caseSchema.json: ${count(caseSchema)} keys; interviewSchema.json: ${count(interviewSchema)} keys; moduleSchema.json: ${count(moduleSchema)} keys`)

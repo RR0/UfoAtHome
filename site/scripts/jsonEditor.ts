@@ -6,6 +6,7 @@ import { SiteCodeTheme } from "./codeTheme.js"
 import { SightingCompletion } from "../../src/component/SightingCompletion.js"
 import caseSchema from "../../src/generated/caseSchema.json"
 import interviewSchema from "../../src/generated/interviewSchema.json"
+import moduleSchema from "../../src/generated/moduleSchema.json"
 import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete"
 
 /**
@@ -34,7 +35,7 @@ export class JsonEditor {
    * worth reading; picking from it changes nothing.
    */
   constructor(parent: HTMLElement, initialValue: string,
-              { at = [], readOnly = false, schema = "sighting" }: { at?: readonly string[] | null, readOnly?: boolean, schema?: "sighting" | "case" | "interview" } = {}) {
+              { at = [], readOnly = false, schema = "sighting" }: { at?: readonly string[] | null, readOnly?: boolean, schema?: "sighting" | "case" | "interview" | "module" } = {}) {
     this.view = new EditorView({
       parent,
       doc: initialValue,
@@ -57,10 +58,12 @@ export class JsonEditor {
     })
   }
 
-  /** The completion of the format the text is in: a recording's (the default), a case's, or an interview's, each described by the schema generated from its own type. */
-  private static completionFor(at: readonly string[], schema: "sighting" | "case" | "interview"): SightingCompletion {
+  /** The completion of the format the text is in: a recording's (the default), a case's, an interview's, or a module's manifest, each described by the schema generated from its own type. */
+  private static completionFor(at: readonly string[], schema: "sighting" | "case" | "interview" | "module"): SightingCompletion {
     if (schema === "case") return new SightingCompletion(at, caseSchema as never)
     if (schema === "interview") return new SightingCompletion(at, interviewSchema as never)
+    // A module's manifest (see ModuleManifestJson), for the documentation of modules.
+    if (schema === "module") return new SightingCompletion(at, moduleSchema as never)
     return new SightingCompletion(at)
   }
 

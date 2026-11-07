@@ -36,19 +36,43 @@ export class DocsModulesPage extends DocsSection {
   "credit": "© ACME",
   "creditUrl": "https://acme.example",
   "contributes": {
-    "imagery": [{
-      "id": "acme-ortho", "name": "ACME ortho", "credit": "© ACME", "creditUrl": "https://acme.example/licence",
-      "tiles": "https://tiles.acme.example/ortho/{z}/{x}/{y}.jpg"
-    }],
-    "elevation": [{
-      "id": "acme-relief", "name": "ACME relief", "credit": "© ACME", "creditUrl": "https://acme.example/licence",
-      "tiles": "relief/{z}/{x}/{y}.png"
-    }],
-    "models": [{
-      "id": "acme-weather-balloon", "kind": "entity", "name": "Weather balloon",
-      "file": "models/balloon.glb", "sizeM": { "widthM": 2, "lengthM": 2, "heightM": 2 },
-      "credit": { "title": "Weather balloon", "author": "ACME", "license": "CC BY 4.0", "sourceUrl": "https://acme.example/models" }
-    }]
+    "imagery": [
+      {
+        "id": "acme-ortho",
+        "name": "ACME ortho",
+        "credit": "© ACME",
+        "creditUrl": "https://acme.example/licence",
+        "tiles": "https://tiles.acme.example/ortho/{z}/{x}/{y}.jpg"
+      }
+    ],
+    "elevation": [
+      {
+        "id": "acme-relief",
+        "name": "ACME relief",
+        "credit": "© ACME",
+        "creditUrl": "https://acme.example/licence",
+        "tiles": "relief/{z}/{x}/{y}.png"
+      }
+    ],
+    "models": [
+      {
+        "id": "acme-weather-balloon",
+        "kind": "entity",
+        "name": "Weather balloon",
+        "file": "models/balloon.glb",
+        "sizeM": {
+          "widthM": 2,
+          "lengthM": 2,
+          "heightM": 2
+        },
+        "credit": {
+          "title": "Weather balloon",
+          "author": "ACME",
+          "license": "CC BY 4.0",
+          "sourceUrl": "https://acme.example/models"
+        }
+      }
+    ]
   },
   "script": "module.js"
 }`
@@ -100,7 +124,8 @@ export default ({ three }) => ({
     <p>${t.what}</p>
     <h2>${t.manifestHeading}</h2>
     <p>${t.manifest}</p>
-    <pre data-json="none"><code>${escape(DocsModulesPage.MANIFEST)}</code></pre>
+    <p class="small">${t.manifestNote}</p>
+    <pre data-json="" data-schema="module"><code>${escape(DocsModulesPage.MANIFEST)}</code></pre>
     <ul>
 ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
     </ul>
@@ -127,7 +152,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
   }
 
   private static readonly TEXT: Said<{
-    whatHeading: string, what: string, manifestHeading: string, manifest: string, fields: string[], scriptHeading: string, script: string,
+    whatHeading: string, what: string, manifestHeading: string, manifest: string, manifestNote: string, fields: string[], scriptHeading: string, script: string,
     points: string, trust: string, skyHeading: string, sky: string, readingHeading: string, reading: string, editorHeading: string, editor: string, recordingHeading: string, recording: string, prHeading: string, pr: string
   }> = {
     en: {
@@ -135,6 +160,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       what: "Sources of data (aerial imagery, ground relief, weather, air traffic…) and 3D models, each with the credit its licence requires. They join the built-in ones: in the editor's pickers after them, and in the scene wherever a recording names one of its models.",
       manifestHeading: "The manifest",
       manifest: "A JSON file, <code>ufoathome-module.json</code> by convention, readable from other sites (CORS). Its relative addresses are read from its own.",
+      manifestNote: "The manifest below is read-only and knows its format: put the caret inside an object and press <kbd>Ctrl</kbd>+<kbd>Space</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> on a Mac) to list every key that could go there, with what each means.",
       fields: [
         "<code>imagery</code>: tiles of ordinary images, <code>{z}</code>, <code>{x}</code> and <code>{y}</code> in the address in whatever order the service has them.",
         "<code>elevation</code>: tiles of relief encoded as Terrarium PNG (height = R × 256 + G + B / 256 − 32768 m).",
@@ -161,6 +187,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       what: "Des sources de données (imagerie aérienne, relief du sol, météo, trafic aérien…) et des modèles 3D, chacun avec le crédit que sa licence demande. Ils s'ajoutent à ceux d'UFO@home : dans les sélecteurs de l'éditeur, après eux, et dans la scène partout où un enregistrement nomme l'un de ses modèles.",
       manifestHeading: "Le manifeste",
       manifest: "Un fichier JSON, <code>ufoathome-module.json</code> par convention, lisible depuis d'autres sites (CORS). Ses adresses relatives se lisent depuis la sienne.",
+      manifestNote: "Le manifeste ci-dessous est en lecture seule et connaît son format : placez le curseur dans un objet et faites <kbd>Ctrl</kbd>+<kbd>Espace</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> sur Mac) pour lister toutes les clés qui pourraient y figurer, avec ce que chacune veut dire.",
       fields: [
         "<code>imagery</code> : des tuiles d'images ordinaires, <code>{z}</code>, <code>{x}</code> et <code>{y}</code> dans l'adresse dans l'ordre que le service leur donne.",
         "<code>elevation</code> : des tuiles de relief encodées en PNG Terrarium (hauteur = R × 256 + G + B / 256 − 32768 m).",
@@ -187,6 +214,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       what: "Fuentes de datos (imágenes aéreas, relieve del suelo, meteorología, tráfico aéreo…) y modelos 3D, cada uno con el crédito que pide su licencia. Se suman a los de UFO@home: en los selectores del editor, después de ellos, y en la escena allí donde una grabación cita uno de sus modelos.",
       manifestHeading: "El manifiesto",
       manifest: "Un archivo JSON, <code>ufoathome-module.json</code> por convención, legible desde otros sitios (CORS). Sus direcciones relativas se leen desde la suya.",
+      manifestNote: "El manifiesto de abajo es de solo lectura y conoce su formato: pon el cursor dentro de un objeto y pulsa <kbd>Ctrl</kbd>+<kbd>Espacio</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> en Mac) para listar todas las claves que podrían ir ahí, con lo que significa cada una.",
       fields: [
         "<code>imagery</code>: teselas de imágenes corrientes, con <code>{z}</code>, <code>{x}</code> e <code>{y}</code> en la dirección en el orden que el servicio les da.",
         "<code>elevation</code>: teselas de relieve codificadas en PNG Terrarium (altura = R × 256 + G + B / 256 − 32768 m).",
@@ -213,6 +241,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       what: "Fonti di dati (immagini aeree, rilievo del suolo, meteo, traffico aereo…) e modelli 3D, ognuno con il credito che la sua licenza chiede. Si aggiungono a quelli di UFO@home: nei selettori dell'editor, dopo di essi, e nella scena ovunque una registrazione citi uno dei suoi modelli.",
       manifestHeading: "Il manifesto",
       manifest: "Un file JSON, <code>ufoathome-module.json</code> per convenzione, leggibile da altri siti (CORS). I suoi indirizzi relativi si leggono dal suo.",
+      manifestNote: "Il manifesto qui sotto è in sola lettura e conosce il suo formato: metti il cursore dentro un oggetto e premi <kbd>Ctrl</kbd>+<kbd>Spazio</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> su Mac) per elencare tutte le chiavi che potrebbero andarci, con ciò che significa ciascuna.",
       fields: [
         "<code>imagery</code>: tasselli di immagini comuni, con <code>{z}</code>, <code>{x}</code> e <code>{y}</code> nell'indirizzo nell'ordine che il servizio dà loro.",
         "<code>elevation</code>: tasselli di rilievo codificati in PNG Terrarium (altezza = R × 256 + G + B / 256 − 32768 m).",
