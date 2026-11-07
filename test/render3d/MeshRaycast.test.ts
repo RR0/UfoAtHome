@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { BoxGeometry, Group, Intersection, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector3, DoubleSide } from "three"
+import { BoxGeometry, Group, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector3, DoubleSide } from "three"
+import type { Intersection } from "three"
 import { MeshRaycast } from "../../src/render3d/MeshRaycast.js"
 
 const plain = Mesh.prototype.raycast
