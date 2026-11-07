@@ -56,7 +56,9 @@ export class WitnessErrorView {
 .app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > :first-child { grid-column: 1; }
 .app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > rr0-input-basis { grid-column: 2 / -1; justify-self: start; }
 .app .form-section > :is(label, .field) > rr0-input-basis .basis-mark { margin-left: 0; }
-.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > :is(.law, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
+/* What is said of the value (an output: "0.1× the Moon") too: left on the value's line, it got the third track only, and ran under the
+   next field. */
+.app .form-section > :is(label, .field):has(> rr0-input-basis > .basis-mark) > :is(.law, output, rr0-date-input, rr0-duration-input) { grid-column: 1 / -1; }
 .law { flex: 1 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font: 400 12px/1.4 var(--sans); color: var(--ink-dim); }
 .law-symbol { color: var(--glow-dim); font-weight: 700; }
 .law-reset { color: var(--glow); }
@@ -176,8 +178,12 @@ export class WitnessErrorView {
     return [symbol, said, status]
   }
 
+  /**
+   * A figure as WitnessError.rounded left it, two significant digits: below 1 those can lie past the second decimal, which cut them off
+   * and read a small angle's bounds as "0.02° to 0.02°" (0.015 and 0.02).
+   */
   private number(value: number): string {
-    return value.toLocaleString(document.documentElement.lang || undefined, { maximumFractionDigits: 2 })
+    return value.toLocaleString(document.documentElement.lang || undefined, { maximumFractionDigits: Math.abs(value) < 1 ? 6 : 2 })
   }
 
   /** A figure of a law in the unit of its kind: seconds or minutes for a duration, degrees for an angle. */

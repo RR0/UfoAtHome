@@ -381,7 +381,8 @@ export class ParameterForm {
     if (hint) row.title = hint
     const name = document.createElement("span")
     name.textContent = this.read(spec.label) ?? spec.key
-    row.append(name, box)
+    // A space between them as every label of the form has: a position field flows on the name's line, and read "In the worldrelative".
+    row.append(name, " ", box)
     return row
   }
 

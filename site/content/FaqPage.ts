@@ -123,9 +123,8 @@ export class FaqPage implements SitePage {
       <p>The idea came out of conversations with the sociologist
         <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, who would cite Roger
         Shepard's work to its author.</p>
-      <p>Because an account written down loses almost everything about it. In 1968, at the AAAS
-        symposium, the psychologist <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> argued, in
-        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the paper he gave there</a>, that a visual reconstruction of an account
+      <p>Because an account written down loses almost everything about it. In 1968, at the UFO symposium of the US House Committee on Science and Astronautics, the psychologist <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> argued,
+        in <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">the statement he submitted to it</a>, that a visual reconstruction of an account
         is more faithful than a written or spoken one — observers are much better at recognising and
         adjusting a picture than at generating a description. UFO@home is that idea, built as
         software: draw it, move it, and let the observer correct it until it matches.</p>
@@ -247,7 +246,7 @@ export class FaqPage implements SitePage {
       <h3>Why not just use Stellarium?</h3>
       <p>Stellarium is a planetarium, and a very good one — we have read its source to learn how it
         does things. But it answers “what was in the sky?”, not “what did this person see, and could
-        the sky account for it?”. It has no account format, no observered phenomenon, no weather, no
+        the sky account for it?”. It has no account format, no observed phenomenon, no weather, no
         decor around the observer, no long-exposure instrument, and nothing to embed in a page.</p>
       <p>Where the two overlap, UFO@home sometimes takes the harder road on purpose: the Milky Way
         is a texture in Stellarium and a line-of-sight integral here, which is why its dark rift
@@ -452,9 +451,8 @@ export class FaqPage implements SitePage {
       <p>L'idée est née de discussions avec le sociologue
         <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, qui citait à son
         auteur les travaux de Roger Shepard.</p>
-      <p>Parce qu'un compte rendu mis par écrit en perd presque tout. En 1968, au symposium de l'AAAS,
-        le psychologue <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> a soutenu, dans
-        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html">la communication qu'il y a donnée</a>, qu'une reconstitution visuelle
+      <p>Parce qu'un compte rendu mis par écrit en perd presque tout. En 1968, au symposium sur les ovnis de la commission de la Science et de l'Astronautique de la Chambre des représentants
+        des États-Unis, le psychologue <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> a soutenu, dans <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index_fr.html">la déclaration qu'il lui a remise</a>, qu'une reconstitution visuelle
         d'un compte rendu est plus fidèle qu'une reconstitution écrite ou orale : un observateur est bien
         meilleur pour reconnaître et corriger une image que pour engendrer une description.
         UFO@home, c'est cette idée mise en logiciel : dessinez, faites bouger, et laissez l'observateur
@@ -793,9 +791,8 @@ export class FaqPage implements SitePage {
       <p>La idea surgió de conversaciones con el sociólogo
         <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, que citaba a su autor la
         obra de Roger Shepard.</p>
-      <p>Porque un relato puesto por escrito lo pierde casi todo. En 1968, en el simposio de la AAAS,
-        el psicólogo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostuvo, en
-        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">la ponencia que presentó allí</a>, que una reconstrucción visual de un relato
+      <p>Porque un relato puesto por escrito lo pierde casi todo. En 1968, en el simposio sobre ovnis del Comité de Ciencia y Astronáutica de la Cámara de Representantes de los
+        Estados Unidos, el psicólogo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostuvo, en <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">la declaración que le remitió</a>, que una reconstrucción visual de un relato
         es más fiel que una escrita u oral — los observadores son mucho mejores reconociendo y
         ajustando una imagen que generando una descripción. UFO@home es esa idea, hecha
         software: dibújalo, muévelo, y deja que el observador lo corrija hasta que coincida.</p>
@@ -1117,9 +1114,8 @@ export class FaqPage implements SitePage {
       <p>L'idea è nata da conversazioni con il sociologo
         <a href="https://rr0.org/people/l/LagrangePierre/">Pierre Lagrange</a>, che citava al suo autore
         il lavoro di Roger Shepard.</p>
-      <p>Perché un resoconto messo per iscritto perde quasi tutto. Nel 1968, al simposio dell'AAAS,
-        lo psicologo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostenne, nella
-        <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">relazione che vi presentò</a>, che una ricostruzione visiva di un resoconto
+      <p>Perché un resoconto messo per iscritto perde quasi tutto. Nel 1968, al simposio sugli UFO della Commissione Scienza e Astronautica della Camera dei Rappresentanti degli
+        Stati Uniti, lo psicologo <a href="https://rr0.org/people/s/ShepardRogerN/">Roger Shepard</a> sostenne, nella <a href="https://rr0.org/time/1/9/6/8/07/29/Symposium/Shepard/index.html">dichiarazione che le presentò</a>, che una ricostruzione visiva di un resoconto
         è più fedele di una scritta o orale — gli osservatori sono molto più bravi a riconoscere e
         correggere un'immagine che a generare una descrizione. UFO@home è quell'idea, fatta
         software: disegnalo, muovilo, e lascia che l'osservatore lo corregga finché non corrisponde.</p>

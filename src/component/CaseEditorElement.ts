@@ -943,7 +943,7 @@ export class CaseEditorElement extends HTMLElement {
       return {
         at: passage.at,
         clock: InterviewFile.clock(passage.at, true),
-        said: said === "" ? where : `${InterviewFile.speakerName(json, passage.speaker)} : « ${said.length > 120 ? `${said.slice(0, 117)}…` : said} »`,
+        said: said === "" ? where : `${InterviewFile.speakerName(json, passage.speaker)}${this.messages.colon}${this.messages.quoted.replace("{text}", said.length > 120 ? `${said.slice(0, 117)}…` : said)}`,
         where,
         open: () => void this.showInterview(interview).then(() => this.interviewElement.revealSegment(passage.index))
       }
@@ -1150,12 +1150,12 @@ export class CaseEditorElement extends HTMLElement {
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
           .map(interview => this.optionLabel({ interview }, 0))
-        if (told.length > 0) said.push(`${m.passagesHeading} : ${told.join(", ")}`)
+        if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}${told.join(", ")}`)
         const readings = session.readingsOf(item.track).length
         if (readings > 0) said.push(m.readingsCount.replace("{n}", String(readings)))
       } else if (item.track) {
         const account = session.accountOf(item.track)
-        if (account) said.push(`${m.interpretationOf} : ${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
+        if (account) said.push(`${m.interpretationOf}${m.colon}${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
       }
       links.textContent = said.join(" · ")
       const remove = document.createElement("button")
