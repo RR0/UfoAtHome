@@ -18,17 +18,19 @@ describe("LaunchEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = (skyEvents: SkyEventsJson | null = stated()) => {
+  const build = (skyEvents: SkyEventsJson | null = stated(), at = 0) => {
     const sighting = { skyEvents: skyEvents ?? undefined, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
+    const time = { now: at, seeks: [] as number[] }
     const editor = new LaunchEditor(container, {
       sighting: () => sighting,
       said: () => new SaidTexts(["en"]),
       writingLanguage: () => "en",
+      currentTime: () => time.now, duration: () => 60000, seekTo: t => { time.seeks.push(t); time.now = t },
       changed: () => changes++
     }, "en")
     editor.sync()
-    return { sighting, editor, changes: () => changes }
+    return { sighting, editor, changes: () => changes, time }
   }
   const field = (key: string) => container.querySelector<HTMLInputElement>(`[data-key="${key}"]`)!
   const typed = (target: Element, value: string) => {
@@ -126,7 +128,7 @@ describe("LaunchEditor", () => {
 
   test("cannot add a launch to a recording with no place, and says why", () => {
     const sighting = { interpretation: undefined, event: {}, observerTrack: { getInterpolatedPoseAt: () => undefined } } as unknown as Sighting
-    const editor = new LaunchEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", changed: () => undefined }, "en")
+    const editor = new LaunchEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", currentTime: () => 0, duration: () => 60000, seekTo: () => undefined, changed: () => undefined }, "en")
     editor.sync()
     const add = container.querySelector<HTMLButtonElement>("#launch-add")!
     expect(add.disabled).toBe(true)
@@ -153,46 +155,49 @@ describe("LaunchEditor", () => {
 
   const placeCell = (key: string) => container.querySelector<HTMLInputElement>(`#launchPlace\\.${key}`)!
 
-  test("the path is edited one place at a time: a picker of instants, and the fields of the place picked", () => {
-    const { sighting } = build()
-    expect([...container.querySelectorAll<HTMLOptionElement>("#launch-place option")].map(option => option.textContent)).toEqual(["0 s", "60 s"])
+  const lanes = () => [...container.querySelectorAll<HTMLElement>("#launch-timeline .track-lane")]
+  const adds = () => [...container.querySelectorAll<HTMLButtonElement>("#launch-timeline .track-add")]
+  const shown = (id: string) => !container.querySelector<HTMLElement>(`#${id}`)!.hidden
+  /** A lane laid out 132 px wide from x = 0: over −6 s to 66 s for a path of 0 to 60 s, a tenth more on either side, so 1.833 px a second. */
+  const laidOut = (lane: HTMLElement) => {
+    lane.getBoundingClientRect = () => ({ left: 0, width: 132, top: 0, height: 24, right: 132, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
+    lane.setPointerCapture = () => undefined
+    return lane
+  }
+  const press = (lane: HTMLElement, x: number, to = x) => {
+    lane.dispatchEvent(new MouseEvent("pointerdown", { clientX: x, bubbles: true }))
+    if (to !== x) lane.dispatchEvent(new MouseEvent("pointermove", { clientX: to, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointerup", { clientX: to, bubbles: true }))
+  }
+
+  test("the path is a row of the launch's timeline, its places diamonds, in place of a picker of instants", () => {
+    build()
+    expect(container.querySelector("#launch-place")).toBeNull()
+    expect(lanes()).toHaveLength(1)
+    expect([...lanes()[0].querySelectorAll<HTMLElement>(".kf")].map(diamond => diamond.dataset.t)).toEqual(["0", "60000"])
+    expect(shown("launch-path")).toBe(true)
+    expect(shown("launch-jets")).toBe(false)
     expect(placeCell("t").value).toBe("0")
-    expect(placeCell("altitudeKm").value).toBe("0")
-    const select = container.querySelector<HTMLSelectElement>("#launch-place")!
-    select.value = "1"
-    select.dispatchEvent(new Event("change", { bubbles: true }))
+  })
+
+  test("a diamond of the path pressed shows its place and takes the playhead there; dragged, it moves in time", () => {
+    const { sighting, time } = build()
+    // 60 s is 66 s from the lane's start, of 72: 121 px.
+    press(laidOut(lanes()[0]), 121)
+    expect(time.seeks.at(-1)).toBe(60000)
     expect(placeCell("altitudeKm").value).toBe("150")
     typed(placeCell("altitudeKm"), "170.5")
-    typed(placeCell("t"), "45")
+    // Dragged back to 45 s: 51 s from the start, 93.5 px.
+    press(laidOut(lanes()[0]), 121, 93.5)
     expect(sighting.skyEvents!.launches![0].track).toEqual([{ t: 0, lat: 28, lng: -80, altitudeKm: 0 }, { t: 45000, lat: 30, lng: -78, altitudeKm: 170.5 }])
+    expect(placeCell("t").value).toBe("45")
   })
 
-  test("steps to the previous and next place with the buttons and with Alt and the arrows, and not past either end", () => {
-    build()
-    const previous = container.querySelector<HTMLButtonElement>("#launch-place-previous")!
-    const next = container.querySelector<HTMLButtonElement>("#launch-place-next")!
-    expect(previous.disabled).toBe(true)
-    expect(next.disabled).toBe(false)
-    next.click()
-    expect(placeCell("t").value).toBe("60")
-    expect(next.disabled).toBe(true)
-    expect(previous.title).toContain("Alt+↑")
-    // With the focus in the field of the place left behind, which is then not being typed in.
-    placeCell("t").focus()
-    placeCell("t").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true }))
-    expect(placeCell("t").value).toBe("0")
-    // The arrows alone belong to the field being edited.
-    placeCell("t").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }))
-    expect(placeCell("t").value).toBe("0")
-    placeCell("t").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true }))
-    expect(placeCell("t").value).toBe("0")
-  })
-
-  test("adds a place that goes on as the path was going, and removes the one picked down to two", () => {
-    const { sighting } = build()
-    container.querySelector<HTMLButtonElement>("#launch-place-add")!.click()
-    expect(sighting.skyEvents!.launches![0].track[2]).toEqual({ t: 120000, lat: 32, lng: -76, altitudeKm: 300 })
-    expect(container.querySelector<HTMLSelectElement>("#launch-place")!.value).toBe("2")
+  test("the + of the path puts a place at the playhead, where the stage is then, and removes the one picked down to two", () => {
+    const { sighting } = build(stated(), 30000)
+    adds()[0].click()
+    expect(sighting.skyEvents!.launches![0].track[1]).toEqual({ t: 30000, lat: 29, lng: -79, altitudeKm: 75 })
+    expect(placeCell("t").value).toBe("30")
     container.querySelector<HTMLButtonElement>("#launch-place-delete")!.click()
     expect(sighting.skyEvents!.launches![0].track).toHaveLength(2)
     expect(container.querySelector<HTMLButtonElement>("#launch-place-delete")!.disabled).toBe(true)
@@ -202,22 +207,36 @@ describe("LaunchEditor", () => {
     const { sighting } = build()
     typed(placeCell("t"), "90")
     expect(sighting.skyEvents!.launches![0].track.map(place => place.t)).toEqual([60000, 90000])
-    expect(container.querySelector<HTMLSelectElement>("#launch-place")!.value).toBe("1")
     expect(placeCell("t").value).toBe("90")
   })
 
   describe("jets", () => {
-    test("a vent added to a launch is listed, shows the vent's values in force, and keeps the ascent's burn drawn", () => {
-      const { sighting, changes } = build()
+    test("a vent added at the playhead is a row of its own, shown alone under the timeline, and keeps the ascent's burn drawn", () => {
+      const { sighting, changes } = build(stated(), 20000)
       container.querySelector<HTMLButtonElement>("#launch-jet-add-vent")!.click()
       const launch = sighting.skyEvents!.launches![0]
-      expect(launch.jets).toEqual([{ kind: "vent", fromT: 30000, untilT: 60000, angleDeg: 90 }])
+      expect(launch.jets).toEqual([{ kind: "vent", fromT: 20000, untilT: 50000, angleDeg: 90 }])
       // The ascent's burn, which jets would otherwise replace, is stated.
       expect([launch.burnFromT, launch.burnUntilT]).toEqual([0, 60000])
       expect(changes()).toBe(1)
-      expect([...container.querySelectorAll<HTMLOptionElement>("#launch-jet option")].map(option => option.textContent)).toEqual(["Propellant vented 30 s"])
+      expect(lanes()).toHaveLength(2)
+      expect(container.querySelectorAll("#launch-timeline .track-name")[1].textContent).toBe("Propellant vented 1")
+      expect(shown("launch-jets")).toBe(true)
+      expect(shown("launch-path")).toBe(false)
       expect(field("speedKmPerS").placeholder).toBe("0.7")
       expect(field("angleDeg").value).toBe("90")
+      // The path's row pressed shows the path again, alone.
+      container.querySelector<HTMLButtonElement>("#launch-timeline .track-name")!.click()
+      expect(shown("launch-path")).toBe(true)
+      expect(shown("launch-jets")).toBe(false)
+    })
+
+    test("an end of a jet's bar dragged moves it in time", () => {
+      const { sighting } = build(stated(), 20000)
+      container.querySelector<HTMLButtonElement>("#launch-jet-add-vent")!.click()
+      // Its end at 50 s, 56 s from the lane's start: 102.7 px; dragged to 40 s, 84.3 px.
+      press(laidOut(lanes()[1]), 103, 84.3)
+      expect(sighting.skyEvents!.launches![0].jets![0]).toMatchObject({ fromT: 20000, untilT: 40000 })
     })
 
     test("a burn's values in force are the launch's engine's, and what is typed is written onto the jet", () => {
@@ -230,12 +249,13 @@ describe("LaunchEditor", () => {
       expect(sighting.skyEvents!.launches![0].jets![0]).toMatchObject({ kind: "burn", angleDeg: 180, spinPeriodS: 60 })
     })
 
-    test("removing the last jet leaves the launch with none", () => {
+    test("removing the last jet leaves the launch with none, and the path shown", () => {
       const { sighting } = build()
       container.querySelector<HTMLButtonElement>("#launch-jet-add-vent")!.click()
       container.querySelector<HTMLButtonElement>("#launch-jet-delete")!.click()
       expect(sighting.skyEvents!.launches![0].jets).toBeUndefined()
+      expect(lanes()).toHaveLength(1)
+      expect(shown("launch-path")).toBe(true)
     })
   })
 })
-

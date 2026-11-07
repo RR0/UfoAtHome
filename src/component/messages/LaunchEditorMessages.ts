@@ -5,17 +5,11 @@ export interface LaunchEditorMessages {
   launch: string
   deleteLaunch: string
   addLaunch: string
-  /** The path of a launch: its legend, the picker of its places, what adds, removes and steps through them. */
+  /** The path of a launch: its row on the timeline and its legend, and what removes the place picked. */
   path: string
-  place: string
-  addPlace: string
   deletePlace: string
-  previousPlace: string
-  nextPlace: string
-  /** What else the stage lets go: the legend, the picker of its jets, what adds and removes one, and the kinds a jet is added of. */
-  jets: string
+  /** What else the stage lets go: a jet's legend, what adds and removes one, and the kinds a jet is added of. */
   jet: string
-  noJet: string
   addJet: string
   deleteJet: string
   jetBurn: string
@@ -24,4 +18,10 @@ export interface LaunchEditorMessages {
   addLaunchNowhere: string
   /** Under the fields: what an empty field means. */
   derivedNote: string
+  /** Under the timeline: how it is used. */
+  timelineNote: string
+  /** The "+" of a row of the timeline, and what it says when something of the row is at the playhead already. */
+  addHere: string
+  here: string
+  zoomHint: string
 }

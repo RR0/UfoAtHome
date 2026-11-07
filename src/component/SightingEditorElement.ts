@@ -7843,6 +7843,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.shadow.getElementById("shape-bodies")?.hidden === false) this.bodyEditor?.syncKeyframe()
     // Its own timeline's playhead follows the recording's: only the playhead is placed again (see ReentryEditor.setTime).
     if (this.shadow.getElementById("sky-reentries")?.hidden === false) this.reentryEditor?.setTime(this.ufoElement.currentTime)
+    if (this.shadow.getElementById("sky-launches")?.hidden === false) this.launchEditor?.setTime(this.ufoElement.currentTime)
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()
@@ -8730,6 +8731,9 @@ export class SightingEditorElement extends HTMLElement {
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
         positionPlace: () => this.framePlace(),
+        currentTime: () => this.ufoElement.currentTime,
+        duration: () => this.ufoElement.seekableDuration,
+        seekTo: t => this.goToMark(t),
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()

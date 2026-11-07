@@ -7,18 +7,16 @@ export const launchEditorMessages_fr: LaunchEditorMessages = {
   deleteLaunch: "Supprimer le lancement",
   addLaunch: "Ajouter un lancement",
   path: "Chemin",
-  place: "Point du chemin",
-  addPlace: "Ajouter un point au chemin, dans la continuité",
   deletePlace: "Retirer ce point",
-  previousPlace: "Point précédent",
-  nextPlace: "Point suivant",
-  jets: "Jets",
   jet: "Jet",
-  noJet: "Aucun : le moteur brûle le long du chemin",
   addJet: "Ajouter un jet",
   deleteJet: "Retirer ce jet",
   jetBurn: "Allumage du moteur",
   jetVent: "Ergols vidangés",
   addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : un lancement est placé devant le témoin",
-  derivedNote: "Un champ vide montre, en grisé, la valeur utilisée : le défaut, ou ce que le moteur implique. Videz un champ pour y revenir."
+  derivedNote: "Un champ vide montre, en grisé, la valeur utilisée : le défaut, ou ce que le moteur implique. Videz un champ pour y revenir.",
+  timelineNote: "Sur la frise, une ligne pressée est celle détaillée dessous : le chemin, ou un jet. Un losange pressé amène la scène à son instant ; faites-le glisser pour le déplacer dans le temps. Le « + » d'une ligne ajoute à la tête de lecture. Les parties hachurées sont avant le début de l'enregistrement ou après sa fin.",
+  addHere: "Ajouter ici, à la tête de lecture",
+  here: "Déjà à la tête de lecture : pressez-le pour le modifier",
+  zoomHint: "Pincez, ou Ctrl + molette, pour zoomer ; Maj + molette pour défiler"
 }

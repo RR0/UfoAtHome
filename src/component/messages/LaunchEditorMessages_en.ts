@@ -7,18 +7,16 @@ export const launchEditorMessages_en: LaunchEditorMessages = {
   deleteLaunch: "Delete launch",
   addLaunch: "Add a launch",
   path: "Path",
-  place: "Place of the path",
-  addPlace: "Add a place to the path, going on as it was going",
   deletePlace: "Remove this place",
-  previousPlace: "Previous place",
-  nextPlace: "Next place",
-  jets: "Jets",
   jet: "Jet",
-  noJet: "None: the engine burns along the path",
   addJet: "Add a jet",
   deleteJet: "Remove this jet",
   jetBurn: "Engine burn",
   jetVent: "Propellant vented",
   addLaunchNowhere: "Give the recording a place first: a launch is put in front of the witness",
-  derivedNote: "An empty field shows, greyed, the value used: the default, or what the engine implies. Clear a field to go back to it."
+  derivedNote: "An empty field shows, greyed, the value used: the default, or what the engine implies. Clear a field to go back to it.",
+  timelineNote: "On the timeline, a row pressed is the one shown below: the path, or a jet. A diamond pressed takes the scene to its instant; drag it to move it in time. The \"+\" of a row adds at the playhead. The hatched parts are before the recording's start or after its end.",
+  addHere: "Add here, at the playhead",
+  here: "Already at the playhead: press it to edit it",
+  zoomHint: "Pinch, or Ctrl + wheel, to zoom; Shift + wheel to scroll"
 }

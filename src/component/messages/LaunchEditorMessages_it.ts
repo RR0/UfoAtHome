@@ -7,18 +7,16 @@ export const launchEditorMessages_it: LaunchEditorMessages = {
   deleteLaunch: "Elimina il lancio",
   addLaunch: "Aggiungi un lancio",
   path: "Percorso",
-  place: "Punto del percorso",
-  addPlace: "Aggiungi un punto al percorso, in continuità",
   deletePlace: "Rimuovi questo punto",
-  previousPlace: "Punto precedente",
-  nextPlace: "Punto successivo",
-  jets: "Getti",
   jet: "Getto",
-  noJet: "Nessuno: il motore brucia lungo il percorso",
   addJet: "Aggiungere un getto",
   deleteJet: "Togliere questo getto",
   jetBurn: "Accensione del motore",
   jetVent: "Propellenti scaricati",
   addLaunchNowhere: "Dia prima un luogo alla registrazione: un lancio è posto davanti al testimone",
-  derivedNote: "Un campo vuoto mostra, in grigio, il valore usato: il predefinito, o ciò che implica il motore. Svuota un campo per tornarci."
+  derivedNote: "Un campo vuoto mostra, in grigio, il valore usato: il predefinito, o ciò che implica il motore. Svuota un campo per tornarci.",
+  timelineNote: "Sulla linea del tempo, una riga premuta è quella dettagliata sotto: il percorso, o un getto. Un rombo premuto porta la scena al suo istante; trascinatelo per spostarlo nel tempo. Il «+» di una riga aggiunge alla testina. Le parti tratteggiate sono prima dell'inizio della registrazione o dopo la sua fine.",
+  addHere: "Aggiungere qui, alla testina",
+  here: "Già alla testina: premetelo per modificarlo",
+  zoomHint: "Pizzicate, o Ctrl + rotella, per ingrandire; Maiusc + rotella per scorrere"
 }

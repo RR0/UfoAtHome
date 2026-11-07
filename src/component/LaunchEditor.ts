@@ -9,9 +9,12 @@ import { launchEditorMessages_en } from "./messages/LaunchEditorMessages_en.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { loadLaunchEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { ElementList } from "./ElementList.js"
+import { Icons } from "./Icons.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import type { PositionPlace } from "./ParameterForm.js"
 import type { ParameterHolder } from "../engine/interpretation/Parameters.js"
+import { TimelineTracks } from "./TimelineTracks.js"
+import type { TimelineTrack } from "./TimelineTracks.js"
 
 /** What the Launches part needs of the editor it stands in, read at every use. */
 export interface LaunchEditorHost {
@@ -20,6 +23,10 @@ export interface LaunchEditorHost {
   writingLanguage(): string
   /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
   positionPlace?(): PositionPlace
+  /** Where the playhead is, ms, how long the recording lasts, and putting the playhead elsewhere: the part's own timeline follows the recording's. */
+  currentTime(): number
+  duration(): number
+  seekTo(t: number): void
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -28,8 +35,10 @@ export interface LaunchEditorHost {
  * The launches of the recording, edited: the rocket launches that happened while it runs, a fact of its sky (see SkyEventsJson, LaunchJson), each with the fields its kind publishes (see LaunchParameters) —
  * the engine, the plume, the collar — drawn by the generic ParameterForm.
  *
- * What is edited here is what a launch IS, how its exhaust behaves, and where it flew: its path is a table of places and instants,
- * drawn by the form as one (see RowsParameter).
+ * What happens when is laid out on a timeline of its own (see TimelineTracks): a row for the path, its places as diamonds, and a row for
+ * each jet, its burn or its venting as a bar between two diamonds. A row pressed is the one whose details are shown under it, alone: the
+ * place of the path picked, or the jet. A diamond pressed takes the playhead to it, so that the scene shows the launch then; dragged, it
+ * moves in time; the "+" of a row adds there at the playhead.
  */
 export class LaunchEditor {
   private messages: LaunchEditorMessages = launchEditorMessages_en
@@ -37,11 +46,11 @@ export class LaunchEditor {
   private currentId?: string
   private form?: ParameterForm
   private list?: ElementList
-  /** The places of the path of the launch on show, and the one being edited — the only one whose fields are drawn. */
-  private places?: ElementList
+  private timeline?: TimelineTracks
+  /** The row of the timeline whose details are shown under it: the path, or the jet at jetIndex. */
+  private row: "path" | "jet" = "path"
   private placeForm?: ParameterForm
   private placeIndex = 0
-  private jets?: ElementList
   private jetForm?: ParameterForm
   private jetIndex = 0
   private language: string
@@ -78,8 +87,8 @@ export class LaunchEditor {
     const launch = this.current
     this.element("launch-fields").hidden = launch === undefined
     if (!launch) return
-    this.syncPlaces(launch)
-    this.syncJets(launch)
+    this.syncPlace(true)
+    this.syncJet(true)
     const set = ParameterRegistry.of("launch")!
     this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
@@ -94,8 +103,16 @@ export class LaunchEditor {
     // Whether a launch can be added follows the place, which is given in another group while the launches stay the same.
     this.syncAddState()
     const launches = this.launches
-    if (launches.length === this.shown.length && launches.every((launch, i) => launch === this.shown[i])) return
+    if (launches.length === this.shown.length && launches.every((launch, i) => launch === this.shown[i])) {
+      this.syncTimeline()
+      return
+    }
     this.sync()
+  }
+
+  /** The playhead has moved: only it is drawn again, as at every frame of a playback. */
+  setTime(t: number): void {
+    this.timeline?.setTime(t)
   }
 
   /** A launch is put in front of the observer: it can be added once the recording has a place. */
@@ -112,7 +129,9 @@ export class LaunchEditor {
   /** Shows a launch by its id, as the summary's chip and the picture do for a body. */
   show(id: string): void {
     this.currentId = id
+    this.row = "path"
     this.placeIndex = 0
+    this.jetIndex = 0
     this.sync()
   }
 
@@ -123,17 +142,21 @@ export class LaunchEditor {
       <p class="launch-intro">${m.intro}</p>
       <div id="launch-list"></div>
       <div id="launch-fields" class="launch-fields">
+        <div id="launch-parameters" class="launch-parameters"></div>
+        <div id="launch-timeline" class="launch-timeline"></div>
+        <button id="launch-jet-add-burn" type="button" title="${m.addJet}">${Icons.PLUS} ${m.jetBurn}</button>
+        <button id="launch-jet-add-vent" type="button" title="${m.addJet}">${Icons.PLUS} ${m.jetVent}</button>
+        <p class="launch-intro">${m.timelineNote}</p>
         <fieldset id="launch-path" class="launch-path">
           <legend>${m.path}</legend>
-          <div id="launch-places"></div>
           <div id="launch-place-parameters" class="launch-parameters"></div>
+          <button id="launch-place-delete" class="icon-btn" type="button" title="${m.deletePlace}" aria-label="${m.deletePlace}">${Icons.TRASH}</button>
         </fieldset>
         <fieldset id="launch-jets" class="launch-path">
-          <legend>${m.jets}</legend>
-          <div id="launch-jet-list"></div>
+          <legend id="launch-jet-legend">${m.jet}</legend>
           <div id="launch-jet-parameters" class="launch-parameters"></div>
+          <button id="launch-jet-delete" class="icon-btn" type="button" title="${m.deleteJet}" aria-label="${m.deleteJet}">${Icons.TRASH}</button>
         </fieldset>
-        <div id="launch-parameters" class="launch-parameters"></div>
         <p class="launch-intro">${m.derivedNote}</p>
       </div>
     </div>`
@@ -141,33 +164,19 @@ export class LaunchEditor {
     this.list = new ElementList({
       header: list, body: this.element("launch-fields"),
       ids: { list: "launch-select", remove: "launch-delete", add: "launch-add", kinds: "launch-add-kind", kind: vehicle => `launch-add-${vehicle}` },
-      onSelect: id => { this.currentId = id; this.placeIndex = 0; this.sync() },
+      onSelect: id => this.show(id),
       onAdd: vehicle => this.addLaunch(vehicle ?? LaunchEditor.VEHICLES[0].id),
       onRemove: () => this.deleteCurrent()
     })
     this.list.setLabels({ list: m.launch, remove: m.deleteLaunch, add: m.addLaunch, empty: m.none })
     // What is launched is picked when the launch is added, and kept: another vehicle is another launch.
     this.list.setKinds(LaunchEditor.VEHICLES.map(vehicle => ({ value: vehicle.id, label: vehicle.vehicle.name ?? vehicle.id })))
-    const places = this.element("launch-places")
-    this.places = new ElementList({
-      header: places, body: this.element("launch-place-parameters"),
-      ids: { list: "launch-place", remove: "launch-place-delete", add: "launch-place-add" },
-      navigation: { scope: this.container, onStep: direction => this.selectPlace(this.placeIndex + direction) },
-      onSelect: id => this.selectPlace(Number(id)),
-      onAdd: () => this.addPlace(),
-      onRemove: () => this.removePlace()
-    })
-    this.places.setLabels({ list: m.place, remove: m.deletePlace, add: m.addPlace, previous: m.previousPlace, next: m.nextPlace })
+    this.timeline = new TimelineTracks(this.element("launch-timeline"), t => this.host.seekTo(t), { addKeyframeHere: m.addHere, keyframeHere: m.here, zoomHint: m.zoomHint })
+    this.element("launch-jet-add-burn").addEventListener("click", () => this.addJet("burn", this.host.currentTime()))
+    this.element("launch-jet-add-vent").addEventListener("click", () => this.addJet("vent", this.host.currentTime()))
+    this.element("launch-place-delete").addEventListener("click", () => this.removePlace())
+    this.element("launch-jet-delete").addEventListener("click", () => this.removeJet())
     this.placeForm = undefined
-    this.jets = new ElementList({
-      header: this.element("launch-jet-list"), body: this.element("launch-jet-parameters"),
-      ids: { list: "launch-jet", remove: "launch-jet-delete", add: "launch-jet-add", kinds: "launch-jet-add-kind", kind: kind => `launch-jet-add-${kind}` },
-      onSelect: id => { this.jetIndex = Number(id); this.syncJets(this.current!, true) },
-      onAdd: kind => this.addJet(kind === "vent" ? "vent" : "burn"),
-      onRemove: () => this.removeJet()
-    })
-    this.jets.setLabels({ list: m.jet, remove: m.deleteJet, add: m.addJet, empty: m.noJet })
-    this.jets.setKinds([{ value: "burn", label: m.jetBurn }, { value: "vent", label: m.jetVent }])
     this.jetForm = undefined
   }
 
@@ -177,83 +186,212 @@ export class LaunchEditor {
     const launch = this.current
     if (!launch) return
     this.list?.rename(launch.id, this.labelOf(launch))
+    this.syncTimeline()
   }
 
-  /** The places of the launch's path, the one being edited picked, and its fields drawn (see LaunchParameters.PLACE). */
-  private syncPlaces(launch: LaunchJson, force = false): void {
-    const track = launch.track ?? []
+  // The timeline.
+
+  /** The rows of the timeline: the path's, and every jet's, readable over a light ground and a dark one. */
+  private static readonly PATH_COLOR = "#e08a1e"
+  private static readonly JET_COLOR = "#4f8fd6"
+
+  private jetLabel(jet: LaunchJetJson, index: number): string {
+    return `${jet.kind === "vent" ? this.messages.jetVent : this.messages.jetBurn} ${index + 1}`
+  }
+
+  /** The rows of the part's timeline (see the class), drawn again only when what they show has changed (see TimelineTracks.show). */
+  private syncTimeline(): void {
+    const launch = this.current
+    if (!this.timeline || !launch) return
+    const m = this.messages
+    const path: TimelineTrack = {
+      id: "path", label: m.path, color: LaunchEditor.PATH_COLOR,
+      times: launch.track.map(place => place.t),
+      active: this.row === "path",
+      selectedTime: this.row === "path" ? launch.track[this.placeIndex]?.t : undefined,
+      open: () => this.selectPlace(this.placeIndex),
+      pressed: (_t, key) => {
+        const index = key === undefined ? -1 : (this.current?.track ?? []).findIndex(place => place.t === key)
+        this.selectPlace(index >= 0 ? index : this.placeIndex)
+      },
+      move: (from, to) => this.movePlace(from, to),
+      add: () => this.addPlaceAt(this.host.currentTime())
+    }
+    const jets = (launch.jets ?? []).map((jet, i): TimelineTrack => ({
+      id: `jet-${i}`, label: this.jetLabel(jet, i), color: LaunchEditor.JET_COLOR,
+      // Its ends, to be dragged, at either end of its bar.
+      times: [jet.fromT, jet.untilT],
+      spans: [{ t: jet.fromT, until: jet.untilT, label: "" }],
+      active: this.row === "jet" && i === this.jetIndex,
+      open: () => this.selectJet(i),
+      pressed: () => this.selectJet(i),
+      move: (from, to) => this.moveJetEnd(i, from, to),
+      add: () => this.addJet(jet.kind ?? "burn", this.host.currentTime())
+    }))
+    const instants = LaunchParameters.instantsOf(launch)
+    const from = Math.min(...instants)
+    const to = Math.max(...instants)
+    const margin = Math.max(500, (to - from) / 10)
+    this.timeline.show([path, ...jets], this.host.duration(), this.host.currentTime(), { from: from - margin, to: to + margin })
+  }
+
+  /** Under the timeline, the details of its row picked alone: the path's place, or the jet. */
+  private syncDetail(): void {
+    const launch = this.current
+    const jet = launch?.jets?.[this.jetIndex]
+    if (this.row === "jet" && !jet) this.row = "path"
+    this.element("launch-path").hidden = this.row !== "path"
+    this.element("launch-jets").hidden = this.row !== "jet"
+    this.element("launch-jet-legend").textContent = jet ? this.jetLabel(jet, this.jetIndex) : this.messages.jet
+  }
+
+  // The path.
+
+  /** A path needs two places to be a path at all: the plume is let go between them. */
+  private static readonly MIN_PLACES = 2
+
+  /** The fields of the place of the path picked (see LaunchParameters.PLACE). */
+  private syncPlace(force = false): void {
+    const track = this.current?.track ?? []
     this.placeIndex = Math.max(0, Math.min(this.placeIndex, track.length - 1))
-    this.places?.setItems(track.map((place, i) => ({ id: String(i), label: this.seconds(place.t) })), String(this.placeIndex))
-    this.places?.setStepState(this.placeIndex > 0, this.placeIndex < track.length - 1)
-    this.places?.setRemoveEnabled(track.length > LaunchEditor.MIN_PLACES)
+    ;(this.element("launch-place-delete") as HTMLButtonElement).disabled = track.length <= LaunchEditor.MIN_PLACES
     if (!this.placeForm) {
       this.placeForm = new ParameterForm(this.element("launch-place-parameters"), this.language, "launchPlace.")
       this.placeForm.show(LaunchParameters.PLACE, new ParameterTarget(
         () => this.current?.track[this.placeIndex] as unknown as ParameterHolder | undefined,
-        apply => this.editPlace(apply),
+        apply => this.editPlace(this.placeIndex, apply),
         undefined,
         this.host.positionPlace?.()
       ), () => undefined)
     } else {
-      // Another place may have been stepped to with the focus still in a field of the last one: it is not being typed in.
+      // Another place may have been picked with the focus still in a field of the last one: it is not being typed in.
       this.placeForm.sync(force)
     }
+    this.syncDetail()
+    this.syncTimeline()
+  }
+
+  private selectPlace(index: number): void {
+    this.row = "path"
+    this.placeIndex = index
+    this.syncPlace(true)
   }
 
   /**
-   * The jets of the launch, the one being edited picked, and its fields drawn (see LaunchParameters.JET): what a field left empty shows
-   * is what the jet uses, which for a burn depends on the launch's engine, so the form is told the launch.
+   * One field of the place at `index` was edited: the place is replaced by an edited copy, and the path is put in order of the instants,
+   * the place being followed to where it now stands — the fields keep showing the place that was being edited.
    */
-  private syncJets(launch: LaunchJson, force = false): void {
-    const jets = launch.jets ?? []
+  private editPlace(index: number, apply: (place: ParameterHolder) => void): void {
+    const launch = this.current
+    if (!launch) return
+    const place = { ...launch.track[index] }
+    apply(place as unknown as ParameterHolder)
+    launch.track = launch.track.map((other, i) => i === index ? place : other).sort((a, b) => a.t - b.t)
+    this.placeIndex = launch.track.indexOf(place)
+    this.syncPlace()
+    this.written()
+  }
+
+  /** A diamond of the path dragged in time: the place it stands for, picked, now at `to`. */
+  private movePlace(from: number, to: number): void {
+    const index = this.current?.track.findIndex(place => place.t === from) ?? -1
+    if (index < 0) return
+    this.editPlace(index, place => { place.t = to })
+    this.syncPlace(true)
+  }
+
+  /** A place of the path at `t`, where the stage is then; the one already there when there is one. */
+  private addPlaceAt(t: number): void {
+    const launch = this.current
+    if (!launch) return
+    const there = launch.track.findIndex(place => Math.abs(place.t - t) < 1)
+    if (there < 0) {
+      const place = LaunchParameters.placeAt(launch.track, Math.round(t))
+      launch.track = [...launch.track, place].sort((a, b) => a.t - b.t)
+      this.host.changed()
+      this.selectPlace(launch.track.indexOf(place))
+      return
+    }
+    this.selectPlace(there)
+  }
+
+  private removePlace(): void {
+    const launch = this.current
+    if (!launch || launch.track.length <= LaunchEditor.MIN_PLACES) return
+    launch.track = launch.track.filter((_, i) => i !== this.placeIndex)
+    this.syncPlace(true)
+    this.host.changed()
+  }
+
+  // The jets.
+
+  /**
+   * The fields of the jet picked (see LaunchParameters.JET): what a field left empty shows is what the jet uses, which for a burn depends
+   * on the launch's engine, so the form is told the launch.
+   */
+  private syncJet(force = false): void {
+    const jets = this.current?.jets ?? []
     this.jetIndex = Math.max(0, Math.min(this.jetIndex, jets.length - 1))
-    const m = this.messages
-    this.jets?.setItems(jets.map((jet, i) => ({ id: String(i), label: `${jet.kind === "vent" ? m.jetVent : m.jetBurn} ${this.seconds(jet.fromT)}` })),
-      jets.length ? String(this.jetIndex) : undefined)
     if (!this.jetForm) {
       this.jetForm = new ParameterForm(this.element("launch-jet-parameters"), this.language, "launchJet.")
       this.jetForm.show(LaunchParameters.JET, new ParameterTarget(
         () => this.current?.jets?.[this.jetIndex] as unknown as ParameterHolder | undefined,
-        apply => this.editJet(apply),
+        apply => this.editJet(this.jetIndex, apply),
         () => this.current ? LaunchParameters.jetContext(this.current, this.jetIndex) : undefined
       ), () => undefined)
     } else {
       this.jetForm.sync(force)
     }
+    this.syncDetail()
+    this.syncTimeline()
   }
 
-  /** One field of the jet on show was edited: the jet is replaced by an edited copy, as a place of the path is. */
-  private editJet(apply: (jet: ParameterHolder) => void): void {
+  private selectJet(index: number): void {
+    this.row = "jet"
+    this.jetIndex = index
+    this.syncJet(true)
+  }
+
+  /** One field of the jet at `index` was edited: the jet is replaced by an edited copy, as a place of the path is. */
+  private editJet(index: number, apply: (jet: ParameterHolder) => void): void {
     const launch = this.current
     if (!launch?.jets) return
-    const jet = { ...launch.jets[this.jetIndex] }
+    const jet = { ...launch.jets[index] }
     apply(jet as unknown as ParameterHolder)
-    launch.jets = launch.jets.map((other, i) => i === this.jetIndex ? jet : other)
-    const m = this.messages
-    this.jets?.rename(String(this.jetIndex), `${jet.kind === "vent" ? m.jetVent : m.jetBurn} ${this.seconds(jet.fromT)}`)
+    launch.jets = launch.jets.map((other, i) => i === index ? jet : other)
     this.written()
   }
 
+  /** An end of the bar of the jet at `index` dragged in time: the one it was at, now at `to`, the jet's start kept before its end. */
+  private moveJetEnd(index: number, from: number, to: number): void {
+    const jet = this.current?.jets?.[index]
+    if (!jet) return
+    this.editJet(index, edited => {
+      const ends = from === jet.fromT ? [to, jet.untilT] : [jet.fromT, to]
+      edited.fromT = Math.min(ends[0], ends[1])
+      edited.untilT = Math.max(ends[0], ends[1])
+    })
+    this.selectJet(index)
+  }
+
   /**
-   * A jet of `kind`, from the middle of the path for half a minute: a burn straight back, propellant vented sideways. Adding the first
-   * jet to a launch whose burn of the ascent was not given its ends states them, so that the ascent's burn stays drawn (see
-   * LaunchJson.jets).
+   * A jet of `kind` from `t` for half a minute: a burn straight back, propellant vented sideways. Adding the first jet to a launch whose
+   * burn of the ascent was not given its ends states them, so that the ascent's burn stays drawn (see LaunchJson.jets).
    */
-  private addJet(kind: LaunchJetKind): void {
+  private addJet(kind: LaunchJetKind, t: number): void {
     const launch = this.current
     if (!launch) return
     const track = launch.track
-    const from = Math.round((track[0].t + track[track.length - 1].t) / 2)
+    const from = Math.round(t)
     const jet: LaunchJetJson = kind === "vent" ? { kind, fromT: from, untilT: from + 30000, angleDeg: 90 } : { kind, fromT: from, untilT: from + 30000 }
     if (!launch.jets?.length && launch.burnFromT === undefined && launch.burnUntilT === undefined) {
       launch.burnFromT = track[0].t
       launch.burnUntilT = track[track.length - 1].t
     }
     launch.jets = [...launch.jets ?? [], jet]
-    this.jetIndex = launch.jets.length - 1
-    this.syncJets(launch, true)
     this.form?.sync(true)
     this.host.changed()
+    this.selectJet(launch.jets.length - 1)
   }
 
   private removeJet(): void {
@@ -262,65 +400,9 @@ export class LaunchEditor {
     const jets = launch.jets.filter((_, i) => i !== this.jetIndex)
     if (jets.length) launch.jets = jets
     else delete launch.jets
-    this.syncJets(launch, true)
     this.host.changed()
-  }
-
-  /** A path needs two places to be a path at all: the plume is let go between them. */
-  private static readonly MIN_PLACES = 2
-
-  private seconds(ms: number): string {
-    return `${Math.round(ms / 100) / 10} s`
-  }
-
-  /** Goes to the place at `index` of the path, or stays where it is past either end. */
-  private selectPlace(index: number): void {
-    const track = this.current?.track ?? []
-    if (index < 0 || index >= track.length) return
-    this.placeIndex = index
-    this.syncPlaces(this.current!, true)
-  }
-
-  /**
-   * One field of the place on show was edited: the place is replaced by an edited copy, and the path is put in order of the instants,
-   * the place being followed to where it now stands — the fields keep showing the place that was being edited.
-   */
-  private editPlace(apply: (place: ParameterHolder) => void): void {
-    const launch = this.current
-    if (!launch) return
-    const place = { ...launch.track[this.placeIndex] }
-    apply(place as unknown as ParameterHolder)
-    const track = launch.track.map((other, i) => i === this.placeIndex ? place : other).sort((a, b) => a.t - b.t)
-    this.replaceTrack(launch, track)
-    this.placeIndex = track.indexOf(place)
-    this.syncPlaces(this.current!)
-    this.written()
-  }
-
-  /** A place after the last, going on as the path was going. */
-  private addPlace(): void {
-    const launch = this.current
-    if (!launch) return
-    const rows = launch.track as unknown as Record<string, number>[]
-    const place = LaunchParameters.nextPlace(rows) as unknown as LaunchJson["track"][number]
-    const track = [...launch.track, place].sort((a, b) => a.t - b.t)
-    this.replaceTrack(launch, track)
-    this.placeIndex = track.indexOf(place)
-    this.syncPlaces(this.current!)
-    this.host.changed()
-  }
-
-  private removePlace(): void {
-    const launch = this.current
-    if (!launch || launch.track.length <= LaunchEditor.MIN_PLACES) return
-    this.replaceTrack(launch, launch.track.filter((_, i) => i !== this.placeIndex))
-    this.syncPlaces(this.current!)
-    this.host.changed()
-  }
-
-  /** The launch with another path. In place, as the other fields of the launch are edited (see ParameterForm.show): the form on show holds this very object. */
-  private replaceTrack(launch: LaunchJson, track: LaunchJson["track"]): void {
-    launch.track = track
+    if (jets.length) this.selectJet(Math.min(this.jetIndex, jets.length - 1))
+    else this.selectPlace(this.placeIndex)
   }
 
   /**
@@ -354,6 +436,8 @@ export class LaunchEditor {
     const sighting = this.host.sighting()
     sighting.skyEvents = { ...sighting.skyEvents, launches: [...this.launches, launch] }
     this.currentId = launch.id
+    this.row = "path"
+    this.placeIndex = 0
     this.host.changed()
     this.sync()
   }

@@ -37,15 +37,29 @@ export class LaunchParameters {
     }
   }
 
-  /** The path goes on as it was going: the step between the last two places, taken once more (ten seconds on from a path of one place). */
-  static nextPlace(rows: ReadonlyArray<Record<string, number>>): Record<string, number> {
-    const last = rows[rows.length - 1] ?? { t: 0, lat: 0, lng: 0, altitudeKm: 0 }
-    const before = rows[rows.length - 2] ?? last
-    const step = (key: string, otherwise = 0) => rows.length > 1 ? last[key] - before[key] : otherwise
-    return {
-      t: last.t + (rows.length > 1 ? step("t") : 10000), lat: last.lat + step("lat"), lng: last.lng + step("lng"),
-      altitudeKm: Math.max(0, last.altitudeKm + step("altitudeKm"))
-    }
+  /**
+   * A place of the path at `t`: between two of its places, where the stage is then (joined linearly, as the plume is let go between them);
+   * past either end, going on as the nearest two were going, the height never below the ground.
+   */
+  static placeAt(track: LaunchJson["track"], t: number): LaunchJson["track"][number] {
+    if (track.length === 0) return { t, lat: 0, lng: 0, altitudeKm: 0 }
+    if (track.length === 1) return { t, lat: track[0].lat, lng: track[0].lng, altitudeKm: track[0].altitudeKm }
+    let i = 0
+    while (i < track.length - 2 && track[i + 1].t < t) i++
+    const a = track[i]
+    const b = track[i + 1]
+    const f = b.t === a.t ? 0 : (t - a.t) / (b.t - a.t)
+    const at = (from: number, to: number) => from + (to - from) * f
+    return { t, lat: at(a.lat, b.lat), lng: at(a.lng, b.lng), altitudeKm: Math.max(0, at(a.altitudeKm, b.altitudeKm)) }
+  }
+
+  /** The instants every point of `launch` stands at: its path, its burn and its jets. */
+  static instantsOf(launch: LaunchJson): number[] {
+    return [
+      ...launch.track.map(place => place.t),
+      ...[launch.burnFromT, launch.burnUntilT].filter((t): t is number => t !== undefined),
+      ...(launch.jets ?? []).flatMap(jet => [jet.fromT, jet.untilT])
+    ]
   }
 
   static readonly SET: ParameterSet = {
