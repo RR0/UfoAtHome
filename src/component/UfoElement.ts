@@ -25,9 +25,8 @@ import type { SightingSound } from "../engine/model/Sound.js"
 import { ShapeHandles } from "../engine/shape/ShapeHandles.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts, type SaidText } from "../engine/model/SaidText.js"
-import { loadUfoMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { UFO_MESSAGES, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { ufoMessages_en } from "./messages/UfoMessages_en.js"
 import { ObserverPath } from "../engine/place/ObserverPath.js"
 import { resolveDecorPlacementAt } from "../engine/model/Decor.js"
 import { localMetersToGeo } from "../render3d/terrain/GeoProjection.js"
@@ -324,7 +323,10 @@ export class UfoElement extends HTMLElement {
   fullscreenTarget: HTMLElement
   /** Matches the template's baked-in English defaults until (if ever) loadLocaleMessages()
    * resolves a better match — see its doc comment. */
-  private messages: UfoMessages = ufoMessages_en
+  /** Settles once the player has its words (see messages). */
+  ready: Promise<void> = Promise.resolve()
+  /** Its words, in the page's language (see loadLocaleMessages): none before, in no language, and every text waits for them. */
+  private messages?: UfoMessages
 
   /** The sighting's real reported duration/start, cached by updateTimeLabels() so onFrame doesn't
    * recompute them every animation frame — see formatPosition, which turns a `Timeline` position
@@ -401,7 +403,7 @@ export class UfoElement extends HTMLElement {
   private updateMoreButton(): void {
     const open = this.controlsRow.classList.contains("more-open")
     UfoElement.setIcon(this.moreButton, open ? PlayerIcons.UNFOLDED : PlayerIcons.FOLDED)
-    const label = open ? this.messages.fewerControls : this.messages.moreControls
+    const label = open ? (this.messages?.fewerControls ?? "") : (this.messages?.moreControls ?? "")
     this.moreButton.title = label
     this.moreButton.setAttribute("aria-label", label)
     this.moreButton.setAttribute("aria-expanded", String(open))
@@ -479,7 +481,7 @@ export class UfoElement extends HTMLElement {
         return
       }
       this.observerMapCanvas.style.cursor = "crosshair"
-      this.showObserverMapTooltip(event, this.messages.placeObserverHere)
+      this.showObserverMapTooltip(event, (this.messages?.placeObserverHere ?? ""))
       return
     }
     this.observerMapCanvas.style.cursor = "pointer"
@@ -875,7 +877,7 @@ export class UfoElement extends HTMLElement {
     // Here and not in the constructor: the page's declared language is read off the ancestors, and
     // an element being constructed has none yet — it fell back to the browser's languages, so the
     // phenomenon inside a Spanish page's editor spoke the browser's French.
-    void this.loadLocaleMessages()
+    this.ready = this.loadLocaleMessages()
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -960,7 +962,7 @@ export class UfoElement extends HTMLElement {
     if (this.playRequested) this.started = true
     const unstarted = !this.started && this.enableClickToPlay
     this.stageElement.classList.toggle("unstarted", unstarted)
-    if (unstarted && !this.minified) this.canvas.title = this.messages.clickToPlay
+    if (unstarted && !this.minified) this.canvas.title = (this.messages?.clickToPlay ?? "")
     else this.canvas.removeAttribute("title")
   }
 
@@ -1062,16 +1064,17 @@ export class UfoElement extends HTMLElement {
   /** The ⚠ over the picture, in the reader's language, or nothing when the recording has nothing
    * to say. A new recording starts with its list closed. */
   private renderIssues(): void {
+    if (!this.messages) return
     const count = this.issues.length
     this.issuesBox.hidden = count === 0
     this.shadow.getElementById("issues-count")!.textContent = String(count)
-    const title = this.messages.recordingIssues.replace("{count}", String(count))
+    const title = (this.messages?.recordingIssues ?? "").replace("{count}", String(count))
     this.issuesButton.title = title
     this.issuesButton.setAttribute("aria-label", title)
     this.shadow.getElementById("issues-title")!.textContent = title
     this.shadow.getElementById("issues-list")!.replaceChildren(...this.issues.map(issue => {
       const item = document.createElement("li")
-      item.textContent = RecordingIssues.text(issue, this.messages.issueTemplates)
+      item.textContent = RecordingIssues.text(issue, this.messages!.issueTemplates)
       return item
     }))
   }
@@ -1537,8 +1540,8 @@ export class UfoElement extends HTMLElement {
       slider.max = "1"
       slider.step = "0.05"
       slider.value = String(view.opacity)
-      slider.title = this.messages.referenceOpacity
-      slider.setAttribute("aria-label", `${this.messages.referenceOpacity}: ${name}`)
+      slider.title = (this.messages?.referenceOpacity ?? "")
+      slider.setAttribute("aria-label", `${(this.messages?.referenceOpacity ?? "")}: ${name}`)
       slider.disabled = !view.shown
       box.addEventListener("change", () => {
         view.shown = box.checked
@@ -1553,7 +1556,7 @@ export class UfoElement extends HTMLElement {
       row.append(label, slider)
       return row
     })
-    this.referencesMenu.setAttribute("aria-label", this.messages.referencesMenu)
+    this.referencesMenu.setAttribute("aria-label", (this.messages?.referencesMenu ?? ""))
     this.referencesMenu.replaceChildren(...rows)
   }
 
@@ -1568,11 +1571,11 @@ export class UfoElement extends HTMLElement {
     if (several) this.referencesButton.setAttribute("aria-haspopup", "true")
     else this.referencesButton.removeAttribute("aria-haspopup")
     UfoElement.setIcon(this.referencesButton, lit ? PlayerIcons.PICTURES_ON : PlayerIcons.PICTURES_OFF)
-    const label = several ? this.messages.referencesMenu : this.referencesShownState ? this.messages.hideReferences : this.messages.showReferences
+    const label = several ? (this.messages?.referencesMenu ?? "") : this.referencesShownState ? (this.messages?.hideReferences ?? "") : (this.messages?.showReferences ?? "")
     this.referencesButton.title = label
     this.referencesButton.setAttribute("aria-label", label)
-    this.referenceOpacityInput.title = this.messages.referenceOpacity
-    this.referenceOpacityInput.setAttribute("aria-label", this.messages.referenceOpacity)
+    this.referenceOpacityInput.title = (this.messages?.referenceOpacity ?? "")
+    this.referenceOpacityInput.setAttribute("aria-label", (this.messages?.referenceOpacity ?? ""))
   }
 
   /** Whether the reader has the investigator's lines on — see InvestigatorTrace. */
@@ -1592,7 +1595,7 @@ export class UfoElement extends HTMLElement {
     this.tracesButton.hidden = this.currentSighting.traces.length === 0
     this.tracesButton.setAttribute("aria-pressed", String(this.tracesShownState))
     UfoElement.setIcon(this.tracesButton, this.tracesShownState ? PlayerIcons.TRACES_ON : PlayerIcons.TRACES_OFF)
-    const label = this.tracesShownState ? this.messages.hideTraces : this.messages.showTraces
+    const label = this.tracesShownState ? (this.messages?.hideTraces ?? "") : (this.messages?.showTraces ?? "")
     this.tracesButton.title = label
     this.tracesButton.setAttribute("aria-label", label)
   }
@@ -1660,7 +1663,7 @@ export class UfoElement extends HTMLElement {
       item.appendChild(button)
       return item
     }))
-    this.momentsButton.title = this.messages.moments
+    this.momentsButton.title = (this.messages?.moments ?? "")
     this.showCurrentMoment(undefined)
   }
 
@@ -1668,7 +1671,7 @@ export class UfoElement extends HTMLElement {
    * changes: this runs on every frame. */
   private showCurrentMoment(current: { t: number; label?: unknown; note?: unknown } | undefined): void {
     const text = current ? this.said.read(current.label as never) ?? "" : ""
-    const shown = text || this.messages.moments
+    const shown = text || (this.messages?.moments ?? "")
     if (this.momentsCurrent.textContent !== shown) this.momentsCurrent.textContent = shown
     for (const button of this.momentsMenu.querySelectorAll("button")) {
       const isCurrent = current !== undefined && Number(button.dataset.t) === current.t
@@ -2444,7 +2447,7 @@ export class UfoElement extends HTMLElement {
     // disabled instead of just showing a stale "Play" that gives no hint anything's wrong.
     const hasDuration = this.player.seekableDuration > 0
     this.playPauseButton.disabled = !hasDuration
-    const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play
+    const label = !hasDuration ? (this.messages?.noDuration ?? "") : isPlaying ? (this.messages?.pause ?? "") : (this.messages?.play ?? "")
     this.playPauseButton.title = label
     this.playPauseButton.setAttribute("aria-label", label)
   }
@@ -2638,13 +2641,13 @@ export class UfoElement extends HTMLElement {
   private updateObserverMapButton(): void {
     const open = !this.observerMapPanel.hidden
     UfoElement.setIcon(this.observerMapButton, open ? PlayerIcons.MAP_ON : PlayerIcons.MAP_OFF)
-    const label = open ? this.messages.hideObserverMap : this.messages.showObserverMap
+    const label = open ? (this.messages?.hideObserverMap ?? "") : (this.messages?.showObserverMap ?? "")
     this.observerMapButton.title = label
     this.observerMapButton.setAttribute("aria-label", label)
     const zoomLabels: Array<[HTMLButtonElement, string]> = [
-      [this.mapZoomInButton, this.messages.zoomMapIn],
-      [this.mapZoomOutButton, this.messages.zoomMapOut],
-      [this.mapFitButton, this.messages.fitMap]
+      [this.mapZoomInButton, (this.messages?.zoomMapIn ?? "")],
+      [this.mapZoomOutButton, (this.messages?.zoomMapOut ?? "")],
+      [this.mapFitButton, (this.messages?.fitMap ?? "")]
     ]
     for (const [button, text] of zoomLabels) {
       button.title = text
@@ -2822,7 +2825,7 @@ export class UfoElement extends HTMLElement {
   /** The line along the bottom of the map: the licence where nowhere else carries it, and the
    * missing-imagery note either way. */
   private get observerMapFooterLine(): string | undefined {
-    if (this.observerMapImageryFailed) return this.messages.mapImageryUnavailable
+    if (this.observerMapImageryFailed) return (this.messages?.mapImageryUnavailable ?? "")
     return this.creditShownExternally ? undefined : this.observerMapImageryCredit
   }
 
@@ -2963,7 +2966,7 @@ export class UfoElement extends HTMLElement {
         label: this.said.read(trace.title)
       })),
       decor: this.observerMapDecorAt(t),
-      observerLabel: this.said.read(this.currentSighting.observer?.title) ?? this.messages.observerHere,
+      observerLabel: this.said.read(this.currentSighting.observer?.title) ?? (this.messages?.observerHere ?? ""),
       nightFraction: this.observerMapNightFraction,
       attribution: this.observerMapFooterLine
     })
@@ -2997,9 +3000,9 @@ export class UfoElement extends HTMLElement {
    * gets none — most name none. */
   private updateMilestonesButton(): void {
     this.milestonesButton.hidden = this.currentSighting.milestones.length === 0
-    this.momentsButton.title = this.messages.moments
+    this.momentsButton.title = (this.messages?.moments ?? "")
     UfoElement.setIcon(this.milestonesButton, this.milestonesShown ? PlayerIcons.MILESTONES_ON : PlayerIcons.MILESTONES_OFF)
-    const label = this.milestonesShown ? this.messages.hideMilestones : this.messages.showMilestones
+    const label = this.milestonesShown ? (this.messages?.hideMilestones ?? "") : (this.messages?.showMilestones ?? "")
     this.milestonesButton.title = label
     this.milestonesButton.setAttribute("aria-label", label)
   }
@@ -3029,7 +3032,7 @@ export class UfoElement extends HTMLElement {
     return this.currentSighting.decor.filter(object => object.kind !== "crop").map(object => {
       const placement = resolveDecorPlacementAt(object, t)
       const { lat, lng } = localMetersToGeo(placement.eastM, -placement.northM, reference.lat!, reference.lng!)
-      return { lat, lng, headingDeg: placement.headingDeg, label: this.said.read(object.title) ?? this.messages.decorHere }
+      return { lat, lng, headingDeg: placement.headingDeg, label: this.said.read(object.title) ?? (this.messages?.decorHere ?? "") }
     })
   }
 
@@ -3174,20 +3177,20 @@ export class UfoElement extends HTMLElement {
     this.miniMuteButton.hidden = silent
     this.miniMuteButton.setAttribute("aria-pressed", String(this.mutedState))
     UfoElement.setIcon(this.miniMuteButton, this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME)
-    const miniLabel = this.mutedState ? this.messages.unmute : this.messages.mute
+    const miniLabel = this.mutedState ? (this.messages?.unmute ?? "") : (this.messages?.mute ?? "")
     this.miniMuteButton.title = miniLabel
     this.miniMuteButton.setAttribute("aria-label", miniLabel)
     this.muteButton.disabled = silent
     this.volumeInput.hidden = silent
     if (silent) {
       UfoElement.setIcon(this.muteButton, PlayerIcons.MUTED)
-      this.muteButton.title = this.messages.noSound
-      this.muteButton.setAttribute("aria-label", this.messages.noSound)
+      this.muteButton.title = (this.messages?.noSound ?? "")
+      this.muteButton.setAttribute("aria-label", (this.messages?.noSound ?? ""))
       this.muteButton.setAttribute("aria-pressed", "true")
       return
     }
     UfoElement.setIcon(this.muteButton, this.mutedState ? PlayerIcons.MUTED : PlayerIcons.VOLUME)
-    const label = this.mutedState ? this.messages.unmute : this.messages.mute
+    const label = this.mutedState ? (this.messages?.unmute ?? "") : (this.messages?.mute ?? "")
     this.muteButton.title = label
     this.muteButton.setAttribute("aria-label", label)
     this.muteButton.setAttribute("aria-pressed", String(this.mutedState))
@@ -3197,7 +3200,7 @@ export class UfoElement extends HTMLElement {
   private updateFullscreenButton(): void {
     const isFullscreen = this.simulatedFullscreen || document.fullscreenElement === this.fullscreenTarget
     UfoElement.setIcon(this.fullscreenButton, isFullscreen ? PlayerIcons.EXIT_FULLSCREEN : PlayerIcons.ENTER_FULLSCREEN)
-    this.fullscreenButton.title = isFullscreen ? this.messages.exitFullscreen : this.messages.fullscreen
+    this.fullscreenButton.title = isFullscreen ? (this.messages?.exitFullscreen ?? "") : (this.messages?.fullscreen ?? "")
     this.fullscreenButton.setAttribute("aria-label", this.fullscreenButton.title)
   }
 
@@ -3221,11 +3224,10 @@ export class UfoElement extends HTMLElement {
 
   private async loadLocaleMessages(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    // Connected again in the same language (moved within one page): nothing to fetch. English is
-    // baked into the template, so it needs a module only to replace another language shown before.
-    if (language === this.messagesLanguage || (language === "en" && this.messagesLanguage === undefined)) return
+    // Connected again in the same language (moved within one page): nothing to fetch.
+    if (language === this.messagesLanguage) return
     this.messagesLanguage = language
-    const messages = await loadUfoMessages(language)
+    const messages = await UFO_MESSAGES.load(language)
     if (this.messagesLanguage === language) {
       this.applyMessages(messages)
     }
@@ -3242,10 +3244,10 @@ export class UfoElement extends HTMLElement {
    * switch to, so it stays plain text and says nothing it cannot do.
    */
   private updateTimeLabelTitles(): void {
-    const hint = this.showClockTime ? this.messages.switchToElapsed : this.messages.switchToClockTime
+    const hint = this.showClockTime ? (this.messages?.switchToElapsed ?? "") : (this.messages?.switchToClockTime ?? "")
     const suffix = this.canSwitchTimeDisplay ? ` — ${hint}` : ""
-    this.timeStartLabel.title = this.messages.currentPosition + suffix
-    this.timeEndLabel.title = this.messages.duration + suffix
+    this.timeStartLabel.title = (this.messages?.currentPosition ?? "") + suffix
+    this.timeEndLabel.title = (this.messages?.duration ?? "") + suffix
     this.timePill.classList.toggle("switchable", this.canSwitchTimeDisplay)
     if (this.canSwitchTimeDisplay) {
       this.timePill.setAttribute("role", "button")
@@ -3258,6 +3260,14 @@ export class UfoElement extends HTMLElement {
 
   private applyMessages(messages: UfoMessages): void {
     this.messages = messages
+    // Everything that says something says it now: nothing did before (see messages).
+    this.volumeInput.title = messages.volume
+    this.volumeInput.setAttribute("aria-label", messages.volume)
+    this.updateMoreButton()
+    this.updateStartState()
+    if (!this.referencesMenu.hidden) this.renderReferencesMenu()
+    this.refreshMilestoneMarks()
+    this.paintObserverMap(this.currentTime)
     this.updateTimeLabelTitles()
     this.updatePlayPauseButton()
     this.updateFullscreenButton()

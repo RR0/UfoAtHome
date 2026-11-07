@@ -13,9 +13,9 @@ export const html = `
       <canvas id="observer-map-canvas" width="240" height="240"></canvas>
       <!-- Wheel and drag do the same on the canvas; these are for whoever has neither. -->
       <div class="map-zoom">
-        <button id="map-zoom-in" type="button" title="Zoom in" aria-label="Zoom in">+</button>
-        <button id="map-zoom-out" type="button" title="Zoom out" aria-label="Zoom out">−</button>
-        <button id="map-fit" type="button" title="Back to the whole path" aria-label="Back to the whole path" hidden>⤢</button>
+        <button id="map-zoom-in" type="button">+</button>
+        <button id="map-zoom-out" type="button">−</button>
+        <button id="map-fit" type="button" hidden>⤢</button>
       </div>
     </div>
   </div>
@@ -32,7 +32,7 @@ export const html = `
   <!-- The bar is also where a click sets the position, as on the video sites: a band taller than the line, for a pointer to find. -->
   <div id="mini-bar" class="mini-bar" aria-hidden="true"><div class="mini-track"><div id="mini-played" class="mini-played"></div><div id="mini-dot" class="mini-dot"></div><span id="mini-scrub-time" class="mini-scrub-time" hidden></span></div></div>
   <span id="mini-remaining" class="mini-remaining"></span>
-  <button id="mini-mute" type="button" class="mini-mute" title="Mute" aria-label="Mute" aria-pressed="false" hidden></button>
+  <button id="mini-mute" type="button" class="mini-mute" aria-pressed="false" hidden></button>
   <!-- What is being played, top left over the picture as on a video site, and there with the controls
        only (see UfoElement.syncPlayerTitle). Inert to the pointer. -->
   <div id="player-title" class="player-title auto-hide" hidden></div>
@@ -42,17 +42,17 @@ export const html = `
        where every control stands in the playback bar and the map has the corner to itself; the
        fullscreen button comes back here only when that bar is hidden (see UfoElement.showToolbar). -->
   <div class="corner-buttons auto-hide" id="corner-buttons">
-    <button id="milestones" type="button" title="Named moments" aria-label="Named moments" aria-pressed="true" hidden></button>
+    <button id="milestones" type="button" aria-pressed="true" hidden></button>
     <!-- The toggles below are parsed here and moved at once — into the playback bar, before the
          fullscreen button, or wherever a composing element hosts them (see UfoElement.hostControls).
          The pictures of the place (see SceneReference)
          have a slider for how much of them shows, then a button for whether they show at all. -->
-    <button id="references" type="button" title="Pictures of the place" aria-label="Pictures of the place" aria-pressed="true" hidden></button>
-    <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" title="Picture opacity" aria-label="Picture opacity" hidden/>
+    <button id="references" type="button" aria-pressed="true" hidden></button>
+    <input id="reference-opacity" type="range" min="0" max="1" step="0.05" value="0.5" hidden/>
     <!-- An investigator's lines laid over the place (see InvestigatorTrace): offered only when the
          recording carries some, and shown until the reader hides them. -->
-    <button id="traces" type="button" title="Investigator's lines" aria-label="Investigator's lines" aria-pressed="true" hidden></button>
-    <button id="observer-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden></button>
+    <button id="traces" type="button" aria-pressed="true" hidden></button>
+    <button id="observer-map" type="button" aria-pressed="false" hidden></button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a
        value made up because the file left it out. Hidden for a recording with nothing to say, which
@@ -99,24 +99,24 @@ export const html = `
     </div>
     <div class="controls">
       <div class="controls-left">
-        <button id="play-pause" type="button" class="round" title="Play" aria-label="Play"></button>
+        <button id="play-pause" type="button" class="round"></button>
         <!-- The slider unfolds beside the button while the pointer is over either, as on the video sites. -->
         <div class="volume">
-          <button id="mute" type="button" class="round" title="Mute" aria-label="Mute" aria-pressed="false"></button>
-          <input id="volume" type="range" min="0" max="1" step="0.05" value="1" title="Volume" aria-label="Volume"/>
+          <button id="mute" type="button" class="round" aria-pressed="false"></button>
+          <input id="volume" type="range" min="0" max="1" step="0.05" value="1"/>
         </div>
         <!-- The position and the length in one place, and one click for both: they switch together
              between the time of day and the time elapsed. -->
         <span id="time" class="time-pill">
-          <span id="time-start" class="time-label" title="Current position">0:00</span>
+          <span id="time-start" class="time-label">0:00</span>
           <span class="time-separator" aria-hidden="true">/</span>
-          <span id="time-end" class="time-label" title="Duration">0:00</span>
+          <span id="time-end" class="time-label">0:00</span>
         </span>
         <!-- For a recording whose account names moments: the moment now on show, and a list of them to
              go to — one choice and the recording is there. See UfoElement.refreshMomentsPicker. -->
         <div id="moments" class="moments" hidden>
-          <button id="moments-button" type="button" class="moments-button" title="Moments" aria-haspopup="true" aria-expanded="false">
-            <span id="moments-current" class="moments-current">Moments</span><svg viewBox="0 0 24 24" width="1.2em" height="1.2em" aria-hidden="true" focusable="false"><path d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z" fill="currentColor"/></svg>
+          <button id="moments-button" type="button" class="moments-button" aria-haspopup="true" aria-expanded="false">
+            <span id="moments-current" class="moments-current"></span><svg viewBox="0 0 24 24" width="1.2em" height="1.2em" aria-hidden="true" focusable="false"><path d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z" fill="currentColor"/></svg>
           </button>
         </div>
       </div>
@@ -126,8 +126,8 @@ export const html = `
       <div class="controls-right" id="controls-right">
         <!-- Only in a player too narrow for everything: it folds the buttons below away, and unfolds
              them over the ones on the left (see UfoElement.fitControls). -->
-        <button id="controls-more" type="button" class="controls-more" title="More" aria-label="More" aria-expanded="false"></button>
-        <button id="fullscreen" type="button" title="Fullscreen" aria-label="Fullscreen"></button>
+        <button id="controls-more" type="button" class="controls-more" aria-expanded="false"></button>
+        <button id="fullscreen" type="button"></button>
       </div>
     </div>
    </div>

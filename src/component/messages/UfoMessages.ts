@@ -18,6 +18,8 @@ export interface UfoMessages {
   exitFullscreen: string
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
+  /** The slider of the sound's level. */
+  volume: string
   unmute: string
   /** The sound button's tooltip when the recording has no sound track: nobody was asked, so there is nothing to hear. */
   noSound: string

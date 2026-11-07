@@ -12,6 +12,7 @@ export const ufoMessages_fr: UfoMessages = {
   fullscreen: "Plein écran",
   exitFullscreen: "Quitter le plein écran",
   mute: "Couper le son",
+  volume: "Volume",
   unmute: "Rétablir le son",
   noSound: "Pas de son enregistré",
   moments: "Moments",

@@ -59,9 +59,10 @@ beforeAll(() => {
   }
 })
 
-function mount(): UfoElement {
+async function mount(): Promise<UfoElement> {
   const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
   document.body.appendChild(element)
+  await element.ready
   return element
 }
 
@@ -108,8 +109,8 @@ describe("UfoElement", () => {
     vi.unstubAllGlobals()
   })
 
-  it("hit-tests the PICTURE and not the instant: a pose long enough draws the object all along its path, and a click on the streak used to fall through to the landscape", () => {
-    const element = mount()
+  it("hit-tests the PICTURE and not the instant: a pose long enough draws the object all along its path, and a click on the streak used to fall through to the landscape", async () => {
+    const element = await mount()
     // A shape crossing the frame over five seconds, photographed with the shutter open ten.
     element.sightingData = {
       ...sampleJson,
@@ -134,8 +135,8 @@ describe("UfoElement", () => {
     expect(element.shapeAt(600, 20)).toBeUndefined()
   })
 
-  it("samples a long pose by how far the object TRAVELLED, not only by how long it lasted — 48 paintings over 300 px is what left the streak beaded", () => {
-    const element = mount()
+  it("samples a long pose by how far the object TRAVELLED, not only by how long it lasted — 48 paintings over 300 px is what left the streak beaded", async () => {
+    const element = await mount()
     const moving = {
       ...sampleJson,
       durationSeconds: 10,
@@ -176,21 +177,21 @@ describe("UfoElement", () => {
     expect(element.exposureTimes(10000).length).toBe(48)
   })
 
-  it("takes a snapshot as one instant, whatever moved", () => {
-    const element = mount()
+  it("takes a snapshot as one instant, whatever moved", async () => {
+    const element = await mount()
     element.sightingData = sampleJson
     expect(element.exposureTimes(0)).toEqual([0])
   })
 
-  it("is ready (canvasElement/renderer/sighting available) immediately after construction", () => {
+  it("is ready (canvasElement/renderer/sighting available) immediately after construction", async () => {
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     expect(element.canvasElement).toBeInstanceOf(HTMLCanvasElement)
     expect(element.renderer).toBeDefined()
     expect(element.sighting).toBeDefined()
   })
 
-  it("sightingData round-trips through the setter/getter", () => {
-    const element = mount()
+  it("sightingData round-trips through the setter/getter", async () => {
+    const element = await mount()
     element.sightingData = sampleJson
     // timeline.order/groups are always present on the way out (order: z-order support, groups:
     // multi-select grouping), even though the hand-written fixture above predates both and omits
@@ -225,15 +226,15 @@ describe("UfoElement", () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve(sampleJson) })
     vi.stubGlobal("fetch", fetchMock)
 
-    const element = mount()
+    const element = await mount()
     element.setAttribute("src", "other-sighting.json")
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(fetchMock).toHaveBeenCalledWith("other-sighting.json")
   })
 
-  it("seek updates the reported frame via the timeline's interpolated lookup", () => {
-    const element = mount()
+  it("seek updates the reported frame via the timeline's interpolated lookup", async () => {
+    const element = await mount()
     element.sightingData = sampleJson
     const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
     expect(Number(seekInput.max)).toBe(0)
@@ -244,8 +245,8 @@ describe("UfoElement", () => {
     expect(seekInput.value).toBe("0")
   })
 
-  it("currentTime/playbackState reflect seek() and play/pause/stop", () => {
-    const element = mount()
+  it("currentTime/playbackState reflect seek() and play/pause/stop", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -269,8 +270,8 @@ describe("UfoElement", () => {
     expect(element.playbackState).toBe("paused")
   })
 
-  it("moves the observer's body only while the replay plays at about its own pace", () => {
-    const element = mount()
+  it("moves the observer's body only while the replay plays at about its own pace", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -305,8 +306,8 @@ describe("UfoElement", () => {
     expect(element.steadyBody).toBe(true)
   })
 
-  it("dispatches timeupdate with the current time on seek", () => {
-    const element = mount()
+  it("dispatches timeupdate with the current time on seek", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -328,16 +329,16 @@ describe("UfoElement", () => {
     expect(lastCall.detail.time).toBe(250)
   })
 
-  it("time labels default to 0:00/0:00 before any sighting is loaded", () => {
-    const element = mount()
+  it("time labels default to 0:00/0:00 before any sighting is loaded", async () => {
+    const element = await mount()
     const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
     const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
     expect(start.textContent).toBe("0:00")
     expect(end.textContent).toBe("0:00")
   })
 
-  it("time labels fall back to the recording's own elapsed duration without a known real duration", () => {
-    const element = mount()
+  it("time labels fall back to the recording's own elapsed duration without a known real duration", async () => {
+    const element = await mount()
     element.sightingData = sampleJson // has a start date but no endTime/durationSeconds
     const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
     const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
@@ -345,8 +346,8 @@ describe("UfoElement", () => {
     expect(end.textContent).toBe("0:00") // single-keyframe timeline: recorded duration is 0
   })
 
-  it("time labels show real clock start/end when time and durationSeconds are both known", () => {
-    const element = mount()
+  it("time labels show real clock start/end when time and durationSeconds are both known", async () => {
+    const element = await mount()
     element.sightingData = {
       ...sampleJson,
       time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
@@ -358,8 +359,8 @@ describe("UfoElement", () => {
     expect(end.textContent).toBe("02:50")
   })
 
-  it("durationSeconds getter/setter patches the sighting's event and rescales the end label, without rebuilding the timeline", () => {
-    const element = mount()
+  it("durationSeconds getter/setter patches the sighting's event and rescales the end label, without rebuilding the timeline", async () => {
+    const element = await mount()
     element.sightingData = { ...sampleJson, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 } }
     expect(element.durationSeconds).toBeUndefined()
     const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
@@ -376,8 +377,8 @@ describe("UfoElement", () => {
     expect(end.textContent).toBe("0:00")
   })
 
-  it("setting durationSeconds extends the seek bar's own range, not just the end label", () => {
-    const element = mount() // fresh, empty timeline — duration 0, nothing recorded yet
+  it("setting durationSeconds extends the seek bar's own range, not just the end label", async () => {
+    const element = await mount() // fresh, empty timeline — duration 0, nothing recorded yet
     const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
     expect(Number(seekInput.max)).toBe(0)
 
@@ -395,7 +396,7 @@ describe("UfoElement", () => {
     expect(start.textContent).toBe("0:04") // reflects the actual scrub position, not stuck at 0:00
   })
 
-  it("play actually advances once a duration is set on a not-yet-recorded (duration 0) timeline", () => {
+  it("play actually advances once a duration is set on a not-yet-recorded (duration 0) timeline", async () => {
     // Regression: playbackRate used to be timeline.duration/realDurationMs unconditionally,
     // i.e. 0/10000 = 0 here — Play would never advance at all.
     let now = 1000
@@ -407,7 +408,7 @@ describe("UfoElement", () => {
     })
     vi.stubGlobal("cancelAnimationFrame", () => {})
 
-    const element = mount() // duration 0 — nothing recorded yet
+    const element = await mount() // duration 0 — nothing recorded yet
     element.durationSeconds = 10
 
     const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
@@ -421,8 +422,8 @@ describe("UfoElement", () => {
     nowSpy.mockRestore()
   })
 
-  it("the single play/pause button toggles its icon and title on click", () => {
-    const element = mount()
+  it("the single play/pause button toggles its icon and title on click", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting() // needs a real duration — see "disables Play..." below
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
@@ -434,8 +435,8 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Play")
   })
 
-  it("clicking the canvas also toggles play/pause", () => {
-    const element = mount()
+  it("clicking the canvas also toggles play/pause", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("Play")
@@ -447,8 +448,8 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Play")
   })
 
-  it("disables Play (button and canvas click) when the observation has zero duration — nothing to play", () => {
-    const element = mount() // default sighting: empty timeline, no durationSeconds → duration 0
+  it("disables Play (button and canvas click) when the observation has zero duration — nothing to play", async () => {
+    const element = await mount() // default sighting: empty timeline, no durationSeconds → duration 0
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.disabled).toBe(true)
 
@@ -459,8 +460,8 @@ describe("UfoElement", () => {
     expect(button.disabled).toBe(false)
   })
 
-  it("canvas click-to-play can be disabled (e.g. by SightingEditorElement, which uses the canvas for drag-to-record)", () => {
-    const element = mount()
+  it("canvas click-to-play can be disabled (e.g. by SightingEditorElement, which uses the canvas for drag-to-record)", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting() // a real duration — otherwise Play is disabled regardless, see above
     element.enableClickToPlay = false
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
@@ -472,7 +473,7 @@ describe("UfoElement", () => {
 
   it("loads French labels when navigator.languages prefers fr, with no language picker", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
-    const element = mount()
+    const element = await mount()
     element.sightingData = twoKeyframeSighting() // a real duration, so the label is "Lecture" and not the disabled one
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     // The dynamic import() of the fr messages module resolves over more than one tick under
@@ -483,7 +484,7 @@ describe("UfoElement", () => {
 
   it("falls back to the English defaults when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
-    const element = mount()
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     await new Promise(resolve => setTimeout(resolve, 20)) // no fr/en module load is triggered; just let any microtasks settle
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
@@ -491,8 +492,8 @@ describe("UfoElement", () => {
     spy.mockRestore()
   })
 
-  it("explains why Play is disabled instead of leaving a stale label", () => {
-    const element = mount()
+  it("explains why Play is disabled instead of leaving a stale label", async () => {
+    const element = await mount()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     expect(button.title).toBe("No observation duration")
     expect(button.getAttribute("aria-label")).toBe("No observation duration")
@@ -501,8 +502,8 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Play")
   })
 
-  it("the toolbar shows only under the pointer, playing or paused", () => {
-    const element = mount()
+  it("the toolbar shows only under the pointer, playing or paused", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     const button = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
@@ -515,16 +516,16 @@ describe("UfoElement", () => {
     expect(toolbar.classList.contains("auto-hide")).toBe(true)
   })
 
-  it("offers no auto-replay button, and so does not loop unless a page asks it to", () => {
-    const element = mount()
+  it("offers no auto-replay button, and so does not loop unless a page asks it to", async () => {
+    const element = await mount()
     expect(element.shadowRoot!.getElementById("loop")).toBeNull()
     expect(element.autoReplayEnabled).toBe(false)
     element.autoReplayEnabled = true
     expect(element.autoReplayEnabled).toBe(true)
   })
 
-  it("showToolbar hides the overlay toolbar for a composing element with its own external controls", () => {
-    const element = mount()
+  it("showToolbar hides the overlay toolbar for a composing element with its own external controls", async () => {
+    const element = await mount()
     const toolbar = element.shadowRoot!.getElementById("toolbar") as HTMLElement
     expect(toolbar.classList.contains("hidden")).toBe(false)
 
@@ -537,8 +538,8 @@ describe("UfoElement", () => {
     expect(toolbar.classList.contains("hidden")).toBe(false)
   })
 
-  it("seekableDuration mirrors the seek input's own max (0 with nothing recorded, real duration once known)", () => {
-    const element = mount()
+  it("seekableDuration mirrors the seek input's own max (0 with nothing recorded, real duration once known)", async () => {
+    const element = await mount()
     expect(element.seekableDuration).toBe(0)
 
     element.durationSeconds = 10
@@ -546,8 +547,8 @@ describe("UfoElement", () => {
     expect(element.seekableDuration).toBe(10_000)
   })
 
-  it("currentTime setter seeks the player, moving the seek input's value", () => {
-    const element = mount()
+  it("currentTime setter seeks the player, moving the seek input's value", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     const seekInput = element.shadowRoot!.getElementById("seek") as HTMLInputElement
 
@@ -557,8 +558,8 @@ describe("UfoElement", () => {
     expect(seekInput.value).toBe("400")
   })
 
-  it("togglePlayPause/toggleLoop are callable directly (public), same effect as clicking the buttons", () => {
-    const element = mount()
+  it("togglePlayPause/toggleLoop are callable directly (public), same effect as clicking the buttons", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
 
     element.togglePlayPause()
@@ -570,10 +571,10 @@ describe("UfoElement", () => {
     expect(element.autoReplayEnabled).toBe(true)
   })
 
-  it("the corner buttons auto-hide alongside the toolbar", () => {
+  it("the corner buttons auto-hide alongside the toolbar", async () => {
     // The whole corner row, not the fullscreen button alone: the map button moved in beside it, and
     // one of the two fading out while the other stayed would be a stray icon over the scene.
-    const element = mount()
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     const playPause = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     const corner = element.shadowRoot!.getElementById("corner-buttons")!
@@ -586,13 +587,13 @@ describe("UfoElement", () => {
     expect(corner.classList.contains("auto-hide")).toBe(true)
   })
 
-  it("defaults fullscreenTarget to the component's own stage", () => {
-    const element = mount()
+  it("defaults fullscreenTarget to the component's own stage", async () => {
+    const element = await mount()
     expect(element.fullscreenTarget).toBe(element.shadowRoot!.getElementById("stage"))
   })
 
-  it("clicking fullscreen requests fullscreen on fullscreenTarget when not already fullscreen", () => {
-    const element = mount()
+  it("clicking fullscreen requests fullscreen on fullscreenTarget when not already fullscreen", async () => {
+    const element = await mount()
     const requestFullscreen = vi.fn().mockResolvedValue(undefined)
     element.fullscreenTarget.requestFullscreen = requestFullscreen
     Object.defineProperty(document, "fullscreenEnabled", { value: true, configurable: true })
@@ -603,12 +604,12 @@ describe("UfoElement", () => {
     expect(requestFullscreen).toHaveBeenCalledOnce()
   })
 
-  it("fills the viewport with CSS where the browser has no Fullscreen API — every iPhone browser", () => {
+  it("fills the viewport with CSS where the browser has no Fullscreen API — every iPhone browser", async () => {
     // Reported from Chrome on an iPhone, where the button did nothing. Every iOS browser is WebKit
     // underneath, and WebKit on the phone exposes no Element.requestFullscreen at all: the call did
     // not reject, it threw, because the method is not there. jsdom is in exactly that position, so
     // this is the path it takes by default.
-    const element = mount()
+    const element = await mount()
     delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
     const target = element.fullscreenTarget
     const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
@@ -625,8 +626,8 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Exit fullscreen")
   })
 
-  it("puts back exactly the inline styles the page had, on the way out", () => {
-    const element = mount()
+  it("puts back exactly the inline styles the page had, on the way out", async () => {
+    const element = await mount()
     delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
     const target = element.fullscreenTarget
     target.setAttribute("style", "outline: 1px solid red")
@@ -640,8 +641,8 @@ describe("UfoElement", () => {
     expect(button.title).toBe("Fullscreen")
   })
 
-  it("leaves the CSS stand-in on Escape, the way real fullscreen does", () => {
-    const element = mount()
+  it("leaves the CSS stand-in on Escape, the way real fullscreen does", async () => {
+    const element = await mount()
     delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
     const target = element.fullscreenTarget
     ;(element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement).click()
@@ -653,8 +654,8 @@ describe("UfoElement", () => {
     expect(document.body.style.overflow).toBe("")
   })
 
-  it("gives the page its scrolling back when the element goes away mid-stand-in", () => {
-    const element = mount()
+  it("gives the page its scrolling back when the element goes away mid-stand-in", async () => {
+    const element = await mount()
     delete (document as { fullscreenEnabled?: boolean }).fullscreenEnabled
     ;(element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement).click()
     expect(document.body.style.overflow).toBe("hidden")
@@ -664,8 +665,8 @@ describe("UfoElement", () => {
     expect(document.body.style.overflow).toBe("")
   })
 
-  it("clicking fullscreen while already fullscreen exits instead of re-requesting", () => {
-    const element = mount()
+  it("clicking fullscreen while already fullscreen exits instead of re-requesting", async () => {
+    const element = await mount()
     const requestFullscreen = vi.fn().mockResolvedValue(undefined)
     element.fullscreenTarget.requestFullscreen = requestFullscreen
     Object.defineProperty(document, "fullscreenEnabled", { value: true, configurable: true })
@@ -680,13 +681,13 @@ describe("UfoElement", () => {
     expect(exitFullscreenSpy).toHaveBeenCalledOnce()
     expect(requestFullscreen).not.toHaveBeenCalled()
     // Restore only these two spies (not vi.restoreAllMocks(), which would also undo the shared
-    // HTMLCanvasElement.getContext mock from the top-level beforeAll and break later tests' mount()).
+    // HTMLCanvasElement.getContext mock from the top-level beforeAll and break later tests' await mount()).
     exitFullscreenSpy.mockRestore()
     fullscreenElementSpy.mockRestore()
   })
 
-  it("fullscreenchange updates the button's title between Fullscreen and Exit fullscreen", () => {
-    const element = mount()
+  it("fullscreenchange updates the button's title between Fullscreen and Exit fullscreen", async () => {
+    const element = await mount()
     const button = element.shadowRoot!.getElementById("fullscreen") as HTMLButtonElement
     expect(button.title).toBe("Fullscreen")
 
@@ -701,8 +702,8 @@ describe("UfoElement", () => {
     spy.mockRestore()
   })
 
-  it("selectedSourceIds flags that source's shape as selected on the next paint, only", () => {
-    const element = mount()
+  it("selectedSourceIds flags that source's shape as selected on the next paint, only", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -729,8 +730,8 @@ describe("UfoElement", () => {
     expect([...element.selectedSourceIds]).toEqual(["ufo-2"])
   })
 
-  it("setting the same selectedSourceIds again doesn't trigger a redundant repaint", () => {
-    const element = mount()
+  it("setting the same selectedSourceIds again doesn't trigger a redundant repaint", async () => {
+    const element = await mount()
     element.selectedSourceIds = new Set(["ufo-1"])
     const onTimeUpdate = vi.fn()
     element.addEventListener("timeupdate", onTimeUpdate)
@@ -740,8 +741,8 @@ describe("UfoElement", () => {
     expect(onTimeUpdate).not.toHaveBeenCalled()
   })
 
-  it("with paintsShapes off, paints no shape at all and only the selection's handles", () => {
-    const element = mount()
+  it("with paintsShapes off, paints no shape at all and only the selection's handles", async () => {
+    const element = await mount()
     // What a composing <rr0-scene> does: the shapes stand in its three.js scene, and this overlay
     // keeps only what edits them — see UfoElement.paintsShapes.
     element.paintsShapes = false
@@ -770,8 +771,8 @@ describe("UfoElement", () => {
     expect(paintSelectionOnly.mock.calls.map(([shape]) => (shape as { bounds: { x: number } }).bounds.x)).toEqual([0])
   })
 
-  it("selecting multiple sources paints individual outlines plus one shared group-handle overlay", () => {
-    const element = mount()
+  it("selecting multiple sources paints individual outlines plus one shared group-handle overlay", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -811,8 +812,8 @@ describe("UfoElement", () => {
     }
   }
 
-  it("suppresses the selection highlight while playing", () => {
-    const element = mount()
+  it("suppresses the selection highlight while playing", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
     playPauseButton.click()
@@ -827,8 +828,8 @@ describe("UfoElement", () => {
     expect(paintedSelected).toHaveLength(0)
   })
 
-  it("pausing immediately repaints with the highlight restored, not just eventually", () => {
-    const element = mount()
+  it("pausing immediately repaints with the highlight restored, not just eventually", async () => {
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     element.selectedSourceIds = new Set(["ufo-1"])
     const playPauseButton = element.shadowRoot!.getElementById("play-pause") as HTMLButtonElement
@@ -845,7 +846,7 @@ describe("UfoElement", () => {
     expect(paintedSelected).toHaveLength(1)
   })
 
-  it("switching sightingData mid-playback cancels the old player's animation loop instead of leaking it", () => {
+  it("switching sightingData mid-playback cancels the old player's animation loop instead of leaking it", async () => {
     // Regression: SightingElement assigns a new sightingData when the visitor switches
     // observers. Doing that mid-playback used to leave the *old* Player's requestAnimationFrame
     // loop running — nothing had ever paused/stopped it, so it kept ticking in the background,
@@ -864,7 +865,7 @@ describe("UfoElement", () => {
     })
     vi.stubGlobal("cancelAnimationFrame", cancelSpy)
 
-    const element = mount()
+    const element = await mount()
     element.sightingData = twoKeyframeSighting()
     element.canvasElement.click() // start playing
     now += 300
@@ -894,8 +895,8 @@ describe("UfoElement sound", () => {
     soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum" as const, volume: 0.8, pitchHz: 200 } }] }
   }
 
-  it("says nothing about sound while paused, whatever the track holds", () => {
-    const element = mount()
+  it("says nothing about sound while paused, whatever the track holds", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.refresh()
@@ -903,8 +904,8 @@ describe("UfoElement sound", () => {
     expect(audio.silence).toHaveBeenCalled()
   })
 
-  it("plays what the track holds at the played instant", () => {
-    const element = mount()
+  it("plays what the track holds at the played instant", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.togglePlayPause()
@@ -915,8 +916,8 @@ describe("UfoElement sound", () => {
   // The regression this exists for: a preview used to be silenced by the very next repaint, and on
   // a real case page a repaint follows an edit within a frame or two — so it was audible for about
   // a tenth of a second, exactly where the observer needed to hear it.
-  it("keeps a preview alive across repaints", () => {
-    const element = mount()
+  it("keeps a preview alive across repaints", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
@@ -927,8 +928,8 @@ describe("UfoElement sound", () => {
     expect(audio.silence).not.toHaveBeenCalled()
   })
 
-  it("ends a preview on stopSoundPreview, and never revives it", () => {
-    const element = mount()
+  it("ends a preview on stopSoundPreview, and never revives it", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
@@ -939,8 +940,8 @@ describe("UfoElement sound", () => {
     expect(audio.silence).toHaveBeenCalled()
   })
 
-  it("drops a preview once playback starts — the recording is what should be heard then", () => {
-    const element = mount()
+  it("drops a preview once playback starts — the recording is what should be heard then", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
@@ -951,8 +952,8 @@ describe("UfoElement sound", () => {
     expect(audio.setSound).not.toHaveBeenCalledWith(expect.objectContaining({ kind: "whistle" }))
   })
 
-  it("silences the outgoing recording's sound when another is loaded", () => {
-    const element = mount()
+  it("silences the outgoing recording's sound when another is loaded", async () => {
+    const element = await mount()
     element.sightingData = humming
     const audio = audioOf(element)
     element.previewSound({ kind: "whistle", volume: 0.5, pitchHz: 1200 })
@@ -982,8 +983,8 @@ describe("UfoElement hover tooltip", () => {
     canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: x, clientY: y }))
   }
 
-  it("shows a tooltip with the shape's title when hovering it", () => {
-    const element = mount()
+  it("shows a tooltip with the shape's title when hovering it", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -1001,8 +1002,8 @@ describe("UfoElement hover tooltip", () => {
     expect(tooltip.textContent).toBe("Vaisseau principal")
   })
 
-  it("keeps the tooltip hidden when hovering an untitled shape", () => {
-    const element = mount()
+  it("keeps the tooltip hidden when hovering an untitled shape", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -1019,8 +1020,8 @@ describe("UfoElement hover tooltip", () => {
     expect(tooltip.hidden).toBe(true)
   })
 
-  it("keeps the tooltip hidden when hovering empty canvas", () => {
-    const element = mount()
+  it("keeps the tooltip hidden when hovering empty canvas", async () => {
+    const element = await mount()
     const canvas = canvasSized(element)
     const tooltip = element.shadowRoot!.getElementById("tooltip") as HTMLElement
 
@@ -1029,8 +1030,8 @@ describe("UfoElement hover tooltip", () => {
     expect(tooltip.hidden).toBe(true)
   })
 
-  it("hides the tooltip on pointerleave", () => {
-    const element = mount()
+  it("hides the tooltip on pointerleave", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       timeline: {
@@ -1077,15 +1078,15 @@ describe("UfoElement seek range vs. declared duration", () => {
     }
   }
 
-  it("keeps the seek range on the recorded timeline once there is motion to stretch", () => {
-    const element = mount()
+  it("keeps the seek range on the recorded timeline once there is motion to stretch", async () => {
+    const element = await mount()
     element.sightingData = shortRecordingLongObservation()
 
     expect(element.seekableDuration).toBe(6000)
   })
 
-  it("advances the displayed clock monotonically across the whole bar", () => {
-    const element = mount()
+  it("advances the displayed clock monotonically across the whole bar", async () => {
+    const element = await mount()
     element.sightingData = shortRecordingLongObservation()
     const seen: string[] = []
     for (let t = 0; t <= element.seekableDuration; t += 500) {
@@ -1099,8 +1100,8 @@ describe("UfoElement seek range vs. declared duration", () => {
     expect(seconds).toEqual([...seconds].sort((a, b) => a - b)) // never runs backwards
   })
 
-  it("still extends the range to the declared duration while nothing is recorded yet — an editor needs somewhere to place its first keyframes", () => {
-    const element = mount()
+  it("still extends the range to the declared duration while nothing is recorded yet — an editor needs somewhere to place its first keyframes", async () => {
+    const element = await mount()
     element.durationSeconds = 10
 
     expect(element.seekableDuration).toBe(10_000)
@@ -1117,8 +1118,8 @@ describe("UfoElement observation start", () => {
     document.body.innerHTML = ""
   })
 
-  it("re-reads the observation's start time on refresh", () => {
-    const element = mount()
+  it("re-reads the observation's start time on refresh", async () => {
+    const element = await mount()
     element.sightingData = {
       version: 1,
       durationSeconds: 20,
@@ -1148,8 +1149,8 @@ describe("switching the counters between clock time and elapsed time", () => {
     durationSeconds: 20
   }
 
-  function mountUfo(sighting: object): UfoElement {
-    const element = mount()
+  async function mountUfo(sighting: object): Promise<UfoElement> {
+    const element = await mount()
     element.sightingData = sighting as typeof sampleJson
     return element
   }
@@ -1159,17 +1160,17 @@ describe("switching the counters between clock time and elapsed time", () => {
     return { start: shadow.getElementById("time-start")!, end: shadow.getElementById("time-end")! }
   }
 
-  it("starts on the clock, which is how a account is written", () => {
-    const element = mountUfo(timedSighting)
+  it("starts on the clock, which is how a account is written", async () => {
+    const element = await mountUfo(timedSighting)
     const { start, end } = counters(element)
     expect(start.textContent).toBe("17:50")
     expect(end.textContent).toBe("17:50:20")
   })
 
-  it("switches both counters together when either is clicked", () => {
+  it("switches both counters together when either is clicked", async () => {
     // Both or neither: one counter reading 17:50 beside another reading 0:20 would be two time
     // bases on one bar, which is exactly the confusion this is meant to remove.
-    const element = mountUfo(timedSighting)
+    const element = await mountUfo(timedSighting)
     const { start, end } = counters(element)
     start.click()
     expect(start.textContent).toBe("0:00")
@@ -1180,19 +1181,19 @@ describe("switching the counters between clock time and elapsed time", () => {
     expect(end.textContent).toBe("17:50:20")
   })
 
-  it("says in its title what the click will do, and updates that after the click", () => {
-    const element = mountUfo(timedSighting)
+  it("says in its title what the click will do, and updates that after the click", async () => {
+    const element = await mountUfo(timedSighting)
     const { start } = counters(element)
     expect(start.title).toContain("elapsed")
     start.click()
     expect(start.title).toContain("time of day")
   })
 
-  it("offers nothing to switch to when the observation has no start time", () => {
+  it("offers nothing to switch to when the observation has no start time", async () => {
     // With no clock there is only one reading available, so the counter stays plain text rather
     // than advertising a control that cannot do anything.
     const { time: _omitted, ...noTime } = sampleJson
-    const element = mountUfo({ ...noTime, durationSeconds: 20 })
+    const element = await mountUfo({ ...noTime, durationSeconds: 20 })
     const { start } = counters(element)
     const pill = element.shadowRoot!.getElementById("time")!
     expect(pill.getAttribute("role")).toBe(null)
@@ -1202,8 +1203,8 @@ describe("switching the counters between clock time and elapsed time", () => {
     expect(start.textContent).toBe(before)
   })
 
-  it("is reachable from the keyboard, as its role promises", () => {
-    const element = mountUfo(timedSighting)
+  it("is reachable from the keyboard, as its role promises", async () => {
+    const element = await mountUfo(timedSighting)
     const { start } = counters(element)
     const pill = element.shadowRoot!.getElementById("time")!
     expect(pill.getAttribute("role")).toBe("button")
@@ -1226,7 +1227,7 @@ describe("UfoElement sequencing API", () => {
     }
   })
 
-  it("turns auto-replay on and off, idempotently", () => {
+  it("turns auto-replay on and off, idempotently", async () => {
     const element = document.createElement("rr0-ufo") as UfoElement
     document.body.append(element)
     expect(element.autoReplayEnabled).toBe(false)
@@ -1240,7 +1241,7 @@ describe("UfoElement sequencing API", () => {
     element.remove()
   })
 
-  it("play() starts and pause() stops, whatever the current state is", () => {
+  it("play() starts and pause() stops, whatever the current state is", async () => {
     const element = document.createElement("rr0-ufo") as UfoElement
     document.body.append(element)
     element.sightingData = twoSecondSighting()
@@ -1256,7 +1257,7 @@ describe("UfoElement sequencing API", () => {
     element.remove()
   })
 
-  it("fires a bubbling, composed `ended` only on the playing -> stopped transition", () => {
+  it("fires a bubbling, composed `ended` only on the playing -> stopped transition", async () => {
     let now = 1000
     let frame: FrameRequestCallback | undefined
     const nowSpy = vi.spyOn(performance, "now").mockImplementation(() => now)
@@ -1352,7 +1353,7 @@ describe("double-click on the canvas", () => {
     return { requested: () => requested, exits: () => exits }
   }
 
-  it("asks for fullscreen, and leaves playback where it found it", () => {
+  it("asks for fullscreen, and leaves playback where it found it", async () => {
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     document.body.append(element)
     element.sightingData = sighting()
@@ -1372,7 +1373,7 @@ describe("double-click on the canvas", () => {
     element.remove()
   })
 
-  it("leaves a PLAYING recording playing", () => {
+  it("leaves a PLAYING recording playing", async () => {
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
     document.body.append(element)
     element.sightingData = sighting()
@@ -1387,7 +1388,7 @@ describe("double-click on the canvas", () => {
     element.remove()
   })
 
-  it("is not ours to take where the canvas has been given to something else", () => {
+  it("is not ours to take where the canvas has been given to something else", async () => {
     // What the recorder does: the canvas is its editing surface, so neither click nor double-click
     // belongs to playback there.
     const element = document.createElement(UFO_ELEMENT_NAME) as UfoElement
@@ -1436,8 +1437,8 @@ describe("the observer's own map", () => {
   }
 
   /** A player whose page has asked for the map — see OBSERVER_MAP_ATTRIBUTE. */
-  function mountWithMap(sighting: object): UfoElement {
-    const element = mount()
+  async function mountWithMap(sighting: object): Promise<UfoElement> {
+    const element = await mount()
     element.setAttribute("show-observer-map", "")
     element.sightingData = sighting as never
     return element
@@ -1455,51 +1456,51 @@ describe("the observer's own map", () => {
     document.body.innerHTML = ""
   })
 
-  it("offers the button to every recording that states a place, asked for or not", () => {
+  it("offers the button to every recording that states a place, asked for or not", async () => {
     // The button depends on the RECORDING, the open state on the page — two different questions.
     // A reader wanting to know where this happened is not something a page can predict, so the
     // button is there whether or not any page thought to ask.
-    const element = mount()
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     const { button, panel } = mapParts(element)
     expect(button.hidden).toBe(false)
     expect(panel.hidden).toBe(true)
   })
 
-  it("starts open for an observer who went somewhere, closed for one who stayed put", () => {
-    const moving = mount()
+  it("starts open for an observer who went somewhere, closed for one who stayed put", async () => {
+    const moving = await mount()
     moving.sightingData = movingObserver() as never
     expect(mapParts(moving).panel.hidden).toBe(false)
     document.body.innerHTML = ""
-    const standing = mount()
+    const standing = await mount()
     standing.sightingData = stationaryObserver() as never
     expect(mapParts(standing).panel.hidden).toBe(true)
   })
 
-  it("follows the recording's own word on the map when the page says nothing, whichever way the observer moved", () => {
-    const shown = mount()
+  it("follows the recording's own word on the map when the page says nothing, whichever way the observer moved", async () => {
+    const shown = await mount()
     shown.sightingData = { ...stationaryObserver(), observerMap: true } as never
     expect(mapParts(shown).panel.hidden).toBe(false)
     document.body.innerHTML = ""
-    const hidden = mount()
+    const hidden = await mount()
     hidden.sightingData = { ...movingObserver(), observerMap: false } as never
     expect(mapParts(hidden).panel.hidden).toBe(true)
   })
 
-  it("lets the page overrule the recording's own word, as it overrules the default", () => {
-    const element = mount()
+  it("lets the page overrule the recording's own word, as it overrules the default", async () => {
+    const element = await mount()
     element.setAttribute("show-observer-map", "false")
     element.sightingData = { ...movingObserver(), observerMap: true } as never
     expect(mapParts(element).panel.hidden).toBe(true)
     document.body.innerHTML = ""
-    const forced = mount()
+    const forced = await mount()
     forced.setAttribute("show-observer-map", "")
     forced.sightingData = { ...stationaryObserver(), observerMap: false } as never
     expect(mapParts(forced).panel.hidden).toBe(false)
   })
 
-  it("says so when the map is opened or closed by hand, for an editor to write it into the recording", () => {
-    const element = mount()
+  it("says so when the map is opened or closed by hand, for an editor to write it into the recording", async () => {
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     const heard: boolean[] = []
     element.addEventListener("observermapchange", event => heard.push((event as CustomEvent<{ open: boolean }>).detail.open))
@@ -1508,8 +1509,8 @@ describe("the observer's own map", () => {
     expect(heard).toEqual([true, false])
   })
 
-  it("lets the page overrule that default either way", () => {
-    const element = mount()
+  it("lets the page overrule that default either way", async () => {
+    const element = await mount()
     element.setAttribute("show-observer-map", "false")
     element.sightingData = movingObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
@@ -1517,8 +1518,8 @@ describe("the observer's own map", () => {
     expect(mapParts(element).panel.hidden).toBe(false)
   })
 
-  it("starts open when the page says so, and shuts again when it takes that back", () => {
-    const element = mount()
+  it("starts open when the page says so, and shuts again when it takes that back", async () => {
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
 
@@ -1531,10 +1532,10 @@ describe("the observer's own map", () => {
     expect(mapParts(element).panel.hidden).toBe(true)
   })
 
-  it("leaves a map the reader opened alone while the recording is edited", () => {
+  it("leaves a map the reader opened alone while the recording is edited", async () => {
     // refresh() runs on every keystroke in the editor. A default re-applied there would slam shut
     // a map the author had just opened, and reopen one they had just closed.
-    const element = mount()
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     mapParts(element).button.click()
     expect(mapParts(element).panel.hidden).toBe(false)
@@ -1543,34 +1544,34 @@ describe("the observer's own map", () => {
     expect(mapParts(element).panel.hidden).toBe(false)
   })
 
-  it("is not offered for a recording that never said where it happened, asked for or not", () => {
+  it("is not offered for a recording that never said where it happened, asked for or not", async () => {
     // Most recordings in this project say nothing about coordinates, and a control that is there
     // and opens onto nothing is worse than one that appears when it has an answer.
-    const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
+    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] } })
     expect(mapParts(element).button.hidden).toBe(true)
     expect(mapParts(element).panel.hidden).toBe(true)
   })
 
-  it("is offered as soon as a recording names one place, tracked or not", () => {
-    const element = mountWithMap({ version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] })
+  it("is offered as soon as a recording names one place, tracked or not", async () => {
+    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] })
     expect(mapParts(element).button.hidden).toBe(false)
   })
 
-  it("costs no tile fetch until something actually opens it", () => {
+  it("costs no tile fetch until something actually opens it", async () => {
     // These are real requests to a third party. A page listing a dozen case dossiers would fire
     // them all on load for maps nobody opened.
     const fetchSpy = vi.spyOn(globalThis, "fetch")
-    const element = mount()
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
   })
 
-  it("gets out of the phenomenon's way, and comes back once the sky is clear", () => {
+  it("gets out of the phenomenon's way, and comes back once the sky is clear", async () => {
     // The top-right corner is the emptiest part of nearly every sky here, which is why the map is
     // there — but a map covering the very thing a reader opened it to place is worse than no map.
-    const element = mountWithMap(movingObserver())
+    const element = await mountWithMap(movingObserver())
     const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
     // jsdom lays nothing out, so the panel's own box is stated rather than measured.
@@ -1593,8 +1594,8 @@ describe("the observer's own map", () => {
     expect(panel.classList.contains("on-the-left")).toBe(false)
   })
 
-  it("avoids both ends of a 3D exposure trail and hides when neither corner is free", () => {
-    const element = mountWithMap(movingObserver())
+  it("avoids both ends of a 3D exposure trail and hides when neither corner is free", async () => {
+    const element = await mountWithMap(movingObserver())
     const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
     ;(element as unknown as { observerMapBoxPx: unknown }).observerMapBoxPx = { width: 200, top: 40, bottom: 240 }
@@ -1612,8 +1613,8 @@ describe("the observer's own map", () => {
     expect(panel.classList.contains("subject-overlap")).toBe(false)
   })
 
-  it("moves for the end of a phenomenon trail even when its first instant is clear", () => {
-    const element = mountWithMap(movingObserver())
+  it("moves for the end of a phenomenon trail even when its first instant is clear", async () => {
+    const element = await mountWithMap(movingObserver())
     const panel = element.shadowRoot!.getElementById("observer-map-panel")!
     const canvas = element.canvasElement
     ;(element as unknown as { observerMapBoxPx: unknown }).observerMapBoxPx = { width: 200, top: 40, bottom: 240 }
@@ -1628,8 +1629,8 @@ describe("the observer's own map", () => {
     expect(panel.classList.contains("on-the-left")).toBe(true)
   })
 
-  it("goes to a named moment on the map the way its mark on the bar does", () => {
-    const element = mountWithMap(movingObserver())
+  it("goes to a named moment on the map the way its mark on the bar does", async () => {
+    const element = await mountWithMap(movingObserver())
     const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
     const renderer = (element as unknown as { observerMapRenderer: { targets: Array<{ kind: string; t?: number; x: number; y: number }> } })
@@ -1641,11 +1642,11 @@ describe("the observer's own map", () => {
     expect(element.currentTime).toBe(83000)
   })
 
-  it("asks whoever owns the 3D to turn toward a place on it", () => {
+  it("asks whoever owns the 3D to turn toward a place on it", async () => {
     // This element draws the map but cannot turn a view — it has no scene. So it says what was
     // clicked and lets the element that does own one decide, which is also what keeps a bare
     // <rr0-ufo> from pretending it can look somewhere.
-    const element = mountWithMap(movingObserver())
+    const element = await mountWithMap(movingObserver())
     const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: canvas.width, height: canvas.height }) as DOMRect
     const renderer = (element as unknown as { observerMapRenderer: { targets: Array<{ kind: string; x: number; y: number }> } })
@@ -1658,11 +1659,11 @@ describe("the observer's own map", () => {
     expect(asked).toEqual([expect.objectContaining({ kind: "observer" })])
   })
 
-  it("asks to be looked at rather than closing, when a mark on it is clicked", () => {
+  it("asks to be looked at rather than closing, when a mark on it is clicked", async () => {
     // Clicking the map used to shut it. Its marks now answer the pointer instead: a named moment is
     // an instant, so going to it moves the playhead, and anything else is a PLACE, so going to it
     // means asking whatever owns the 3D to turn the view — this element cannot turn one.
-    const element = mountWithMap(movingObserver())
+    const element = await mountWithMap(movingObserver())
     const asked: unknown[] = []
     element.addEventListener("lookat", event => asked.push((event as CustomEvent).detail))
     const canvas = element.shadowRoot!.getElementById("observer-map-canvas") as HTMLCanvasElement
@@ -1673,8 +1674,8 @@ describe("the observer's own map", () => {
     expect(mapParts(element).panel.hidden).toBe(false) // and it did NOT close
   })
 
-  it("opens and closes on the button, and says which it will do", () => {
-    const element = mount()
+  it("opens and closes on the button, and says which it will do", async () => {
+    const element = await mount()
     element.sightingData = stationaryObserver() as never
     const { button, panel } = mapParts(element)
 
@@ -1688,10 +1689,10 @@ describe("the observer's own map", () => {
     expect(button.title).toBe("Show where the witness was")
   })
 
-  it("closes itself when the recording it was showing is replaced by one with no place", () => {
+  it("closes itself when the recording it was showing is replaced by one with no place", async () => {
     // A page playing several recordings in turn does exactly this. Leaving the panel up would show
     // the previous observer's ground under the new one's recording.
-    const element = mountWithMap(movingObserver())
+    const element = await mountWithMap(movingObserver())
     expect(mapParts(element).panel.hidden).toBe(false)
 
     element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
@@ -1699,10 +1700,10 @@ describe("the observer's own map", () => {
     expect(mapParts(element).button.hidden).toBe(true)
   })
 
-  it("applies the page's default again for each recording that arrives", () => {
+  it("applies the page's default again for each recording that arrives", async () => {
     // A carousel swaps recordings under one stage. The map opening is about the recording being
     // loaded, not the one it replaced.
-    const element = mountWithMap({ version: 1, timeline: { keyframes: [] } })
+    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] } })
     expect(mapParts(element).panel.hidden).toBe(true) // nowhere to point it
 
     element.sightingData = movingObserver() as never
@@ -1732,9 +1733,9 @@ describe("the account's named moments", () => {
     document.body.innerHTML = ""
   })
 
-  it("cuts the bar into segments where the moments begin, and leaves it whole without them", () => {
+  it("cuts the bar into segments where the moments begin, and leaves it whole without them", async () => {
     // A moment at the very start cuts nothing: the bar would begin with a gap.
-    const element = mount()
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const segments = () => element.shadowRoot!.querySelectorAll(".seek-segment").length
     expect(segments()).toBe(2)
@@ -1742,16 +1743,16 @@ describe("the account's named moments", () => {
     expect(segments()).toBe(1)
   })
 
-  it("ends the timeline with the fullscreen button, and puts the moments' toggle before it", () => {
-    const element = mount()
+  it("ends the timeline with the fullscreen button, and puts the moments' toggle before it", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const right = [...element.shadowRoot!.getElementById("controls-right")!.children].map(child => child.id)
     expect(right[right.length - 1]).toBe("fullscreen")
     expect(right).toContain("milestones")
   })
 
-  it("toggles fullscreen on F from anywhere in the player, but not while typing", () => {
-    const element = mount()
+  it("toggles fullscreen on F from anywhere in the player, but not while typing", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     let toggles = 0
     ;(element as unknown as { toggleFullscreen: () => void }).toggleFullscreen = () => { toggles++ }
@@ -1766,8 +1767,8 @@ describe("the account's named moments", () => {
     expect(toggles).toBe(1)
   })
 
-  it("follows a finger dragged along the bar, which the zero-wide thumb cannot be grabbed by", () => {
-    const element = mount()
+  it("follows a finger dragged along the bar, which the zero-wide thumb cannot be grabbed by", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const seek = element.shadowRoot!.getElementById("seek")!
     // jsdom lays nothing out: the bar is given the box a phone would.
@@ -1785,7 +1786,7 @@ describe("the account's named moments", () => {
   })
 
   it("holds playback while the bar is held, and goes on from where it is let go", async () => {
-    const element = mount()
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const seek = element.shadowRoot!.getElementById("seek")!
     element.togglePlayPause()
@@ -1798,7 +1799,7 @@ describe("the account's named moments", () => {
   })
 
   it("leaves a paused recording paused when the bar is let go", async () => {
-    const element = mount()
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const seek = element.shadowRoot!.getElementById("seek")!
     seek.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }))
@@ -1807,8 +1808,8 @@ describe("the account's named moments", () => {
     expect(element.playbackState).not.toBe("playing")
   })
 
-  it("stops playing when the page is hidden, and stays stopped when it is back", () => {
-    const element = mount()
+  it("stops playing when the page is hidden, and stays stopped when it is back", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     element.togglePlayPause()
     expect(element.playbackState).toBe("playing")
@@ -1825,8 +1826,8 @@ describe("the account's named moments", () => {
     expect(element.playbackState).toBe("paused") // the reader starts it again
   })
 
-  it("puts the picture opacity slider after the pictures button, as the volume's follows the sound's", () => {
-    const element = mount()
+  it("puts the picture opacity slider after the pictures button, as the volume's follows the sound's", async () => {
+    const element = await mount()
     const ids = [...element.shadowRoot!.getElementById("controls-right")!.children].map(child => child.id)
     expect(ids.indexOf("reference-opacity")).toBe(ids.indexOf("references") + 1)
   })
@@ -1837,8 +1838,8 @@ describe("the account's named moments", () => {
     })
     const withPictures = (...pictures: ReturnType<typeof picture>[]) => ({ version: 1, timeline: { keyframes: [] }, references: pictures })
 
-    it("keeps the single button for one picture, and opens a list of them for several", () => {
-      const element = mount()
+    it("keeps the single button for one picture, and opens a list of them for several", async () => {
+      const element = await mount()
       const shadow = element.shadowRoot!
       element.sightingData = withPictures(picture("a", 0.5)) as never
       shadow.getElementById("references")!.click()
@@ -1852,8 +1853,8 @@ describe("the account's named moments", () => {
       expect(shadow.getElementById("reference-opacity")!.hidden).toBe(true)
     })
 
-    it("tells each picture's own view when one is hidden or faded", () => {
-      const element = mount()
+    it("tells each picture's own view when one is hidden or faded", async () => {
+      const element = await mount()
       const shadow = element.shadowRoot!
       element.sightingData = withPictures(picture("a", 0.5), picture("b", 0.3)) as never
       const seen: { views: Record<string, { shown: boolean, opacity: number }> }[] = []
@@ -1872,8 +1873,8 @@ describe("the account's named moments", () => {
     })
   })
 
-  it("offers a picker of the account's moments after the time, and going to one is choosing it", () => {
-    const element = mount()
+  it("offers a picker of the account's moments after the time, and going to one is choosing it", async () => {
+    const element = await mount()
     const shadow = element.shadowRoot!
     element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] } } as never
     expect(shadow.getElementById("moments")!.hidden).toBe(true) // nothing to choose from
@@ -1892,16 +1893,16 @@ describe("the account's named moments", () => {
     expect(shadow.getElementById("moments-current")!.textContent).toBe("B")
   })
 
-  it("takes the picker away with the moments themselves", () => {
-    const element = mount()
+  it("takes the picker away with the moments themselves", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("milestones") as HTMLButtonElement).click()
     expect(shadow.getElementById("moments")!.hidden).toBe(true)
   })
 
-  it("shows the sound button as a muted speaker that cannot be pressed, with no volume, when the recording has no sound track", () => {
-    const element = mount()
+  it("shows the sound button as a muted speaker that cannot be pressed, with no volume, when the recording has no sound track", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
     const volume = element.shadowRoot!.getElementById("volume") as HTMLInputElement
@@ -1915,8 +1916,8 @@ describe("the account's named moments", () => {
     expect(volume.hidden).toBe(false)
   })
 
-  it("enables the sound button for what the scene plays around the recording: the van it rode in", () => {
-    const element = mount()
+  it("enables the sound button for what the scene plays around the recording: the van it rode in", async () => {
+    const element = await mount()
     element.ambientSound = sighting => sighting.vehicle !== undefined
     element.sightingData = { ...withMilestones(), vehicle: { kind: "van" } } as never
     const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
@@ -1925,8 +1926,8 @@ describe("the account's named moments", () => {
     expect(mute.disabled).toBe(true)
   })
 
-  it("mutes and unmutes from the button beside play, and says so", () => {
-    const element = mount()
+  it("mutes and unmutes from the button beside play, and says so", async () => {
+    const element = await mount()
     element.sightingData = { ...withMilestones(), soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 0.8, pitchHz: 200 } }] } } as never
     const mute = element.shadowRoot!.getElementById("mute") as HTMLButtonElement
     const events: boolean[] = []
@@ -1939,27 +1940,27 @@ describe("the account's named moments", () => {
     expect(events).toEqual([true, false])
   })
 
-  it("stacks the caption on the controls instead of guessing their height", () => {
+  it("stacks the caption on the controls instead of guessing their height", async () => {
     // It used to sit a fixed 2.6em from the bottom edge, which is a guess at how tall the toolbar
     // is — and Socorro's (E), long enough to wrap to two lines, then lost its second line under it.
     // jsdom lays nothing out, so what is guarded here is the structure that makes the layout right:
     // one bottom-anchored box, caption first, controls second.
-    const element = mount()
+    const element = await mount()
     const stack = element.shadowRoot!.getElementById("bottom-stack")!
     const order = [...stack.children].map(child => child.id)
     expect(order).toEqual(["milestone-caption", "toolbar"])
   })
 
-  it("offers no button to a recording that names no moment", () => {
-    const element = mount()
+  it("offers no button to a recording that names no moment", async () => {
+    const element = await mount()
     element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as never
     expect(parts(element).button.hidden).toBe(true)
   })
 
-  it("is on by default wherever there are moments to show", () => {
+  it("is on by default wherever there are moments to show", async () => {
     // Unlike the map: these are the recording's own words about itself, so they belong wherever
     // they exist rather than waiting for a page to ask.
-    const element = mount()
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const { button, marks, caption } = parts(element)
     expect(button.hidden).toBe(false)
@@ -1968,10 +1969,10 @@ describe("the account's named moments", () => {
     expect(button.title).toBe("Hide the account's moments")
   })
 
-  it("takes them off on the button, marks and caption together", () => {
+  it("takes them off on the button, marks and caption together", async () => {
     // Three views of the same few facts — the ticks on the bar, the sentence over the controls and
     // the lettered points on the map. Hiding one and leaving another would be showing half a thing.
-    const element = mount()
+    const element = await mount()
     element.sightingData = withMilestones() as never
     const { button, marks, caption } = parts(element)
 
@@ -1986,8 +1987,8 @@ describe("the account's named moments", () => {
     expect(caption.hidden).toBe(false)
   })
 
-  it("lets a page take them off, and put them back", () => {
-    const element = mount()
+  it("lets a page take them off, and put them back", async () => {
+    const element = await mount()
     element.sightingData = withMilestones() as never
 
     element.setAttribute("hide-milestones", "")
@@ -2004,7 +2005,7 @@ describe("the account's named moments", () => {
 describe("the title laid over the picture", () => {
   const css = ufoCss
 
-  it("never takes the pointer, whatever the rule that gives the controls theirs while the stage is hovered says: it lies over the observer's map", () => {
+  it("never takes the pointer, whatever the rule that gives the controls theirs while the stage is hovered says: it lies over the observer's map", async () => {
     // The controls of the picture are given the pointer while the stage is hovered, with a rule more specific than the title's own: the title, which spans the
     // top of the picture, took the pointer from the map's corner, and the zoom buttons that show while the map is hovered went before the pointer reached them.
     const rule = /\.player-title \{[^}]*\}/.exec(css)![0]
