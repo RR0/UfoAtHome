@@ -15,7 +15,7 @@ export const eventsMessages_fr: EventsMessages = {
   wholeBody: "le corps entier",
   derivedBodiesNote: "Les images clés de ces corps sont calculées à partir de ce qu'ils ont fait. Des images clés posées à la main l'emportent sur ces événements.",
   overriddenBodiesNote: "Des images clés propres l'emportent sur ces événements.",
-  add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement",
+  add: "Ajouter un événement", remove: "Supprimer l'événement", none: "Aucun événement", zoomHint: "Pincez, ou Ctrl + molette, pour zoomer ; Maj + molette pour défiler",
   resetToEvents: "Revenir aux événements",
   kinds: { drive: "Conduit", lookAhead: "Regarde la route", lean: "Se penche", watch: "Regarde dans le rétroviseur", stand: "Se tient", look: "Regarde", appearance: "Aspect", walk: "Marche", follow: "Suit des yeux", blink: "Clignote", vanish: "Disparaît", motion: "Bouge", spin: "Tourne", rise: "S'élève", ride: "Est porté par", turn: "Se tourne", light: "Feu", travel: "Parcourt le ciel", roll: "S'incline", vibrate: "Vibre", spiral: "Spirale" },
   params: {

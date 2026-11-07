@@ -15,7 +15,7 @@ export const eventsMessages_en: EventsMessages = {
   wholeBody: "the whole body",
   derivedBodiesNote: "These bodies' keyframes are worked out from what they did. Keyframes set by hand win over these events.",
   overriddenBodiesNote: "Keyframes of its own win over these events.",
-  add: "Add an event", remove: "Remove the event", none: "No event",
+  add: "Add an event", remove: "Remove the event", none: "No event", zoomHint: "Pinch, or Ctrl + wheel, to zoom; Shift + wheel to scroll",
   resetToEvents: "Back to the events",
   kinds: { drive: "Drives", lookAhead: "Looks down the road", lean: "Leans", watch: "Watches in the mirror", stand: "Stands", look: "Looks at", appearance: "Looks like", walk: "Walks", follow: "Follows with the eyes", blink: "Blinks", vanish: "Is lost", motion: "Moves", spin: "Turns", rise: "Rises", ride: "Rides in", turn: "Turns", light: "Light", travel: "Crosses the sky", roll: "Banks", vibrate: "Vibrates", spiral: "Spirals" },
   params: {

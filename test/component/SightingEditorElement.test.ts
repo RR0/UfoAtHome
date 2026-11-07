@@ -7448,7 +7448,7 @@ describe("SightingEditorElement header", () => {
     toggle.click()
     expect(root.getElementById("timeline-tracks")!.hidden).toBe(false)
     expect(root.querySelector(".scene-card")!.hasAttribute("data-tracks")).toBe(true)
-    expect(root.querySelectorAll(".track-name")).toHaveLength(4)
+    expect(root.querySelectorAll("#timeline-tracks .track-name")).toHaveLength(4)
     toggle.click()
     expect(root.getElementById("timeline-tracks")!.hidden).toBe(true)
   })

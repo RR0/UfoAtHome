@@ -26,6 +26,8 @@ export interface EventsMessages {
   add: string
   remove: string
   none: string
+  /** How to zoom the timeline of the events and scroll it. */
+  zoomHint: string
   /** The button that gives the observer the events' poses again. */
   resetToEvents: string
   /** The kinds of event, by their eventType. */

@@ -15,7 +15,7 @@ export const eventsMessages_es: EventsMessages = {
   wholeBody: "el cuerpo entero",
   derivedBodiesNote: "Los fotogramas clave de estos cuerpos se calculan a partir de lo que hicieron. Los fotogramas clave puestos a mano prevalecen sobre estos eventos.",
   overriddenBodiesNote: "Fotogramas clave propios prevalecen sobre estos eventos.",
-  add: "Añadir un evento", remove: "Eliminar el evento", none: "Ningún evento",
+  add: "Añadir un evento", remove: "Eliminar el evento", none: "Ningún evento", zoomHint: "Pellizque, o Ctrl + rueda, para ampliar; Mayús + rueda para desplazar",
   resetToEvents: "Volver a los eventos",
   kinds: { drive: "Conduce", lookAhead: "Mira la carretera", lean: "Se inclina", watch: "Mira por el retrovisor", stand: "Se sitúa", look: "Mira", appearance: "Aspecto", walk: "Camina", follow: "Sigue con la mirada", blink: "Parpadea", vanish: "Desaparece", motion: "Se mueve", spin: "Gira", rise: "Se eleva", ride: "Va en", turn: "Se gira", light: "Luz", travel: "Cruza el cielo", roll: "Se inclina", vibrate: "Vibra", spiral: "Espiral" },
   params: {

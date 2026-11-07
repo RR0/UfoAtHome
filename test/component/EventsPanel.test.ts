@@ -24,12 +24,14 @@ function mounted(actor: "observer" | "phenomenon" | "bodies" = "observer", json:
     ...(frame ? { positionFrame: () => frame, positionMessages: () => positionInputMessages_en } : {})
   }, eventsMessages_fr, actor)
   panel.render()
-  const picker = () => root.querySelector<HTMLSelectElement>(`#${actor}-event`)!
-  const pick = (index: number) => {
-    picker().value = picker().options[index].value
-    picker().dispatchEvent(new Event("change"))
-  }
-  return { sighting, root, panel, calls, picker, pick }
+  // The events are bars on the panel's timeline, in the order of the recording's events: pressed, one is picked.
+  const bars = () => [...root.querySelectorAll<HTMLElement>(".events-timeline .span[data-id]")]
+  const labels = () => bars().map(bar => bar.textContent)
+  const press = (bar: HTMLElement) => bar.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }))
+  const pick = (index: number) => press(bars()[index])
+  const pickId = (id: string) => press(bars().find(bar => bar.dataset.id === id)!)
+  const picked = () => root.querySelector<HTMLElement>('.events-timeline .span[aria-selected="true"]')?.dataset.id
+  return { sighting, root, panel, calls, labels, pick, pickId, picked }
 }
 
 describe("EventsPanel", () => {
@@ -38,8 +40,10 @@ describe("EventsPanel", () => {
   })
 
   it("lists the observer's events to pick from, and shows the picked one's parameters, and where they come from", () => {
-    const { root, picker, pick, calls } = mounted()
-    expect([...picker().options].map(option => option.text)).toEqual(["0:00 · Conduit", "0:00 · Regarde la route", "1:33.8 · Se penche", "1:33.8 · Regarde dans le rétroviseur"])
+    const { root, labels, pick, picked, calls } = mounted()
+    expect(root.querySelector("#observer-event")).toBeNull()
+    expect(labels()).toEqual(["Conduit", "Regarde la route", "Se penche", "Regarde dans le rétroviseur"])
+    expect(picked()).toBe("0")
     // One event's fields at a time.
     expect(root.querySelector(".events-fields")!.textContent).toContain("Vitesses")
     expect(root.querySelector(".events-fields .basis-mark[data-basis='derived']")).not.toBeNull()
@@ -76,19 +80,18 @@ describe("EventsPanel", () => {
   })
 
   it("adds an event of a kind at the playhead, picks it, and removes it, what is said of the others' parameters following them", () => {
-    const { sighting, root, picker } = mounted("bodies", valensole, 100000)
+    const { sighting, root, panel, picked } = mounted("bodies", valensole, 100000)
     const count = sighting.events!.length
     root.querySelector<HTMLButtonElement>("#bodies-event-add")!.click()
     root.querySelector<HTMLElement>("#bodies-event-kind-rise")!.click()
     expect(sighting.events).toHaveLength(count + 1)
     expect(sighting.events![count]).toMatchObject({ eventType: "rise", who: "craft", t: 100000, until: 103000 })
-    expect(picker().value).toBe(String(count))
+    expect(picked()).toBe(String(count))
     // A rise is drawn at once: the craft is off the ground in the middle of it.
     expect(sighting.interpretation!.bodies[0].track.some(key => key.t > 100000 && key.t < 103000 && (key.altitudeAboveGroundM ?? 0) > 0)).toBe(true)
     // The first event, and what was said of the craft's first rise (the fourth event), which moves up one.
     const riseBasis = sighting.provenance.at("events.3.params.angleDeg")
-    picker().value = "0"
-    picker().dispatchEvent(new Event("change"))
+    panel.pick(0)
     root.querySelector<HTMLButtonElement>("#bodies-event-delete")!.click()
     expect(sighting.events).toHaveLength(count)
     expect(sighting.provenance.at("events.2.params.angleDeg")).toEqual(riseBasis)
@@ -101,8 +104,8 @@ describe("EventsPanel of the phenomenon", () => {
   })
 
   it("lists what the phenomenon did, and works the account's shapes out again when its size is typed", () => {
-    const { sighting, root, picker } = mounted("phenomenon")
-    expect([...picker().options].map(option => option.text.split(" · ")[1])).toEqual(["Se tient", "Aspect", "Aspect", "Clignote", "Clignote", "Disparaît"])
+    const { sighting, root, labels } = mounted("phenomenon")
+    expect(labels()).toEqual(["Se tient", "Aspect", "Aspect", "Clignote", "Clignote", "Disparaît"])
     expect(root.querySelector(".events-note")!.textContent).toBe(eventsMessages_fr.derivedShapesNote)
     const before = sighting.timeline.getInterpolatedShapeAt(40000, "pan")!.angular!.widthDeg
     // Its width at 36.6 s (the third row: an instant, a width, a height each), doubled.
@@ -116,8 +119,8 @@ describe("EventsPanel of the phenomenon", () => {
 
 describe("TimelineTracks", () => {
   it("says a place as every position is, from the observer or as degrees, and keeps how it was said once the focus leaves it", () => {
-    const { sighting, root, pick, picker, calls } = mounted("observer", valensole, 0, { origin: { lat: 43.8447, lng: 5.9632 }, references: [{ label: "the observer", eastM: 0, northM: 0 }] })
-    pick([...picker().options].findIndex(option => option.text.includes("Marche")))
+    const { sighting, root, pick, labels, calls } = mounted("observer", valensole, 0, { origin: { lat: 43.8447, lng: 5.9632 }, references: [{ label: "the observer", eastM: 0, northM: 0 }] })
+    pick(labels().findIndex(text => text!.includes("Marche")))
     const to = root.querySelectorAll<PositionInputElement>(".events-fields rr0-input-position")[1]
     expect(to).toBeDefined()
     to.querySelector<HTMLButtonElement>(".position-mode")!.click()
@@ -171,15 +174,15 @@ describe("EventsPanel's tables of instants", () => {
 describe("EventsPanel's choices", () => {
   it("picks a value the player knows among the others, and says what one the file leaves out then is", async () => {
     const saintLo = (await import("../../public/demo-data/observer-saint-lo.json")).default
-    const { sighting, root, pick, picker } = mounted("phenomenon", saintLo)
-    pick([...picker().options].findIndex(option => option.text.includes("Parcourt")))
+    const { sighting, root, pick, labels } = mounted("phenomenon", saintLo)
+    pick(labels().findIndex(text => text!.includes("Parcourt")))
     const travel = sighting.events!.find(event => event.eventType === "travel")!
     const sizeBy = [...root.querySelectorAll<HTMLSelectElement>(".events-fields .event-params select")].find(select => [...select.options].some(option => option.value === "altitude"))!
     expect(sizeBy.value).toBe("altitude")
     sizeBy.value = ""
     sizeBy.dispatchEvent(new Event("change"))
     expect(travel.params!.sizeBy).toBeUndefined()
-    pick([...picker().options].findIndex(option => option.text.includes("Se tourne")))
+    pick(labels().findIndex(text => text!.includes("Se tourne")))
     const seenFrom = [...root.querySelectorAll<HTMLSelectElement>(".events-fields .event-params select")].find(select => [...select.options].some(option => option.value === "craft"))!
     expect(seenFrom.value).toBe("craft")
   })
@@ -201,8 +204,8 @@ describe("EventsPanel's bases", () => {
   })
 
   it("keeps a label short, its details in a (?)", () => {
-    const { root, pick, picker } = mounted("phenomenon")
-    pick([...picker().options].findIndex(option => option.text.includes("Se tient")))
+    const { root, pick, labels } = mounted("phenomenon")
+    pick(labels().findIndex(text => text!.includes("Se tient")))
     const label = [...root.querySelectorAll(".events-fields .event-param-label")].find(candidate => candidate.querySelector("rr0-hint"))!
     expect(label.querySelector(".event-param-name")!.firstChild!.textContent).toBe("Taille")
     expect(label.querySelector("rr0-hint button")!.getAttribute("title")).toContain("hauteur au-dessus de l'œil")

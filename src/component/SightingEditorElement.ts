@@ -1549,6 +1549,7 @@ export class SightingEditorElement extends HTMLElement {
       },
       seek: (t: number) => this.goToMark(t),
       now: () => this.ufoElement.currentTime,
+      duration: () => this.ufoElement.seekableDuration,
       currentBody: () => this.bodyEditor?.selectedId ?? this.ufoElement.sighting.interpretation?.bodies[0]?.id,
       currentShapes: () => {
         const timeline = this.ufoElement.sighting.timeline
@@ -7844,6 +7845,7 @@ export class SightingEditorElement extends HTMLElement {
     // Its own timeline's playhead follows the recording's: only the playhead is placed again (see ReentryEditor.setTime).
     if (this.shadow.getElementById("sky-reentries")?.hidden === false) this.reentryEditor?.setTime(this.ufoElement.currentTime)
     if (this.shadow.getElementById("sky-launches")?.hidden === false) this.launchEditor?.setTime(this.ufoElement.currentTime)
+    for (const panel of [this.eventsPanel, this.phenomenonEventsPanel, this.bodiesEventsPanel]) panel?.setTime(this.ufoElement.currentTime)
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
     this.syncWeatherFromTimeline()

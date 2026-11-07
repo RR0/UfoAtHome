@@ -3,7 +3,8 @@ import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import { RecordingEvents } from "../engine/events/RecordingEvents.js"
 import { RecordingActors, type ActorKind } from "../engine/events/RecordingActors.js"
 import type { EventsMessages } from "./messages/EventsMessages.js"
-import { ElementList } from "./ElementList.js"
+import { AddMenu } from "./AddMenu.js"
+import { TimelineTracks } from "./TimelineTracks.js"
 import { Icons } from "./Icons.js"
 import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
 import { HintElement } from "./HintElement.js"
@@ -21,6 +22,8 @@ export interface EventsPanelHost {
   changed(): void
   /** Moves the playhead to `t`, ms. */
   seek(t: number): void
+  /** How long the recording lasts, ms: what the timeline of the events spans. */
+  duration?(): number
   /** The playhead, ms: where an event added starts. */
   now(): number
   /** The body whose events a panel of the bodies shows: the one picked in the list of bodies. */
@@ -64,6 +67,12 @@ export class EventsPanel {
 .events-section[hidden] { display: none; }
 .events-note { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--ink-dim); }
 .events-row, .events-fields { grid-column: 1 / -1; min-width: 0; }
+.events-row { display: grid; gap: 6px; }
+.events-row .events-add { justify-self: start; }
+.events-empty { margin: 0; font-size: 13px; color: var(--ink-dim); font-style: italic; }
+/* An event of an instant is a bar too narrow to press: drawn wide enough. */
+.events-timeline .track-lane .span[data-id] { min-width: 8px; }
+.events-delete { justify-self: start; }
 .events-fields { display: grid; gap: 6px; }
 .event-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
 /* A label wraps rather than push its field aside: no wider than a third of the panel. */
@@ -110,7 +119,13 @@ export class EventsPanel {
   private readonly note: HTMLElement
   private readonly reset: HTMLButtonElement
   private readonly fields: HTMLElement
-  private readonly list: ElementList
+  /** The actor's events on a timeline of their own, each a bar from when it starts to when it ends (see TimelineTracks): pressed, it is picked. */
+  private readonly timeline: TimelineTracks
+  private readonly timelineHost: HTMLElement
+  private readonly empty: HTMLElement
+  private readonly addButton: HTMLButtonElement
+  private readonly addMenu: AddMenu
+  private readonly deleteButton: HTMLButtonElement
   /** The picked event, by its place among the recording's events. */
   private picked?: number
 
@@ -132,19 +147,25 @@ export class EventsPanel {
     this.fields = document.createElement("div")
     this.fields.className = "events-fields"
     body.replaceChildren(this.note, this.reset, row, this.fields)
-    this.list = new ElementList({
-      header: row, body: this.fields,
-      ids: { list: `${actor}-event`, remove: `${actor}-event-delete`, add: `${actor}-event-add`, kinds: `${actor}-event-kinds`, kind: kind => `${actor}-event-kind-${kind}` },
-      onSelect: id => {
-        this.picked = Number(id)
-        const event = this.host.sighting().events?.[this.picked]
-        if (event) this.host.seek(event.t)
-        this.render()
-        this.host.picked?.()
-      },
-      onAdd: kind => { if (kind) this.add(kind) },
-      onRemove: () => this.remove()
-    })
+    const timeline = document.createElement("div")
+    timeline.className = "events-timeline"
+    this.empty = document.createElement("p")
+    this.empty.className = "events-empty"
+    this.addButton = document.createElement("button")
+    this.addButton.type = "button"
+    this.addButton.id = `${actor}-event-add`
+    this.addButton.className = "events-add"
+    // In its place before its menu is made: the menu is put after it.
+    row.append(timeline, this.empty, this.addButton)
+    this.addMenu = new AddMenu(this.addButton, `${actor}-event-kinds`, kind => this.add(kind), kind => `${actor}-event-kind-${kind}`)
+    this.timelineHost = timeline
+    this.timeline = new TimelineTracks(timeline, t => this.host.seek(t), { addKeyframeHere: messages.add, keyframeHere: messages.add, zoomHint: messages.zoomHint })
+    this.deleteButton = document.createElement("button")
+    this.deleteButton.type = "button"
+    this.deleteButton.id = `${actor}-event-delete`
+    this.deleteButton.className = "icon-btn events-delete"
+    this.deleteButton.innerHTML = Icons.TRASH
+    this.deleteButton.addEventListener("click", () => this.remove())
     this.localizeList()
   }
 
@@ -156,9 +177,49 @@ export class EventsPanel {
 
   private localizeList(): void {
     const m = this.messages
-    this.list.setLabels({ list: m.title, remove: m.remove, add: m.add, empty: m.none })
-    this.list.setKinds(EventsPanel.ADDABLE[this.actor].map(kind => ({ value: kind, label: m.kinds[kind] ?? kind })))
+    this.timeline.setMessages({ addKeyframeHere: m.add, keyframeHere: m.add, zoomHint: m.zoomHint })
+    this.addButton.innerHTML = `${Icons.PLUS} ${m.add}`
+    this.addMenu.setKinds(EventsPanel.ADDABLE[this.actor].map(kind => ({ value: kind, label: m.kinds[kind] ?? kind })))
+    this.empty.textContent = m.none
+    this.deleteButton.title = m.remove
+    this.deleteButton.setAttribute("aria-label", m.remove)
   }
+
+  /** Picks the event at `index` among the recording's events, as a press on its bar does: the playhead goes to its start. */
+  private choose(index: number): void {
+    this.picked = index
+    const event = this.host.sighting().events?.[index]
+    if (event) this.host.seek(event.t)
+    this.render()
+    this.host.picked?.()
+  }
+
+  /**
+   * The actor's events laid out on the timeline, one row of bars packed where they overlap (see TimelineTracks), the picked one marked:
+   * drawn again only when the events change, the playhead alone moving at every frame (see setTime).
+   */
+  private syncTimeline(events: { event: RecordingEventJson, index: number }[]): void {
+    const m = this.messages
+    const kindOf = (event: RecordingEventJson) => m.kinds[event.eventType] ?? event.eventType
+    const spans = events.map(({ event, index }) => ({ id: String(index), t: event.t, until: Math.max(event.t, event.until ?? event.t), label: kindOf(event) }))
+    const ends = spans.flatMap(span => [span.t, span.until])
+    const duration = this.host.duration?.() ?? Math.max(1, ...ends)
+    this.timeline.show([{
+      id: this.actor, label: m.title, color: EventsPanel.COLOR, times: [], spans,
+      selected: this.picked === undefined ? undefined : String(this.picked),
+      select: id => this.choose(Number(id)),
+      open: () => undefined,
+      add: () => this.addButton.click()
+    }], duration, this.host.now(), { from: Math.min(0, ...ends), to: Math.max(duration, ...ends) })
+  }
+
+  /** The playhead has moved: only it is drawn again. */
+  setTime(t: number): void {
+    this.timeline.setTime(t)
+  }
+
+  /** The row of the events, readable over a light ground and a dark one. */
+  private static readonly COLOR = "#4f8fd6"
 
   /** Whether what it says was said of values that were the events' (see sync). */
   private shownTheirs?: boolean
@@ -236,18 +297,11 @@ export class EventsPanel {
         : theirs ? this.messages.derivedBodiesNote : this.messages.overriddenBodiesNote
     this.reset.hidden = events.length === 0 || theirs
     this.reset.textContent = this.messages.resetToEvents
-    this.list.setItems(events.map(({ event, index }) => ({ id: String(index), label: `${EventsPanel.clock(event.t)} · ${this.messages.kinds[event.eventType] ?? event.eventType}` })),
-      this.picked === undefined ? undefined : String(this.picked))
+    this.empty.hidden = events.length > 0
+    this.timelineHost.hidden = events.length === 0
+    this.syncTimeline(events)
     const picked = this.picked === undefined ? undefined : this.host.sighting().events?.[this.picked]
-    this.fields.replaceChildren(...(picked ? this.details(picked, this.picked!) : []))
-  }
-
-  /** "1:02.5": an instant of the recording, as the list names an event by it. */
-  private static clock(ms: number): string {
-    const seconds = ms / 1000
-    const minutes = Math.floor(seconds / 60)
-    const rest = Math.round((seconds - minutes * 60) * 10) / 10
-    return `${minutes}:${rest < 10 ? "0" : ""}${rest}`
+    this.fields.replaceChildren(...(picked ? [this.deleteButton, ...this.details(picked, this.picked!)] : []))
   }
 
   /** Adds an event of `kind` at the playhead, with what a first draft of it says, and picks it. */
