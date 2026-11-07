@@ -11,6 +11,9 @@
  *
  * Every registry is an extension point of ModuleRegistry, and lives with its implementations under src/modules (see its
  * README.md): another module adds its own sources to the same lists.
+ *
+ * Its name and its credit are not words of the interface, which come from a MessageCatalog: they are what the source says of itself,
+ * a service's own name and the attribution its licensor asks for, kept as written whatever the reader's language.
  */
 export interface DataSource<T> {
   /** Stable id — what a stored preference or a URL parameter would name. */

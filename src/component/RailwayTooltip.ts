@@ -18,23 +18,6 @@ export interface RailwayPick {
  * valley), and a reader pointing at one wants to know whether trains under a wire run there, and how high that wire is.
  */
 export class RailwayTooltip {
-  /** The sentences in English, which is what a reader has until their language's module has arrived and all an English reader ever has. */
-  static readonly ENGLISH: RailwayTexts = {
-    kinds: { rail: "Railway", light_rail: "Light rail", tram: "Tramway", subway: "Metro", funicular: "Funicular" },
-    highSpeed: "High-speed line",
-    service: "Siding",
-    singleTrack: "single track",
-    tracks: "{count} tracks",
-    overhead: "overhead wire {height} m above the rail",
-    overheadVoltage: "overhead wire at {voltage}, {height} m above the rail",
-    thirdRail: "third rail",
-    thirdRailVoltage: "third rail at {voltage}",
-    notElectrified: "not electrified",
-    gauge: "{mm} mm gauge",
-    metreGauge: "metre gauge",
-    distance: "{distance} away"
-  }
-
   private static readonly STANDARD_GAUGE_MM = 1435
   private static readonly METRE_GAUGE_MM = 1000
 

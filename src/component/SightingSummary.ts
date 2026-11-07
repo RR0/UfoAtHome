@@ -386,7 +386,7 @@ export class SightingSummary {
     // editor's own picker makes to decide which entry to show as selected.
     const carried = selected.lights?.map(light => light.id).join() ?? ""
     const rig = carried === "" ? undefined : LIGHT_RIGS.find(candidate => candidate.create().map(light => light.id).join() === carried)
-    this.push(entries, "decor", "decorState.lightRig", this.labels.decorLights, rig?.name)
+    this.push(entries, "decor", "decorState.lightRig", this.labels.decorLights, rig && this.naming.lightRig(rig))
     this.push(entries, "decor", "decorState.observerSide", this.labels.decorObserverSide, this.decorSideName(selected.observerSide))
     // What its kind publishes (floors, windows, a bridge's railing…), each stated value as a chip that leads to its own field.
     const stated = DecorParameterSets.of(selected)

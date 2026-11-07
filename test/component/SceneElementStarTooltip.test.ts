@@ -180,9 +180,10 @@ describe("SceneElement star tooltip", () => {
     return tooltip.hidden ? undefined : tooltip.textContent!
   }
 
-  function mount(): SceneElement {
+  async function mount(): Promise<SceneElement> {
     const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
     document.body.appendChild(element)
+    await element.ready
     return element
   }
 
@@ -191,10 +192,10 @@ describe("SceneElement star tooltip", () => {
    * candidate for a misidentification is how bright it was and how low it stood, which is the
    * question this whole tooltip exists to answer — with Alt held, as every detail of the scene's tooltips.
    */
-  it("names the star, and with Alt says how bright it was and how high it stood", () => {
+  it("names the star, and with Alt says how bright it was and how high it stood", async () => {
     hit.star = { name: "Capella", raHours: 5.27815, decDeg: 45.997991, mag: 0.08 }
     hit.altitudeDeg = 21.4
-    const element = mount()
+    const element = await mount()
 
     expect(hover(element)).toBe("Capella — mag 0.08, 21° above the horizon")
     // Without Alt, the name alone: as every other tooltip of the scene.
@@ -206,10 +207,10 @@ describe("SceneElement star tooltip", () => {
    * decimal the four brightest stars in the table printed as "mag 0,0" and "mag -0" — Vega is 0.03
    * and Rigil Kentaurus -0.01, and a reader has no way to tell that from a field that failed.
    */
-  it("keeps the near-zero magnitudes legible instead of rounding them to nothing", () => {
+  it("keeps the near-zero magnitudes legible instead of rounding them to nothing", async () => {
     hit.star = { name: "Rigil Kentaurus", raHours: 14.6608, decDeg: -60.834, mag: -0.01 }
     hit.altitudeDeg = 3
-    const element = mount()
+    const element = await mount()
 
     expect(hover(element)).toBe("Rigil Kentaurus — mag -0.01, 3° above the horizon")
   })
@@ -226,7 +227,7 @@ describe("SceneElement star tooltip", () => {
     document.body.appendChild(section)
     const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
     section.appendChild(element)
-    await vi.waitFor(() => expect(element.naming.names).toBeDefined())
+    await element.ready
 
     expect(hover(element)).toMatch(/^Vega — mag 0[.,]03, 40° sobre el horizonte$/)
     hit.star = { name: "Sirius", raHours: 6.7525, decDeg: -16.7161, mag: -1.44 }
@@ -236,16 +237,16 @@ describe("SceneElement star tooltip", () => {
     expect(hover(element)).toMatch(/^Sirio — mag -1[.,]4, 1° bajo la horizontal$/)
   })
 
-  it("says nothing when nothing named is under the pointer", () => {
-    const element = mount()
+  it("says nothing when nothing named is under the pointer", async () => {
+    const element = await mount()
     expect(hover(element)).toBeUndefined()
   })
 
   // 33 of the 178 stars in the table have no proper name, and carry what a star chart prints.
-  it("shows a designation as readily as a proper name", () => {
+  it("shows a designation as readily as a proper name", async () => {
     hit.star = { name: "η Orionis", raHours: 5.407949, decDeg: -2.397146, mag: 3.35 }
     hit.altitudeDeg = 8
-    const element = mount()
+    const element = await mount()
 
     expect(hover(element)).toBe("η Orionis — mag 3.4, 8° above the horizon")
   })

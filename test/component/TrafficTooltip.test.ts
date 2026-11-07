@@ -4,6 +4,7 @@ import { sceneNames_fr } from "../../src/component/messages/SceneNames_fr.js"
 import { sceneNames_it } from "../../src/component/messages/SceneNames_it.js"
 import { TrafficTooltip } from "../../src/component/TrafficTooltip.js"
 import type { TrafficInfo } from "../../src/engine/traffic/TrafficInfo.js"
+import { sceneNames_en } from "../../src/component/messages/SceneNames_en.js"
 
 const info = (overrides: Partial<TrafficInfo> = {}): TrafficInfo => ({
   hex: "3944ed", registration: "F-GKXA", typeCode: "A320", name: "Airbus A320", kind: "airliner-narrow", basis: "type",
@@ -13,7 +14,7 @@ const info = (overrides: Partial<TrafficInfo> = {}): TrafficInfo => ({
   ...overrides
 })
 const towards = (azimuth: number) => `towards ${Math.round(azimuth)}`
-const english = (overrides?: Partial<TrafficInfo>) => TrafficTooltip.text(info(overrides), TrafficTooltip.ENGLISH, towards, "en")
+const english = (overrides?: Partial<TrafficInfo>) => TrafficTooltip.text(info(overrides), sceneNames_en.trafficTooltip, towards, "en")
 
 describe("TrafficTooltip", () => {
   test("says who it is, how it flies, where it is and how it sounds, one line each", () => {

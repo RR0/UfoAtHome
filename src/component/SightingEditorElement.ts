@@ -11221,7 +11221,7 @@ export class SightingEditorElement extends HTMLElement {
     // The provider's own settings too, alongside: applyMessages renders them.
     const localizing = this.narrativeProvider.localize?.(language)
     const [messages, tagNames, sceneNames, decorParameterTexts] = await Promise.all([SIGHTING_EDITOR_MESSAGES.load(language),
-      language === "en" ? {} : loadTagNames(language), language === "en" ? undefined : loadSceneNames(language), DECOR_PARAMETER_TEXTS.load(language)])
+      language === "en" ? {} : loadTagNames(language), loadSceneNames(language), DECOR_PARAMETER_TEXTS.load(language)])
     await localizing
     // Superseded by a later decision (the editor was connected while this one was loading).
     if (token !== this.localeToken) return

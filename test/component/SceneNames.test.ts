@@ -12,6 +12,7 @@ import { SATELLITE_CLASSES } from "../../src/engine/astronomy/satelliteCatalog.j
 import { METEOR_SHOWERS } from "../../src/engine/astronomy/MeteorShowers.js"
 import { INSTRUMENTS } from "../../src/engine/instrument/Instrument.js"
 import { LIGHT_RIGS } from "../../src/engine/model/LightRig.js"
+import { sceneNames_en } from "../../src/component/messages/SceneNames_en.js"
 
 const languages: Record<string, SceneNames> = { fr: sceneNames_fr, es: sceneNames_es, it: sceneNames_it }
 
@@ -70,16 +71,20 @@ describe("SceneNames", () => {
     })
   }
 
-  it("is loaded for the languages that have one, and not for English", async () => {
-    expect(await loadSceneNames("en")).toBeUndefined()
+  it("is loaded for each language, English too: none is written in the code", async () => {
+    expect(await loadSceneNames("en")).toBe(sceneNames_en)
     expect(await loadSceneNames("fr")).toBe(sceneNames_fr)
     expect(await loadSceneNames("es")).toBe(sceneNames_es)
     expect(await loadSceneNames("it")).toBe(sceneNames_it)
   })
 
   describe("SceneNaming", () => {
-    it("names in English without names, which is what every reader has until theirs arrive", () => {
-      const naming = new SceneNaming()
+    it("names nothing before the reader's names have come", () => {
+      expect(String(new SceneNaming().star({ name: "Vega" }))).toBe("")
+    })
+
+    it("names in English as the catalogues have it", () => {
+      const naming = new SceneNaming(sceneNames_en)
       expect(naming.star({ name: "Vega" })).toBe("Vega")
       expect(naming.shower(METEOR_SHOWERS.find(shower => shower.id === "perseids")!)).toBe("Perseids")
       expect(naming.towards(315)).toBe("to the NW")
@@ -89,8 +94,8 @@ describe("SceneNames", () => {
       const naming = new SceneNaming(sceneNames_fr)
       expect(naming.star({ name: "Vega" })).toBe("Véga")
       expect(naming.star({ name: "Sirius" })).toBe("Sirius")
-      expect(naming.body("Mars", "Mars")).toBe("Mars")
-      expect(naming.body("sun", "Sun")).toBe("Soleil")
+      expect(naming.body("Mars")).toBe("Mars")
+      expect(naming.body("sun")).toBe("Soleil")
     })
   })
 })

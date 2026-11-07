@@ -71,9 +71,9 @@ describe("HaloFeatures, which names what a pointer is over and only where the di
 
 describe("what pointing at a feature says", () => {
   it("has, in every language, a short name before the dash and an explanation after it", async () => {
-    const { OPTICS_TOOLTIPS_EN } = await import("../../../src/component/messages/OpticsTooltips.js")
+    const { sceneNames_en } = await import("../../../src/component/messages/SceneNames_en.js")
     const { SceneNames_fr } = await import("../../../src/component/messages/SceneNames_fr.js").then(module => ({ SceneNames_fr: Object.values(module)[0] as { opticsTooltips: Record<string, string> } }))
-    for (const texts of [OPTICS_TOOLTIPS_EN, SceneNames_fr.opticsTooltips]) {
+    for (const texts of [sceneNames_en.opticsTooltips, SceneNames_fr.opticsTooltips]) {
       for (const text of Object.values(texts)) {
         const [name, explanation] = text.split(" — ")
         expect(name.length).toBeGreaterThan(0)

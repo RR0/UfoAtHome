@@ -2,6 +2,7 @@ import type { OpticsFeatureId } from "../../engine/atmosphere/HaloFeatures.js"
 import type { DecorKind } from "../../engine/model/Decor.js"
 import type { RailwayKind } from "../../render3d/terrain/RailwayProvider.js"
 import { Compass } from "../../engine/astronomy/Compass.js"
+import { Messages } from "../../i18n/MessageCatalog.js"
 import type { GhostCause } from "../../engine/instrument/LensGhost.js"
 
 /**
@@ -123,61 +124,66 @@ export interface SceneNames {
 }
 
 /**
- * Names things for one reader: from their language's SceneNames where it has a name, else as the
- * catalogue or the code has it in English.
+ * Names things for one reader: from their language's SceneNames where it has a name, else as the catalogue has it (in English, the
+ * language the catalogues are generated in).
  *
- * Without names at all it is the English naming, which is what every reader has until their
- * language's module has arrived — and all an English reader ever has.
+ * Without names, before the reader's have come, everything it says is blank (see Messages.blank): nothing is named before the words.
  */
 export class SceneNaming {
+  readonly names: SceneNames
 
-  constructor(readonly names?: SceneNames) {
+  constructor(names?: SceneNames) {
+    this.names = names ?? Messages.blank<SceneNames>()
+    this.loaded = names !== undefined
   }
 
-  body(key: string, english: string): string {
-    return this.names?.bodies[key] ?? english
+  /** Whether the reader's names have come. */
+  readonly loaded: boolean
+
+  body(key: string): string {
+    return this.names.bodies[key] ?? key
   }
 
   star(star: { name: string }): string {
-    return this.names?.stars[star.name] ?? star.name
+    return this.names.stars[star.name] ?? star.name
   }
 
   comet(apparition: { id: string, name: string }): string {
-    return this.names?.comets[apparition.id] ?? apparition.name
+    return this.names.comets[apparition.id] ?? apparition.name
   }
 
   nova(outburst: { id: string, name: string }): string {
-    return this.names?.novae[outburst.id] ?? outburst.name
+    return this.names.novae[outburst.id] ?? outburst.name
   }
 
   satelliteClass(entry: { id: string, name: string }): string {
-    return this.names?.satelliteClasses[entry.id] ?? entry.name
+    return this.names.satelliteClasses[entry.id] ?? entry.name
   }
 
   shower(shower: { id: string, name: string }): string {
-    return this.names?.showers[shower.id] ?? shower.name
+    return this.names.showers[shower.id] ?? shower.name
   }
 
   lightRig(rig: { id: string, name: string }): string {
-    return this.names?.lightRigs[rig.id] ?? rig.name
+    return this.names.lightRigs[rig.id] ?? rig.name
   }
 
   instrument(instrument: { id: string, name: string }): string {
-    return this.names?.instruments[instrument.id] ?? instrument.name
+    return this.names.instruments[instrument.id] ?? instrument.name
   }
 
-  decorKind(kind: DecorKind, english: string): string {
-    return this.names?.decorKinds[kind] ?? english
+  decorKind(kind: DecorKind): string {
+    return this.names.decorKinds[kind]
   }
 
   /** The compass point `azimuthDeg` falls in — see Compass.point. */
   point(azimuthDeg: number): string {
-    return Compass.point(azimuthDeg, this.names?.compassPoints)
+    return Compass.point(azimuthDeg, this.loaded ? this.names.compassPoints : undefined)
   }
 
   /** The same with its preposition — see Compass.towards. */
   towards(azimuthDeg: number): string {
-    return Compass.towards(azimuthDeg, this.names)
+    return Compass.towards(azimuthDeg, this.loaded ? this.names : undefined)
   }
 }
 

@@ -50,15 +50,13 @@ import { Gait } from "../engine/place/Gait.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { ObserverPose } from "../engine/model/ObserverTrack.js"
 import type { Weather } from "../engine/model/Weather.js"
-import type { DecorKind } from "../engine/model/Decor.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { SceneNaming, type GhostTooltipTexts } from "./messages/SceneNames.js"
+import { SceneNaming } from "./messages/SceneNames.js"
 import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
-import { OPTICS_TOOLTIPS_EN } from "./messages/OpticsTooltips.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
@@ -126,70 +124,6 @@ import type { BodyAppearance, BodyAttitude, BodyJson, BodySize, InterpretationJs
 
 registerUfo()
 
-/** Display names for pickBodyAt's return keys — note "sun"/"moon" are lowercase (SceneRenderer's
- * own internal keys for those two) while planets are capitalized (CelestialBody values, used
- * verbatim as their own key) — deliberately not unified, since unifying casing would mean
- * SceneRenderer inventing a display-string convention it otherwise has no reason to know about.
- * English: every other language's are in its SceneNames (see loadSceneNames). */
-const BODY_NAMES: Record<string, string> = {
-  sun: "Sun",
-  moon: "Moon",
-  Venus: "Venus",
-  Mars: "Mars",
-  Jupiter: "Jupiter",
-  Saturn: "Saturn"
-}
-
-/**
- * What a star's tooltip says, and why it says three things rather than one.
- *
- * A name alone identifies without explaining. What makes a bright point a candidate for a
- * misidentification is how bright it was and how low it stood — a observer reporting a light near
- * the horizon has been answered the moment they read "Venus, magnitude -4, 8 degrees up", and not
- * at all by a bare name.
- */
-const STAR_TOOLTIP = "{name} — mag {mag}, {alt}° above the horizon"
-
-/**
- * The same sentence for a star standing BELOW the horizontal, which is not the contradiction it
- * looks like.
- *
- * The sky is built a little under the level of the eye on purpose, and for a observer who is high up
- * that patch is genuinely in view: from a DC-3 at 1500 m the horizon has dropped 1.24°, so a star
- * at −0.6° is above it and plainly visible. Saying "−1° above the horizon" of it was simply the
- * wrong words for a real sight — it reads as a fault in the tool, and it buries the one fact that
- * explains the geometry, which is that the observer was looking DOWN at it.
- *
- * A star the ground actually hides is a different matter and never reaches this point at all: see
- * SceneRenderer.groundHides.
- */
-/** A satellite under the pointer: its catalogue name, how bright, how high. The height in
- * kilometres, not the altitude in degrees, because the height is what tells a Starlink still
- * raising its orbit from one on station. */
-const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
-
-/** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
-const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
-
-/** What is said of a ghost of the lens pointed at: see SceneNames.ghostTooltip. */
-const GHOST_TOOLTIP: GhostTooltipTexts = {
-  ghost: "Ghost: {name}", halo: "Halo: {name}", double: "Double: {name}", unnamed: "a light",
-  detail: "{name}. {cause}, {where}.",
-  causes: {
-    lens: "A reflection between two surfaces of the lens", sensor: "The sensor's reflection, sent back by its cover glass",
-    filter: "The sensor's reflection, sent back by the filter", glass: "A reflection between the two faces of the glass in front of the lens",
-    drops: "Light scattered by drops on the glass", condensation: "Light scattered by condensation on the glass", dirt: "Light scattered by dirt on the glass"
-  },
-  opposite: "across the centre of the picture from the light", sameSide: "on the same side of the centre as the light", around: "round the light",
-  drop: { lens: "Drop on the lens", filter: "Drop on the filter", window: "Drop on the window", windscreen: "Drop on the windscreen" },
-  dropDetail: "{name}. Like a small lens, it shows upside down and blurred what is on the other side of it, rather than what is behind it."
-}
-/** What is said of the eye's afterimage pointed at: see SceneNames.afterimageTooltip. */
-const AFTERIMAGE_TOOLTIP = {
-  name: "Afterimage, in the eye",
-  detail: "{name}: where the image of a light brighter than the Sun fell, the retina's pigment is bleached: for a few seconds it goes on glowing, white then coloured, and then what is seen there looks darker. It stays where it is in the field of view whichever way the eye turns, and takes minutes to fade."
-}
-
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
 import type { HeadlightMode } from "../engine/model/Headlights.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
@@ -218,47 +152,12 @@ interface ReferenceViewDetail {
 
 export type SatelliteStatus = "none" | "loading" | "outside" | "unavailable" | "ready"
 
-const STAR_TOOLTIP_BELOW = "{name} — mag {mag}, {alt}° below the horizontal"
-
-/** The credits button's label — English, like BODY_NAMES. */
-const CREDITS_LABEL = "Credits"
-
 /** How SceneRenderer keys a comet's own body mesh — see its buildComet. Kept here beside the names
  * it is used with rather than exported from the renderer, which has no interest in what the rest of
  * the key means. */
 const COMET_KEY_PREFIX = "comet:"
 /** The same, for a nova's — see SceneRenderer.buildNovae. */
 const NOVA_KEY_PREFIX = "nova:"
-
-/** Fallback hover-tooltip label for an untitled decor object — a coarse "what is this" (unlike an
- * untitled SHAPE's tooltip, which shows nothing at all — see UfoElement.handlePointerMove's own
- * doc comment on why a raw sourceId is too internal to surface) is still genuinely useful here: a
- * building/tree/streetlight/vehicle's kind is meaningful, human-facing information on its own,
- * not an authoring-only implementation detail. decor.title wins when given (same precedence as
- * SightingEditorElement's own decorLabel, which additionally numbers same-kind objects for its
- * editing dropdown — this tooltip has no such numbering need, standalone `<rr0-scene>` has no
- * dropdown to number against anyway). English, like BODY_NAMES. */
-const DECOR_KIND_NAMES: Record<DecorKind, string> = {
-  building: "Building",
-  tree: "Tree",
-  shrub: "Shrub",
-  bridge: "Bridge",
-  wire: "Overhead line",
-  crop: "Crop row",
-  terrace: "Terrace (restanque)",
-  mound: "Stone heap",
-  wall: "Dry-stone wall",
-  streetlight: "Streetlight",
-  trafficlight: "Traffic light",
-  crossing: "Pedestrian crossing",
-  roadsign: "Road sign",
-  vehicle: "Vehicle",
-  observer: "Observer",
-  aircraft: "Aircraft",
-  // Not "creature" and not "alien": the account says a being was there and says nothing about what
-  // it was, which is the whole of what this project is willing to assert.
-  entity: "Being"
-}
 
 /** Where the star catalog asset (see scripts/build-star-catalog.ts) is fetched from by default —
  * resolved relative to this module's own URL so it works both from this package's own demo and
@@ -360,7 +259,7 @@ export class SceneElement extends HTMLElement {
   private readonly sceneCanvas: HTMLCanvasElement
   private readonly busyElement: HTMLElement
   private readonly busyNote: HTMLElement
-  /** The sentence under the loader's spinner — English until the reader's names arrive. */
+  /** The sentence under the loader's spinner, once the reader's names have come. */
   private readonly loaderNote: HTMLElement
   /** The one above the spinner: what the picture is not. */
   private readonly loaderNotVideo: HTMLElement
@@ -661,7 +560,7 @@ export class SceneElement extends HTMLElement {
     // A drop on the glass the picture is taken through, when asked for: nearer than anything of the scene, which it deforms, but on a wet
     // glass everywhere, so that it is looked for only on demand (Alt held, see handlePointerMove).
     if (drops && this.sceneRenderer.pickDropAt(ndcX, ndcY)) {
-      const texts = names?.ghostTooltip ?? GHOST_TOOLTIP
+      const texts = names.ghostTooltip
       const name = texts.drop[this.ufoElement.sighting.lens?.glass ?? "lens"]
       return { kind: "drop", name, detail: () => texts.dropDetail.replace("{name}", name) }
     }
@@ -671,7 +570,7 @@ export class SceneElement extends HTMLElement {
     const standing = this.interpretationShown ? this.sceneRenderer.pickInterpretationBodyAt(ndcX, ndcY) : undefined
     const standingBody = standing ? this.interpretationShown?.bodies.find(body => body.id === standing) : undefined
     const standingName = standingBody
-      ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
+      ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity") : undefined)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
     // An event of the sky that stands in the scene (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin, and
@@ -683,19 +582,19 @@ export class SceneElement extends HTMLElement {
     if (ghost) return ghost
     // The eye's afterimage, in the eye and not in the world: over whatever is behind it, as a ghost is over the picture.
     if (this.sceneRenderer.pickAfterimageAt(ndcX, ndcY)) {
-      const texts = this.naming.names?.afterimageTooltip ?? AFTERIMAGE_TOOLTIP
+      const texts = this.naming.names.afterimageTooltip
       return { kind: "afterimage", name: texts.name, detail: () => texts.detail.replace("{name}", texts.name) }
     }
     const decorId = this.pickDecorAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
-      const name = this.said.read(decor.title) || naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind])
+      const name = this.said.read(decor.title) || naming.decorKind(decor.kind)
       return { kind: "decor", id: decor.id, name, detail: () => this.decorTooltip(decor, name) }
     }
     // A railway: the ground of the place, as the decor is, and what explains a light at night as often as an aircraft (see RailwayTooltip).
     const railway = this.sceneRenderer.pickRailwayAt(ndcX, ndcY)
     if (railway) {
-      const texts = names?.railwayTooltip ?? RailwayTooltip.ENGLISH
+      const texts = names.railwayTooltip
       return {
         kind: "railway", id: railway.line.id, name: RailwayTooltip.name(railway.line, texts),
         detail: () => RailwayTooltip.detail(railway, texts, metres => this.distanceText(metres))
@@ -717,7 +616,7 @@ export class SceneElement extends HTMLElement {
     if (satellite) {
       return {
         kind: "satellite",
-        name: (names?.satelliteTooltip ?? SATELLITE_TOOLTIP)
+        name: names.satelliteTooltip
           .replace("{name}", satellite.name)
           .replace("{mag}", satellite.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
           .replace("{height}", Math.round(satellite.heightKm).toLocaleString())
@@ -731,7 +630,7 @@ export class SceneElement extends HTMLElement {
     if (optics) {
       // The name alone by default, and what it is and what makes it with Alt held — the same two depths a decor object's tooltip
       // has. Each text is "name — explanation", so the name is what comes before the dash.
-      const full = (names?.opticsTooltips ?? OPTICS_TOOLTIPS_EN)[optics.id].replace("{angle}", String(Math.round(optics.angleDeg ?? 0)))
+      const full = names.opticsTooltips[optics.id].replace("{angle}", String(Math.round(optics.angleDeg ?? 0)))
       return { kind: "optics", id: optics.id, name: full.split(" — ")[0], detail: () => full }
     }
     const star = this.sceneRenderer.pickStarAt(ndcX, ndcY)
@@ -745,8 +644,8 @@ export class SceneElement extends HTMLElement {
       const magnitude = star.star.mag
       const altitudeDeg = star.altitudeDeg
       const template = altitudeDeg < 0
-        ? names?.starTooltipBelow ?? STAR_TOOLTIP_BELOW
-        : names?.starTooltip ?? STAR_TOOLTIP
+        ? names.starTooltipBelow
+        : names.starTooltip
       const name = naming.star(star.star)
       // The name alone by default, and its magnitude and height with Alt held: the two depths every other tooltip of the scene has.
       return {
@@ -806,7 +705,7 @@ export class SceneElement extends HTMLElement {
   private ghostPick(ndcX: number, ndcY: number): ScenePick | undefined {
     const hit = this.sceneRenderer.pickGhostAt(ndcX, ndcY)
     if (!hit) return undefined
-    const texts = this.naming.names?.ghostTooltip ?? GHOST_TOOLTIP
+    const texts = this.naming.names.ghostTooltip
     const light = this.lightOfGhost(hit.source.x, hit.source.y) ?? undefined
     // A star's label carries its magnitude and height: its name is what comes before them.
     const lightName = (light?.kind === "star" ? light.name.split(" — ")[0] : light?.name) ?? texts.unnamed
@@ -834,7 +733,7 @@ export class SceneElement extends HTMLElement {
       if (!box) continue
       const distance = Math.hypot(Math.max(box.minX - ndcX, 0, ndcX - box.maxX), Math.max(box.minY - ndcY, 0, ndcY - box.maxY))
       if (distance > reachNdc || (best && distance >= best.distance)) continue
-      const name = this.said.read(decor.title) || this.naming.decorKind(decor.kind, DECOR_KIND_NAMES[decor.kind])
+      const name = this.said.read(decor.title) || this.naming.decorKind(decor.kind)
       best = { distance, pick: { kind: "decor", id: decor.id, name } }
     }
     return best?.pick
@@ -943,7 +842,7 @@ export class SceneElement extends HTMLElement {
     const size = DecorSystem.sizeOf(decor)
     const distance = this.sceneRenderer.decorDistanceM(decor.id)
     const far = distance === undefined ? "" : this.distanceText(distance)
-    const template = this.naming.names?.decorTooltip ?? DECOR_TOOLTIP
+    const template = this.naming.names.decorTooltip
     const text = template.replace("{name}", name).replace("{size}", `${metres(size.widthM)} × ${metres(size.lengthM)} × ${metres(size.heightM)} m`)
     return text.replace("{distance}", far)
   }
@@ -957,17 +856,16 @@ export class SceneElement extends HTMLElement {
     if (comet) return this.naming.comet(comet)
     const nova = bodyKey.startsWith(NOVA_KEY_PREFIX) ? Novae.byId(bodyKey.slice(NOVA_KEY_PREFIX.length)) : undefined
     if (nova) return this.naming.nova(nova)
-    const english = BODY_NAMES[bodyKey]
-    return english === undefined ? bodyKey : this.naming.body(bodyKey, english)
+    return this.naming.body(bodyKey)
   }
 
   /**
-   * What this reader calls the things in the scene — English (the catalogues' own names, and the
-   * code's) until their language's names have arrived, and for good when they read English.
+   * What this reader calls the things in the scene, and what it says of them: blank until their language's names have come (see
+   * SceneNaming), in their language alone.
    *
    * The lookups it serves are synchronous (a hover tooltip, a compass label drawn into a frame), so
    * the names are asked for as soon as the language is known (see loadSceneNames, on connection) and
-   * kept; whatever showed English meanwhile is redone when they land.
+   * kept; whatever was drawn meanwhile is redone when they land.
    */
   get naming(): SceneNaming {
     return this.sceneNaming
@@ -977,7 +875,10 @@ export class SceneElement extends HTMLElement {
 
   /** The language sceneNaming was last asked for — so that a reconnection deciding the same one does
    * not fetch again, and a decision overtaken by a later one is dropped. */
-  private namesLanguage: UfoLanguage = "en"
+  private namesLanguage?: UfoLanguage
+
+  /** Settled once the scene's names, in its reader's language, are on show (see naming). */
+  ready: Promise<void> = Promise.resolve()
 
   private async loadSceneNames(): Promise<void> {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
@@ -1033,11 +934,11 @@ export class SceneElement extends HTMLElement {
 
   private applySceneNaming(naming: SceneNaming): void {
     this.sceneNaming = naming
-    const creditsLabel = naming.names?.credits ?? CREDITS_LABEL
-    this.creditsButton.title = creditsLabel
-    this.creditsButton.setAttribute("aria-label", creditsLabel)
-    if (naming.names) this.renderLoaderText(naming.names.notAVideo, naming.names.isASimulation)
-    this.sceneRenderer.setCompassPoints(naming.names?.compassPoints)
+    if (!naming.loaded) return
+    this.creditsButton.title = naming.names.credits
+    this.creditsButton.setAttribute("aria-label", naming.names.credits)
+    this.renderLoaderText(naming.names.notAVideo, naming.names.isASimulation)
+    this.sceneRenderer.setCompassPoints(naming.names.compassPoints)
   }
 
   private showHoverTooltip(event: { clientX: number, clientY: number }, text: string): void {
@@ -1231,7 +1132,6 @@ export class SceneElement extends HTMLElement {
     const loader = this.shadow.getElementById("scene-loader")!
     this.loaderNote = this.shadow.getElementById("scene-loader-note")!
     this.loaderNotVideo = this.shadow.getElementById("scene-loader-not-video")!
-    this.renderLoaderText("This is not a video", "It is a real-time simulation.")
     this.busyElement = this.shadow.getElementById("scene-busy")!
     this.busyNote = this.shadow.getElementById("scene-busy-note")!
     this.loader = loader
@@ -1275,9 +1175,6 @@ export class SceneElement extends HTMLElement {
     creditsPanel.addEventListener("beforetoggle", event => {
       if ((event as ToggleEvent).newState === "open") SceneCredits.fill(creditsList, this)
     })
-    // English until the reader's names arrive — see naming.
-    this.creditsButton.title = CREDITS_LABEL
-    this.creditsButton.setAttribute("aria-label", CREDITS_LABEL)
     this.sceneRenderer.onMapSubjectBounds = bounds => this.ufoElement.setMapSubjectBounds(bounds)
     this.ufoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     // Playing is what takes the cover away — the scene behind it is shown at once if whole, else behind the loader.
@@ -1379,7 +1276,7 @@ export class SceneElement extends HTMLElement {
   connectedCallback(): void {
     ModuleRegistry.changes.addEventListener("change", this.onModulesChanged)
     this.saidTexts = undefined
-    void this.loadSceneNames()
+    this.ready = this.loadSceneNames()
     this.sceneRenderer.restoreContext()
     this.resizeToStage()
     this.updateAstronomy(this.lastTimeMs)
@@ -2558,7 +2455,7 @@ export class SceneElement extends HTMLElement {
     if (!info) return undefined
     const naming = this.naming
     const runtime = SceneElement.trafficRuntime
-    return runtime?.TrafficTooltip.text(info, naming.names?.trafficTooltip ?? runtime.TrafficTooltip.ENGLISH, azimuth => naming.towards(azimuth))
+    return runtime?.TrafficTooltip.text(info, naming.names.trafficTooltip, azimuth => naming.towards(azimuth))
   }
 
   /**

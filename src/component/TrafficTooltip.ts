@@ -8,28 +8,6 @@ import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
  * heard (or not) from where the observer stands. It never says that this is what was seen.
  */
 export class TrafficTooltip {
-  /** The sentences in English, which is what a reader has until their language's module has arrived and all an English reader ever has. */
-  static readonly ENGLISH: TrafficTexts = {
-    unnamed: "Aircraft {hex}",
-    altitude: "{value} ft",
-    speed: "{value} kt",
-    heading: "heading {value}°",
-    position: "{distance} km away, {elevation}° above the horizon, {bearing}",
-    heard: "Heard at {level} dB(A), left the aircraft {delay} s ago, {lag}° behind it: {character}{pitch}",
-    rumble: "a low rumble, nothing above {cutoff} Hz",
-    muffled: "a dull noise, nothing above {cutoff} Hz",
-    broad: "a broad roar",
-    pitchHigher: ", pitch {percent} % higher",
-    pitchLower: ", pitch {percent} % lower",
-    inaudible: "Not audible here: {level} dB(A) against {ambient} dB(A) of ambient noise",
-    soundUnknown: "Its sound cannot be worked out: the aircraft was not recorded yet when it left",
-    contrailPersistent: "Leaves a trail that lasts: the air is supersaturated over ice ({rhi} % over ice)",
-    contrailShort: "Leaves a short-lived trail: the air is dry over ice ({rhi} % over ice)",
-    military: "military",
-    restricted: "identity withheld by its owner",
-    candidate: "A compatible candidate, not an identification"
-  }
-
   /** The highest a sound goes, Hz, for it to be called a rumble, and for it to be called dull rather than broad. */
   private static readonly RUMBLE_BELOW_HZ = 500
   private static readonly DULL_BELOW_HZ = 2000

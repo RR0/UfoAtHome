@@ -133,20 +133,16 @@ export function loadBodyEditorMessages(language: UfoLanguage): Promise<BodyEdito
   return BODY_EDITOR_MESSAGES.load(language)
 }
 
-/**
- * What the scene and its catalogues call things in `language` — undefined for English, the
- * language the catalogues are generated in and the code names things in (see SceneNames).
- *
- * Lazy like everything above: a page reading in English never downloads a table of names, and a
- * page reading in French downloads the French one alone.
- */
-export function loadSceneNames(language: UfoLanguage): Promise<SceneNames | undefined> {
-  switch (language) {
-    case "fr": return import("./SceneNames_fr.js").then(m => m.sceneNames_fr)
-    case "es": return import("./SceneNames_es.js").then(m => m.sceneNames_es)
-    case "it": return import("./SceneNames_it.js").then(m => m.sceneNames_it)
-    default: return Promise.resolve(undefined)
-  }
+/** What the scene and its catalogues call things, and what it says of them, one chunk per language (see MessageCatalog). */
+export const SCENE_NAMES = Messages.catalog<SceneNames>({
+  en: () => import("./SceneNames_en.js").then(m => m.sceneNames_en),
+  fr: () => import("./SceneNames_fr.js").then(m => m.sceneNames_fr),
+  es: () => import("./SceneNames_es.js").then(m => m.sceneNames_es),
+  it: () => import("./SceneNames_it.js").then(m => m.sceneNames_it)
+})
+
+export function loadSceneNames(language: UfoLanguage): Promise<SceneNames> {
+  return SCENE_NAMES.load(language)
 }
 
 /** The cloud editor's texts, one chunk per language (see MessageCatalog). */

@@ -35,6 +35,11 @@ vi.mock("../../src/component/messages/ModulesPanelMessages_en.js", async origina
   const actual = await original<typeof import("../../src/component/messages/ModulesPanelMessages_en.js")>()
   return { ...actual, modulesPanelMessages_en: WordsAudit.pseudo(actual.modulesPanelMessages_en) }
 })
+vi.mock("../../src/component/messages/SceneNames_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/SceneNames_en.js")>()
+  return { ...actual, sceneNames_en: WordsAudit.pseudo(actual.sceneNames_en) }
+})
 vi.mock("../../src/component/messages/ShareMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/component/messages/ShareMessages_en.js")>()
@@ -402,14 +407,14 @@ async function mounted(): Promise<HTMLElement> {
 }
 
 /**
- * What still speaks English of its own, outside the editor, each to have its catalog in its turn (step 3): the core's sets of parameters,
- * the instruments' names, and the names and credits of the providers.
+ * What the providers say of themselves (see DataSource): a service's name and the attribution its licensor asks for, kept as written;
+ * and the names of the assessors, which are their authors'.
  */
-const STEP_3 = Object.values(import.meta.glob([
-  "../../src/engine/instrument/Instrument.ts", "../../src/modules/providers/**/*.ts", "../../src/modules/models/*.ts", "../../src/modules/assessors/*.ts"
+const PROVIDERS = Object.values(import.meta.glob([
+  "../../src/modules/providers/**/*.ts", "../../src/modules/models/*.ts", "../../src/modules/assessors/*.ts"
 ], { query: "?raw", import: "default", eager: true }) as Record<string, string>)
-const STEP_3_TEXTS = new Set([
-  ...STEP_3.flatMap(source => [...source.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(match => match[1])),
+const PROVIDERS_TEXTS = new Set([
+  ...PROVIDERS.flatMap(source => [...source.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(match => match[1])),
   // The surroundings source made of two others, which the editor declares itself: a provider's name and credit like the others.
   "IGN BD TOPO / OpenStreetMap", "© IGN, BD TOPO (Licence Ouverte 2.0) in France; © OpenStreetMap contributors (ODbL) elsewhere"
 ])
@@ -417,10 +422,10 @@ const STEP_3_TEXTS = new Set([
 /** Words that are no words to translate: the project's name, units, an example of an id, the time zones' names (see Intl). */
 const NO_WORDS = new Set(["UFO@home", "ISO", "mag/arcsec²", "UTC±h", "1964-04-24-ZamoraLonnie"])
 
-/** Whether `text` is not the editor's to say: no word, or made of what step 3 still says (a label and its part, a choice and its ellipsis). */
+/** Whether `text` is not the editor's to say: no word, or what a provider says of itself (with the ellipsis of a choice). */
 function notTheEditors(text: string): boolean {
   if (NO_WORDS.has(text) || text.startsWith("https://") || /^[A-Z][A-Za-z_]+\/[A-Za-z_/+-]+$/.test(text)) return true
-  return STEP_3_TEXTS.has(text.replace(/ …$/, "")) || text.split(" ").every(part => STEP_3_TEXTS.has(part))
+  return PROVIDERS_TEXTS.has(text.replace(/ …$/, "")) || text.split(" ").every(part => PROVIDERS_TEXTS.has(part))
 }
 
 describe("the words of <rr0-sighting-editor>", () => {

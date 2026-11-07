@@ -124,20 +124,161 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
   }
 }))
 
-vi.mock("../../src/component/messages/SightingMessages_en.js", async original => {
+// Every module of English words in the project, pseudo-words instead (see WordsAudit).
+vi.mock("../../src/component/messages/BodyEditorMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
-  const actual = await original<typeof import("../../src/component/messages/SightingMessages_en.js")>()
-  return { sightingMessages_en: WordsAudit.pseudo(actual.sightingMessages_en) }
+  const actual = await original<typeof import("../../src/component/messages/BodyEditorMessages_en.js")>()
+  return { ...actual, bodyEditorMessages_en: WordsAudit.pseudo(actual.bodyEditorMessages_en) }
 })
-vi.mock("../../src/component/messages/UfoMessages_en.js", async original => {
+vi.mock("../../src/component/messages/CaseEditorMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
-  const actual = await original<typeof import("../../src/component/messages/UfoMessages_en.js")>()
-  return { ufoMessages_en: WordsAudit.pseudo(actual.ufoMessages_en) }
+  const actual = await original<typeof import("../../src/component/messages/CaseEditorMessages_en.js")>()
+  return { ...actual, caseEditorMessages_en: WordsAudit.pseudo(actual.caseEditorMessages_en) }
+})
+vi.mock("../../src/component/messages/CloudEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/CloudEditorMessages_en.js")>()
+  return { ...actual, cloudEditorMessages_en: WordsAudit.pseudo(actual.cloudEditorMessages_en) }
+})
+vi.mock("../../src/component/messages/EventsMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/EventsMessages_en.js")>()
+  return { ...actual, eventsMessages_en: WordsAudit.pseudo(actual.eventsMessages_en) }
+})
+vi.mock("../../src/component/messages/InterviewMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/InterviewMessages_en.js")>()
+  return { ...actual, interviewMessages_en: WordsAudit.pseudo(actual.interviewMessages_en) }
+})
+vi.mock("../../src/component/messages/ModulesPanelMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/ModulesPanelMessages_en.js")>()
+  return { ...actual, modulesPanelMessages_en: WordsAudit.pseudo(actual.modulesPanelMessages_en) }
+})
+vi.mock("../../src/component/messages/SceneNames_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/SceneNames_en.js")>()
+  return { ...actual, sceneNames_en: WordsAudit.pseudo(actual.sceneNames_en) }
 })
 vi.mock("../../src/component/messages/ShareMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/component/messages/ShareMessages_en.js")>()
-  return { shareMessages_en: WordsAudit.pseudo(actual.shareMessages_en) }
+  return { ...actual, shareMessages_en: WordsAudit.pseudo(actual.shareMessages_en) }
+})
+vi.mock("../../src/component/messages/SightingEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/SightingEditorMessages_en.js")>()
+  return { ...actual, sightingEditorMessages_en: WordsAudit.pseudo(actual.sightingEditorMessages_en) }
+})
+vi.mock("../../src/component/messages/SightingLabels_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/SightingLabels_en.js")>()
+  return { ...actual, sightingLabels_en: WordsAudit.pseudo(actual.sightingLabels_en) }
+})
+vi.mock("../../src/component/messages/SightingMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/SightingMessages_en.js")>()
+  return { ...actual, sightingMessages_en: WordsAudit.pseudo(actual.sightingMessages_en) }
+})
+vi.mock("../../src/component/messages/UfoMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/UfoMessages_en.js")>()
+  return { ...actual, ufoMessages_en: WordsAudit.pseudo(actual.ufoMessages_en) }
+})
+vi.mock("../../src/component/messages/WitnessErrorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/WitnessErrorMessages_en.js")>()
+  return { ...actual, witnessErrorMessages_en: WordsAudit.pseudo(actual.witnessErrorMessages_en) }
+})
+vi.mock("../../src/engine/interpretation/messages/BodyParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/interpretation/messages/BodyParameterTexts_en.js")>()
+  return { ...actual, bodyParameterTexts_en: WordsAudit.pseudo(actual.bodyParameterTexts_en) }
+})
+vi.mock("../../src/engine/model/messages/CloudParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/model/messages/CloudParameterTexts_en.js")>()
+  return { ...actual, cloudParameterTexts_en: WordsAudit.pseudo(actual.cloudParameterTexts_en) }
+})
+vi.mock("../../src/engine/model/messages/DecorParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/engine/model/messages/DecorParameterTexts_en.js")>()
+  return { ...actual, decorParameterTexts_en: WordsAudit.pseudo(actual.decorParameterTexts_en) }
+})
+vi.mock("../../src/modules/interpretations/flares/messages/FlareKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/flares/messages/FlareKindMessages_en.js")>()
+  return { ...actual, flareKindMessages_en: WordsAudit.pseudo(actual.flareKindMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/lanterns/messages/LanternEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/lanterns/messages/LanternEditorMessages_en.js")>()
+  return { ...actual, lanternEditorMessages_en: WordsAudit.pseudo(actual.lanternEditorMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/lanterns/messages/LanternKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/lanterns/messages/LanternKindMessages_en.js")>()
+  return { ...actual, lanternKindMessages_en: WordsAudit.pseudo(actual.lanternKindMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/lanterns/messages/LanternParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/lanterns/messages/LanternParameterTexts_en.js")>()
+  return { ...actual, lanternParameterTexts_en: WordsAudit.pseudo(actual.lanternParameterTexts_en) }
+})
+vi.mock("../../src/modules/perception/messages/PerceptionMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/perception/messages/PerceptionMessages_en.js")>()
+  return { ...actual, perceptionMessages_en: WordsAudit.pseudo(actual.perceptionMessages_en) }
+})
+vi.mock("../../src/modules/providers/narrative/messages/ClaudeNarrativeTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/providers/narrative/messages/ClaudeNarrativeTexts_en.js")>()
+  return { ...actual, claudeNarrativeTexts_en: WordsAudit.pseudo(actual.claudeNarrativeTexts_en) }
+})
+vi.mock("../../src/modules/sky-events/beams/messages/BeamEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/beams/messages/BeamEditorMessages_en.js")>()
+  return { ...actual, beamEditorMessages_en: WordsAudit.pseudo(actual.beamEditorMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/beams/messages/BeamKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/beams/messages/BeamKindMessages_en.js")>()
+  return { ...actual, beamKindMessages_en: WordsAudit.pseudo(actual.beamKindMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/beams/messages/BeamParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/beams/messages/BeamParameterTexts_en.js")>()
+  return { ...actual, beamParameterTexts_en: WordsAudit.pseudo(actual.beamParameterTexts_en) }
+})
+vi.mock("../../src/modules/sky-events/launches/messages/LaunchEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/launches/messages/LaunchEditorMessages_en.js")>()
+  return { ...actual, launchEditorMessages_en: WordsAudit.pseudo(actual.launchEditorMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/launches/messages/LaunchKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/launches/messages/LaunchKindMessages_en.js")>()
+  return { ...actual, launchKindMessages_en: WordsAudit.pseudo(actual.launchKindMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/launches/messages/LaunchParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/launches/messages/LaunchParameterTexts_en.js")>()
+  return { ...actual, launchParameterTexts_en: WordsAudit.pseudo(actual.launchParameterTexts_en) }
+})
+vi.mock("../../src/modules/sky-events/reentries/messages/ReentryEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/reentries/messages/ReentryEditorMessages_en.js")>()
+  return { ...actual, reentryEditorMessages_en: WordsAudit.pseudo(actual.reentryEditorMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/reentries/messages/ReentryKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/reentries/messages/ReentryKindMessages_en.js")>()
+  return { ...actual, reentryKindMessages_en: WordsAudit.pseudo(actual.reentryKindMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/reentries/messages/ReentryParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/reentries/messages/ReentryParameterTexts_en.js")>()
+  return { ...actual, reentryParameterTexts_en: WordsAudit.pseudo(actual.reentryParameterTexts_en) }
 })
 
 const { registerSighting, SIGHTING_ELEMENT_NAME } = await import("../../src/component/SightingElement.js")
@@ -199,8 +340,7 @@ describe("the words of <rr0-sighting>", () => {
     const element = document.createElement(SIGHTING_ELEMENT_NAME)
     document.body.appendChild(element)
     await new Promise(resolve => setTimeout(resolve, 300))
-    // The project's name is no word to translate; the scene's loader and credits are written in English in SceneElement still (step 3).
-    const still = new Set(["UFO@home", "This is not a video", "It is a real-time simulation.", "Credits"])
-    expect(WordsAudit.leftovers(element, text => still.has(text))).toEqual([])
+    // The project's name is no word to translate.
+    expect(WordsAudit.leftovers(element, text => text === "UFO@home")).toEqual([])
   })
 })
