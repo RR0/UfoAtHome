@@ -2,31 +2,31 @@ import { SummaryDescription } from "./SummaryDescription.js"
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
   <span id="account" class="account">
-    <span id="account-prefix">Account by</span>
+    <span id="account-prefix"></span>
     <span id="observer-text"></span><select id="observer" hidden></select>
   </span>
   <!-- What to replay the account with: the raw account, the observer's own reading of it, or an
        analyst's from the case (see InterpretationJson). Only there when there is a choice. -->
   <label id="interpretation-choice" class="interpretation-choice" hidden>
-    <span id="interpretation-label">Interpretation</span> <select id="interpretation"></select>
+    <span id="interpretation-label"></span> <select id="interpretation"></select>
   </label>
   <!-- The playback layer's own toggles, taken out of the picture and put here — see
        UfoElement.hostControls. -->
   <span id="scene-controls" class="scene-controls">
     <!-- Whether the account is shown beside the interpretation on show, as outlines, and
          measured against it — see SceneElement.compareAccount. Only while an interpretation is. -->
-    <button id="compare-account" type="button" title="Compare with the account" aria-label="Compare with the account" aria-pressed="false" hidden>◌</button>
+    <button id="compare-account" type="button" aria-pressed="false" hidden>◌</button>
   </span>
   <!-- The way into this very observation in the online editor, where what the recording does not
        say shows as missing. Beside "?" rather than inside its panel, which is where it used to hide
        behind the version link. Hidden for a recording with no address (set by script, pasted),
        which the editor could not open. -->
-  <a id="edit-link" class="edit-link" target="_blank" rel="noopener" title="Edit this observation" aria-label="Edit this observation" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
-  <button id="info-button" class="info-btn" type="button" title="About" aria-label="About" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
+  <a id="edit-link" class="edit-link" target="_blank" rel="noopener" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
+  <button id="info-button" class="info-btn" type="button" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
   <div id="info-panel" class="info-panel" hidden>
-    <button id="info-close" class="info-close" type="button" aria-label="Close">×</button>
+    <button id="info-close" class="info-close" type="button">×</button>
     <section>
-      <h3 id="info-observation-heading">Observation</h3>
+      <h3 id="info-observation-heading"></h3>
       <dl id="info-observation-list" class="info-dl"></dl>
     </section>
     <!-- Both fold-out blocks sit ABOVE the footer, never after it: the footer is sticky to the
@@ -40,8 +40,8 @@ export const html = `
              than on the toolbar because it is a preference about how much this player says, not
              an action on the observation — and because the panel is what it takes over from: with
              the strip showing, the rows above become a second, poorer copy of it. -->
-        <button id="info-labels-toggle" class="info-credits-toggle" type="button" aria-pressed="false">Labels</button>
-        <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false">Credits</button>
+        <button id="info-labels-toggle" class="info-credits-toggle" type="button" aria-pressed="false"></button>
+        <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false"></button>
       </span>
     </div>
   </div>
@@ -51,20 +51,20 @@ export const html = `
   <div slot="options">
     <!-- Only for a recording that is one of a case's: share the case (opening on one of its recordings) or one recording. -->
     <div id="share-scope-row" class="share-scope" hidden>
-      <label><span id="share-scope-label">Share</span> <select id="share-scope"></select></label>
-      <label id="share-opens-row"><span id="share-opens-label">Opens on</span> <select id="share-opens"></select></label>
+      <label><span id="share-scope-label"></span> <select id="share-scope"></select></label>
+      <label id="share-opens-row"><span id="share-opens-label"></span> <select id="share-opens"></select></label>
     </div>
     <!-- How the shared replay opens. -->
     <fieldset id="share-replay-options" class="share-flags">
       <span class="share-start">
-        <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label">Start at</span></label>
-        <input id="share-start" class="share-start-input" type="number" min="0" step="1" value="0" aria-label="Start at"/>
+        <label><input id="share-start-on" type="checkbox"/> <span id="share-start-label"></span></label>
+        <input id="share-start" class="share-start-input" type="number" min="0" step="1" value="0"/>
         <span id="share-start-unit">s</span>
       </span>
-      <label><input id="share-opt-labels" type="checkbox" checked/> <span id="share-opt-labels-label">Show summary chips</span></label>
-      <label><input id="share-opt-map" type="checkbox"/> <span id="share-opt-map-label">Open map</span></label>
-      <label><input id="share-opt-milestones" type="checkbox" checked/> <span id="share-opt-milestones-label">Show moments</span></label>
-      <label><input id="share-opt-compare" type="checkbox"/> <span id="share-opt-compare-label">Compare account</span></label>
+      <label><input id="share-opt-labels" type="checkbox" checked/> <span id="share-opt-labels-label"></span></label>
+      <label><input id="share-opt-map" type="checkbox"/> <span id="share-opt-map-label"></span></label>
+      <label><input id="share-opt-milestones" type="checkbox" checked/> <span id="share-opt-milestones-label"></span></label>
+      <label><input id="share-opt-compare" type="checkbox"/> <span id="share-opt-compare-label"></span></label>
     </fieldset>
   </div>
 </rr0-share-dialog>
@@ -72,7 +72,7 @@ export const html = `
 <!-- The interpretation's bodies against what the observer said, at the instant on show — see
      BodyConfrontation. Only while an interpretation is. -->
 <div id="confrontation" class="confrontation" hidden>
-  <span id="confrontation-heading" class="confrontation-heading">Against the account</span>
+  <span id="confrontation-heading" class="confrontation-heading"></span>
   <ul id="confrontation-list"></ul>
 </div>
 <!-- The variants the recording keeps (see InterpretationJson.variant): one chip a candidate, with

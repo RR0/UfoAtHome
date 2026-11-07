@@ -37,8 +37,7 @@ const INLINE_STILL = new Map<string, string>([
 
 /** Components that still import English up front. */
 const ENGLISH_UP_FRONT_STILL = new Set([
-  "component/CaseEditorElement.ts", "component/SightingEditorElement.ts",
-  "component/SightingElement.ts"
+  "component/CaseEditorElement.ts", "component/SightingEditorElement.ts"
 ])
 
 const code = Object.entries(SOURCES).map(([file, text]) => ({ file, text }))

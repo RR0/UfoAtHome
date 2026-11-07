@@ -24,10 +24,9 @@ import type { SaidText } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
 import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { parseEdtfTime } from "../engine/model/Sighting.js"
-import { loadSceneNames, loadSightingMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { loadSceneNames, loadTagNames, SIGHTING_MESSAGES, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import type { UfoLanguage } from "./messages/index.js"
-import { sightingMessages_en } from "./messages/SightingMessages_en.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import { AppLocation } from "./AppLocation.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
@@ -143,7 +142,8 @@ export class SightingElement extends HTMLElement {
   private readonly shareOptions: Record<"labels" | "map" | "milestones" | "compare", { input: HTMLInputElement, label: HTMLElement }>
   private readonly labelsToggle: HTMLButtonElement
   private readonly paramSummary: HTMLElement
-  private summaryBuilder = new SightingSummary(sightingMessages_en, new SceneNaming(), new SaidTexts(["en"]), new SightingTags({}), { messages: sightingMessages_en, locale: "en" })
+  /** What the summary strip says, in the element's language: made with its words (see loadLocaleMessages). */
+  private summaryBuilder?: SightingSummary
   /** What the strip last rendered. It refreshes on every playback tick (see the timeupdate
    * listener), and replacing forty elements sixty times a second — under a reader's own text
    * selection, at that — for values that changed in none of them is not free. */
@@ -191,7 +191,10 @@ export class SightingElement extends HTMLElement {
    * themselves) — the two are the same switch, so a reader can always close what a page opened. */
   private labelsShown = false
   private language: UfoLanguage = "en"
-  private messages: SightingMessages = sightingMessages_en
+  /** Its words, in the page's language (see loadLocaleMessages): none before, in no language, and every text waits for them. */
+  private messages?: SightingMessages
+  /** Settles once the element has its words (see messages). */
+  ready: Promise<void> = Promise.resolve()
 
   constructor() {
     super()
@@ -310,7 +313,7 @@ export class SightingElement extends HTMLElement {
     // Only when already in the page (an element upgraded in place): a detached one has no
     // ancestor to read the page's language from, and would fetch the browser's language before
     // connectedCallback fetches the right one.
-    if (this.isConnected) void this.loadLocaleMessages()
+    if (this.isConnected) this.ready = this.loadLocaleMessages()
   }
 
   /** The scene this view composes, and through it (`.ufoElement`) the playback controls — what a
@@ -338,45 +341,44 @@ export class SightingElement extends HTMLElement {
     const preferences = HostLocale.preferencesFor(this)
     this.preferences = preferences
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, tagNames, sceneNames] = language === "en"
-      ? [sightingMessages_en, {}, undefined]
-      : await Promise.all([loadSightingMessages(language), loadTagNames(language), loadSceneNames(language)])
+    const [messages, tagNames, sceneNames] = await Promise.all([SIGHTING_MESSAGES.load(language), loadTagNames(language), loadSceneNames(language)])
     // Superseded by a later decision (the element was connected while this one was loading).
     if (token !== this.localeToken) return
-    const changed = language !== this.language
+    // A first language counts as a change: nothing was said before (see messages).
+    const changed = language !== this.language || this.messages === undefined
     this.language = language
     this.messages = messages
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
     this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags, { messages: this.messages, locale: language })
-    this.accountPrefix.textContent = this.messages.accountBy
-    this.interpretationLabel.textContent = this.messages.interpretation
-    this.confrontationHeading.textContent = this.messages.confrontation
+    this.accountPrefix.textContent = (this.messages?.accountBy ?? "")
+    this.interpretationLabel.textContent = (this.messages?.interpretation ?? "")
+    this.confrontationHeading.textContent = (this.messages?.confrontation ?? "")
     const shown = this.entries.find(entry => entry.src === this.currentSrc)
     if (shown) this.offerInterpretations(shown)
     this.updateCompareButton()
-    this.infoButton.title = this.messages.about
-    this.infoButton.setAttribute("aria-label", this.messages.about)
-    this.editLink.title = this.messages.editThisObservation
-    this.editLink.setAttribute("aria-label", this.messages.editThisObservation)
-    this.infoCloseButton.setAttribute("aria-label", this.messages.close)
-    this.infoObservationHeading.textContent = this.messages.observation
-    this.infoCreditsToggle.textContent = this.messages.credits
+    this.infoButton.title = (this.messages?.about ?? "")
+    this.infoButton.setAttribute("aria-label", (this.messages?.about ?? ""))
+    this.editLink.title = (this.messages?.editThisObservation ?? "")
+    this.editLink.setAttribute("aria-label", (this.messages?.editThisObservation ?? ""))
+    this.infoCloseButton.setAttribute("aria-label", (this.messages?.close ?? ""))
+    this.infoObservationHeading.textContent = (this.messages?.observation ?? "")
+    this.infoCreditsToggle.textContent = (this.messages?.credits ?? "")
     this.syncLabelsToggle()
     this.refreshParamSummary()
     // An assessment names ids ("coverage", "ce3") through these same messages, so a reading taken
     // before they arrived is in the wrong language — read it again rather than translating chips.
     if (changed && this.currentSrc) void this.runAssessments()
-    this.shareButton.title = this.messages.share
-    this.shareButton.setAttribute("aria-label", this.messages.share)
-    this.shareStartLabel.textContent = this.messages.shareStartAt
-    this.shareScopeLabel.textContent = this.messages.shareScope
-    this.shareOpensLabel.textContent = this.messages.shareOpensOn
-    this.shareOptions.labels.label.textContent = this.messages.shareOptionLabels
-    this.shareOptions.map.label.textContent = this.messages.shareOptionMap
-    this.shareOptions.milestones.label.textContent = this.messages.shareOptionMilestones
-    this.shareOptions.compare.label.textContent = this.messages.shareOptionCompare
-    this.shareStart.setAttribute("aria-label", this.messages.shareStartAt)
+    this.shareButton.title = (this.messages?.share ?? "")
+    this.shareButton.setAttribute("aria-label", (this.messages?.share ?? ""))
+    this.shareStartLabel.textContent = (this.messages?.shareStartAt ?? "")
+    this.shareScopeLabel.textContent = (this.messages?.shareScope ?? "")
+    this.shareOpensLabel.textContent = (this.messages?.shareOpensOn ?? "")
+    this.shareOptions.labels.label.textContent = (this.messages?.shareOptionLabels ?? "")
+    this.shareOptions.map.label.textContent = (this.messages?.shareOptionMap ?? "")
+    this.shareOptions.milestones.label.textContent = (this.messages?.shareOptionMilestones ?? "")
+    this.shareOptions.compare.label.textContent = (this.messages?.shareOptionCompare ?? "")
+    this.shareStart.setAttribute("aria-label", (this.messages?.shareStartAt ?? ""))
     void this.shareDialog.useLanguage(language)
     if (this.infoOpen) this.populateInfoPanel()
     this.updateAccountLine()
@@ -404,7 +406,7 @@ export class SightingElement extends HTMLElement {
   connectedCallback(): void {
     // The constructor could only read the browser's list if this element was created before being
     // put anywhere; the page it now stands in may declare a language (see HostLocale).
-    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) void this.loadLocaleMessages()
+    if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) this.ready = this.loadLocaleMessages()
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
@@ -551,7 +553,7 @@ export class SightingElement extends HTMLElement {
     // and looked like a fault.
     // A recording that names nobody (a dashcam, a security camera) is told by what the case calls it, when it calls it anything.
     const names = entries.map((entry, index) => this.observerDisplayName(this.plain(entry).observer)
-      ?? this.caseTitleOf(entry) ?? this.messages.unnamedObserver.replace("{n}", String(index + 1)))
+      ?? this.caseTitleOf(entry) ?? (this.messages?.unnamedObserver ?? "").replace("{n}", String(index + 1)))
     for (const [index, entry] of entries.entries()) {
       const option = document.createElement("option")
       option.value = entry.src
@@ -755,10 +757,10 @@ export class SightingElement extends HTMLElement {
       option.textContent = label
       select.appendChild(option)
     }
-    add(this.shareScope, CASE_SCOPE, this.messages.shareScopeCase)
+    add(this.shareScope, CASE_SCOPE, (this.messages?.shareScopeCase ?? ""))
     for (const entry of this.entries) {
       const name = this.observerDisplayName(this.plain(entry).observer) ?? this.caseTitleOf(entry)
-        ?? this.messages.unnamedObserver.replace("{n}", String(this.entries.indexOf(entry) + 1))
+        ?? (this.messages?.unnamedObserver ?? "").replace("{n}", String(this.entries.indexOf(entry) + 1))
       add(this.shareScope, entry.src, name)
       add(this.shareOpens, entry.src, name)
     }
@@ -798,13 +800,13 @@ export class SightingElement extends HTMLElement {
     // Provenance), the same object the scene is showing.
     const current = entry === this.entries.find(e => e.src === this.currentSrc)
     const own = current ? this.sceneElement.ufoElement.sighting.interpretation : undefined
-    offer(ACCOUNT_OPTION, this.messages.account, () => Promise.resolve(own))
+    offer(ACCOUNT_OPTION, (this.messages?.account ?? ""), () => Promise.resolve(own))
     const source = this.caseSource
     if (source) {
       CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id)).forEach((event, index) => {
         const title = this.said.read(event.title) ?? `#${index + 1}`
         const by = (event.by ?? []).map(agent => this.agentName(agent)).filter(Boolean).join(", ")
-        offer(`case-${index}`, by ? this.messages.interpretationBy.replace("{title}", title).replace("{by}", by) : title,
+        offer(`case-${index}`, by ? (this.messages?.interpretationBy ?? "").replace("{title}", title).replace("{by}", by) : title,
           () => CaseFile.interpretationOf(event, source.url, url => SightingFetch.recording(url)))
       })
     }
@@ -812,7 +814,7 @@ export class SightingElement extends HTMLElement {
     // replays the account itself, its moved values said under the render.
     const variants = current ? this.keptVariants(entry) : []
     for (const { index, kept } of variants) {
-      offer(`${VARIANT_OPTION}${index}`, `${this.variantLabel(kept)} (${this.messages.verdicts[kept.variant!.verdict]})`,
+      offer(`${VARIANT_OPTION}${index}`, `${this.variantLabel(kept)} (${this.messages?.verdicts[kept.variant!.verdict] ?? ""})`,
         () => Promise.resolve(kept.bodies.length > 0 ? kept : undefined))
     }
     const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)
@@ -840,11 +842,12 @@ export class SightingElement extends HTMLElement {
   }
 
   private variantLabel(kept: InterpretationJson): string {
-    return this.messages.variant.replace("{name}", kept.variant!.label ?? kept.variant!.candidate)
+    return (this.messages?.variant ?? "").replace("{name}", kept.variant!.label ?? kept.variant!.candidate)
   }
 
   /** One chip a kept variant under the render, with its verdict, choosing it; the account's own first, to come back to. Then what the one on show moves. */
   private showVariants(variants: { index: number, kept: InterpretationJson }[]): void {
+    if (!this.messages) return
     this.variantChips.innerHTML = ""
     this.variantChips.hidden = variants.length === 0
     if (variants.length === 0) {
@@ -857,7 +860,7 @@ export class SightingElement extends HTMLElement {
       button.dataset.value = value
       if (verdict) {
         button.dataset.verdict = verdict
-        button.title = this.messages.verdicts[verdict as keyof SightingMessages["verdicts"]]
+        button.title = this.messages!.verdicts[verdict as keyof SightingMessages["verdicts"]]
         button.append(Object.assign(document.createElement("span"), { className: "dot" }))
       }
       button.append(label)
@@ -868,13 +871,14 @@ export class SightingElement extends HTMLElement {
       })
       this.variantChips.append(button)
     }
-    chip(ACCOUNT_OPTION, this.messages.account)
+    chip(ACCOUNT_OPTION, (this.messages?.account ?? ""))
     for (const { index, kept } of variants) chip(`${VARIANT_OPTION}${index}`, kept.variant!.label ?? kept.variant!.candidate, kept.variant!.verdict)
     this.showVariantMoved()
   }
 
   /** The chip of what is on show pressed, and the values the variant on show moves: the account's struck, the variant's beside it. */
   private showVariantMoved(): void {
+    if (!this.messages) return
     const value = this.interpretationSelect.value
     for (const button of this.variantChips.querySelectorAll<HTMLButtonElement>("button")) button.setAttribute("aria-pressed", String(button.dataset.value === value))
     this.variantMoved.innerHTML = ""
@@ -916,7 +920,7 @@ export class SightingElement extends HTMLElement {
     const comparing = this.sceneElement.compareAccount
     this.compareButton.hidden = !this.sceneElement.interpretation
     this.compareButton.setAttribute("aria-pressed", String(comparing))
-    const label = comparing ? this.messages.hideComparison : this.messages.showComparison
+    const label = comparing ? (this.messages?.hideComparison ?? "") : (this.messages?.showComparison ?? "")
     this.compareButton.title = label
     this.compareButton.setAttribute("aria-label", label)
   }
@@ -973,13 +977,13 @@ export class SightingElement extends HTMLElement {
       item.append(`${this.said.read(reading.title) ?? reading.sourceId}${this.colon}`)
       const parts: [string, boolean][] = []
       if (reading.separationDeg !== undefined) {
-        parts.push([this.messages.confrontationDirection.replace("{deg}", degrees.format(reading.separationDeg)), reading.disagreements.includes("direction")])
+        parts.push([(this.messages?.confrontationDirection ?? "").replace("{deg}", degrees.format(reading.separationDeg)), reading.disagreements.includes("direction")])
       }
       if (reading.widthRatio !== undefined) {
-        parts.push([this.messages.confrontationWidth.replace("{ratio}", times.format(reading.widthRatio)), reading.disagreements.includes("width")])
+        parts.push([(this.messages?.confrontationWidth ?? "").replace("{ratio}", times.format(reading.widthRatio)), reading.disagreements.includes("width")])
       }
       if (reading.heightRatio !== undefined) {
-        parts.push([this.messages.confrontationHeight.replace("{ratio}", times.format(reading.heightRatio)), reading.disagreements.includes("height")])
+        parts.push([(this.messages?.confrontationHeight ?? "").replace("{ratio}", times.format(reading.heightRatio)), reading.disagreements.includes("height")])
       }
       parts.forEach(([text, disagrees], index) => {
         if (index > 0) item.append(" · ")
@@ -1058,8 +1062,9 @@ export class SightingElement extends HTMLElement {
    * which is the price of the chips being there when they do.
    */
   private async runAssessments(): Promise<void> {
+    if (!this.messages) return
     const token = ++this.assessmentToken
-    const reading = await new SightingAssessments(this.messages).read(this.sceneElement.ufoElement.sighting)
+    const reading = await new SightingAssessments(this.messages!).read(this.sceneElement.ufoElement.sighting)
     if (token !== this.assessmentToken) return
     this.assessmentEntries = reading.entries
     // The strip redraws only when its signature changes, and that signature is over the entries —
@@ -1090,8 +1095,8 @@ export class SightingElement extends HTMLElement {
     this.observerText.textContent = name ?? ""
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
-    this.editLink.title = this.messages.editThisObservation
-    this.editLink.setAttribute("aria-label", this.messages.editThisObservation)
+    this.editLink.title = (this.messages?.editThisObservation ?? "")
+    this.editLink.setAttribute("aria-label", (this.messages?.editThisObservation ?? ""))
   }
 
   /** Picks the best available display string out of a People reference — a full name (built from
@@ -1336,7 +1341,7 @@ export class SightingElement extends HTMLElement {
   }
 
   private syncLabelsToggle(): void {
-    this.labelsToggle.textContent = this.labelsShown ? this.messages.hideLabels : this.messages.showLabels
+    this.labelsToggle.textContent = this.labelsShown ? (this.messages?.hideLabels ?? "") : (this.messages?.showLabels ?? "")
     this.labelsToggle.setAttribute("aria-pressed", String(this.labelsShown))
   }
 
@@ -1360,7 +1365,7 @@ export class SightingElement extends HTMLElement {
     // from the assessors rather than from the file, so they are held here and appended (see
     // runAssessments) instead of being emitted by the summary.
     const entries = [
-      ...this.summaryBuilder.entriesFor(sighting, this.sceneElement.ufoElement.currentTime, { roadGradeDeg: this.sceneElement.roadGradeDeg }),
+      ...(this.summaryBuilder?.entriesFor(sighting, this.sceneElement.ufoElement.currentTime, { roadGradeDeg: this.sceneElement.roadGradeDeg }) ?? []),
       ...this.assessmentEntries
     ]
     const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.full ?? ""}${entry.fromSource ? "*" : ""}`).join("|")
@@ -1382,12 +1387,12 @@ export class SightingElement extends HTMLElement {
       if (open && open.group !== entry.group) {
         open = undefined
       }
-      const boxName = entry.group === "summary" ? this.messages.summaryGroup
-        : entry.group === "observer" ? this.messages.observerGroup
-        : entry.group in this.messages.summaryGroups ? this.messages.summaryGroups[entry.group as keyof typeof this.messages.summaryGroups]
+      const boxName = entry.group === "summary" ? (this.messages?.summaryGroup ?? "")
+        : entry.group === "observer" ? (this.messages?.observerGroup ?? "")
+        : this.messages && entry.group in this.messages.summaryGroups ? this.messages.summaryGroups[entry.group as keyof SightingMessages["summaryGroups"]]
         // Named by its GROUP and never by what it leads to — an assessment of the observer's own
         // account still belongs in a box saying Assessment.
-        : entry.group === "assessment" ? this.messages.assessmentGroup : undefined
+        : entry.group === "assessment" ? (this.messages?.assessmentGroup ?? "") : undefined
       if (boxName !== undefined && !open) {
         const box = document.createElement("span")
         box.className = "param-nest"
@@ -1417,8 +1422,8 @@ export class SightingElement extends HTMLElement {
     if (this.openDescription !== undefined && !entries.some(entry => entry.full === this.openDescription)) {
       this.openDescription = undefined
     }
-    SummaryDescription.sync(this.paramSummary, this.openDescription, this.messages.summaryDescription,
-      this.messages.closeDescription, () => {
+    SummaryDescription.sync(this.paramSummary, this.openDescription, (this.messages?.summaryDescription ?? ""),
+      (this.messages?.closeDescription ?? ""), () => {
         this.openDescription = undefined
         this.syncDescription(entries)
       })
@@ -1468,7 +1473,7 @@ export class SightingElement extends HTMLElement {
       // The case always: the strip reads a recording, and a recording does not name its case.
       const caseTitle = this.caseSource && (this.caseSource.json.title ?? this.caseSource.json.id)
       if (caseTitle) {
-        this.appendInfoRow(this.infoObservationList, this.messages.case, caseTitle)
+        this.appendInfoRow(this.infoObservationList, (this.messages?.case ?? ""), caseTitle)
       }
       // Date, place and tags only while the strip under the render isn't already stating them —
       // see toggleLabels. The description is never dropped: it is the one thing the strip refuses
@@ -1476,27 +1481,27 @@ export class SightingElement extends HTMLElement {
       if (!this.labelsShown) {
         const date = this.formatDate(this.plain(entry))
         if (date) {
-          this.appendInfoRow(this.infoObservationList, this.messages.date, date,
+          this.appendInfoRow(this.infoObservationList, (this.messages?.date ?? ""), date,
             this.basisOf(entry, SightingElement.DATE_PATHS))
         }
         const location = this.formatLocation(this.plain(entry))
         if (location) {
-          this.appendInfoRow(this.infoObservationList, this.messages.location, location,
+          this.appendInfoRow(this.infoObservationList, (this.messages?.location ?? ""), location,
             this.basisOf(entry, SightingElement.PLACE_PATHS))
         }
       }
       const description = this.said.read(this.plain(entry).description)
       // Not while the strip shows: its Summary box has the description, opened on a click.
       if (description && !this.labelsShown) {
-        this.appendInfoRow(this.infoObservationList, this.messages.description, description)
+        this.appendInfoRow(this.infoObservationList, (this.messages?.description ?? ""), description)
       }
       // Where the words above can be read as they were given (see RecordingSource).
       for (const source of this.plain(entry).sources ?? []) {
-        this.appendInfoSource(this.infoObservationList, this.messages.source, source)
+        this.appendInfoSource(this.infoObservationList, (this.messages?.source ?? ""), source)
       }
       const tags = this.plain(entry).tags
       if (!this.labelsShown && tags && tags.length > 0) {
-        this.appendInfoRow(this.infoObservationList, this.messages.tags,
+        this.appendInfoRow(this.infoObservationList, (this.messages?.tags ?? ""),
           tags.map(tag => this.tags.name(tag)).join(", "))
       }
     }
@@ -1540,6 +1545,7 @@ export class SightingElement extends HTMLElement {
   private static readonly PLACE_PATHS = ["place"] as const
 
   private appendInfoRow(list: HTMLElement, label: string, value: string, qualified?: { basis: Basis, rationales: string[] }): void {
+    if (!this.messages) return
     const dt = document.createElement("dt")
     dt.textContent = label
     const dd = document.createElement("dd")
