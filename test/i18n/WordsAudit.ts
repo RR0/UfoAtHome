@@ -14,8 +14,11 @@ export class WordsAudit {
     return messages
   }
 
-  /** The texts under `root` (its shadow roots included) and the words of its attributes a reader is told, that came from no message. */
-  static leftovers(root: Node, ignore: (text: string) => boolean = () => false): string[] {
+  /**
+   * The texts under `root` (its shadow roots included) and the words of its attributes a reader is told, that came from no message; none
+   * of the elements `skipped` says are another component's, audited on its own.
+   */
+  static leftovers(root: Node, ignore: (text: string) => boolean = () => false, skipped: (element: Element) => boolean = () => false): string[] {
     const found = new Set<string>()
     const words = (text: string | null | undefined): void => {
       const trimmed = text?.replace(/\s+/g, " ").trim()
@@ -29,6 +32,7 @@ export class WordsAudit {
         return
       }
       if (node instanceof Element) {
+        if (skipped(node)) return
         for (const attribute of ["title", "aria-label", "placeholder", "alt"]) words(node.getAttribute(attribute))
         if (node.shadowRoot) visit(node.shadowRoot)
         if (node instanceof HTMLTemplateElement) return

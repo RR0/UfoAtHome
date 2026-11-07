@@ -19,7 +19,6 @@ import { EdtfDateField } from "./EdtfDateField.js"
 import { register as registerDateInput } from "./DateInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
-import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 import type { CaseTrack } from "./CaseSession.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
@@ -30,8 +29,8 @@ import type { SightingEditorMessages } from "./messages/SightingEditorMessages.j
 import { register as registerSightingEditor } from "./SightingEditorElement.js"
 import type { SightingEditorElement } from "./SightingEditorElement.js"
 import type { CaseEditorMessages } from "./messages/CaseEditorMessages.js"
-import { caseEditorMessages_en } from "./messages/CaseEditorMessages_en.js"
-import { loadCaseEditorMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { CASE_EDITOR_MESSAGES, SIGHTING_EDITOR_MESSAGES, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { Messages } from "../i18n/MessageCatalog.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
@@ -210,34 +209,34 @@ const TEMPLATE = `
 <section id="case-panel" class="case-panel" aria-labelledby="case-heading" hidden>
   <header class="editor-head header">
     <div class="head-text title">
-      <span id="case-kicker" class="kicker">Case</span>
-      <h1 id="case-heading" class="editor-title">Case</h1>
-      <span id="dirty" class="dirty" role="status" title="Changes not saved" hidden></span>
+      <span id="case-kicker" class="kicker"></span>
+      <h1 id="case-heading" class="editor-title"></h1>
+      <span id="dirty" class="dirty" role="status" hidden></span>
     </div>
     <div class="head-actions">
-      <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also">Also save the observations</span></label>
+      <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also"></span></label>
       <!-- The editor on this case, for somebody else (see ShareDialogElement): off while the case has no address to give. -->
-      <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case">Share</span></button>
-      <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case">Save</span></button>
+      <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case"></span></button>
+      <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case"></span></button>
     </div>
   </header>
   <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
   <div id="case-tabs" class="group-tabs">
-    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group">Events</span> <span id="events-count" class="count"></span></button>
-    <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group">File</span></button>
+    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group"></span> <span id="events-count" class="count"></span></button>
+    <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group"></span></button>
   </div>
 </section>
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
     <!-- The case itself while no event is open: its title, its date, its id, then its events in the order of time (see renderEvents). -->
     <div id="case-overview" class="case-overview" hidden>
       <div class="case-fields">
-        <label class="wide"><span id="label-case-title">Title</span> <input id="case-title" type="text" size="24"/></label>
-        <div class="field"><span id="label-case-time">When</span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
-        <label><span id="label-case-id">ID</span> <input id="case-id" type="text" size="18"/></label>
+        <label class="wide"><span id="label-case-title"></span> <input id="case-title" type="text" size="24"/></label>
+        <div class="field"><span id="label-case-time"></span> <rr0-date-input id="case-date" name="case-time"></rr0-date-input></div>
+        <label><span id="label-case-id"></span> <input id="case-id" type="text" size="18"/></label>
       </div>
       <div class="events-head">
-        <h3 id="label-events-in-time" class="section-title">Events · in the order of time</h3>
-        <button id="add" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><span id="label-add">Add an event</span></button>
+        <h3 id="label-events-in-time" class="section-title"></h3>
+        <button id="add" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><span id="label-add"></span></button>
       </div>
       <ol id="event-list" class="event-list"></ol>
     </div>
@@ -251,7 +250,7 @@ const TEMPLATE = `
     <div id="event-item" class="element-list-body">
     <!-- The event open, in the case: the way back to it, what kind of event and which, and the events before and after. -->
     <nav id="event-crumbs" class="crumbs" hidden>
-      <button id="back-to-case" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg><span id="label-back-to-case">Case</span></button>
+      <button id="back-to-case" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg><span id="label-back-to-case"></span></button>
       <span class="crumb-sep" aria-hidden="true">›</span>
       <span id="crumb-kind" class="kind-pill"></span>
       <span id="crumb-title" class="crumb-title"></span>
@@ -263,15 +262,15 @@ const TEMPLATE = `
     <!-- Over the observation opened from an interview's link to one of its moments: where it was quoted, and the way back (§5). -->
     <div id="cited" class="cited" role="status" hidden>
       <span id="cited-text"></span>
-      <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview">Back to the interview</span></button>
+      <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview"></span></button>
     </div>
     <!-- The event's id, and on its line the observation's Undo and Redo (see SightingEditorElement.historyControls). -->
     <div class="event-id-row" hidden>
-      <label id="row-recording-id" class="row"><span id="label-recording-id">ID</span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
+      <label id="row-recording-id" class="row"><span id="label-recording-id"></span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
       <span id="history-slot" class="history-slot"></span>
     </div>
     <section id="recording" class="recording">
-      <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" title="Changes not saved" hidden>●</span></rr0-sighting-editor>
+      <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" hidden>●</span></rr0-sighting-editor>
     </section>
     <section id="interview-section" class="recording" hidden>
       <rr0-interview-editor id="interview"></rr0-interview-editor>
@@ -280,13 +279,13 @@ const TEMPLATE = `
   </section>
   <section class="group-panel" id="group-case-file" aria-labelledby="label-case-file-group" hidden>
     <div class="row toolbar">
-      <span class="input-file-row"><span id="label-import-file">Load case file</span> <rr0-input-file id="import" name="import" accept="application/json,.json" placeholder="https://…/case.json"></rr0-input-file></span>
-      <button id="export" type="button">Save</button>
+      <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json" placeholder="https://…/case.json"></rr0-input-file></span>
+      <button id="export" type="button"></button>
     </div>
     <p id="case-file-note" class="file-note" hidden role="status"></p>
     <div id="case-file-editor" class="file-editor"></div>
   </section>
-<p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link">Add to a case</button></p>
+<p id="make-case-row" class="make-case"><button id="make-case" type="button" class="link"></button></p>
 </div>
 <dialog id="dialog">
   <form method="dialog" id="form">
@@ -294,25 +293,25 @@ const TEMPLATE = `
     <p id="dialog-message" hidden></p>
     <p id="dialog-error" role="alert" hidden></p>
     <div id="fields-add">
-      <label><span id="label-kind">Type</span> <select id="kind"><option value="observation"></option><option value="interview"></option></select></label>
-      <label id="row-source"><span id="label-source">Source</span> <select id="source">
+      <label><span id="label-kind"></span> <select id="kind"><option value="observation"></option><option value="interview"></option></select></label>
+      <label id="row-source"><span id="label-source"></span> <select id="source">
         <option value="blank"></option><option value="file"></option>
       </select></label>
-      <label id="row-witness"><span id="label-witness">Witness</span> <select id="witness"></select></label>
-      <label id="row-medium"><span id="label-medium">Medium</span> <select id="medium"></select></label>
-      <label id="row-observer"><span id="label-observer">Observer</span> <input id="observer" type="text"/></label>
-      <label id="row-title"><span id="label-title">Title</span> <input id="title" type="text"/></label>
-      <label id="row-author"><span id="label-author">Author</span> <input id="author" type="text"/></label>
-      <label id="row-date"><span id="label-date">Date</span> <input id="date" type="date"/></label>
-      <div id="row-file" class="row-input-file"><span id="label-file">File</span> <rr0-input-file id="add-source" name="add-source" accept="application/json,.json" no-button keep-file></rr0-input-file></div>
-      <label id="row-of"><span id="label-of">Interpretation of</span> <select id="of"></select></label>
+      <label id="row-witness"><span id="label-witness"></span> <select id="witness"></select></label>
+      <label id="row-medium"><span id="label-medium"></span> <select id="medium"></select></label>
+      <label id="row-observer"><span id="label-observer"></span> <input id="observer" type="text"/></label>
+      <label id="row-title"><span id="label-title"></span> <input id="title" type="text"/></label>
+      <label id="row-author"><span id="label-author"></span> <input id="author" type="text"/></label>
+      <label id="row-date"><span id="label-date"></span> <input id="date" type="date"/></label>
+      <div id="row-file" class="row-input-file"><span id="label-file"></span> <rr0-input-file id="add-source" name="add-source" accept="application/json,.json" no-button keep-file></rr0-input-file></div>
+      <label id="row-of"><span id="label-of"></span> <select id="of"></select></label>
     </div>
     <div id="fields-export">
-      <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings">Also export the observations</span></label>
+      <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings"></span></label>
     </div>
     <div class="actions">
-      <button id="ok" type="submit" value="ok">OK</button>
-      <button id="cancel" type="button">Cancel</button>
+      <button id="ok" type="submit" value="ok"></button>
+      <button id="cancel" type="button"></button>
     </div>
   </form>
 </dialog>
@@ -357,8 +356,12 @@ export class CaseEditorElement extends HTMLElement {
   private fileEditorLoading?: Promise<SightingFileEditor>
   /** The text the case last gave the editor, or the editor gave the case: what tells an edit of the author's from one of ours. */
   private fileApplied = ""
-  private editorMessages: SightingEditorMessages = sightingEditorMessages_en
-  private messages: CaseEditorMessages = caseEditorMessages_en
+  /** The recording editor's words, for the file's text editor: none before they come, in the reader's language only. */
+  private editorMessages?: SightingEditorMessages
+  /** Empty texts until the reader's come (see Messages.none): nothing shows before them, and English is never fetched for nothing. */
+  private messages: CaseEditorMessages = Messages.none<CaseEditorMessages>()
+  /** Settled once the element's words, in its reader's language, are on show. */
+  ready: Promise<void> = Promise.resolve()
   private said = new SaidTexts(["en"])
   private localeToken = 0
   private language: UfoLanguage = "en"
@@ -541,7 +544,7 @@ export class CaseEditorElement extends HTMLElement {
     window.addEventListener("beforeunload", this.warnBeforeLeaving)
     const src = this.getAttribute("src")
     if (src && this.editor.getAttribute("src") !== src) this.editor.setAttribute("src", src)
-    void this.loadLocale()
+    this.ready = this.loadLocale()
   }
 
   /** The recording on show, whichever it is. */
@@ -574,9 +577,7 @@ export class CaseEditorElement extends HTMLElement {
     const token = ++this.localeToken
     const preferences = HostLocale.preferencesFor(this)
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, editorMessages] = language === "en"
-      ? [caseEditorMessages_en, sightingEditorMessages_en]
-      : await Promise.all([loadCaseEditorMessages(language), loadSightingEditorMessages(language)])
+    const [messages, editorMessages] = await Promise.all([CASE_EDITOR_MESSAGES.load(language), SIGHTING_EDITOR_MESSAGES.load(language)])
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
     this.language = language
@@ -687,13 +688,14 @@ export class CaseEditorElement extends HTMLElement {
   /** The text editor, a chunk of its own fetched the first time the File group is opened. */
   private loadFileEditor(): Promise<SightingFileEditor> {
     this.fileEditorLoading ??= (async () => {
+      await this.ready
       this.showFileNote(this.messages.fileLoading)
       try {
         const [{ SightingFileEditor }, { default: schema }] = await Promise.all([import("./SightingFileEditor.js"), import("../generated/caseSchema.json")])
         const text = this.fileText()
         this.fileApplied = text
-        this.fileEditor = new SightingFileEditor(this.byId("case-file-editor"), text, edited => this.onFileEdited(edited), this.editorMessages.fileEditorLabel,
-          { baseline: text, phrases: this.editorMessages.fileSearchPhrases, schema: schema as never })
+        this.fileEditor = new SightingFileEditor(this.byId("case-file-editor"), text, edited => this.onFileEdited(edited), this.editorMessages!.fileEditorLabel,
+          { baseline: text, phrases: this.editorMessages!.fileSearchPhrases, schema: schema as never })
         return this.fileEditor
       } catch (error) {
         this.fileEditorLoading = undefined
