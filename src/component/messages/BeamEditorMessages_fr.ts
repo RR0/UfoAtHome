@@ -15,6 +15,16 @@ export const beamEditorMessages_fr: BeamEditorMessages = {
   addBeamNowhere: "Donnez d'abord un lieu à l'enregistrement : un faisceau est placé devant le témoin",
   derivedNote: "Un champ vide montre, en grisé, la valeur utilisée. Videz un champ pour y revenir.",
   on: "Allumé",
-  onHere: "L'allumer ici, à la tête de lecture",
-  zoomHint: "Pincez, ou Ctrl + molette, pour zoomer ; Maj + molette pour défiler"
+  zoomHint: "Pincez, ou Ctrl + molette, pour zoomer ; Maj + molette pour défiler",
+  light: "Lumière",
+  colour: "Couleur",
+  colourHint: "La lumière d'un laser est d'une seule longueur d'onde : la couleur choisie donne la longueur d'onde de teinte la plus proche. Un violet pourpre, qu'aucune longueur d'onde n'est, donne un bout du spectre.",
+  deleteKey: "Retirer cette image clé",
+  timelineNote: "Sur la frise, une ligne pressée est celle détaillée dessous : quand il est allumé, sa lumière, son trajet. Un losange pressé amène la scène à son instant ; faites-le glisser pour le déplacer dans le temps. Le « + » d'une ligne pose une image clé à la tête de lecture, telle qu'est le faisceau à cet instant.",
+  addHere: "Ajouter ici, à la tête de lecture",
+  here: "Déjà à la tête de lecture : pressez-le pour le modifier",
+  lightKeyNote: "Sa lumière à cet instant, reliée à celle de l'image clé suivante. Un champ vide prend celle du faisceau.",
+  lightNoKeyNote: "Sa lumière tout du long : aucune image clé. Le « + » de la ligne Lumière en pose une à la tête de lecture, pour que la lumière change dans le temps.",
+  pathKeyNote: "Son trajet à cet instant : chaque point va vers le même point de l'image clé suivante.",
+  pathNoKeyNote: "Son trajet tout du long : aucune image clé. Le « + » de la ligne Trajet en pose une à la tête de lecture, pour que le faisceau bouge."
 }

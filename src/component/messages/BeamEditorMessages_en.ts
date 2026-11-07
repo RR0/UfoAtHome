@@ -15,6 +15,16 @@ export const beamEditorMessages_en: BeamEditorMessages = {
   addBeamNowhere: "Give the recording a place first: a beam is put in front of the witness",
   derivedNote: "An empty field shows, greyed, the value in use. Clear a field to go back to it.",
   on: "On",
-  onHere: "Switch it on here, at the playhead",
-  zoomHint: "Pinch, or Ctrl + wheel, to zoom; Shift + wheel to scroll"
+  zoomHint: "Pinch, or Ctrl + wheel, to zoom; Shift + wheel to scroll",
+  light: "Light",
+  colour: "Colour",
+  colourHint: "A laser's light is of one wavelength: the colour picked sets the wavelength nearest it in hue. A purple, which no wavelength is, gives an end of the spectrum.",
+  deleteKey: "Remove this key",
+  timelineNote: "On the timeline, a row pressed is the one shown below: when it is on, its light, its path. A diamond pressed takes the scene to its instant; drag it to move it in time. The \"+\" of a row puts a key at the playhead, as the beam is then.",
+  addHere: "Add here, at the playhead",
+  here: "Already at the playhead: press it to edit it",
+  lightKeyNote: "Its light at this instant, joined to the next key's. A field left empty takes the beam's own.",
+  lightNoKeyNote: "Its light all along: no key. The \"+\" of the Light row puts one at the playhead, so that the light can change in time.",
+  pathKeyNote: "Its path at this instant: each point goes to the same point of the next key.",
+  pathNoKeyNote: "Its path all along: no key. The \"+\" of the Path row puts one at the playhead, so that the beam can move."
 }

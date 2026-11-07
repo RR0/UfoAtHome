@@ -38,7 +38,9 @@ describe("BeamEditor", () => {
     const beam = { id: "b", path, wavelengthNm: 532, powerW: 10 }
     const { sighting } = build({ beams: [beam] })
     const before = sighting.skyEvents!.beams!
-    typed(container.querySelector('[data-key="powerW"]')!, "20")
+    // Its power is a field of its light, shown with the Light row.
+    container.querySelectorAll<HTMLButtonElement>("#beam-timeline .track-name")[1].click()
+    typed(container.querySelector('#beam-light-parameters [data-key="powerW"]')!, "20")
     const after = sighting.skyEvents!.beams!
     expect(after).not.toBe(before)
     expect(after[0]).not.toBe(beam)
@@ -46,8 +48,35 @@ describe("BeamEditor", () => {
     expect(beam.powerW).toBe(10)
   })
 
+  const rows = () => [...container.querySelectorAll<HTMLElement>("#beam-timeline .track-row")]
+  const name = (index: number) => rows()[index].querySelector<HTMLButtonElement>(".track-name")!
+  const add = (index: number) => rows()[index].querySelector<HTMLButtonElement>(".track-add")!
+  const shown = (id: string) => !container.querySelector<HTMLElement>(`#${id}`)!.hidden
+  /** A lane laid out 200 px wide over the 20 s of the recording: 10 px a second. */
+  const laidOut = (lane: HTMLElement) => {
+    lane.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 24, right: 200, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
+    lane.setPointerCapture = () => undefined
+    return lane
+  }
+  const drag = (lane: HTMLElement, from: number, to: number) => {
+    lane.dispatchEvent(new MouseEvent("pointerdown", { clientX: from, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointermove", { clientX: to, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointerup", { clientX: to, bubbles: true }))
+  }
+
+  test("lays the beam out on a timeline of three rows, the details of the one picked alone under it", () => {
+    build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+    expect(rows().map(row => row.querySelector(".track-name")!.textContent)).toEqual(["On", "Light", "Path"])
+    expect(rows().map(row => row.dataset.active)).toEqual(["true", "false", "false"])
+    expect([shown("beam-on"), shown("beam-light"), shown("beam-path")]).toEqual([true, false, false])
+    name(2).click()
+    expect([shown("beam-on"), shown("beam-light"), shown("beam-path")]).toEqual([false, false, true])
+    expect(rows().map(row => row.dataset.active)).toEqual(["false", "false", "true"])
+  })
+
   test("edits a point of the path, and keeps two at least", () => {
     const { sighting } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+    name(2).click()
     typed(container.querySelector('#beam-place-parameters [data-key="altitudeM"]')!, "175")
     expect(sighting.skyEvents!.beams![0].path[0].altitudeM).toBe(175)
     expect(container.querySelector<HTMLButtonElement>("#beam-place-delete")!.disabled).toBe(true)
@@ -55,23 +84,59 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0].path).toHaveLength(3)
   })
 
-  test("lays out when the beam is on on a timeline: the whole recording where it says nothing, its ends dragged, switched on at the playhead", () => {
+  test("its ends dragged move when it is on, and the + switches it on at the playhead", () => {
     const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
-    const lane = container.querySelector<HTMLElement>("#beam-timeline .track-lane")!
+    const lane = laidOut(rows()[0].querySelector<HTMLElement>(".track-lane")!)
     expect([...lane.querySelectorAll<HTMLElement>(".kf")].map(diamond => diamond.dataset.t)).toEqual(["0", "20000"])
-    // 200 px over the 20 s of the recording: its end dragged back to 15 s.
-    lane.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 24, right: 200, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
-    lane.setPointerCapture = () => undefined
-    lane.dispatchEvent(new MouseEvent("pointerdown", { clientX: 199, bubbles: true }))
-    lane.dispatchEvent(new MouseEvent("pointermove", { clientX: 150, bubbles: true }))
-    lane.dispatchEvent(new MouseEvent("pointerup", { clientX: 150, bubbles: true }))
+    drag(lane, 199, 150)
     expect(sighting.skyEvents!.beams![0].untilT).toBe(15000)
-    expect(container.querySelector<HTMLInputElement>('[data-key="untilT"]')!.value).toBe("15")
+    expect(container.querySelector<HTMLInputElement>('#beam-on-parameters [data-key="untilT"]')!.value).toBe("15")
     // The playhead went with the end dragged: taken back to 4 s.
     expect(time.now).toBe(15000)
     time.now = 4000
-    container.querySelector<HTMLButtonElement>("#beam-timeline .track-add")!.click()
+    add(0).click()
     expect(sighting.skyEvents!.beams![0]).toMatchObject({ fromT: 4000, untilT: 15000 })
+  })
+
+  test("a key of the light put at the playhead is as the light is then, and its colour picked sets its wavelength", () => {
+    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10, light: [{ t: 0, wavelengthNm: 532 }, { t: 8000, wavelengthNm: 638, powerW: 20 }] }] })
+    time.now = 4000
+    add(1).click()
+    const light = sighting.skyEvents!.beams![0].light!
+    expect(light.map(key => key.t)).toEqual([0, 4000, 8000])
+    expect(light[1]).toEqual({ t: 4000, wavelengthNm: 585, powerW: 20 })
+    expect(shown("beam-light")).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('#beam-light-key-parameters [data-key="t"]')!.value).toBe("4")
+    const colour = container.querySelector<HTMLInputElement>("#beam-colour")!
+    colour.value = "#0000ff"
+    colour.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(sighting.skyEvents!.beams![0].light![1].wavelengthNm).toBeLessThan(470)
+    container.querySelector<HTMLButtonElement>("#beam-light-delete")!.click()
+    expect(sighting.skyEvents!.beams![0].light).toHaveLength(2)
+  })
+
+  test("without a key of the light, the colour picked is the beam's own", () => {
+    const { sighting } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+    name(1).click()
+    const colour = container.querySelector<HTMLInputElement>("#beam-colour")!
+    expect(colour.value).toMatch(/^#[0-9a-f]{6}$/)
+    colour.value = "#ff0000"
+    colour.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(sighting.skyEvents!.beams![0].wavelengthNm).toBeGreaterThan(600)
+  })
+
+  test("a key of the path put at the playhead holds the path then, and its points are edited where it stands", () => {
+    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+    time.now = 6000
+    add(2).click()
+    const moves = sighting.skyEvents!.beams![0].moves!
+    expect(moves).toEqual([{ t: 6000, path }])
+    typed(container.querySelector('#beam-place-parameters [data-key="altitudeM"]')!, "300")
+    expect(sighting.skyEvents!.beams![0].moves![0].path[0].altitudeM).toBe(300)
+    // The beam's own path is left as it was.
+    expect(sighting.skyEvents!.beams![0].path[0].altitudeM).toBe(172)
+    container.querySelector<HTMLButtonElement>("#beam-move-delete")!.click()
+    expect(sighting.skyEvents!.beams![0].moves).toBeUndefined()
   })
 
   test("deleting the last beam leaves no event of the sky behind", () => {

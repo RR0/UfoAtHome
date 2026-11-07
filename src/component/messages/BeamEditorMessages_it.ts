@@ -15,6 +15,16 @@ export const beamEditorMessages_it: BeamEditorMessages = {
   addBeamNowhere: "Dai prima un luogo alla registrazione: un fascio è posto davanti al testimone",
   derivedNote: "Un campo vuoto mostra, in grigio, il valore usato. Svuota un campo per tornarci.",
   on: "Acceso",
-  onHere: "Accenderlo qui, alla testina",
-  zoomHint: "Pizzicate, o Ctrl + rotella, per ingrandire; Maiusc + rotella per scorrere"
+  zoomHint: "Pizzicate, o Ctrl + rotella, per ingrandire; Maiusc + rotella per scorrere",
+  light: "Luce",
+  colour: "Colore",
+  colourHint: "La luce di un laser è di una sola lunghezza d'onda: il colore scelto dà la lunghezza d'onda di tinta più vicina. Un porpora, che nessuna lunghezza d'onda è, dà un estremo dello spettro.",
+  deleteKey: "Togliere questa chiave",
+  timelineNote: "Sulla linea del tempo, una riga premuta è quella dettagliata sotto: quando è acceso, la sua luce, il suo percorso. Un rombo premuto porta la scena al suo istante; trascinatelo per spostarlo nel tempo. Il «+» di una riga mette una chiave alla testina, com'è il fascio in quel momento.",
+  addHere: "Aggiungere qui, alla testina",
+  here: "Già alla testina: premetelo per modificarlo",
+  lightKeyNote: "La sua luce in questo istante, unita a quella della chiave seguente. Un campo vuoto prende quella del fascio.",
+  lightNoKeyNote: "La sua luce per tutto il tempo: nessuna chiave. Il «+» della riga Luce ne mette una alla testina, perché la luce cambi nel tempo.",
+  pathKeyNote: "Il suo percorso in questo istante: ogni punto va verso lo stesso punto della chiave seguente.",
+  pathNoKeyNote: "Il suo percorso per tutto il tempo: nessuna chiave. Il «+» della riga Percorso ne mette una alla testina, perché il fascio si muova."
 }

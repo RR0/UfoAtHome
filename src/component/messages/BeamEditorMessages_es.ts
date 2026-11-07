@@ -15,6 +15,16 @@ export const beamEditorMessages_es: BeamEditorMessages = {
   addBeamNowhere: "Dé primero un lugar a la grabación: un haz se coloca delante del testigo",
   derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacíe un campo para volver a él.",
   on: "Encendido",
-  onHere: "Encenderlo aquí, en el cabezal",
-  zoomHint: "Pellizque, o Ctrl + rueda, para ampliar; Mayús + rueda para desplazar"
+  zoomHint: "Pellizque, o Ctrl + rueda, para ampliar; Mayús + rueda para desplazar",
+  light: "Luz",
+  colour: "Color",
+  colourHint: "La luz de un láser es de una sola longitud de onda: el color elegido da la longitud de onda de tono más cercano. Un púrpura, que ninguna longitud de onda es, da un extremo del espectro.",
+  deleteKey: "Quitar esta clave",
+  timelineNote: "En la línea de tiempo, una fila pulsada es la que se detalla debajo: cuándo está encendido, su luz, su trayecto. Un rombo pulsado lleva la escena a su instante; arrástrelo para moverlo en el tiempo. El «+» de una fila pone una clave en el cabezal, tal como está el haz entonces.",
+  addHere: "Añadir aquí, en el cabezal",
+  here: "Ya en el cabezal: púlselo para editarlo",
+  lightKeyNote: "Su luz en este instante, unida a la de la clave siguiente. Un campo vacío toma la del haz.",
+  lightNoKeyNote: "Su luz todo el tiempo: ninguna clave. El «+» de la fila Luz pone una en el cabezal, para que la luz cambie en el tiempo.",
+  pathKeyNote: "Su trayecto en este instante: cada punto va hacia el mismo punto de la clave siguiente.",
+  pathNoKeyNote: "Su trayecto todo el tiempo: ninguna clave. El «+» de la fila Trayecto pone una en el cabezal, para que el haz se mueva."
 }
