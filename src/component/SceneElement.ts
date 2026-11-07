@@ -101,6 +101,9 @@ import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { GeoPoint, ReentryDetonation, ReentryJson } from "../engine/interpretation/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
 import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
+import { ModuleRegistry } from "../modules/ModuleRegistry.js"
+import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
+import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
@@ -108,7 +111,6 @@ import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftPoint, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 import type { TrafficInfo } from "../engine/traffic/TrafficInfo.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
-import type { BeamJson } from "../modules/sky-events/beams/LaserBeam.js"
 import type { UpperAirProvider, UpperAirSample, UpperAirSource } from "../engine/traffic/UpperAirProvider.js"
 import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
@@ -328,7 +330,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "reentry" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "skyEvent" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "reentry" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -458,7 +460,6 @@ export class SceneElement extends HTMLElement {
   /** The most aircraft whose trails are drawn: the nearest, as for the aircraft themselves. */
   private static readonly TRAIL_MAX_AIRCRAFT = 60
   private static readonly NO_CONTRAILS: readonly ContrailTrail[] = []
-  private static readonly NO_BEAMS: readonly BeamJson[] = []
   private static readonly upperAirProviders = new Map<string, UpperAirProvider>()
   private static readonly NO_PRESENCE: ReadonlyMap<string, { fromMs: number; untilMs: number }> = new Map()
   /** Where the air traffic is read from — see AircraftProvider. The editor's picker changes it. */
@@ -674,16 +675,18 @@ export class SceneElement extends HTMLElement {
       ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
-    // A beam of light shot while the recording runs (see SkyEventsJson), before the decor it passes in front of: thin, and found only a few
-    // pixels round its line.
-    const beams = this.ufoElement.sighting.skyEvents?.beams
-    const beamHit = beams?.length ? this.sceneRenderer.pickBeamAt(ndcX, ndcY) : undefined
-    const beam = beamHit ? beams?.find(candidate => candidate.id === beamHit.id) : undefined
-    if (beamHit && beam) {
-      const name = this.said.read(beam.title) || "Laser"
+    // An event of the sky shot while the recording runs (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin,
+    // and found only a few pixels round its line. Named by its kind (see SkyEventKind.describe).
+    const skyEvents = this.ufoElement.sighting.skyEvents
+    const eventHit = skyEvents ? this.sceneRenderer.pickSkyEventAt(ndcX, ndcY) : undefined
+    const eventKind = eventHit ? SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).find(kind => kind.key === eventHit.kind) : undefined
+    const event = eventHit && eventKind ? SkyEventKinds.eventsOf(skyEvents, eventKind).find(candidate => candidate.id === eventHit.id) : undefined
+    if (eventHit && eventKind && event) {
+      const name = this.said.read(event.title) || eventKind.fallbackName || this.said.read(eventKind.title) || eventKind.key
+      const distance = this.distanceText(eventHit.distanceM)
       return {
-        kind: "beam", id: beam.id, name,
-        detail: () => `${name} (${beam.wavelengthNm} nm, ${beam.powerW.toLocaleString()} W), ${this.distanceText(beamHit.distanceM)}`
+        kind: eventKind.key === "beams" ? "beam" : "skyEvent", id: event.id, name,
+        detail: () => eventKind.describe ? eventKind.describe(event, name, distance) : `${name}, ${distance}`
       }
     }
     // A ghost of the lens, laid over whatever is behind it: a disc in the sky where nothing is, named after the light that makes it.
@@ -1362,6 +1365,7 @@ export class SceneElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    ModuleRegistry.changes.addEventListener("change", this.onModulesChanged)
     this.saidTexts = undefined
     void this.loadSceneNames()
     this.sceneRenderer.restoreContext()
@@ -1423,6 +1427,7 @@ export class SceneElement extends HTMLElement {
   private visibilityObserver?: IntersectionObserver
 
   disconnectedCallback(): void {
+    ModuleRegistry.changes.removeEventListener("change", this.onModulesChanged)
     this.visibilityObserver?.disconnect()
     this.resizeObserver?.disconnect()
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange)
@@ -1696,6 +1701,11 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.compileNextFrameOffThread()
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
+  }
+
+  /** A kind of event of the sky a module brought or took away is drawn, or no longer, at once. */
+  private readonly onModulesChanged = (event: Event): void => {
+    if ((event as CustomEvent<string>).detail === "skyEvents") this.sceneRenderer.setSkyEvents(this.ufoElement.sighting.skyEvents, true)
   }
 
   /**
@@ -2199,8 +2209,9 @@ export class SceneElement extends HTMLElement {
       const place = { lat: then?.lat ?? lat, lng: then?.lng ?? lng, heightM: then?.elevationM ?? observer.elevationM }
       return { views: ReentrySighting.viewsAt(dazzling, at, place), pose: then }
     }, sighting)
-    // The beams: placed and lit by the renderer, which knows where its scene stands and what its air is.
-    this.sceneRenderer.setBeams(sky?.beams ?? SceneElement.NO_BEAMS)
+    // The events of the sky drawn by their kinds (the beams, and any a module brought): placed and lit by the renderer, which knows where its
+    // scene stands and what its air is.
+    this.sceneRenderer.setSkyEvents(sky)
     // The plumes of the launches: lit by the Sun at the real date and hour, so with no date there is no light to put on them.
     const launches = sky?.launches ?? []
     this.sceneRenderer.setLaunchPlumes(launches.length === 0 || !startDate ? []

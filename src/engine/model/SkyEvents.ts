@@ -19,22 +19,32 @@ export interface SkyEventsJson {
   launches?: LaunchJson[]
   /** Re-entries: placed on the Earth, not round the observer — see ReentryJson. */
   reentries?: ReentryJson[]
+  /** The events of a kind a module brings (see SkyEventKind), under that kind's key: each with an `id` of its own. */
+  [kind: string]: unknown[] | undefined
 }
 
 /** Where a recording states its events of the sky, and what was stated of them before they had a place of their own. */
 export class SkyEvents {
+  /** The kinds an interpretation held before the events of the sky had a place of their own: the only ones read from there. */
   private static readonly KINDS = ["beams", "launches", "reentries"] as const
+
+  /** The kinds `events` states something of, built-in or brought by a module, in the order it states them. */
+  private static statedKinds(events: SkyEventsJson | undefined): string[] {
+    return Object.keys(events ?? {}).filter(kind => Array.isArray(events![kind]) && events![kind]!.length > 0)
+  }
 
   /** Whether `events` states none. */
   static isEmpty(events: SkyEventsJson | undefined): boolean {
-    return !events || SkyEvents.KINDS.every(kind => !events[kind]?.length)
+    return SkyEvents.statedKinds(events).length === 0
   }
 
-  /** `events` with the kinds that state nothing left out, or undefined where none states anything: what a file is written with. */
+  /** `events` with the kinds that state nothing left out, or undefined where none states anything: what a file is written with. A kind no
+   * module of this page knows is written back as it was read: dropping it would be an edit nobody made. */
   static written(events: SkyEventsJson | undefined): SkyEventsJson | undefined {
-    if (SkyEvents.isEmpty(events)) return undefined
+    const kinds = SkyEvents.statedKinds(events)
+    if (kinds.length === 0) return undefined
     const written: SkyEventsJson = {}
-    for (const kind of SkyEvents.KINDS) if (events![kind]?.length) (written as Record<string, unknown>)[kind] = events![kind]
+    for (const kind of kinds) written[kind] = events![kind]
     return written
   }
 
@@ -46,6 +56,7 @@ export class SkyEvents {
   static read(stated: SkyEventsJson | undefined, interpretation: InterpretationJson | undefined): { skyEvents?: SkyEventsJson, interpretation?: InterpretationJson } {
     const legacy = interpretation as (InterpretationJson & SkyEventsJson) | undefined
     const events: SkyEventsJson = {}
+    for (const kind of SkyEvents.statedKinds(stated)) events[kind] = stated![kind]
     for (const kind of SkyEvents.KINDS) {
       const merged = [...(stated?.[kind] ?? []), ...(legacy?.[kind] ?? [])]
       if (merged.length > 0) (events as Record<string, unknown>)[kind] = merged

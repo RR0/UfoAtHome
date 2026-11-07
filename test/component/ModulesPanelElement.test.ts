@@ -22,6 +22,9 @@ const mount = (modules: ModuleSession): ModulesPanelElement => {
   return panel
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
+const until = async (check: () => boolean): Promise<void> => {
+  for (let i = 0; i < 400 && !check(); i++) await new Promise(resolve => setTimeout(resolve, 5))
+}
 
 afterEach(() => {
   document.body.replaceChildren()
@@ -36,7 +39,7 @@ describe("ModulesPanelElement", () => {
     input.value = MANIFEST
     input.dispatchEvent(new Event("input"))
     panel.querySelector("form")!.requestSubmit()
-    await settle(); await settle()
+    await until(() => panel.querySelector(`.mp-module[data-url="${MANIFEST}"] .mp-name`)?.textContent === "ACME")
 
     const item = panel.querySelector<HTMLElement>(`.mp-module[data-url="${MANIFEST}"]`)!
     expect(item.querySelector(".mp-name")!.textContent).toBe("ACME")

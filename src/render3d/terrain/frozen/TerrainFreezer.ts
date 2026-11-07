@@ -17,6 +17,8 @@ import type { FrozenVectorPatch, VectorAnnexData } from "./VectorAnnex.js"
 import { ObserverPath } from "../../../engine/place/ObserverPath.js"
 import { ObserverMapView } from "../../../render/ObserverMapView.js"
 import type { GeoBounds } from "../GeoBounds.js"
+import { SKY_EVENT_SOURCES } from "../../../modules/sky-events/skyEventSources.js"
+import { SkyEventKinds } from "../../../modules/sky-events/SkyEventKind.js"
 
 /** Where each group is taken from: the sources the scene asks live. */
 export interface FreezerSources {
@@ -77,10 +79,12 @@ export class TerrainFreezer {
     }
     // The far ring round a patch, where the beams the recording claims go past it (see SceneRenderer.buildFarRing). Not where the eye only overlooks
     // lower ground: that is known from the relief, which is what is being frozen; a frozen scene then has the patches and no ring.
-    const beams = sighting.skyEvents?.beams ?? []
-    if (beams.length > 0) {
+    const kinds = SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source))
+      .filter(kind => kind.reachM && SkyEventKinds.eventsOf(sighting.skyEvents, kind).length > 0)
+    if (kinds.length > 0) {
+      const reachM = (centre: { lat: number, lng: number }) => Math.max(...kinds.map(kind => kind.reachM!(SkyEventKinds.eventsOf(sighting.skyEvents, kind), centre)))
       for (const patch of [...patches]) {
-        if (TerrainReach.needsFarRing(patch.radiusM, 0, TerrainReach.beamReachFor(beams, patch))) {
+        if (TerrainReach.needsFarRing(patch.radiusM, 0, reachM(patch))) {
           patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
         }
       }

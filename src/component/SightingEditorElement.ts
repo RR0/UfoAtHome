@@ -22,7 +22,9 @@ import { RecordingActors, type ActorIssue, type ActorKind } from "../engine/even
 import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
-import type { BeamEditor } from "../modules/sky-events/beams/BeamEditor.js"
+import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
+import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
+import type { SkyEventEditor, SkyEventKind } from "../modules/sky-events/SkyEventKind.js"
 import type { ReentryEditor } from "./ReentryEditor.js"
 import type { LanternEditor } from "./LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
@@ -609,9 +611,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The Launches part, loaded the first time it is opened — see loadLaunchEditor. */
   private launchEditor?: LaunchEditor
   private launchEditorLoading?: Promise<LaunchEditor>
-  /** The Beams part, loaded the first time it is opened — see loadBeamEditor. */
-  private beamEditor?: BeamEditor
-  private beamEditorLoading?: Promise<BeamEditor>
+  /**
+   * The parts of the Sky group of the kinds of events of the sky the registry holds (see SkyEventKind): each a tab and a panel made from
+   * the kind, its editor loaded the first time it is opened (see loadSkyEventEditor).
+   */
+  private readonly skyEventParts = new Map<string, { kind: SkyEventKind, tab: HTMLButtonElement, label: HTMLElement, panel: HTMLElement, editor?: SkyEventEditor, loading?: Promise<SkyEventEditor> }>()
   /** The Fireballs part, loaded the first time it is opened — see loadReentryEditor. */
   private reentryEditor?: ReentryEditor
   private reentryEditorLoading?: Promise<ReentryEditor>
@@ -814,7 +818,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelShapesSubgroup: HTMLElement
   private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelLaunchesSubgroup: HTMLElement
-  private readonly labelBeamsSubgroup: HTMLElement
   private readonly labelReentriesSubgroup: HTMLElement
   private readonly labelLanternsSubgroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
@@ -1620,7 +1623,6 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapesSubgroup = this.shadow.getElementById("label-shapes-subgroup")!
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
-    this.labelBeamsSubgroup = this.shadow.getElementById("label-beams-subgroup")!
     this.labelReentriesSubgroup = this.shadow.getElementById("label-reentries-subgroup")!
     this.labelLanternsSubgroup = this.shadow.getElementById("label-lanterns-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
@@ -2194,6 +2196,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const tab of this.subgroupTabs) {
       tab.addEventListener("click", () => this.openSubgroup(tab))
     }
+    this.syncSkyEventParts()
     // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
     NumberFields.fit(this.shadow)
     this.paramSummary = this.shadow.getElementById("param-summary")!
@@ -2305,6 +2308,7 @@ export class SightingEditorElement extends HTMLElement {
     if (point === "surroundings" && this.surveyIds) void this.fillScenerySources()
     // A catalogue that came or went changes what the model ids of the recording are drawn with.
     if (point === "decorModels") this.sceneElement.setDecorModelProvider(this.decorModelProvider)
+    if (point === "skyEvents") this.syncSkyEventParts()
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -7283,7 +7287,7 @@ export class SightingEditorElement extends HTMLElement {
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     // The Sky group edits fields only: nothing on the picture is moved from there.
-    if (this.isGroupIdOpen("group-weather") && (this.shadow.getElementById("sky-launches")?.hidden === false || this.shadow.getElementById("sky-beams")?.hidden === false || this.shadow.getElementById("sky-reentries")?.hidden === false)) return "scene"
+    if (this.isGroupIdOpen("group-weather") && (this.shadow.getElementById("sky-launches")?.hidden === false || this.openSkyEventParts().length > 0 || this.shadow.getElementById("sky-reentries")?.hidden === false)) return "scene"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     // The Environment group frames the object it has selected, as the Bodies part does a body.
     if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
@@ -7365,7 +7369,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private syncSkyParts(): void {
     if (!this.isGroupIdOpen("group-weather")) return
-    if (this.shadow.getElementById("sky-beams")?.hidden === false) void this.loadBeamEditor().then(editor => editor.refresh())
+    for (const part of this.openSkyEventParts()) void this.loadSkyEventEditor(part.kind.key)?.then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-reentries")?.hidden === false) void this.loadReentryEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-lanterns")?.hidden === false) void this.loadLanternEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-launches")?.hidden === false) void this.loadLaunchEditor().then(editor => editor.refresh())
@@ -7400,7 +7404,8 @@ export class SightingEditorElement extends HTMLElement {
     // The shapes it offers to stand for may have been renamed, added or deleted meanwhile.
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-launches") void this.loadLaunchEditor().then(editor => editor.sync())
-    if (tab.getAttribute("aria-controls") === "sky-beams") void this.loadBeamEditor().then(editor => editor.sync())
+    const skyEventPart = [...this.skyEventParts.values()].find(part => part.tab === tab)
+    if (skyEventPart) void this.loadSkyEventEditor(skyEventPart.kind.key)?.then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-reentries") void this.loadReentryEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-lanterns") void this.loadLanternEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
@@ -7927,7 +7932,7 @@ export class SightingEditorElement extends HTMLElement {
     // Its own timeline's playhead follows the recording's: only the playhead is placed again (see ReentryEditor.setTime).
     if (this.shadow.getElementById("sky-reentries")?.hidden === false) this.reentryEditor?.setTime(this.ufoElement.currentTime)
     if (this.shadow.getElementById("sky-launches")?.hidden === false) this.launchEditor?.setTime(this.ufoElement.currentTime)
-    if (this.shadow.getElementById("sky-beams")?.hidden === false) this.beamEditor?.setTime(this.ufoElement.currentTime)
+    for (const part of this.openSkyEventParts()) part.editor?.setTime(this.ufoElement.currentTime)
     for (const panel of [this.eventsPanel, this.phenomenonEventsPanel, this.bodiesEventsPanel]) panel?.setTime(this.ufoElement.currentTime)
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
@@ -8759,13 +8764,72 @@ export class SightingEditorElement extends HTMLElement {
     return this.lanternEditorLoading
   }
 
+  /** The parts of the kinds of events of the sky that are open now. */
+  private openSkyEventParts(): { kind: SkyEventKind, editor?: SkyEventEditor }[] {
+    return [...this.skyEventParts.values()].filter(part => !part.panel.hidden)
+  }
+
   /**
-   * The Beams part of the Sky group, fetched and built the first time it is opened: a chunk of its own, since a recording has a beam only
-   * when somebody has put one in (see BeamEditor).
+   * A part of the Sky group for each kind of event of the sky that has an editor (see SkyEventKind.editor): a tab before the Fireballs', and its
+   * panel. Said again when a module brings or takes away a kind; a part whose kind went is removed, with its editor.
    */
-  private loadBeamEditor(): Promise<BeamEditor> {
-    this.beamEditorLoading ??= import("../modules/sky-events/beams/BeamEditor.js").then(({ BeamEditor }) => {
-      this.beamEditor = new BeamEditor(this.shadow.getElementById("beam-editor")!, {
+  private syncSkyEventParts(): void {
+    const strip = this.shadow.getElementById("weather-tabs")
+    const before = strip?.querySelector<HTMLButtonElement>('[aria-controls="sky-reentries"]') ?? null
+    const panelBefore = this.shadow.getElementById("sky-reentries")
+    if (!strip || !panelBefore) return
+    const kinds = SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).filter(kind => kind.editor)
+    for (const [key, part] of this.skyEventParts) {
+      if (kinds.some(kind => kind.key === key && kind === part.kind)) continue
+      if (part.tab.getAttribute("aria-expanded") === "true") {
+        const first = this.subgroupTabs.find(tab => tab.parentElement === strip && tab !== part.tab)
+        if (first) this.openSubgroup(first)
+      }
+      part.tab.remove()
+      part.panel.remove()
+      this.subgroupTabs.splice(this.subgroupTabs.indexOf(part.tab), 1)
+      this.skyEventParts.delete(key)
+    }
+    for (const kind of kinds) {
+      if (this.skyEventParts.has(kind.key)) continue
+      const id = `sky-event-${kind.key}`
+      const tab = document.createElement("button")
+      tab.className = "subgroup-tab"
+      tab.type = "button"
+      tab.setAttribute("aria-controls", id)
+      tab.setAttribute("aria-expanded", "false")
+      const label = document.createElement("span")
+      label.id = `label-${id}`
+      label.textContent = this.said.read(kind.title) ?? kind.key
+      tab.append(label)
+      tab.addEventListener("click", () => this.openSubgroup(tab))
+      strip.insertBefore(tab, before)
+      this.subgroupTabs.push(tab)
+      const panel = document.createElement("section")
+      panel.className = "subgroup-panel"
+      panel.id = id
+      panel.hidden = true
+      panel.setAttribute("aria-labelledby", label.id)
+      const toolbar = document.createElement("div")
+      toolbar.className = "toolbar"
+      const container = document.createElement("div")
+      container.id = `${id}-editor`
+      toolbar.append(container)
+      panel.append(toolbar)
+      panelBefore.before(panel)
+      this.skyEventParts.set(kind.key, { kind, tab, label, panel })
+    }
+  }
+
+  /**
+   * The editor of a kind of event of the sky, fetched and built the first time its part is opened: a chunk of its own, since a recording has
+   * such an event only when somebody has put one in.
+   */
+  private loadSkyEventEditor(key: string): Promise<SkyEventEditor> | undefined {
+    const part = this.skyEventParts.get(key)
+    if (!part?.kind.editor) return undefined
+    part.loading ??= part.kind.editor().then(create => {
+      part.editor = create(part.panel.querySelector<HTMLElement>(`#sky-event-${key}-editor`)!, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
@@ -8779,9 +8843,9 @@ export class SightingEditorElement extends HTMLElement {
           this.sceneElement.redrawSky()
         }
       }, this.language)
-      return this.beamEditor
+      return part.editor
     })
-    return this.beamEditorLoading
+    return part.loading
   }
 
   /**
@@ -11434,7 +11498,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapesSubgroup.textContent = messages.shapesSubgroup
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
-    this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
+    for (const part of this.skyEventParts.values()) part.label.textContent = this.said.read(part.kind.title) ?? part.kind.key
     this.labelReentriesSubgroup.textContent = messages.reentriesSubgroup
     this.labelLanternsSubgroup.textContent = messages.lanternsSubgroup
     for (const group of ["location", "decor", "weather"]) {
@@ -11446,7 +11510,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.bodyEditor?.setLanguage(this.language)
     void this.launchEditor?.setLanguage(this.language)
-    void this.beamEditor?.setLanguage(this.language)
+    for (const part of this.skyEventParts.values()) void part.editor?.setLanguage(this.language)
     void this.reentryEditor?.setLanguage(this.language)
     void this.lanternEditor?.setLanguage(this.language)
     void this.modulesPanel?.setLanguage(this.language)

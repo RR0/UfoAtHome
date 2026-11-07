@@ -13,6 +13,7 @@ Every implementation UFO@home can be given a choice of lives here, one folder pe
 | `providers/terrain/` | `elevation`, `imagery`, `surroundings` (and the roads, railways and water the surveys use) | `render3d/terrain/*Provider.ts` |
 | `assessors/` | `assessment` | `engine/assessment/Assessor.ts` |
 | `models/` | `decorModels` | `render3d/decor/DecorModelProvider.ts` |
+| `sky-events/<kind>/` | `skyEvents` | `sky-events/SkyEventKind.ts` |
 
 Each folder has a `*Sources.ts` that lists its built-in implementations as `DataSource` entries (an id, a name, the credit its
 licence requires, and a `create()` that builds it on demand), given to the extension point through
@@ -62,3 +63,17 @@ shape as `public/models/index.json`) and, for what needs code, a `script` whose 
   whichever module's catalogue they come from.
 - In the editor: the **Modules** item of the Files group (`component/ModulesPanelElement.ts`). On the site:
   `/docs/modules/` (`site/content/DocsModulesPage.ts`).
+
+## Kinds of events of the sky
+
+A kind of event of the sky (`sky-events/SkyEventKind.ts`) is what a recording states under `skyEvents.<key>`: its code to draw
+(`simulation`, a `SkyEventSimulation` the scene gives the events and the instant at every tick, never drawing itself), to edit
+(`editor`, a part of the editor's Sky group made from the kind's `title`), how far it reaches (`reachM`, for the ground and the
+depth of the scene) and what the tooltip says (`describe`). The scene (`SceneRenderer.setSkyEvents`), the editor
+(`SightingEditorElement.syncSkyEventParts`) and the terrain freezer read the list in `sky-events/skyEventSources.ts`, and follow a
+module that adds a kind.
+
+The beams (`sky-events/beams/`) are the pilot. The launches, re-entries and lanterns still have code of their own in the scene and
+the editor, and are to be moved the same way. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
+of its own would be a second three.js. The list is explicit, since the whole namespace would keep all of three.js in every
+bundle (+120 kB measured); a class a module needs is a line to add there.

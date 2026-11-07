@@ -73,8 +73,18 @@ export class BeamEditor {
   /** The beams the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly BeamJson[] = []
 
+  /** The part's layout, given with it (see SkyEventKind.editor): the editor it stands in knows nothing of a beam. */
+  private static readonly STYLE = `.beam-editor { flex-basis: 100%; min-width: 0; } .beam-editor #beam-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } .beam-editor #beam-list, .beam-editor #beam-places { flex-basis: 100%; min-width: 0; } .beam-editor .launch-editor, .beam-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .beam-editor .launch-fields { flex-basis: 100%; min-width: 0; } .beam-editor [hidden] { display: none !important; } .beam-editor select { min-width: 0; width: 100%; } .beam-editor .launch-intro { flex-basis: 100%; margin: 0; } .beam-editor .launch-track { flex-basis: 100%; margin: 0; } .beam-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .beam-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .beam-editor input, .beam-editor select { max-width: 100%; box-sizing: border-box; } .beam-editor input[type="text"] { width: 12em; } .beam-editor #launch-title { width: 18em; } .beam-editor label { min-width: 0; max-width: 100%; } .beam-editor input.parameter-derived::placeholder { opacity: .65; } .beam-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }`
+
   constructor(private readonly container: HTMLElement, private readonly host: BeamEditorHost, language: string) {
     this.language = language
+    container.classList.add("beam-editor")
+    if (!container.parentElement?.querySelector(":scope > style.beam-editor-style")) {
+      const style = container.ownerDocument.createElement("style")
+      style.className = "beam-editor-style"
+      style.textContent = BeamEditor.STYLE
+      container.before(style)
+    }
     if (!ParameterRegistry.of("beam")) BeamParameters.publish()
     this.render()
     void this.setLanguage(language)

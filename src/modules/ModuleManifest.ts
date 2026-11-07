@@ -3,6 +3,7 @@ import type { DecorModelEntry } from "../render3d/decor/DecorModelProvider.js"
 import type { ElevationProvider } from "../render3d/terrain/ElevationProvider.js"
 import type { ImageryProvider } from "../render3d/terrain/ImageryProvider.js"
 import type { ModuleContributions, UfoAtHomeModule } from "./ModuleRegistry.js"
+import type { ModuleThree } from "./sky-events/ModuleThree.js"
 import { ManifestModelCatalogue } from "./models/ManifestModelCatalogue.js"
 import { AwsTerrariumElevationProvider } from "./providers/terrain/AwsTerrariumElevationProvider.js"
 import { XyzImageryProvider } from "./providers/terrain/XyzImageryProvider.js"
@@ -54,6 +55,8 @@ export interface ModuleManifestJson {
 export interface ModuleScriptContext {
   /** The manifest's own address, for the script to resolve its files from. */
   manifestUrl: string
+  /** The page's three.js classes, for what a script draws (a kind of event of the sky, see SkyEventKind, ModuleThree). */
+  three: ModuleThree
 }
 
 /** The default export of a module's script. */

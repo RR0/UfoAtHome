@@ -11,6 +11,7 @@ import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js
 import type { ElevationProvider } from "../render3d/terrain/ElevationProvider.js"
 import type { ImageryProvider } from "../render3d/terrain/ImageryProvider.js"
 import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
+import type { SkyEventKind } from "./sky-events/SkyEventKind.js"
 
 /**
  * What each extension point of UFO@home is a list of: the interface an implementation of that point gives.
@@ -45,6 +46,8 @@ export interface ExtensionPointTypes {
   surroundings: SurroundingsProvider
   /** Which catalogues the 3D models of the decor and of bodies come from (see DecorModelProvider). */
   decorModels: DecorModelProvider
+  /** The kinds of events of the sky a recording can state, drawn and edited (see SkyEventKind): its `id` is the kind's key. */
+  skyEvents: SkyEventKind
 }
 
 export type ExtensionPointId = keyof ExtensionPointTypes

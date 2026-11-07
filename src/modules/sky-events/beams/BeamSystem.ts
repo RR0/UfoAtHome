@@ -1,31 +1,12 @@
 import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial } from "three"
 import type { Vector3 } from "three"
-import type { AerialPerspective, Rgb } from "../../../engine/atmosphere/AerialPerspective.js"
+import type { AerialPerspective } from "../../../engine/atmosphere/AerialPerspective.js"
+import type { SkyEventFrame, SkyEventSimulation } from "../SkyEventKind.js"
 import { LaserBeamSighting } from "./LaserBeam.js"
 import type { BeamJson, BeamView } from "./LaserBeam.js"
 
-/** What the beams are drawn against, at one instant. */
-export interface BeamFrame {
-  /** The latitude and longitude the scene's frame is laid out from (the decor's reference pose). */
-  reference: { lat: number; lng: number }
-  /** Where that place stands in the scene, metres, and how much a metre east of it is in the scene now (see SceneRenderer.bodyEastScale). */
-  origin: { x: number; z: number }
-  eastScale: number
-  /** The altitude above the sea the scene's y = 0 stands for. */
-  siteElevationM: number
-  eye: Vector3
-  /** The angle of one pixel of the picture, radians: nothing is drawn thinner. */
-  pixelRad: number
-  /** What a candela per square metre is in the scene's own light (see ScatteredSky.relativeScale). */
-  relativeScale: number
-  air: AerialPerspective
-  /** How much of a light at a point of the scene reaches the eye, per channel. */
-  transmittanceTo: (x: number, y: number, z: number) => Rgb
-  /** The ground under a point of the scene: a beam stops where it meets it. */
-  groundYAt: (x: number, z: number) => number
-  /** The wind, metres a second towards the east and towards the north: what drifts the patches of haze along a beam (see LaserBeamSighting.patchAt). */
-  wind?: { eastMS: number; northMS: number }
-}
+/** What the beams are drawn against, at one instant: the frame every event of the sky is drawn in (see SkyEventFrame). */
+export type BeamFrame = SkyEventFrame
 
 interface Placed {
   x: number
@@ -49,7 +30,7 @@ interface Placed {
  * A beam narrower than two pixels is drawn two pixels wide with the same light, spread: a laser beam a centimetre across, ten metres off, is
  * far below what the eye resolves, and is seen as a line as wide as its acuity, as bright as all its light shared over that.
  */
-export class BeamSystem {
+export class BeamSystem implements SkyEventSimulation<BeamJson> {
   private static readonly MAX_SEGMENTS = 12000
   /** The least a ribbon is drawn across, in pixels, edge to edge (see ContrailSystem.MIN_PIXELS). */
   private static readonly MIN_PIXELS = 2
@@ -92,6 +73,19 @@ export class BeamSystem {
   /** How many stretches of beam are drawn. */
   get segmentCount(): number {
     return this.segments
+  }
+
+  /** What the scene holds of the beams (see SkyEventSimulation). */
+  get object(): Group {
+    return this.group
+  }
+
+  get drawnCount(): number {
+    return this.segments
+  }
+
+  pick(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string; distanceM: number } | undefined {
+    return this.pickAt(origin, direction, toleranceRad)
   }
 
   /** Draws `beams` as they are at `t` (ms of the recording). */

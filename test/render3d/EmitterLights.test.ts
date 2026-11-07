@@ -3,7 +3,8 @@ import { DirectionalLight, Group, PointLight, Vector3 } from "three"
 import { EmitterLights } from "../../src/render3d/EmitterLights.js"
 
 /** Every file of the renderer, by name, without loading any (see Vite's import.meta.glob). */
-const render3d = Object.keys(import.meta.glob("../../src/render3d/*.ts")).map(file => file.split("/").pop()!)
+// The systems of the scene, and those of the kinds of events of the sky that modules give (see src/modules/sky-events).
+const render3d = Object.keys({ ...import.meta.glob("../../src/render3d/*.ts"), ...import.meta.glob("../../src/modules/sky-events/**/*.ts") }).map(file => file.split("/").pop()!)
 
 describe("EmitterLights", () => {
   it("knows, for every system that draws, how its light reaches the scene", () => {

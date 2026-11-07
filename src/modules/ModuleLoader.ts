@@ -45,7 +45,8 @@ export class ModuleLoader {
       const scriptUrl = new URL(manifest.script!, url).href
       const imported = await this.importImpl(scriptUrl)
       if (typeof imported.default !== "function") throw new Error(`${scriptUrl}: its default export is not a function`)
-      scripted = (await (imported.default as ModuleScript)({ manifestUrl: url })) ?? {}
+      const { MODULE_THREE: three } = await import("./sky-events/ModuleThree.js")
+      scripted = (await (imported.default as ModuleScript)({ manifestUrl: url, three })) ?? {}
     }
     return { url, manifest, module: ModuleManifest.module(manifest, url, scripted), hasScript, scriptRun: hasScript && options.runScript }
   }

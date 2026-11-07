@@ -118,7 +118,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setSatellites(): void {}
     setReentries(): void {}
     setLaunchPlumes(): void {}
-    setBeams(): void {}
+    setSkyEvents(): void {}
     pickTrafficAt(): undefined {
       return undefined
     }
