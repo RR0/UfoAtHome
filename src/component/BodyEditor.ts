@@ -9,6 +9,8 @@ import type { BodyReading } from "./SceneElement.js"
 import type { ModelPicker } from "./ModelPicker.js"
 import type { ModelSource } from "../render3d/decor/ModelSource.js"
 import { ElementList } from "./ElementList.js"
+import { Icons } from "./Icons.js"
+import { TimelineTracks } from "./TimelineTracks.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import type { PositionPlace } from "./ParameterForm.js"
 import { BodyKeyframes, BodyParameterSets } from "../engine/interpretation/BodyParameterSets.js"
@@ -43,8 +45,10 @@ export interface BodyEditorHost {
   currentTime(): number
   /** The body picked in the list changed (or the list did): what is shown of that body elsewhere follows it (its events). */
   bodySelected?(id: string | undefined): void
-  /** Moves the playhead to `t`, ms: how a keyframe picked in the list is shown. */
+  /** Moves the playhead to `t`, ms: how a keyframe pressed on the timeline is shown. */
   seekTo(t: number): void
+  /** How long the recording lasts, ms: what the timeline of the keyframes spans. */
+  duration?(): number
   /** The body as it stands at `t` — see SceneElement.bodyReading. */
   readingOf(body: BodyJson, t: number): BodyReading | undefined
   /** How far along a line of sight from the eye at `t` the ground is — see SceneElement.groundAlong. */
@@ -146,26 +150,43 @@ export class BodyEditor {
     const m = this.messages
     const reading = this.host.readingOf(body, t)
     const here = body.track.find(key => key.t === t)
-    // The instant is named above, by the picker of the keyframes, when there is one there: said again it is noise.
-    const legend = this.element("body-key-legend")
-    legend.textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
-    legend.hidden = here !== undefined
+    this.element("body-key-legend").textContent = m.atPlayhead.replace("{t}", BodyEditor.seconds(t))
     this.element("body-key-note").textContent = !reading ? m.notPlaced : here ? m.keyframeHere : m.keyframeAdded
-    this.keyList?.setItems(body.track.map(key => ({ id: String(key.t), label: BodyEditor.seconds(key.t) })), here ? String(here.t) : "")
-    this.keyList?.setAddState(reading !== undefined && here === undefined)
-    this.keyList?.setStepState(body.track.some(key => key.t < t), body.track.some(key => key.t > t))
+    ;(this.element("body-key-delete") as HTMLButtonElement).disabled = here === undefined
+    this.syncTimeline(body, here?.t)
     this.element("body-key-parameters").hidden = !reading
     if (reading) this.keyForm?.sync(force)
   }
 
-  /** Goes to the keyframe before or after the playhead: the one picked, or the nearest where the playhead is between two. */
-  private stepKeyframe(direction: -1 | 1): void {
+  /**
+   * The body's keyframes on a timeline of their own (see TimelineTracks), in place of a list of their instants: a diamond pressed takes
+   * the playhead to it, whose fields are then the keyframe's; dragged, it moves in time; the "+" puts one at the playhead. Drawn again only
+   * when the keyframes change: the playhead alone moves at every frame.
+   */
+  private syncTimeline(body: BodyJson, here: number | undefined): void {
+    if (!this.timeline) return
+    const times = body.track.map(key => key.t)
+    const duration = this.host.duration?.() ?? Math.max(1, ...times)
+    this.timeline.show([{
+      id: "keys", label: this.messages.keyframes, color: BodyEditor.KEY_COLOR, times, selectedTime: here,
+      open: () => undefined,
+      move: (from, to) => this.moveKeyframe(from, to),
+      add: () => this.keyframeHere()
+    }], duration, this.host.currentTime(), { from: Math.min(0, ...times), to: Math.max(duration, ...times) })
+  }
+
+  /** The row of the keyframes, readable over a light ground and a dark one. */
+  private static readonly KEY_COLOR = "#c0581b"
+
+  /** A diamond dragged in time: the keyframe at `from` now at `to`, the one there before it replaced. */
+  private moveKeyframe(from: number, to: number): void {
     const body = this.current
     if (!body) return
-    const t = this.host.currentTime()
-    const times = body.track.map(key => key.t).filter(at => direction < 0 ? at < t : at > t)
-    if (times.length === 0) return
-    this.host.seekTo(direction < 0 ? Math.max(...times) : Math.min(...times))
+    const moved = body.track.find(key => key.t === from)
+    if (!moved) return
+    const track = [...body.track.filter(key => key !== moved && key.t !== to), { ...moved, t: to }].sort((a, b) => a.t - b.t)
+    this.write({ ...this.interpretation!, bodies: this.bodies.map(other => other === body ? { ...body, track } : other) }, true)
+    this.host.seekTo(to)
     this.syncKeyframe(true)
   }
 
@@ -211,6 +232,7 @@ export class BodyEditor {
         <div id="body-keys" class="body-keys"></div>
         <fieldset class="body-key">
           <legend id="body-key-legend"></legend>
+          <button id="body-key-delete" class="icon-btn" type="button" title="${m.deleteKeyframe}" aria-label="${m.deleteKeyframe}">${Icons.TRASH}</button>
           <p id="body-key-note" class="body-intro"></p>
           <div id="body-key-parameters" class="body-parameters"></div>
           <p class="body-intro">${m.appearanceNote}</p>
@@ -242,16 +264,9 @@ export class BodyEditor {
       // A catalogue model's address and credit are shown as soon as it is picked; a built-in shape has none.
       ;(this.element("body-model-advanced") as HTMLDetailsElement).open = id !== "" && !(BODY_PRIMITIVES as readonly string[]).includes(id)
     })
-    const keys = this.element("body-keys")
-    this.keyList = new ElementList({
-      header: keys, optional: true,
-      ids: { list: "body-key", remove: "body-key-delete", add: "body-key-add" },
-      navigation: { scope: this.container, onStep: direction => this.stepKeyframe(direction) },
-      onSelect: id => { if (id !== "") this.host.seekTo(Number(id)); this.syncKeyframe(true) },
-      onAdd: () => this.keyframeHere(),
-      onRemove: () => this.deleteKeyframe()
-    })
-    this.keyList.setLabels({ list: m.keyframes, remove: m.deleteKeyframe, add: m.addKeyframe, none: m.noKeyframeHere, previous: m.previousKeyframe, next: m.nextKeyframe })
+    this.timeline = new TimelineTracks(this.element("body-keys"), t => { this.host.seekTo(t); this.syncKeyframe(true) },
+      { addKeyframeHere: m.addKeyframe, keyframeHere: m.keyframeHere, zoomHint: m.zoomHint })
+    this.element("body-key-delete").addEventListener("click", () => this.deleteKeyframe())
     // The drop-down gives way to a window of pictures, over the same options and the same "change".
     this.host.modelPicker().enhance(this.select("body-model"), id => this.modelSourceOf(id), {
       current: () => {
@@ -678,7 +693,7 @@ export class BodyEditor {
   /** The picker of the bodies, and what is done with them (see ElementList). */
   private list?: ElementList
   /** The keyframes of the body on show, and the one at the playhead (see ElementList). */
-  private keyList?: ElementList
+  private timeline?: TimelineTracks
 
   private element(id: string): HTMLElement {
     return this.container.querySelector<HTMLElement>("#" + id)!

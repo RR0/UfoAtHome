@@ -79,10 +79,12 @@ class Fixture {
 }
 
 describe("The Bodies part of the editor", () => {
-  it("keeps the keyframe picker outside the fieldset of the instant it chooses, which it opens", () => {
+  it("lays the keyframes out on a timeline outside the fieldset of the instant, in place of a picker of instants", () => {
     const fixture = new Fixture()
-    const picker = fixture.container.querySelector("#body-key")!
-    expect(picker.closest("fieldset")).toBeNull()
+    expect(fixture.container.querySelector("#body-key")).toBeNull()
+    const lane = fixture.container.querySelector("#body-keys .track-lane")!
+    expect(lane.closest("fieldset")).toBeNull()
+    expect([...lane.querySelectorAll<HTMLElement>(".kf")].map(diamond => diamond.dataset.t)).toEqual(["0", "5000"])
     expect(fixture.container.querySelector("fieldset.body-key")).not.toBeNull()
   })
 
@@ -97,7 +99,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.field("body-model").value).toBe("catalogue-craft")
     const checked = [...fixture.container.querySelectorAll<HTMLInputElement>('[data-key="explains"] input')].filter(check => check.checked).map(check => check.value)
     expect(checked).toEqual(["ufo-1"])
-    expect([...fixture.container.querySelectorAll<HTMLOptionElement>("#body-key option")].map(option => option.textContent)).toEqual(["No keyframe at this instant", "0 s", "5 s"])
+    expect(fixture.container.querySelectorAll("#body-keys .kf")).toHaveLength(2)
   })
 
   it("shows a model given by address, with its credit", () => {
@@ -220,17 +222,36 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track.find(candidate => candidate.t === 2500)!.saidPosition).toBeUndefined()
   })
 
-  it("lists the keyframes, shows the one at the playhead, and goes to the one picked", () => {
+  /** The timeline's lane laid out 100 px wide from x = 0, over the 5 s the keyframes span: 20 px a second. */
+  const laidOut = (fixture: Fixture) => {
+    const lane = fixture.container.querySelector<HTMLElement>("#body-keys .track-lane")!
+    lane.getBoundingClientRect = () => ({ left: 0, width: 100, top: 0, height: 24, right: 100, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
+    lane.setPointerCapture = () => undefined
+    return lane
+  }
+  const press = (lane: HTMLElement, x: number, to = x) => {
+    lane.dispatchEvent(new MouseEvent("pointerdown", { clientX: x, bubbles: true }))
+    if (to !== x) lane.dispatchEvent(new MouseEvent("pointermove", { clientX: to, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointerup", { clientX: to, bubbles: true }))
+  }
+
+  it("marks the keyframe at the playhead, and goes to the one pressed", () => {
     const fixture = new Fixture()
-    const select = fixture.container.querySelector<HTMLSelectElement>("#body-key")!
-    expect(select.value).toBe("0")
+    const selected = () => fixture.container.querySelector<HTMLElement>('#body-keys .kf[data-selected="true"]')?.dataset.t
+    expect(selected()).toBe("0")
     fixture.time = 2500
     fixture.editor.syncKeyframe()
-    expect(select.value).toBe("")
-    select.value = "5000"
-    select.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(selected()).toBeUndefined()
+    press(laidOut(fixture), 99)
     expect(fixture.time).toBe(5000)
-    expect(select.value).toBe("5000")
+    expect(selected()).toBe("5000")
+  })
+
+  it("moves a keyframe in time when its diamond is dragged, the playhead with it", () => {
+    const fixture = new Fixture()
+    press(laidOut(fixture), 99, 70)
+    expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 3500])
+    expect(fixture.time).toBe(3500)
   })
 
   it("leaves the options of the model picker alone while a body is moved: they are rebuilt only when what they list changes", async () => {
@@ -246,33 +267,15 @@ describe("The Bodies part of the editor", () => {
     expect(select.firstElementChild).toBe(first)
   })
 
-  it("steps to the keyframe before and after the playhead, from between two as from one, with the buttons and with Alt and the arrows", () => {
-    const fixture = new Fixture()
-    const previous = fixture.container.querySelector<HTMLButtonElement>("#body-key-previous")!
-    const next = fixture.container.querySelector<HTMLButtonElement>("#body-key-next")!
-    expect(previous.disabled).toBe(true)
-    expect(next.disabled).toBe(false)
-    fixture.time = 2500
-    fixture.editor.syncKeyframe()
-    expect(previous.disabled).toBe(false)
-    next.click()
-    expect(fixture.time).toBe(5000)
-    expect(next.disabled).toBe(true)
-    fixture.container.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", altKey: true, bubbles: true, cancelable: true }))
-    expect(fixture.time).toBe(0)
-    expect(previous.title).toContain("Alt+↑")
-  })
-
   it("adds a keyframe at the playhead where there is none, and only there", () => {
     const fixture = new Fixture()
-    const add = fixture.container.querySelector<HTMLButtonElement>("#body-key-add")!
-    expect(add.disabled).toBe(true)
+    const add = () => fixture.container.querySelector<HTMLButtonElement>("#body-keys .track-add")!
+    add().click()
+    expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 5000])
     fixture.time = 2500
     fixture.editor.syncKeyframe()
-    expect(add.disabled).toBe(false)
-    add.click()
+    add().click()
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 2500, 5000])
-    expect(add.disabled).toBe(true)
   })
 
   it("writes an edit at the playhead as a keyframe of position, size and attitude only", () => {

@@ -26,14 +26,11 @@ export interface BodyEditorMessages {
   modelIncomplete: string
   /** Under the address block, when it shows a catalogue model. */
   modelFromCatalogue: string
-  /** The picker of the body's keyframes, and the button that adds one at the playhead. */
+  /** The row of the body's keyframes on its timeline, its "+" that adds one at the playhead, and how to zoom it. */
   keyframes: string
+  zoomHint: string
   addKeyframe: string
-  /** What the picker says when the playhead is between two keyframes. */
-  noKeyframeHere: string
   /** What the buttons that step to the keyframe before and after the playhead are called. */
-  previousKeyframe: string
-  nextKeyframe: string
   /** {t} is the playhead, in seconds. */
   atPlayhead: string
   /** Why the model of a body cannot be changed: it is chosen when the body is added. */
