@@ -172,7 +172,16 @@ export class BodyEditor {
       open: () => undefined,
       move: (from, to) => this.moveKeyframe(from, to),
       add: () => this.keyframeHere()
-    }], duration, this.host.currentTime(), { from: Math.min(0, ...times), to: Math.max(duration, ...times) })
+    }], duration, this.host.currentTime(), BodyEditor.extentOf(times, duration))
+  }
+
+  /** Over the keyframes, a tenth more on either side; the whole recording while there are fewer than two. */
+  private static extentOf(times: number[], duration: number): { from: number, to: number } {
+    if (times.length < 2) return { from: Math.min(0, ...times), to: Math.max(duration, ...times) }
+    const first = Math.min(...times)
+    const last = Math.max(...times)
+    const margin = Math.max(500, (last - first) / 10)
+    return { from: first - margin, to: last + margin }
   }
 
   /** The row of the keyframes, readable over a light ground and a dark one. */

@@ -222,7 +222,7 @@ describe("The Bodies part of the editor", () => {
     expect(fixture.sighting.interpretation!.bodies[0].track.find(candidate => candidate.t === 2500)!.saidPosition).toBeUndefined()
   })
 
-  /** The timeline's lane laid out 100 px wide from x = 0, over the 5 s the keyframes span: 20 px a second. */
+  /** The timeline's lane laid out 100 px wide from x = 0, over the 5 s the keyframes span and a tenth more on either side: 60 ms a pixel. */
   const laidOut = (fixture: Fixture) => {
     const lane = fixture.container.querySelector<HTMLElement>("#body-keys .track-lane")!
     lane.getBoundingClientRect = () => ({ left: 0, width: 100, top: 0, height: 24, right: 100, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
@@ -242,14 +242,15 @@ describe("The Bodies part of the editor", () => {
     fixture.time = 2500
     fixture.editor.syncKeyframe()
     expect(selected()).toBeUndefined()
-    press(laidOut(fixture), 99)
+    press(laidOut(fixture), 92)
     expect(fixture.time).toBe(5000)
     expect(selected()).toBe("5000")
   })
 
   it("moves a keyframe in time when its diamond is dragged, the playhead with it", () => {
     const fixture = new Fixture()
-    press(laidOut(fixture), 99, 70)
+    // 5 s is at 91.7 px; 67 px is 3.52 s, put at the tenth of a second.
+    press(laidOut(fixture), 92, 67)
     expect(fixture.sighting.interpretation!.bodies[0].track.map(key => key.t)).toEqual([0, 3500])
     expect(fixture.time).toBe(3500)
   })

@@ -204,13 +204,17 @@ export class EventsPanel {
     const spans = events.map(({ event, index }) => ({ id: String(index), t: event.t, until: Math.max(event.t, event.until ?? event.t), label: kindOf(event) }))
     const ends = spans.flatMap(span => [span.t, span.until])
     const duration = this.host.duration?.() ?? Math.max(1, ...ends)
+    // Over what happens, a tenth more on either side: a few events at the end of a long recording are not crushed into its last pixels.
+    const first = Math.min(...ends)
+    const last = Math.max(...ends)
+    const margin = Math.max(500, (last - first) / 10)
     this.timeline.show([{
-      id: this.actor, label: m.title, color: EventsPanel.COLOR, times: [], spans,
+      id: this.actor, label: this.titleText(), color: EventsPanel.COLOR, times: [], spans,
       selected: this.picked === undefined ? undefined : String(this.picked),
       select: id => this.choose(Number(id)),
       open: () => undefined,
       add: () => this.addButton.click()
-    }], duration, this.host.now(), { from: Math.min(0, ...ends), to: Math.max(duration, ...ends) })
+    }], duration, this.host.now(), { from: first - margin, to: last + margin })
   }
 
   /** The playhead has moved: only it is drawn again. */
@@ -277,13 +281,18 @@ export class EventsPanel {
     this.root.scrollIntoView?.({ block: "start" })
   }
 
+  /** Whose events these are: the observer's, the phenomenon's, the body's picked. */
+  private titleText(): string {
+    return this.actor === "observer" ? this.messages.title
+      : this.actor === "phenomenon" ? this.messages.phenomenonTitle
+      : this.messages.bodyTitle.replace("{body}", this.host.bodyLabel?.(this.who() ?? "") ?? this.who() ?? "")
+  }
+
   /** Shows the actor's events as they now stand, and the picked one's fields. */
   render(): void {
     this.shownTheirs = this.theirs()
     // Whose events these are, said in the title: the list under it is theirs, not that of the shapes or the bodies above.
-    this.root.querySelector<HTMLElement>(".events-title")!.textContent = this.actor === "observer" ? this.messages.title
-      : this.actor === "phenomenon" ? this.messages.phenomenonTitle
-      : this.messages.bodyTitle.replace("{body}", this.host.bodyLabel?.(this.who() ?? "") ?? this.who() ?? "")
+    this.root.querySelector<HTMLElement>(".events-title")!.textContent = this.titleText()
     // A panel of the bodies needs a body to say whose events it would add.
     this.root.hidden = this.actor === "bodies" && this.who() === undefined
     const events = this.events()
@@ -301,7 +310,10 @@ export class EventsPanel {
     this.timelineHost.hidden = events.length === 0
     this.syncTimeline(events)
     const picked = this.picked === undefined ? undefined : this.host.sighting().events?.[this.picked]
-    this.fields.replaceChildren(...(picked ? [this.deleteButton, ...this.details(picked, this.picked!)] : []))
+    const details = picked ? this.details(picked, this.picked!) : []
+    // At the end of the line saying when it is: what it removes is the event of that line.
+    details[0]?.append(this.deleteButton)
+    this.fields.replaceChildren(...details)
   }
 
   /** Adds an event of `kind` at the playhead, with what a first draft of it says, and picks it. */
