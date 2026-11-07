@@ -1,3 +1,4 @@
+import { Messages } from "../../../../i18n/MessageCatalog.js"
 /** What the Beams part of the Sky group says — see BeamEditor. */
 export interface BeamEditorMessages {
   intro: string
@@ -31,3 +32,11 @@ export interface BeamEditorMessages {
   pathKeyNote: string
   pathNoKeyNote: string
 }
+
+/** The texts of the part, one chunk per language (see MessageCatalog). */
+export const BEAM_EDITOR_MESSAGES = Messages.catalog<BeamEditorMessages>({
+  en: () => import("./BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en),
+  fr: () => import("./BeamEditorMessages_fr.js").then(m => m.beamEditorMessages_fr),
+  es: () => import("./BeamEditorMessages_es.js").then(m => m.beamEditorMessages_es),
+  it: () => import("./BeamEditorMessages_it.js").then(m => m.beamEditorMessages_it)
+})

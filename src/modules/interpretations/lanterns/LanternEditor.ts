@@ -9,9 +9,7 @@ import { resolveWeatherAt } from "../../../engine/model/Sighting.js"
 import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
 import type { LanternEditorMessages } from "./messages/LanternEditorMessages.js"
-import { lanternEditorMessages_en } from "./messages/LanternEditorMessages_en.js"
-import type { UfoLanguage } from "../../../component/messages/index.js"
-import { loadLanternEditorMessages, UFO_SUPPORTED_LANGUAGES } from "../../../component/messages/index.js"
+import { LANTERN_EDITOR_MESSAGES } from "./messages/LanternEditorMessages.js"
 import { ElementList } from "../../../component/ElementList.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
 import type { PositionPlace } from "../../../component/ParameterForm.js"
@@ -40,7 +38,10 @@ export interface LanternEditorHost {
  * computes the lanterns again when the interpretation it is given is another one (see SightingEditorElement.syncBodiesShown).
  */
 export class LanternEditor {
-  private messages: LanternEditorMessages = lanternEditorMessages_en
+  /** Its texts, once they have come (see ready). */
+  private messages!: LanternEditorMessages
+  /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
+  readonly ready: Promise<void>
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -56,16 +57,14 @@ export class LanternEditor {
     SkyEventEditorStyle.attach(container, "lantern-editor-part", LanternEditor.STYLE)
     this.language = language
     if (!ParameterRegistry.of("lantern")) LanternParameters.publish()
-    this.render()
-    void this.setLanguage(language)
+    this.ready = this.setLanguage(language)
   }
 
   /** Rebuilds the part in another language, keeping the launch on show. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? lanternEditorMessages_en : await loadLanternEditorMessages(supported)
+    const messages = await LANTERN_EDITOR_MESSAGES.load(language)
     if (token !== this.languageToken) return
     this.messages = messages
     this.render()
@@ -74,6 +73,7 @@ export class LanternEditor {
 
   /** Shows what the recording states now: after a recording is loaded or an edit written. */
   sync(): void {
+    if (!this.messages) return
     const launches = this.launches
     this.shown = [...launches]
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
@@ -97,6 +97,7 @@ export class LanternEditor {
 
   /** Shows what the recording states only if it holds other launches than the fields were filled for: one loaded, one deleted. */
   refresh(): void {
+    if (!this.messages) return
     this.syncAddState()
     const launches = this.launches
     if (launches.length === this.shown.length && launches.every((launch, i) => launch.id === this.shown[i].id)) return
@@ -115,6 +116,7 @@ export class LanternEditor {
   }
 
   private render(): void {
+    if (!this.messages) return
     const m = this.messages
     this.form = undefined
     this.container.innerHTML = `<div class="launch-editor">

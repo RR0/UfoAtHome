@@ -6,9 +6,7 @@ import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
 import { SkyEvents } from "../../../engine/model/SkyEvents.js"
 import type { ReentryEditorMessages } from "./messages/ReentryEditorMessages.js"
-import { reentryEditorMessages_en } from "./messages/ReentryEditorMessages_en.js"
-import type { UfoLanguage } from "../../../component/messages/index.js"
-import { loadReentryEditorMessages, UFO_SUPPORTED_LANGUAGES } from "../../../component/messages/index.js"
+import { REENTRY_EDITOR_MESSAGES } from "./messages/ReentryEditorMessages.js"
 import { ElementList } from "../../../component/ElementList.js"
 import { Icons } from "../../../component/Icons.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
@@ -47,7 +45,10 @@ type Kind = "fireball" | "reentry"
  * and an edit made in place would not be seen.
  */
 export class ReentryEditor {
-  private messages: ReentryEditorMessages = reentryEditorMessages_en
+  /** Its texts, once they have come (see ready). */
+  private messages!: ReentryEditorMessages
+  /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
+  readonly ready: Promise<void>
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -71,16 +72,14 @@ export class ReentryEditor {
   constructor(private readonly container: HTMLElement, private readonly host: ReentryEditorHost, language: string) {
     SkyEventEditorStyle.attach(container, "reentry-editor-part", ReentryEditor.STYLE)
     this.language = language
-    this.render()
-    void this.setLanguage(language)
+    this.ready = this.setLanguage(language)
   }
 
   /** Rebuilds the part in another language, keeping the re-entry on show. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? reentryEditorMessages_en : await loadReentryEditorMessages(supported)
+    const messages = await REENTRY_EDITOR_MESSAGES.load(language)
     if (token !== this.languageToken) return
     this.messages = messages
     this.render()
@@ -89,6 +88,7 @@ export class ReentryEditor {
 
   /** Shows what the recording states now: after a recording is loaded or an edit written. */
   sync(): void {
+    if (!this.messages) return
     const reentries = this.reentries
     this.shown = [...reentries]
     if (!reentries.some(reentry => reentry.id === this.currentId)) this.currentId = reentries[0]?.id
@@ -113,6 +113,7 @@ export class ReentryEditor {
 
   /** Shows what the recording states only if it holds other re-entries than the fields were filled for: one loaded, one deleted. */
   refresh(): void {
+    if (!this.messages) return
     this.syncAddState()
     const reentries = this.reentries
     if (reentries.length === this.shown.length && reentries.every((reentry, i) => reentry.id === this.shown[i].id)) {
@@ -125,6 +126,7 @@ export class ReentryEditor {
 
   /** The playhead has moved: only it is drawn again, as at every frame of a playback. */
   setTime(t: number): void {
+    if (!this.messages) return
     this.timeline?.setTime(t)
   }
 
@@ -141,6 +143,7 @@ export class ReentryEditor {
 
   /** Shows a re-entry by its id. */
   show(id: string): void {
+    if (!this.messages) return
     this.currentId = id
     this.row = "path"
     this.placeIndex = 0
@@ -150,6 +153,7 @@ export class ReentryEditor {
   }
 
   private render(): void {
+    if (!this.messages) return
     const m = this.messages
     this.form = undefined
     this.container.innerHTML = `<div class="launch-editor">

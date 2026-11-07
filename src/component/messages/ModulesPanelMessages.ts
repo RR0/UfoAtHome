@@ -1,3 +1,4 @@
+import { Messages } from "../../i18n/MessageCatalog.js"
 /** What the Modules item of the Files group says — see ModulesPanelElement. */
 export interface ModulesPanelMessages {
   /** What a module is, above the list. */
@@ -38,3 +39,11 @@ export interface ModulesPanelMessages {
   /** Each extension point, by its id (see ExtensionPointTypes). */
   points: Record<string, string>
 }
+
+/** The texts of the Modules item, one chunk per language (see MessageCatalog). */
+export const MODULES_PANEL_MESSAGES = Messages.catalog<ModulesPanelMessages>({
+  en: () => import("./ModulesPanelMessages_en.js").then(m => m.modulesPanelMessages_en),
+  fr: () => import("./ModulesPanelMessages_fr.js").then(m => m.modulesPanelMessages_fr),
+  es: () => import("./ModulesPanelMessages_es.js").then(m => m.modulesPanelMessages_es),
+  it: () => import("./ModulesPanelMessages_it.js").then(m => m.modulesPanelMessages_it)
+})

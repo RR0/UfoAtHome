@@ -2,10 +2,9 @@ import { ModuleSession } from "../modules/ModuleSession.js"
 import { ModuleAddress } from "../modules/ModuleAddress.js"
 import type { ModuleState } from "../modules/ModuleSession.js"
 import { MessageStyle } from "./MessageStyle.js"
+import { HostLocale } from "../i18n/locale.js"
 import type { ModulesPanelMessages } from "./messages/ModulesPanelMessages.js"
-import { modulesPanelMessages_en } from "./messages/ModulesPanelMessages_en.js"
-import { loadModulesPanelMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
-import type { UfoLanguage } from "./messages/index.js"
+import { MODULES_PANEL_MESSAGES } from "./messages/ModulesPanelMessages.js"
 
 export const MODULES_PANEL_ELEMENT_NAME = "rr0-modules-panel"
 
@@ -34,7 +33,10 @@ rr0-modules-panel .mp-files { display: flex; gap: .6em; flex-wrap: wrap; align-i
  */
 export class ModulesPanelElement extends HTMLElement {
   private session = ModuleSession.shared
-  private messages: ModulesPanelMessages = modulesPanelMessages_en
+  /** Its texts, once they have come: nothing is drawn before, in no language (see setLanguage). */
+  private messages!: ModulesPanelMessages
+  /** Whether a language was asked for: the page's is taken otherwise (see connectedCallback). */
+  private languageAsked = false
   private named: string[] = []
   private recordingBase?: string
   private note?: { text: string, kind: "info" | "error" }
@@ -66,15 +68,17 @@ export class ModulesPanelElement extends HTMLElement {
   }
 
   async setLanguage(language: string): Promise<void> {
+    this.languageAsked = true
     const token = ++this.languageToken
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? modulesPanelMessages_en : await loadModulesPanelMessages(supported)
+    const messages = await MODULES_PANEL_MESSAGES.load(language)
     if (token !== this.languageToken) return
     this.messages = messages
     this.render()
   }
 
   connectedCallback(): void {
+    // Put in a page by itself, it speaks the page's language (see HostLocale).
+    if (!this.languageAsked) void this.setLanguage(HostLocale.preferencesFor(this)[0] ?? "en")
     this.session.changes.addEventListener("change", this.onChange)
     void this.session.start()
     this.render()
@@ -106,8 +110,8 @@ export class ModulesPanelElement extends HTMLElement {
   }
 
   private render(): void {
-    if (!this.isConnected) return
     const m = this.messages
+    if (!this.isConnected || !this.messages) return
     const doc = this.ownerDocument
     const style = doc.createElement("style")
     style.textContent = STYLE

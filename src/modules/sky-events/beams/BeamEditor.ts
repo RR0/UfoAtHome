@@ -8,9 +8,7 @@ import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
 import { SkyEvents } from "../../../engine/model/SkyEvents.js"
 import type { BeamEditorMessages } from "./messages/BeamEditorMessages.js"
-import { beamEditorMessages_en } from "./messages/BeamEditorMessages_en.js"
-import type { UfoLanguage } from "../../../component/messages/index.js"
-import { loadBeamEditorMessages, UFO_SUPPORTED_LANGUAGES } from "../../../component/messages/index.js"
+import { BEAM_EDITOR_MESSAGES } from "./messages/BeamEditorMessages.js"
 import { ElementList } from "../../../component/ElementList.js"
 import { Icons } from "../../../component/Icons.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
@@ -51,7 +49,10 @@ type Row = "on" | "light" | "path"
  * scene keeps the points it cut a beam into for as long as it is the same beam (see BeamSystem), and an edit made in place would not be seen.
  */
 export class BeamEditor {
-  private messages: BeamEditorMessages = beamEditorMessages_en
+  /** Its texts, once they have come (see ready). */
+  private messages!: BeamEditorMessages
+  /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
+  readonly ready: Promise<void>
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -81,16 +82,14 @@ export class BeamEditor {
     this.language = language
     SkyEventEditorStyle.attach(container, "beam-editor", BeamEditor.STYLE)
     if (!ParameterRegistry.of("beam")) BeamParameters.publish()
-    this.render()
-    void this.setLanguage(language)
+    this.ready = this.setLanguage(language)
   }
 
   /** Rebuilds the part in another language, keeping the beam on show. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? beamEditorMessages_en : await loadBeamEditorMessages(supported)
+    const messages = await BEAM_EDITOR_MESSAGES.load(language)
     if (token !== this.languageToken) return
     this.messages = messages
     this.render()
@@ -99,6 +98,7 @@ export class BeamEditor {
 
   /** Shows what the recording states now: after a recording is loaded or an edit written. */
   sync(): void {
+    if (!this.messages) return
     const beams = this.beams
     this.shown = [...beams]
     if (!beams.some(beam => beam.id === this.currentId)) this.currentId = beams[0]?.id
@@ -115,6 +115,7 @@ export class BeamEditor {
 
   /** Shows what the recording states only if it holds other beams than the fields were filled for: one loaded, one deleted. */
   refresh(): void {
+    if (!this.messages) return
     this.syncAddState()
     const beams = this.beams
     if (beams.length === this.shown.length && beams.every((beam, i) => beam.id === this.shown[i].id)) {
@@ -127,6 +128,7 @@ export class BeamEditor {
 
   /** The playhead has moved: only it is drawn again, as at every frame of a playback. */
   setTime(t: number): void {
+    if (!this.messages) return
     this.timeline?.setTime(t)
   }
 
@@ -143,6 +145,7 @@ export class BeamEditor {
 
   /** Shows a beam by its id. */
   show(id: string): void {
+    if (!this.messages) return
     this.currentId = id
     this.row = "on"
     this.lightIndex = undefined
@@ -152,6 +155,7 @@ export class BeamEditor {
   }
 
   private render(): void {
+    if (!this.messages) return
     const m = this.messages
     this.form = undefined
     this.container.innerHTML = `<div class="launch-editor">

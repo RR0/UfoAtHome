@@ -3,6 +3,7 @@ import { InterpretationKinds } from "../../src/modules/interpretations/Interpret
 import type { InterpretationKind } from "../../src/modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../../src/modules/interpretations/interpretationSources.js"
 import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
+import { Messages } from "../../src/i18n/MessageCatalog.js"
 import { CaseFile } from "../../src/engine/persistence/caseJson.js"
 import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
 import type { BodyJson } from "../../src/engine/interpretation/Interpretation.js"
@@ -10,7 +11,7 @@ import type { BodyJson } from "../../src/engine/interpretation/Interpretation.js
 /** A weather balloon stated as its burst height, computed into one body. */
 const BALLOON: InterpretationKind<{ id: string, burstM: number }> = {
   key: "balloons",
-  title: { en: "Weather balloons" },
+  messages: Messages.catalog({ en: async () => ({ title: "Weather balloons" }), fr: async () => ({ title: "Ballons-sondes" }), es: async () => ({ title: "Globos sonda" }), it: async () => ({ title: "Palloni sonda" }) }),
   bodiesOf: balloon => [{ id: balloon.id, model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 0, altitudeAboveGroundM: balloon.burstM }] } as unknown as BodyJson]
 }
 

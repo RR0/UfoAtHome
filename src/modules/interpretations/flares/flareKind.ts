@@ -1,3 +1,4 @@
+import { FLARE_KIND_MESSAGES } from "./messages/FlareKindMessages.js"
 import type { InterpretationKind } from "../InterpretationKind.js"
 import { DecoyFlare } from "./DecoyFlare.js"
 import type { FlareSalvoJson } from "./DecoyFlare.js"
@@ -6,6 +7,6 @@ import type { FlareSalvoJson } from "./DecoyFlare.js"
  * in the recording's text: no part of the editor of its own yet. */
 export const FLARE_KIND: InterpretationKind<FlareSalvoJson> = {
   key: "flares",
-  title: { en: "Decoy flares", fr: "Leurres pyrotechniques", es: "Bengalas señuelo", it: "Bengala esca" },
+  messages: FLARE_KIND_MESSAGES,
   bodiesOf: salvo => DecoyFlare.bodiesOf(salvo)
 }

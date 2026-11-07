@@ -1,3 +1,4 @@
+import { Messages } from "../../../../i18n/MessageCatalog.js"
 /** What the Launches part of the Phenomenon group says — see LaunchEditor. */
 export interface LaunchEditorMessages {
   intro: string
@@ -25,3 +26,11 @@ export interface LaunchEditorMessages {
   here: string
   zoomHint: string
 }
+
+/** The texts of the part, one chunk per language (see MessageCatalog). */
+export const LAUNCH_EDITOR_MESSAGES = Messages.catalog<LaunchEditorMessages>({
+  en: () => import("./LaunchEditorMessages_en.js").then(m => m.launchEditorMessages_en),
+  fr: () => import("./LaunchEditorMessages_fr.js").then(m => m.launchEditorMessages_fr),
+  es: () => import("./LaunchEditorMessages_es.js").then(m => m.launchEditorMessages_es),
+  it: () => import("./LaunchEditorMessages_it.js").then(m => m.launchEditorMessages_it)
+})

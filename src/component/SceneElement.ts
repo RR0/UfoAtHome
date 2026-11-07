@@ -102,7 +102,7 @@ import { ModuleRegistry } from "../modules/ModuleRegistry.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
 import type { SkyEventsJson } from "../engine/model/SkyEvents.js"
-import type { SkyEventKind, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
+import type { SkyEventKind, SkyEventKindMessages, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
@@ -171,7 +171,7 @@ const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
 /** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
 
-/** What is said of a rocket's plume pointed at: see SceneNames.plumeTooltip. */
+/** What is said of a ghost of the lens pointed at: see SceneNames.ghostTooltip. */
 const GHOST_TOOLTIP: GhostTooltipTexts = {
   ghost: "Ghost: {name}", halo: "Halo: {name}", double: "Double: {name}", unnamed: "a light",
   detail: "{name}. {cause}, {where}.",
@@ -884,6 +884,25 @@ export class SceneElement extends HTMLElement {
     return shown
   }
 
+  /** The texts of the kinds of events of the sky, in the scene's language, by kind (see SkyEventKind.messages). */
+  private readonly skyEventTexts = new Map<SkyEventKind, SkyEventKindMessages>()
+  private skyEventTextsLanguage?: string
+
+  /** Loads the texts of `kinds` in the scene's language, once each; those of another language are forgotten when the language changes. */
+  private loadSkyEventTexts(kinds: readonly SkyEventKind[]): void {
+    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES)
+    if (language !== this.skyEventTextsLanguage) {
+      this.skyEventTexts.clear()
+      this.skyEventTextsLanguage = language
+    }
+    for (const kind of kinds) {
+      if (this.skyEventTexts.has(kind)) continue
+      void kind.messages.load(language).then(texts => {
+        if (this.skyEventTextsLanguage === language) this.skyEventTexts.set(kind, texts)
+      }, () => undefined)
+    }
+  }
+
   /**
    * The event of the sky under a point of the picture, among the kinds `which` takes, named by its kind (see SkyEventKind.describe): the
    * events the recording states, with the fireballs a camera network recorded while it runs (see skyEventsShown).
@@ -895,10 +914,15 @@ export class SceneElement extends HTMLElement {
     const kind = hit ? SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).find(candidate => candidate.key === hit.kind) : undefined
     const event = hit && kind ? SkyEventKinds.eventsOf(skyEvents, kind).find(candidate => candidate.id === hit.id) : undefined
     if (!hit || !kind || !event) return undefined
-    const name = this.said.read(event.title) || kind.fallbackName || this.said.read(kind.title) || kind.key
-    const described = kind.describe?.(event, hit, {
-      said: this.said, name, distance: m => this.distanceText(m), names: this.naming.names as unknown as Record<string, unknown> | undefined
-    })
+    // Its texts are loaded when the recording has an event of the kind (see loadSkyEventTexts): one under the pointer before they came is
+    // named on the next move.
+    const texts = this.skyEventTexts.get(kind)
+    if (!texts) {
+      this.loadSkyEventTexts([kind])
+      return undefined
+    }
+    const name = this.said.read(event.title) || texts.name
+    const described = kind.describe?.(event, hit, { said: this.said, texts, name, distance: m => this.distanceText(m) })
     const detail = described?.detail ?? (hit.distanceM !== undefined ? `${name}, ${this.distanceText(hit.distanceM)}` : undefined)
     return {
       kind: (kind.pickKind ?? "skyEvent") as ScenePick["kind"], id: event.id, name: described?.name ?? name,
@@ -2200,6 +2224,8 @@ export class SceneElement extends HTMLElement {
     // and lit by the renderer at this instant, which knows where its scene and its observer stand, what its air is and what date it is.
     this.skyEventsStartDate = startDate
     this.sceneRenderer.setSkyEvents(sky, false, startDate)
+    // What their tooltips say, ready before the pointer comes.
+    if (sky) this.loadSkyEventTexts(SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).filter(kind => SkyEventKinds.eventsOf(sky, kind).length > 0 && !this.skyEventTexts.has(kind)))
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no

@@ -6,9 +6,7 @@ import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
 import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
 import type { LaunchEditorMessages } from "./messages/LaunchEditorMessages.js"
-import { launchEditorMessages_en } from "./messages/LaunchEditorMessages_en.js"
-import type { UfoLanguage } from "../../../component/messages/index.js"
-import { loadLaunchEditorMessages, UFO_SUPPORTED_LANGUAGES } from "../../../component/messages/index.js"
+import { LAUNCH_EDITOR_MESSAGES } from "./messages/LaunchEditorMessages.js"
 import { ElementList } from "../../../component/ElementList.js"
 import { Icons } from "../../../component/Icons.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
@@ -42,7 +40,10 @@ export interface LaunchEditorHost {
  * moves in time; the "+" of a row adds there at the playhead.
  */
 export class LaunchEditor {
-  private messages: LaunchEditorMessages = launchEditorMessages_en
+  /** Its texts, once they have come (see ready). */
+  private messages!: LaunchEditorMessages
+  /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
+  readonly ready: Promise<void>
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -66,16 +67,14 @@ export class LaunchEditor {
     this.language = language
     // The kind's description is what the form is built from; published so that an asset can refine it.
     if (!ParameterRegistry.of("launch")) LaunchParameters.publish()
-    this.render()
-    void this.setLanguage(language)
+    this.ready = this.setLanguage(language)
   }
 
   /** Rebuilds the part in another language, keeping the launch on show. */
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const supported = (UFO_SUPPORTED_LANGUAGES as readonly string[]).includes(language) ? language as UfoLanguage : "en"
-    const messages = supported === "en" ? launchEditorMessages_en : await loadLaunchEditorMessages(supported)
+    const messages = await LAUNCH_EDITOR_MESSAGES.load(language)
     if (token !== this.languageToken) return
     this.messages = messages
     this.render()
@@ -84,6 +83,7 @@ export class LaunchEditor {
 
   /** Shows what the recording states now: after a recording is loaded or an edit written. */
   sync(): void {
+    if (!this.messages) return
     const launches = this.launches
     this.shown = [...launches]
     if (!launches.some(launch => launch.id === this.currentId)) this.currentId = launches[0]?.id
@@ -105,6 +105,7 @@ export class LaunchEditor {
    * leaves the fields alone, so that what is being typed is not drawn again under the cursor.
    */
   refresh(): void {
+    if (!this.messages) return
     // Whether a launch can be added follows the place, which is given in another group while the launches stay the same.
     this.syncAddState()
     const launches = this.launches
@@ -117,6 +118,7 @@ export class LaunchEditor {
 
   /** The playhead has moved: only it is drawn again, as at every frame of a playback. */
   setTime(t: number): void {
+    if (!this.messages) return
     this.timeline?.setTime(t)
   }
 
@@ -133,6 +135,7 @@ export class LaunchEditor {
 
   /** Shows a launch by its id, as the summary's chip and the picture do for a body. */
   show(id: string): void {
+    if (!this.messages) return
     this.currentId = id
     this.row = "path"
     this.placeIndex = 0
@@ -141,6 +144,7 @@ export class LaunchEditor {
   }
 
   private render(): void {
+    if (!this.messages) return
     const m = this.messages
     this.form = undefined
     this.container.innerHTML = `<div class="launch-editor">

@@ -1,0 +1,47 @@
+/** The languages UFO@home's interface is written in. */
+export const UFO_LANGUAGES = ["en", "fr", "es", "it"] as const
+export type UfoInterfaceLanguage = (typeof UFO_LANGUAGES)[number]
+
+/**
+ * The texts of one part of the interface (a component, a kind of event, a set of parameters), one module per language, loaded only for the
+ * language asked: a French reader never downloads the English.
+ *
+ * The one way this project gives an interface its words. Whatever shows text to a reader takes a catalog (see SkyEventKind.messages,
+ * ParameterSet, the editors' constructors) rather than words written inline, however few: the day it needs one more, nothing has to be
+ * decided. `T` is the interface of the texts, and each language's module is checked against it (`satisfies T`): a language that lacks a
+ * text does not compile.
+ */
+export interface MessageCatalog<T> {
+  /** The texts in `language` (a tag such as "fr" or "fr-CA"), or in English when the interface is not written in it. Loaded once. */
+  load(language: string): Promise<T>
+}
+
+/** Builds catalogs, and says which interface language a reader gets. */
+export class Messages {
+  /**
+   * A catalog from one loader per language, each a dynamic `import()` of that language's module, so that the bundler makes it a chunk of
+   * its own: `Messages.catalog<BeamEditorMessages>({ en: () => import("./BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en), … })`.
+   */
+  static catalog<T>(loaders: Readonly<Record<UfoInterfaceLanguage, () => Promise<T>>>): MessageCatalog<T> {
+    const loaded = new Map<UfoInterfaceLanguage, Promise<T>>()
+    return {
+      load(language: string): Promise<T> {
+        const supported = Messages.languageOf(language)
+        let texts = loaded.get(supported)
+        if (!texts) {
+          texts = loaders[supported]()
+          loaded.set(supported, texts)
+          // A chunk that failed (a page offline, a deployment replaced under it) is asked again next time rather than failing for good.
+          texts.catch(() => loaded.delete(supported))
+        }
+        return texts
+      }
+    }
+  }
+
+  /** The interface language for a language tag: its base ("fr" of "fr-CA") when the interface is written in it, English otherwise. */
+  static languageOf(language: string): UfoInterfaceLanguage {
+    const base = language.toLowerCase().split("-")[0]
+    return (UFO_LANGUAGES as readonly string[]).includes(base) ? base as UfoInterfaceLanguage : "en"
+  }
+}

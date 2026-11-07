@@ -23,7 +23,7 @@ import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
-import type { SaidText } from "../engine/model/SaidText.js"
+import type { MessageCatalog } from "../i18n/MessageCatalog.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
@@ -8766,7 +8766,7 @@ export class SightingEditorElement extends HTMLElement {
   /** The parts the registry's kinds ask for now, in their order: what buildSkyParts makes the Sky group hold. */
   private wantedSkyParts(): Omit<SkyPart, "tab" | "label" | "panel">[] {
     const interpretations = InterpretationRegistry.kinds().filter(kind => kind.editor).map(kind => ({
-      key: `interpretation:${kind.key}`, id: `interpretation-${kind.key}`, category: "interpretation" as const, kind, title: kind.title,
+      key: `interpretation:${kind.key}`, id: `interpretation-${kind.key}`, category: "interpretation" as const, kind, titles: kind.messages,
       create: () => kind.editor!().then(create => (container: HTMLElement): SkyPartEditor => create(container, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
@@ -8782,7 +8782,7 @@ export class SightingEditorElement extends HTMLElement {
       }, this.language))
     }))
     const skyEvents = SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).filter(kind => kind.editor).map(kind => ({
-      key: `skyEvent:${kind.key}`, id: `sky-event-${kind.key}`, category: "skyEvent" as const, kind, title: kind.title,
+      key: `skyEvent:${kind.key}`, id: `sky-event-${kind.key}`, category: "skyEvent" as const, kind, titles: kind.messages,
       create: () => kind.editor!().then(create => (container: HTMLElement): SkyPartEditor => create(container, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
@@ -8830,7 +8830,7 @@ export class SightingEditorElement extends HTMLElement {
       tab.setAttribute("aria-expanded", "false")
       const label = document.createElement("span")
       label.id = `label-${want.id}`
-      label.textContent = this.said.read(want.title) ?? want.key
+      this.nameSkyPart(label, want.titles)
       tab.append(label)
       tab.addEventListener("click", () => this.openSubgroup(tab))
       strip.append(tab)
@@ -8855,6 +8855,14 @@ export class SightingEditorElement extends HTMLElement {
       strip.append(part.tab)
       panelBefore.before(part.panel)
     }
+  }
+
+  /** Names a part's tab in the editor's language, once the kind's texts have come (see MessageCatalog). */
+  private nameSkyPart(label: HTMLElement, titles: MessageCatalog<{ title: string }>): void {
+    const language = this.language
+    void titles.load(language).then(texts => {
+      if (this.language === language) label.textContent = texts.title
+    }, () => undefined)
   }
 
   /**
@@ -11470,7 +11478,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelShapeGroup.textContent = messages.shapeGroup
     this.labelShapesSubgroup.textContent = messages.shapesSubgroup
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
-    for (const part of this.skyParts.values()) part.label.textContent = this.said.read(part.title) ?? part.key
+    for (const part of this.skyParts.values()) this.nameSkyPart(part.label, part.titles)
     for (const group of ["location", "decor", "weather"]) {
       const button = this.shadow.getElementById(`${group}-settings-button`)
       button?.setAttribute("title", messages.dataSources)
@@ -12902,7 +12910,8 @@ interface SkyPart {
   category: "interpretation" | "skyEvent"
   /** The kind it was made from: another one under the same key (a module replaced) makes another part. */
   kind: object
-  title: SaidText
+  /** What its tab is called, in the editor's language (see nameSkyPart). */
+  titles: MessageCatalog<{ title: string }>
   create(): Promise<(container: HTMLElement) => SkyPartEditor>
   tab: HTMLButtonElement
   label: HTMLElement

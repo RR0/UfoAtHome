@@ -5,6 +5,7 @@ import type { SaidText } from "../../engine/model/SaidText.js"
 import type { SaidTexts } from "../../engine/model/SaidText.js"
 import type { PositionPlace } from "../../component/ParameterForm.js"
 import type { DataSource } from "../../engine/source/DataSource.js"
+import type { MessageCatalog } from "../../i18n/MessageCatalog.js"
 import type { HorizontalPosition } from "../../engine/astronomy/CelestialPositions.js"
 
 /** What every event of the sky states, whatever its kind: an id, unique among the events of its kind in the recording. */
@@ -130,11 +131,11 @@ export interface SkyEventEditor {
  * skyEventSources.ts, another module's by its script. Its code is loaded the first time a recording has an event of the kind
  * (`simulation`) or the author opens its part (`editor`), never before.
  */
-export interface SkyEventKind<J extends SkyEventJson = SkyEventJson> {
+export interface SkyEventKind<J extends SkyEventJson = SkyEventJson, M extends SkyEventKindMessages = SkyEventKindMessages> {
   /** Where the recording states them: `skyEvents.<key>`. Unique among the kinds. */
   key: string
-  /** What the editor's part is called, in as many languages as it has. */
-  title: SaidText
+  /** Its texts in the reader's language (see MessageCatalog): what its part is called, what one with no title is, what its tooltip says. */
+  messages: MessageCatalog<M>
   /** The code that draws them. */
   simulation(): Promise<() => SkyEventSimulation<J>>
   /** The code of the editor's part; a kind without one is drawn and not edited. */
@@ -142,26 +143,30 @@ export interface SkyEventKind<J extends SkyEventJson = SkyEventJson> {
   /** How far from `centre` they reach, metres: the ground is built that far, and the scene drawn that deep. */
   reachM?(events: readonly J[], centre: { lat: number, lng: number }): number
   /** What the scene's tooltip says of one under the pointer: its name, and a sentence shown on demand (see SkyEventDescribeContext). */
-  describe?(event: J, hit: SkyEventHit, context: SkyEventDescribeContext): { name: string, detail?: string }
+  describe?(event: J, hit: SkyEventHit, context: SkyEventDescribeContext<M>): { name: string, detail?: string }
   /** What the scene calls what is under the pointer, for those who style or test it: "beam", "plume", "reentry"; "skyEvent" when absent. */
   pickKind?: string
   /** Looked for under the pointer after the satellites rather than before: a point moving across the sky, which a satellite crossing it is
    * the better answer for. Only for a kind drawn on the sky's shell (see SkyEventSimulation.inSky). */
   pickedAfterSatellites?: boolean
-  /** What it is called when it has no title of its own. */
-  fallbackName?: string
+}
+
+/** What every kind's texts say: what its part of the editor is called, and what one with no title of its own is called. */
+export interface SkyEventKindMessages {
+  title: string
+  name: string
 }
 
 /** What a kind's tooltip is said with. */
-export interface SkyEventDescribeContext {
-  /** Reads a text in the reader's language. */
+export interface SkyEventDescribeContext<M extends SkyEventKindMessages = SkyEventKindMessages> {
+  /** Reads a text of the recording (an event's title) in the reader's language. */
   said: SaidTexts
+  /** The kind's own texts, in the reader's language (see SkyEventKind.messages). */
+  texts: M
   /** The event's own name, or the kind's when it has none. */
   name: string
   /** A distance from the eye as the page writes it: "540 m", "1,7 km". */
   distance(m: number): string
-  /** The scene's own words in the reader's language (see SceneNames), by key; what a built-in kind's tooltips are taken from. */
-  names?: Readonly<Record<string, unknown>>
 }
 
 /** The kinds of the registry, and the events of one of them a recording states. */

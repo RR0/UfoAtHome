@@ -11,11 +11,12 @@ describe("BeamEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = (skyEvents?: SkyEventsJson) => {
+  const build = async (skyEvents?: SkyEventsJson) => {
     const sighting = { skyEvents, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
     const time = { now: 4000 }
     const editor = new BeamEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", currentTime: () => time.now, duration: () => 20000, seekTo: t => { time.now = t }, changed: () => changes++ }, "en")
+    await editor.ready
     editor.sync()
     return { sighting, changes: () => changes, time }
   }
@@ -24,8 +25,8 @@ describe("BeamEditor", () => {
     target.dispatchEvent(new Event("input", { bubbles: true }))
   }
 
-  test("adds a beam in front of the observer, a green laser, under the recording's events of the sky", () => {
-    const { sighting, changes } = build()
+  test("adds a beam in front of the observer, a green laser, under the recording's events of the sky", async () => {
+    const { sighting, changes } = await build()
     container.querySelector<HTMLButtonElement>("#beam-add")!.click()
     const beams = sighting.skyEvents!.beams!
     expect(beams).toHaveLength(1)
@@ -34,9 +35,9 @@ describe("BeamEditor", () => {
     expect(changes()).toBe(1)
   })
 
-  test("writes an edit as a new beam in a new list, so that the scene sees it", () => {
+  test("writes an edit as a new beam in a new list, so that the scene sees it", async () => {
     const beam = { id: "b", path, wavelengthNm: 532, powerW: 10 }
-    const { sighting } = build({ beams: [beam] })
+    const { sighting } = await build({ beams: [beam] })
     const before = sighting.skyEvents!.beams!
     // Its power is a field of its light, shown with the Light row.
     container.querySelectorAll<HTMLButtonElement>("#beam-timeline .track-name")[1].click()
@@ -64,8 +65,8 @@ describe("BeamEditor", () => {
     lane.dispatchEvent(new MouseEvent("pointerup", { clientX: to, bubbles: true }))
   }
 
-  test("lays the beam out on a timeline of three rows, the details of the one picked alone under it", () => {
-    build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("lays the beam out on a timeline of three rows, the details of the one picked alone under it", async () => {
+    await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     expect(rows().map(row => row.querySelector(".track-name")!.textContent)).toEqual(["On", "Light", "Path"])
     expect(rows().map(row => row.dataset.active)).toEqual(["true", "false", "false"])
     expect([shown("beam-on"), shown("beam-light"), shown("beam-path")]).toEqual([true, false, false])
@@ -74,8 +75,8 @@ describe("BeamEditor", () => {
     expect(rows().map(row => row.dataset.active)).toEqual(["false", "false", "true"])
   })
 
-  test("edits a point of the path, and keeps two at least", () => {
-    const { sighting } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("edits a point of the path, and keeps two at least", async () => {
+    const { sighting } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     name(2).click()
     typed(container.querySelector('#beam-place-parameters [data-key="altitudeM"]')!, "175")
     expect(sighting.skyEvents!.beams![0].path[0].altitudeM).toBe(175)
@@ -84,8 +85,8 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0].path).toHaveLength(3)
   })
 
-  test("its ends dragged move when it is on, and the + switches it on at the playhead", () => {
-    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("its ends dragged move when it is on, and the + switches it on at the playhead", async () => {
+    const { sighting, time } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     const lane = laidOut(rows()[0].querySelector<HTMLElement>(".track-lane")!)
     expect([...lane.querySelectorAll<HTMLElement>(".kf")].map(diamond => diamond.dataset.t)).toEqual(["0", "20000"])
     drag(lane, 199, 150)
@@ -98,8 +99,8 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0]).toMatchObject({ fromT: 4000, untilT: 15000 })
   })
 
-  test("a key of the light put at the playhead is as the light is then, and its colour picked sets its wavelength", () => {
-    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10, light: [{ t: 0, wavelengthNm: 532 }, { t: 8000, wavelengthNm: 638, powerW: 20 }] }] })
+  test("a key of the light put at the playhead is as the light is then, and its colour picked sets its wavelength", async () => {
+    const { sighting, time } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10, light: [{ t: 0, wavelengthNm: 532 }, { t: 8000, wavelengthNm: 638, powerW: 20 }] }] })
     time.now = 4000
     add(1).click()
     const light = sighting.skyEvents!.beams![0].light!
@@ -115,8 +116,8 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0].light).toHaveLength(2)
   })
 
-  test("without a key of the light, the colour picked is the beam's own", () => {
-    const { sighting } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("without a key of the light, the colour picked is the beam's own", async () => {
+    const { sighting } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     name(1).click()
     const colour = container.querySelector<HTMLInputElement>("#beam-colour")!
     expect(colour.value).toMatch(/^#[0-9a-f]{6}$/)
@@ -125,8 +126,8 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0].wavelengthNm).toBeGreaterThan(600)
   })
 
-  test("a key of the path put at the playhead holds the path then, and its points are edited where it stands", () => {
-    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("a key of the path put at the playhead holds the path then, and its points are edited where it stands", async () => {
+    const { sighting, time } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     time.now = 6000
     add(2).click()
     const moves = sighting.skyEvents!.beams![0].moves!
@@ -139,8 +140,8 @@ describe("BeamEditor", () => {
     expect(sighting.skyEvents!.beams![0].moves).toBeUndefined()
   })
 
-  test("deleting the last beam leaves no event of the sky behind", () => {
-    const { sighting } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+  test("deleting the last beam leaves no event of the sky behind", async () => {
+    const { sighting } = await build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
     container.querySelector<HTMLButtonElement>("#beam-delete")!.click()
     expect(sighting.skyEvents).toBeUndefined()
   })

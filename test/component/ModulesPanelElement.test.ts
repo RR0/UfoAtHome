@@ -15,10 +15,11 @@ const fetchImpl = (async (input: RequestInfo | URL) => String(input) === MANIFES
   ? new Response(JSON.stringify(manifest)) : new Response("", { status: 404 })) as typeof fetch
 const session = () => new ModuleSession(new ModuleLoader({ fetchImpl, importImpl: async () => ({ default: () => ({}) }) }), sessionStorage)
 
-const mount = (modules: ModuleSession): ModulesPanelElement => {
+const mount = async (modules: ModuleSession): Promise<ModulesPanelElement> => {
   const panel = document.createElement("rr0-modules-panel") as ModulesPanelElement
   panel.moduleSession = modules
   document.body.append(panel)
+  await panel.setLanguage("en")
   return panel
 }
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
@@ -34,7 +35,7 @@ afterEach(() => {
 
 describe("ModulesPanelElement", () => {
   it("adds a module by its address and says what it brings and that it runs code", async () => {
-    const panel = mount(session())
+    const panel = await mount(session())
     const input = panel.querySelector<HTMLInputElement>("#module-url")!
     input.value = MANIFEST
     input.dispatchEvent(new Event("input"))
@@ -50,7 +51,7 @@ describe("ModulesPanelElement", () => {
 
   it("lists what the recording names, without running its code, and lets the recording stop naming it", async () => {
     const modules = session()
-    const panel = mount(modules)
+    const panel = await mount(modules)
     panel.base = "https://acme.example/case/sighting.json"
     panel.recordingModules = ["../ufoathome-module.json"]
     await modules.require(panel.recordingModules, "https://acme.example/case/sighting.json")
@@ -71,7 +72,7 @@ describe("ModulesPanelElement", () => {
   })
 
   it("shows why a file is not a list of modules", async () => {
-    const panel = mount(session())
+    const panel = await mount(session())
     const input = panel.querySelector<HTMLInputElement>("#modules-import")!
     Object.defineProperty(input, "files", { value: [new Blob(["{}"])] })
     input.dispatchEvent(new Event("change"))

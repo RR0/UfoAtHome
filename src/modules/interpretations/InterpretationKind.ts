@@ -1,8 +1,9 @@
 import type { BodyJson, InterpretationJson } from "../../engine/interpretation/Interpretation.js"
 import type { Sighting } from "../../engine/model/Sighting.js"
-import type { SaidText, SaidTexts } from "../../engine/model/SaidText.js"
+import type { SaidTexts } from "../../engine/model/SaidText.js"
 import type { PositionPlace } from "../../component/ParameterForm.js"
 import type { DataSource } from "../../engine/source/DataSource.js"
+import type { MessageCatalog } from "../../i18n/MessageCatalog.js"
 
 /** What an editor of a kind of interpretation needs of the editor it is a part of. */
 export interface InterpretationEditorHost {
@@ -41,8 +42,8 @@ export interface InterpretationEditor {
 export interface InterpretationKind<J = unknown> {
   /** Where the interpretation states them: `interpretation.<key>`. Unique among the kinds. */
   key: string
-  /** What the editor's part is called, in as many languages as it has. */
-  title: SaidText
+  /** Its texts in the reader's language (see MessageCatalog): what its part of the editor is called. */
+  messages: MessageCatalog<{ title: string }>
   /** The bodies one of them is, as drawn. */
   bodiesOf(item: J): BodyJson[]
   /** The code of the editor's part; a kind without one is drawn and not edited. */

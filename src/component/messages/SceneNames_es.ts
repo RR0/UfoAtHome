@@ -159,9 +159,7 @@ export const sceneNames_es: SceneNames = {
   starTooltipBelow: "{name} — mag {mag}, {alt}° bajo la horizontal",
   decorTooltip: "{name} — {size}, a {distance}",
   satelliteTooltip: "{name} — satélite, mag {mag}, a {height} km de altitud",
-  reentryTooltip: { name: "Reentrada atmosférica", piece: "{name} — mag {mag}, a {height} km de altitud y {distance} km", fragment: "{name}, un fragmento — mag {mag}, a {height} km de altitud y {distance} km" },
   afterimageTooltip: { name: "Imagen remanente, en el ojo", detail: "{name}: donde cayó la imagen de una luz más brillante que el Sol, el pigmento de la retina está decolorado: durante unos segundos sigue brillando, blanca y luego de colores, y después lo que se ve allí parece más oscuro. Se queda en el mismo lugar del campo de visión hacia donde se gire la mirada, y tarda minutos en borrarse." },
-  plumeTooltip: { name: "Estela de cohete", detail: "{name} — {part}, a {distance}, a {height} km de altitud", ascent: "escape del ascenso", burn: "escape de un encendido", vent: "propelentes purgados" },
   ghostTooltip: {
     ghost: "Reflejo: {name}", halo: "Halo: {name}", double: "Doble: {name}", unnamed: "una luz",
     detail: "{name}. {cause}, {where}.",

@@ -5,14 +5,9 @@ import type { TagNames } from "./TagNames.js"
 import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
-import type { LaunchEditorMessages } from "../../modules/sky-events/launches/messages/LaunchEditorMessages.js"
-import type { BeamEditorMessages } from "../../modules/sky-events/beams/messages/BeamEditorMessages.js"
-import type { ReentryEditorMessages } from "../../modules/sky-events/reentries/messages/ReentryEditorMessages.js"
-import type { LanternEditorMessages } from "../../modules/interpretations/lanterns/messages/LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
 import type { ShareMessages } from "./ShareMessages.js"
-import type { ModulesPanelMessages } from "./ModulesPanelMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -86,49 +81,9 @@ const bodyEditorLoaders: Record<UfoLanguage, () => Promise<BodyEditorMessages>> 
   it: () => import("./BodyEditorMessages_it.js").then(m => m.bodyEditorMessages_it)
 }
 
-const beamEditorLoaders: Record<UfoLanguage, () => Promise<BeamEditorMessages>> = {
-  en: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en),
-  fr: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_fr.js").then(m => m.beamEditorMessages_fr),
-  es: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_es.js").then(m => m.beamEditorMessages_es),
-  it: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_it.js").then(m => m.beamEditorMessages_it)
-}
 
-export function loadBeamEditorMessages(language: UfoLanguage): Promise<BeamEditorMessages> {
-  return beamEditorLoaders[language]()
-}
 
-const reentryEditorLoaders: Record<UfoLanguage, () => Promise<ReentryEditorMessages>> = {
-  en: () => import("../../modules/sky-events/reentries/messages/ReentryEditorMessages_en.js").then(m => m.reentryEditorMessages_en),
-  fr: () => import("../../modules/sky-events/reentries/messages/ReentryEditorMessages_fr.js").then(m => m.reentryEditorMessages_fr),
-  es: () => import("../../modules/sky-events/reentries/messages/ReentryEditorMessages_es.js").then(m => m.reentryEditorMessages_es),
-  it: () => import("../../modules/sky-events/reentries/messages/ReentryEditorMessages_it.js").then(m => m.reentryEditorMessages_it)
-}
 
-export function loadReentryEditorMessages(language: UfoLanguage): Promise<ReentryEditorMessages> {
-  return reentryEditorLoaders[language]()
-}
-
-const lanternEditorLoaders: Record<UfoLanguage, () => Promise<LanternEditorMessages>> = {
-  en: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_en.js").then(m => m.lanternEditorMessages_en),
-  fr: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_fr.js").then(m => m.lanternEditorMessages_fr),
-  es: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_es.js").then(m => m.lanternEditorMessages_es),
-  it: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_it.js").then(m => m.lanternEditorMessages_it)
-}
-
-export function loadLanternEditorMessages(language: UfoLanguage): Promise<LanternEditorMessages> {
-  return lanternEditorLoaders[language]()
-}
-
-const launchEditorLoaders: Record<UfoLanguage, () => Promise<LaunchEditorMessages>> = {
-  en: () => import("../../modules/sky-events/launches/messages/LaunchEditorMessages_en.js").then(m => m.launchEditorMessages_en),
-  fr: () => import("../../modules/sky-events/launches/messages/LaunchEditorMessages_fr.js").then(m => m.launchEditorMessages_fr),
-  es: () => import("../../modules/sky-events/launches/messages/LaunchEditorMessages_es.js").then(m => m.launchEditorMessages_es),
-  it: () => import("../../modules/sky-events/launches/messages/LaunchEditorMessages_it.js").then(m => m.launchEditorMessages_it)
-}
-
-export function loadLaunchEditorMessages(language: UfoLanguage): Promise<LaunchEditorMessages> {
-  return launchEditorLoaders[language]()
-}
 
 const caseEditorLoaders: Record<UfoLanguage, () => Promise<CaseEditorMessages>> = {
   en: () => import("./CaseEditorMessages_en.js").then(m => m.caseEditorMessages_en),
@@ -183,13 +138,3 @@ export function loadCloudEditorMessages(language: UfoLanguage): Promise<CloudEdi
   }
 }
 
-const modulesPanelLoaders: Record<UfoLanguage, () => Promise<ModulesPanelMessages>> = {
-  en: () => import("./ModulesPanelMessages_en.js").then(m => m.modulesPanelMessages_en),
-  fr: () => import("./ModulesPanelMessages_fr.js").then(m => m.modulesPanelMessages_fr),
-  es: () => import("./ModulesPanelMessages_es.js").then(m => m.modulesPanelMessages_es),
-  it: () => import("./ModulesPanelMessages_it.js").then(m => m.modulesPanelMessages_it)
-}
-
-export function loadModulesPanelMessages(language: UfoLanguage): Promise<ModulesPanelMessages> {
-  return modulesPanelLoaders[language]()
-}

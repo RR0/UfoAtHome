@@ -16,7 +16,7 @@ describe("ReentryEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = (skyEvents?: SkyEventsJson, at = 0) => {
+  const build = async (skyEvents?: SkyEventsJson, at = 0) => {
     const sighting = { skyEvents, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
     const time = { now: at, seeks: [] as number[] }
@@ -24,6 +24,7 @@ describe("ReentryEditor", () => {
       sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en",
       currentTime: () => time.now, duration: () => 20000, seekTo: t => { time.seeks.push(t); time.now = t }, changed: () => changes++
     }, "en")
+    await editor.ready
     editor.sync()
     return { sighting, changes: () => changes, time }
   }
@@ -41,8 +42,8 @@ describe("ReentryEditor", () => {
   }
   const pointer = (lane: HTMLElement, type: string, x: number) => lane.dispatchEvent(new MouseEvent(type, { clientX: x, bubbles: true }) as PointerEvent)
 
-  test("adds a fireball in front of the observer, from the playhead on", () => {
-    const { sighting, changes } = build(undefined, 4000)
+  test("adds a fireball in front of the observer, from the playhead on", async () => {
+    const { sighting, changes } = await build(undefined, 4000)
     container.querySelector<HTMLButtonElement>("#reentry-add")!.click()
     container.querySelector<HTMLElement>("#reentry-add-fireball")?.click()
     const reentries = sighting.skyEvents!.reentries!
@@ -55,8 +56,8 @@ describe("ReentryEditor", () => {
     expect(changes()).toBeGreaterThan(0)
   })
 
-  test("lays the path and each piece out on a timeline of its own, in place of lists of instants", () => {
-    build({ reentries: [chelyabinsk()] })
+  test("lays the path and each piece out on a timeline of its own, in place of lists of instants", async () => {
+    await build({ reentries: [chelyabinsk()] })
     expect(lanes()).toHaveLength(2)
     expect(container.querySelector("#reentry-place")).toBeNull()
     const [path, piece] = lanes()
@@ -66,9 +67,9 @@ describe("ReentryEditor", () => {
     expect(piece.querySelector(".span")).not.toBeNull()
   })
 
-  test("writes an edit of the path as a new re-entry in a new list, so that the scene sees it", () => {
+  test("writes an edit of the path as a new re-entry in a new list, so that the scene sees it", async () => {
     const reentry = chelyabinsk()
-    const { sighting } = build({ reentries: [reentry] })
+    const { sighting } = await build({ reentries: [reentry] })
     const before = sighting.skyEvents!.reentries!
     typed(container.querySelector('#reentry-place-parameters [data-key="altitudeKm"]')!, "96")
     const after = sighting.skyEvents!.reentries!
@@ -78,8 +79,8 @@ describe("ReentryEditor", () => {
     expect(reentry.track[0].altitudeKm).toBe(95)
   })
 
-  test("the + of the path puts a point at the playhead, where the fireball is then, and shows it", () => {
-    const { sighting } = build({ reentries: [chelyabinsk()] }, 4000)
+  test("the + of the path puts a point at the playhead, where the fireball is then, and shows it", async () => {
+    const { sighting } = await build({ reentries: [chelyabinsk()] }, 4000)
     adds()[0].click()
     const track = sighting.skyEvents!.reentries![0].track
     expect(track.map(place => place.t)).toEqual([-2000, 4000, 10000])
@@ -87,8 +88,8 @@ describe("ReentryEditor", () => {
     expect((container.querySelector('#reentry-place-parameters [data-key="t"]') as HTMLInputElement).value).toBe("4")
   })
 
-  test("the + of a piece puts a point of its light curve at the playhead, as bright as it is then", () => {
-    const { sighting } = build({ reentries: [chelyabinsk()] }, 4000)
+  test("the + of a piece puts a point of its light curve at the playhead, as bright as it is then", async () => {
+    const { sighting } = await build({ reentries: [chelyabinsk()] }, 4000)
     adds()[1].click()
     const curve = sighting.skyEvents!.reentries![0].fragments[0].lightCurve!
     expect(curve.map(point => point.t)).toEqual([-2000, 4000, 8000])
@@ -96,8 +97,8 @@ describe("ReentryEditor", () => {
     expect(curve[1].absoluteMagnitude).toBeCloseTo(-17.7, 5)
   })
 
-  test("a diamond pressed shows its point and takes the playhead there; dragged, it moves in time", () => {
-    const { sighting, time } = build({ reentries: [chelyabinsk()] })
+  test("a diamond pressed shows its point and takes the playhead there; dragged, it moves in time", async () => {
+    const { sighting, time } = await build({ reentries: [chelyabinsk()] })
     const path = laidOut(lanes()[0])
     // The second point, at 10 s, is 13.2 s from the lane's start, of 14.4: 201.7 px.
     pointer(path, "pointerdown", 202)
@@ -114,8 +115,8 @@ describe("ReentryEditor", () => {
     expect(time.seeks.at(-1)).toBe(0)
   })
 
-  test("shows under the timeline the details of its row picked alone, and marks that row", () => {
-    build({ reentries: [chelyabinsk()] })
+  test("shows under the timeline the details of its row picked alone, and marks that row", async () => {
+    await build({ reentries: [chelyabinsk()] })
     const shown = (id: string) => !container.querySelector<HTMLElement>(`#${id}`)!.hidden
     const rows = () => [...container.querySelectorAll<HTMLElement>("#reentry-timeline .track-row")].map(row => row.dataset.active)
     expect(shown("reentry-path")).toBe(true)
@@ -135,8 +136,8 @@ describe("ReentryEditor", () => {
     expect(rows()).toEqual(["true", "false"])
   })
 
-  test("edits a piece's brightness and its light curve, keeping one piece at least", () => {
-    const { sighting } = build({ reentries: [chelyabinsk()] })
+  test("edits a piece's brightness and its light curve, keeping one piece at least", async () => {
+    const { sighting } = await build({ reentries: [chelyabinsk()] })
     typed(container.querySelector('#reentry-fragment-parameters [data-key="absoluteMagnitude"]')!, "-27")
     expect(sighting.skyEvents!.reentries![0].fragments[0].absoluteMagnitude).toBe(-27)
     expect(container.querySelector<HTMLButtonElement>("#reentry-fragment-delete")!.disabled).toBe(true)
@@ -148,16 +149,16 @@ describe("ReentryEditor", () => {
     expect(lanes()).toHaveLength(3)
   })
 
-  test("taking out the last points of a light curve leaves the piece without one", () => {
-    const { sighting } = build({ reentries: [chelyabinsk()] })
+  test("taking out the last points of a light curve leaves the piece without one", async () => {
+    const { sighting } = await build({ reentries: [chelyabinsk()] })
     container.querySelector<HTMLButtonElement>("#reentry-curve-delete")!.click()
     container.querySelector<HTMLButtonElement>("#reentry-curve-delete")!.click()
     expect(sighting.skyEvents!.reentries![0].fragments[0].lightCurve).toBeUndefined()
     expect(container.querySelector<HTMLElement>("#reentry-curve-empty")!.hidden).toBe(false)
   })
 
-  test("deleting the last re-entry leaves no event of the sky behind", () => {
-    const { sighting } = build({ reentries: [chelyabinsk()] })
+  test("deleting the last re-entry leaves no event of the sky behind", async () => {
+    const { sighting } = await build({ reentries: [chelyabinsk()] })
     container.querySelector<HTMLButtonElement>("#reentry-delete")!.click()
     expect(sighting.skyEvents).toBeUndefined()
   })

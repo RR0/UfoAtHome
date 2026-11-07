@@ -1,3 +1,4 @@
+import { Messages } from "../../../../i18n/MessageCatalog.js"
 /** What the Fireballs part of the Sky group says — see ReentryEditor. */
 export interface ReentryEditorMessages {
   intro: string
@@ -23,3 +24,11 @@ export interface ReentryEditorMessages {
   pointHere: string
   zoomHint: string
 }
+
+/** The texts of the part, one chunk per language (see MessageCatalog). */
+export const REENTRY_EDITOR_MESSAGES = Messages.catalog<ReentryEditorMessages>({
+  en: () => import("./ReentryEditorMessages_en.js").then(m => m.reentryEditorMessages_en),
+  fr: () => import("./ReentryEditorMessages_fr.js").then(m => m.reentryEditorMessages_fr),
+  es: () => import("./ReentryEditorMessages_es.js").then(m => m.reentryEditorMessages_es),
+  it: () => import("./ReentryEditorMessages_it.js").then(m => m.reentryEditorMessages_it)
+})

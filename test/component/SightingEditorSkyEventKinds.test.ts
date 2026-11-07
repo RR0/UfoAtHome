@@ -5,6 +5,7 @@ import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.j
 
 register()
 import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
+import { Messages } from "../../src/i18n/MessageCatalog.js"
 import type { SkyEventEditor, SkyEventEditorHost, SkyEventKind } from "../../src/modules/sky-events/SkyEventKind.js"
 import { SkyEvents } from "../../src/engine/model/SkyEvents.js"
 
@@ -228,7 +229,7 @@ function mount(): SightingEditorElement {
 const synced: string[] = []
 const BALL_LIGHTNING: SkyEventKind = {
   key: "ballLightning",
-  title: { en: "Ball lightning", fr: "Foudre en boule" },
+  messages: Messages.catalog({ en: async () => ({ title: "Ball lightning", name: "Ball" }), fr: async () => ({ title: "Foudre en boule", name: "Boule" }), es: async () => ({ title: "Rayo en bola", name: "Bola" }), it: async () => ({ title: "Fulmine globulare", name: "Globo" }) }),
   simulation: () => Promise.reject(new Error("not drawn in this test")),
   editor: async () => (container: HTMLElement, host: SkyEventEditorHost): SkyEventEditor => {
     container.textContent = `${SkyEvents.isEmpty(host.sighting().skyEvents) ? 0 : (host.sighting().skyEvents!.ballLightning ?? []).length} ball(s)`
@@ -272,7 +273,7 @@ describe("a kind of event of the sky a module brings", () => {
     // The built-in kinds in the registry's order, then the module's.
     expect(tabs.slice(-4)).toEqual(["sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
     const tab = shadow.querySelector<HTMLButtonElement>('[aria-controls="sky-event-ballLightning"]')!
-    expect(tab.textContent).toBe("Ball lightning")
+    await waitFor(() => tab.textContent === "Ball lightning")
 
     tab.click()
     await waitFor(() => synced.length > 0)
@@ -285,7 +286,7 @@ describe("a kind of event of the sky a module brings", () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: {
       skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }],
       interpretations: [{ id: "balloons", name: "Balloons", credit: "©", creditUrl: "https://example.org", create: () => ({
-        key: "balloons", title: { en: "Balloons" }, bodiesOf: () => [],
+        key: "balloons", messages: Messages.catalog({ en: async () => ({ title: "Balloons" }), fr: async () => ({ title: "Ballons" }), es: async () => ({ title: "Globos" }), it: async () => ({ title: "Palloni" }) }), bodiesOf: () => [],
         editor: async () => () => ({ sync: () => undefined, refresh: () => undefined, setLanguage: async () => undefined })
       }) }]
     } })

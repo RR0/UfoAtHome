@@ -10,7 +10,7 @@ describe("LanternEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = (interpretation?: InterpretationJson, place = true) => {
+  const build = async (interpretation?: InterpretationJson, place = true) => {
     const sighting = {
       interpretation,
       event: { place: place ? [{ lat: 48, lng: 2 }] : [] },
@@ -22,6 +22,7 @@ describe("LanternEditor", () => {
       sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", shapes: () => [{ id: "light-1", label: "Light 1" }],
       changed: () => changes++
     }, "en")
+    await editor.ready
     editor.sync()
     return { sighting, changes: () => changes }
   }
@@ -30,9 +31,9 @@ describe("LanternEditor", () => {
     target.dispatchEvent(new Event("input", { bubbles: true }))
   }
 
-  test("adds a dozen lanterns let go in front of the observer, read into the account beside its bodies", () => {
+  test("adds a dozen lanterns let go in front of the observer, read into the account beside its bodies", async () => {
     const body = { id: "b", model: { id: "sphere" }, track: [] }
-    const { sighting, changes } = build({ bodies: [body] })
+    const { sighting, changes } = await build({ bodies: [body] })
     container.querySelector<HTMLButtonElement>("#lantern-add")!.click()
     const launches = sighting.interpretation!.lanterns!
     expect(launches).toHaveLength(1)
@@ -44,9 +45,9 @@ describe("LanternEditor", () => {
     expect(changes()).toBe(1)
   })
 
-  test("writes an edit as a new launch in a new interpretation, so that the scene computes the lanterns again", () => {
+  test("writes an edit as a new launch in a new interpretation, so that the scene computes the lanterns again", async () => {
     const launch = { id: "l", site: { eastM: 100, northM: 200 }, group: { count: 12, fromT: 0, untilT: 60000 } }
-    const { sighting } = build({ bodies: [], lanterns: [launch] })
+    const { sighting } = await build({ bodies: [], lanterns: [launch] })
     const before = sighting.interpretation
     typed(container.querySelector('[data-key="group.count"]')!, "5")
     expect(sighting.interpretation).not.toBe(before)
@@ -56,20 +57,20 @@ describe("LanternEditor", () => {
     expect(sighting.interpretation!.lanterns![0].turbulence!.horizontalMS).toBe(0)
   })
 
-  test("deleting the last lanterns leaves no interpretation behind when it says nothing else, and keeps it when it does", () => {
+  test("deleting the last lanterns leaves no interpretation behind when it says nothing else, and keeps it when it does", async () => {
     const launch = { id: "l", site: { eastM: 100, northM: 200 }, group: { count: 12, fromT: 0, untilT: 60000 } }
-    const alone = build({ bodies: [], lanterns: [launch] })
+    const alone = await build({ bodies: [], lanterns: [launch] })
     container.querySelector<HTMLButtonElement>("#lantern-delete")!.click()
     expect(alone.sighting.interpretation).toBeUndefined()
     container.replaceChildren()
-    const withBodies = build({ bodies: [{ id: "b", model: { id: "sphere" }, track: [] }], lanterns: [launch] })
+    const withBodies = await build({ bodies: [{ id: "b", model: { id: "sphere" }, track: [] }], lanterns: [launch] })
     container.querySelector<HTMLButtonElement>("#lantern-delete")!.click()
     expect(withBodies.sighting.interpretation!.bodies).toHaveLength(1)
     expect(withBodies.sighting.interpretation!.lanterns).toBeUndefined()
   })
 
-  test("adds none to a recording with no place to let them go from", () => {
-    const { sighting } = build(undefined, false)
+  test("adds none to a recording with no place to let them go from", async () => {
+    const { sighting } = await build(undefined, false)
     const add = container.querySelector<HTMLButtonElement>("#lantern-add")!
     add.click()
     expect(sighting.interpretation).toBeUndefined()
