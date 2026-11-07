@@ -28,6 +28,7 @@ import json
 import math
 import os
 import pathlib
+import sys
 
 # A variant for trying another start without touching the published file: START_AZ=300 OUT_NAME=observer-saint-lo-wnw.json (the call sheet of 2026-10-13 had
 # west-north-west; in the call itself he said north-north-east, about 25 degrees east of north, and will check with a compass: see ZENITH_MS below).
@@ -642,6 +643,10 @@ def build():
 
 if __name__ == "__main__":
     OUT.write_text(json.dumps(build(), ensure_ascii=False, indent=1) + "\n")
+    # The survey goes beside the recording, in its annex: the recording keeps the account (see annex_surroundings.py).
+    sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+    from surroundings_common import annex_surveyed
+    annex_surveyed(OUT, SURROUNDINGS)
     az_end, alt_end = path(SPIRAL_FROM_MS)
     print(f"wrote {OUT} {OUT.stat().st_size} bytes; slow speed {DOWN_SPEED:.1f} deg/s, last turn {TURN_3_DEG} deg, "
           f"spiral starts at az {az_end:.0f} alt {alt_end:.0f}; t={ZENITH_MS}: alt {path(ZENITH_MS)[1]:.0f}")

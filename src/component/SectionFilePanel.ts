@@ -136,8 +136,8 @@ export class SectionFilePanel {
   /** The section's keys as the recording states them, with what it says of where they came from. */
   private bytesOf(name: RecordingSectionName): Uint8Array {
     const json = toSightingJson(this.host.sighting()) as unknown as Record<string, unknown>
-    const annex: SectionAnnex = { version: FormatVersion.CURRENT.sighting }
-    for (const key of RecordingSections.KEYS[name]) if (json[key] !== undefined) annex[key] = json[key]
+    const { takenOn, attribution } = this.host.sighting().frozen?.[name] ?? {}
+    const annex: SectionAnnex = { version: FormatVersion.CURRENT.sighting, takenOn, attribution, ...RecordingSections.taken(name, json) }
     return new TextEncoder().encode(JSON.stringify(annex))
   }
 
@@ -186,7 +186,9 @@ export class SectionFilePanel {
     // Read as a recording would be, provenance and all, then put into this one.
     const sighting = this.host.sighting()
     const merged = { ...(toSightingJson(sighting) as unknown as Record<string, unknown>) }
-    for (const key of RecordingSections.KEYS[name]) merged[key] = given[key]
+    // A recording gives what its own annex would hold (of its scenery, what a survey gave); an annex, all it holds.
+    if (name === "decor") RecordingSections.put(name, merged, "timeline" in given ? RecordingSections.taken(name, given) : given)
+    else for (const key of RecordingSections.KEYS[name]) merged[key] = given[key]
     const read = fromSightingJson(merged as unknown as SightingRecordingJson)
     SectionFilePanel.copy(name, read, sighting)
     const frozen: FrozenData = { ...(sighting.frozen ?? {}) }

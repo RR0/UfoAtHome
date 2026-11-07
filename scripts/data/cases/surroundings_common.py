@@ -53,3 +53,47 @@ def survey_sources(path):
         {"title": "Aerial photograph of the IGN (the colour of the roofs), flown " + dates.get("photo", unknown),
          "url": "https://geoservices.ign.fr/bdortho", "publication": {"publisher": "IGN", "time": dates.get("photo", fetched_on)}},
     ]
+
+
+def write_like(file, data, text):
+    """Writes a recording in the shape its generator gave it (compact or indented), so that a change shows as the change it is."""
+    compact = '"version":' in text[:60] and '"version": ' not in text[:60]
+    indent = 2 if text.startswith('{\n  "') else 1
+    file.write_text(json.dumps(data, ensure_ascii=False, indent=indent, separators=(",", ":") if compact else None) + ("\n" if text.endswith("\n") else ""))
+
+
+def annex_surveyed(path, surroundings):
+    """Moves what a survey gave a recording's scenery (the objects with an `origin`) into its annex `<base>.decor.json`, named by
+    `frozen.decor`, where the players put it back as they load the recording (see RecordingSections in FrozenData.ts). What the case states
+    of its own stays in the recording. Idempotent: an annex already there is put back first (unless the recording was just given surveyed objects, which replace it), so
+    running it again rewrites the same files.
+
+    `surroundings` is the fetch (scripts/fetch-surroundings.ts) the objects came from: the day it was taken, and whom from."""
+    file = pathlib.Path(path)
+    text = file.read_text()
+    recording = json.loads(text)
+    frozen = recording.get("frozen") or {}
+    group = frozen.get("decor") or {}
+    annex_name = group.get("src") or file.name[:-len(".json")] + ".decor.json"
+    annex_file = file.with_name(annex_name)
+    # A recording that holds surveyed objects of its own was just given them (by its generator, or add_surroundings.py): they are the newer.
+    if group.get("src") and annex_file.exists() and not any("origin" in one for one in recording.get("decor", [])):
+        held = json.loads(annex_file.read_text()).get("decor", [])
+        recording["decor"] = [decor for decor in recording.get("decor", []) if "origin" not in decor] + held
+    decor = recording.get("decor", [])
+    surveyed = [one for one in decor if "origin" in one]
+    if not surveyed:
+        return 0
+    found = json.loads(pathlib.Path(surroundings).read_text())
+    stated = [one for one in decor if "origin" not in one]
+    if stated:
+        recording["decor"] = stated
+    else:
+        recording.pop("decor", None)
+    group = {**group, "src": annex_name, "takenOn": found["fetchedOn"], "attribution": found["provider"]["attribution"]}
+    group.pop("live", None)
+    recording["frozen"] = {**frozen, "decor": group}
+    annex = {"version": recording.get("version", 1), "takenOn": group["takenOn"], "attribution": group["attribution"], "decor": surveyed}
+    annex_file.write_text(json.dumps(annex, ensure_ascii=False, separators=(",", ":")) + "\n")
+    write_like(file, recording, text)
+    return len(surveyed)

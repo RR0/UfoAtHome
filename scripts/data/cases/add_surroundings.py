@@ -13,7 +13,8 @@ account from the observer, as the case's own object it replaces did: the bridge 
 
 For the recordings of cases whose own generator is not the one that last wrote them (other tools add their sources and their share image to the file the
 generator wrote, and running it again would drop them). Idempotent: what an earlier run added (the objects that carry an `origin`, the IGN survey sources)
-is taken out first, so running it again with a newer fetch replaces and does not pile up. What the case states of its own (its woods, its aircraft, its
+is taken out first, so running it again with a newer fetch replaces and does not pile up. The fetched objects are then written in the
+recording's annex `<base>.decor.json` (see annex_surroundings.py), not in the recording. What the case states of its own (its woods, its aircraft, its
 bridge) is never touched.
 """
 import json
@@ -22,7 +23,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from surroundings_common import fetched, survey_sources  # noqa: E402
+from surroundings_common import annex_surveyed, fetched, survey_sources  # noqa: E402
 
 SURVEY_URLS = {"https://geoservices.ign.fr/lidarhd", "https://geoservices.ign.fr/bdtopo", "https://geoservices.ign.fr/bdortho"}
 
@@ -91,6 +92,8 @@ def main(argv):
         compact = '"version":1' in text[:60]
         indent = 2 if text.startswith('{\n  "') else 1
         file.write_text(json.dumps(recording, ensure_ascii=False, indent=indent, separators=(",", ":") if compact else None) + ("\n" if text.endswith("\n") else ""))
+        # The survey is kept beside the recording, as its roads and its relief are: the recording keeps what the case states.
+        annex_surveyed(path, surroundings)
         print(f"{path}: {len(own)} of its own + {len(added)} fetched")
 
 

@@ -44,6 +44,17 @@ describe("SightingFetch", () => {
     expect(await SightingFetch.recording(`${OTHER}/d/t.json`)).toMatchObject({ weatherTrack: { keyframes: [] } })
   })
 
+  it("puts the surveyed scenery it keeps beside it after the scenery the recording states itself", async () => {
+    const van = { id: "van", kind: "car", eastM: 0, northM: 0 }
+    const tree = { id: "ign-lidar-topo-1", kind: "tree", eastM: 9, northM: 15, origin: "ign-lidar-topo" }
+    const files: Record<string, unknown> = {
+      [`${OTHER}/d/s.json`]: { version: 3, decor: [van], frozen: { decor: { src: "s.decor.json", takenOn: "2026-10-23" } } },
+      [`${OTHER}/d/s.decor.json`]: { version: 3, decor: [tree] }
+    }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url in files ? respond(files[url]) : respond(undefined, false, 404)))
+    expect((await SightingFetch.recording(`${OTHER}/d/s.json`) as { decor: unknown[] }).decor).toEqual([van, tree])
+  })
+
   it("calls a cross-origin failure CORS when the server answers an opaque request", async () => {
     // The real signature of a refused origin: the readable request fails, the unreadable one does
     // not — so something is there, and the browser simply would not hand it over.

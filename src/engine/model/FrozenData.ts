@@ -69,7 +69,8 @@ export interface FrozenData {
   lightPollution?: FrozenGroup
   /**
    * The scenery (`decor`), read from the recording's file rather than taken again from a survey of the place as the observer moves, when
-   * present: inside the recording, or in the annex `src` names.
+   * present: inside the recording, or in the annex `src` names. The annex holds only what a survey gave (the objects with an `origin`, see
+   * DecorObject.origin): what the observer or the author stated stays in the recording, which is the account and not the survey's.
    */
   decor?: FrozenGroup
 }
@@ -100,6 +101,50 @@ export class RecordingSections {
   /** The annex's file name for a recording saved as `base`. */
   static annexName(base: string, name: RecordingSectionName): string {
     return `${base}.${name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}.json`
+  }
+
+  /**
+   * What of a recording (as its JSON) a section's annex holds: the section's keys, and of the scenery only what a survey gave, since the
+   * objects the observer or the author stated are the account's own and stay in it (see FrozenData.decor).
+   */
+  static taken(name: RecordingSectionName, json: Record<string, unknown>): Record<string, unknown> {
+    const taken: Record<string, unknown> = {}
+    if (name === "decor") {
+      if (Array.isArray(json.decor)) taken.decor = json.decor.filter(RecordingSections.surveyed)
+      return taken
+    }
+    for (const key of RecordingSections.KEYS[name]) if (json[key] !== undefined) taken[key] = json[key]
+    return taken
+  }
+
+  /** Takes out of a recording (as its JSON) what a section's annex holds (see taken), as it is saved with the annex beside it. */
+  static strip(name: RecordingSectionName, json: Record<string, unknown>): void {
+    if (name === "decor") {
+      const stated = Array.isArray(json.decor) ? json.decor.filter(object => !RecordingSections.surveyed(object)) : []
+      if (stated.length > 0) json.decor = stated
+      else delete json.decor
+      return
+    }
+    for (const key of RecordingSections.KEYS[name]) delete json[key]
+  }
+
+  /**
+   * Puts a section's annex back in a recording (as its JSON), as it is loaded: its keys, and for the scenery the annex's objects after those
+   * the recording states itself, which replace any surveyed object the recording still holds.
+   */
+  static put(name: RecordingSectionName, json: Record<string, unknown>, annex: Record<string, unknown>): void {
+    if (name === "decor") {
+      if (!Array.isArray(annex.decor)) return
+      const stated = Array.isArray(json.decor) ? json.decor.filter(object => !RecordingSections.surveyed(object)) : []
+      json.decor = [...stated, ...annex.decor]
+      return
+    }
+    for (const key of RecordingSections.KEYS[name]) if (annex[key] !== undefined) json[key] = annex[key]
+  }
+
+  /** Whether a scenery object (as JSON) was given by a survey rather than stated (see DecorObject.origin). */
+  private static surveyed(object: unknown): boolean {
+    return typeof object === "object" && object !== null && typeof (object as { origin?: unknown }).origin === "string"
   }
 
   /** Whether the section is read from the recording's file rather than asked of its source: said for the place and the night sky. */

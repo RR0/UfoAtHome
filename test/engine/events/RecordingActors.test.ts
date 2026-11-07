@@ -4,7 +4,7 @@ import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "..
 
 /** The demo recordings (not the cases, nor the files beside a recording), by name. */
 const demos = Object.entries(import.meta.glob("../../../public/demo-data/observer-*.json", { eager: true, import: "default" }) as Record<string, unknown>)
-  .filter(([path]) => !/\.(roads|railways|water|signals)\.json$/.test(path))
+  .filter(([path]) => /\/observer-[^./]*\.json$/.test(path))
 
 describe("RecordingActors", () => {
   it("finds every demo saying whom each of its events is about, by an id that says one thing", () => {

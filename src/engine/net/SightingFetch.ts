@@ -45,7 +45,7 @@ export class SightingFetch {
       try {
         // Its keys as the current version of the format writes them, whichever the annex was written in.
         const annex = SightingMigration.toCurrent(await SightingFetch.json(new URL(section.src, new URL(url, location.href)).href) as Record<string, unknown>)
-        for (const key of RecordingSections.KEYS[name]) if (annex[key] !== undefined) json[key] = annex[key]
+        RecordingSections.put(name, json, annex)
       } catch {
         // The recording plays with what it holds itself.
       }

@@ -2709,7 +2709,7 @@ export class SightingEditorElement extends HTMLElement {
       if (!section) continue
       // Beside the recording, it goes into the archive; at an address of its own, it is read from there.
       if (!/^[a-z][a-z0-9+.-]*:/i.test(section.src)) annexes.set(section.src, section.bytes)
-      for (const key of RecordingSections.KEYS[name]) delete (json as unknown as Record<string, unknown>)[key]
+      RecordingSections.strip(name, json as unknown as Record<string, unknown>)
     }
     const fileName = `${base}.json`
     const text = this.writtenText(json)
@@ -2871,7 +2871,7 @@ export class SightingEditorElement extends HTMLElement {
     if (bytes[0] !== 0x50 || bytes[1] !== 0x4b) return new TextDecoder().decode(bytes)
     const { unzipSync, strFromU8 } = await import("fflate")
     const files = unzipSync(bytes)
-    const annex = /\.(relief|imagery|map)\.zip$|\.(roads|water|railways|upper-air|weather)\.json$/
+    const annex = /\.(relief|imagery|map)\.zip$|\.(roads|water|railways|upper-air|weather|place|light-pollution|decor)\.json$/
     const name = Object.keys(files).find(path => path.endsWith(".json") && !annex.test(path))
     if (!name) throw new Error("No recording in this archive")
     const folder = name.includes("/") ? name.slice(0, name.lastIndexOf("/") + 1) : ""
@@ -2887,7 +2887,7 @@ export class SightingEditorElement extends HTMLElement {
       const file = src !== undefined ? files[folder + src] : undefined
       if (!file) continue
       const kept = SightingMigration.toCurrent(JSON.parse(strFromU8(file)) as Record<string, unknown>)
-      for (const key of RecordingSections.KEYS[section]) if (kept[key] !== undefined) json[key] = kept[key]
+      RecordingSections.put(section, json, kept)
       put = true
     }
     return put ? JSON.stringify(json) : text
