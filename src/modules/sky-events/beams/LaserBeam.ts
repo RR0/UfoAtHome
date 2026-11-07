@@ -1,9 +1,9 @@
-import type { SaidPosition } from "../model/SaidPosition.js"
-import type { SaidText } from "../model/SaidText.js"
-import { AtmosphereProfile } from "../atmosphere/AtmosphereProfile.js"
-import type { AerialPerspective } from "../atmosphere/AerialPerspective.js"
-import { VisibleSpectrum } from "../atmosphere/Spectrum.js"
-import { ReentrySighting } from "./Reentry.js"
+import type { SaidPosition } from "../../../engine/model/SaidPosition.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
+import { AtmosphereProfile } from "../../../engine/atmosphere/AtmosphereProfile.js"
+import type { AerialPerspective } from "../../../engine/atmosphere/AerialPerspective.js"
+import { VisibleSpectrum } from "../../../engine/atmosphere/Spectrum.js"
+import { ReentrySighting } from "../../../engine/interpretation/Reentry.js"
 
 /**
  * A beam of light sent through the air from the ground — a laser shot between two observatories, a

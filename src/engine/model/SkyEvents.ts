@@ -1,5 +1,5 @@
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
-import type { BeamJson } from "../interpretation/LaserBeam.js"
+import type { BeamJson } from "../../modules/sky-events/beams/LaserBeam.js"
 import type { LaunchJson } from "../interpretation/LaunchPlume.js"
 import type { ReentryJson } from "../interpretation/Reentry.js"
 

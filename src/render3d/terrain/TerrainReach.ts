@@ -1,5 +1,5 @@
 import type { DecorObject } from "../../engine/model/Decor.js"
-import type { BeamJson } from "../../engine/interpretation/LaserBeam.js"
+import type { BeamJson } from "../../modules/sky-events/beams/LaserBeam.js"
 import { geoToLocalMeters } from "./GeoProjection.js"
 
 /**

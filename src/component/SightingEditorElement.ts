@@ -22,7 +22,7 @@ import { RecordingActors, type ActorIssue, type ActorKind } from "../engine/even
 import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
-import type { BeamEditor } from "./BeamEditor.js"
+import type { BeamEditor } from "../modules/sky-events/beams/BeamEditor.js"
 import type { ReentryEditor } from "./ReentryEditor.js"
 import type { LanternEditor } from "./LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
@@ -8764,7 +8764,7 @@ export class SightingEditorElement extends HTMLElement {
    * when somebody has put one in (see BeamEditor).
    */
   private loadBeamEditor(): Promise<BeamEditor> {
-    this.beamEditorLoading ??= import("./BeamEditor.js").then(({ BeamEditor }) => {
+    this.beamEditorLoading ??= import("../modules/sky-events/beams/BeamEditor.js").then(({ BeamEditor }) => {
       this.beamEditor = new BeamEditor(this.shadow.getElementById("beam-editor")!, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,

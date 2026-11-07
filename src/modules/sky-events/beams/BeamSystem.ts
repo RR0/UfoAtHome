@@ -1,8 +1,8 @@
 import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial } from "three"
 import type { Vector3 } from "three"
-import type { AerialPerspective, Rgb } from "../engine/atmosphere/AerialPerspective.js"
-import { LaserBeamSighting } from "../engine/interpretation/LaserBeam.js"
-import type { BeamJson, BeamView } from "../engine/interpretation/LaserBeam.js"
+import type { AerialPerspective, Rgb } from "../../../engine/atmosphere/AerialPerspective.js"
+import { LaserBeamSighting } from "./LaserBeam.js"
+import type { BeamJson, BeamView } from "./LaserBeam.js"
 
 /** What the beams are drawn against, at one instant. */
 export interface BeamFrame {

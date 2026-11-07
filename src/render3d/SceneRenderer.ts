@@ -93,8 +93,8 @@ import type { StatedRoad } from "../engine/model/Road.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { TraceSystem } from "./TraceSystem.js"
 import type { ContrailSystem } from "./ContrailSystem.js"
-import type { BeamSystem } from "./BeamSystem.js"
-import type { BeamJson } from "../engine/interpretation/LaserBeam.js"
+import type { BeamSystem } from "../modules/sky-events/beams/BeamSystem.js"
+import type { BeamJson } from "../modules/sky-events/beams/LaserBeam.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { DEFAULT_CLOUD_BASE_M, DEFAULT_ICE_CRYSTAL_ALIGNMENT, DEFAULT_WEATHER } from "../engine/model/Weather.js"
@@ -2703,7 +2703,7 @@ export class SceneRenderer {
   }
 
   private loadBeamSystem(): Promise<void> {
-    return this.beamSystemLoading ??= import("./BeamSystem.js").then(({ BeamSystem }) => {
+    return this.beamSystemLoading ??= import("../modules/sky-events/beams/BeamSystem.js").then(({ BeamSystem }) => {
       const system = new BeamSystem()
       this.scene.add(system.group)
       this.beamSystem = system

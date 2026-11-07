@@ -6,7 +6,7 @@ import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
-import type { BeamEditorMessages } from "./BeamEditorMessages.js"
+import type { BeamEditorMessages } from "../../modules/sky-events/beams/messages/BeamEditorMessages.js"
 import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
 import type { LanternEditorMessages } from "./LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
@@ -87,10 +87,10 @@ const bodyEditorLoaders: Record<UfoLanguage, () => Promise<BodyEditorMessages>> 
 }
 
 const beamEditorLoaders: Record<UfoLanguage, () => Promise<BeamEditorMessages>> = {
-  en: () => import("./BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en),
-  fr: () => import("./BeamEditorMessages_fr.js").then(m => m.beamEditorMessages_fr),
-  es: () => import("./BeamEditorMessages_es.js").then(m => m.beamEditorMessages_es),
-  it: () => import("./BeamEditorMessages_it.js").then(m => m.beamEditorMessages_it)
+  en: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_en.js").then(m => m.beamEditorMessages_en),
+  fr: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_fr.js").then(m => m.beamEditorMessages_fr),
+  es: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_es.js").then(m => m.beamEditorMessages_es),
+  it: () => import("../../modules/sky-events/beams/messages/BeamEditorMessages_it.js").then(m => m.beamEditorMessages_it)
 }
 
 export function loadBeamEditorMessages(language: UfoLanguage): Promise<BeamEditorMessages> {

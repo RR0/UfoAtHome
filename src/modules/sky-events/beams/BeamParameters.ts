@@ -1,7 +1,7 @@
 import { LaserBeamSighting } from "./LaserBeam.js"
 import type { BeamJson } from "./LaserBeam.js"
-import { ParameterRegistry } from "./Parameters.js"
-import type { ParameterSet, ParameterSpec } from "./Parameters.js"
+import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
 
 /**
  * What a beam of light lets its author set (see BeamJson): its colour, its power, how it widens and when it is on, and the points of its path.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { AerialPerspective } from "../../../src/engine/atmosphere/AerialPerspective.js"
-import { LaserBeamSighting } from "../../../src/engine/interpretation/LaserBeam.js"
-import type { BeamJson } from "../../../src/engine/interpretation/LaserBeam.js"
+import { LaserBeamSighting } from "../../../src/modules/sky-events/beams/LaserBeam.js"
+import type { BeamJson } from "../../../src/modules/sky-events/beams/LaserBeam.js"
 
 /** The shot of 9 October 2026, from the Grande Coupole of Meudon to the Arago dome of the Paris Observatory. */
 const MEUDON_TO_PARIS: BeamJson = {

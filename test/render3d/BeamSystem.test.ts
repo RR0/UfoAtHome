@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest"
 import { Vector3 } from "three"
 import type { BufferAttribute, Mesh } from "three"
 import { AerialPerspective } from "../../src/engine/atmosphere/AerialPerspective.js"
-import type { BeamJson } from "../../src/engine/interpretation/LaserBeam.js"
-import { BeamSystem } from "../../src/render3d/BeamSystem.js"
-import type { BeamFrame } from "../../src/render3d/BeamSystem.js"
+import type { BeamJson } from "../../src/modules/sky-events/beams/LaserBeam.js"
+import { BeamSystem } from "../../src/modules/sky-events/beams/BeamSystem.js"
+import type { BeamFrame } from "../../src/modules/sky-events/beams/BeamSystem.js"
 
 /** The shot of 9 October 2026, from the Grande Coupole of Meudon to the Arago dome, watched from beside the emitter. */
 const SHOT: BeamJson = {
