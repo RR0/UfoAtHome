@@ -1,0 +1,30 @@
+import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
+
+export const reentryEditorMessages_es: ReentryEditorMessages = {
+  intro: "Un bólido o una reentrada visto durante la grabación: un meteoro, un satélite o una etapa de cohete que se consume. Un hecho del cielo, no una lectura del relato. Se coloca donde estaba realmente, latitud, longitud y altura, y se ve a través de la forma de la Tierra; su luz ilumina la escena desde allí.",
+  none: "Ningún bólido ni reentrada en esta grabación",
+  reentry: "Bólido o reentrada",
+  deleteReentry: "Eliminarlo",
+  addReentry: "Añadir un bólido o una reentrada",
+  kindFireball: "Bólido (meteoro)",
+  kindReentry: "Reentrada (satélite, etapa)",
+  path: "Trayecto",
+  place: "Punto del trayecto",
+  addPlace: "Añadir un punto al trayecto, en su continuación",
+  deletePlace: "Quitar este punto",
+  previousPlace: "Punto anterior",
+  nextPlace: "Punto siguiente",
+  fragments: "Piezas",
+  fragment: "Pieza",
+  addFragment: "Añadir una pieza detrás de la última",
+  deleteFragment: "Quitar esta pieza",
+  curve: "Curva de luz",
+  curvePoint: "Punto de la curva de luz",
+  addCurvePoint: "Añadir un punto a la curva de luz",
+  deleteCurvePoint: "Quitar este punto",
+  noCurve: "Sin curva de luz: su magnitud absoluta vale todo el tiempo",
+  previousCurvePoint: "Punto anterior",
+  nextCurvePoint: "Punto siguiente",
+  addNowhere: "Dé primero un lugar a la grabación: un bólido se coloca delante del testigo",
+  derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacíe un campo para volver a él. Los fragmentos más pequeños que suelta cada pieza se ajustan en el archivo."
+}

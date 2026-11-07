@@ -7,6 +7,7 @@ import type { CloudEditorMessages } from "./CloudEditorMessages.js"
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "./LaunchEditorMessages.js"
 import type { BeamEditorMessages } from "./BeamEditorMessages.js"
+import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
 import type { LanternEditorMessages } from "./LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
@@ -93,6 +94,17 @@ const beamEditorLoaders: Record<UfoLanguage, () => Promise<BeamEditorMessages>> 
 
 export function loadBeamEditorMessages(language: UfoLanguage): Promise<BeamEditorMessages> {
   return beamEditorLoaders[language]()
+}
+
+const reentryEditorLoaders: Record<UfoLanguage, () => Promise<ReentryEditorMessages>> = {
+  en: () => import("./ReentryEditorMessages_en.js").then(m => m.reentryEditorMessages_en),
+  fr: () => import("./ReentryEditorMessages_fr.js").then(m => m.reentryEditorMessages_fr),
+  es: () => import("./ReentryEditorMessages_es.js").then(m => m.reentryEditorMessages_es),
+  it: () => import("./ReentryEditorMessages_it.js").then(m => m.reentryEditorMessages_it)
+}
+
+export function loadReentryEditorMessages(language: UfoLanguage): Promise<ReentryEditorMessages> {
+  return reentryEditorLoaders[language]()
 }
 
 const lanternEditorLoaders: Record<UfoLanguage, () => Promise<LanternEditorMessages>> = {

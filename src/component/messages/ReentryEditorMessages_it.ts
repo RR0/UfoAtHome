@@ -1,0 +1,30 @@
+import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
+
+export const reentryEditorMessages_it: ReentryEditorMessages = {
+  intro: "Un bolide o un rientro visto durante la registrazione: una meteora, un satellite o uno stadio di razzo che si consuma. Un fatto del cielo, non una lettura del resoconto. È posto dove era davvero, latitudine, longitudine e quota, e visto attraverso la forma della Terra; la sua luce illumina la scena da lì.",
+  none: "Nessun bolide né rientro in questa registrazione",
+  reentry: "Bolide o rientro",
+  deleteReentry: "Eliminarlo",
+  addReentry: "Aggiungere un bolide o un rientro",
+  kindFireball: "Bolide (meteora)",
+  kindReentry: "Rientro (satellite, stadio)",
+  path: "Percorso",
+  place: "Punto del percorso",
+  addPlace: "Aggiungere un punto al percorso, in continuità",
+  deletePlace: "Togliere questo punto",
+  previousPlace: "Punto precedente",
+  nextPlace: "Punto successivo",
+  fragments: "Pezzi",
+  fragment: "Pezzo",
+  addFragment: "Aggiungere un pezzo dietro l'ultimo",
+  deleteFragment: "Togliere questo pezzo",
+  curve: "Curva di luce",
+  curvePoint: "Punto della curva di luce",
+  addCurvePoint: "Aggiungere un punto alla curva di luce",
+  deleteCurvePoint: "Togliere questo punto",
+  noCurve: "Nessuna curva di luce: la sua magnitudine assoluta vale per tutto il tempo",
+  previousCurvePoint: "Punto precedente",
+  nextCurvePoint: "Punto successivo",
+  addNowhere: "Date prima un luogo alla registrazione: un bolide è posto davanti al testimone",
+  derivedNote: "Un campo vuoto mostra, in grigio, il valore usato. Svuotate un campo per tornarci. I frammenti più piccoli che perde ogni pezzo si regolano nel file."
+}

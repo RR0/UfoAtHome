@@ -1,0 +1,30 @@
+import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
+
+export const reentryEditorMessages_fr: ReentryEditorMessages = {
+  intro: "Un bolide ou une rentrée vu pendant l'enregistrement : un météore, un satellite ou un étage de fusée qui se consume. Un fait du ciel, pas une lecture du compte rendu. Il est placé là où il était vraiment, latitude, longitude et altitude, et vu à travers la forme de la Terre ; sa lumière éclaire la scène depuis là.",
+  none: "Aucun bolide ni rentrée dans cet enregistrement",
+  reentry: "Bolide ou rentrée",
+  deleteReentry: "Le supprimer",
+  addReentry: "Ajouter un bolide ou une rentrée",
+  kindFireball: "Bolide (météore)",
+  kindReentry: "Rentrée (satellite, étage)",
+  path: "Trajet",
+  place: "Point du trajet",
+  addPlace: "Ajouter un point au trajet, dans la continuité",
+  deletePlace: "Retirer ce point",
+  previousPlace: "Point précédent",
+  nextPlace: "Point suivant",
+  fragments: "Pièces",
+  fragment: "Pièce",
+  addFragment: "Ajouter une pièce derrière la dernière",
+  deleteFragment: "Retirer cette pièce",
+  curve: "Courbe de lumière",
+  curvePoint: "Point de la courbe de lumière",
+  addCurvePoint: "Ajouter un point à la courbe de lumière",
+  deleteCurvePoint: "Retirer ce point",
+  noCurve: "Pas de courbe de lumière : sa magnitude absolue vaut tout du long",
+  previousCurvePoint: "Point précédent",
+  nextCurvePoint: "Point suivant",
+  addNowhere: "Donnez d'abord un lieu à l'enregistrement : un bolide est placé devant le témoin",
+  derivedNote: "Un champ vide montre, en grisé, la valeur utilisée. Videz un champ pour y revenir. Les débris plus petits que perd chaque pièce se règlent dans le fichier."
+}

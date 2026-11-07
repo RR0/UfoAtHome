@@ -195,6 +195,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   sky: "Ciel",
   dataSources: "Sources des données",
   beamsSubgroup: "Faisceaux",
+  reentriesSubgroup: "Bolides",
   lanternsSubgroup: "Lanternes",
   soundGroup: "Son",
   close: "Fermer",

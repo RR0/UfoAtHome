@@ -1,0 +1,30 @@
+import type { ReentryEditorMessages } from "./ReentryEditorMessages.js"
+
+export const reentryEditorMessages_en: ReentryEditorMessages = {
+  intro: "A fireball or a re-entry seen while the recording runs: a meteor, a satellite or a rocket stage burning up. A fact of the sky, not a reading of the account. It is placed where it really was, latitude, longitude and height, and seen through the Earth's shape; its light lights the scene from there.",
+  none: "No fireball or re-entry in this recording",
+  reentry: "Fireball or re-entry",
+  deleteReentry: "Delete it",
+  addReentry: "Add a fireball or a re-entry",
+  kindFireball: "Fireball (meteor)",
+  kindReentry: "Re-entry (satellite, stage)",
+  path: "Path",
+  place: "Point of the path",
+  addPlace: "Add a point to the path, going on as it went",
+  deletePlace: "Remove this point",
+  previousPlace: "Previous point",
+  nextPlace: "Next point",
+  fragments: "Pieces",
+  fragment: "Piece",
+  addFragment: "Add a piece behind the last",
+  deleteFragment: "Remove this piece",
+  curve: "Light curve",
+  curvePoint: "Point of the light curve",
+  addCurvePoint: "Add a point to the light curve",
+  deleteCurvePoint: "Remove this point",
+  noCurve: "No light curve: its absolute magnitude stands throughout",
+  previousCurvePoint: "Previous point",
+  nextCurvePoint: "Next point",
+  addNowhere: "Give the recording a place first: a fireball is put in front of the witness",
+  derivedNote: "An empty field shows, greyed, the value in use. Empty a field to go back to it. The smaller pieces each one sheds are set in the file."
+}

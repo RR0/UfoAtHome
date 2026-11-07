@@ -23,6 +23,7 @@ import type { RecordingEventJson } from "../engine/events/RecordingEvent.js"
 import type { BodyEditor } from "./BodyEditor.js"
 import type { LaunchEditor } from "./LaunchEditor.js"
 import type { BeamEditor } from "./BeamEditor.js"
+import type { ReentryEditor } from "./ReentryEditor.js"
 import type { LanternEditor } from "./LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
@@ -610,6 +611,9 @@ export class SightingEditorElement extends HTMLElement {
   /** The Beams part, loaded the first time it is opened — see loadBeamEditor. */
   private beamEditor?: BeamEditor
   private beamEditorLoading?: Promise<BeamEditor>
+  /** The Fireballs part, loaded the first time it is opened — see loadReentryEditor. */
+  private reentryEditor?: ReentryEditor
+  private reentryEditorLoading?: Promise<ReentryEditor>
   /** The Lanterns part, loaded the first time it is opened — see loadLanternEditor. */
   private lanternEditor?: LanternEditor
   private lanternEditorLoading?: Promise<LanternEditor>
@@ -811,6 +815,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly labelBodiesSubgroup: HTMLElement
   private readonly labelLaunchesSubgroup: HTMLElement
   private readonly labelBeamsSubgroup: HTMLElement
+  private readonly labelReentriesSubgroup: HTMLElement
   private readonly labelLanternsSubgroup: HTMLElement
   private readonly labelPrecipitationGroup: HTMLElement
   private readonly labelWindGroup: HTMLElement
@@ -1617,6 +1622,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelLaunchesSubgroup = this.shadow.getElementById("label-launches-subgroup")!
     this.labelBeamsSubgroup = this.shadow.getElementById("label-beams-subgroup")!
+    this.labelReentriesSubgroup = this.shadow.getElementById("label-reentries-subgroup")!
     this.labelLanternsSubgroup = this.shadow.getElementById("label-lanterns-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
@@ -7194,7 +7200,7 @@ export class SightingEditorElement extends HTMLElement {
     // The Bodies part of the group moves the bodies (see beginBodyDrag); the Shapes part the shapes.
     if (this.isGroupIdOpen("group-shape") && this.shadow.getElementById("shape-bodies")?.hidden === false) return "body"
     // The Sky group edits fields only: nothing on the picture is moved from there.
-    if (this.isGroupIdOpen("group-weather") && (this.shadow.getElementById("sky-launches")?.hidden === false || this.shadow.getElementById("sky-beams")?.hidden === false)) return "scene"
+    if (this.isGroupIdOpen("group-weather") && (this.shadow.getElementById("sky-launches")?.hidden === false || this.shadow.getElementById("sky-beams")?.hidden === false || this.shadow.getElementById("sky-reentries")?.hidden === false)) return "scene"
     if (this.isGroupIdOpen("group-shape")) return "shape"
     // The Environment group frames the object it has selected, as the Bodies part does a body.
     if (this.isGroupIdOpen("group-decor") && this.editableDecor() !== undefined) return "decor"
@@ -7277,6 +7283,7 @@ export class SightingEditorElement extends HTMLElement {
   private syncSkyParts(): void {
     if (!this.isGroupIdOpen("group-weather")) return
     if (this.shadow.getElementById("sky-beams")?.hidden === false) void this.loadBeamEditor().then(editor => editor.refresh())
+    if (this.shadow.getElementById("sky-reentries")?.hidden === false) void this.loadReentryEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-lanterns")?.hidden === false) void this.loadLanternEditor().then(editor => editor.refresh())
     if (this.shadow.getElementById("sky-launches")?.hidden === false) void this.loadLaunchEditor().then(editor => editor.refresh())
   }
@@ -7311,6 +7318,7 @@ export class SightingEditorElement extends HTMLElement {
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-launches") void this.loadLaunchEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-beams") void this.loadBeamEditor().then(editor => editor.sync())
+    if (tab.getAttribute("aria-controls") === "sky-reentries") void this.loadReentryEditor().then(editor => editor.sync())
     if (tab.getAttribute("aria-controls") === "sky-lanterns") void this.loadLanternEditor().then(editor => editor.sync())
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
@@ -8682,6 +8690,28 @@ export class SightingEditorElement extends HTMLElement {
       return this.beamEditor
     })
     return this.beamEditorLoading
+  }
+
+  /**
+   * The Fireballs part of the Sky group, fetched and built the first time it is opened: a chunk of its own, since a recording has a fireball
+   * or a re-entry only when somebody has put one in (see ReentryEditor).
+   */
+  private loadReentryEditor(): Promise<ReentryEditor> {
+    this.reentryEditorLoading ??= import("./ReentryEditor.js").then(({ ReentryEditor }) => {
+      this.reentryEditor = new ReentryEditor(this.shadow.getElementById("reentry-editor")!, {
+        sighting: () => this.ufoElement.sighting,
+        said: () => this.said,
+        writingLanguage: () => this.writingLanguage,
+        positionPlace: () => this.framePlace(),
+        changed: () => {
+          this.ufoElement.refresh()
+          this.refreshParamSummary()
+          this.sceneElement.redrawSky()
+        }
+      }, this.language)
+      return this.reentryEditor
+    })
+    return this.reentryEditorLoading
   }
 
   /**
@@ -11308,6 +11338,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup.textContent = messages.bodiesSubgroup
     this.labelLaunchesSubgroup.textContent = messages.launchesSubgroup
     this.labelBeamsSubgroup.textContent = messages.beamsSubgroup
+    this.labelReentriesSubgroup.textContent = messages.reentriesSubgroup
     this.labelLanternsSubgroup.textContent = messages.lanternsSubgroup
     for (const group of ["location", "decor", "weather"]) {
       const button = this.shadow.getElementById(`${group}-settings-button`)
@@ -11319,6 +11350,7 @@ export class SightingEditorElement extends HTMLElement {
     this.bodyEditor?.setLanguage(this.language)
     void this.launchEditor?.setLanguage(this.language)
     void this.beamEditor?.setLanguage(this.language)
+    void this.reentryEditor?.setLanguage(this.language)
     void this.lanternEditor?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelFileGroup.textContent = messages.fileGroup

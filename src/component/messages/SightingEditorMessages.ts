@@ -323,6 +323,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The gear of a group whose data comes from somewhere, and the title of what it opens: where each kind of the group's data is read from. */
   dataSources: string
   beamsSubgroup: string
+  reentriesSubgroup: string
   /** The Sky group's part of sky lanterns — see LanternEditor. */
   lanternsSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
