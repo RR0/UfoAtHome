@@ -13,5 +13,8 @@ export const beamEditorMessages_it: BeamEditorMessages = {
   previousPlace: "Punto precedente",
   nextPlace: "Punto successivo",
   addBeamNowhere: "Dai prima un luogo alla registrazione: un fascio è posto davanti al testimone",
-  derivedNote: "Un campo vuoto mostra, in grigio, il valore usato. Svuota un campo per tornarci."
+  derivedNote: "Un campo vuoto mostra, in grigio, il valore usato. Svuota un campo per tornarci.",
+  on: "Acceso",
+  onHere: "Accenderlo qui, alla testina",
+  zoomHint: "Pizzicate, o Ctrl + rotella, per ingrandire; Maiusc + rotella per scorrere"
 }

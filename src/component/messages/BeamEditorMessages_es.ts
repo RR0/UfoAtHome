@@ -13,5 +13,8 @@ export const beamEditorMessages_es: BeamEditorMessages = {
   previousPlace: "Punto anterior",
   nextPlace: "Punto siguiente",
   addBeamNowhere: "Dé primero un lugar a la grabación: un haz se coloca delante del testigo",
-  derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacíe un campo para volver a él."
+  derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacíe un campo para volver a él.",
+  on: "Encendido",
+  onHere: "Encenderlo aquí, en el cabezal",
+  zoomHint: "Pellizque, o Ctrl + rueda, para ampliar; Mayús + rueda para desplazar"
 }

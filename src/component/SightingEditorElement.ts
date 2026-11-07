@@ -7845,6 +7845,7 @@ export class SightingEditorElement extends HTMLElement {
     // Its own timeline's playhead follows the recording's: only the playhead is placed again (see ReentryEditor.setTime).
     if (this.shadow.getElementById("sky-reentries")?.hidden === false) this.reentryEditor?.setTime(this.ufoElement.currentTime)
     if (this.shadow.getElementById("sky-launches")?.hidden === false) this.launchEditor?.setTime(this.ufoElement.currentTime)
+    if (this.shadow.getElementById("sky-beams")?.hidden === false) this.beamEditor?.setTime(this.ufoElement.currentTime)
     for (const panel of [this.eventsPanel, this.phenomenonEventsPanel, this.bodiesEventsPanel]) panel?.setTime(this.ufoElement.currentTime)
     this.syncAppearanceFromTimeline()
     this.syncObserverFromTimeline()
@@ -8687,6 +8688,9 @@ export class SightingEditorElement extends HTMLElement {
         said: () => this.said,
         writingLanguage: () => this.writingLanguage,
         positionPlace: () => this.framePlace(),
+        currentTime: () => this.ufoElement.currentTime,
+        duration: () => this.ufoElement.seekableDuration,
+        seekTo: t => this.goToMark(t),
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()

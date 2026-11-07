@@ -16,4 +16,8 @@ export interface BeamEditorMessages {
   addBeamNowhere: string
   /** Under the fields: what an empty field means. */
   derivedNote: string
+  /** The row of its timeline saying when it is on, what its "+" does, and how to zoom it. */
+  on: string
+  onHere: string
+  zoomHint: string
 }

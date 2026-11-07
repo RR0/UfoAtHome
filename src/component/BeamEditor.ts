@@ -12,6 +12,7 @@ import { loadBeamEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/inde
 import { ElementList } from "./ElementList.js"
 import { ParameterForm, ParameterTarget } from "./ParameterForm.js"
 import type { PositionPlace } from "./ParameterForm.js"
+import { TimelineTracks } from "./TimelineTracks.js"
 
 /** What the Beams part needs of the editor it stands in, read at every use. */
 export interface BeamEditorHost {
@@ -20,6 +21,10 @@ export interface BeamEditorHost {
   writingLanguage(): string
   /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
   positionPlace?(): PositionPlace
+  /** Where the playhead is, ms, how long the recording lasts, and putting the playhead elsewhere: the part's own timeline follows the recording's. */
+  currentTime(): number
+  duration(): number
+  seekTo(t: number): void
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -41,6 +46,8 @@ export class BeamEditor {
   private places?: ElementList
   private placeForm?: ParameterForm
   private placeIndex = 0
+  /** When the beam is on, on a timeline of its own (see syncTimeline). */
+  private timeline?: TimelineTracks
   private language: string
   /** The beams the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly BeamJson[] = []
@@ -75,6 +82,7 @@ export class BeamEditor {
     this.element("beam-fields").hidden = beam === undefined
     if (!beam) return
     this.syncPlaces(beam)
+    this.syncTimeline()
     this.form ??= new ParameterForm(this.element("beam-parameters"), this.language, "beam.", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(BeamParameters.SET, new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
@@ -86,8 +94,52 @@ export class BeamEditor {
   refresh(): void {
     this.syncAddState()
     const beams = this.beams
-    if (beams.length === this.shown.length && beams.every((beam, i) => beam.id === this.shown[i].id)) return
+    if (beams.length === this.shown.length && beams.every((beam, i) => beam.id === this.shown[i].id)) {
+      // The recording's length or its playhead may have changed meanwhile.
+      this.syncTimeline()
+      return
+    }
     this.sync()
+  }
+
+  /** The playhead has moved: only it is drawn again, as at every frame of a playback. */
+  setTime(t: number): void {
+    this.timeline?.setTime(t)
+  }
+
+  /** The row of the beam's timeline, readable over a light ground and a dark one. */
+  private static readonly COLOR = "#2f9e5a"
+
+  /**
+   * When the beam is on, on a timeline of its own (see TimelineTracks): a bar from when it is switched on to when it is switched off, the
+   * start and the end of the recording where it says neither, a diamond at either end. Dragged, an end moves in time, the playhead with it;
+   * the "+" switches it on at the playhead.
+   */
+  private syncTimeline(): void {
+    const beam = this.current
+    if (!this.timeline || !beam) return
+    const duration = this.host.duration()
+    const from = beam.fromT ?? 0
+    const until = beam.untilT ?? duration
+    this.timeline.show([{
+      id: "on", label: this.messages.on, color: BeamEditor.COLOR, times: [from, until], spans: [{ t: from, until, label: "" }],
+      open: () => undefined,
+      move: (moved, to) => this.moveEnd(moved === from ? "fromT" : "untilT", to),
+      add: () => this.moveEnd("fromT", Math.round(this.host.currentTime()))
+    }], duration, this.host.currentTime(), { from: Math.min(0, from, until), to: Math.max(duration, from, until) })
+  }
+
+  /** An end of the time the beam is on, now at `to`: the other kept after the start, or let go back to the recording's end. */
+  private moveEnd(key: "fromT" | "untilT", to: number): void {
+    this.editBeam(beam => {
+      beam[key] = to
+      if (beam.fromT !== undefined && beam.untilT !== undefined && beam.untilT < beam.fromT) {
+        if (key === "fromT") delete beam.untilT
+        else [beam.fromT, beam.untilT] = [beam.untilT, beam.fromT]
+      }
+    })
+    this.form?.sync(true)
+    this.syncTimeline()
   }
 
   /** A beam is put in front of the observer: it can be added once the recording has a place. */
@@ -115,6 +167,7 @@ export class BeamEditor {
       <p class="launch-intro">${m.intro}</p>
       <div id="beam-list"></div>
       <div id="beam-fields" class="launch-fields">
+        <div id="beam-timeline" class="launch-timeline"></div>
         <fieldset id="beam-path" class="launch-path">
           <legend>${m.path}</legend>
           <div id="beam-places"></div>
@@ -142,12 +195,14 @@ export class BeamEditor {
     })
     this.places.setLabels({ list: m.place, remove: m.deletePlace, add: m.addPlace, previous: m.previousPlace, next: m.nextPlace })
     this.placeForm = undefined
+    this.timeline = new TimelineTracks(this.element("beam-timeline"), t => this.host.seekTo(t), { addKeyframeHere: m.onHere, keyframeHere: m.onHere, zoomHint: m.zoomHint })
   }
 
   /** A field was written onto the beam. */
   private written(): void {
     const beam = this.current
     if (beam) this.list?.rename(beam.id, this.labelOf(beam))
+    this.syncTimeline()
   }
 
   /** The points of the beam's path, the one being edited picked, and its fields drawn (see BeamParameters.PLACE). */

@@ -13,5 +13,8 @@ export const beamEditorMessages_en: BeamEditorMessages = {
   previousPlace: "Previous point",
   nextPlace: "Next point",
   addBeamNowhere: "Give the recording a place first: a beam is put in front of the witness",
-  derivedNote: "An empty field shows, greyed, the value in use. Clear a field to go back to it."
+  derivedNote: "An empty field shows, greyed, the value in use. Clear a field to go back to it.",
+  on: "On",
+  onHere: "Switch it on here, at the playhead",
+  zoomHint: "Pinch, or Ctrl + wheel, to zoom; Shift + wheel to scroll"
 }

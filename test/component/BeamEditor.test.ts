@@ -14,9 +14,10 @@ describe("BeamEditor", () => {
   const build = (skyEvents?: SkyEventsJson) => {
     const sighting = { skyEvents, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
-    const editor = new BeamEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", changed: () => changes++ }, "en")
+    const time = { now: 4000 }
+    const editor = new BeamEditor(container, { sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en", currentTime: () => time.now, duration: () => 20000, seekTo: t => { time.now = t }, changed: () => changes++ }, "en")
     editor.sync()
-    return { sighting, changes: () => changes }
+    return { sighting, changes: () => changes, time }
   }
   const typed = (target: Element, value: string) => {
     ;(target as HTMLInputElement).value = value
@@ -52,6 +53,25 @@ describe("BeamEditor", () => {
     expect(container.querySelector<HTMLButtonElement>("#beam-place-delete")!.disabled).toBe(true)
     container.querySelector<HTMLButtonElement>("#beam-place-add")!.click()
     expect(sighting.skyEvents!.beams![0].path).toHaveLength(3)
+  })
+
+  test("lays out when the beam is on on a timeline: the whole recording where it says nothing, its ends dragged, switched on at the playhead", () => {
+    const { sighting, time } = build({ beams: [{ id: "b", path, wavelengthNm: 532, powerW: 10 }] })
+    const lane = container.querySelector<HTMLElement>("#beam-timeline .track-lane")!
+    expect([...lane.querySelectorAll<HTMLElement>(".kf")].map(diamond => diamond.dataset.t)).toEqual(["0", "20000"])
+    // 200 px over the 20 s of the recording: its end dragged back to 15 s.
+    lane.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 24, right: 200, bottom: 24, x: 0, y: 0, toJSON: () => undefined })
+    lane.setPointerCapture = () => undefined
+    lane.dispatchEvent(new MouseEvent("pointerdown", { clientX: 199, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointermove", { clientX: 150, bubbles: true }))
+    lane.dispatchEvent(new MouseEvent("pointerup", { clientX: 150, bubbles: true }))
+    expect(sighting.skyEvents!.beams![0].untilT).toBe(15000)
+    expect(container.querySelector<HTMLInputElement>('[data-key="untilT"]')!.value).toBe("15")
+    // The playhead went with the end dragged: taken back to 4 s.
+    expect(time.now).toBe(15000)
+    time.now = 4000
+    container.querySelector<HTMLButtonElement>("#beam-timeline .track-add")!.click()
+    expect(sighting.skyEvents!.beams![0]).toMatchObject({ fromT: 4000, untilT: 15000 })
   })
 
   test("deleting the last beam leaves no event of the sky behind", () => {
