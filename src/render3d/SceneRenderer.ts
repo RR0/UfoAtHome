@@ -180,6 +180,7 @@ import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { SourceDiffraction } from "./SourceDiffraction.js"
 import { Reflections } from "./Reflections.js"
 import { Photometry } from "./Photometry.js"
+import { MeshRaycast } from "./MeshRaycast.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -1444,6 +1445,8 @@ export class SceneRenderer {
   ) {
     // Before any material is compiled: the leaves of a tree stay as covered afar as up close.
     CutoutCoverage.install()
+    // Lines of sight through the decor at every frame: through a tree of its triangles, not each of them (see MeshRaycast).
+    MeshRaycast.install()
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
     // The display's own ratio at most, and less while the frames are late — see AdaptiveResolution.
     this.resolution = new AdaptiveResolution(Math.min(window.devicePixelRatio || 1, 2), this.renderer.getContext())
