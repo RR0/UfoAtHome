@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { imageryTilePlan } from "../../../src/render3d/terrain/providers/xyzImageryRaster.js"
+import { imageryTilePlan } from "../../../src/modules/providers/terrain/xyzImageryRaster.js"
 import { metersPerPixel } from "../../../src/render3d/terrain/TileMath.js"
 
 /** Socorro — the patch this was measured on, and a latitude where a tile is neither its widest nor

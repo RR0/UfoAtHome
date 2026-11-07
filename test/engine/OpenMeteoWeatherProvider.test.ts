@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { OpenMeteoWeatherProvider } from "../../src/engine/weather/providers/OpenMeteoWeatherProvider.js"
+import { OpenMeteoWeatherProvider } from "../../src/modules/providers/weather/OpenMeteoWeatherProvider.js"
 
 /** One hour of Open-Meteo's real archive shape (field names and units verified against a live
  * 1965-07-01 Valensole request), with every value overridable per test. */

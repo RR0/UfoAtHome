@@ -1,8 +1,8 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
 import { gunzipSync } from "node:zlib"
 import { join } from "node:path"
-import { AdsbLolArchiveProvider } from "../src/engine/traffic/providers/AdsbLolArchiveProvider.js"
-import { AircraftTile } from "../src/engine/traffic/providers/AircraftTile.js"
+import { AdsbLolArchiveProvider } from "../src/modules/providers/traffic/AdsbLolArchiveProvider.js"
+import { AircraftTile } from "../src/modules/providers/traffic/AircraftTile.js"
 import { AircraftSlice } from "./AircraftSlice.js"
 
 /**

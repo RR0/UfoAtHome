@@ -1,5 +1,5 @@
 import type { PlaceProvider } from "./PlaceProvider.js"
-import { NominatimPlaceProvider } from "./providers/NominatimPlaceProvider.js"
+import { NominatimPlaceProvider } from "../../modules/providers/place/NominatimPlaceProvider.js"
 
 /**
  * The single composition point choosing which geocoder backs the place-name field — same role

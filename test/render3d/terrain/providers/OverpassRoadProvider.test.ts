@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { OverpassRoadProvider } from "../../../../src/render3d/terrain/providers/OverpassRoadProvider.js"
-import { OverpassClient } from "../../../../src/render3d/terrain/providers/OverpassClient.js"
+import { OverpassRoadProvider } from "../../../../src/modules/providers/terrain/OverpassRoadProvider.js"
+import { OverpassClient } from "../../../../src/modules/providers/terrain/OverpassClient.js"
 
 const BOUNDS = { north: 34.059, south: 34.043, east: -106.882, west: -106.902 }
 /** One instance, so a test is not at the mercy of which of several answered. */

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { ArchivedRoadProvider } from "../../../../src/render3d/terrain/providers/ArchivedRoadProvider.js"
+import { ArchivedRoadProvider } from "../../../../src/modules/providers/terrain/ArchivedRoadProvider.js"
 import type { RoadProvider, RoadWay } from "../../../../src/render3d/terrain/RoadProvider.js"
 
 const INDEX_URL = "https://example.test/roads/index.json"

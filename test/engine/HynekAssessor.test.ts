@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { ASSESSMENT_SOURCES } from "../../src/engine/assessment/assessmentSources.js"
+import { ASSESSMENT_SOURCES } from "../../src/modules/assessors/assessmentSources.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
 import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
 

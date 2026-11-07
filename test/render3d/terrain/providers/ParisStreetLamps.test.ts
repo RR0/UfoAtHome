@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { ParisStreetLamps } from "../../../../src/render3d/terrain/providers/ParisStreetLamps.js"
-import { OsmStreetFurniture } from "../../../../src/render3d/terrain/providers/OsmStreetFurniture.js"
+import { ParisStreetLamps } from "../../../../src/modules/providers/terrain/ParisStreetLamps.js"
+import { OsmStreetFurniture } from "../../../../src/modules/providers/terrain/OsmStreetFurniture.js"
 
 const NOTRE_DAME = { lat: 48.85335, lng: 2.34775 }
 const METRES = 111320

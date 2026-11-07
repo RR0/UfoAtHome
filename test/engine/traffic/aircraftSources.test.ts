@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { dataSourceById } from "../../../src/engine/source/DataSource.js"
-import { AIRCRAFT_SOURCES } from "../../../src/engine/traffic/aircraftSources.js"
+import { AIRCRAFT_SOURCES } from "../../../src/modules/providers/traffic/aircraftSources.js"
 import { LazyAircraftProvider } from "../../../src/engine/traffic/LazyAircraftProvider.js"
 
 describe("AIRCRAFT_SOURCES", () => {

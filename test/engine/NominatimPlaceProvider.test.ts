@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { NominatimPlaceProvider } from "../../src/engine/place/providers/NominatimPlaceProvider.js"
+import { NominatimPlaceProvider } from "../../src/modules/providers/place/NominatimPlaceProvider.js"
 
 /** Nominatim's real jsonv2 shape (verified against a live "Valensole" query). */
 const VALENSOLE = {

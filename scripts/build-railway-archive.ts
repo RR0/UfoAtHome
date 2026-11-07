@@ -12,9 +12,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { IgnTopoRailwayProvider } from "../src/render3d/terrain/providers/IgnTopoRailwayProvider.js"
-import { OsmRailwayNames } from "../src/render3d/terrain/providers/OsmRailwayNames.js"
-import { OverpassRailwayProvider } from "../src/render3d/terrain/providers/OverpassRailwayProvider.js"
+import { IgnTopoRailwayProvider } from "../src/modules/providers/terrain/IgnTopoRailwayProvider.js"
+import { OsmRailwayNames } from "../src/modules/providers/terrain/OsmRailwayNames.js"
+import { OverpassRailwayProvider } from "../src/modules/providers/terrain/OverpassRailwayProvider.js"
 import type { RailwayLine } from "../src/render3d/terrain/RailwayProvider.js"
 import { ArchivedPlaces } from "./ArchivedPlaces.js"
 

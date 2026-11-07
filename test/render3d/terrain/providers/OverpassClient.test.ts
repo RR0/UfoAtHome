@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { OverpassClient } from "../../../../src/render3d/terrain/providers/OverpassClient.js"
+import { OverpassClient } from "../../../../src/modules/providers/terrain/OverpassClient.js"
 
 const NANTERRE = '[out:json][timeout:25];(node["highway"="street_lamp"](48.893500,2.199000,48.897500,2.205000););out geom;'
 const SOCORRO = '[out:json][timeout:25];(node["highway"="street_lamp"](34.000000,-106.900000,34.010000,-106.890000););out geom;'

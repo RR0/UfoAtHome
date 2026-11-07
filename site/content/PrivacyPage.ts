@@ -11,7 +11,7 @@ interface Recipient {
 /**
  * What this site and its components do with the people who use them, and with the people whose
  * accounts they replay. It states what the code does, so it is to be changed with the code: a new
- * provider in `src/render3d/terrain/providers/` or `src/engine/*\/providers/` is a new row below.
+ * provider in `src/modules/` is a new row below.
  */
 export class PrivacyPage implements SitePage {
 

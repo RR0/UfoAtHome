@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { OpenMeteoUpperAirProvider } from "../../../src/engine/traffic/providers/OpenMeteoUpperAirProvider.js"
+import { OpenMeteoUpperAirProvider } from "../../../src/modules/providers/traffic/OpenMeteoUpperAirProvider.js"
 
 const LEVELS = [500, 400, 300, 250, 200, 150]
 

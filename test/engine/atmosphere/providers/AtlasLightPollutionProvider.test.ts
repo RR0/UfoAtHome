@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { AtlasLightPollutionProvider } from "../../../../src/engine/atmosphere/providers/AtlasLightPollutionProvider.js"
+import { AtlasLightPollutionProvider } from "../../../../src/modules/providers/light-pollution/AtlasLightPollutionProvider.js"
 
 /** A two-degree world with one lit tile, N33W118 (33°N to 35°N), whose cells all say `code`. */
 class FakeAtlas {

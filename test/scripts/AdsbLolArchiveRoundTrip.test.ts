@@ -5,7 +5,7 @@ import path from "node:path"
 import { gzipSync } from "node:zlib"
 import { afterEach, beforeEach, describe, expect, test } from "vitest"
 import { AircraftArchiveBuild } from "../../scripts/AircraftArchiveBuild.js"
-import { AdsbLolArchiveProvider } from "../../src/engine/traffic/providers/AdsbLolArchiveProvider.js"
+import { AdsbLolArchiveProvider } from "../../src/modules/providers/traffic/AdsbLolArchiveProvider.js"
 import type { AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
 import { TarFixture } from "./TarFixture.js"
 

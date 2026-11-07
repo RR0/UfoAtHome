@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { IgnMntElevationProvider } from "../../../../src/render3d/terrain/providers/IgnMntElevationProvider.js"
+import { IgnMntElevationProvider } from "../../../../src/modules/providers/terrain/IgnMntElevationProvider.js"
 import { FirstElevationThatAnswers } from "../../../../src/render3d/terrain/FirstElevationThatAnswers.js"
 import type { ElevationProvider } from "../../../../src/render3d/terrain/ElevationProvider.js"
 import { TiffFixture } from "../TiffFixture.js"

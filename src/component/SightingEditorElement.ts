@@ -50,7 +50,7 @@ import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import type { ShareMessages } from "./messages/ShareMessages.js"
 import { AppLocation } from "./AppLocation.js"
 import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
-import { NARRATIVE_SOURCES } from "../engine/narrative/narrativeSources.js"
+import { NARRATIVE_SOURCES } from "../modules/providers/narrative/narrativeSources.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
@@ -111,7 +111,7 @@ import type { BowForm } from "../engine/atmosphere/Rainbows.js"
 import type { HaloForm } from "../engine/atmosphere/IceHalos.js"
 import { computeBodyPosition, computeMoonPhase } from "../engine/astronomy/CelestialPositions.js"
 import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
-import { LIGHT_POLLUTION_SOURCES } from "../engine/atmosphere/lightPollutionSources.js"
+import { LIGHT_POLLUTION_SOURCES } from "../modules/providers/light-pollution/lightPollutionSources.js"
 import type { LightPollutionLookup, LightPollutionProvider } from "../engine/atmosphere/LightPollutionProvider.js"
 import { LimitingMagnitude } from "../engine/instrument/LimitingMagnitude.js"
 import { DEEP_STAR_CATALOG_MAGNITUDE_LIMIT } from "../render3d/StarCatalog.js"
@@ -166,14 +166,14 @@ import type { WeatherInferenceResult } from "../engine/weather/WeatherInference.
 import { defaultWeatherProvider } from "../engine/weather/defaultWeatherProvider.js"
 import type { WeatherProvider } from "../engine/weather/WeatherProvider.js"
 import { defaultPlaceProvider } from "../engine/place/defaultPlaceProvider.js"
-import { PLACE_SOURCES } from "../engine/place/placeSources.js"
-import { isRecordSource, WEATHER_SOURCES } from "../engine/weather/weatherSources.js"
-import { UPPER_AIR_SOURCES } from "../engine/traffic/upperAirSources.js"
-import { AIRCRAFT_SOURCES } from "../engine/traffic/aircraftSources.js"
+import { PLACE_SOURCES } from "../modules/providers/place/placeSources.js"
+import { isRecordSource, WEATHER_SOURCES } from "../modules/providers/weather/weatherSources.js"
+import { UPPER_AIR_SOURCES } from "../modules/providers/traffic/upperAirSources.js"
+import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
-import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../render3d/terrain/terrainSources.js"
-import { DECOR_MODEL_SOURCES } from "../render3d/decor/decorModelSources.js"
+import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../modules/providers/terrain/terrainSources.js"
+import { DECOR_MODEL_SOURCES } from "../modules/models/decorModelSources.js"
 import { ModelPicker } from "./ModelPicker.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorTraits } from "../engine/model/DecorTraits.js"
@@ -194,7 +194,7 @@ import { sightingTimeToDate } from "../engine/astronomy/CelestialPositions.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { SightingTags } from "./messages/TagNames.js"
-import { TIME_ZONE_SOURCES } from "../engine/time/timeZoneSources.js"
+import { TIME_ZONE_SOURCES } from "../modules/providers/time-zone/timeZoneSources.js"
 import type { TimeZoneProvider } from "../engine/time/TimeZoneProvider.js"
 import { loadSceneNames, loadSightingEditorMessages, loadTagNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
@@ -1680,7 +1680,7 @@ export class SightingEditorElement extends HTMLElement {
     }, sightingEditorMessages_en,
     async (lat, lng) => this.surroundingsProvider
       ? (this.surroundingsProvider.covers(lat, lng) ? this.surroundingsProvider : undefined)
-      : (await import("../render3d/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng),
+      : (await import("../modules/providers/terrain/surroundingsSources.js")).SurroundingsSources.providerFor(this.sceneryChoice, lat, lng),
     { radiusM: Number(this.sceneryRadius.value) })
     // The first survey of the registry unless the author chose another, or none, which the browser remembers: asking sends the place to a
     // service, and that is the author's to allow.
@@ -9155,7 +9155,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private async fillScenerySources(): Promise<void> {
     // A chunk that does not come (a page offline, a deployment replaced under it) leaves the choice as it is, rather than a rejection nobody handles.
-    const registry = await import("../render3d/terrain/surroundingsSources.js").catch(() => undefined)
+    const registry = await import("../modules/providers/terrain/surroundingsSources.js").catch(() => undefined)
     if (!registry) return
     const { SURROUNDINGS_SOURCES, SurroundingsSources } = registry
     // The editor can be gone (a test torn down, a page left) while the chunk loads: there is nothing to fill, and no document to make options with.

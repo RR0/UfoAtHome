@@ -30,8 +30,8 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { IgnTopoRoadProvider } from "../src/render3d/terrain/providers/IgnTopoRoadProvider.js"
-import { OverpassRoadProvider } from "../src/render3d/terrain/providers/OverpassRoadProvider.js"
+import { IgnTopoRoadProvider } from "../src/modules/providers/terrain/IgnTopoRoadProvider.js"
+import { OverpassRoadProvider } from "../src/modules/providers/terrain/OverpassRoadProvider.js"
 import type { RoadWay } from "../src/render3d/terrain/RoadProvider.js"
 import { ArchivedPlaces } from "./ArchivedPlaces.js"
 

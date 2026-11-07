@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-import { IgnTopoWaterProvider } from "../../../../src/render3d/terrain/providers/IgnTopoWaterProvider.js"
-import { OverpassWaterProvider } from "../../../../src/render3d/terrain/providers/OverpassWaterProvider.js"
-import { RegionalWaterProvider } from "../../../../src/render3d/terrain/providers/RegionalWaterProvider.js"
+import { IgnTopoWaterProvider } from "../../../../src/modules/providers/terrain/IgnTopoWaterProvider.js"
+import { OverpassWaterProvider } from "../../../../src/modules/providers/terrain/OverpassWaterProvider.js"
+import { RegionalWaterProvider } from "../../../../src/modules/providers/terrain/RegionalWaterProvider.js"
 import type { WaterProvider } from "../../../../src/render3d/terrain/WaterProvider.js"
 
 const PARIS = { south: 48.851, north: 48.855, west: 2.346, east: 2.352 }

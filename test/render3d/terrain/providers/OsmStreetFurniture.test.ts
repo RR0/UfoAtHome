@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { OsmStreetFurniture } from "../../../../src/render3d/terrain/providers/OsmStreetFurniture.js"
+import { OsmStreetFurniture } from "../../../../src/modules/providers/terrain/OsmStreetFurniture.js"
 import { SAINT_LO } from "./IgnSurvey.js"
 
 const METRES = 111320

@@ -1,5 +1,5 @@
 import type { WeatherProvider } from "./WeatherProvider.js"
-import { OpenMeteoWeatherProvider } from "./providers/OpenMeteoWeatherProvider.js"
+import { OpenMeteoWeatherProvider } from "../../modules/providers/weather/OpenMeteoWeatherProvider.js"
 
 /**
  * The single composition point choosing which record backs inferred weather — same role

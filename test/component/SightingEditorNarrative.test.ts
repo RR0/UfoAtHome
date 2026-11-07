@@ -19,7 +19,7 @@ let asked: NarrativeRequest[] = []
 let answer: (request: NarrativeRequest) => Promise<NarrativeDraft> = () =>
   Promise.reject(new NarrativeError("malformed"))
 
-vi.mock("../../src/engine/narrative/narrativeSources.js", () => ({
+vi.mock("../../src/modules/providers/narrative/narrativeSources.js", () => ({
   NARRATIVE_SOURCES: [
     {
       id: "test-narrative",

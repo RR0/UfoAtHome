@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { OsmStreetLamps } from "../../../../src/render3d/terrain/providers/OsmStreetLamps.js"
-import { OsmStreetFurniture } from "../../../../src/render3d/terrain/providers/OsmStreetFurniture.js"
-import { IgnTopoSurroundingsProvider } from "../../../../src/render3d/terrain/providers/IgnTopoSurroundingsProvider.js"
+import { OsmStreetLamps } from "../../../../src/modules/providers/terrain/OsmStreetLamps.js"
+import { OsmStreetFurniture } from "../../../../src/modules/providers/terrain/OsmStreetFurniture.js"
+import { IgnTopoSurroundingsProvider } from "../../../../src/modules/providers/terrain/IgnTopoSurroundingsProvider.js"
 import { SAINT_LO, Survey } from "./IgnSurvey.js"
 
 const METRES = 111320

@@ -20,7 +20,7 @@ register()
  */
 let elevationLookups = 0
 
-vi.mock("../../src/render3d/terrain/terrainSources.js", () => ({
+vi.mock("../../src/modules/providers/terrain/terrainSources.js", () => ({
   ELEVATION_SOURCES: [
     {
       id: "test-elevation",

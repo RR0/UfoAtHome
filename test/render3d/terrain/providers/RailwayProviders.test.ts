@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { IgnTopoRailwayProvider } from "../../../../src/render3d/terrain/providers/IgnTopoRailwayProvider.js"
-import { OverpassRailwayProvider } from "../../../../src/render3d/terrain/providers/OverpassRailwayProvider.js"
-import { RegionalRailwayProvider } from "../../../../src/render3d/terrain/providers/RegionalRailwayProvider.js"
-import { CachedRailwayProvider } from "../../../../src/render3d/terrain/providers/CachedRailwayProvider.js"
+import { IgnTopoRailwayProvider } from "../../../../src/modules/providers/terrain/IgnTopoRailwayProvider.js"
+import { OverpassRailwayProvider } from "../../../../src/modules/providers/terrain/OverpassRailwayProvider.js"
+import { RegionalRailwayProvider } from "../../../../src/modules/providers/terrain/RegionalRailwayProvider.js"
+import { CachedRailwayProvider } from "../../../../src/modules/providers/terrain/CachedRailwayProvider.js"
 import type { RailwayLine, RailwayProvider } from "../../../../src/render3d/terrain/RailwayProvider.js"
 
 const GARE_DE_LYON = { south: 48.832, north: 48.848, west: 2.366, east: 2.39 }

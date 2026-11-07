@@ -1,4 +1,4 @@
-import { AircraftTile } from "../src/engine/traffic/providers/AircraftTile.js"
+import { AircraftTile } from "../src/modules/providers/traffic/AircraftTile.js"
 
 /** Writes the 20-byte records of one tile and hour that AircraftTile.decode reads. */
 export class AircraftTileWriter {

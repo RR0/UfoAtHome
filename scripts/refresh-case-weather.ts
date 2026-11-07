@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url"
 import { fromSightingJson } from "../src/engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../src/engine/persistence/sightingJson.js"
 import { WeatherInference } from "../src/engine/weather/WeatherInference.js"
-import { OpenMeteoWeatherProvider } from "../src/engine/weather/providers/OpenMeteoWeatherProvider.js"
+import { OpenMeteoWeatherProvider } from "../src/modules/providers/weather/OpenMeteoWeatherProvider.js"
 
 class CaseWeatherRefresh {
 

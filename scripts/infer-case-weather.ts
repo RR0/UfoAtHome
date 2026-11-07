@@ -19,7 +19,7 @@ import { readFile, writeFile } from "node:fs/promises"
 import { fromSightingJson } from "../src/engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../src/engine/persistence/sightingJson.js"
 import { WeatherInference } from "../src/engine/weather/WeatherInference.js"
-import { OpenMeteoWeatherProvider } from "../src/engine/weather/providers/OpenMeteoWeatherProvider.js"
+import { OpenMeteoWeatherProvider } from "../src/modules/providers/weather/OpenMeteoWeatherProvider.js"
 
 /** Open-Meteo asks for no key and sets no hard rate limit, but a handful of case files in a row is
  * still a burst — one second apart is well inside anything it minds. */

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-import { OsmBuildingsSurroundingsProvider } from "../../../../src/render3d/terrain/providers/OsmBuildingsSurroundingsProvider.js"
-import { OsmStreetFurniture } from "../../../../src/render3d/terrain/providers/OsmStreetFurniture.js"
-import { SURROUNDINGS_SOURCES, SurroundingsSources } from "../../../../src/render3d/terrain/surroundingsSources.js"
+import { OsmBuildingsSurroundingsProvider } from "../../../../src/modules/providers/terrain/OsmBuildingsSurroundingsProvider.js"
+import { OsmStreetFurniture } from "../../../../src/modules/providers/terrain/OsmStreetFurniture.js"
+import { SURROUNDINGS_SOURCES, SurroundingsSources } from "../../../../src/modules/providers/terrain/surroundingsSources.js"
 
 const BRAINE = { lat: 50.6055, lng: 4.1400 }
 const METRES = 111320

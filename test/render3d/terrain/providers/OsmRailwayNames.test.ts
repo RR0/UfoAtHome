@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { OsmRailwayNames } from "../../../../src/render3d/terrain/providers/OsmRailwayNames.js"
-import type { OverpassResponse } from "../../../../src/render3d/terrain/providers/OverpassClient.js"
+import { OsmRailwayNames } from "../../../../src/modules/providers/terrain/OsmRailwayNames.js"
+import type { OverpassResponse } from "../../../../src/modules/providers/terrain/OverpassClient.js"
 import type { RailwayLine } from "../../../../src/render3d/terrain/RailwayProvider.js"
 
 const BOUNDS = { south: 49.1, north: 49.11, west: 2.74, east: 2.76 }

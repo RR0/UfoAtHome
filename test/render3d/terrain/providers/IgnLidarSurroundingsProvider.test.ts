@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { SurroundingsUnavailableError } from "../../../../src/render3d/terrain/SurroundingsProvider.js"
-import { IgnLidarSurroundingsProvider } from "../../../../src/render3d/terrain/providers/IgnLidarSurroundingsProvider.js"
+import { IgnLidarSurroundingsProvider } from "../../../../src/modules/providers/terrain/IgnLidarSurroundingsProvider.js"
 import { Scene } from "../Scene.js"
 import { GREEN, ROOF, SAINT_LO, Survey } from "./IgnSurvey.js"
 

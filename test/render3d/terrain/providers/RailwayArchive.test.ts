@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { ArchivedRailwayProvider } from "../../../../src/render3d/terrain/providers/ArchivedRailwayProvider.js"
+import { ArchivedRailwayProvider } from "../../../../src/modules/providers/terrain/ArchivedRailwayProvider.js"
 import type { RailwayLine, RailwayProvider } from "../../../../src/render3d/terrain/RailwayProvider.js"
 
 const INDEX_URL = "https://example.org/railways/index.json"

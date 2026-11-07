@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { AdsbLolArchiveProvider } from "../../../src/engine/traffic/providers/AdsbLolArchiveProvider.js"
+import { AdsbLolArchiveProvider } from "../../../src/modules/providers/traffic/AdsbLolArchiveProvider.js"
 
 describe("AdsbLolArchiveProvider.tilesAround", () => {
   test("a place in the middle of a tile reaches its neighbours at 150 km", () => {

@@ -1,6 +1,6 @@
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { Assessment } from "../engine/assessment/Assessor.js"
-import { ASSESSMENT_SOURCES } from "../engine/assessment/assessmentSources.js"
+import { ASSESSMENT_SOURCES } from "../modules/assessors/assessmentSources.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
 

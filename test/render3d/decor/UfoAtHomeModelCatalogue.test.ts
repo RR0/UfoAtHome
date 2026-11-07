@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { UfoAtHomeModelCatalogue, UFOATHOME_MODEL_INDEX_URL } from "../../../src/render3d/decor/providers/UfoAtHomeModelCatalogue.js"
+import { UfoAtHomeModelCatalogue, UFOATHOME_MODEL_INDEX_URL } from "../../../src/modules/models/UfoAtHomeModelCatalogue.js"
 
 const CATALOGUE = {
   version: 1,

@@ -1,7 +1,7 @@
 import type { GeoBounds } from "../GeoBounds.js"
 import type { ImageryProvider, ImageryTexture } from "../ImageryProvider.js"
 import { dataSourceById } from "../../../engine/source/DataSource.js"
-import { IMAGERY_SOURCES } from "../terrainSources.js"
+import { IMAGERY_SOURCES } from "../../../modules/providers/terrain/terrainSources.js"
 import type { FrozenPatch } from "./FrozenPatches.js"
 
 /** One tile as its source served it. */

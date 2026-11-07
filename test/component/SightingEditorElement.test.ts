@@ -178,9 +178,9 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
 // fetch"), and the 14 tests that wait on one of them (the assessment's marks, the File group) ran out of time.
 beforeAll(async () => {
   await Promise.all([
-    import("../../src/render3d/terrain/surroundingsSources.js"),
-    import("../../src/engine/assessment/assessors/CoverageAssessor.js"),
-    import("../../src/engine/assessment/assessors/HynekAssessor.js"),
+    import("../../src/modules/providers/terrain/surroundingsSources.js"),
+    import("../../src/modules/assessors/CoverageAssessor.js"),
+    import("../../src/modules/assessors/HynekAssessor.js"),
     import("../../src/component/SightingFileEditor.js"),
     import("../../src/component/BodyEditor.js"),
     import("../../src/component/BeamEditor.js"),

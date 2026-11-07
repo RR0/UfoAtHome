@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { ArchivedWaterProvider } from "../../../../src/render3d/terrain/providers/ArchivedWaterProvider.js"
-import { CachedWaterProvider } from "../../../../src/render3d/terrain/providers/CachedWaterProvider.js"
+import { ArchivedWaterProvider } from "../../../../src/modules/providers/terrain/ArchivedWaterProvider.js"
+import { CachedWaterProvider } from "../../../../src/modules/providers/terrain/CachedWaterProvider.js"
 import type { WaterProvider, WaterSurface } from "../../../../src/render3d/terrain/WaterProvider.js"
 
 const INDEX_URL = "https://example.org/water/index.json"

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { AircraftTile } from "../../src/engine/traffic/providers/AircraftTile.js"
+import { AircraftTile } from "../../src/modules/providers/traffic/AircraftTile.js"
 import { AircraftTileWriter } from "../../scripts/AircraftTileWriter.js"
 
 describe("AircraftTile", () => {

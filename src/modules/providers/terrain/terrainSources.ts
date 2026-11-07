@@ -1,0 +1,46 @@
+import { ModuleRegistry } from "../../ModuleRegistry.js"
+import type { DataSource } from "../../../engine/source/DataSource.js"
+import type { ElevationProvider } from "../../../render3d/terrain/ElevationProvider.js"
+import type { ImageryProvider } from "../../../render3d/terrain/ImageryProvider.js"
+import { AwsTerrariumElevationProvider } from "./AwsTerrariumElevationProvider.js"
+import { defaultElevationProvider } from "../../../render3d/terrain/defaultTerrainProviders.js"
+import { EsriWorldImageryProvider } from "./EsriWorldImageryProvider.js"
+import { EoxSentinel2ImageryProvider } from "./EoxSentinel2ImageryProvider.js"
+
+/** Every source of ground relief the scene can be built from. */
+export const ELEVATION_SOURCES: DataSource<ElevationProvider>[] = ModuleRegistry.point("elevation").provide(ModuleRegistry.BUILT_IN, [
+  {
+    id: "ign-mnt",
+    name: "IGN LiDAR HD / RGE ALTI",
+    credit: "Relief © IGN, LiDAR HD and RGE ALTI (Licence Ouverte 2.0) in France; © AWS Open Data (SRTM, ETOPO1) elsewhere",
+    creditUrl: "https://geoservices.ign.fr/lidarhd",
+    create: () => defaultElevationProvider()
+  },
+  {
+    id: "aws-terrarium",
+    name: "AWS Terrain Tiles",
+    credit: "© AWS Open Data (SRTM, ETOPO1)",
+    creditUrl: "https://registry.opendata.aws/terrain-tiles/",
+    create: () => new AwsTerrariumElevationProvider()
+  }
+])
+
+/** Every source of aerial imagery the relief can be draped with. Two real entries — the second was
+ * written to prove ImageryProvider had more than one implementation (see its own doc comment) and
+ * had until now no way of being reached without editing code. */
+export const IMAGERY_SOURCES: DataSource<ImageryProvider>[] = ModuleRegistry.point("imagery").provide(ModuleRegistry.BUILT_IN, [
+  {
+    id: "esri-world",
+    name: "Esri World Imagery",
+    credit: "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+    creditUrl: "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
+    create: fetchImpl => new EsriWorldImageryProvider({ fetchImpl })
+  },
+  {
+    id: "eox-s2cloudless",
+    name: "EOX Sentinel-2 cloudless",
+    credit: "EOxCloudless by EOX IT Services GmbH (contains modified Copernicus Sentinel data)",
+    creditUrl: "https://cloudless.eox.at",
+    create: fetchImpl => new EoxSentinel2ImageryProvider({ fetchImpl })
+  }
+])

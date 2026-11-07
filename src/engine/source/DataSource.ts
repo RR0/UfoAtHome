@@ -8,6 +8,9 @@
  * both — the option names the source, the link beside it carries the attribution its licence
  * requires. Registries stay one-entry until a second implementation exists (see placeSources.ts and
  * weatherSources.ts, both single today), which is the point: the seam is visible before it is used.
+ *
+ * Every registry is an extension point of ModuleRegistry, and lives with its implementations under src/modules (see its
+ * README.md): another module adds its own sources to the same lists.
  */
 export interface DataSource<T> {
   /** Stable id — what a stored preference or a URL parameter would name. */

@@ -11,8 +11,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { IgnTopoWaterProvider } from "../src/render3d/terrain/providers/IgnTopoWaterProvider.js"
-import { OverpassWaterProvider } from "../src/render3d/terrain/providers/OverpassWaterProvider.js"
+import { IgnTopoWaterProvider } from "../src/modules/providers/terrain/IgnTopoWaterProvider.js"
+import { OverpassWaterProvider } from "../src/modules/providers/terrain/OverpassWaterProvider.js"
 import type { WaterSurface } from "../src/render3d/terrain/WaterProvider.js"
 import { ArchivedPlaces } from "./ArchivedPlaces.js"
 

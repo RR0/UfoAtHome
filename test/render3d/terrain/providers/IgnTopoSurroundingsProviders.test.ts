@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { IgnLidarTopoSurroundingsProvider } from "../../../../src/render3d/terrain/providers/IgnLidarTopoSurroundingsProvider.js"
-import { IgnTopoSurroundingsProvider } from "../../../../src/render3d/terrain/providers/IgnTopoSurroundingsProvider.js"
+import { IgnLidarTopoSurroundingsProvider } from "../../../../src/modules/providers/terrain/IgnLidarTopoSurroundingsProvider.js"
+import { IgnTopoSurroundingsProvider } from "../../../../src/modules/providers/terrain/IgnTopoSurroundingsProvider.js"
 import { GREEN, GROUND, ROOF, SAINT_LO, Survey, line, outline } from "./IgnSurvey.js"
 
 /** Two houses that touch, as the map outlines them: 8 m by 10 m each, side by side along the east-west line, on the north side of the place. */

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { IgnTopoRoadProvider } from "../../../../src/render3d/terrain/providers/IgnTopoRoadProvider.js"
-import { RegionalRoadProvider } from "../../../../src/render3d/terrain/providers/RegionalRoadProvider.js"
+import { IgnTopoRoadProvider } from "../../../../src/modules/providers/terrain/IgnTopoRoadProvider.js"
+import { RegionalRoadProvider } from "../../../../src/modules/providers/terrain/RegionalRoadProvider.js"
 import type { RoadProvider, RoadWay } from "../../../../src/render3d/terrain/RoadProvider.js"
 
 const SAINT_LO = { south: 49.113, north: 49.118, west: -1.095, east: -1.086 }
