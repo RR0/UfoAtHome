@@ -1,6 +1,6 @@
-import type { ObserverProvider, ObserverSettings } from "./ObserverProvider.js"
-import type { Perception } from "./Perception.js"
-import { Perceptions } from "./Perception.js"
+import type { ObserverProvider, ObserverSettings } from "../../engine/observer/ObserverProvider.js"
+import type { Perception } from "../../engine/observer/Perception.js"
+import { Perceptions } from "../../engine/observer/Perception.js"
 
 /**
  * An observer who has been drinking, for the one effect the literature puts a number on: lower contrast

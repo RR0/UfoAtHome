@@ -1,6 +1,6 @@
-import type { ObserverProvider, ObserverSettings } from "./ObserverProvider.js"
-import type { Perception } from "./Perception.js"
-import { Perceptions } from "./Perception.js"
+import type { ObserverProvider, ObserverSettings } from "../../engine/observer/ObserverProvider.js"
+import type { Perception } from "../../engine/observer/Perception.js"
+import { Perceptions } from "../../engine/observer/Perception.js"
 
 /**
  * Colour vision deficiencies, by the matrices of Machado, Oliveira and Fernandes, "A Physiologically-based
