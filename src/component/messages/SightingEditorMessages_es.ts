@@ -501,7 +501,6 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   narrativeSource: "Redactado por",
   narrativeNeedsSetting: "Rellena \"{setting}\" ({source}) para generar una reconstrucción a partir del relato",
   narrativeNeedsAsk: "Nada que enviar todavía",
-  narrativeRemember: "Recordar en este dispositivo",
   narrativeDraft: "Generar reconstrucción",
   narrativeStop: "Detener",
   narrativeWorking: "Leyendo el relato…",

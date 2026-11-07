@@ -1,6 +1,5 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
-import { register, ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
-import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
+import { register, ELEMENT_NAME, SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { NarrativeDraft, NarrativeRequest } from "../../src/engine/narrative/NarrativeProvider.js"
 import { NarrativeError } from "../../src/engine/narrative/NarrativeError.js"
 import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
@@ -252,6 +251,7 @@ async function draft(element: SightingEditorElement, ask: string, key = "sk-test
 afterEach(() => {
   document.body.replaceChildren()
   localStorage.clear()
+  SightingEditorElement.forgetCredentials()
   answer = () => Promise.reject(new NarrativeError("malformed"))
 })
 
@@ -515,23 +515,20 @@ describe("SightingEditorElement drafting from an account", () => {
     expect(field<HTMLButtonElement>(element, "narrative-draft").disabled).toBe(false)
   })
 
-  it("keeps the key only when asked to, and forgets it the moment that is unticked", async () => {
-    // Storing somebody's credential is their decision, not a convenience to help them to.
-    const element = mount()
-    type(element, "narrative-key", "sk-test")
+  it("keeps the key for the page only, never in the browser, and clears what an earlier version stored", async () => {
+    // Whatever else runs on this origin could read the browser's storage: a credential is not kept there.
     const stored = "rr0-sighting-editor.narrative.test-narrative.key"
+    localStorage.setItem(stored, "sk-old")
+    localStorage.setItem("rr0-sighting-editor.narrative-key", "sk-older")
+    const element = mount()
 
+    expect(field<HTMLInputElement>(element, "narrative-key").value).toBe("")
     expect(localStorage.getItem(stored)).toBeNull()
+    expect(localStorage.getItem("rr0-sighting-editor.narrative-key")).toBeNull()
 
-    const remember = field<HTMLInputElement>(element, "narrativeRemember")
-    remember.checked = true
-    remember.dispatchEvent(new Event("change"))
-    expect(localStorage.getItem(stored)).toBe("sk-test")
+    type(element, "narrative-key", "sk-test")
+    expect(localStorage.getItem(stored)).toBeNull()
     expect(field<HTMLInputElement>(mount(), "narrative-key").value).toBe("sk-test")
-
-    remember.checked = false
-    remember.dispatchEvent(new Event("change"))
-    expect(localStorage.getItem(stored)).toBeNull()
   })
 
   it("credits the provider it drafts with, on the picker that names it", async () => {

@@ -105,7 +105,6 @@ export const html = `
          provider itself: see NarrativeSetting, and SightingEditorElement.renderNarrativeSettings. -->
     <span class="narrative-source"><span id="label-narrative-source">Drafted by</span> <span id="narrative-source-row"></span></span>
     <span id="narrative-settings" class="narrative-settings"></span>
-    <label class="checkbox"><input id="narrativeRemember" type="checkbox"/> <span id="label-narrative-remember">Remember on this device</span></label>
     <button id="narrative-draft" type="button">Generate reconstruction</button>
     <button id="narrative-stop" type="button" hidden>Stop</button>
     <output id="narrative-status" for="description"></output>

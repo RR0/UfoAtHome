@@ -520,7 +520,6 @@ export class SightingEditorElement extends HTMLElement {
   private readonly narrativeSettingsBox: HTMLElement
   /** The inputs the current provider's settings were rendered into, by setting id. */
   private narrativeSettingInputs = new Map<string, HTMLInputElement | HTMLSelectElement>()
-  private readonly narrativeRememberInput: HTMLInputElement
   private readonly narrativeDraftButton: HTMLButtonElement
   private readonly narrativeStopButton: HTMLButtonElement
   private readonly narrativeStatus: HTMLElement
@@ -777,7 +776,6 @@ export class SightingEditorElement extends HTMLElement {
   /** The shapes a body of this recording can stand for when they are not its own: those of the account it reads. */
   accountShapeIds?: readonly string[]
   private readonly labelNarrativeSource: HTMLElement
-  private readonly labelNarrativeRemember: HTMLElement
   private readonly groupTabs: HTMLButtonElement[]
   private readonly groupPanels: HTMLElement[]
   private readonly paramSummary: HTMLElement
@@ -1315,7 +1313,6 @@ export class SightingEditorElement extends HTMLElement {
     this.importInput = this.shadow.getElementById("import") as InputFileElement
     this.narrativeSourceRow = this.shadow.getElementById("narrative-source-row")!
     this.narrativeSettingsBox = this.shadow.getElementById("narrative-settings")!
-    this.narrativeRememberInput = this.shadow.getElementById("narrativeRemember") as HTMLInputElement
     this.narrativeDraftButton = this.shadow.getElementById("narrative-draft") as HTMLButtonElement
     this.narrativeStopButton = this.shadow.getElementById("narrative-stop") as HTMLButtonElement
     this.narrativeStatus = this.shadow.getElementById("narrative-status")!
@@ -1489,7 +1486,6 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.wholeKeyframesInput.addEventListener("change", () => this.setKeyframesWritten())
     this.labelNarrativeSource = this.shadow.getElementById("label-narrative-source")!
-    this.labelNarrativeRemember = this.shadow.getElementById("label-narrative-remember")!
     this.labelShapeGroup = this.shadow.getElementById("label-shape-group")!
     this.labelTemporalGroup = this.shadow.getElementById("label-temporal-group")!
     this.labelFileGroup = this.shadow.getElementById("label-file-group")!
@@ -1890,7 +1886,6 @@ export class SightingEditorElement extends HTMLElement {
     })
     this.narrativeDraftButton.addEventListener("click", () => this.draftFromDescription())
     this.narrativeStopButton.addEventListener("click", () => this.narrativeAbort?.abort())
-    this.narrativeRememberInput.addEventListener("change", () => this.rememberNarrativeSettings())
     // The provider picker (with its credit) and its settings are built in script, from the registry
     // and from the provider — see refreshSourceRows and renderNarrativeSettings. Done here and not
     // only in applyMessages, which never runs for an English reader (see loadLocaleMessages).
@@ -3001,8 +2996,8 @@ export class SightingEditorElement extends HTMLElement {
   }
 
 
-  /** Where a Claude key was kept before settings were each provider's own — read once, so nobody
-   * retypes theirs, then cleared (see storedNarrativeSetting and rememberNarrativeSettings). */
+  /** Where a Claude key was kept before settings were each provider's own: never read any more, only cleared (see
+   * forgetStoredCredentials). */
   private static readonly NARRATIVE_KEY_STORAGE = "rr0-sighting-editor.narrative-key"
 
   /** And the workspace it named, the same way. */
@@ -3219,9 +3214,6 @@ export class SightingEditorElement extends HTMLElement {
         .replace("{setting}", this.said.read(missing.label) ?? missing.id)
         .replace("{source}", source)
       : missingAsk ? this.messages.narrativeNeedsAsk : ""
-    // A reader with nothing to keep is not offered to keep it.
-    this.narrativeRememberInput.parentElement!.hidden =
-      !this.narrativeProvider.settings.some(setting => setting.remembered === "credential")
     // Marked, never blocked: see NarrativeSetting.suspect.
     for (const setting of this.narrativeProvider.settings) {
       const input = this.narrativeSettingInputs.get(setting.id)
@@ -3274,9 +3266,7 @@ export class SightingEditorElement extends HTMLElement {
       return label
     })
     this.narrativeSettingsBox.replaceChildren(...fields)
-    // The box is ticked when a credential of this provider was kept: it says where the value came from.
-    this.narrativeRememberInput.checked = this.narrativeProvider.settings.some(setting =>
-      setting.remembered === "credential" && this.storedNarrativeSetting(setting.id) !== undefined)
+    this.forgetStoredCredentials()
     this.syncNarrativeEnabled()
   }
 
@@ -3310,36 +3300,52 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Keeps the reader's settings in this browser, or stops keeping them.
-   *
-   * A preference (a model picked) is kept like any choice. A credential (a key, and the workspace
-   * that is half of it) only when the reader ticks the box, which is off by default and never turned
-   * on for them: localStorage is readable by anything else that ever runs on the same origin, and
-   * the convenience of not retyping a key is not ours to trade for that on somebody's behalf.
-   * Unticking it forgets the stored copies at once, which is what a reader who just changed their
-   * mind about it means.
+   * The credentials typed on this page (a key, the workspace that is half of it), by provider and setting: held in memory until the page
+   * is reloaded, shared by every editor of the page, and never written anywhere. Whatever else runs on this origin (a module loaded from
+   * a URL) could read what the browser stores, so a credential is not stored; typing it again after a reload is the price of that.
+   */
+  private static readonly pageCredentials = new Map<string, string>()
+
+  /** Forgets the credentials typed on this page, as a reload does. */
+  static forgetCredentials(): void {
+    SightingEditorElement.pageCredentials.clear()
+  }
+
+  /**
+   * Keeps the reader's settings for later: a preference (a model picked) in this browser, like any choice of theirs; a credential in
+   * this page's memory only (see pageCredentials).
    */
   private rememberNarrativeSettings(): void {
-    try {
-      for (const setting of this.narrativeProvider.settings) {
-        const key = this.narrativeStorageKey(setting.id)
-        const value = this.narrativeSettingInputs.get(setting.id)?.value ?? ""
-        const keep = setting.remembered === "preference"
-          || (setting.remembered === "credential" && this.narrativeRememberInput.checked)
-        if (keep && value !== "") {
-          localStorage.setItem(key, value)
-        } else {
-          localStorage.removeItem(key)
+    for (const setting of this.narrativeProvider.settings) {
+      const key = this.narrativeStorageKey(setting.id)
+      const value = this.narrativeSettingInputs.get(setting.id)?.value ?? ""
+      if (setting.remembered === "credential") {
+        if (value !== "") SightingEditorElement.pageCredentials.set(key, value)
+        else SightingEditorElement.pageCredentials.delete(key)
+      } else if (setting.remembered === "preference") {
+        try {
+          if (value !== "") localStorage.setItem(key, value)
+          else localStorage.removeItem(key)
+        } catch {
+          // Private browsing, a blocked origin, a full quota: the value still works for this page.
         }
       }
-      // Where a Claude key and workspace were kept before (see storedNarrativeSetting): what is
-      // still wanted has just been written under its new name, so the old copies only ever stood
-      // for a choice the reader may since have unmade.
+    }
+  }
+
+  /**
+   * Removes from this browser the credentials an earlier version kept there when asked to (under the provider's name, or under the
+   * two names a Claude key and workspace had before that): nothing reads them any more, and leaving them would leave them readable.
+   */
+  private forgetStoredCredentials(): void {
+    try {
+      for (const setting of this.narrativeProvider.settings) {
+        if (setting.remembered === "credential") localStorage.removeItem(this.narrativeStorageKey(setting.id))
+      }
       localStorage.removeItem(SightingEditorElement.NARRATIVE_KEY_STORAGE)
       localStorage.removeItem(SightingEditorElement.NARRATIVE_SCOPE_STORAGE)
     } catch {
-      // Private browsing, a blocked origin, a full quota. Nothing to tell the reader: the values
-      // still work for this session, which is all keeping them was ever offering to extend.
+      // No storage: nothing was kept there either.
     }
   }
 
@@ -3347,16 +3353,14 @@ export class SightingEditorElement extends HTMLElement {
     return `rr0-sighting-editor.narrative.${this.narrativeSourceId}.${settingId}`
   }
 
-  /** A setting kept on this device, reading the two places a Claude key and workspace were kept
-   * before settings were the provider's own, so that nobody has to type theirs again. */
+  /** A setting kept for later: a credential from this page's memory, a preference from this browser. */
   private storedNarrativeSetting(settingId: string): string | undefined {
+    const key = this.narrativeStorageKey(settingId)
+    const setting = this.narrativeProvider.settings.find(candidate => candidate.id === settingId)
+    if (setting?.remembered === "credential") return SightingEditorElement.pageCredentials.get(key)
+    if (setting?.remembered !== "preference") return undefined
     try {
-      const stored = localStorage.getItem(this.narrativeStorageKey(settingId))
-      if (stored !== null) return stored
-      if (this.narrativeSourceId !== "claude") return undefined
-      const legacy = settingId === "key" ? SightingEditorElement.NARRATIVE_KEY_STORAGE
-        : settingId === "workspace" ? SightingEditorElement.NARRATIVE_SCOPE_STORAGE : undefined
-      return (legacy && localStorage.getItem(legacy)) || undefined
+      return localStorage.getItem(key) ?? undefined
     } catch {
       return undefined
     }
@@ -11240,7 +11244,6 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.labelNarrativeSource.textContent = messages.narrativeSource
     this.renderNarrativeSettings()
-    this.labelNarrativeRemember.textContent = messages.narrativeRemember
     this.narrativeStopButton.textContent = messages.narrativeStop
     this.narrativeDraftButton.textContent = messages.narrativeDraft
     this.descriptionInput.placeholder = messages.narrativePlaceholder

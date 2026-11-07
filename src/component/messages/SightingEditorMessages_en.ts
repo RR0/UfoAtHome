@@ -496,7 +496,6 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   narrativeSource: "Drafted by",
   narrativeNeedsSetting: "Fill in \"{setting}\" ({source}) to generate a reconstruction from the account",
   narrativeNeedsAsk: "Nothing to send yet",
-  narrativeRemember: "Remember on this device",
   narrativeDraft: "Generate reconstruction",
   narrativeStop: "Stop",
   narrativeWorking: "Reading the account…",

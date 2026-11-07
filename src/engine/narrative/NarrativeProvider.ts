@@ -98,9 +98,10 @@ export interface NarrativeSetting {
   /** A draft cannot be asked for while this is empty; the button says which setting is missing. */
   required?: boolean
   /**
-   * Whether the value may outlive the page. "credential": only when the reader ticks the box that
-   * says so, and forgotten the moment it is unticked. "preference": always, like any other choice
-   * of theirs (a model picked). Absent: never.
+   * Whether the value is kept for later. "credential": in the page's memory only, until it is
+   * reloaded, never in the browser's storage (anything else running on the origin could read it
+   * there). "preference": in the browser, like any other choice of theirs (a model picked).
+   * Absent: never.
    */
   remembered?: "credential" | "preference"
   /** A warning for a value that looks wrong (a key without its service's prefix): shown, never
