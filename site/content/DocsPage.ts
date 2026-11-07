@@ -97,7 +97,7 @@ export class DocsPage implements SitePage {
       ],
       fr: [
         ["/docs/case/", "Qu'est-ce qu'un dossier ufologique ?",
-          "Ce qu'un dossier réunit, les trois sortes d'événements qu'il contient (observations, interprétations, interviews) et comment ils peuvent être liés."],
+          "Ce qu'un dossier réunit, les trois types d'événements qu'il contient (observations, interprétations, interviews) et comment ils peuvent être liés."],
         ["/docs/format/", "Les observations",
           "Ce qu'est une observation, puis ce que contient son fichier, champ par champ. Avec un exemple entier."],
         ["/docs/interview/", "Les interviews",

@@ -102,7 +102,7 @@ export class DocsCasePage extends DocsSection {
       lede: "Dans UFO@home, un dossier réunit tout ce que l'on sait d'un événement : ce qui a été vu, par qui, comment on peut l'expliquer, ce que les témoins ont dit quand on les a interrogés.",
       what: "Un dossier est ce dont parle une enquête : une nuit, un lieu, un titre. Il ne décrit pas l'événement lui-même. Il <strong>liste ce qui s'est passé autour</strong>, sous forme d'<em>événements</em>, chacun étant un document à part. Personne n'a à tous les écrire : un dossier peut n'être qu'une observation, et grandir.",
       eventsHeading: "Les événements d'un dossier",
-      eventsIntro: "Un dossier contient trois sortes d'événements.",
+      eventsIntro: "Un dossier contient trois types d'événements.",
       observation: "<strong><a href=\"/docs/format/\">Des observations</a>.</strong> Généralement au moins une : le compte rendu d'un témoin, qu'UFO@home rejoue. Un dossier peut en contenir d'autres, d'<em>autres témoins</em> du même événement, chacun avec son propre compte rendu, qui peuvent diverger.",
       interpretation: "<strong><a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">Des interprétations</a>.</strong> Une <em>explication alternative</em> de ce qui a été vu : un cerf-volant, une planète, un avion, un canular. C'est elle-même une observation, rejouée à côté de celle du témoin, pour que les deux se comparent.",
       interview: "<strong><a href=\"/docs/interview/\">Des interviews</a>.</strong> Une conversation menée avec un témoin, qui fixe ce qu'il a dit quand on l'a interrogé. Elle n'est pas rejouée.",

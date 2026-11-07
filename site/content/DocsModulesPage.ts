@@ -86,6 +86,10 @@ export default ({ three }) => ({
   }]
 })`
 
+  script(): string {
+    return this.excerptsScript()
+  }
+
   render(language: SiteLanguage): string {
     const escape = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     const t = DocsModulesPage.TEXT[language]
@@ -96,25 +100,25 @@ export default ({ three }) => ({
     <p>${t.what}</p>
     <h2>${t.manifestHeading}</h2>
     <p>${t.manifest}</p>
-    <pre><code>${escape(DocsModulesPage.MANIFEST)}</code></pre>
+    <pre data-json="none"><code>${escape(DocsModulesPage.MANIFEST)}</code></pre>
     <ul>
 ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
     </ul>
     <h2>${t.scriptHeading}</h2>
     <p>${t.script}</p>
-    <pre><code>${escape(DocsModulesPage.SCRIPT)}</code></pre>
+    <pre data-code="javascript"><code>${escape(DocsModulesPage.SCRIPT)}</code></pre>
     <p>${t.points} <code>${DocsModulesPage.POINTS}</code>.</p>
     <p><strong>${t.trust}</strong></p>
     <h2>${t.skyHeading}</h2>
     <p>${t.sky}</p>
-    <pre><code>${escape(DocsModulesPage.SKY_EVENT)}</code></pre>
+    <pre data-code="javascript"><code>${escape(DocsModulesPage.SKY_EVENT)}</code></pre>
     <h2>${t.readingHeading}</h2>
     <p>${t.reading}</p>
     <h2>${t.editorHeading}</h2>
     <p>${t.editor}</p>
     <h2>${t.recordingHeading}</h2>
     <p>${t.recording}</p>
-    <pre><code>${escape(`"modules": ["https://acme.example/ufo/ufoathome-module.json"]`)}</code></pre>
+    <pre data-json=""><code>${escape(`{\n  "modules": ["https://acme.example/ufo/ufoathome-module.json"]\n}`)}</code></pre>
     <h2>${t.prHeading}</h2>
     <p>${t.pr}</p>
   </div>
@@ -160,23 +164,23 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       fields: [
         "<code>imagery</code> : des tuiles d'images ordinaires, <code>{z}</code>, <code>{x}</code> et <code>{y}</code> dans l'adresse dans l'ordre que le service leur donne.",
         "<code>elevation</code> : des tuiles de relief encodées en PNG Terrarium (hauteur = R × 256 + G + B / 256 − 32768 m).",
-        "<code>models</code> : des fichiers glTF ou GLB, chacun avec sa sorte (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), sa taille et son crédit, comme dans le catalogue d'UFO@home.",
+        "<code>models</code> : des fichiers glTF ou GLB, chacun avec son type (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), sa taille et son crédit, comme dans le catalogue d'UFO@home.",
         "Un <code>id</code> qu'un autre module ou UFO@home donne déjà au même endroit est refusé, pour tout le module : donnez aux vôtres un préfixe à vous."
       ],
       scriptHeading: "Quand il faut du code",
       script: "Un service dont les réponses ont une forme à lui demande du code : <code>script</code> nomme un module ES dont l'export par défaut renvoie des implémentations des interfaces de <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>.",
       points: "Les endroits où un module peut ajouter :",
       trust: "Un script s'exécute avec tous les droits de la page. Il n'est exécuté que pour un module que la personne a ajouté elle-même, jamais pour un module qu'un enregistrement nomme.",
-      skyHeading: "Simuler une sorte d'événement du ciel",
-      sky: "Une sorte d'événement du ciel (un éclair, une fusée, une fusée éclairante…) est ce qu'un enregistrement énonce sous <code>skyEvents.&lt;clé&gt;</code>, dessiné dans la scène et édité dans une partie à elle du groupe Ciel. Sa <code>simulation</code> donne à la scène un objet three.js et le place à chaque image, d'après l'instant et le cadre où la scène se trouve (où est l'œil, l'air, le sol, le vent) ; elle ne dessine jamais elle-même. Le cadre dit aussi où le témoin se tient vraiment, l'instant réel, la magnitude la plus faible vue, ce que les nuages et l'air laissent passer, et lui permet d'éclairer le sol (<code>lightFrom</code>) et d'éblouir l'œil (<code>glareFrom</code>). Construisez-la avec le <code>three</code> que reçoit le script, jamais une copie à vous. Les lancements, les faisceaux et les bolides d'UFO@home sont écrits ainsi, dans <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
-      readingHeading: "Une sorte d'interprétation",
+      skyHeading: "Simuler un type d'événement du ciel",
+      sky: "Un type d'événement du ciel (un éclair, une fusée, une fusée éclairante…) est ce qu'un enregistrement énonce sous <code>skyEvents.&lt;clé&gt;</code>, dessiné dans la scène et édité dans une partie à lui du groupe Ciel. Sa <code>simulation</code> donne à la scène un objet three.js et le place à chaque image, d'après l'instant et le cadre où la scène se trouve (où est l'œil, l'air, le sol, le vent) ; elle ne dessine jamais elle-même. Le cadre dit aussi où le témoin se tient vraiment, l'instant réel, la magnitude la plus faible vue, ce que les nuages et l'air laissent passer, et lui permet d'éclairer le sol (<code>lightFrom</code>) et d'éblouir l'œil (<code>glareFrom</code>). Construisez-la avec le <code>three</code> que reçoit le script, jamais une copie à vous. Les lancements, les faisceaux et les bolides d'UFO@home sont écrits ainsi, dans <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events\">src/modules/sky-events</a>.",
+      readingHeading: "Un type d'interprétation",
       reading: "Une lecture d'un compte rendu qu'énoncent quelques paramètres, calculée en corps quand elle est montrée (des lanternes célestes lâchées d'un jardin, des leurres pyrotechniques largués par un avion) : énoncée sous <code>interpretation.&lt;clé&gt;</code>, donnée à <code>interpretations</code> avec une <code>key</code>, un <code>title</code>, <code>bodiesOf(item)</code> qui renvoie les corps qu'elle est, et un <code>editor</code> facultatif. Pas un fait du ciel : ce que quelqu'un affirme que le compte rendu a vu.",
       editorHeading: "En ajouter un dans l'éditeur",
       editor: "Dans le groupe <strong>Fichiers</strong>, l'élément <strong>Modules</strong> : saisissez l'adresse du manifeste et appuyez sur <strong>Ajouter</strong>. Vos modules sont gardés dans ce navigateur, peuvent être désactivés ou retirés, et enregistrés dans un fichier (<strong>Enregistrer mes modules</strong>) qui les charge ailleurs (<strong>Charger des modules</strong>).",
       recordingHeading: "Un enregistrement qui en a besoin",
       recording: "Un enregistrement qui dessine un modèle d'un module le nomme, pour que qui l'ouvre voie la même chose : l'éditeur écrit son adresse dans le fichier dès qu'un de ses modèles est utilisé, relative à l'enregistrement quand les deux sont sur le même site, et <strong>Nommé par cet enregistrement</strong> le décoche. Un lecteur qui n'a pas ajouté le module en reçoit ce que son manifeste énonce, sans son script.",
       prHeading: "Dans UFO@home lui-même",
-      pr: "Une implémentation peut aussi rejoindre UFO@home : chaque sorte a son dossier sous <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, dont le README dit quoi écrire et où l'inscrire. Une pull request est la bienvenue."
+      pr: "Une implémentation peut aussi rejoindre UFO@home : chaque type a son dossier sous <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, dont le README dit quoi écrire et où l'inscrire. Une pull request est la bienvenue."
     },
     es: {
       whatHeading: "Lo que aporta un módulo",

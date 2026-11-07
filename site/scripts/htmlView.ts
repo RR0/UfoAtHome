@@ -1,7 +1,11 @@
 import { EditorState } from "@codemirror/state"
 import { EditorView, lineNumbers } from "@codemirror/view"
 import { html } from "@codemirror/lang-html"
+import { javascript } from "@codemirror/lang-javascript"
 import { SiteCodeTheme } from "./codeTheme.js"
+
+/** The languages a read-only excerpt can be shown in: the page's HTML, and a module's JavaScript (see DocsModulesPage). */
+export type CodeLanguage = "html" | "javascript"
 
 /**
  * A read-only CodeMirror showing the snippet the Share page writes as the reader types an address.
@@ -19,13 +23,13 @@ export class HtmlView {
 
   private readonly view: EditorView
 
-  constructor(parent: HTMLElement, initialValue: string) {
+  constructor(parent: HTMLElement, initialValue: string, language: CodeLanguage = "html") {
     this.view = new EditorView({
       parent,
       doc: initialValue,
       extensions: [
         ...new SiteCodeTheme().extensions,
-        html(),
+        language === "javascript" ? javascript() : html(),
         lineNumbers(),
         EditorView.editable.of(false),
         // The caret would blink in a document nobody can change.
@@ -41,4 +45,8 @@ export class HtmlView {
   set value(code: string) {
     this.view.dispatch({ changes: { from: 0, to: this.view.state.doc.length, insert: code } })
   }
+}
+
+/** A read-only excerpt in a language other than JSON (see DocsSection.excerptsScript): HtmlView's view, the language its own. */
+export class CodeView extends HtmlView {
 }

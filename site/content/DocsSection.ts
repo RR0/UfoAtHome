@@ -99,6 +99,24 @@ if (excerpts.length > 0) {
       /* No editor, then. The listings are still there and still say the same thing. */
     }
   })()
+}
+// An excerpt in another language (a module's JavaScript, see DocsModulesPage): highlighted, read-only, in the site's code view.
+const codeExcerpts = [...document.querySelectorAll("pre[data-code]")]
+if (codeExcerpts.length > 0) {
+  void (async () => {
+    try {
+      const { CodeView } = await import(SITE_LIB + "/site-html-view.mjs")
+      for (const pre of codeExcerpts) {
+        const mount = document.createElement("div")
+        mount.className = "code-view"
+        pre.after(mount)
+        new CodeView(mount, pre.textContent.trimEnd(), pre.dataset.code)
+        pre.hidden = true
+      }
+    } catch {
+      /* No view, then: the listing is still there. */
+    }
+  })()
 }`
   }
 
