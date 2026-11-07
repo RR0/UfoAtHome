@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "vitest"
-import { LanternEditor } from "../../src/component/LanternEditor.js"
+import { LanternEditor } from "../../src/modules/interpretations/lanterns/LanternEditor.js"
 import type { InterpretationJson } from "../../src/engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../../src/engine/model/SaidText.js"
 import type { Sighting } from "../../src/engine/model/Sighting.js"

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { DecoyFlare } from "../../../src/engine/interpretation/DecoyFlare.js"
-import type { FlareSalvoJson } from "../../../src/engine/interpretation/DecoyFlare.js"
+import { DecoyFlare } from "../../../src/modules/interpretations/flares/DecoyFlare.js"
+import type { FlareSalvoJson } from "../../../src/modules/interpretations/flares/DecoyFlare.js"
 
 /** A fighter flying due south at 230 m/s, 6 km up and 6 km east of the observer, dispensing three flares a second apart. */
 const salvo = (wind?: FlareSalvoJson["wind"]): FlareSalvoJson => ({

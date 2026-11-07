@@ -1,5 +1,5 @@
-import { ParameterRegistry } from "./Parameters.js"
-import type { ParameterSet, ParameterSpec } from "./Parameters.js"
+import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
 import { SkyLantern } from "./SkyLantern.js"
 
 /** What the form of a launch of lanterns needs of the editor: the shapes the lanterns may stand for. */

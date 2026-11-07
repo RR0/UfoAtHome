@@ -2,8 +2,8 @@ import type { SaidPosition } from "../model/SaidPosition.js"
 import type { DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
-import type { FlareSalvoJson } from "./DecoyFlare.js"
-import type { LanternLaunchJson } from "./SkyLantern.js"
+import type { FlareSalvoJson } from "../../modules/interpretations/flares/DecoyFlare.js"
+import type { LanternLaunchJson } from "../../modules/interpretations/lanterns/SkyLantern.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**

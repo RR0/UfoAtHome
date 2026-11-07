@@ -1,6 +1,6 @@
-import type { DecorModelRef } from "../model/Decor.js"
-import type { SaidText } from "../model/SaidText.js"
-import type { BodyJson, BodyKeyframe, BodySize, BodySound, InterpretationJson } from "./Interpretation.js"
+import type { DecorModelRef } from "../../../engine/model/Decor.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
+import type { BodyJson, BodyKeyframe, BodySize, BodySound, InterpretationJson } from "../../../engine/interpretation/Interpretation.js"
 
 /**
  * A salvo of infrared decoy flares an interpretation claims was what the observer saw: a military

@@ -19,8 +19,8 @@
 import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { SkyLantern } from "../../../src/engine/interpretation/SkyLantern.js"
-import type { LanternLaunchJson } from "../../../src/engine/interpretation/SkyLantern.js"
+import { SkyLantern } from "../../../src/modules/interpretations/lanterns/SkyLantern.js"
+import type { LanternLaunchJson } from "../../../src/modules/interpretations/lanterns/SkyLantern.js"
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "public", "demo-data", "sky-test-lanterns.json")
 const OBSERVER = { lat: 18.7955, lng: 98.9555, elevationM: 320, name: "Chiang Mai, foot of Doi Suthep" }

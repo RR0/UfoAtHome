@@ -8,7 +8,7 @@ import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 import type { LaunchEditorMessages } from "../../modules/sky-events/launches/messages/LaunchEditorMessages.js"
 import type { BeamEditorMessages } from "../../modules/sky-events/beams/messages/BeamEditorMessages.js"
 import type { ReentryEditorMessages } from "../../modules/sky-events/reentries/messages/ReentryEditorMessages.js"
-import type { LanternEditorMessages } from "./LanternEditorMessages.js"
+import type { LanternEditorMessages } from "../../modules/interpretations/lanterns/messages/LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
 import type { ShareMessages } from "./ShareMessages.js"
@@ -109,10 +109,10 @@ export function loadReentryEditorMessages(language: UfoLanguage): Promise<Reentr
 }
 
 const lanternEditorLoaders: Record<UfoLanguage, () => Promise<LanternEditorMessages>> = {
-  en: () => import("./LanternEditorMessages_en.js").then(m => m.lanternEditorMessages_en),
-  fr: () => import("./LanternEditorMessages_fr.js").then(m => m.lanternEditorMessages_fr),
-  es: () => import("./LanternEditorMessages_es.js").then(m => m.lanternEditorMessages_es),
-  it: () => import("./LanternEditorMessages_it.js").then(m => m.lanternEditorMessages_it)
+  en: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_en.js").then(m => m.lanternEditorMessages_en),
+  fr: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_fr.js").then(m => m.lanternEditorMessages_fr),
+  es: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_es.js").then(m => m.lanternEditorMessages_es),
+  it: () => import("../../modules/interpretations/lanterns/messages/LanternEditorMessages_it.js").then(m => m.lanternEditorMessages_it)
 }
 
 export function loadLanternEditorMessages(language: UfoLanguage): Promise<LanternEditorMessages> {

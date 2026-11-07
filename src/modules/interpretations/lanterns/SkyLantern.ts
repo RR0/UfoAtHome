@@ -1,6 +1,6 @@
-import type { SaidPosition } from "../model/SaidPosition.js"
-import type { SaidText } from "../model/SaidText.js"
-import type { BodyJson, BodyKeyframe, InterpretationJson } from "./Interpretation.js"
+import type { SaidPosition } from "../../../engine/model/SaidPosition.js"
+import type { SaidText } from "../../../engine/model/SaidText.js"
+import type { BodyJson, BodyKeyframe, InterpretationJson } from "../../../engine/interpretation/Interpretation.js"
 
 /**
  * Sky lanterns (Thai lanterns, Kongming lanterns) an interpretation claims were what the observer saw: paper envelopes lifted by the air a

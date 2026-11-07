@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { SkyLantern } from "../../../src/engine/interpretation/SkyLantern.js"
-import type { LanternLaunchJson } from "../../../src/engine/interpretation/SkyLantern.js"
+import { SkyLantern } from "../../../src/modules/interpretations/lanterns/SkyLantern.js"
+import type { LanternLaunchJson } from "../../../src/modules/interpretations/lanterns/SkyLantern.js"
 
 /** Three lanterns let go a minute apart from a garden 3 km north of the observer, at 200 m above sea level. */
 const launch = (more: Partial<LanternLaunchJson> = {}): LanternLaunchJson => ({

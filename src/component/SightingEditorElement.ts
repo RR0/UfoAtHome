@@ -24,7 +24,7 @@ import type { BodyEditor } from "./BodyEditor.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
 import type { SkyEventEditor, SkyEventKind } from "../modules/sky-events/SkyEventKind.js"
-import type { LanternEditor } from "./LanternEditor.js"
+import type { LanternEditor } from "../modules/interpretations/lanterns/LanternEditor.js"
 import { AddMenu } from "./AddMenu.js"
 import type { AddMenuKind } from "./AddMenu.js"
 import { SurroundingsPlanter } from "./SurroundingsPlanter.js"
@@ -8728,7 +8728,7 @@ export class SightingEditorElement extends HTMLElement {
    * lanterns from again when given another one (see syncBodiesShown).
    */
   private loadLanternEditor(): Promise<LanternEditor> {
-    this.lanternEditorLoading ??= import("./LanternEditor.js").then(({ LanternEditor }) => {
+    this.lanternEditorLoading ??= import("../modules/interpretations/lanterns/LanternEditor.js").then(({ LanternEditor }) => {
       this.lanternEditor = new LanternEditor(this.shadow.getElementById("lantern-editor")!, {
         sighting: () => this.ufoElement.sighting,
         said: () => this.said,
