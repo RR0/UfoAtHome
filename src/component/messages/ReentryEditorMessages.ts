@@ -8,22 +8,18 @@ export interface ReentryEditorMessages {
   kindFireball: string
   kindReentry: string
   path: string
-  place: string
-  addPlace: string
   deletePlace: string
-  previousPlace: string
-  nextPlace: string
   fragments: string
   fragment: string
   addFragment: string
   deleteFragment: string
   curve: string
-  curvePoint: string
-  addCurvePoint: string
   deleteCurvePoint: string
   noCurve: string
-  previousCurvePoint: string
-  nextCurvePoint: string
   addNowhere: string
   derivedNote: string
+  timelineNote: string
+  addPointHere: string
+  pointHere: string
+  zoomHint: string
 }

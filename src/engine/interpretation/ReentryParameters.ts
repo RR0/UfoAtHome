@@ -1,5 +1,5 @@
 import { ReentrySighting } from "./Reentry.js"
-import type { ReentryFragment, ReentryJson } from "./Reentry.js"
+import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
 import type { ParameterHolder, ParameterSet, ParameterSpec } from "./Parameters.js"
 
 /**
@@ -14,23 +14,37 @@ export class ReentryParameters {
   private static readonly LIGHT = { en: "Light", fr: "Lumière", es: "Luz", it: "Luce" }
   private static readonly WHEN = { en: "When", fr: "Quand", es: "Cuándo", it: "Quando" }
 
-  /** The path goes on as it was going: the step between the last two points taken once more, or a second further at the same place. */
-  static nextPlace(rows: ReadonlyArray<Record<string, number>>): Record<string, number> {
-    const last = rows[rows.length - 1] ?? { t: 0, lat: 0, lng: 0, altitudeKm: 80 }
-    const before = rows[rows.length - 2]
-    if (!before) return { t: last.t + 1000, lat: last.lat, lng: last.lng, altitudeKm: last.altitudeKm }
-    return {
-      t: 2 * last.t - before.t, lat: 2 * last.lat - before.lat, lng: 2 * last.lng - before.lng,
-      altitudeKm: Math.max(0, 2 * last.altitudeKm - before.altitudeKm)
+  /**
+   * A point of the path at `t`, where the leading piece is then: on the path between two of its points, or past either end going on as
+   * the nearest two were going (the height never below the ground).
+   */
+  static placeAt(reentry: ReentryJson, t: number): ReentryKeyframe {
+    const lead = ReentrySighting.leadAt(reentry, t)
+    if (lead) return { t, lat: lead.lat, lng: lead.lng, altitudeKm: lead.heightM / 1000 }
+    const track = reentry.track
+    const [a, b] = t < (track[0]?.t ?? 0) ? [track[0], track[1]] : [track[track.length - 2], track[track.length - 1]]
+    if (!a || !b || b.t === a.t) {
+      const only = a ?? b ?? { lat: 0, lng: 0, altitudeKm: 80 }
+      return { t, lat: only.lat, lng: only.lng, altitudeKm: only.altitudeKm }
     }
+    const f = (t - a.t) / (b.t - a.t)
+    return { t, lat: a.lat + (b.lat - a.lat) * f, lng: a.lng + (b.lng - a.lng) * f, altitudeKm: Math.max(0, a.altitudeKm + (b.altitudeKm - a.altitudeKm) * f) }
   }
 
-  /** A point of the light curve after the last, a second later and as bright, or one at the piece's start as bright as it is said to be. */
-  static nextCurvePoint(fragment: ReentryFragment, reentry: ReentryJson): { t: number, absoluteMagnitude: number } {
-    const curve = fragment.lightCurve ?? []
-    const last = curve[curve.length - 1]
-    if (last) return { t: last.t + 1000, absoluteMagnitude: last.absoluteMagnitude }
-    return { t: fragment.fromT ?? reentry.track[0]?.t ?? 0, absoluteMagnitude: fragment.absoluteMagnitude }
+  /** A point of a piece's light curve at `t`, as bright as the piece is then: putting it changes nothing until it is edited. */
+  static curvePointAt(fragment: ReentryFragment, t: number): { t: number, absoluteMagnitude: number } {
+    return { t, absoluteMagnitude: Math.round(ReentrySighting.absoluteMagnitudeAt(fragment, t) * 10) / 10 }
+  }
+
+  /** The instants every point of `reentry` stands at: its path, its pieces' lives and their light curves. */
+  static instantsOf(reentry: ReentryJson): number[] {
+    return [
+      ...reentry.track.map(place => place.t),
+      ...reentry.fragments.flatMap(fragment => [
+        ...(fragment.fromT === undefined ? [] : [fragment.fromT]), ...(fragment.untilT === undefined ? [] : [fragment.untilT]),
+        ...(fragment.lightCurve ?? []).map(point => point.t)
+      ])
+    ]
   }
 
   /** An instant of the recording: stored in milliseconds, typed in seconds. */

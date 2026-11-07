@@ -17,6 +17,18 @@ export interface TimelineTrack {
   selected?: string
   /** Picks a span pressed in the lane, by its id: the section shows its details. */
   select?(id: string): void
+  /** The keyframe whose fields the section shows, marked as picked whether or not the playhead is on it. */
+  selectedTime?: number
+  /** The lane was pressed at `t`, on the keyframe `key` when within its reach: the section shows what was pressed. */
+  pressed?(t: number, key: number | undefined): void
+  /** A keyframe was dragged from `from` to `to`, ms: without it, a keyframe cannot be dragged. */
+  move?(from: number, to: number): void
+}
+
+/** How far the lanes reach, ms, when it is not the recording: keyframes before its start or after its end, or only the part where something happens. */
+export interface TimelineExtent {
+  from: number
+  to: number
 }
 
 /** An event on a track, from when to when, ms. */
@@ -65,6 +77,10 @@ export class TimelineTracks {
 .track-row:focus-within .track-lane .span { font-size: 11px; }
 .track-lane .kf { position: absolute; top: 50%; width: 9px; height: 9px; margin: -5px 0 0 -5px; border: 1.5px solid var(--track); background: transparent; transform: rotate(45deg); pointer-events: none; }
 .track-lane .kf[aria-current="true"] { background: var(--track); }
+.track-lane .kf[data-selected="true"] { width: 11px; height: 11px; margin: -6px 0 0 -6px; background: var(--track); box-shadow: 0 0 0 2px var(--ink, #fff); }
+.track-lane[data-movable] .kf { cursor: ew-resize; }
+/* Before the recording's start or after its end: keyframes stand there, the playhead cannot. */
+.track-lane .outside { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(127, 127, 127, .18) 0 4px, transparent 4px 8px); pointer-events: none; }
 .track-lane .span { position: absolute; box-sizing: border-box; min-width: 3px; border: 1px solid var(--track); border-radius: 4px; background: color-mix(in srgb, var(--track) 30%, transparent);
   overflow: hidden; padding: 0 4px; font: 600 10px/1 var(--sans, inherit); color: var(--ink, inherit); white-space: nowrap; text-overflow: ellipsis; display: flex; align-items: center; pointer-events: none; }
 .track-lane .span[data-id] { pointer-events: auto; cursor: pointer; }
@@ -85,6 +101,9 @@ export class TimelineTracks {
   private tracks: readonly TimelineTrack[] = []
   private duration = 0
   private currentTime = 0
+  /** How far the lanes reach: the recording, or more when keyframes stand outside it (see TimelineExtent). */
+  private extentStart = 0
+  private extentEnd = 1
   private drawn = ""
   /** The part of the recording the lanes show, ms. */
   private windowStart = 0
@@ -112,16 +131,22 @@ export class TimelineTracks {
   }
 
   /** Shows `tracks` over a recording `duration` ms long, with the playhead at `currentTime`. */
-  show(tracks: readonly TimelineTrack[], duration: number, currentTime: number): void {
+  show(tracks: readonly TimelineTrack[], duration: number, currentTime: number, extent?: TimelineExtent): void {
     this.tracks = tracks
+    // An extent said is what the lanes reach, the recording or not: a fireball of 17 s is laid out over its 17 s, not over the four minutes
+    // the recording lasts.
+    const from = extent ? extent.from : 0
+    const to = extent ? Math.max(extent.from + 1, extent.to) : Math.max(1, duration)
     // Another length is another recording, or one cut: it is shown whole again.
-    if (duration !== this.duration || this.windowLength === 0) {
-      this.windowStart = 0
-      this.windowLength = Math.max(1, duration)
+    if (duration !== this.duration || from !== this.extentStart || to !== this.extentEnd || this.windowLength === 0) {
+      this.windowStart = from
+      this.windowLength = to - from
     }
     this.duration = duration
+    this.extentStart = from
+    this.extentEnd = to
     this.currentTime = currentTime
-    const signature = JSON.stringify([duration, tracks.map(track => [track.id, track.label, track.times, track.spans])])
+    const signature = JSON.stringify([duration, from, to, tracks.map(track => [track.id, track.label, track.times, track.spans])])
     if (signature !== this.drawn) {
       this.drawn = signature
       this.draw()
@@ -129,9 +154,15 @@ export class TimelineTracks {
     this.place(currentTime)
   }
 
+  /** Moves the playhead alone, as a playback does every frame: nothing else is drawn again. */
+  setTime(currentTime: number): void {
+    this.currentTime = currentTime
+    this.place(currentTime)
+  }
+
   /** Whether part of the recording is out of the lanes. */
   get zoomed(): boolean {
-    return this.windowLength < Math.max(1, this.duration)
+    return this.windowLength < this.extentEnd - this.extentStart
   }
 
   /**
@@ -139,7 +170,7 @@ export class TimelineTracks {
    * the window narrows or widens around it.
    */
   zoomTo(length: number, anchor = this.windowStart + this.windowLength / 2): void {
-    const whole = Math.max(1, this.duration)
+    const whole = this.extentEnd - this.extentStart
     const next = Math.min(whole, Math.max(Math.min(whole, TimelineTracks.MIN_WINDOW_MS), length))
     const share = (anchor - this.windowStart) / this.windowLength
     this.windowLength = next
@@ -148,7 +179,7 @@ export class TimelineTracks {
 
   /** Shows the window from `start`, kept within the recording. */
   scrollTo(start: number): void {
-    this.windowStart = Math.min(Math.max(1, this.duration) - this.windowLength, Math.max(0, start))
+    this.windowStart = Math.min(this.extentEnd - this.windowLength, Math.max(this.extentStart, start))
     this.layout()
     this.place(this.currentTime)
   }
@@ -176,8 +207,8 @@ export class TimelineTracks {
   private dragWindow(event: PointerEvent): void {
     const box = this.scroll.getBoundingClientRect()
     if (box.width === 0) return
-    const whole = Math.max(1, this.duration)
-    if (event.target !== this.thumb) this.scrollTo(((event.clientX - box.left) / box.width) * whole - this.windowLength / 2)
+    const whole = this.extentEnd - this.extentStart
+    if (event.target !== this.thumb) this.scrollTo(this.extentStart + ((event.clientX - box.left) / box.width) * whole - this.windowLength / 2)
     const from = event.clientX
     const start = this.windowStart
     this.scroll.setPointerCapture?.(event.pointerId)
@@ -247,6 +278,13 @@ export class TimelineTracks {
         diamond.dataset.t = String(t)
         lane.append(diamond)
       }
+      if (track.move) lane.dataset.movable = ""
+      for (const side of ["before", "after"]) {
+        const outside = document.createElement("span")
+        outside.className = "outside"
+        outside.dataset.side = side
+        lane.prepend(outside)
+      }
       const playhead = document.createElement("span")
       playhead.className = "playhead"
       lane.append(playhead)
@@ -271,10 +309,17 @@ export class TimelineTracks {
   /** Puts what is drawn where the window shows it: a bar cut to the part in view, so that its name starts where it can be read. */
   private layout(): void {
     const end = this.windowStart + this.windowLength
+    const recordingEnd = Math.max(1, this.duration)
     for (const lane of this.lanes.values()) {
+      for (const outside of lane.querySelectorAll<HTMLElement>(".outside")) {
+        const [from, until] = outside.dataset.side === "before" ? [this.windowStart, Math.min(end, 0)] : [Math.max(this.windowStart, recordingEnd), end]
+        outside.hidden = until <= from
+        outside.style.left = `${this.x(from)}%`
+        outside.style.width = `${this.x(until) - this.x(from)}%`
+      }
       for (const bar of lane.querySelectorAll<HTMLElement>(".span")) {
         const from = Math.max(this.windowStart, Number(bar.dataset.t))
-        const until = Math.min(end, Math.max(1, this.duration), Number(bar.dataset.until))
+        const until = Math.min(end, Number(bar.dataset.until))
         bar.hidden = until <= from
         bar.style.left = `${this.x(from)}%`
         bar.style.width = `${this.x(until) - this.x(from)}%`
@@ -285,19 +330,44 @@ export class TimelineTracks {
         diamond.style.left = `${this.x(t)}%`
       }
     }
-    const whole = Math.max(1, this.duration)
+    const whole = this.extentEnd - this.extentStart
     this.scroll.hidden = !this.zoomed
     this.scroll.title = this.messages.zoomHint
-    this.thumb.style.left = `${(this.windowStart / whole) * 100}%`
+    this.thumb.style.left = `${((this.windowStart - this.extentStart) / whole) * 100}%`
     this.thumb.style.width = `${(this.windowLength / whole) * 100}%`
   }
 
-  /** A press on a lane moves the playhead there, and it follows the pointer while it is held, as on the seek bar. */
+  /**
+   * A press on a lane moves the playhead there, and it follows the pointer while it is held, as on the seek bar. A press on a keyframe of
+   * a track that lets them move drags the keyframe instead, the playhead with it, and the track is told where it was let go.
+   */
   private dragPlayhead(lane: HTMLElement, track: TimelineTrack, event: PointerEvent): void {
-    this.seekFrom(lane, track, event)
+    const pressed = this.instantAt(lane, event)
+    if (pressed === undefined) return
+    const key = this.keyNear(lane, track, pressed)
     lane.setPointerCapture?.(event.pointerId)
-    const move = (moved: PointerEvent) => this.seekFrom(lane, track, moved)
+    let move = (moved: PointerEvent) => this.seekFrom(lane, track, moved)
+    let release = () => undefined as void
+    if (key !== undefined && track.move) {
+      const diamond = [...lane.querySelectorAll<HTMLElement>(".kf")].find(candidate => Number(candidate.dataset.t) === key)
+      let to = key
+      this.seekTo(key)
+      move = moved => {
+        const at = this.instantAt(lane, moved)
+        if (at === undefined || !diamond) return
+        // In tenths of a second, the step its field is typed in.
+        to = Math.round(Math.min(this.extentEnd, Math.max(this.extentStart, at)) / 100) * 100
+        diamond.style.left = `${this.x(to)}%`
+        this.seekTo(to)
+      }
+      release = () => { if (to !== key) track.move!(key, to) }
+    } else {
+      this.seekTo(key ?? pressed)
+    }
+    // Told last: what the track does with it may draw the lanes again (other keyframes), and the press goes on with the lane it began on.
+    track.pressed?.(pressed, key)
     const end = () => {
+      release()
       lane.removeEventListener("pointermove", move)
       lane.removeEventListener("pointerup", end)
       lane.removeEventListener("pointercancel", end)
@@ -309,12 +379,27 @@ export class TimelineTracks {
 
   /** A press within a diamond's reach lands on it; elsewhere, on the instant under the pointer. */
   private seekFrom(lane: HTMLElement, track: TimelineTrack, event: PointerEvent): void {
+    const t = this.instantAt(lane, event)
+    if (t === undefined) return
+    this.seekTo(this.keyNear(lane, track, t) ?? t)
+  }
+
+  /** The instant under the pointer, ms, within what the lanes reach. */
+  private instantAt(lane: HTMLElement, event: PointerEvent): number | undefined {
     const box = lane.getBoundingClientRect()
-    if (box.width === 0) return
-    const reach = (6 / box.width) * this.windowLength
-    const t = Math.min(Math.max(1, this.duration), Math.max(0, this.windowStart + ((event.clientX - box.left) / box.width) * this.windowLength))
-    const near = track.times.reduce<number | undefined>((best, k) => Math.abs(k - t) <= reach && (best === undefined || Math.abs(k - t) < Math.abs(best - t)) ? k : best, undefined)
-    this.seek(Math.round(near ?? t))
+    if (box.width === 0) return undefined
+    return this.windowStart + ((event.clientX - box.left) / box.width) * this.windowLength
+  }
+
+  /** The keyframe of `track` within a diamond's reach of `t`, the nearest. */
+  private keyNear(lane: HTMLElement, track: TimelineTrack, t: number): number | undefined {
+    const reach = (6 / lane.getBoundingClientRect().width) * this.windowLength
+    return track.times.reduce<number | undefined>((best, k) => Math.abs(k - t) <= reach && (best === undefined || Math.abs(k - t) < Math.abs(best - t)) ? k : best, undefined)
+  }
+
+  /** The playhead goes to `t`, kept within the recording: before its start or after its end, nothing is there to show. */
+  private seekTo(t: number): void {
+    this.seek(Math.round(Math.min(Math.max(1, this.duration), Math.max(0, t))))
   }
 
   private place(currentTime: number): void {
@@ -324,7 +409,12 @@ export class TimelineTracks {
       const add = this.adds.get(track.id)
       if (!lane || !add) continue
       const here = track.times.some(t => Math.abs(t - currentTime) < 1)
-      for (const diamond of lane.querySelectorAll<HTMLElement>(".kf")) diamond.setAttribute("aria-current", String(Math.abs(Number(diamond.dataset.t) - currentTime) < 1))
+      for (const diamond of lane.querySelectorAll<HTMLElement>(".kf")) {
+        const t = Number(diamond.dataset.t)
+        diamond.setAttribute("aria-current", String(Math.abs(t - currentTime) < 1))
+        // The keyframe picked is marked where it is drawn, as the span picked is: picking another draws nothing anew, the lane pressed included.
+        diamond.dataset.selected = String(track.selectedTime !== undefined && Math.abs(track.selectedTime - t) < 1)
+      }
       // The span picked is marked where it is drawn: picking another draws nothing anew (a focused track stays unfolded).
       for (const bar of lane.querySelectorAll<HTMLElement>(".span[data-id]")) bar.setAttribute("aria-selected", String(bar.dataset.id === track.selected))
       const playhead = lane.querySelector<HTMLElement>(".playhead")!
