@@ -1,4 +1,4 @@
-import { Decoration, EditorView, GutterMarker, gutter, keymap, lineNumbers, highlightSpecialChars, drawSelection, type KeyBinding } from "@codemirror/view"
+import { Decoration, EditorView, GutterMarker, WidgetType, gutter, keymap, lineNumbers, highlightSpecialChars, drawSelection, type DecorationSet, type KeyBinding } from "@codemirror/view"
 import { Annotation, EditorState, RangeSetBuilder, StateEffect, StateField, Text } from "@codemirror/state"
 import { openSearchPanel, search, searchKeymap } from "@codemirror/search"
 import { defaultKeymap, history, historyKeymap, indentWithTab, isolateHistory, redo, redoDepth, undo, undoDepth } from "@codemirror/commands"
@@ -21,6 +21,38 @@ interface ChangeMarks {
 }
 
 /** What the editor is told besides the text it starts with. */
+/**
+ * A run of the text that is not the recording's own file but an annex's (see RecordingSections): from the element at `from` to the element
+ * at `to`, both whole, shown as `label` in their place.
+ */
+export interface HeldRun {
+  from: JsonPath
+  to: JsonPath
+  label: string
+}
+
+/** What stands in the text in place of a held run: what is held, and where. */
+class HeldWidget extends WidgetType {
+  constructor(readonly label: string) {
+    super()
+  }
+
+  override eq(other: HeldWidget): boolean {
+    return other.label === this.label
+  }
+
+  override toDOM(): HTMLElement {
+    const span = document.createElement("span")
+    span.className = "cm-held"
+    span.textContent = this.label
+    return span
+  }
+
+  override ignoreEvent(): boolean {
+    return false
+  }
+}
+
 export interface SightingFileEditorOptions {
   /** The text the changed lines are changed from: what the recording was when it was last saved or exported. Default: the text it starts with. */
   baseline?: string
@@ -128,6 +160,36 @@ export class SightingFileEditor {
   })
 
   /**
+   * The runs of the text kept in annexes beside the recording (see hold): each shown as one line saying what is there, and stepped over
+   * by the caret as one character. The text itself is whole underneath, so that the history, the changes since the save and the form all
+   * see the recording as it is played.
+   */
+  private static readonly HOLD = StateEffect.define<HeldRun[]>()
+  private static readonly held = StateField.define<DecorationSet>({
+    create: () => Decoration.none,
+    update: (value, transaction) => {
+      for (const effect of transaction.effects) {
+        if (!effect.is(SightingFileEditor.HOLD)) continue
+        const builder = new RangeSetBuilder<Decoration>()
+        const ranges = effect.value.flatMap(run => {
+          const from = JsonPaths.range(transaction.state, run.from, 500)
+          const to = JsonPaths.range(transaction.state, run.to, 500)
+          return from && to && to.to > from.from ? [{ from: from.from, to: to.to, label: run.label }] : []
+        }).sort((a, b) => a.from - b.from)
+        for (const range of ranges) builder.add(range.from, range.to, Decoration.replace({ widget: new HeldWidget(range.label) }))
+        return builder.finish()
+      }
+      return value.map(transaction.changes)
+    },
+    provide: field => [EditorView.decorations.from(field), EditorView.atomicRanges.of(view => view.state.field(field))]
+  })
+
+  /** Shows the runs of the text kept in annexes as what they are (see HeldRun), in place of their text: none, when `runs` is empty. */
+  hold(runs: HeldRun[]): void {
+    this.view.dispatch({ effects: SightingFileEditor.HOLD.of(runs) })
+  }
+
+  /**
    * The lines of the doc that stand where lines were taken away (a place, not a line: the index of the one that is there now, or the
    * last when they were at the end).
    */
@@ -207,6 +269,7 @@ export class SightingFileEditor {
       extensions: [
         ...marks.extensions,
         SightingFileEditor.revealed,
+        SightingFileEditor.held,
         lineNumbers(),
         search({ top: true }),
         EditorState.phrases.of(options.phrases ?? {}),
@@ -252,6 +315,8 @@ export class SightingFileEditor {
           ".cm-removed-below": { boxShadow: "inset 0 -2px 0 #e5534b" },
           ".cm-changed-line": { backgroundColor: "color-mix(in srgb, #2f81f7 13%, transparent)" },
           // What the picture showed: warmer and edged, over the changed lines' tint when both are there.
+          // A run kept in an annex: said in the place of its text, as a comment would be.
+          ".cm-held": { fontStyle: "italic", color: "color-mix(in srgb, currentColor 60%, transparent)", border: "1px dashed color-mix(in srgb, currentColor 35%, transparent)", borderRadius: "3px", padding: "0 4px" },
           ".cm-revealed-line": { backgroundColor: "color-mix(in srgb, #f2cc60 30%, transparent)", boxShadow: "inset 3px 0 0 #f2cc60" },
           // The search panel follows the page, not the system: derived from the text colour the page gave, as the editor's own caret is. Over
           // the editor's own ground, not over nothing: it stays at the top while the text scrolls under it, and a tint alone let the text

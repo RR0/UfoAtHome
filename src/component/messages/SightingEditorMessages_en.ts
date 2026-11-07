@@ -96,6 +96,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   fileItemPlace: "Place",
   fileItemLightPollution: "Light pollution",
   fileItemDecor: "Scenery",
+  fileHeldObjects: "… {count} surveyed objects, kept in {file}",
   weatherStatedByObserver: "as the observer stated it",
   annexSource: "File",
   annexStorageInline: "inside the recording",
