@@ -8039,7 +8039,8 @@ export class SightingEditorElement extends HTMLElement {
       this.shapeRotationInput,
     ]) {
       input.disabled = multiple
-      input.title = title
+      // The field's own hint when nothing keeps it from being used: emptied, it was lost for good.
+      input.title = multiple ? title : this.fieldHints.get(input.id) ?? ""
     }
   }
 
