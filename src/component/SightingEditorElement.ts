@@ -1353,6 +1353,9 @@ export class SightingEditorElement extends HTMLElement {
     this.accountFollowedUpSelect = this.shadow.getElementById("accountFollowedUp") as HTMLSelectElement
     this.evaluationFields = new AccountEvaluationFields(this.shadow.getElementById("profile-section")!, this.shadow.getElementById("testimony-section")!,
       this.shadow.getElementById("strangeness-section")!, () => this.updateObserverMetadata())
+    // Built here and not in the template, so the template's English does not name them: an English reader's locale load finds the
+    // messages it already has and skips applyMessages, which left their labels and blank choices empty.
+    this.evaluationFields.messages = this.messages.accountEvaluation
     this.sightingIdInput = this.shadow.getElementById("sightingId") as HTMLInputElement
     this.descriptionInput = this.shadow.getElementById("description") as HTMLTextAreaElement
     this.tagsInput = this.shadow.getElementById("tags") as HTMLInputElement
@@ -7402,7 +7405,9 @@ export class SightingEditorElement extends HTMLElement {
     if (signature === this.paramSummarySignature) {
       if (account !== this.assessedAccount) {
         this.assessedAccount = account
-        void this.runAssessments()
+        this.assessSoon()
+      } else if (this.assessmentsOwed && this.ufoElement.playbackState !== "playing") {
+        this.assessSoon()
       }
       return
     }
@@ -7413,6 +7418,23 @@ export class SightingEditorElement extends HTMLElement {
     // What the recording says has changed, so what an assessor makes of it has too. Fired and not
     // awaited: an assessment arrives after the strip rather than holding it up, and re-renders it
     // when it does.
+    this.assessSoon()
+  }
+
+  /** A reading asked for while playing, given when playback stops (see assessSoon). */
+  private assessmentsOwed = false
+
+  /**
+   * Reads the recording again with every assessor, unless it is playing: the chips change at every frame then (a heading, a distance at
+   * the playhead), but an assessor reads the recording, not the playhead, so its answer cannot have changed. Read once playback stops,
+   * which comes back through refreshParamSummary (its last frame, or the repaint of a pause).
+   */
+  private assessSoon(): void {
+    if (this.ufoElement.playbackState === "playing") {
+      this.assessmentsOwed = true
+      return
+    }
+    this.assessmentsOwed = false
     void this.runAssessments()
   }
 
@@ -8261,8 +8283,6 @@ export class SightingEditorElement extends HTMLElement {
     this.focalLengthInput.min = String(frame ? frame.focalRangeMm?.minMm ?? 1 : 1)
     this.focalLengthInput.max = String(frame ? frame.focalRangeMm?.maxMm ?? 2000 : 179)
     NumberFields.fit(this.focalLengthInput.parentElement ?? this.shadow)
-    // The device decides which of its settings show, and so how many a fold holds back.
-    this.sectionFolds?.refresh()
     // A device that fixes its lens leaves nothing to type, but what it takes in is still worth
     // reading: the field it gives, beside the millimetres it is stated in.
     this.focalFovOutput.textContent = frame && fovDeg !== undefined
@@ -8309,6 +8329,10 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.setRowVisible(this.focusDistanceInput, frame !== undefined && instrument.fNumber !== undefined)
     if (this.filterSelect !== this.shadow.activeElement) this.filterSelect.value = Filters.byId(pose?.filter).id
+    // The device decides which of its settings show, and so how many a fold holds back: counted once they are shown or hidden above.
+    // Not while playing: the playhead moving changes no setting shown, and measuring every section at every frame forced a layout of
+    // the whole form each time (a third of a frame on Silly-le-Long).
+    if (this.ufoElement.playbackState !== "playing") this.sectionFolds?.refresh()
   }
 
   /**

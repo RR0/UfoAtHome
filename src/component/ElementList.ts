@@ -96,14 +96,19 @@ ${AddMenu.CSS}`
     }
     if (body) {
       body.hidden = !present
-      if (present) ElementList.glue(body)
+      if (present && !ElementList.glued.has(body)) ElementList.glue(body)
     }
   }
 
+  /** The frames whose gap was read from a container on show: it is the container's style, which a showing again does not change. */
+  private static readonly glued = new WeakSet<HTMLElement>()
+
   /**
    * Puts the frame of the picked element right under its picker: it takes back the space the container both stand in puts between its
-   * lines, which is a toolbar's gap in one group, a path's in another, and nothing in a plain panel. Read from the container itself at
-   * every showing, so that no list has to say what its container is.
+   * lines, which is a toolbar's gap in one group, a path's in another, and nothing in a plain panel. Read from the container itself, so
+   * that no list has to say what its container is; once, unless the container was itself not displayed then (its style then says no
+   * gap; under a closed ancestor it still says its own). Not at every showing: a list re-listed at every frame of playback (the cloud
+   * layers at the playhead) read a computed style after writing the form, which forced a style recalculation of the whole editor each time.
    */
   static glue(body: HTMLElement): void {
     const parent = body.parentElement
@@ -112,6 +117,7 @@ ${AddMenu.CSS}`
     const style = view.getComputedStyle(parent)
     const gap = /flex|grid/.test(style.display) ? parseFloat(style.rowGap) || 0 : 0
     body.style.marginTop = `${-gap}px`
+    if (style.display !== "none") ElementList.glued.add(body)
   }
 
   private readonly select: HTMLSelectElement
