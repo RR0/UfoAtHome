@@ -105,25 +105,4 @@ describe("SightingFileEditor.changesBetween", () => {
     expect(changes).toHaveLength(10)
     expect(changes.every(change => !change.insert.includes("\n"))).toBe(true)
   })
-
-  it("shows the runs kept in an annex as what they are, its text whole underneath, until told there are none", () => {
-    const host = document.createElement("div")
-    document.body.append(host)
-    const text = JSON.stringify({ decor: [{ id: "van" }, { id: "t1", origin: "s" }, { id: "t2", origin: "s" }], milestones: [] }, null, 2)
-    const editor = new SightingFileEditor(host, text, () => undefined, "label")
-    const held = () => {
-      const internal = editor as unknown as { view: { state: { doc: { length: number }, field(field: unknown): { between(from: number, to: number, f: (from: number, to: number) => void): void } } } }
-      const ranges: string[] = []
-      internal.view.state.field((SightingFileEditor as unknown as { held: unknown }).held).between(0, internal.view.state.doc.length, (from, to) => { ranges.push(text.slice(from, to)) })
-      return ranges
-    }
-    editor.hold([{ from: ["decor", 1], to: ["decor", 2], label: "2 held" }])
-    expect(held()).toHaveLength(1)
-    expect(held()[0]).toContain('"t1"')
-    expect(held()[0]).toContain('"t2"')
-    expect(held()[0]).not.toContain('"van"')
-    expect(editor.text).toBe(text)
-    editor.hold([])
-    expect(held()).toEqual([])
-  })
 })

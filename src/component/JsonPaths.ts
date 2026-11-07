@@ -34,8 +34,8 @@ export class JsonPaths {
 
   /** The range of what is at `path` — a property from its key to the end of its value, an array's element
    * whole — or undefined when the text has nothing there. */
-  static range(state: EditorState, path: JsonPath, timeoutMs = 50): { from: number, to: number } | undefined {
-    const tree = ensureSyntaxTree(state, state.doc.length, timeoutMs)
+  static range(state: EditorState, path: JsonPath): { from: number, to: number } | undefined {
+    const tree = ensureSyntaxTree(state, state.doc.length, 50)
     if (tree === null) return undefined
     let node: SyntaxNode | null = tree.topNode.firstChild
     let range: { from: number, to: number } | undefined

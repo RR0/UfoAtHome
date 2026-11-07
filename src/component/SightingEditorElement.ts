@@ -39,7 +39,7 @@ import type { DecorBaseContext } from "../engine/model/DecorBase.js"
 import { DecorBaseParameterSets } from "../engine/model/DecorBaseParameterSets.js"
 import { ElementList } from "./ElementList.js"
 import type { ChoiceParameter, ParameterHolder } from "../engine/interpretation/Parameters.js"
-import type { HeldRun, SightingFileEditor } from "./SightingFileEditor.js"
+import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { JsonPath } from "./JsonPaths.js"
 import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
@@ -2530,7 +2530,6 @@ export class SightingEditorElement extends HTMLElement {
     this.historySnapshot = now
     this.historyAnswering = false
     editor.replaceText(now, this.fileSyncActive())
-    this.holdAnnexed()
     this.fileTextApplied = editor.text
     this.syncHistoryButtons()
     this.refreshEditorHead()
@@ -2554,7 +2553,6 @@ export class SightingEditorElement extends HTMLElement {
     const editor = this.fileEditor
     if (editor === undefined || this.isRecording || this.ufoElement.playbackState === "playing") return
     if (!step(editor)) return
-    this.holdAnnexed()
     // At once, not after the half second an author's typing is given: a key pressed to undo is answered now.
     clearTimeout(this.fileApplyTimer)
     this.applyFileText(editor.text, true)
@@ -6260,7 +6258,6 @@ export class SightingEditorElement extends HTMLElement {
           this.messages.fileEditorLabel, {
             baseline: this.touched ? this.savedFileText : this.fileText(), phrases: this.messages.fileSearchPhrases, caretMoved: path => this.onFileCaret(path)
           })
-        this.holdAnnexed()
         return this.fileEditor
       } catch (error) {
         // Not remembered: opening the group again is a second try.
@@ -6349,30 +6346,6 @@ export class SightingEditorElement extends HTMLElement {
     MessageStyle.show(this.fileNote, text, kind)
   }
 
-  /**
-   * Shows in the File group's text, as what they are, the runs of it that are not the recording's own file but an annex's: the surveyed
-   * objects of its scenery, when it keeps them beside it (see RecordingSections). Their text stays underneath, the history's and the
-   * form's, and only the annex holds them when the recording is saved.
-   */
-  private holdAnnexed(): void {
-    const editor = this.fileEditor
-    if (editor === undefined) return
-    const src = this.ufoElement.sighting.frozen?.decor?.src
-    const runs: HeldRun[] = []
-    if (src !== undefined) {
-      const decor = this.sightingData.decor ?? []
-      const file = decodeURIComponent(src.split("/").pop() ?? src)
-      for (let i = 0; i < decor.length; i++) {
-        if (decor[i].origin === undefined) continue
-        let last = i
-        while (last + 1 < decor.length && decor[last + 1].origin !== undefined) last++
-        runs.push({ from: ["decor", i], to: ["decor", last], label: this.messages.fileHeldObjects.replaceAll("{count}", String(last - i + 1)).replaceAll("{file}", file) })
-        i = last
-      }
-    }
-    editor.hold(runs)
-  }
-
   /** What the file would be if saved now — the same text Export writes. */
   private fileText(): string {
     return this.writtenText(this.sightingData)
@@ -6444,7 +6417,6 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
     editor.replaceText(this.fileText(), show)
-    this.holdAnnexed()
     this.fileTextApplied = editor.text
   }
 

@@ -189,8 +189,6 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   fileItemLightPollution: string
   /** The recording's scenery, in the same pickers. */
   fileItemDecor: string
-  /** What the File group's text says in the place of objects kept in an annex beside the recording: {count} of them, in {file}. */
-  fileHeldObjects: string
   /** Where a weather no record gave comes from. */
   weatherStatedByObserver: string
   /** Before the file or address of an annex. */
