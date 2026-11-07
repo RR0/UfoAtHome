@@ -3,7 +3,6 @@ import { HostLocale } from "../i18n/locale.js"
 import { EdtfDateField } from "./EdtfDateField.js"
 import { HelpPopover } from "./HelpPopover.js"
 import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
-import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 
 export const DATE_INPUT_ELEMENT_NAME = "rr0-date-input"
 
@@ -45,7 +44,8 @@ ${HelpPopover.css("rr0-date-input .edtf-helppop")}
 export class DateInputElement extends HTMLElement {
   private dateField?: EdtfDateField
   private shown?: SightingTime
-  private wording: EdtfDateFieldMessages = sightingEditorMessages_en
+  /** Its words, given by the editor it stands in (see messages): none before, in no language. */
+  private wording?: EdtfDateFieldMessages
   private helpPopup?: HTMLElement
 
   /** Makes the controls, once. */
@@ -117,7 +117,7 @@ export class DateInputElement extends HTMLElement {
   /** The syntax the text takes, one line to a line of the message. */
   private fillHelp(): void {
     const popup = this.helpPopup
-    if (!popup) return
+    if (!popup || !this.wording) return
     const title = this.ownerDocument.createElement("p")
     title.textContent = this.wording.dateHelpTitle
     const list = this.ownerDocument.createElement("ul")

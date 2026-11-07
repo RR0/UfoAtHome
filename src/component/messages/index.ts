@@ -1,3 +1,4 @@
+import { Messages } from "../../i18n/MessageCatalog.js"
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import type { SightingMessages } from "./SightingMessages.js"
@@ -21,8 +22,11 @@ const loaders: Record<UfoLanguage, () => Promise<UfoMessages>> = {
   it: () => import("./UfoMessages_it.js").then(m => m.ufoMessages_it)
 }
 
+/** The texts of Ufo, one chunk per language (see MessageCatalog). */
+export const UFO_MESSAGES = Messages.catalog<UfoMessages>(loaders)
+
 export function loadUfoMessages(language: UfoLanguage): Promise<UfoMessages> {
-  return loaders[language]()
+  return UFO_MESSAGES.load(language)
 }
 
 const recorderLoaders: Record<UfoLanguage, () => Promise<SightingEditorMessages>> = {
@@ -32,8 +36,11 @@ const recorderLoaders: Record<UfoLanguage, () => Promise<SightingEditorMessages>
   it: () => import("./SightingEditorMessages_it.js").then(m => m.sightingEditorMessages_it)
 }
 
+/** The texts of SightingEditor, one chunk per language (see MessageCatalog). */
+export const SIGHTING_EDITOR_MESSAGES = Messages.catalog<SightingEditorMessages>(recorderLoaders)
+
 export function loadSightingEditorMessages(language: UfoLanguage): Promise<SightingEditorMessages> {
-  return recorderLoaders[language]()
+  return SIGHTING_EDITOR_MESSAGES.load(language)
 }
 
 const sightingLoaders: Record<UfoLanguage, () => Promise<SightingMessages>> = {
@@ -43,8 +50,11 @@ const sightingLoaders: Record<UfoLanguage, () => Promise<SightingMessages>> = {
   it: () => import("./SightingMessages_it.js").then(m => m.sightingMessages_it)
 }
 
+/** The texts of Sighting, one chunk per language (see MessageCatalog). */
+export const SIGHTING_MESSAGES = Messages.catalog<SightingMessages>(sightingLoaders)
+
 export function loadSightingMessages(language: UfoLanguage): Promise<SightingMessages> {
-  return sightingLoaders[language]()
+  return SIGHTING_MESSAGES.load(language)
 }
 
 const shareLoaders: Record<UfoLanguage, () => Promise<ShareMessages>> = {
@@ -54,8 +64,11 @@ const shareLoaders: Record<UfoLanguage, () => Promise<ShareMessages>> = {
   it: () => import("./ShareMessages_it.js").then(m => m.shareMessages_it)
 }
 
+/** The texts of Share, one chunk per language (see MessageCatalog). */
+export const SHARE_MESSAGES = Messages.catalog<ShareMessages>(shareLoaders)
+
 export function loadShareMessages(language: UfoLanguage): Promise<ShareMessages> {
-  return shareLoaders[language]()
+  return SHARE_MESSAGES.load(language)
 }
 
 /**
@@ -99,16 +112,25 @@ const interviewLoaders: Record<UfoLanguage, () => Promise<InterviewMessages>> = 
   it: () => import("./InterviewMessages_it.js").then(m => m.interviewMessages_it)
 }
 
+/** The texts of Interview, one chunk per language (see MessageCatalog). */
+export const INTERVIEW_MESSAGES = Messages.catalog<InterviewMessages>(interviewLoaders)
+
 export function loadInterviewMessages(language: UfoLanguage): Promise<InterviewMessages> {
-  return interviewLoaders[language]()
+  return INTERVIEW_MESSAGES.load(language)
 }
+
+/** The texts of CaseEditor, one chunk per language (see MessageCatalog). */
+export const CASE_EDITOR_MESSAGES = Messages.catalog<CaseEditorMessages>(caseEditorLoaders)
 
 export function loadCaseEditorMessages(language: UfoLanguage): Promise<CaseEditorMessages> {
-  return caseEditorLoaders[language]()
+  return CASE_EDITOR_MESSAGES.load(language)
 }
 
+/** The texts of BodyEditor, one chunk per language (see MessageCatalog). */
+export const BODY_EDITOR_MESSAGES = Messages.catalog<BodyEditorMessages>(bodyEditorLoaders)
+
 export function loadBodyEditorMessages(language: UfoLanguage): Promise<BodyEditorMessages> {
-  return bodyEditorLoaders[language]()
+  return BODY_EDITOR_MESSAGES.load(language)
 }
 
 /**

@@ -4,6 +4,7 @@ import { register } from "../../src/component/DateInputElement.js"
 import type { DateInputElement } from "../../src/component/DateInputElement.js"
 import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
 import type { SightingTime } from "../../src/engine/model/Sighting.js"
+import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 
 register()
 
@@ -12,6 +13,8 @@ const make = () => {
   const element = document.createElement("rr0-date-input") as DateInputElement
   element.addEventListener("datechange", event => told.push((event as CustomEvent<{ time: SightingTime | undefined }>).detail.time))
   document.body.appendChild(element)
+  // Its words are its host's (see DateInputElement.messages): an editor's English here.
+  element.messages = sightingEditorMessages_en
   const picker = element.querySelector("input[type=datetime-local]") as HTMLInputElement
   const text = element.querySelector("input[type=text]") as HTMLInputElement
   const mode = element.querySelector("button.edtf-mode") as HTMLButtonElement

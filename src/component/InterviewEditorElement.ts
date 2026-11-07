@@ -7,10 +7,9 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
-import { loadInterviewMessages, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { INTERVIEW_MESSAGES, loadSightingEditorMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import type { InterviewMessages } from "./messages/InterviewMessages.js"
-import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
@@ -180,39 +179,39 @@ const TEMPLATE = `
 <!-- The player: what plays the interview's recordings, with who speaks along it (see InterviewPlayer). -->
 <div id="player"></div>
 <div id="tabs" class="group-tabs">
-  <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group">Summary</span></button>
-  <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group">Exchanges</span></button>
-  <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false"><span id="label-file-group">File</span></button>
+  <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false"><span id="label-file-group"></span></button>
 </div>
 <section class="group-panel" id="group-summary" aria-labelledby="label-summary-group">
   <div class="row">
-    <label class="fill"><span id="label-title">Title</span> <input id="title" type="text"/></label>
+    <label class="fill"><span id="label-title"></span> <input id="title" type="text"/></label>
   </div>
   <div class="row">
-    <fieldset id="witness" class="witnesses"><legend id="label-witness">Witness</legend></fieldset>
-    <label><span id="label-medium">Medium</span> <select id="medium"></select></label>
-    <label><span id="label-time">When</span> <input id="time" type="text" size="16" placeholder="2026-10-13 21:27"/></label>
-    <label><span id="label-by">Interviewer</span> <input id="by" type="text" autocomplete="off" spellcheck="false"/></label>
+    <fieldset id="witness" class="witnesses"><legend id="label-witness"></legend></fieldset>
+    <label><span id="label-medium"></span> <select id="medium"></select></label>
+    <label><span id="label-time"></span> <input id="time" type="text" size="16" placeholder="2026-10-13 21:27"/></label>
+    <label><span id="label-by"></span> <input id="by" type="text" autocomplete="off" spellcheck="false"/></label>
   </div>
   <div class="row">
-    <label class="wide"><span id="label-summary">What it established</span> <textarea id="summary"></textarea></label>
+    <label class="wide"><span id="label-summary"></span> <textarea id="summary"></textarea></label>
   </div>
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
   <div id="review" class="review" hidden></div>
   <div class="redact-row">
-    <button id="redact-selection" type="button" class="pill-btn">Take out the selection</button>
+    <button id="redact-selection" type="button" class="pill-btn"></button>
     <span id="redact-note" class="redact-note" role="status"></span>
   </div>
   <rr0-interview id="exchanges"></rr0-interview>
 </section>
 <section class="group-panel" id="group-transcript" aria-labelledby="label-file-group" hidden>
   <div class="row">
-    <label class="fill"><span id="label-url">Transcript</span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
+    <label class="fill"><span id="label-url"></span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
   </div>
   <div class="row toolbar">
-    <span class="input-file-row"><span id="label-import-file">Load a file (JSON, text, WebVTT, SRT)</span> <rr0-input-file id="import" name="import" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*" placeholder="https://…/interview.json"></rr0-input-file></span>
-    <button id="save" type="button">Save</button>
+    <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*" placeholder="https://…/interview.json"></rr0-input-file></span>
+    <button id="save" type="button"></button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
   <div id="file-editor" class="file-editor"></div>
@@ -243,7 +242,8 @@ export class InterviewEditorElement extends HTMLElement {
   private get importInput(): InputFileElement {
     return this.shadow.getElementById("import") as InputFileElement
   }
-  private messages: InterviewMessages = interviewMessages_en
+  /** Its words, in the page's language (see loadLocale): nothing is drawn before, in no language. */
+  private messages!: InterviewMessages
   private said = new SaidTexts(["en"])
   private language: UfoLanguage = "en"
   private localeToken = 0
@@ -259,7 +259,10 @@ export class InterviewEditorElement extends HTMLElement {
   /** The interview the file editor shows the transcript of. */
   private shownFor?: InterviewEvent
   /** The player over the tabs (see InterviewPlayer). */
-  private readonly player: InterviewPlayer
+  /** Settles once the editor has its words and is drawn: nothing of it shows before, in no language. */
+  ready: Promise<void> = Promise.resolve()
+  /** Made with the editor's first words (see loadLocale). */
+  private player?: InterviewPlayer
   /** The transcript as last drawn: what the exchanges' tools act on. */
   private drawn?: InterviewJson
   /**
@@ -291,13 +294,6 @@ export class InterviewEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
-    this.player = new InterviewPlayer(this.shadow.getElementById("player")!, {
-      timeChanged: t => this.markCurrentTurn(t),
-      recordingsChanged: recordings => void this.editTranscript(json => {
-        if (recordings.length === 0) delete json.recordings
-        else json.recordings = recordings
-      })
-    }, this.messages)
     this.shadow.getElementById("redact-selection")!.addEventListener("click", () => void this.redactSelection())
     // A press on a passage taken out puts it back, while its text is still known.
     this.shadow.getElementById("exchanges")!.addEventListener("click", event => {
@@ -317,7 +313,7 @@ export class InterviewEditorElement extends HTMLElement {
   }
 
   connectedCallback(): void {
-    void this.loadLocale()
+    this.ready = this.loadLocale()
   }
 
   disconnectedCallback(): void {
@@ -381,11 +377,22 @@ export class InterviewEditorElement extends HTMLElement {
     const token = ++this.localeToken
     const preferences = HostLocale.preferencesFor(this)
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const messages = language === "en" ? interviewMessages_en : await loadInterviewMessages(language)
+    const messages = await INTERVIEW_MESSAGES.load(language)
     if (token !== this.localeToken) return
     this.language = language
     this.said = new SaidTexts(preferences)
     this.messages = messages
+    // Made with its first words: a player is never shown without them.
+    if (!this.player) {
+      this.player = new InterviewPlayer(this.shadow.getElementById("player")!, {
+        timeChanged: t => this.markCurrentTurn(t),
+        recordingsChanged: recordings => void this.editTranscript(json => {
+          if (recordings.length === 0) delete json.recordings
+          else json.recordings = recordings
+        })
+      }, messages)
+      this.render()
+    }
     this.render()
   }
 
@@ -405,6 +412,7 @@ export class InterviewEditorElement extends HTMLElement {
 
   private render(): void {
     const m = this.messages
+    if (!m) return
     const text = (id: string, value: string): void => { this.shadow.getElementById(id)!.textContent = value }
     text("label-summary-group", m.summaryTab)
     text("label-file-group", m.fileTab)
@@ -558,7 +566,7 @@ export class InterviewEditorElement extends HTMLElement {
     reader.documentUrl = this.current ? this.transcriptUrl(this.current) : undefined
     reader.interview = json
     this.drawn = json
-    this.player.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
+    this.player?.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
     this.renderReview(json)
     this.decorateExchanges(json)
   }
@@ -642,7 +650,7 @@ export class InterviewEditorElement extends HTMLElement {
         time.type = "button"
         time.className = "turn-time"
         time.textContent = InterviewFile.clock(segment.start)
-        time.addEventListener("click", () => this.player.seek(segment.start!))
+        time.addEventListener("click", () => this.player?.seek(segment.start!))
         turn.prepend(time)
       }
       // The passages taken out, in order: each says how much was, and can be put back while its text is known.

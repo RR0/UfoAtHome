@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { register } from "../../src/component/DurationInputElement.js"
 import type { DurationInputElement } from "../../src/component/DurationInputElement.js"
 import { DurationText } from "../../src/engine/model/DurationText.js"
+import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 
 register()
 
@@ -11,6 +12,8 @@ const make = () => {
   element.setAttribute("name", "durationSeconds")
   element.addEventListener("durationchange", event => told.push((event as CustomEvent).detail))
   document.body.appendChild(element)
+  // Its words are its host's (see DurationInputElement.messages): an editor's English here.
+  element.messages = sightingEditorMessages_en
   return {
     element, told,
     number: element.input, text: element.textField,

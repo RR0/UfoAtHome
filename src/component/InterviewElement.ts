@@ -2,10 +2,9 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
-import { loadInterviewMessages, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
+import { INTERVIEW_MESSAGES, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import type { InterviewMessages } from "./messages/InterviewMessages.js"
-import { interviewMessages_en } from "./messages/InterviewMessages_en.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
 import type { InterviewSegment, InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
@@ -65,7 +64,8 @@ interface Seekable {
  * `<rr0-interview-editor>` (see InterviewEditorElement) shows one in its Exchanges group.
  */
 export class InterviewElement extends HTMLElement {
-  private messages: InterviewMessages = interviewMessages_en
+  /** Its words, in the page's language (see loadLocale): nothing is drawn before, in no language. */
+  private messages!: InterviewMessages
   private said = new SaidTexts(["en"])
   private localeToken = 0
   private loadToken = 0
@@ -149,7 +149,7 @@ export class InterviewElement extends HTMLElement {
     const token = ++this.localeToken
     const preferences = HostLocale.preferencesFor(this)
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const messages = language === "en" ? interviewMessages_en : await loadInterviewMessages(language)
+    const messages = await INTERVIEW_MESSAGES.load(language)
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
     this.messages = messages
@@ -221,6 +221,7 @@ export class InterviewElement extends HTMLElement {
   }
 
   private draw(): void {
+    if (!this.messages) return
     const m = this.messages
     const json = this.json
     this.blocks.clear()

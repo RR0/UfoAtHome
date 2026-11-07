@@ -67,11 +67,11 @@ export class EdtfDateField {
    */
   constructor(
     private readonly parts: EdtfDateParts,
-    private messages: EdtfDateFieldMessages,
+    private messages: EdtfDateFieldMessages | undefined,
     private readonly onChange: (time: SightingTime | undefined) => void,
     private locale = "en"
   ) {
-    this.setMessages(messages)
+    if (messages) this.setMessages(messages)
     parts.text.addEventListener("input", () => {
       this.readText()
       this.showDeduction()
@@ -106,7 +106,7 @@ export class EdtfDateField {
     this.precise = precise
     this.parts.picker.hidden = !precise
     this.parts.text.hidden = precise
-    this.parts.mode.textContent = precise ? this.messages.datePrecise : this.messages.dateEdtf
+    this.parts.mode.textContent = (precise ? this.messages?.datePrecise : this.messages?.dateEdtf) ?? ""
     this.parts.mode.setAttribute("aria-pressed", String(!precise))
     if (this.parts.help) this.parts.help.hidden = precise
     this.showDeduction()
@@ -183,7 +183,7 @@ export class EdtfDateField {
    * What an author reads above the text to be sure of what was understood.
    */
   describe(time: SightingTime): string {
-    return EdtfDateField.describeTime(time, this.messages, this.locale)
+    return this.messages ? EdtfDateField.describeTime(time, this.messages, this.locale) : ""
   }
 
   /** `describe` without a field: the same words, for whoever shows a time elsewhere (the summary's chips). */
@@ -233,7 +233,7 @@ export class EdtfDateField {
       return
     }
     const parsed = parseEdtfTime(value)
-    text.title = parsed ? `→ ${this.describe(parsed)}` : this.messages.edtfInvalid
+    text.title = parsed ? `→ ${this.describe(parsed)}` : this.messages?.edtfInvalid ?? ""
   }
 
   /**
@@ -279,7 +279,7 @@ export class EdtfDateField {
     const { text } = this.parts
     const value = text.value.trim()
     if (value === "" || parseEdtfTime(value)) return
-    text.setCustomValidity(this.messages.edtfInvalid)
+    text.setCustomValidity(this.messages?.edtfInvalid ?? "")
     text.classList.add("invalid")
   }
 }

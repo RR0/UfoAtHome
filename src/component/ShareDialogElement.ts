@@ -2,8 +2,7 @@ import type { ShareCodeEditor } from "./ShareCodeEditor.js"
 import { EmbedScript, type EmbeddedModule } from "./EmbedScript.js"
 import { AppLocation } from "./AppLocation.js"
 import type { ShareMessages } from "./messages/ShareMessages.js"
-import { shareMessages_en } from "./messages/ShareMessages_en.js"
-import { loadShareMessages, type UfoLanguage } from "./messages/index.js"
+import { SHARE_MESSAGES, type UfoLanguage } from "./messages/index.js"
 
 /** What a share dialog shares: told by the element it belongs to, which alone knows what it has on show. */
 export interface ShareSubject {
@@ -210,25 +209,25 @@ const TEMPLATE = `
 </style>
 <dialog id="dialog" class="share-dialog" aria-labelledby="title">
   <div class="share-head">
-    <h3 id="title" class="share-title">Share</h3>
-    <button id="close" class="share-close" type="button" aria-label="Close">×</button>
+    <h3 id="title" class="share-title"></h3>
+    <button id="close" class="share-close" type="button">×</button>
   </div>
   <!-- What is given: the link, or the code that puts it on another page. -->
   <div class="share-options">
     <button id="link-option" class="share-option" type="button" aria-pressed="true">
       <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span id="link-label">Link</span>
+      <span id="link-label"></span>
     </button>
     <button id="embed-option" class="share-option" type="button" aria-pressed="false">
       <span class="share-option-icon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span id="embed-label">Embed</span>
+      <span id="embed-label"></span>
     </button>
   </div>
   <!-- What the element that holds the dialog lets its reader choose of what is shared: the player's position and options. -->
   <slot name="options"></slot>
   <p id="note" class="share-note" role="status" hidden></p>
   <div id="link-box" class="share-link">
-    <textarea id="link" class="share-link-input" rows="2" spellcheck="false" aria-label="Link"></textarea>
+    <textarea id="link" class="share-link-input" rows="2" spellcheck="false"></textarea>
   </div>
   <div id="embed-box" class="share-embed" hidden>
     <div id="embed-code" class="embed-code"></div>
@@ -236,9 +235,9 @@ const TEMPLATE = `
   </div>
   <div class="share-actions">
     <!-- Unticked, what is shared follows each release; ticked, it keeps this one for good (see EmbedScript). -->
-    <label class="share-freeze"><input id="freeze" type="checkbox"/> <span id="freeze-label">Freeze this version</span></label>
+    <label class="share-freeze"><input id="freeze" type="checkbox"/> <span id="freeze-label"></span></label>
     <!-- Copies what is on show: the link, or the code. -->
-    <button id="copy" class="share-copy" type="button">Copy</button>
+    <button id="copy" class="share-copy" type="button"></button>
   </div>
 </dialog>
 `
@@ -263,7 +262,8 @@ export class ShareDialogElement extends HTMLElement {
   /** What is shared. Nothing is given until it is set. */
   subject?: ShareSubject
 
-  private messages: ShareMessages = shareMessages_en
+  /** Its words, in its holder's language (see useLanguage): none before, in no language. */
+  private messages?: ShareMessages
   private languageToken = 0
   private readonly shadow: ShadowRoot
   private readonly dialog: HTMLDialogElement
@@ -315,7 +315,7 @@ export class ShareDialogElement extends HTMLElement {
    */
   async useLanguage(language: UfoLanguage): Promise<ShareMessages | undefined> {
     const token = ++this.languageToken
-    const messages = language === "en" ? shareMessages_en : await loadShareMessages(language)
+    const messages = await SHARE_MESSAGES.load(language)
     if (token !== this.languageToken) return undefined
     this.messages = messages
     this.applyMessages()
@@ -362,6 +362,7 @@ export class ShareDialogElement extends HTMLElement {
 
   private applyMessages(): void {
     const m = this.messages
+    if (!m) return
     const text = (id: string, value: string) => { this.shadow.getElementById(id)!.textContent = value }
     text("title", m.share)
     text("link-label", m.link)
@@ -397,7 +398,7 @@ export class ShareDialogElement extends HTMLElement {
   private loadCodeEditor(): void {
     this.codeLoading ??= import("./ShareCodeEditor.js").then(({ ShareCodeEditor }) => {
       this.codeEditor = new ShareCodeEditor(this.shadow.getElementById("embed-code")!, this.embedMarkup.value,
-        text => { this.embedMarkup.value = text }, this.messages.embed)
+        text => { this.embedMarkup.value = text }, this.messages?.embed ?? "")
       this.embedMarkup.hidden = true
     }).catch(() => { this.codeLoading = undefined })
   }
@@ -407,8 +408,8 @@ export class ShareDialogElement extends HTMLElement {
   private async copy(text: string, field: HTMLTextAreaElement): Promise<void> {
     try {
       await navigator.clipboard.writeText(text)
-      this.copyButton.textContent = this.messages.copied
-      window.setTimeout(() => (this.copyButton.textContent = this.messages.copy), 1500)
+      this.copyButton.textContent = this.messages?.copied ?? ""
+      window.setTimeout(() => (this.copyButton.textContent = this.messages?.copy ?? ""), 1500)
     } catch {
       field.select()
     }

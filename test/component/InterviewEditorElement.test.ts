@@ -20,16 +20,18 @@ const wait = (ms = 40) => new Promise(resolve => setTimeout(resolve, ms))
 
 const fetched = (): string[] => (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.map(call => String(call[0]))
 
-const make = (event: InterviewEvent): { element: InterviewEditorElement, changes: { field: string, text?: string }[] } => {
+const make = async (event: InterviewEvent, prepare?: (element: InterviewEditorElement) => void): Promise<{ element: InterviewEditorElement, changes: { field: string, text?: string }[] }> => {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
     ok: url in files, status: url in files ? 200 : 404, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
   })))
   const element = document.createElement("rr0-interview-editor") as InterviewEditorElement
   document.body.appendChild(element)
   element.documentUrl = "https://example.org/d/case.json"
+  prepare?.(element)
   element.event = event
   const changes: { field: string, text?: string }[] = []
   element.addEventListener(INTERVIEW_CHANGE_EVENT, e => changes.push((e as CustomEvent<{ field: string, text?: string }>).detail))
+  await element.ready
   return { element, changes }
 }
 const part = (element: InterviewEditorElement, id: string) => element.shadowRoot!.getElementById(id) as HTMLElement
@@ -45,8 +47,8 @@ describe("InterviewEditorElement's groups", () => {
 
   const event = (): InterviewEvent => ({ type: "event", eventType: "interview", id: "interview-qb-1", time: "2026-10-13 21:27", title: { en: "Video interview" }, summary: { en: "It fixed the figures." } })
 
-  it("has a summary and a file, the summary on show first, with the event's fields in it", () => {
-    const { element } = make(event())
+  it("has a summary and a file, the summary on show first, with the event's fields in it", async () => {
+    const { element } = await make(event())
     expect(tabs(element).map(tab => tab.getAttribute("aria-controls"))).toEqual(["group-summary", "group-exchanges", "group-transcript"])
     expect(tabs(element).map(tab => tab.getAttribute("aria-expanded"))).toEqual(["true", "false", "false"])
     expect(part(element, "group-summary").hidden).toBe(false)
@@ -60,8 +62,8 @@ describe("InterviewEditorElement's groups", () => {
     expect(part(element, "group-transcript").contains(part(element, "url"))).toBe(true)
   })
 
-  it("shows the file group in place of the summary, and the summary again", () => {
-    const { element } = make(event())
+  it("shows the file group in place of the summary, and the summary again", async () => {
+    const { element } = await make(event())
     tabs(element)[2].click()
     expect(part(element, "group-summary").hidden).toBe(true)
     expect(part(element, "group-transcript").hidden).toBe(false)
@@ -74,7 +76,7 @@ describe("InterviewEditorElement's groups", () => {
 
   it("shows in the file the transcript at the event's address, fetched relative to the case", async () => {
     files["https://example.org/d/interview.json"] = transcript
-    const { element } = make({ ...event(), url: "interview.json" })
+    const { element } = await make({ ...event(), url: "interview.json" })
     tabs(element)[2].click()
     await wait(200)
     expect(fetched()).toContain("https://example.org/d/interview.json")
@@ -84,7 +86,7 @@ describe("InterviewEditorElement's groups", () => {
   })
 
   it("shows a transcript with nobody speaking when the interview has none, and gives it no address until it is written", async () => {
-    const { element, changes } = make(event())
+    const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(200)
     expect(shown(element)).toContain('"segments"')
@@ -94,9 +96,9 @@ describe("InterviewEditorElement's groups", () => {
 
   it("shows what the host kept rather than fetching it again", async () => {
     files["https://example.org/d/interview.json"] = transcript
-    const { element } = make({ ...event(), url: "interview.json" })
-    element.transcriptText = '{ "version": 1, "segments": [], "language": "edited" }'
-    element.event = element.event
+    const { element } = await make({ ...event(), url: "interview.json" }, editor => {
+      editor.transcriptText = '{ "version": 1, "segments": [], "language": "edited" }'
+    })
     tabs(element)[2].click()
     await wait(200)
     expect(shown(element)).toContain("edited")
@@ -105,7 +107,7 @@ describe("InterviewEditorElement's groups", () => {
 
   it("loads a transcript from an address, keeps it, gives the interview the address of a file beside the case, and tells the host", async () => {
     files["https://example.org/d/other.json"] = transcript
-    const { element, changes } = make(event())
+    const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(100)
     ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/other.json"
@@ -121,7 +123,7 @@ describe("InterviewEditorElement's groups", () => {
 
   it("refuses a file that is not an interview transcript, and keeps nothing of it", async () => {
     files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
-    const { element, changes } = make(event())
+    const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(100)
     ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/plain.json"
@@ -133,7 +135,7 @@ describe("InterviewEditorElement's groups", () => {
   })
 
   it("says so when the transcript at the interview's address cannot be read, and shows a blank one", async () => {
-    const { element } = make({ ...event(), url: "missing.json" })
+    const { element } = await make({ ...event(), url: "missing.json" })
     tabs(element)[2].click()
     await wait(200)
     expect(part(element, "file-note").hidden).toBe(false)
@@ -142,7 +144,7 @@ describe("InterviewEditorElement's groups", () => {
 
   it("shows the file at a new address once it is typed", async () => {
     files["https://example.org/d/typed.json"] = transcript
-    const { element } = make(event())
+    const { element } = await make(event())
     tabs(element)[2].click()
     await wait(100)
     const url = part(element, "url") as HTMLInputElement
@@ -174,7 +176,7 @@ describe("What the summary shows is what the file holds, and the other way round
   const fileJson = (element: InterviewEditorElement): Record<string, unknown> => JSON.parse(element.shadowRoot!.querySelector<HTMLElement>("#file-editor .cm-content")!.textContent!.replace(/\u00a0/g, " "))
 
   it("has, in the file of a new interview, everything the summary shows", async () => {
-    const { element } = make(event())
+    const { element } = await make(event())
     tabs(element)[2].click()
     await wait(200)
     expect(element.transcriptText).toBeUndefined()
@@ -187,7 +189,7 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 
   it("writes in the file what is edited in the summary, and tells the host the transcript is now that", async () => {
-    const { element, changes } = make(event())
+    const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(200)
     typed(element, "summary", "It fixed the figures and the azimuth.")
@@ -201,15 +203,15 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(changes.filter(change => change.field === "transcript").length).toBeGreaterThanOrEqual(3)
   })
 
-  it("leaves the file alone while there is no transcript text to say it in", () => {
-    const { element, changes } = make(event())
+  it("leaves the file alone while there is no transcript text to say it in", async () => {
+    const { element, changes } = await make(event())
     typed(element, "summary", "Changed.")
     expect(element.transcriptText).toBeUndefined()
     expect(changes.map(change => change.field)).toEqual(["summary"])
   })
 
   it("changes the summary when the text of the file is edited, and clears what the text no longer has", async () => {
-    const { element, changes } = make(event())
+    const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(200)
     const edited = { version: 1, title: { en: "Renamed" }, time: "2026-10-14", interviewOf: "other", speakers: {}, segments: [] }
@@ -224,7 +226,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("takes the fields a loaded file says, and keeps the ones it does not", async () => {
     files["https://example.org/d/other.json"] = { version: 1, title: { en: "From the file" }, summary: { en: "Its own summary." }, speakers: {}, segments: [{ speaker: "a", start: 0, end: 1, text: "Hi" }] }
-    const { element } = make(event())
+    const { element } = await make(event())
     tabs(element)[2].click()
     await wait(100)
     ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/other.json"
@@ -238,7 +240,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("reconciles a file fetched at the interview's address the same way, and says it changed the summary", async () => {
     files["https://example.org/d/interview.json"] = { version: 1, summary: { en: "Written in the file." }, speakers: {}, segments: [] }
-    const { element, changes } = make({ ...event(), url: "interview.json" })
+    const { element, changes } = await make({ ...event(), url: "interview.json" })
     tabs(element)[2].click()
     await wait(300)
     expect(element.event!.summary).toEqual({ en: "Written in the file." })
@@ -252,15 +254,15 @@ describe("What the summary shows is what the file holds, and the other way round
     box.dispatchEvent(new Event("change", { bubbles: true }))
   }
 
-  it("offers the case's observers as witnesses, those the interview was held with checked", () => {
-    const { element } = make({ ...event(), interviewOf: "qb" })
+  it("offers the case's observers as witnesses, those the interview was held with checked", async () => {
+    const { element } = await make({ ...event(), interviewOf: "qb" })
     element.witnesses = [{ id: "qb", label: "Q. B." }, { id: "jd", label: "J. D." }]
     expect(boxes(element).map(box => [box.value, box.checked])).toEqual([["qb", true], ["jd", false]])
   })
 
-  it("is held with one witness, or several, written as an id or as a list of ids", () => {
+  it("is held with one witness, or several, written as an id or as a list of ids", async () => {
     const { interviewOf: _none, ...unnamed } = event()
-    const { element, changes } = make(unnamed)
+    const { element, changes } = await make(unnamed)
     element.witnesses = [{ id: "qb", label: "Q. B." }, { id: "jd", label: "J. D." }]
     expect(boxes(element).every(box => !box.checked)).toBe(true)
     toggle(boxes(element)[0])
@@ -270,8 +272,8 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(changes.map(change => change.field)).toContain("witness")
   })
 
-  it("is held with somebody: the last witness cannot be unchecked", () => {
-    const { element } = make({ ...event(), interviewOf: "qb" })
+  it("is held with somebody: the last witness cannot be unchecked", async () => {
+    const { element } = await make({ ...event(), interviewOf: "qb" })
     element.witnesses = [{ id: "qb", label: "Q. B." }]
     toggle(boxes(element)[0])
     expect(element.event!.interviewOf).toBe("qb")
@@ -279,7 +281,7 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 
   it("keeps in the file a speaker for each interviewer and each witness the summary names", async () => {
-    const { element } = make({ ...event(), by: [{ people: "BeauJerome" }, { people: "Ufologue2" }], interviewOf: ["qb", "jd"] })
+    const { element } = await make({ ...event(), by: [{ people: "BeauJerome" }, { people: "Ufologue2" }], interviewOf: ["qb", "jd"] })
     tabs(element)[2].click()
     await wait(200)
     // The editor draws only what is in view: the text it holds is the file.
@@ -303,7 +305,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("reads the interview as a dialogue: who said what, the passages taken out as one gap with their reason, who has not proofread it", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element } = make({ ...event(), url: "interview.json" })
+    const { element } = await make({ ...event(), url: "interview.json" })
     tabs(element)[1].click()
     await wait(100)
     const turns = [...element.shadowRoot!.querySelectorAll<HTMLElement>("#exchanges .turn")]
@@ -329,7 +331,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("says who has proofread it, and keeps it when a participant's box is ticked", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element, changes } = make({ ...event(), url: "interview.json" })
+    const { element, changes } = await make({ ...event(), url: "interview.json" })
     tabs(element)[1].click()
     await wait(100)
     const root = element.shadowRoot!
@@ -344,7 +346,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("takes a whole turn out and puts it back while its text is known", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element, changes } = make({ ...event(), url: "interview.json" })
+    const { element, changes } = await make({ ...event(), url: "interview.json" })
     tabs(element)[1].click()
     await wait(100)
     const tool = (index: number, label: string) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(`#exchanges .turn[data-segment="${index}"] .turn-tools button`)]
@@ -360,7 +362,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("links a witness's passage to a moment of their observation, named after it", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element, changes } = make({ ...event(), url: "interview.json" })
+    const { element, changes } = await make({ ...event(), url: "interview.json" })
     element.witnesses = [{ id: "qb", label: "Q. B.", moments: [{ at: 0.5, label: "A", note: "A light" }, { at: 3, label: "B", note: "It turns" }] }]
     tabs(element)[1].click()
     await wait(100)
@@ -373,7 +375,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("plays nothing without a recording, and says how to get one", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element } = make({ ...event(), url: "interview.json" })
+    const { element } = await make({ ...event(), url: "interview.json" })
     await wait(100)
     const root = element.shadowRoot!
     expect(root.querySelector<HTMLButtonElement>(".player-play")!.disabled).toBe(true)
@@ -384,7 +386,7 @@ describe("What the summary shows is what the file holds, and the other way round
 
   it("follows a passage to the moment of the observation it tells of", async () => {
     files["https://example.org/d/interview.json"] = dialogue
-    const { element } = make({ ...event(), url: "interview.json" })
+    const { element } = await make({ ...event(), url: "interview.json" })
     const seen: { sighting?: string, at: number }[] = []
     element.addEventListener("interviewseek", e => seen.push((e as CustomEvent<{ sighting?: string, at: number }>).detail))
     tabs(element)[1].click()
@@ -395,7 +397,7 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 
   it("says nothing was said when the interview has no transcript", async () => {
-    const { element } = make(event())
+    const { element } = await make(event())
     tabs(element)[1].click()
     await wait(100)
     expect(part(element, "exchanges").textContent).toBe("Nothing was said yet.")
@@ -409,7 +411,7 @@ describe("What the summary shows is what the file holds, and the other way round
   }
 
   it("loads a transcript that is not in our format, as best it can be read, naming the speakers the case names", async () => {
-    const { element, changes } = make({ ...event(), by: [{ people: "BeauJerome" }], interviewOf: "qb" })
+    const { element, changes } = await make({ ...event(), by: [{ people: "BeauJerome" }], interviewOf: "qb" })
     element.witnesses = [{ id: "qb", label: "Q. B." }]
     tabs(element)[2].click()
     await wait(200)
@@ -424,7 +426,7 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 
   it("says so when a file holds nothing that reads as an interview", async () => {
-    const { element } = make(event())
+    const { element } = await make(event())
     tabs(element)[2].click()
     await wait(200)
     await load(element, "empty.txt", "   ")
@@ -432,16 +434,16 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(part(element, "file-note").textContent).toContain("not an interview transcript")
   })
 
-  it("says what the interview was held through, among the media, and not nothing once one is said", () => {
-    const { element } = make({ ...event(), medium: "phone" })
+  it("says what the interview was held through, among the media, and not nothing once one is said", async () => {
+    const { element } = await make({ ...event(), medium: "phone" })
     const select = part(element, "medium") as HTMLSelectElement
     expect([...select.options].map(option => option.value)).toEqual(["in-person", "phone", "video", "chat", "email", "letter", "other"])
     expect(select.value).toBe("phone")
     expect([...select.options].find(option => option.value === "video")!.textContent).toBe("Video call")
   })
 
-  it("shows a placeholder for an interview that says none, which cannot be chosen and goes once a medium is", () => {
-    const { element, changes } = make(event())
+  it("shows a placeholder for an interview that says none, which cannot be chosen and goes once a medium is", async () => {
+    const { element, changes } = await make(event())
     const select = part(element, "medium") as HTMLSelectElement
     expect([...select.options][0]).toMatchObject({ value: "", disabled: true, hidden: true })
     select.value = "video"
@@ -452,7 +454,7 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 
   it("keeps in the file the medium the summary says, and in the summary the medium the file says", async () => {
-    const { element } = make({ ...event(), medium: "phone" })
+    const { element } = await make({ ...event(), medium: "phone" })
     tabs(element)[2].click()
     await wait(200)
     expect(fileJson(element).medium).toBe("phone")

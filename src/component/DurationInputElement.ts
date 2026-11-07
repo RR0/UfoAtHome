@@ -2,7 +2,6 @@ import { HelpPopover } from "./HelpPopover.js"
 import { DurationText } from "../engine/model/DurationText.js"
 import type { DurationReading } from "../engine/model/DurationText.js"
 import type { EdtfDateFieldMessages } from "./EdtfDateField.js"
-import { sightingEditorMessages_en } from "./messages/SightingEditorMessages_en.js"
 
 export const DURATION_INPUT_ELEMENT_NAME = "rr0-duration-input"
 
@@ -50,7 +49,8 @@ ${HelpPopover.css("rr0-duration-input .duration-helppop")}
  * holds, telling nobody. The controls are made when the element is connected, or by `build()`.
  */
 export class DurationInputElement extends HTMLElement {
-  private wording: DurationInputMessages = sightingEditorMessages_en
+  /** Its words, given by the editor it stands in (see messages): none before, in no language. */
+  private wording?: DurationInputMessages
   private built = false
   private precise = true
   private numberInput!: HTMLInputElement
@@ -159,6 +159,7 @@ export class DurationInputElement extends HTMLElement {
 
   private applyWording(): void {
     const m = this.wording
+    if (!m) return
     this.modeButton.title = m.durationModeTitle
     this.modeButton.setAttribute("aria-label", m.durationModeTitle)
     const title = this.ownerDocument.createElement("p")
@@ -182,7 +183,7 @@ export class DurationInputElement extends HTMLElement {
     this.querySelector<HTMLElement>(".duration-unit")!.hidden = !precise
     this.textInput.hidden = precise
     this.helpButton.hidden = precise
-    this.modeButton.textContent = precise ? this.wording.durationPrecise : this.wording.durationIso
+    this.modeButton.textContent = (precise ? this.wording?.durationPrecise : this.wording?.durationIso) ?? ""
     this.modeButton.setAttribute("aria-pressed", String(!precise))
     // Going to the text with an exact length in the number, the text starts as that length, there to be made vaguer.
     if (!precise && wasPrecise && this.textInput.value === "" && this.numberInput.value !== "") {
@@ -230,7 +231,7 @@ export class DurationInputElement extends HTMLElement {
     const said = reading.minSeconds === reading.maxSeconds
       ? DurationText.say(reading.minSeconds)
       : `${DurationText.say(reading.minSeconds)} – ${DurationText.say(reading.maxSeconds)}`
-    const word = reading.doubt === "~" ? m.timeQualifierApproximate : reading.doubt === "?" ? m.timeQualifierUncertain
+    const word = !m ? "" : reading.doubt === "~" ? m.timeQualifierApproximate : reading.doubt === "?" ? m.timeQualifierUncertain
       : reading.doubt === "%" ? m.timeQualifierBoth : ""
     return word ? `${said} — ${word.toLowerCase()}` : said
   }
@@ -243,7 +244,7 @@ export class DurationInputElement extends HTMLElement {
       return
     }
     const reading = DurationText.parse(value)
-    this.textInput.title = reading ? `→ ${this.describe(reading)}` : this.wording.durationInvalid
+    this.textInput.title = reading ? `→ ${this.describe(reading)}` : this.wording?.durationInvalid ?? ""
   }
 
   /** After a duration that was not stated exactly, in brackets: the one length the simulation is played at. */
@@ -251,7 +252,7 @@ export class DurationInputElement extends HTMLElement {
     const reading = this.precise ? undefined : DurationText.parse(this.textInput.value)
     const shown = reading !== undefined && !DurationText.isExact(this.textInput.value)
     this.chosen.hidden = !shown
-    this.chosen.textContent = shown ? this.wording.durationChosen.replace("{value}", DurationText.say(reading!.chosenSeconds)) : ""
+    this.chosen.textContent = shown && this.wording ? this.wording.durationChosen.replace("{value}", DurationText.say(reading!.chosenSeconds)) : ""
   }
 }
 
