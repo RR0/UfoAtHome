@@ -155,6 +155,19 @@ describe("ReentrySighting", () => {
     expect(early.magnitude).toBeGreaterThan(later.magnitude + 1)
   })
 
+  test("however bright, it goes out gradually and is invisible at its end, not cut off while dazzling", () => {
+    // Chelyabinsk's pieces end at magnitude -15: faded by a share of their light they were still blinding on their last frame.
+    const r = reentry([{ absoluteMagnitude: -15, untilT: 20000 }])
+    const observer = { lat: 0, lng: 1, heightM: 0 }
+    const at = (t: number) => ReentrySighting.viewsAt([r], t, observer)[0].magnitude
+    const full = at(15000)
+    const half = at(20000 - ReentrySighting.FADE_MS / 2)
+    const last = at(20000 - 16)
+    expect(half).toBeGreaterThan(full + 5)
+    expect(half).toBeLessThan(last - 5)
+    expect(last).toBeGreaterThan(ReentrySighting.FADED_MAGNITUDE - 0.5)
+  })
+
   test("its train runs back along its own path, never before it appeared", () => {
     const r = reentry([{ absoluteMagnitude: -2, trainS: 2, fromT: 14000 }])
     const [view] = ReentrySighting.viewsAt([r], 15000, { lat: 0, lng: 1, heightM: 0 })

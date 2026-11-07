@@ -255,8 +255,11 @@ export class ReentrySighting {
   }
   /** How long a piece takes to brighten when it appears and to go out when it ends, ms: a burning
    * piece flares and dies over a moment, not between two frames. A quarter of its life when that is
-   * shorter. */
-  static readonly FADE_MS = 600
+   * shorter. Judged, not measured: the end of a fireball's light on video takes about a second. */
+  static readonly FADE_MS = 1000
+  /** The magnitude a piece fades to and from: fainter than the eye sees under the darkest sky, so
+   * whatever its brightness it is gone at its end, not cut off while still dazzling. */
+  static readonly FADED_MAGNITUDE = 8
   /** How finely the train follows the path, points per train. */
   private static readonly TRAIN_POINTS = 8
 
@@ -367,10 +370,11 @@ export class ReentrySighting {
         // A quarter of its life at most, so a meteor burning one second still reaches its peak.
         const fadeMs = Math.min(ReentrySighting.FADE_MS, (piece.untilT - piece.fromT) / 4)
         const fade = fadeMs > 0 ? Math.min(1, (t - piece.fromT) / fadeMs, (piece.untilT - t) / fadeMs) : 1
-        // A fraction of its light, as a magnitude: 2.5 log of the share. Floored so a piece at the
-        // very instant it appears is merely too faint, not infinitely so.
-        const fadeMagnitudes = -2.5 * Math.log10(Math.max(fade, 1e-3))
-        const magnitude = piece.magnitudeAt(t) + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM) + fadeMagnitudes
+        // Faded in magnitudes, not in a share of its light: a share floored at a thousandth is only
+        // 7.5 magnitudes, which leaves a magnitude -15 piece still dazzling on its last frame. Joined
+        // linearly in magnitude, its light falls off geometrically, as a cooling glow does.
+        const full = piece.magnitudeAt(t) + 5 * Math.log10(head.distanceKm / ReentrySighting.STANDARD_DISTANCE_KM)
+        const magnitude = full + (1 - fade) * Math.max(0, ReentrySighting.FADED_MAGNITUDE - full)
         const train: SkyPoint[] = [head]
         for (let k = 1; k <= ReentrySighting.TRAIN_POINTS; k++) {
           // Never further back than where it broke off: a piece has no tail from before it existed.
