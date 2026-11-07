@@ -1,3 +1,7 @@
+import { LANTERN_PARAMETER_TEXTS } from "./messages/LanternParameterTexts.js"
+import type { LanternParameterTexts } from "./messages/LanternParameterTexts.js"
+import { ParameterTexts } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet } from "../../../engine/interpretation/Parameters.js"
 import { SkyEventEditorStyle } from "../../sky-events/SkyEventEditorStyle.js"
 import { LanternParameters } from "./LanternParameters.js"
 import type { LanternContext } from "./LanternParameters.js"
@@ -42,6 +46,8 @@ export class LanternEditor {
   private messages!: LanternEditorMessages
   /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
   readonly ready: Promise<void>
+  /** The words of its parameters, in its language (see ParameterTexts). */
+  private parameterTexts!: LanternParameterTexts
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -64,9 +70,10 @@ export class LanternEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const messages = await LANTERN_EDITOR_MESSAGES.load(language)
+    const [messages, parameterTexts] = await Promise.all([LANTERN_EDITOR_MESSAGES.load(language), LANTERN_PARAMETER_TEXTS.load(language)])
     if (token !== this.languageToken) return
     this.messages = messages
+    this.parameterTexts = parameterTexts
     this.render()
     this.sync()
   }
@@ -87,7 +94,7 @@ export class LanternEditor {
     note.hidden = stated === 0
     note.textContent = this.messages.releasesNote.replace("{n}", String(stated))
     this.form ??= new ParameterForm(this.element("lantern-parameters"), this.language, "lantern.", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
-    this.form.show(LanternParameters.SET, new ParameterTarget(
+    this.form.show(this.resolved(LanternParameters.SET), new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
       apply => this.editLaunch(launch => apply(launch as unknown as ParameterHolder)),
       (): LanternContext => ({ shapes: this.host.shapes().map(shape => ({ value: shape.id, label: shape.label })) }),
@@ -113,6 +120,11 @@ export class LanternEditor {
   /** The launch on show, if any. */
   get current(): LanternLaunchJson | undefined {
     return this.launches.find(launch => launch.id === this.currentId)
+  }
+
+  /** A set of its parameters in its language (see ParameterTexts.resolve). */
+  private resolved(set: ParameterSet): ParameterSet {
+    return ParameterTexts.resolve(set, this.parameterTexts)
   }
 
   private render(): void {

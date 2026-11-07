@@ -1,3 +1,4 @@
+import { PERCEPTION_MESSAGES } from "./messages/PerceptionMessages.js"
 import type { ObserverProvider, ObserverSettings } from "../../engine/observer/ObserverProvider.js"
 import type { Perception } from "../../engine/observer/Perception.js"
 import { Perceptions } from "../../engine/observer/Perception.js"
@@ -27,26 +28,23 @@ export class ColorVisionProvider implements ObserverProvider {
   }
 
   readonly id = ColorVisionProvider.ID
-  readonly label = "Colour vision"
-  readonly hint =
-    "How colours look to someone whose cones differ, from Machado et al. 2009. Only recolours: it does not change brightness or what the eye can resolve."
+  readonly messages = PERCEPTION_MESSAGES
   readonly sources = [
     "Machado, Oliveira, Fernandes, A Physiologically-based Model for Simulation of Color Vision Deficiency, IEEE TVCG 15(6), 2009"
   ]
   readonly settings = [
     {
       id: "type",
-      label: "Type",
       kind: "choice" as const,
       default: "normal",
       choices: [
-        { id: "normal", label: "Typical" },
-        { id: "protan", label: "Protan (red-weak or red-blind)" },
-        { id: "deutan", label: "Deutan (green-weak or green-blind)" },
-        { id: "tritan", label: "Tritan (blue-weak or blue-blind)" }
+        { id: "normal" },
+        { id: "protan" },
+        { id: "deutan" },
+        { id: "tritan" }
       ]
     },
-    { id: "severity", label: "Severity", kind: "number" as const, default: 100, min: 0, max: 100, step: 5, unit: "%" }
+    { id: "severity", kind: "number" as const, default: 100, min: 0, max: 100, step: 5, unit: "%" }
   ]
 
   perceive(values: ObserverSettings): Perception {

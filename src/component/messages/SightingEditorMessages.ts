@@ -946,10 +946,6 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   observerAge: string
   /** The observer's birth date, which stays in step with their age then. */
   observerBirth: string
-  /** The words of the observer-perception providers' settings, by key: `<provider>`, `<provider>.hint`,
-   * `<provider>.<setting>` and `<provider>.<setting>.<choice>` (see ProviderSettingsElement). A key left
-   * out reads in English. */
-  observerPerception: Record<string, string>
   /** What they did, in prose — never a level: banding occupations is each method's own argument
    * (see Account.observerOccupation). */
   observerOccupation: string

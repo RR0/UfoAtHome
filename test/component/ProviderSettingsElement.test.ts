@@ -7,14 +7,15 @@ register()
 const PROVIDERS: SettingsProvider[] = [
   {
     id: "p",
-    label: "Provider P",
-    hint: "About P",
     settings: [
-      { id: "mode", label: "Mode", kind: "choice", default: "a", choices: [{ id: "a", label: "A" }, { id: "b", label: "B" }] },
-      { id: "level", label: "Level", kind: "number", default: 0, min: 0, max: 10, step: 1, unit: "u" }
+      { id: "mode", kind: "choice", default: "a", choices: [{ id: "a" }, { id: "b" }] },
+      { id: "level", kind: "number", default: 0, min: 0, max: 10, step: 1, unit: "u" }
     ]
   }
 ]
+
+/** The words of P, as its catalog would give them (see ObserverProvider.messages). */
+const LABELS = { p: "Provider P", "p.hint": "About P", "p.mode": "Mode", "p.mode.a": "A", "p.mode.b": "B", "p.level": "Level" }
 
 describe("ProviderSettingsElement", () => {
   afterEach(() => {
@@ -25,6 +26,7 @@ describe("ProviderSettingsElement", () => {
     const element = document.createElement("rr0-provider-settings") as ProviderSettingsElement
     document.body.append(element)
     element.providers = PROVIDERS
+    element.labels = LABELS
     return element
   }
 
@@ -41,8 +43,8 @@ describe("ProviderSettingsElement", () => {
     document.documentElement.lang = "fr"
     const element = document.createElement("rr0-provider-settings") as ProviderSettingsElement
     document.body.append(element)
-    element.providers = [{ id: "a", label: "Alcohol", hint: "", settings: [
-      { id: "level", label: "Level", kind: "number", default: 0, min: 0, max: 0.5, step: 0.01, unit: "%", also: { unit: "g/L", factor: 10, digits: 1 } }
+    element.providers = [{ id: "a", settings: [
+      { id: "level", kind: "number", default: 0, min: 0, max: 0.5, step: 0.01, unit: "%", also: { unit: "g/L", factor: 10, digits: 1 } }
     ] }]
     element.values = { a: { level: 0.08 } }
     expect(element.querySelector(".ps-also")!.textContent).toBe("(≈ 0,8 g/L)")
@@ -53,12 +55,12 @@ describe("ProviderSettingsElement", () => {
     document.documentElement.removeAttribute("lang")
   })
 
-  it("reads in the language it is given, falling back to English per key", () => {
+  it("reads in the language it is given, a key it lacks shown as the key", () => {
     const element = mount()
-    element.labels = { p: "Fournisseur P", "p.mode.b": "Bé" }
+    element.labels = { p: "Fournisseur P", "p.hint": "À propos de P", "p.mode.b": "Bé" }
     expect(element.querySelector(".ps-heading")!.textContent).toBe("Fournisseur P")
-    expect(element.querySelector(".ps-heading")!.getAttribute("title")).toBe("About P")
-    expect([...(element.querySelector("#p-mode") as HTMLSelectElement).options].map(option => option.text)).toEqual(["A", "Bé"])
+    expect(element.querySelector(".ps-heading")!.getAttribute("title")).toBe("À propos de P")
+    expect([...(element.querySelector("#p-mode") as HTMLSelectElement).options].map(option => option.text)).toEqual(["a", "Bé"])
   })
 
   it("tells the host by a bubbling settingschange, and shows what it is given without telling", () => {

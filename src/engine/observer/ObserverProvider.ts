@@ -1,3 +1,4 @@
+import type { MessageCatalog } from "../../i18n/MessageCatalog.js"
 import type { Perception } from "./Perception.js"
 
 /** What a setting holds: a number, or the id of one of its choices. */
@@ -11,8 +12,6 @@ export type ObserverSettings = Record<string, ObserverSettingValue>
  * any setting from this alone, which is what lets a provider be added without touching it. */
 export interface ObserverSetting {
   id: string
-  /** English name, the fallback when a language's messages hold none (key `<provider>.<id>`). */
-  label: string
   kind: "number" | "choice"
   /** The value that means "nothing special". */
   default: ObserverSettingValue
@@ -26,8 +25,8 @@ export interface ObserverSetting {
    * `factor` times the value, with `digits` decimals.
    */
   also?: { unit: string; factor: number; digits?: number }
-  /** For a choice: its ids, with an English label each (key `<provider>.<id>.<choice>`). */
-  choices?: { id: string; label: string }[]
+  /** For a choice: its ids, each named by the key `<provider>.<id>.<choice>` of the provider's messages. */
+  choices?: { id: string }[]
 }
 
 /**
@@ -42,11 +41,11 @@ export interface ObserverSetting {
 export interface ObserverProvider {
   /** Stable id: what a recording names, and the prefix of this provider's message keys. */
   id: string
-  /** English heading, the fallback for the messages' `<id>` key. */
-  label: string
-  /** English text for what the provider models and what it does NOT, shown as the heading's tooltip
-   * (messages key `<id>.hint`). */
-  hint: string
+  /**
+   * Its words in the reader's language (see MessageCatalog), by key: `<id>` its heading, `<id>.hint` what it models and what it does NOT,
+   * `<id>.<setting>` each setting and `<id>.<setting>.<choice>` each choice of one.
+   */
+  messages: MessageCatalog<Readonly<Record<string, string>>>
   /** Where its numbers come from: citations, in the order they are used. */
   sources: string[]
   settings: ObserverSetting[]

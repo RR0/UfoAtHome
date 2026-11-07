@@ -3,11 +3,13 @@ import { ObserverProviders } from "../../src/engine/observer/ObserverProviders.j
 import type { ObserverProvider } from "../../src/engine/observer/ObserverProvider.js"
 import { Perceptions } from "../../src/engine/observer/Perception.js"
 import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
+import { Messages } from "../../src/i18n/MessageCatalog.js"
 
 /** A glare of the eye after a camera flash: the contrast halved, for as long as it is stated. */
 const AFTER_FLASH: ObserverProvider = {
-  id: "after-flash", label: "After a flash", hint: "", sources: ["Test"],
-  settings: [{ id: "share", label: "Share", kind: "number", default: 1, min: 0, max: 1, step: 0.1 }],
+  id: "after-flash", sources: ["Test"],
+  messages: Messages.catalog({ en: async () => ({ "after-flash": "After a flash" }), fr: async () => ({ "after-flash": "Après un flash" }), es: async () => ({ "after-flash": "Tras un flash" }), it: async () => ({ "after-flash": "Dopo un flash" }) }),
+  settings: [{ id: "share", kind: "number", default: 1, min: 0, max: 1, step: 0.1 }],
   perceive: values => ({ ...Perceptions.NONE, contrastGain: Number(values.share ?? 1) })
 }
 

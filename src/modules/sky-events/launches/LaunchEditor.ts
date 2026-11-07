@@ -1,3 +1,7 @@
+import { LAUNCH_PARAMETER_TEXTS } from "./messages/LaunchParameterTexts.js"
+import type { LaunchParameterTexts } from "./messages/LaunchParameterTexts.js"
+import { ParameterTexts } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet } from "../../../engine/interpretation/Parameters.js"
 import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { LaunchParameters } from "./LaunchParameters.js"
 import type { LaunchJetJson, LaunchJetKind, LaunchJson, LaunchVehicle } from "./LaunchPlume.js"
@@ -44,6 +48,8 @@ export class LaunchEditor {
   private messages!: LaunchEditorMessages
   /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
   readonly ready: Promise<void>
+  /** The words of its parameters, in its language (see ParameterTexts). */
+  private parameterTexts!: LaunchParameterTexts
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -74,9 +80,10 @@ export class LaunchEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const messages = await LAUNCH_EDITOR_MESSAGES.load(language)
+    const [messages, parameterTexts] = await Promise.all([LAUNCH_EDITOR_MESSAGES.load(language), LAUNCH_PARAMETER_TEXTS.load(language)])
     if (token !== this.languageToken) return
     this.messages = messages
+    this.parameterTexts = parameterTexts
     this.render()
     this.sync()
   }
@@ -94,7 +101,7 @@ export class LaunchEditor {
     if (!launch) return
     this.syncPlace(true)
     this.syncJet(true)
-    const set = ParameterRegistry.of("launch")!
+    const set = this.resolved(ParameterRegistry.of("launch")!)
     this.form ??= new ParameterForm(this.element("launch-parameters"), this.language, "", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(set, launch as unknown as Record<string, unknown>, () => this.written())
   }
@@ -141,6 +148,11 @@ export class LaunchEditor {
     this.placeIndex = 0
     this.jetIndex = 0
     this.sync()
+  }
+
+  /** A set of its parameters in its language (see ParameterTexts.resolve). */
+  private resolved(set: ParameterSet): ParameterSet {
+    return ParameterTexts.resolve(set, this.parameterTexts)
   }
 
   private render(): void {
@@ -266,7 +278,7 @@ export class LaunchEditor {
     ;(this.element("launch-place-delete") as HTMLButtonElement).disabled = track.length <= LaunchEditor.MIN_PLACES
     if (!this.placeForm) {
       this.placeForm = new ParameterForm(this.element("launch-place-parameters"), this.language, "launchPlace.")
-      this.placeForm.show(LaunchParameters.PLACE, new ParameterTarget(
+      this.placeForm.show(this.resolved(LaunchParameters.PLACE), new ParameterTarget(
         () => this.current?.track[this.placeIndex] as unknown as ParameterHolder | undefined,
         apply => this.editPlace(this.placeIndex, apply),
         undefined,
@@ -343,7 +355,7 @@ export class LaunchEditor {
     this.jetIndex = Math.max(0, Math.min(this.jetIndex, jets.length - 1))
     if (!this.jetForm) {
       this.jetForm = new ParameterForm(this.element("launch-jet-parameters"), this.language, "launchJet.")
-      this.jetForm.show(LaunchParameters.JET, new ParameterTarget(
+      this.jetForm.show(this.resolved(LaunchParameters.JET), new ParameterTarget(
         () => this.current?.jets?.[this.jetIndex] as unknown as ParameterHolder | undefined,
         apply => this.editJet(this.jetIndex, apply),
         () => this.current ? LaunchParameters.jetContext(this.current, this.jetIndex) : undefined

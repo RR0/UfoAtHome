@@ -1,3 +1,4 @@
+import { PERCEPTION_MESSAGES } from "./messages/PerceptionMessages.js"
 import type { ObserverProvider, ObserverSettings } from "../../engine/observer/ObserverProvider.js"
 import type { Perception } from "../../engine/observer/Perception.js"
 import { Perceptions } from "../../engine/observer/Perception.js"
@@ -16,14 +17,12 @@ export class FatigueProvider implements ObserverProvider {
   static readonly ID = "fatigue"
 
   readonly id = FatigueProvider.ID
-  readonly label = "Fatigue"
-  readonly hint =
-    "Stated only: sleep loss has not been shown to change what a healthy eye receives, so the picture is unchanged. It bears on attention and memory, not on vision."
+  readonly messages = PERCEPTION_MESSAGES
   readonly sources = [
     "Studies of contrast sensitivity during prolonged sleep deprivation (60 hours, naval officers): no significant change"
   ]
   readonly settings = [
-    { id: "hoursAwake", label: "Awake for", kind: "number" as const, default: 0, min: 0, max: 72, step: 1, unit: "h" }
+    { id: "hoursAwake", kind: "number" as const, default: 0, min: 0, max: 72, step: 1, unit: "h" }
   ]
 
   perceive(_values: ObserverSettings): Perception {

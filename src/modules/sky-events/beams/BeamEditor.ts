@@ -1,3 +1,7 @@
+import { BEAM_PARAMETER_TEXTS } from "./messages/BeamParameterTexts.js"
+import type { BeamParameterTexts } from "./messages/BeamParameterTexts.js"
+import { ParameterTexts } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet } from "../../../engine/interpretation/Parameters.js"
 import { BeamParameters } from "./BeamParameters.js"
 import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { LaserBeamSighting } from "./LaserBeam.js"
@@ -53,6 +57,8 @@ export class BeamEditor {
   private messages!: BeamEditorMessages
   /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
   readonly ready: Promise<void>
+  /** The words of its parameters, in its language (see ParameterTexts). */
+  private parameterTexts!: BeamParameterTexts
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -89,9 +95,10 @@ export class BeamEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const messages = await BEAM_EDITOR_MESSAGES.load(language)
+    const [messages, parameterTexts] = await Promise.all([BEAM_EDITOR_MESSAGES.load(language), BEAM_PARAMETER_TEXTS.load(language)])
     if (token !== this.languageToken) return
     this.messages = messages
+    this.parameterTexts = parameterTexts
     this.render()
     this.sync()
   }
@@ -109,7 +116,7 @@ export class BeamEditor {
     if (!beam) return
     const said = { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() }
     this.form ??= new ParameterForm(this.element("beam-parameters"), this.language, "beam.", said)
-    this.form.show(BeamParameters.SET, this.targetOfBeam(), () => this.written())
+    this.form.show(this.resolved(BeamParameters.SET), this.targetOfBeam(), () => this.written())
     this.syncDetail(true)
   }
 
@@ -152,6 +159,11 @@ export class BeamEditor {
     this.moveIndex = undefined
     this.placeIndex = 0
     this.sync()
+  }
+
+  /** A set of its parameters in its language (see ParameterTexts.resolve). */
+  private resolved(set: ParameterSet): ParameterSet {
+    return ParameterTexts.resolve(set, this.parameterTexts)
   }
 
   private render(): void {
@@ -309,7 +321,7 @@ export class BeamEditor {
   private syncOn(force: boolean): void {
     if (!this.onForm) {
       this.onForm = new ParameterForm(this.element("beam-on-parameters"), this.language, "beamOn.")
-      this.onForm.show(BeamParameters.ON, this.targetOfBeam(), () => this.syncTimeline())
+      this.onForm.show(this.resolved(BeamParameters.ON), this.targetOfBeam(), () => this.syncTimeline())
     } else {
       this.onForm.sync(force)
     }
@@ -350,13 +362,13 @@ export class BeamEditor {
     this.element("beam-light-delete").hidden = key === undefined
     if (!this.lightForm) {
       this.lightForm = new ParameterForm(this.element("beam-light-parameters"), this.language, "beamLight.")
-      this.lightForm.show(BeamParameters.LIGHT, this.targetOfBeam(), () => this.syncColour())
+      this.lightForm.show(this.resolved(BeamParameters.LIGHT), this.targetOfBeam(), () => this.syncColour())
     } else {
       this.lightForm.sync(force)
     }
     if (!this.lightKeyForm) {
       this.lightKeyForm = new ParameterForm(this.element("beam-light-key-parameters"), this.language, "beamLightKey.")
-      this.lightKeyForm.show(BeamParameters.LIGHT_KEY, new ParameterTarget(
+      this.lightKeyForm.show(this.resolved(BeamParameters.LIGHT_KEY), new ParameterTarget(
         () => this.currentLightKey as unknown as ParameterHolder | undefined,
         apply => this.editLightKey(this.lightIndex!, apply),
         () => this.current
@@ -465,7 +477,7 @@ export class BeamEditor {
     this.element("beam-move-delete").hidden = key === undefined
     if (!this.moveKeyForm) {
       this.moveKeyForm = new ParameterForm(this.element("beam-move-key-parameters"), this.language, "beamMoveKey.")
-      this.moveKeyForm.show(BeamParameters.MOVE_KEY, new ParameterTarget(
+      this.moveKeyForm.show(this.resolved(BeamParameters.MOVE_KEY), new ParameterTarget(
         () => this.currentMoveKey as unknown as ParameterHolder | undefined,
         apply => this.editMoveKey(this.moveIndex!, edited => apply(edited as unknown as ParameterHolder))
       ), () => undefined)
@@ -533,7 +545,7 @@ export class BeamEditor {
     this.places?.setRemoveEnabled(path.length > BeamEditor.MIN_PLACES)
     if (!this.placeForm) {
       this.placeForm = new ParameterForm(this.element("beam-place-parameters"), this.language, "beamPlace.")
-      this.placeForm.show(BeamParameters.PLACE, new ParameterTarget(
+      this.placeForm.show(this.resolved(BeamParameters.PLACE), new ParameterTarget(
         () => this.shownPath[this.placeIndex] as unknown as ParameterHolder | undefined,
         apply => this.editPath(path => {
           const place = { ...path[this.placeIndex] }

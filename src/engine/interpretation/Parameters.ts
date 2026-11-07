@@ -240,3 +240,61 @@ export class ParameterRegistry {
     return [...ParameterRegistry.sets.keys()]
   }
 }
+
+/**
+ * A set of parameters in the reader's language. A set whose words are a catalog of their own (see MessageCatalog) states keys of it
+ * where it would state a label, a hint, a group, a placeholder, the label of a choice: `resolve` puts the words in their place, so that a
+ * form draws a resolved set as it draws any other. A string that is no key of `texts` is left as it is (a name a recording gives).
+ */
+export class ParameterTexts {
+  private static readonly resolved = new WeakMap<ParameterSet, WeakMap<object, ParameterSet>>()
+
+  /** `set` with its keys replaced by `texts`, the same object each time for the same two. */
+  static resolve(set: ParameterSet, texts: object): ParameterSet {
+    let bySet = ParameterTexts.resolved.get(set)
+    if (!bySet) ParameterTexts.resolved.set(set, bySet = new WeakMap())
+    let resolved = bySet.get(texts)
+    if (!resolved) {
+      const words = texts as Record<string, unknown>
+      const text = <T>(said: T): T => typeof said === "string" && typeof words[said] === "string" ? words[said] as T : said
+      const options = <O extends { label: unknown }>(list: ReadonlyArray<O>): O[] => list.map(option => ({ ...option, label: text(option.label) }))
+      resolved = {
+        ...set,
+        title: text(set.title),
+        parameters: set.parameters.map(spec => {
+          const shown = {
+            ...spec, label: text(spec.label), hint: text(spec.hint), summary: text(spec.summary), group: text(spec.group),
+            ...("placeholder" in spec ? { placeholder: text(spec.placeholder) } : {}),
+            ...("empty" in spec ? { empty: text(spec.empty) } : {})
+          } as ParameterSpec
+          if (shown.type === "choice") {
+            const optionsOf = shown.optionsOf
+            return { ...shown, choices: options(shown.choices), ...(optionsOf ? { optionsOf: (element: ParameterHolder, context?: unknown) => options(optionsOf(element, context)) } : {}) }
+          }
+          if (shown.type === "set") {
+            const of = shown.options
+            return { ...shown, options: (element: ParameterHolder, context?: unknown) => options(of(element, context)) }
+          }
+          return shown
+        })
+      }
+      bySet.set(texts, resolved)
+    }
+    return resolved
+  }
+
+  /** The keys of `set` that `texts` does not have: what a language that lacks a word of the set leaves shown as a key. */
+  static missing(set: ParameterSet, texts: object): string[] {
+    const words = texts as Record<string, unknown>
+    const keys = new Set<string>()
+    const see = (said: unknown) => { if (typeof said === "string" && /^[a-z][A-Za-z0-9]*$/.test(said) && words[said] === undefined) keys.add(said) }
+    see(set.title)
+    for (const spec of set.parameters) {
+      see(spec.label); see(spec.hint); see(spec.summary); see(spec.group)
+      if ("placeholder" in spec) see(spec.placeholder)
+      if ("empty" in spec) see(spec.empty)
+      if (spec.type === "choice") for (const choice of spec.choices) see(choice.label)
+    }
+    return [...keys]
+  }
+}

@@ -2100,7 +2100,7 @@ export class SightingEditorElement extends HTMLElement {
     // What bends this observer's perception is whatever the providers list: see ObserverProviders.
     this.perceptionSettings = this.shadow.getElementById("observerPerception") as ProviderSettingsElement
     this.perceptionSettings.providers = ObserverProviders.ALL
-    this.perceptionSettings.labels = this.messages.observerPerception
+    this.applyPerceptionLabels()
     this.perceptionSettings.addEventListener("settingschange", () => this.updateObserverMetadata())
     this.startDate.messages = this.messages
     this.endDate.messages = this.messages
@@ -2296,7 +2296,10 @@ export class SightingEditorElement extends HTMLElement {
     if (point === "decorModels") this.sceneElement.setDecorModelProvider(this.decorModelProvider)
     if (point === "skyEvents" || point === "interpretations") this.buildSkyParts()
     // The observer's perception, whatever a module brought (see ObserverProviders).
-    if (point === "perception") this.perceptionSettings.providers = ObserverProviders.ALL
+    if (point === "perception") {
+      this.perceptionSettings.providers = ObserverProviders.ALL
+      this.applyPerceptionLabels()
+    }
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -8857,11 +8860,22 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
+  /** The words of the providers of perception, each from its own catalog, in the editor's language (see ObserverProvider.messages). */
+  private applyPerceptionLabels(): void {
+    const language = this.decidedLanguage
+    if (language === undefined) return
+    const catalogs = [...new Set(ObserverProviders.ALL.map(provider => provider.messages))]
+    void Promise.all(catalogs.map(catalog => catalog.load(language))).then(all => {
+      if (this.decidedLanguage === language) this.perceptionSettings.labels = Object.assign({}, ...all)
+    }, () => undefined)
+  }
+
   /** Names a part's tab in the editor's language, once the kind's texts have come (see MessageCatalog). */
   private nameSkyPart(label: HTMLElement, titles: MessageCatalog<{ title: string }>): void {
-    const language = this.language
+    const language = this.decidedLanguage
+    if (language === undefined) return
     void titles.load(language).then(texts => {
-      if (this.language === language) label.textContent = texts.title
+      if (this.decidedLanguage === language) label.textContent = texts.title
     }, () => undefined)
   }
 
@@ -11193,6 +11207,14 @@ export class SightingEditorElement extends HTMLElement {
     const preferences = HostLocale.preferencesFor(this)
     this.preferences = preferences
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
+    // What the parts made from catalogs load their words in (see nameSkyPart, applyPerceptionLabels): known from here on, so that none of
+    // them is fetched in a language the editor then drops.
+    const firstDecision = this.decidedLanguage === undefined
+    this.decidedLanguage = language
+    if (firstDecision) {
+      for (const part of this.skyParts.values()) this.nameSkyPart(part.label, part.titles)
+      this.applyPerceptionLabels()
+    }
     // The provider's own settings too, alongside: applyMessages renders them.
     const localizing = this.narrativeProvider.localize?.(language)
     const [messages, tagNames, sceneNames] = language === "en"
@@ -11225,6 +11247,8 @@ export class SightingEditorElement extends HTMLElement {
   /** The reader's languages as loadLocaleMessages last read them — what connectedCallback compares
    * against to tell whether being put somewhere changed the answer. */
   private preferences: readonly string[] = []
+  /** The interface language once the editor has chosen it (see loadLocaleMessages); undefined before. */
+  private decidedLanguage?: UfoLanguage
 
   /** The language the interface is in, as loadLocaleMessages last decided it. */
   private language: UfoLanguage = "en"
@@ -11343,7 +11367,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const input of this.shadow.querySelectorAll<InputFileElement>(INPUT_FILE_ELEMENT_NAME)) input.messages = messages
     this.labelObserverAge.textContent = messages.observerAge
     this.labelObserverBirth.textContent = messages.observerBirth
-    this.perceptionSettings.labels = messages.observerPerception
+    this.applyPerceptionLabels()
     this.labelObserverOccupation.textContent = messages.observerOccupation
     this.labelAccountSource.textContent = messages.accountSource
     HintElement.say(this.labelAccountUrl, messages.accountUrl, messages.accountUrlHint)

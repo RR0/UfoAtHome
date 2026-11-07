@@ -89,3 +89,12 @@ the sky lanterns (`interpretations/lanterns/`) and the decoy flares (`interpreta
 claims the account saw. Its editor, when it has one, is a part of the Sky group made from its `title`, before the events of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
 of its own would be a second three.js. The list is explicit, since the whole namespace would keep all of three.js in every
 bundle (+120 kB measured); a class a module needs is a line to add there.
+
+## Words
+
+Whatever an implementation shows a reader takes its words from a `MessageCatalog` (`src/i18n/MessageCatalog.ts`): one module per
+language under a `messages/` folder, loaded only in the reader's, its interface checked by `satisfies` in each language. A kind's
+`messages` holds its title, what one with no title is called and its tooltip's texts; an `ObserverProvider`'s, its heading, hint and
+settings; a set of parameters states keys of a catalog where it would state a label (`ParameterTexts.resolve` puts the words in);
+an editor's part loads its own and draws nothing before (`ready`). No word is written inline, in English or in several languages:
+`test/i18n/MessagesGuard.test.ts` fails on one, and on an English module imported up front.

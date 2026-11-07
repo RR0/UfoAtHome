@@ -32,7 +32,7 @@ export class LaunchParameters {
   private static burn(key: "burnFromT" | "burnUntilT", spec: { label: SaidText, hint: SaidText, ends: (track: LaunchJson["track"]) => { t: number } | undefined }): NumberParameter {
     return {
       type: "number", key, min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001, label: spec.label, hint: spec.hint,
-      group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" },
+      group: "engine",
       effective: element => spec.ends((element as unknown as LaunchJson).track ?? [])?.t
     }
   }
@@ -64,130 +64,100 @@ export class LaunchParameters {
 
   static readonly SET: ParameterSet = {
     kind: "launch",
-    title: { en: "Launch", fr: "Lancement", es: "Lanzamiento", it: "Lancio" },
+    title: "launch",
     parameters: ([
-      { type: "said", key: "title", label: { en: "Name", fr: "Nom", es: "Nombre", it: "Nome" }, group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" } },
+      { type: "said", key: "title", label: "name", group: "vehicle" },
       // The vehicle itself is picked when the launch is added (see LaunchEditor.VEHICLES), and kept: another vehicle is another launch.
       {
         type: "text", key: "vehicle.mission",
-        label: { en: "Mission", fr: "Mission", es: "Misión", it: "Missione" },
+        label: "mission",
         placeholder: "Starlink Group 10-49",
-        group: { en: "Vehicle", fr: "Lanceur", es: "Lanzador", it: "Lanciatore" }
+        group: "vehicle"
       },
       {
         type: "number", key: "vehicle.engine.thrustKN", min: 1, max: 100000, step: 1, unit: "kN",
-        label: { en: "Thrust (vacuum)", fr: "Poussée (dans le vide)", es: "Empuje (en el vacío)", it: "Spinta (nel vuoto)" },
-        hint: { en: "Merlin Vacuum 934, RL10 110, a solid booster several thousand. With the specific impulse, it sets how much exhaust leaves each second.",
-          fr: "Merlin Vacuum 934, RL10 110, un booster à poudre plusieurs milliers. Avec l'impulsion spécifique, elle fixe le débit d'échappement.",
-          es: "Merlin Vacuum 934, RL10 110, un propulsor sólido varios miles. Con el impulso específico, fija el caudal de escape.",
-          it: "Merlin Vacuum 934, RL10 110, un booster solido diverse migliaia. Con l'impulso specifico, fissa la portata dello scarico." },
-        group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" }
+        label: "thrustVacuum",
+        hint: "merlinVacuum934Rl10110A",
+        group: "engine"
       },
       {
         type: "number", key: "vehicle.engine.specificImpulseS", min: 100, max: 500, step: 1, unit: "s",
-        label: { en: "Specific impulse (vacuum)", fr: "Impulsion spécifique (dans le vide)", es: "Impulso específico (en el vacío)", it: "Impulso specifico (nel vuoto)" },
-        hint: { en: "Times 9.81 m/s² it is the exhaust velocity, which sets how fast the exhaust spreads round the stage: 348 s is 3.4 km/s.",
-          fr: "Multipliée par 9,81 m/s², c'est la vitesse d'éjection, qui fixe la vitesse à laquelle l'échappement s'étale autour de l'étage : 348 s font 3,4 km/s.",
-          es: "Multiplicado por 9,81 m/s² es la velocidad de escape, que fija la rapidez con que el escape se extiende alrededor de la etapa: 348 s son 3,4 km/s.",
-          it: "Moltiplicato per 9,81 m/s² è la velocità di scarico, che fissa quanto in fretta lo scarico si allarga attorno allo stadio: 348 s sono 3,4 km/s." },
-        group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" }
+        label: "specificImpulseVacuum",
+        hint: "times981MSIt",
+        group: "engine"
       },
       {
         type: "choice", key: "vehicle.engine.propellant",
-        label: { en: "Propellant", fr: "Ergols", es: "Propelentes", it: "Propellenti" },
-        hint: { en: "What the exhaust is made of decides how much of it turns into particles that scatter light.",
-          fr: "Ce dont l'échappement est fait décide quelle part devient des particules qui diffusent la lumière.",
-          es: "De qué está hecho el escape decide qué parte se vuelve partículas que difunden la luz.",
-          it: "Di cosa è fatto lo scarico decide quanta parte diventa particelle che diffondono la luce." },
+        label: "propellant",
+        hint: "whatTheExhaustIsMadeOf",
         choices: [
-          { value: "rp1-lox", label: { en: "Kerosene and oxygen", fr: "Kérosène et oxygène", es: "Queroseno y oxígeno", it: "Cherosene e ossigeno" } },
-          { value: "methane-lox", label: { en: "Methane and oxygen", fr: "Méthane et oxygène", es: "Metano y oxígeno", it: "Metano e ossigeno" } },
-          { value: "hydrogen-lox", label: { en: "Hydrogen and oxygen", fr: "Hydrogène et oxygène", es: "Hidrógeno y oxígeno", it: "Idrogeno e ossigeno" } },
-          { value: "hypergolic", label: { en: "Hypergolic", fr: "Hypergolique", es: "Hipergólico", it: "Ipergolico" } },
-          { value: "solid", label: { en: "Solid", fr: "Poudre", es: "Sólido", it: "Solido" } }
+          { value: "rp1-lox", label: "keroseneAndOxygen" },
+          { value: "methane-lox", label: "methaneAndOxygen" },
+          { value: "hydrogen-lox", label: "hydrogenAndOxygen" },
+          { value: "hypergolic", label: "hypergolic" },
+          { value: "solid", label: "solid" }
         ],
-        group: { en: "Engine", fr: "Moteur", es: "Motor", it: "Motore" }
+        group: "engine"
       },
       LaunchParameters.burn("burnFromT", {
-        label: { en: "Engine start", fr: "Allumage du moteur", es: "Encendido del motor", it: "Accensione del motore" },
-        hint: { en: "When the engine started, in seconds of the recording; it may be before it. Empty: the first point of the path.",
-          fr: "Quand le moteur s'est allumé, en secondes de l'enregistrement ; avant lui si besoin. Vide : le premier point du chemin.",
-          es: "Cuándo se encendió el motor, en segundos de la grabación; puede ser antes. Vacío: el primer punto de la trayectoria.",
-          it: "Quando si è acceso il motore, in secondi della registrazione; può essere prima. Vuoto: il primo punto del percorso." },
+        label: "engineStart",
+        hint: "whenTheEngineStartedInSeconds",
         ends: track => track[0]
       }),
       LaunchParameters.burn("burnUntilT", {
-        label: { en: "Engine cut-off", fr: "Extinction du moteur", es: "Apagado del motor", it: "Spegnimento del motore" },
-        hint: { en: "When the engine stopped, in seconds of the recording. Empty: the last point of the path. Nothing is let go after it.",
-          fr: "Quand le moteur s'est éteint, en secondes de l'enregistrement. Vide : le dernier point du chemin. Rien n'est lâché après.",
-          es: "Cuándo se apagó el motor, en segundos de la grabación. Vacío: el último punto de la trayectoria. Nada se suelta después.",
-          it: "Quando si è spento il motore, in secondi della registrazione. Vuoto: l'ultimo punto del percorso. Dopo non si rilascia nulla." },
+        label: "engineCutOff",
+        hint: "whenTheEngineStoppedInSeconds",
         ends: track => track[track.length - 1]
       }),
       LaunchParameters.plume("exhaustKgPerS", {
         min: 0.1, max: 100000, step: 0.1, unit: "kg/s",
-        label: { en: "Exhaust flow", fr: "Débit d'échappement", es: "Caudal de escape", it: "Portata di scarico" },
-        hint: { en: "How much exhaust leaves the engine each second: how bright the plume is. Thrust over exhaust velocity when the engine is stated.",
-          fr: "La masse d'échappement qui sort du moteur chaque seconde : la luminosité du panache. La poussée sur la vitesse d'éjection quand le moteur est donné.",
-          es: "La masa de escape que sale del motor cada segundo: el brillo de la estela. El empuje sobre la velocidad de escape cuando se da el motor.",
-          it: "La massa di scarico che esce dal motore ogni secondo: la luminosità della scia. La spinta sulla velocità di scarico quando il motore è dato." },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "exhaustFlow",
+        hint: "howMuchExhaustLeavesTheEngine",
+        group: "plume"
       }),
       LaunchParameters.plume("condensedShare", {
         min: 0, max: 1, step: 0.01,
-        label: { en: "Share that scatters", fr: "Part qui diffuse", es: "Parte que difunde", it: "Parte che diffonde" },
-        hint: { en: "The share of the exhaust that ends up as particles that scatter the Sun's light. Nobody has measured it for a launch: the one number to fit against a photograph.",
-          fr: "La part de l'échappement qui devient des particules diffusant la lumière du Soleil. Personne ne l'a mesurée pour un lancement : le seul nombre à caler sur une photographie.",
-          es: "La parte del escape que acaba como partículas que difunden la luz del Sol. Nadie la ha medido para un lanzamiento: el único número que ajustar con una fotografía.",
-          it: "La parte dello scarico che diventa particelle che diffondono la luce del Sole. Nessuno l'ha misurata per un lancio: l'unico numero da tarare su una fotografia." },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "shareThatScatters",
+        hint: "theShareOfTheExhaustThat",
+        group: "plume"
       }),
       LaunchParameters.plume("particleRadiusUm", {
         min: 0.05, max: 5, step: 0.05, unit: "µm",
-        label: { en: "Particle radius", fr: "Rayon des particules", es: "Radio de las partículas", it: "Raggio delle particelle" },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "particleRadius",
+        group: "plume"
       }),
       LaunchParameters.plume("lifetimeS", {
         min: 10, max: 3600, step: 10, unit: "s",
-        label: { en: "Trail lifetime", fr: "Durée de la traînée", es: "Duración de la estela", it: "Durata della scia" },
-        hint: { en: "How long the narrow trail lasts before the particles have gone.",
-          fr: "Combien de temps la traînée étroite dure avant que les particules aient disparu.",
-          es: "Cuánto dura la estela estrecha antes de que las partículas hayan desaparecido.",
-          it: "Quanto dura la scia stretta prima che le particelle siano sparite." },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "trailLifetime",
+        hint: "howLongTheNarrowTrailLasts",
+        group: "plume"
       }),
       LaunchParameters.plume("expansionKmPerS", {
         min: 0, max: 5, step: 0.01, unit: "km/s",
-        label: { en: "Trail spreading", fr: "Étalement de la traînée", es: "Expansión de la estela", it: "Espansione della scia" },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "trailSpreading",
+        group: "plume"
       }),
       LaunchParameters.plume("initialRadiusKm", {
         min: 0, max: 50, step: 0.1, unit: "km",
-        label: { en: "Radius at release", fr: "Rayon au lâcher", es: "Radio al soltar", it: "Raggio al rilascio" },
-        group: { en: "Plume", fr: "Panache", es: "Estela", it: "Scia" }
+        label: "radiusAtRelease",
+        group: "plume"
       }),
       LaunchParameters.plume("collarShare", {
         min: 0, max: 1, step: 0.01,
-        label: { en: "Share in the collar", fr: "Part dans la collerette", es: "Parte en el collar", it: "Parte nel collare" },
-        hint: { en: "The collar is the exhaust just let go, which spreads fast into a wide short-lived shell round the stage; the rest stays behind as the narrow trail.",
-          fr: "La collerette est l'échappement qui vient d'être lâché, qui s'étale vite en une coque large et brève autour de l'étage ; le reste demeure derrière en traînée étroite.",
-          es: "El collar es el escape recién soltado, que se extiende rápido en una envoltura ancha y breve alrededor de la etapa; el resto queda detrás como estela estrecha.",
-          it: "Il collare è lo scarico appena rilasciato, che si allarga in fretta in un guscio largo e breve attorno allo stadio; il resto resta dietro come scia stretta." },
-        group: { en: "Collar", fr: "Collerette", es: "Collar", it: "Collare" }
+        label: "shareInTheCollar",
+        hint: "theCollarIsTheExhaustJust",
+        group: "collar"
       }),
       LaunchParameters.plume("collarExpansionKmPerS", {
         min: 0, max: 10, step: 0.05, unit: "km/s",
-        label: { en: "Collar spreading", fr: "Étalement de la collerette", es: "Expansión del collar", it: "Espansione del collare" },
-        hint: { en: "How fast the collar widens: three quarters of the exhaust velocity when the engine is stated.",
-          fr: "La vitesse à laquelle la collerette s'élargit : les trois quarts de la vitesse d'éjection quand le moteur est donné.",
-          es: "La rapidez con que el collar se ensancha: tres cuartos de la velocidad de escape cuando se da el motor.",
-          it: "Quanto in fretta il collare si allarga: tre quarti della velocità di scarico quando il motore è dato." },
-        group: { en: "Collar", fr: "Collerette", es: "Collar", it: "Collare" }
+        label: "collarSpreading",
+        hint: "howFastTheCollarWidensThree",
+        group: "collar"
       }),
       LaunchParameters.plume("collarLifetimeS", {
         min: 1, max: 300, step: 1, unit: "s",
-        label: { en: "Collar lifetime", fr: "Durée de la collerette", es: "Duración del collar", it: "Durata del collare" },
-        group: { en: "Collar", fr: "Collerette", es: "Collar", it: "Collare" }
+        label: "collarLifetime",
+        group: "collar"
       })
     ] satisfies ParameterSpec[])
   }
@@ -198,19 +168,16 @@ export class LaunchParameters {
    */
   static readonly PLACE: ParameterSet = {
     kind: "launch-place",
-    title: { en: "Place of the path", fr: "Point du chemin", es: "Punto de la trayectoria", it: "Punto del percorso" },
+    title: "placeOfThePath",
     parameters: ([
       {
         type: "number", key: "t", min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
-        label: { en: "Time", fr: "Instant", es: "Instante", it: "Istante" },
-        hint: { en: "Seconds of the recording; negative before it began: a stage seen minutes after its launch was already high when the recording started.",
-          fr: "Secondes de l'enregistrement ; négatives avant son début : un étage vu des minutes après son lancement était déjà haut quand l'enregistrement a commencé.",
-          es: "Segundos de la grabación; negativos antes de que empezara: una etapa vista minutos después de su lanzamiento ya estaba alta cuando empezó la grabación.",
-          it: "Secondi della registrazione; negativi prima del suo inizio: uno stadio visto minuti dopo il lancio era già alto quando la registrazione è iniziata." }
+        label: "time",
+        hint: "secondsOfTheRecordingNegativeBefore"
       },
       // As degrees, or from the observer or a decor object: see PositionInputElement.
-      { type: "position", key: "lat", secondKey: "lng", saidKey: "saidPosition", native: "geo", step: 1, label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" } },
-      { type: "number", key: "altitudeKm", min: 0, max: 2000, step: 0.1, unit: "km", required: true, label: { en: "Altitude", fr: "Altitude", es: "Altitud", it: "Altitudine" } }
+      { type: "position", key: "lat", secondKey: "lng", saidKey: "saidPosition", native: "geo", step: 1, label: "position" },
+      { type: "number", key: "altitudeKm", min: 0, max: 2000, step: 0.1, unit: "km", required: true, label: "altitude" }
     ] satisfies ParameterSpec[])
   }
 
@@ -227,7 +194,7 @@ export class LaunchParameters {
     }
   }
 
-  private static readonly JET_GROUP: SaidText = { en: "Jet", fr: "Jet", es: "Chorro", it: "Getto" }
+  private static readonly JET_GROUP: SaidText = "jet"
 
   /**
    * One jet of a launch: another burn of its engine, or propellant vented from its tanks (see LaunchJetJson), edited one at a time
@@ -235,93 +202,81 @@ export class LaunchParameters {
    */
   static readonly JET: ParameterSet = {
     kind: "launch-jet",
-    title: { en: "Jet", fr: "Jet", es: "Chorro", it: "Getto" },
+    title: "jet",
     parameters: ([
       {
         type: "choice", key: "kind", required: true,
-        label: { en: "What", fr: "Quoi", es: "Qué", it: "Cosa" },
+        label: "what",
         choices: [
-          { value: "burn", label: { en: "Engine burn", fr: "Allumage du moteur", es: "Encendido del motor", it: "Accensione del motore" } },
-          { value: "vent", label: { en: "Propellant vented", fr: "Ergols vidangés", es: "Propelentes purgados", it: "Propellenti scaricati" } }
+          { value: "burn", label: "engineBurn" },
+          { value: "vent", label: "propellantVented" }
         ],
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "fromT", min: -36000, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
-        label: { en: "From", fr: "Début", es: "Desde", it: "Da" },
-        hint: { en: "Seconds of the recording; negative before it began.", fr: "Secondes de l'enregistrement ; négatives avant son début.",
-          es: "Segundos de la grabación; negativos antes de que empezara.", it: "Secondi della registrazione; negativi prima del suo inizio." },
+        label: "from",
+        hint: "secondsOfTheRecordingNegativeBefore2",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "untilT", min: -36000, max: 36000, step: 0.1, unit: "s", scale: 0.001, required: true,
-        label: { en: "Until", fr: "Fin", es: "Hasta", it: "Fino a" },
+        label: "until",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "angleDeg", min: 0, max: 180, step: 1, unit: "°", effective: () => 0,
-        label: { en: "Direction from aft", fr: "Direction depuis l'arrière", es: "Dirección desde atrás", it: "Direzione da dietro" },
-        hint: { en: "0 straight back along the stage's motion (an engine pushing it on), 90 sideways, 180 straight ahead (an engine braking it).",
-          fr: "0 droit vers l'arrière du mouvement de l'étage (un moteur qui le pousse), 90 sur le côté, 180 droit devant (un moteur qui le freine).",
-          es: "0 hacia atrás del movimiento de la etapa (un motor que la empuja), 90 de lado, 180 hacia delante (un motor que la frena).",
-          it: "0 dritto all'indietro rispetto al moto dello stadio (un motore che lo spinge), 90 di lato, 180 dritto in avanti (un motore che lo frena)." },
+        label: "directionFromAft",
+        hint: "t0StraightBackAlongTheStage",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "azimuthDeg", min: -360, max: 360, step: 1, unit: "°", effective: () => 0,
-        label: { en: "Side", fr: "Côté", es: "Lado", it: "Lato" },
-        hint: { en: "Round the line of motion, which side it leaves on at the start: 0 away from the Earth, 90 to the right of the motion.",
-          fr: "Autour de la ligne du mouvement, le côté par lequel il part au début : 0 à l'opposé de la Terre, 90 à droite du mouvement.",
-          es: "Alrededor de la línea del movimiento, el lado por el que sale al principio: 0 opuesto a la Tierra, 90 a la derecha del movimiento.",
-          it: "Attorno alla linea del moto, il lato da cui esce all'inizio: 0 opposto alla Terra, 90 a destra del moto." },
+        label: "side",
+        hint: "roundTheLineOfMotionWhich",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "spinPeriodS", min: -3600, max: 3600, step: 0.1, unit: "s",
-        label: { en: "Spin period", fr: "Période de rotation", es: "Período de giro", it: "Periodo di rotazione" },
-        hint: { en: "How long the stage takes to turn once round its line of motion; the jet turns with it and vented propellant draws a spiral. Negative turns the other way. Empty: it does not turn.",
-          fr: "Le temps que met l'étage à faire un tour autour de sa ligne de mouvement ; le jet tourne avec lui et les ergols vidangés dessinent une spirale. Négative : dans l'autre sens. Vide : il ne tourne pas.",
-          es: "Lo que tarda la etapa en dar una vuelta alrededor de su línea de movimiento; el chorro gira con ella y los propelentes purgados dibujan una espiral. Negativo: en el otro sentido. Vacío: no gira.",
-          it: "Il tempo che lo stadio impiega a fare un giro attorno alla sua linea di moto; il getto gira con lui e i propellenti scaricati disegnano una spirale. Negativo: nell'altro verso. Vuoto: non gira." },
+        label: "spinPeriod",
+        hint: "howLongTheStageTakesTo",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "speedKmPerS", min: 0, max: 10, step: 0.01, unit: "km/s", effective: LaunchParameters.jetValue(release => release.speedKmPerS),
-        label: { en: "Speed", fr: "Vitesse", es: "Velocidad", it: "Velocità" },
-        hint: { en: "How fast it leaves the stage. A burn: the engine's exhaust velocity.", fr: "La vitesse à laquelle il quitte l'étage. Un allumage : la vitesse d'éjection du moteur.",
-          es: "La velocidad con que sale de la etapa. Un encendido: la velocidad de escape del motor.", it: "La velocità con cui lascia lo stadio. Un'accensione: la velocità di scarico del motore." },
+        label: "speed",
+        hint: "howFastItLeavesTheStage",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "massKgPerS", min: 0, max: 100000, step: 0.1, unit: "kg/s", effective: LaunchParameters.jetValue(release => release.massKgPerS),
-        label: { en: "Flow", fr: "Débit", es: "Caudal", it: "Portata" },
+        label: "flow",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "condensedShare", min: 0, max: 1, step: 0.01, effective: LaunchParameters.jetValue(release => release.condensedShare),
-        label: { en: "Share that scatters", fr: "Part qui diffuse", es: "Parte que difunde", it: "Parte che diffonde" },
+        label: "shareThatScatters",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "particleRadiusUm", min: 0.05, max: 5, step: 0.05, unit: "µm", effective: LaunchParameters.jetValue(release => release.particleRadiusUm),
-        label: { en: "Particle radius", fr: "Rayon des particules", es: "Radio de las partículas", it: "Raggio delle particelle" },
+        label: "particleRadius",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "expansionKmPerS", min: 0, max: 5, step: 0.01, unit: "km/s", effective: LaunchParameters.jetValue(release => release.populations[0].expansionKmPerS),
-        label: { en: "Spreading", fr: "Étalement", es: "Expansión", it: "Espansione" },
-        hint: { en: "How fast each puff of it widens: a narrow jet keeps the arms of a spiral apart.", fr: "La vitesse à laquelle chaque bouffée s'élargit : un jet étroit garde les bras d'une spirale séparés.",
-          es: "La rapidez con que se ensancha cada bocanada: un chorro estrecho mantiene separados los brazos de una espiral.", it: "Quanto in fretta si allarga ogni sbuffo: un getto stretto tiene separati i bracci di una spirale." },
+        label: "spreading",
+        hint: "howFastEachPuffOfIt",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "initialRadiusKm", min: 0, max: 50, step: 0.1, unit: "km", effective: LaunchParameters.jetValue(release => release.initialRadiusKm),
-        label: { en: "Radius at release", fr: "Rayon au lâcher", es: "Radio al soltar", it: "Raggio al rilascio" },
+        label: "radiusAtRelease",
         group: LaunchParameters.JET_GROUP
       },
       {
         type: "number", key: "lifetimeS", min: 1, max: 7200, step: 1, unit: "s", effective: LaunchParameters.jetValue(release => release.populations[0].lifetimeS),
-        label: { en: "Lifetime", fr: "Durée", es: "Duración", it: "Durata" },
+        label: "lifetime",
         group: LaunchParameters.JET_GROUP
       }
     ] satisfies ParameterSpec[])

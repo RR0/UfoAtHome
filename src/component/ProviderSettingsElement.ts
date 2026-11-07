@@ -5,7 +5,7 @@ import { HostLocale } from "../i18n/locale.js"
 export const PROVIDER_SETTINGS_ELEMENT_NAME = "rr0-provider-settings"
 
 /** What this element needs of a provider: nothing about what it does to a picture. */
-export type SettingsProvider = Pick<ObserverProvider, "id" | "label" | "hint" | "settings">
+export type SettingsProvider = Pick<ObserverProvider, "id" | "settings">
 
 const STYLE = `
 rr0-provider-settings { display: block; }
@@ -81,8 +81,8 @@ export class ProviderSettingsElement extends HTMLElement {
       block.dataset.provider = provider.id
       const heading = doc.createElement("span")
       heading.className = "ps-heading"
-      heading.textContent = this.word(provider.id, provider.label)
-      heading.title = this.word(`${provider.id}.hint`, provider.hint)
+      heading.textContent = this.word(provider.id, provider.id)
+      heading.title = this.word(`${provider.id}.hint`, "")
       block.append(heading, ...provider.settings.map(setting => this.control(provider, setting)))
       return block
     })
@@ -95,7 +95,7 @@ export class ProviderSettingsElement extends HTMLElement {
     const label = doc.createElement("label")
     label.className = "ps-setting"
     const name = doc.createElement("span")
-    name.textContent = this.word(`${provider.id}.${setting.id}`, setting.label)
+    name.textContent = this.word(`${provider.id}.${setting.id}`, setting.id)
     label.append(name)
     const key = `${provider.id}-${setting.id}`
     if (setting.kind === "choice") {
@@ -104,7 +104,7 @@ export class ProviderSettingsElement extends HTMLElement {
       for (const choice of setting.choices ?? []) {
         const option = doc.createElement("option")
         option.value = choice.id
-        option.textContent = this.word(`${provider.id}.${setting.id}.${choice.id}`, choice.label)
+        option.textContent = this.word(`${provider.id}.${setting.id}.${choice.id}`, choice.id)
         select.append(option)
       }
       select.value = String(this.current(provider, setting))

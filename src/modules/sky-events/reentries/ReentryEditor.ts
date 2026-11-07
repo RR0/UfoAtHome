@@ -1,3 +1,7 @@
+import { REENTRY_PARAMETER_TEXTS } from "./messages/ReentryParameterTexts.js"
+import type { ReentryParameterTexts } from "./messages/ReentryParameterTexts.js"
+import { ParameterTexts } from "../../../engine/interpretation/Parameters.js"
+import type { ParameterSet } from "../../../engine/interpretation/Parameters.js"
 import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { ReentryParameters } from "./ReentryParameters.js"
 import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
@@ -49,6 +53,8 @@ export class ReentryEditor {
   private messages!: ReentryEditorMessages
   /** Settles once the part has its texts and is drawn: nothing of it is shown before, in no language. */
   readonly ready: Promise<void>
+  /** The words of its parameters, in its language (see ParameterTexts). */
+  private parameterTexts!: ReentryParameterTexts
   private languageToken = 0
   private currentId?: string
   private form?: ParameterForm
@@ -79,9 +85,10 @@ export class ReentryEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const messages = await REENTRY_EDITOR_MESSAGES.load(language)
+    const [messages, parameterTexts] = await Promise.all([REENTRY_EDITOR_MESSAGES.load(language), REENTRY_PARAMETER_TEXTS.load(language)])
     if (token !== this.languageToken) return
     this.messages = messages
+    this.parameterTexts = parameterTexts
     this.render()
     this.sync()
   }
@@ -100,7 +107,7 @@ export class ReentryEditor {
     this.syncPlace(true)
     this.syncFragments(reentry, true)
     this.form ??= new ParameterForm(this.element("reentry-parameters"), this.language, "reentry.", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
-    this.form.show(ReentryParameters.SET, new ParameterTarget(
+    this.form.show(this.resolved(ReentryParameters.SET), new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
       apply => this.editReentry(edited => {
         // The object is copied before it is written to: the one of the re-entry before the edit is left as it was.
@@ -150,6 +157,11 @@ export class ReentryEditor {
     this.fragmentIndex = 0
     this.curveIndex = 0
     this.sync()
+  }
+
+  /** A set of its parameters in its language (see ParameterTexts.resolve). */
+  private resolved(set: ParameterSet): ParameterSet {
+    return ParameterTexts.resolve(set, this.parameterTexts)
   }
 
   private render(): void {
@@ -275,7 +287,7 @@ export class ReentryEditor {
     ;(this.element("reentry-place-delete") as HTMLButtonElement).disabled = track.length <= ReentryEditor.MIN_PLACES
     if (!this.placeForm) {
       this.placeForm = new ParameterForm(this.element("reentry-place-parameters"), this.language, "reentryPlace.")
-      this.placeForm.show(ReentryParameters.PLACE, new ParameterTarget(
+      this.placeForm.show(this.resolved(ReentryParameters.PLACE), new ParameterTarget(
         () => this.current?.track[this.placeIndex] as unknown as ParameterHolder | undefined,
         apply => this.editPlace(this.placeIndex, apply),
         undefined,
@@ -363,7 +375,7 @@ export class ReentryEditor {
     this.syncDetail()
     if (!this.fragmentForm) {
       this.fragmentForm = new ParameterForm(this.element("reentry-fragment-parameters"), this.language, "reentryFragment.")
-      this.fragmentForm.show(ReentryParameters.FRAGMENT, new ParameterTarget(
+      this.fragmentForm.show(this.resolved(ReentryParameters.FRAGMENT), new ParameterTarget(
         () => this.currentFragment as unknown as ParameterHolder | undefined,
         apply => this.editFragment(fragment => apply(fragment as unknown as ParameterHolder)),
         () => this.current
@@ -435,7 +447,7 @@ export class ReentryEditor {
     this.element("reentry-curve-delete").hidden = curve.length === 0
     if (!this.curveForm) {
       this.curveForm = new ParameterForm(this.element("reentry-curve-parameters"), this.language, "reentryCurve.")
-      this.curveForm.show(ReentryParameters.CURVE_POINT, new ParameterTarget(
+      this.curveForm.show(this.resolved(ReentryParameters.CURVE_POINT), new ParameterTarget(
         () => this.currentFragment?.lightCurve?.[this.curveIndex] as unknown as ParameterHolder | undefined,
         apply => this.editCurvePoint(this.fragmentIndex, this.curveIndex, apply)
       ), () => undefined)

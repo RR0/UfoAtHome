@@ -1,3 +1,4 @@
+import { PERCEPTION_MESSAGES } from "./messages/PerceptionMessages.js"
 import type { ObserverProvider, ObserverSettings } from "../../engine/observer/ObserverProvider.js"
 import type { Perception } from "../../engine/observer/Perception.js"
 import { Perceptions } from "../../engine/observer/Perception.js"
@@ -29,14 +30,12 @@ export class IntoxicationProvider implements ObserverProvider {
   static readonly MAX_LEVEL = 0.5
 
   readonly id = IntoxicationProvider.ID
-  readonly label = "Alcohol"
-  readonly hint =
-    "Lowers contrast sensitivity by about 0.9 dB at 0.08 % blood alcohol (one controlled study, results vary), drawn up to 0.1 % at most: a higher level is recorded but shown as 0.1 %, since nothing was measured past it. Double vision, narrowed field and other drugs are not modelled: no source quantifies them."
+  readonly messages = PERCEPTION_MESSAGES
   readonly sources = [
     "Frontiers in Neuroscience, 2022, doi:10.3389/fnins.2022.873671 (contrast sensitivity at about 0.08 % blood alcohol)"
   ]
   readonly settings = [
-    { id: "bloodAlcohol", label: "Blood alcohol", kind: "number" as const, default: 0, min: 0, max: IntoxicationProvider.MAX_LEVEL, step: 0.01, unit: "%", also: { unit: "g/L", factor: 10, digits: 1 } }
+    { id: "bloodAlcohol", kind: "number" as const, default: 0, min: 0, max: IntoxicationProvider.MAX_LEVEL, step: 0.01, unit: "%", also: { unit: "g/L", factor: 10, digits: 1 } }
   ]
 
   perceive(values: ObserverSettings): Perception {
