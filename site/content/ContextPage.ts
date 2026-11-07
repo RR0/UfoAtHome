@@ -29,13 +29,13 @@ export class ContextPage implements SitePage {
     },
     asideFromNav: true,
     description: {
-      en: "Every part of a reconstruction that is not the observer's own account: where its data "
+      en: "Every part of a reconstruction that is not the witness's own account: where its data "
         + "comes from, how it is computed, and the point at which it stops and says so.",
       fr: "Chaque partie d'une reconstitution qui n'est pas le compte rendu lui-même : d'où vient sa "
         + "donnée, comment elle est calculée, et le point où elle s'arrête et le dit.",
-      es: "Cada parte de una reconstrucción que no es el propio relato del observador: de dónde proceden sus "
+      es: "Cada parte de una reconstrucción que no es el propio relato del testigo: de dónde proceden sus "
         + "datos, cómo se calcula y el punto en el que se detiene y lo dice.",
-      it: "Ogni parte di una ricostruzione che non è il resoconto dell'osservatore stesso: da dove vengono i suoi "
+      it: "Ogni parte di una ricostruzione che non è il resoconto del testimone stesso: da dove vengono i suoi "
         + "dati, come viene calcolata e il punto in cui si ferma e lo dice."
     }
   }
@@ -116,7 +116,7 @@ class ContextText {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Home</a></p>
     <h1>Check what the scene claims.</h1>
-    <p class="lede">The observer supplies the phenomenon. Everything else is looked up in a named
+    <p class="lede">The witness supplies the phenomenon. Everything else is looked up in a named
       record or computed from physics — and where neither can answer, the tool says so instead of
       drawing something plausible. This is that, part by part, with the numbers it actually
       applies.</p>
@@ -126,7 +126,7 @@ class ContextText {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Accueil</a></p>
     <h1>Vérifier ce que la scène affirme.</h1>
-    <p class="lede">L'observateur fournit le phénomène. Tout le reste est relevé dans une source nommée
+    <p class="lede">Le témoin fournit le phénomène. Tout le reste est relevé dans une source nommée
       ou calculé depuis la physique — et là où ni l'un ni l'autre ne répond, l'outil le dit plutôt
       que de dessiner quelque chose de vraisemblable. Voici cela, élément par élément, avec les
       nombres qu'il applique réellement.</p>
@@ -136,7 +136,7 @@ class ContextText {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Inicio</a></p>
     <h1>Comprobar lo que afirma la escena.</h1>
-    <p class="lede">El observador aporta el fenómeno. Todo lo demás se consulta en un registro con
+    <p class="lede">El testigo aporta el fenómeno. Todo lo demás se consulta en un registro con
       nombre o se calcula a partir de la física — y allí donde ni lo uno ni lo otro puede responder,
       la herramienta lo dice en lugar de dibujar algo verosímil. Esto es eso, parte por parte, con
       los números que realmente aplica.</p>
@@ -146,7 +146,7 @@ class ContextText {
   <div class="wrap">
     <p class="eyebrow"><a class="crumb" href="/">← Home</a></p>
     <h1>Verificare ciò che la scena afferma.</h1>
-    <p class="lede">L'osservatore fornisce il fenomeno. Tutto il resto è ricavato da una fonte
+    <p class="lede">Il testimone fornisce il fenomeno. Tutto il resto è ricavato da una fonte
       nominata o calcolato dalla fisica — e dove né l'una né l'altra sanno rispondere, lo strumento
       lo dice invece di disegnare qualcosa di plausibile. Eccolo, parte per parte, con i numeri che
       applica davvero.</p>

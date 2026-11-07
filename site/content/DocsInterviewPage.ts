@@ -441,10 +441,10 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
           "El evento del caso que es la entrevista, editado en su sitio.",
           "L'evento del caso che è l'intervista, modificato sul posto.")],
         ["witnesses", "property", said(
-          "The observers it may have been held with, <code>[{ id, label }]</code>: one box each, at least one checked.",
-          "Les observateurs avec qui elle a pu avoir lieu, <code>[{ id, label }]</code> : une case chacun, une au moins cochée.",
-          "Los observadores con quienes pudo celebrarse, <code>[{ id, label }]</code>: una casilla cada uno, al menos una marcada.",
-          "Gli osservatori con cui può essersi tenuta, <code>[{ id, label }]</code>: una casella ciascuno, almeno una spuntata.")],
+          "The witnesses it may have been held with, <code>[{ id, label }]</code>: one box each, at least one checked.",
+          "Les témoins avec qui elle a pu avoir lieu, <code>[{ id, label }]</code> : une case chacun, une au moins cochée.",
+          "Los testigos con quienes pudo celebrarse, <code>[{ id, label }]</code>: una casilla cada uno, al menos una marcada.",
+          "I testimoni con cui può essersi tenuta, <code>[{ id, label }]</code>: una casella ciascuno, almeno una spuntata.")],
         ["documentUrl", "property", said(
           "What the transcript's <code>url</code> is relative to: the address of the case.",
           "Ce à quoi l'<code>url</code> de la transcription est relative : l'adresse du dossier.",

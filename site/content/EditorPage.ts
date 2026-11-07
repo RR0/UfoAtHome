@@ -66,7 +66,7 @@ const announce = title => {
   heading.textContent = sentence + "."
   document.title = sentence + " — UFO@home"
 }
-/* The recording arrives after its address is set, so the name is asked again until the editor holds it (its own id or its observer, which
+/* The recording arrives after its address is set, so the name is asked again until the editor holds it (its own id or its witness, which
    is what names it) or the wait is long enough to say it never will. A demo is named at once, by this site's own name for it. */
 const announceWhenLoaded = src => {
   announce(titleOf(undefined, src))
@@ -209,9 +209,9 @@ if (docs) {
     <ul class="plain">
       <li><strong>The case</strong> has an <em>ID</em>, a <em>title</em> and a date — the same picker, qualifier and EDTF text as an observation's start — and <em>Save</em> in the File tab.</li>
       <li>Two tabs, as a recording's editor has: <strong>Events</strong> and <strong>File</strong>. The File tab shows <code>case.json</code> as text, which can be edited (what reads as a case is the case at once, what does not yet is said and leaves the case as it was), loaded from a JSON file or an address in place of the case open (asked first when changes were not saved), and saved. Its keys are completed from the case's own description, <a href="/case.schema.json"><code>case.schema.json</code></a>, generated from the type like the recording's.</li>
-      <li><strong>Events</strong>: a picker lists what the case holds: the observers' accounts (“Observation of Q. B.”) and the readings of them, each a recording of its own, and the interviews (“Interview of Q. B.”). Choosing one opens it below, and what was changed in the others is kept. An account or a reading opens in the editor of a recording; an interview, which is not a recording, opens in an <code>&lt;rr0-interview&gt;</code>: its title, the witnesses it was held with (checked among the case's observers, at least one, possibly several), when, through what medium (face to face, phone, video call, chat, email, letter), who held it (one or several interviewers) and its description. It has three groups, as a recording's editor has: the <em>Summary</em>, which holds those; the <em>Exchanges</em>, which reads the interview as a dialogue (who said what; the time of each turn is its tooltip; a passage taken out of the published file is blacked out, with its reason as a tooltip; a passage that tells of a moment of the observation has a link that shows the observation at that moment, and the observation lists such passages under it, each a link back); and the <em>File</em>, which holds the interview's transcript with the address of its file, as text to edit, to load from a file or an address and to save. The file holds everything the summary shows, and the two are kept the same, whichever is edited.</li>
-      <li>An account has an <strong>ID</strong> in the case, which is what a reading names it by: proposed from the observer's family name (<code>trent</code>, then <code>trent-2</code> if it is taken) and shown greyed until it is kept, or typed. It is made of letters, digits, hyphens and underscores, and no other event of the case may have it. Changing it changes it in every reading that named it, and it cannot be emptied while one does. A reading that names an ID nothing has is reported above the recordings.</li>
-      <li><strong>+</strong> (its tooltip: <em>Add an event</em>) asks the <em>Type</em> of the event. An <em>Observation</em> is a recording: blank, from a file or from an address. An <em>Interview</em> is described right there: whom it was held with (one of the case's observers), a title and who held it; its transcript address is filled in afterwards. For an observation, name an account in the last field, <em>Interpretation of</em>, and what is added is a reading of it — another observation, which the case lists marked <code>interpretationOf</code>, dated and signed. Blank, it starts as a copy of the whole scene of the account it reads.</li>
+      <li><strong>Events</strong>: a picker lists what the case holds: the witnesses' accounts (“Observation of Q. B.”) and the readings of them, each a recording of its own, and the interviews (“Interview of Q. B.”). Choosing one opens it below, and what was changed in the others is kept. An account or a reading opens in the editor of a recording; an interview, which is not a recording, opens in an <code>&lt;rr0-interview&gt;</code>: its title, the witnesses it was held with (checked among the case's witnesses, at least one, possibly several), when, through what medium (face to face, phone, video call, chat, email, letter), who held it (one or several interviewers) and its description. It has three groups, as a recording's editor has: the <em>Summary</em>, which holds those; the <em>Exchanges</em>, which reads the interview as a dialogue (who said what; the time of each turn is its tooltip; a passage taken out of the published file is blacked out, with its reason as a tooltip; a passage that tells of a moment of the observation has a link that shows the observation at that moment, and the observation lists such passages under it, each a link back); and the <em>File</em>, which holds the interview's transcript with the address of its file, as text to edit, to load from a file or an address and to save. The file holds everything the summary shows, and the two are kept the same, whichever is edited.</li>
+      <li>An account has an <strong>ID</strong> in the case, which is what a reading names it by: proposed from the witness's family name (<code>trent</code>, then <code>trent-2</code> if it is taken) and shown greyed until it is kept, or typed. It is made of letters, digits, hyphens and underscores, and no other event of the case may have it. Changing it changes it in every reading that named it, and it cannot be emptied while one does. A reading that names an ID nothing has is reported above the recordings.</li>
+      <li><strong>+</strong> (its tooltip: <em>Add an event</em>) asks the <em>Type</em> of the event. An <em>Observation</em> is a recording: blank, from a file or from an address. An <em>Interview</em> is described right there: whom it was held with (one of the case's witnesses), a title and who held it; its transcript address is filled in afterwards. For an observation, name an account in the last field, <em>Interpretation of</em>, and what is added is a reading of it — another observation, which the case lists marked <code>interpretationOf</code>, dated and signed. Blank, it starts as a copy of the whole scene of the account it reads.</li>
       <li>The <strong>bin</strong> removes the event on show from the case; the file of a recording is not deleted. An observation a reading still interprets cannot be removed: delete its readings first. A case keeps at least one recording.</li>
       <li><strong>Save</strong> asks whether to save the observations too: yes writes a zip of the case and every observation beside it, no writes only <code>case.json</code>.</li>
       <li>A recording opened alone has <em>Add to a case</em> under it. It makes a case around that recording, without touching what is being edited.</li>
@@ -252,7 +252,7 @@ if (docs) {
       </li>
     </ol>
     <p class="small">Under the playback bar, a tick marks each keyframe of what the open group edits
-      (the selected shapes, the observer, the weather, the sound; all of them from the other groups),
+      (the selected shapes, the witness, the weather, the sound; all of them from the other groups),
       and a taller amber one each named moment. A press within a few pixels of one lands on it
       exactly, the bar names it under the pointer, and <strong>◂◆</strong> / <strong>◆▸</strong> go
       to the previous or next one — so an existing keyframe is changed rather than a new one made a
@@ -276,7 +276,7 @@ if (docs) {
         <strong>ID</strong>, a <strong>description</strong>, <strong>tags</strong>. The ID is this
         account's own, the day and then who saw it (<code>1964-04-24-ZamoraLonnie</code>); a recording
         does not name its case, it is <a href="/docs/format/#several-observers-the-case">the case</a>
-        that names its accounts and gives a page its observer picker.</p>
+        that names its accounts and gives a page its witness picker.</p>
     </div>
 
     <div class="group-doc">
@@ -297,7 +297,7 @@ if (docs) {
         an hour. A long pose is drawn at once as the viewfinder showed it, then fills in into the
         photograph as the scene settles.</p>
       <p><strong>Roll</strong> sits here rather than with the place, because it is how the device
-        was <em>held</em> — a camera askew, a head leaned over — not where the observer stood.</p>
+        was <em>held</em> — a camera askew, a head leaned over — not where the witness stood.</p>
       <p>A device that records a picture lays its <strong>lens ghosts</strong> over every light of it: fainter, out-of-focus copies on the
         line through the centre of the picture, mirrored through it for a phone's main one. Below the instrument, <strong>Taken
         through</strong> says what was in front of the lens (a filter, a window, a windscreen, each adding a ghost or a twin of every light),
@@ -310,19 +310,19 @@ if (docs) {
       <h3>Location</h3>
       <p>Account names a place, it does not give coordinates. So type the name and press
         <strong>Locate</strong>: latitude and longitude are filled from OpenStreetMap's own
-        geocoder, every candidate stays listed, and picking another moves the observer. What is
+        geocoder, every candidate stays listed, and picking another moves the witness. What is
         stored is the <em>qualified</em> name that was resolved, so a later reader lands on the same
         spot. Move a coordinate by hand and a name that came from a search is re-derived, or cleared — a
         name describing somewhere the sighting is no longer at would be a written false statement. A
         name you typed yourself is kept as typed and never replaced, even when no lookup finds it.</p>
       <p><strong>Heading</strong> is the direction faced, <strong>Tilt</strong> how far up or down,
         and <strong>Altitude</strong> is above sea level, floored by the ground's own height at that
-        location: an observer in the Alps is not at 0 m. Relief and imagery sources are chosen right
+        location: a witness in the Alps is not at 0 m. Relief and imagery sources are chosen right
         here, under the coordinates whose ground they describe.</p>
-      <p>Position, heading and tilt are written at the playhead, as a keyframe of the observer's
-        track: set them at another moment and the observer moves or turns between the two.</p>
+      <p>Position, heading and tilt are written at the playhead, as a keyframe of the witness's
+        track: set them at another moment and the witness moves or turns between the two.</p>
       <p>The <strong>map</strong> over the render does the same for the position: click bare ground
-        and the observer stands there at the playhead, exactly as if both coordinates had been typed.
+        and the witness stands there at the playhead, exactly as if both coordinates had been typed.
         The wheel zooms around the pointer, a drag moves the ground, and <strong>+</strong>,
         <strong>−</strong> and <strong>⤢</strong> (back to the whole path) are there for whoever has
         neither.</p>
@@ -331,7 +331,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Date</h3>
       <p>A start, an end, a duration — and a <strong>time zone</strong>, which is the rule, not the
-        number. Pick the observer's own zone and the offset is derived from that zone's rules
+        number. Pick the witness's own zone and the offset is derived from that zone's rules
         <em>at the observation's date</em>: Valensole in July 1965 resolves to UTC+1, not today's
         UTC+2, because France only reintroduced summer time in 1976.</p>
       <p>The zone is filled in from the coordinates, and never replaces one you chose. Zone
@@ -348,39 +348,39 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Environment</h3>
-      <p>What stood around the observer, at a real distance east and north: buildings with their
+      <p>What stood around the witness, at a real distance east and north: buildings with their
         floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
-        observers</strong>. This is the only thing that can put a number on a distance: if the object
+        witnesses</strong>. This is the only thing that can put a number on a distance: if the object
         passed <em>behind</em> that hangar it was at least that far, if <em>in front of</em> that
         tree, at most. Each crossing narrows the object's real width from one side for the whole
         recording; the result appears under the apparent size, and reads “unknown” when nothing
         crosses its line of sight, which is the honest answer for most sightings.</p>
-      <p><strong>The scenery comes by itself, where a place has been surveyed.</strong> When you give the recording a place (by name, by coordinates, or by moving the observer), the editor asks the survey that covers it for what stands within a hundred metres, and puts each tree, building, bridge and span of electric line in the list, at its measured place, height and width: in France, the IGN's LiDAR HD (a scan of the whole country from the air) for the trees and buildings, and its map for the bridges and the overhead lines, with their voltage. Nothing to press. A line under the list says how many were found, and a choice beside it says which survey it comes from: <em>IGN LiDAR HD + BD TOPO</em> (the default, which knows the most), the laser alone, the map alone, or <em>File</em>, which keeps the scenery the recording says and asks no survey any more, even as the observer moves (the choice is the recording's, and links to its item of the Files tab), or <em>None</em>, which leaves the scenery to you and takes away what a survey had brought (Undo puts it back; what you placed stays; your browser remembers the choice: asking sends the place to that service). Choosing another survey asks it at once for the place the recording stands at, and replaces what the first brought. Elsewhere, and wherever no survey covers the place, nothing is asked and nothing is said.
-        What is taken is of the day of the survey, which is not the day of the recording: keep it, move it, resize it or delete it, like anything else. Of each kind it brings nothing where you have placed some of your own (those you placed stay), and it is never added to a recording that is merely loaded. Moving the observer to another place replaces what a survey brought for the first, and nothing else.</p>
+      <p><strong>The scenery comes by itself, where a place has been surveyed.</strong> When you give the recording a place (by name, by coordinates, or by moving the witness), the editor asks the survey that covers it for what stands within a hundred metres, and puts each tree, building, bridge and span of electric line in the list, at its measured place, height and width: in France, the IGN's LiDAR HD (a scan of the whole country from the air) for the trees and buildings, and its map for the bridges and the overhead lines, with their voltage. Nothing to press. A line under the list says how many were found, and a choice beside it says which survey it comes from: <em>IGN LiDAR HD + BD TOPO</em> (the default, which knows the most), the laser alone, the map alone, or <em>File</em>, which keeps the scenery the recording says and asks no survey any more, even as the witness moves (the choice is the recording's, and links to its item of the Files tab), or <em>None</em>, which leaves the scenery to you and takes away what a survey had brought (Undo puts it back; what you placed stays; your browser remembers the choice: asking sends the place to that service). Choosing another survey asks it at once for the place the recording stands at, and replaces what the first brought. Elsewhere, and wherever no survey covers the place, nothing is asked and nothing is said.
+        What is taken is of the day of the survey, which is not the day of the recording: keep it, move it, resize it or delete it, like anything else. Of each kind it brings nothing where you have placed some of your own (those you placed stay), and it is never added to a recording that is merely loaded. Moving the witness to another place replaces what a survey brought for the first, and nothing else.</p>
       <p>The survey also <strong>names</strong> what it knows the name of. A building takes the name of the zone the map gives it (<em>Mairie de Saint-Lô</em>, a post office, a belfry), the parts of one numbered; a bridge is named for the road it carries (<em>Bridge (Rue de Carentan)</em>), a span of line for its voltage; the others are numbered like anything you add. In France the <strong>roads</strong> of the scene come from the same map, with their names, rather than from OpenStreetMap, which too often did not answer. Buildings, like trees, stand on the lowest ground under them, as they are built into a slope; and a span of line meets the ground at both its poles.</p>
-      <p>The <strong>radius</strong> next to the choice says how far round the observer the survey is asked, from 20 m to 3 km (100 m by default, and the browser remembers it): a wider one brings the farther buildings, bridges and lines from the map. The laser, which gives the trees, is asked within 150 m only. Outside France, where the laser has not flown, the buildings come from OpenStreetMap (anything its volunteers wrote of a building is drawn: height, roof, colours; the rest is an ordinary building), without trees; choose it in the list of surveys to have it anywhere.</p>
+      <p>The <strong>radius</strong> next to the choice says how far round the witness the survey is asked, from 20 m to 3 km (100 m by default, and the browser remembers it): a wider one brings the farther buildings, bridges and lines from the map. The laser, which gives the trees, is asked within 150 m only. Outside France, where the laser has not flown, the buildings come from OpenStreetMap (anything its volunteers wrote of a building is drawn: height, roof, colours; the rest is an ordinary building), without trees; choose it in the list of surveys to have it anywhere.</p>
       <p>The <strong>street lamps, traffic lights, pedestrian crossings and road signs</strong> come with any survey, from OpenStreetMap; in Paris the lamps come from the city's own inventory (Paris Data), every lamp at its place with the colour and the flux of its light, a sodium lamp's orange as an LED's white. OpenStreetMap is often slow or down: the line under the survey then says the lighting is awaited, and plants it when it comes, without you doing anything (one step of the history), or says it is unavailable for now with a <strong>Retry</strong> button.</p>
       <p>While the scenery is being looked up, a <strong>spinner</strong> stands over the picture; choosing "None" in the list of surveys stops the wait (what the survey answers afterwards is dropped). What was taken is <strong>dated</strong>: the status line gives the day of the laser flight, of the aerial photograph and of the map's last edition, and each object keeps the newest day it was drawn from (<code>surveyedOn</code>). Where that day is <strong>later than the observation</strong>, a warning says so, and goes on saying it if the date of the observation is changed afterwards: the scenery is then a landmark, not what stood there.</p>
       <p>A building's <strong>roof</strong> is read too: from the laser, a roof with two or four slopes (and which way its ridge runs) or a flat one, with the building then as high as its ridge; from the aerial photograph, its colour (tile, slate, zinc), taken without the green of the trees over it. A roof the survey cannot read stays a plain box, not a guess.</p>
       <p>The <strong>walls</strong> are drawn as walls: the colour of the material the map states for them (stone, brick, concrete, breeze block, wood; a pale plaster, a little different from one house to the next, where it states none, which is two buildings in five), with windows on every floor and a door on the ground floor of the front face. They are the typical windows of a facade, not the windows of that house, and some of them are lit once the Sun is well below the horizon: about half in the evening, practically none from three to five in the morning, a few more at dawn, by the hour on the clock (always the same windows, so those lit at three are still lit at nine). The hours follow the French time-use survey (INSEE, <em>Enquête Emploi du temps</em> 2009-2010: half of couples asleep at 22:40 and half up at 7:00, nine in ten asleep from 1:00 to 6:00); the curve between those points, the two in a hundred always up and the half of the windows lit when everybody is up are assumptions. Everything about the walls and the roof (their colour, plain walls, the roof's shape, rise and ridge) can be edited afterwards in the building's properties, like any other decor.</p>
       <p><strong>Click an object in the picture to select it:</strong> the Environment group opens on it, framed, ready to move, size or turn. Drag the selected object to carry it over the ground; hold <kbd>Shift</kbd> to carry it east-west only, <kbd>Alt</kbd> north-south only, <kbd>Ctrl</kbd> up and down only. Hold <kbd>Cmd</kbd> (or two of those keys) with the press and it is the view that turns, as over bare ground — the way to turn it from over a forest, where every press lands on a tree.</p>
-      <p><strong>Several observers, and their points of view.</strong> An observer placed here can
+      <p><strong>Several witnesses, and their points of view.</strong> A witness placed here can
         carry the URL of their <em>own</em> recording, and right-clicking them in the scene offers
         to view it — which loads their account and puts you where they stood, looking the way they
         looked. Two people a hundred metres apart did not see the same thing, and being able to step
         from one to the other is how that stops being an assertion and becomes something to check.
         The <strong>🎯</strong> button does the smaller version of the same thing: it turns the
-        current observer to face whatever is selected.</p>
-      <p>Published together, those recordings become the observer picker a reader gets — see
+        current witness to face whatever is selected.</p>
+      <p>Published together, those recordings become the witness picker a reader gets — see
         <a href="/docs/format/#several-observers-the-case">the case</a> that lists them.</p>
-      <p>Beyond placement and size, an object has the <strong>properties its kind has</strong>, drawn from what the kind says it lets you set: floors, the floor the observer is on and a window on each side for a building; the windows of a car, whose windscreen and rear window never open; the span, deck and railing of a bridge; the poles and strand of an overhead line. A field left empty states nothing and shows, greyed, the value the scene uses. A model carries its own colours, so the single <strong>Colour</strong> is offered for the built-in shapes only; a model can instead offer the colour of a part of itself — the costume of a figure, the leaves of a tree — or a switch of one of its parts — an airliner's retracted landing gear — and any other setting of its own, which appear here the same way.</p>
+      <p>Beyond placement and size, an object has the <strong>properties its kind has</strong>, drawn from what the kind says it lets you set: floors, the floor the witness is on and a window on each side for a building; the windows of a car, whose windscreen and rear window never open; the span, deck and railing of a bridge; the poles and strand of an overhead line. A field left empty states nothing and shows, greyed, the value the scene uses. A model carries its own colours, so the single <strong>Colour</strong> is offered for the built-in shapes only; a model can instead offer the colour of a part of itself — the costume of a figure, the leaves of a tree — or a switch of one of its parts — an airliner's retracted landing gear — and any other setting of its own, which appear here the same way.</p>
       <p>Decor can also <strong>move</strong> (an aircraft crossing the sky, a car driving past) and
         carry <strong>lights</strong> with real, regulated flash rates — anticollision beacons at
         40–100 a minute, hazard flashers at 60–120. On a long exposure that rate is drawn: steady
         lamps leave lines, flashing ones leave dots at regular intervals, which is exactly how a
         photograph of an airliner is told from a photograph of something that does not blink.</p>
       <p>The <strong>ready-made sets of lamps</strong> offered for an object are those that suit the model it is drawn as, and are scaled to the size of the machine: an airliner is not offered a helicopter's, a patrol car gets its emergency beacons. The model also says what noise an aircraft makes in flight (an A350 is heard as a wide-body, a stand-in for something whose noise nobody reported is silent) and gives a vehicle its engine.</p>
-      <p>A <strong>vehicle's lights</strong> are a setting and not a switch, because not everybody puts them on, nor as they should: <strong>off</strong>, <strong>position lights</strong> (which show the vehicle and light nothing), <strong>dipped beam</strong>, <strong>main beam</strong> (far, narrow, dazzling) or <strong>fog lamps</strong> (low and wide). Choose it in the object's <em>State</em> group at the instant you want it to change: it is written as a keyframe, as the lamp switch is, and holds until the next. A beam really lights the road, the verges, the trees and the walls in front of the vehicle. The vehicle the observer rides (the recording's <code>vehicle</code>) puts its dipped beam on by itself from the dusk on unless the file says otherwise.</p>
+      <p>A <strong>vehicle's lights</strong> are a setting and not a switch, because not everybody puts them on, nor as they should: <strong>off</strong>, <strong>position lights</strong> (which show the vehicle and light nothing), <strong>dipped beam</strong>, <strong>main beam</strong> (far, narrow, dazzling) or <strong>fog lamps</strong> (low and wide). Choose it in the object's <em>State</em> group at the instant you want it to change: it is written as a keyframe, as the lamp switch is, and holds until the next. A beam really lights the road, the verges, the trees and the walls in front of the vehicle. The vehicle the witness rides (the recording's <code>vehicle</code>) puts its dipped beam on by itself from the dusk on unless the file says otherwise.</p>
     </div>
 
     <div class="group-doc">
@@ -389,9 +389,9 @@ if (docs) {
         instant, and the two groups above already state both — so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
-      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data sources</strong>, behind the gear at the top right of the group, <strong>Weather</strong>, in the <strong>Sky</strong> group) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the observer's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
+      <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data sources</strong>, behind the gear at the top right of the group, <strong>Weather</strong>, in the <strong>Sky</strong> group) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the witness's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
       <p>A lookup writes a weather keyframe at the start, at each whole hour and at the end of the
-        recording, each at wherever the observer stands at that moment; the track is laid out again
+        recording, each at wherever the witness stands at that moment; the track is laid out again
         when the recording's length changes.</p>
       <p>The group has three handles of its own, one part open at a time like the groups
         themselves: <strong>Precipitation</strong> — its type and intensity, and the
@@ -400,7 +400,7 @@ if (docs) {
         <strong>Clouds</strong>, and <strong>Wind</strong>, the direction it blows toward and its
         speed, which is what carries every cloud that has no wind of its own.</p>
       <p>The clouds are the <strong>Clouds</strong> part of this group. A looked-up sky
-        arrives as three of them, the low, middle and high bands of the record; a sky the observer
+        arrives as three of them, the low, middle and high bands of the record; a sky the witness
         described is as many as they saw. Every number in the panel is written into the recording
         the moment it is valid, and the first edit pauses playback, so nothing is committed at a
         moving playhead.</p>
@@ -429,14 +429,14 @@ if (docs) {
         puts one in the layer, ahead of where you are looking, at the layer's own base. It is drawn
         as one of the layer's own — the same texture, the same edges — and differs from its
         neighbours only in standing exactly where you say, even with the layer's coverage at 0 %.
-        <strong>Point at cloud</strong> turns the observer to it. <strong>Delete cloud</strong> removes
+        <strong>Point at cloud</strong> turns the witness to it. <strong>Delete cloud</strong> removes
         it.</p>
       <p>Tick <strong>Select and drag clouds in the sky</strong> and the picture itself becomes the
         control: click a cloud to select it, drag to move it — in the plane facing you, so it
         keeps its distance while its bearing and its altitude follow the pointer, and it never goes
         below the ground. Untick it and clicks are the player's again. The numeric fields do the
         rest, and do it exactly: <strong>East</strong> and <strong>North position</strong> in metres
-        from where the observer started, its own <strong>base</strong>, <strong>thickness</strong>,
+        from where the witness started, its own <strong>base</strong>, <strong>thickness</strong>,
         <strong>width</strong>, <strong>depth</strong> and <strong>rotation</strong>, its
         <strong>density</strong> and a <strong>darkness</strong> that, left empty, is the layer's.
         Keyframe it twice and it drifts, grows or darkens between the two; on top of that it rides
@@ -451,13 +451,13 @@ if (docs) {
         shower is a position in Earth's orbit and a comet's orbit is a solved problem, so the date
         and the place alone decide both. It states what else was in that patch of sky: the shower
         and its rate over the sporadic background, the comet and its magnitude, any nova or
-        supernova whose recorded light curve covers that night (the 🌟 button turns the observer
+        supernova whose recorded light curve covers that night (the 🌟 button turns the witness
         towards it), whether low orbit
         was still sunlit, whether the Milky Way or the zodiacal light could have been seen at all.
         From February 2021 it also names the satellites that really crossed that sky bright enough
-        to be seen, the brightest with the time of its pass on the observer's clock, and says when
+        to be seen, the brightest with the time of its pass on the witness's clock, and says when
         some of them were a Starlink train; the 🛰 button moves the playhead to each pass in turn,
-        brightest first, and turns the observer towards it. 🌠 and ☄ do the same for the next meteor
+        brightest first, and turns the witness towards it. 🌠 and ☄ do the same for the next meteor
         and for the comet. Where the instrument reaches deeper than magnitude 9, the line says the
         stars are drawn only as far as this project's catalogue goes; and a rainbow is mentioned only
         when rain was reported.
@@ -485,8 +485,8 @@ if (docs) {
         stands at that one's distance, just in front of it, so a light on a craft stays on the
         craft.</p>
       <p><strong>Sampling rate</strong> is how often the pointer is read while recording.</p>
-      <p>The selector above the render, <strong>Account</strong>, says how the account is drawn and edited: <em>2D · shapes</em>, the angles the observer drew, or <em>3D · bodies</em>, what they said those were. Choosing one opens the matching part of this group, and opening a part sets the selector; a reading of an account has no shapes, and no selector. Those are the group's <strong>Shapes</strong>: what the observer drew. Its
-        <strong>Bodies</strong> are what the observer said those shapes were, in 3D: each body names
+      <p>The selector above the render, <strong>Account</strong>, says how the account is drawn and edited: <em>2D · shapes</em>, the angles the witness drew, or <em>3D · bodies</em>, what they said those were. Choosing one opens the matching part of this group, and opening a part sets the selector; a reading of an account has no shapes, and no selector. Those are the group's <strong>Shapes</strong>: what the witness drew. Its
+        <strong>Bodies</strong> are what the witness said those shapes were, in 3D: each body names
         the shapes it stands for and the model it is drawn as, a built-in shape, a model of the
         catalogue, or a glTF file at an address. The address can be relative to the recording's own
         file, so a <code>sighting.json</code> and the <code>craft.gltf</code> beside it work together
@@ -494,10 +494,10 @@ if (docs) {
         <strong>Interpretation title</strong>, at the top of this part, names what the recording claims — “Craft on its legs”, “April 2013: a model on a thread” — and is always offered: typing one creates the interpretation before any body does. <strong>+</strong> adds a body (and the interpretation, when the recording has none): it
         stands for the selected shape, in its direction, at the distance the scene draws it and as
         big as its apparent width makes it there, in a single keyframe at the playhead; on the ground
-        at that distance when the line of sight goes into it first; with no shape, where the observer
-        is looking. 🎯 turns the observer towards the body. A recording may hold only bodies: its
+        at that distance when the line of sight goes into it first; with no shape, where the witness
+        is looking. 🎯 turns the witness towards the body. A recording may hold only bodies: its
         last shape can be deleted. <strong>At</strong> the playhead, the body's position (from the
-        observer, or in the world), size and attitude are shown as they are at that instant; editing
+        witness, or in the world), size and attitude are shown as they are at that instant; editing
         one writes a keyframe there, which is how a body is given its movement: move the playhead,
         edit again. Such a keyframe states nothing else, so the body's light, flame and moving parts
         go on as before. With this part open, a body can also be taken on the picture itself: dragging
@@ -523,12 +523,12 @@ if (docs) {
       magnitude and how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
       near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
       any comet up that night answer the same way, and so does everything in the environment: a
-      building, a tree, another observer. With <kbd>Alt</kbd> held, an object of the environment also
+      building, a tree, another witness. With <kbd>Alt</kbd> held, an object of the environment also
       says its size and how far it stands from the eye (“Tree 19 — 2 × 2 × 11.8 m, 540 m away”):
       the measure is taken only then.</p>
     <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
       horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
-      what could have been seen from where the observer stood.</p>
+      what could have been seen from where the witness stood.</p>
   </div>
 </section>
 
@@ -541,12 +541,12 @@ if (docs) {
           stays as it was; one whose first keyframe is at five seconds is already painted, in that
           state, from zero. To make something stop being visible, keyframe it at transparency 1.</li>
         <li><strong>Declared outranks deduced.</strong> “It went into a cloud” is stated by the
-          observer, never worked out by geometry — this format describes an appearance on a field of
+          witness, never worked out by geometry — this format describes an appearance on a field of
           view, not a position in space, so nothing in it <em>can</em> know whether cloud came
           between them.</li>
         <li><strong>Paused is paused.</strong> Falling rain, twinkling stars, lightning, lens flare,
           ambient sound — all stop with the player. A paused replay is one instant of a sighting;
-          weather still going on over it would be your own room, not the observer's evening.</li>
+          weather still going on over it would be your own room, not the witness's evening.</li>
         <li><strong>Out of sight, nothing runs.</strong> A scene scrolled past, or in a panel that is
           closed, draws and computes nothing, and a replay that was playing is paused. It is
           drawn again when it comes back, and the play button starts the replay again.</li>
@@ -567,7 +567,7 @@ if (docs) {
       <p>The sound is <em>synthesized</em> from that description, exactly as the shape is drawn from
         its own, at no cost in bundled audio. A recording that actually captured the sound can point
         at the audio file instead. Note the difference between the two silences: <em>none</em> means
-        the observer reported hearing nothing; no sound track at all means nobody was asked.</p>
+        the witness reported hearing nothing; no sound track at all means nobody was asked.</p>
       <p>Loudness and pitch glide from one keyframe to the next; the kind and the audio file change
         at the keyframe. An audio file on another site must be served to any origin (CORS), and a
         browser plays nothing until the reader has clicked the page once.</p>
@@ -582,17 +582,17 @@ if (docs) {
         was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
         on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
       <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
-        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the observer),
+        blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the witness),
         <strong>wheel</strong> to change its field, or type
         <strong>heading</strong>, <strong>pitch</strong>, <strong>roll</strong> and <strong>vertical
-        field</strong>, or <strong>use the observer's pose</strong> as a start. To measure rather than
+        field</strong>, or <strong>use the witness's pose</strong> as a start. To measure rather than
         eyeball, <strong>Add a landmark</strong> arms two clicks: a detail on the picture, then the same
         detail in the render. Two landmarks turn the picture to fit them, three or more fit its field
         too; each has a name and a residual, green within a degree, orange within three, red beyond,
-        and either end of one can be dragged. <strong>Adopt as the observer's pose</strong> then writes
+        and either end of one can be dragged. <strong>Adopt as the witness's pose</strong> then writes
         the fitted heading, pitch and roll into the pose at the playhead as a measurement, with its
         provenance. <strong>Street-level pictures nearby</strong> asks Panoramax for pictures taken
-        within 300 m of the observer's spot, each arriving already lined up in heading.</p>
+        within 300 m of the witness's spot, each arriving already lined up in heading.</p>
       <p><strong>Look for ghosts</strong> searches the selected picture for the ghosts of the lens: the
         faint copies of a bright light that a lens's glass sends back, each on the far side of the
         lens's axis from its light, as far from it, whatever its shape: a point, a lamp's large pale
@@ -609,9 +609,9 @@ if (docs) {
         are drawn over the scene and on the map in their own colour, dashed on the map, as the
         investigator's and not the reconstruction's: nothing is fitted to them, and each is credited to
         the file it came from until you say better. Rename one, set its <strong>source</strong>, or
-        delete it; the player offers a button to hide them all. Names stand beside what they name, in the scene as on the map; the map widens to frame what lies near the observer (a line running off to the horizon is left to run off), and each source is listed in the credits. GPS tracks (<code>gx:Track</code>) are read as lines.</p>
+        delete it; the player offers a button to hide them all. Names stand beside what they name, in the scene as on the map; the map widens to frame what lies near the witness (a line running off to the horizon is left to run off), and each source is listed in the credits. GPS tracks (<code>gx:Track</code>) are read as lines.</p>
       <p>A picture holds from one point only, so lining it up also records <em>where</em> it was
-        lined up from: the observer's position at the playhead. Playing, it fades out as the observer
+        lined up from: the witness's position at the playhead. Playing, it fades out as the witness
         walks away from that point (fully shown within 2 m, gone beyond 20 m) and back in as they
         return, rather than show a comparison that no longer holds.</p>
     </div>
@@ -680,9 +680,9 @@ if (docs) {
     <ul class="plain">
       <li><strong>Le dossier</strong> a un <em>identifiant</em>, un <em>titre</em> et une date — le même sélecteur, le même qualificatif et le même texte EDTF que le début d'une observation — et <em>Sauver</em> dans l'onglet Fichier.</li>
       <li>Deux onglets, comme l'éditeur d'un enregistrement : <strong>Événements</strong> et <strong>Fichier</strong>. L'onglet Fichier montre <code>case.json</code> en texte, qu'on peut modifier (ce qui se lit comme un dossier est aussitôt le dossier, ce qui ne se lit pas encore est signalé et laisse le dossier comme il était), charger depuis un fichier JSON ou une adresse à la place du dossier ouvert (avec une question d'abord si des changements ne sont pas sauvés), et sauver. Ses clés sont complétées d'après la description propre au dossier, <a href="/case.schema.json"><code>case.schema.json</code></a>, générée depuis le type comme celle d'un enregistrement.</li>
-      <li><strong>Événements</strong> : un sélecteur liste ce que contient le dossier : les comptes rendus des observateurs (« Observation de Q. B. ») et les lectures qu'on en fait, chacun un enregistrement à part, et les entretiens (« Interview de Q. B. »). En choisir un l'ouvre dessous, et ce qu'on a changé dans les autres est conservé. Un compte rendu ou une lecture s'ouvre dans l'éditeur d'un enregistrement ; un entretien, qui n'est pas un enregistrement, s'ouvre dans un <code>&lt;rr0-interview&gt;</code> : son titre, les témoins avec qui il a eu lieu (à cocher parmi les observateurs du dossier, au moins un, parfois plusieurs), quand, par quel moyen (face à face, téléphone, visioconférence, chat, mail, courrier), qui l'a mené (un ou plusieurs enquêteurs) et sa description. Il a trois groupes, comme l'éditeur d'un enregistrement : le <em>Résumé</em>, qui contient cela ; les <em>Échanges</em>, qui lisent l'interview comme un dialogue (qui a dit quoi ; le temps de chaque tour en infobulle ; un passage retiré du fichier publié est noirci, sa raison en infobulle ; un passage qui raconte un moment de l'observation a un lien qui montre l'observation à ce moment, et l'observation liste ces passages dessous, chacun un lien en retour) ; et le <em>Fichier</em>, qui contient la transcription de l'interview avec l'adresse de son fichier, en texte à modifier, à charger depuis un fichier ou une adresse et à sauver. Le fichier contient tout ce que montre le résumé, et les deux restent identiques, quel que soit celui qu'on modifie.</li>
-      <li>Un compte rendu a un <strong>identifiant</strong> dans le dossier, par lequel une interprétation le désigne : proposé d'après le nom de famille de l'observateur (<code>trent</code>, puis <code>trent-2</code> s'il est pris) et affiché en grisé tant qu'il n'est pas gardé, ou saisi. Il est fait de lettres, de chiffres, de tirets et de soulignés, et aucun autre événement du dossier ne peut le porter. Le changer le change dans toutes les interprétations qui le désignaient, et on ne peut pas le vider tant que l'une le fait. Une interprétation qui désigne un identifiant que rien ne porte est signalée au-dessus des enregistrements.</li>
-      <li><strong>+</strong> (infobulle : <em>Ajouter un événement</em>) demande le <em>Type</em> de l'événement. Une <em>Observation</em> est un enregistrement : vierge, depuis un fichier ou depuis une adresse. Une <em>Interview</em> se décrit sur place : avec quel témoin (un des observateurs du dossier), un titre et qui l'a menée ; l'adresse de sa transcription se renseigne ensuite. Pour une observation, nommez un compte rendu dans le dernier champ, <em>Interprétation de</em>, et ce qu'on ajoute est une lecture de celui-ci — une autre observation, que le dossier liste marquée <code>interpretationOf</code>, datée et signée. Vierge, elle commence comme une copie de toute la scène du compte rendu qu'elle lit.</li>
+      <li><strong>Événements</strong> : un sélecteur liste ce que contient le dossier : les comptes rendus des témoins (« Observation de Q. B. ») et les lectures qu'on en fait, chacun un enregistrement à part, et les entretiens (« Interview de Q. B. »). En choisir un l'ouvre dessous, et ce qu'on a changé dans les autres est conservé. Un compte rendu ou une lecture s'ouvre dans l'éditeur d'un enregistrement ; un entretien, qui n'est pas un enregistrement, s'ouvre dans un <code>&lt;rr0-interview&gt;</code> : son titre, les témoins avec qui il a eu lieu (à cocher parmi les témoins du dossier, au moins un, parfois plusieurs), quand, par quel moyen (face à face, téléphone, visioconférence, chat, mail, courrier), qui l'a mené (un ou plusieurs enquêteurs) et sa description. Il a trois groupes, comme l'éditeur d'un enregistrement : le <em>Résumé</em>, qui contient cela ; les <em>Échanges</em>, qui lisent l'interview comme un dialogue (qui a dit quoi ; le temps de chaque tour en infobulle ; un passage retiré du fichier publié est noirci, sa raison en infobulle ; un passage qui raconte un moment de l'observation a un lien qui montre l'observation à ce moment, et l'observation liste ces passages dessous, chacun un lien en retour) ; et le <em>Fichier</em>, qui contient la transcription de l'interview avec l'adresse de son fichier, en texte à modifier, à charger depuis un fichier ou une adresse et à sauver. Le fichier contient tout ce que montre le résumé, et les deux restent identiques, quel que soit celui qu'on modifie.</li>
+      <li>Un compte rendu a un <strong>identifiant</strong> dans le dossier, par lequel une interprétation le désigne : proposé d'après le nom de famille du témoin (<code>trent</code>, puis <code>trent-2</code> s'il est pris) et affiché en grisé tant qu'il n'est pas gardé, ou saisi. Il est fait de lettres, de chiffres, de tirets et de soulignés, et aucun autre événement du dossier ne peut le porter. Le changer le change dans toutes les interprétations qui le désignaient, et on ne peut pas le vider tant que l'une le fait. Une interprétation qui désigne un identifiant que rien ne porte est signalée au-dessus des enregistrements.</li>
+      <li><strong>+</strong> (infobulle : <em>Ajouter un événement</em>) demande le <em>Type</em> de l'événement. Une <em>Observation</em> est un enregistrement : vierge, depuis un fichier ou depuis une adresse. Une <em>Interview</em> se décrit sur place : avec quel témoin (un des témoins du dossier), un titre et qui l'a menée ; l'adresse de sa transcription se renseigne ensuite. Pour une observation, nommez un compte rendu dans le dernier champ, <em>Interprétation de</em>, et ce qu'on ajoute est une lecture de celui-ci — une autre observation, que le dossier liste marquée <code>interpretationOf</code>, datée et signée. Vierge, elle commence comme une copie de toute la scène du compte rendu qu'elle lit.</li>
       <li>La <strong>corbeille</strong> retire du dossier l'événement affiché ; le fichier d'un enregistrement n'est pas supprimé. Une observation qu'une lecture interprète encore ne peut pas être retirée : supprimez d'abord ses lectures. Un dossier garde au moins un enregistrement.</li>
       <li><strong>Sauver</strong> demande s'il faut sauver aussi les observations : oui écrit un zip du dossier et de chaque observation à côté, non n'écrit que <code>case.json</code>.</li>
       <li>Un enregistrement ouvert seul a dessous <em>Ajouter à un dossier</em> : cela crée un dossier autour de cet enregistrement, sans toucher à ce qu'on est en train d'éditer.</li>
@@ -724,7 +724,7 @@ if (docs) {
       </li>
     </ol>
     <p class="small">Sous la barre de lecture, un trait marque chaque image clé de ce que le groupe
-      ouvert modifie (les formes sélectionnées, l'observateur, la météo, le son ; toutes depuis les
+      ouvert modifie (les formes sélectionnées, le témoin, la météo, le son ; toutes depuis les
       autres groupes), et un trait ambre plus haut chaque moment nommé. Un appui à quelques pixels de
       l'un d'eux tombe exactement dessus, la barre le nomme sous le pointeur, et
       <strong>◂◆</strong> / <strong>◆▸</strong> vont au précédent ou au suivant : on modifie ainsi
@@ -749,7 +749,7 @@ if (docs) {
         L'identifiant est celui de ce compte rendu, le jour puis qui a vu
         (<code>1964-04-24-ZamoraLonnie</code>) ; un enregistrement ne nomme pas son dossier, c'est
         <a href="/docs/format/#several-observers-the-case">le dossier</a> qui nomme ses comptes rendus
-        et donne à une page son sélecteur d'observateur.</p>
+        et donne à une page son sélecteur de témoin.</p>
     </div>
 
     <div class="group-doc">
@@ -773,7 +773,7 @@ if (docs) {
         mesure que la scène se pose.</p>
       <p>Le <strong>roulis</strong> est ici et non avec le lieu, parce qu'il dit comment l'appareil
         était <em>tenu</em> — un appareil de travers, une tête penchée — et non où se tenait le
-        observateur.</p>
+        témoin.</p>
       <p>Un appareil qui enregistre une image y pose les <strong>reflets de son objectif</strong> sur chaque lumière : des copies plus
         faibles et floues sur la droite qui passe par le centre de l'image, symétriques par rapport à lui pour le reflet principal d'un
         téléphone. Sous l'instrument, <strong>À travers</strong> dit ce qu'il y avait devant l'objectif (un filtre, une vitre, un pare-brise,
@@ -788,21 +788,21 @@ if (docs) {
       <p>Un compte rendu nomme un lieu, il ne donne pas de coordonnées. Tapez donc le nom et appuyez
         sur <strong>Localiser</strong> : latitude et longitude sont remplies par le géocodeur
         d'OpenStreetMap, tous les candidats restent listés, et en choisir un autre déplace le
-        observateur. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
+        témoin. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
         ultérieur retombe au même endroit. Déplacez une coordonnée à la main et un nom venu d'une
         recherche est redérivé, ou effacé — un nom décrivant un endroit où l'observation n'a plus
         lieu serait une fausse déclaration écrite. Un nom que vous avez tapé vous-même est gardé tel
         quel et jamais remplacé, même si aucune recherche ne le trouve.</p>
       <p><strong>Cap</strong> est la direction regardée, <strong>Inclinaison</strong> de combien
         vers le haut ou le bas, et <strong>Altitude</strong> s'entend au-dessus du niveau de la mer,
-        plancher fixé par la hauteur du sol à cet endroit : un observateur dans les Alpes n'est pas à
+        plancher fixé par la hauteur du sol à cet endroit : un témoin dans les Alpes n'est pas à
         0 m. Les sources de relief et d'imagerie se choisissent ici même, sous les coordonnées dont
         elles décrivent le sol.</p>
       <p>Position, cap et inclinaison s'écrivent à la tête de lecture, comme une image clé de la
-        trajectoire de l'observateur : réglez-les à un autre moment et l'observateur se déplace ou se
+        trajectoire du témoin : réglez-les à un autre moment et le témoin se déplace ou se
         tourne entre les deux.</p>
       <p>La <strong>carte</strong> posée sur le rendu fait de même pour la position : cliquez sur le
-        sol et l'observateur s'y tient à la tête de lecture, exactement comme si les deux coordonnées
+        sol et le témoin s'y tient à la tête de lecture, exactement comme si les deux coordonnées
         avaient été saisies. La molette zoome autour du pointeur, un glisser déplace le terrain, et
         <strong>+</strong>, <strong>−</strong> et <strong>⤢</strong> (retour au trajet entier) sont là
         pour qui n'a ni l'un ni l'autre.</p>
@@ -811,7 +811,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Date</h3>
       <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
-        non le nombre. Choisissez le fuseau de l'observateur et le décalage est dérivé des règles de ce
+        non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
         l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
       <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
@@ -829,33 +829,33 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Environnement</h3>
-      <p>Ce qui se tenait autour de l'observateur, à une distance réelle vers l'est et vers le nord :
+      <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
-        et <strong>d'autres observateurs</strong>. C'est la seule chose qui puisse mettre un nombre sur
+        et <strong>d'autres témoins</strong>. C'est la seule chose qui puisse mettre un nombre sur
         une distance : si l'objet est passé <em>derrière</em> ce hangar il était au moins aussi
         loin, <em>devant</em> cet arbre, au plus. Chaque croisement resserre d'un côté la largeur
         réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
         apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
         pour la plupart des observations.</p>
-      <p><strong>Le décor vient tout seul, là où un lieu a été relevé.</strong> Quand vous donnez un lieu à l'enregistrement (par son nom, par ses coordonnées, ou en déplaçant l'observateur), l'éditeur demande au relevé qui le couvre ce qui se trouve dans un rayon de cent mètres, et met chaque arbre, bâtiment, pont et portée de ligne électrique dans la liste, à sa place, sa hauteur et sa largeur mesurées : en France, le LiDAR HD de l'IGN (un balayage aérien du pays entier) pour les arbres et les bâtiments, et sa carte pour les ponts et les lignes aériennes, avec leur tension. Rien à presser. Une ligne sous la liste dit combien ont été trouvés, et un choix à côté dit de quel relevé ils viennent : <em>IGN LiDAR HD + BD TOPO</em> (par défaut, celui qui en sait le plus), le laser seul, la carte seule, ou <em>Fichier</em>, qui garde le décor que dit l'enregistrement et ne demande plus aucun relevé, même quand l'observateur se déplace (le choix est celui de l'enregistrement, et renvoie à son élément de l'onglet Fichiers), ou <em>Aucun</em>, qui laisse le décor à vous seul et retire ce qu'un relevé avait apporté (Annuler le remet ; ce que vous avez placé reste ; votre navigateur retient le choix : demander envoie le lieu à ce service). Choisir un autre relevé l'interroge aussitôt sur le lieu où se tient l'enregistrement, et remplace ce que le premier avait apporté. Ailleurs, et partout où aucun relevé ne couvre le lieu, rien n'est demandé et rien n'est dit.
-        Ce qui est pris est celui du jour du relevé, qui n'est pas celui de l'enregistrement : gardez-le, déplacez-le, redimensionnez-le ou supprimez-le, comme n'importe quoi d'autre. De chaque sorte il n'apporte rien là où vous en avez placé vous-même (ce que vous avez placé reste), et jamais ajouté à un enregistrement qui est seulement chargé. Déplacer l'observateur vers un autre lieu remplace ce qu'un relevé avait apporté pour le premier, et rien d'autre.</p>
+      <p><strong>Le décor vient tout seul, là où un lieu a été relevé.</strong> Quand vous donnez un lieu à l'enregistrement (par son nom, par ses coordonnées, ou en déplaçant le témoin), l'éditeur demande au relevé qui le couvre ce qui se trouve dans un rayon de cent mètres, et met chaque arbre, bâtiment, pont et portée de ligne électrique dans la liste, à sa place, sa hauteur et sa largeur mesurées : en France, le LiDAR HD de l'IGN (un balayage aérien du pays entier) pour les arbres et les bâtiments, et sa carte pour les ponts et les lignes aériennes, avec leur tension. Rien à presser. Une ligne sous la liste dit combien ont été trouvés, et un choix à côté dit de quel relevé ils viennent : <em>IGN LiDAR HD + BD TOPO</em> (par défaut, celui qui en sait le plus), le laser seul, la carte seule, ou <em>Fichier</em>, qui garde le décor que dit l'enregistrement et ne demande plus aucun relevé, même quand le témoin se déplace (le choix est celui de l'enregistrement, et renvoie à son élément de l'onglet Fichiers), ou <em>Aucun</em>, qui laisse le décor à vous seul et retire ce qu'un relevé avait apporté (Annuler le remet ; ce que vous avez placé reste ; votre navigateur retient le choix : demander envoie le lieu à ce service). Choisir un autre relevé l'interroge aussitôt sur le lieu où se tient l'enregistrement, et remplace ce que le premier avait apporté. Ailleurs, et partout où aucun relevé ne couvre le lieu, rien n'est demandé et rien n'est dit.
+        Ce qui est pris est celui du jour du relevé, qui n'est pas celui de l'enregistrement : gardez-le, déplacez-le, redimensionnez-le ou supprimez-le, comme n'importe quoi d'autre. De chaque sorte il n'apporte rien là où vous en avez placé vous-même (ce que vous avez placé reste), et jamais ajouté à un enregistrement qui est seulement chargé. Déplacer le témoin vers un autre lieu remplace ce qu'un relevé avait apporté pour le premier, et rien d'autre.</p>
       <p>Le relevé <strong>nomme</strong> aussi ce dont il connaît le nom. Un bâtiment prend le nom de la zone que la carte lui donne (<em>Mairie de Saint-Lô</em>, une poste, un beffroi), les parties de l'un étant numérotées ; un pont est nommé d'après la route qu'il porte (<em>Pont (Rue de Carentan)</em>), une portée de ligne d'après sa tension ; les autres sont numérotés comme tout ce que vous ajoutez. En France les <strong>routes</strong> de la scène viennent de la même carte, avec leurs noms, plutôt que d'OpenStreetMap, qui trop souvent ne répondait pas. Les bâtiments, comme les arbres, se tiennent sur le sol le plus bas sous eux, puisqu'ils sont construits dans la pente ; et une portée de ligne touche le sol à ses deux poteaux.</p>
-      <p>Le <strong>rayon</strong> à côté du choix dit jusqu'où autour de l'observateur le relevé est interrogé, de 20 m à 3 km (100 m par défaut, et le navigateur le retient) : un rayon plus large ramène les bâtiments, ponts et lignes plus éloignés, tirés de la carte. Le laser, qui donne les arbres, n'est interrogé que dans 150 m. Hors de France, où le laser n'a pas volé, les bâtiments viennent d'OpenStreetMap (tout ce que ses bénévoles ont écrit d'un bâtiment est dessiné : hauteur, toit, couleurs ; le reste est un bâtiment ordinaire), sans arbres ; on la choisit dans la liste des relevés pour l'avoir n'importe où.</p>
+      <p>Le <strong>rayon</strong> à côté du choix dit jusqu'où autour du témoin le relevé est interrogé, de 20 m à 3 km (100 m par défaut, et le navigateur le retient) : un rayon plus large ramène les bâtiments, ponts et lignes plus éloignés, tirés de la carte. Le laser, qui donne les arbres, n'est interrogé que dans 150 m. Hors de France, où le laser n'a pas volé, les bâtiments viennent d'OpenStreetMap (tout ce que ses bénévoles ont écrit d'un bâtiment est dessiné : hauteur, toit, couleurs ; le reste est un bâtiment ordinaire), sans arbres ; on la choisit dans la liste des relevés pour l'avoir n'importe où.</p>
       <p>Les <strong>lampadaires, feux, passages piétons et panneaux</strong> viennent avec tout relevé, d'OpenStreetMap ; à Paris les lampadaires viennent de l'inventaire de la ville elle-même (Paris Data), chaque lampe à sa place avec la couleur et le flux de sa lumière, l'orange d'une lampe au sodium comme le blanc d'une LED. OpenStreetMap est souvent lent ou en panne : la ligne sous le relevé dit alors que l'éclairage est attendu, et le plante quand il arrive, sans que vous ayez rien à faire (une étape de l'historique), ou dit qu'il n'est pas disponible pour l'instant, avec un bouton <strong>Réessayer</strong>.</p>
       <p>Pendant que le décor est recherché, un <strong>spinner</strong> couvre l'image ; choisir « Aucun » dans la liste des relevés arrête l'attente (ce que le relevé répond ensuite est jeté). Ce qui a été pris est <strong>daté</strong> : la ligne d'état donne le jour du vol du laser, de la photo aérienne et de la dernière édition de la carte, et chaque objet garde le jour le plus récent dont il est tiré (<code>surveyedOn</code>). Quand ce jour est <strong>postérieur à l'observation</strong>, un avertissement le dit, et continue de le dire si la date de l'observation est modifiée ensuite : le décor est alors un repère, pas ce qui se tenait là.</p>
       <p>Le <strong>toit</strong> d'un bâtiment est lu aussi : dans le laser, un toit à deux ou quatre pentes (et dans quel sens court son faîte) ou plat, le bâtiment montant alors jusqu'au faîte ; dans la photo aérienne, sa couleur (tuile, ardoise, zinc), prise sans le vert des arbres qui le recouvrent. Un toit que le relevé ne sait pas lire reste une simple boîte, pas une supposition.</p>
       <p>Les <strong>murs</strong> sont dessinés comme des murs : la couleur de la matière que la carte énonce pour eux (pierre, brique, béton, parpaing, bois ; un enduit clair, un peu différent d'une maison à l'autre, là où elle n'en énonce pas, soit deux bâtiments sur cinq), avec des fenêtres à chaque étage et une porte au rez-de-chaussée de la face avant. Ce sont les fenêtres typiques d'une façade, pas celles de cette maison, et certaines sont éclairées quand le Soleil est bien sous l'horizon : environ la moitié le soir, presque aucune de trois à cinq heures du matin, quelques-unes de plus à l'aube, selon l'heure de l'horloge (toujours les mêmes fenêtres, donc celles allumées à trois heures le sont encore à vingt et une). Les heures suivent l'enquête Emploi du temps de l'INSEE (2009-2010 : la moitié des couples dorment à 22 h 40 et la moitié sont levés à 7 h, neuf personnes sur dix dorment de 1 h à 6 h) ; la courbe entre ces points, les deux sur cent toujours debout et la moitié des fenêtres allumées quand tout le monde est debout sont des hypothèses. Tout ce qui concerne les murs et le toit (leur couleur, des murs nus, la forme du toit, sa hauteur et son faîte) peut ensuite être modifié dans les propriétés du bâtiment, comme n'importe quel autre décor.</p>
       <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Environnement s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Glissez l'objet sélectionné pour le porter sur le sol ; avec <kbd>Maj</kbd> il ne va qu'est-ouest, avec <kbd>Alt</kbd> que nord-sud, avec <kbd>Ctrl</kbd> que haut-bas. Maintenez <kbd>Cmd</kbd> (ou deux de ces touches) pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre.</p>
-      <p><strong>Plusieurs observateurs, et leurs points de vue.</strong> Un observateur placé ici peut porter
+      <p><strong>Plusieurs témoins, et leurs points de vue.</strong> Un témoin placé ici peut porter
         l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
         de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il
         regardait. Deux personnes à cent mètres l'une de l'autre n'ont pas vu la même chose, et
         pouvoir passer de l'une à l'autre est ce qui fait cesser d'être une affirmation pour devenir
         quelque chose à vérifier. Le bouton <strong>🎯</strong> en fait la version réduite : il
-        tourne l'observateur courant vers ce qui est sélectionné.</p>
-      <p>Publiés ensemble, ces enregistrements deviennent le sélecteur d'observateur que voit un
+        tourne le témoin courant vers ce qui est sélectionné.</p>
+      <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
         lecteur — voir <a href="/docs/format/#several-observers-the-case">le dossier</a> qui les liste.</p>
-      <p>Au-delà de la place et de la taille, un objet a les <strong>propriétés de son genre</strong>, dessinées d'après ce que le genre dit qu'il laisse régler : étages, étage où se tient l'observateur et une fenêtre par côté pour un bâtiment ; les fenêtres d'une voiture, dont le pare-brise et la lunette arrière ne s'ouvrent jamais ; la portée, le tablier et le garde-corps d'un pont ; les poteaux et le brin d'une ligne aérienne. Un champ vide ne dit rien et montre, en grisé, la valeur qu'utilise la scène. Un modèle porte ses propres couleurs : la <strong>Couleur</strong> unique n'est donc proposée que pour les formes de base ; un modèle peut offrir à la place la couleur d'une de ses parties — le costume d'une silhouette, les feuilles d'un arbre — ou un interrupteur d'une de ses parties — le train d'atterrissage rentré d'un avion de ligne — et tout autre réglage qui lui est propre, qui apparaissent ici de la même façon.</p>
+      <p>Au-delà de la place et de la taille, un objet a les <strong>propriétés de son genre</strong>, dessinées d'après ce que le genre dit qu'il laisse régler : étages, étage où se tient le témoin et une fenêtre par côté pour un bâtiment ; les fenêtres d'une voiture, dont le pare-brise et la lunette arrière ne s'ouvrent jamais ; la portée, le tablier et le garde-corps d'un pont ; les poteaux et le brin d'une ligne aérienne. Un champ vide ne dit rien et montre, en grisé, la valeur qu'utilise la scène. Un modèle porte ses propres couleurs : la <strong>Couleur</strong> unique n'est donc proposée que pour les formes de base ; un modèle peut offrir à la place la couleur d'une de ses parties — le costume d'une silhouette, les feuilles d'un arbre — ou un interrupteur d'une de ses parties — le train d'atterrissage rentré d'un avion de ligne — et tout autre réglage qui lui est propre, qui apparaissent ici de la même façon.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.
@@ -863,7 +863,7 @@ if (docs) {
         clignotantes des points à intervalles réguliers — c'est exactement ce qui distingue la photo
         d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
       <p>Les <strong>jeux de lampes prêts à l'emploi</strong> proposés pour un objet sont ceux qui conviennent au modèle dont il est dessiné, mis à l'échelle de la machine : on n'offre pas à un avion de ligne ceux d'un hélicoptère, une voiture de police reçoit ses gyrophares. Le modèle dit aussi quel bruit fait un aéronef en vol (un A350 s'entend comme un gros porteur, la doublure de quelque chose dont personne n'a rapporté le bruit est silencieuse) et donne son moteur à un véhicule.</p>
-      <p>Les <strong>feux d'un véhicule</strong> sont un réglage et non un interrupteur, car tout le monde ne les met pas, ni comme il faut : <strong>éteints</strong>, <strong>feux de position</strong> (qui montrent le véhicule et n'éclairent rien), <strong>feux de croisement</strong>, <strong>feux de route</strong> (loin, étroits, éblouissants) ou <strong>antibrouillards</strong> (bas et larges). On le choisit dans le groupe <em>État</em> de l'objet, à l'instant où l'on veut qu'il change : c'est écrit comme une image clé, comme l'interrupteur des lampes, et cela tient jusqu'à la suivante. Un faisceau éclaire vraiment la route, les bas-côtés, les arbres et les murs devant le véhicule. Le véhicule où roule l'observateur (le <code>vehicle</code> de l'enregistrement) met ses feux de croisement tout seul à partir du crépuscule, sauf si le fichier dit autre chose.</p>
+      <p>Les <strong>feux d'un véhicule</strong> sont un réglage et non un interrupteur, car tout le monde ne les met pas, ni comme il faut : <strong>éteints</strong>, <strong>feux de position</strong> (qui montrent le véhicule et n'éclairent rien), <strong>feux de croisement</strong>, <strong>feux de route</strong> (loin, étroits, éblouissants) ou <strong>antibrouillards</strong> (bas et larges). On le choisit dans le groupe <em>État</em> de l'objet, à l'instant où l'on veut qu'il change : c'est écrit comme une image clé, comme l'interrupteur des lampes, et cela tient jusqu'à la suivante. Un faisceau éclaire vraiment la route, les bas-côtés, les arbres et les murs devant le véhicule. Le véhicule où roule le témoin (le <code>vehicle</code> de l'enregistrement) met ses feux de croisement tout seul à partir du crépuscule, sauf si le fichier dit autre chose.</p>
     </div>
 
     <div class="group-doc">
@@ -873,9 +873,9 @@ if (docs) {
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Sources des données</strong>, derrière la roue dentée en haut à droite du groupe, <strong>Météo</strong>, dans le groupe <strong>Ciel</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle de l'observateur et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
+      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Sources des données</strong>, derrière la roue dentée en haut à droite du groupe, <strong>Météo</strong>, dans le groupe <strong>Ciel</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle du témoin et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
       <p>Une consultation écrit un point météo au début, à chaque heure pleine et à la fin de
-        l'enregistrement, chacun là où se tient l'observateur à ce moment ; la piste est redisposée
+        l'enregistrement, chacun là où se tient le témoin à ce moment ; la piste est redisposée
         quand la durée de l'enregistrement change.</p>
       <p>Le groupe a trois onglets à lui, une partie ouverte à la fois comme les groupes eux-mêmes :
         <strong>Précipitations</strong> — leur type et leur intensité, et la case
@@ -885,7 +885,7 @@ if (docs) {
         sa force, qui est ce qui porte tout nuage sans vent propre.</p>
       <p>Les nuages sont la partie <strong>Nuages</strong> de ce groupe. Un ciel relevé
         arrive en trois couches, les bandes basse, moyenne et haute du relevé ; un ciel décrit par
-        l'observateur en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
+        le témoin en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
         l'enregistrement dès qu'il est valide, et la première modification met la lecture en pause :
         rien n'est enregistré sous une tête de lecture qui bouge.</p>
       <p>La <strong>portée des modifications</strong> décide de quoi parle une modification.
@@ -916,7 +916,7 @@ if (docs) {
         individuel</strong> en pose un dans la couche, devant votre regard, à la base de la couche.
         Il est dessiné comme un nuage de la couche — même texture, mêmes bords — et ne diffère de
         ses voisins qu'en se tenant exactement où vous le dites, même avec la couverture de la
-        couche à 0 %. <strong>Pointer le nuage</strong> tourne l'observateur vers lui.
+        couche à 0 %. <strong>Pointer le nuage</strong> tourne le témoin vers lui.
         <strong>Supprimer ce nuage</strong> le retire.</p>
       <p>Cochez <strong>Sélectionner et déplacer les nuages dans le ciel</strong> et l'image
         elle-même devient la commande : cliquez un nuage pour le sélectionner, faites-le glisser pour
@@ -924,7 +924,7 @@ if (docs) {
         son cap et son altitude suivent le pointeur, et il ne passe jamais sous le sol. Décochez, et
         les clics redeviennent ceux du lecteur. Les champs numériques font le reste, et le font
         exactement : <strong>position est</strong> et <strong>nord</strong> en mètres depuis le point
-        de départ de l'observateur, sa propre <strong>base</strong>, son <strong>épaisseur</strong>, sa
+        de départ du témoin, sa propre <strong>base</strong>, son <strong>épaisseur</strong>, sa
         <strong>largeur</strong>, sa <strong>profondeur</strong> et sa <strong>rotation</strong>, sa
         <strong>densité</strong> et une <strong>obscurité</strong> qui, vide, est celle de la couche.
         Posez-le à deux instants et il dérive, grossit ou s'assombrit entre les deux ; par-dessus,
@@ -941,13 +941,13 @@ if (docs) {
         d'une comète est un problème résolu : la date et le lieu suffisent à décider des deux. Elle
         énonce ce qu'il y avait d'autre dans ce coin de ciel : la pluie et son taux au-dessus du fond
         sporadique, la comète et sa magnitude, toute nova ou supernova dont la courbe de lumière
-        relevée couvre cette nuit-là (le bouton 🌟 tourne l'observateur vers elle), si l'orbite basse
+        relevée couvre cette nuit-là (le bouton 🌟 tourne le témoin vers elle), si l'orbite basse
         était encore éclairée, si la Voie
         lactée ou la lumière zodiacale pouvaient seulement être vues. À partir de février 2021, elle
         nomme aussi les satellites qui ont réellement traversé ce ciel assez brillants pour être vus,
-        le plus brillant avec l'heure de son passage à la montre de l'observateur, et dit quand certains
+        le plus brillant avec l'heure de son passage à la montre du témoin, et dit quand certains
         formaient un train de Starlink ; le bouton 🛰 amène la tête de lecture sur chaque passage tour
-        à tour, du plus brillant au plus faible, et tourne l'observateur vers lui. 🌠 et ☄ font de
+        à tour, du plus brillant au plus faible, et tourne le témoin vers lui. 🌠 et ☄ font de
         même pour le prochain météore et pour la comète. Quand l'instrument va plus loin que la
         magnitude 9, la ligne précise que les étoiles ne sont dessinées que jusqu'où va le catalogue
         de ce projet ; et un arc-en-ciel n'est mentionné que si de la pluie a été signalée.
@@ -979,8 +979,8 @@ if (docs) {
         engin reste sur l'engin.</p>
       <p>La <strong>fréquence d'échantillonnage</strong> est la cadence à laquelle le curseur est lu
         pendant l'enregistrement.</p>
-      <p>Le sélecteur au-dessus du rendu, <strong>Compte rendu</strong>, dit comment le compte rendu est dessiné et édité : <em>2D · formes</em>, les angles que l'observateur a dessinés, ou <em>3D · corps</em>, ce qu'il a dit qu'ils étaient. En choisir un ouvre la partie correspondante de ce groupe, et ouvrir une partie règle le sélecteur ; une lecture d'un compte rendu n'a pas de formes, donc pas de sélecteur. Voilà pour les <strong>Formes</strong> du groupe : ce que l'observateur a dessiné. Ses
-        <strong>Corps</strong> sont ce que l'observateur a dit que ces formes étaient, en 3D : chaque
+      <p>Le sélecteur au-dessus du rendu, <strong>Compte rendu</strong>, dit comment le compte rendu est dessiné et édité : <em>2D · formes</em>, les angles que le témoin a dessinés, ou <em>3D · corps</em>, ce qu'il a dit qu'ils étaient. En choisir un ouvre la partie correspondante de ce groupe, et ouvrir une partie règle le sélecteur ; une lecture d'un compte rendu n'a pas de formes, donc pas de sélecteur. Voilà pour les <strong>Formes</strong> du groupe : ce que le témoin a dessiné. Ses
+        <strong>Corps</strong> sont ce que le témoin a dit que ces formes étaient, en 3D : chaque
         corps désigne les formes qu'il représente et le modèle qui le dessine, une forme de base, un
         modèle du catalogue, ou un fichier glTF à une adresse. Cette adresse peut être relative au
         fichier de l'enregistrement : un <code>sighting.json</code> et le <code>craft.gltf</code> posé
@@ -989,9 +989,9 @@ if (docs) {
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
         seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
-        entre avant ; sans forme, là où l'observateur regarde. 🎯 tourne l'observateur vers le corps. Un
+        entre avant ; sans forme, là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
         enregistrement peut ne tenir que des corps : sa dernière forme se supprime.
-        <strong>À</strong> la tête de lecture, la position du corps (depuis l'observateur, ou dans le
+        <strong>À</strong> la tête de lecture, la position du corps (depuis le témoin, ou dans le
         monde), sa taille et son attitude sont affichées telles qu'elles sont à cet instant ; en
         modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
         déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
@@ -1018,12 +1018,12 @@ if (docs) {
       magnitude et sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
       de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
       planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
-      aussi : un bâtiment, un arbre, un autre observateur. Avec <kbd>Alt</kbd> enfoncée, un objet de
+      aussi : un bâtiment, un arbre, un autre témoin. Avec <kbd>Alt</kbd> enfoncée, un objet de
       l'environnement dit aussi sa taille et sa distance à l'œil (« Arbre 19 — 2 × 2 × 11,8 m, à 540 m ») :
       la mesure n'est prise qu'alors.</p>
     <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
       étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
-      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait l'observateur.</p>
+      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait le témoin.</p>
   </div>
 </section>
 
@@ -1037,13 +1037,13 @@ if (docs) {
           déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être visible, posez-lui un
           keyframe à transparence 1.</li>
         <li><strong>L'énoncé l'emporte sur le déduit.</strong> « Il est entré dans un nuage » est
-          énoncé par l'observateur, jamais calculé par la géométrie : ce format décrit une apparence
+          énoncé par le témoin, jamais calculé par la géométrie : ce format décrit une apparence
           dans un champ de vision, pas une position dans l'espace, donc rien en lui <em>ne peut</em>
           savoir si un nuage s'est interposé.</li>
         <li><strong>En pause, tout est en pause.</strong> Pluie qui tombe, scintillement des étoiles,
           éclairs, reflets d'objectif, ambiances sonores — tout s'arrête avec le lecteur. Une lecture
           en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
-          pièce, pas la soirée de l'observateur.</li>
+          pièce, pas la soirée du témoin.</li>
         <li><strong>Hors de vue, rien ne tourne.</strong> Une scène qu'on a fait défiler, ou dans un
           panneau fermé, ne dessine ni ne calcule rien, et une lecture en cours est mise en pause.
           Elle est redessinée à son retour, et c'est le bouton de lecture qui relance la lecture.</li>
@@ -1065,7 +1065,7 @@ if (docs) {
       <p>Le son est <em>synthétisé</em> à partir de cette description, exactement comme la forme est
         dessinée à partir de la sienne, sans un octet d'audio embarqué. Un enregistrement qui a
         réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
-        deux silences : <em>aucun</em> signifie que l'observateur a déclaré n'avoir rien entendu ;
+        deux silences : <em>aucun</em> signifie que le témoin a déclaré n'avoir rien entendu ;
         l'absence totale de piste sonore signifie que personne ne le lui a demandé.</p>
       <p>Intensité et hauteur glissent d'une image clé à l'autre ; le timbre et le fichier audio
         changent à l'image clé. Un fichier audio sur un autre site doit être servi à toute origine
@@ -1084,16 +1084,16 @@ if (docs) {
         lecteur la fera glisser ensuite.</p>
       <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
         pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
-        l'observateur), <strong>molette</strong> pour son
+        le témoin), <strong>molette</strong> pour son
         champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
-        <strong>champ vertical</strong>, ou <strong>prenez la pose de l'observateur</strong> comme point de
+        <strong>champ vertical</strong>, ou <strong>prenez la pose du témoin</strong> comme point de
         départ. Pour mesurer plutôt qu'estimer, <strong>Ajouter un repère</strong> arme deux clics : un
         détail sur la photo, puis le même détail dans le rendu. Deux repères tournent la photo pour les
         faire coïncider, trois ou plus ajustent aussi son champ ; chacun a un nom et un écart, vert
         jusqu'à un degré, orange jusqu'à trois, rouge au-delà, et chaque extrémité se déplace.
-        <strong>Adopter comme pose de l'observateur</strong> écrit alors cap, assiette et roulis ajustés dans
+        <strong>Adopter comme pose du témoin</strong> écrit alors cap, assiette et roulis ajustés dans
         la pose au point de lecture, comme une mesure, avec sa provenance. <strong>Photos de rue à
-        proximité</strong> demande à Panoramax les photos prises à moins de 300 m de l'observateur, chacune
+        proximité</strong> demande à Panoramax les photos prises à moins de 300 m du témoin, chacune
         arrivant déjà recalée en cap.</p>
       <p><strong>Chercher les reflets</strong> cherche dans la photo choisie les reflets fantômes de
         l'objectif : les copies pâles d'une lumière vive que renvoie le verre de l'objectif, chacune de
@@ -1112,10 +1112,10 @@ if (docs) {
         sont affichés sur la scène et sur la carte dans leur couleur propre, en pointillés sur la carte,
         comme ceux de l'enquêteur et non de la reconstitution : rien n'est ajusté sur eux, et chacun est
         crédité au fichier d'où il vient tant que vous n'avez pas mieux à dire. Renommez-en un, indiquez sa
-        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous. Les noms s'affichent à côté de ce qu'ils nomment, sur la scène comme sur la carte ; la carte s'élargit pour cadrer ce qui est proche de l'observateur (une ligne qui file vers l'horizon est laissée filer), et chaque source figure dans les crédits. Les traces GPS (<code>gx:Track</code>) sont lues comme des lignes.</p>
+        <strong>source</strong>, ou supprimez-le ; le lecteur offre un bouton pour les masquer tous. Les noms s'affichent à côté de ce qu'ils nomment, sur la scène comme sur la carte ; la carte s'élargit pour cadrer ce qui est proche du témoin (une ligne qui file vers l'horizon est laissée filer), et chaque source figure dans les crédits. Les traces GPS (<code>gx:Track</code>) sont lues comme des lignes.</p>
       <p>Une photo ne vaut que depuis un point : la recaler enregistre donc aussi <em>d'où</em> elle a
-        été recalée, la position de l'observateur à la tête de lecture. En lecture, elle s'efface en
-        fondu quand l'observateur s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
+        été recalée, la position du témoin à la tête de lecture. En lecture, elle s'efface en
+        fondu quand le témoin s'éloigne de ce point (entière à moins de 2 m, disparue au-delà de
         20 m) et revient quand il y retourne, plutôt que de montrer une comparaison qui ne tient plus.</p>
     </div>
 
@@ -1185,8 +1185,8 @@ if (docs) {
     <p>La dirección puede ser el <code>case.json</code> de un caso. El editor muestra entonces <strong>el caso</strong> arriba y, dentro del mismo contenedor, la observación que se edita en un contenedor aparte. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
     <ul class="plain">
       <li><strong>El caso</strong> tiene un <em>identificador</em>, un <em>título</em> y una fecha — el mismo selector, el mismo calificativo y el mismo texto EDTF que el inicio de una observación — y <em>Guardar</em> arriba a la derecha.</li>
-      <li><strong>Observaciones</strong>: un selector lista las grabaciones del caso, los relatos de los observadores y las lecturas que se hacen de ellos, cada una una grabación aparte. Elegir una la abre debajo, y lo que se cambió en las demás se conserva.</li>
-      <li>Un relato tiene un <strong>identificador</strong> en el caso, por el que una lectura lo designa: propuesto a partir del apellido del observador (<code>trent</code>, luego <code>trent-2</code> si está tomado) y mostrado en gris mientras no se conserva, o escrito. Se compone de letras, dígitos, guiones y guiones bajos, y ningún otro evento del caso puede tenerlo. Cambiarlo lo cambia en todas las lecturas que lo designaban, y no puede vaciarse mientras alguna lo haga. Una lectura que designa un identificador que nada tiene se señala sobre las grabaciones.</li>
+      <li><strong>Observaciones</strong>: un selector lista las grabaciones del caso, los relatos de los testigos y las lecturas que se hacen de ellos, cada una una grabación aparte. Elegir una la abre debajo, y lo que se cambió en las demás se conserva.</li>
+      <li>Un relato tiene un <strong>identificador</strong> en el caso, por el que una lectura lo designa: propuesto a partir del apellido del testigo (<code>trent</code>, luego <code>trent-2</code> si está tomado) y mostrado en gris mientras no se conserva, o escrito. Se compone de letras, dígitos, guiones y guiones bajos, y ningún otro evento del caso puede tenerlo. Cambiarlo lo cambia en todas las lecturas que lo designaban, y no puede vaciarse mientras alguna lo haga. Una lectura que designa un identificador que nada tiene se señala sobre las grabaciones.</li>
       <li><strong>+</strong> añade una grabación: en blanco, desde un archivo o desde una dirección. Nombre un relato en el último campo, <em>Interpretación de</em>, y lo que se añade es una lectura de él — otra observación, que el caso lista marcada <code>interpretationOf</code>, fechada y firmada. En blanco, empieza como una copia de toda la escena del relato que lee.</li>
       <li>La <strong>papelera</strong> quita del caso la grabación mostrada; su archivo no se borra. Una observación que una lectura aún interpreta no se puede quitar: elimine antes sus lecturas. Un caso conserva al menos una grabación.</li>
       <li><strong>Guardar</strong> pregunta si guardar también las observaciones: sí escribe un zip del caso y de cada observación a su lado, no escribe solo <code>case.json</code>.</li>
@@ -1229,7 +1229,7 @@ if (docs) {
       </li>
     </ol>
     <p class="small">Bajo la barra de reproducción, una marca señala cada fotograma clave de lo que
-      edita el grupo abierto (las formas seleccionadas, el observador, el tiempo, el sonido; todos ellos
+      edita el grupo abierto (las formas seleccionadas, el testigo, el tiempo, el sonido; todos ellos
       desde los demás grupos), y una marca ámbar más alta cada momento con nombre. Una pulsación a pocos
       píxeles de una de ellas cae exactamente sobre ella, la barra la nombra bajo el puntero, y
       <strong>◂◆</strong> / <strong>◆▸</strong> van a la anterior o a la siguiente: así se modifica un
@@ -1253,7 +1253,7 @@ if (docs) {
         <strong>ID</strong>, una <strong>Descripción</strong>, unas <strong>Etiquetas</strong>. El ID es
         el propio de este relato, el día y luego quién lo vio (<code>1964-04-24-ZamoraLonnie</code>); un
         registro no nombra su caso, es <a href="/docs/format/#several-observers-the-case">el caso</a>
-        el que nombra sus relatos y da a una página su selector de observador.</p>
+        el que nombra sus relatos y da a una página su selector de testigo.</p>
     </div>
 
     <div class="group-doc">
@@ -1276,7 +1276,7 @@ if (docs) {
         fotografía a medida que la escena se asienta.</p>
       <p>El <strong>Alabeo</strong> está aquí y no con el lugar, porque indica cómo se
         <em>sostenía</em> el aparato (una cámara torcida, una cabeza inclinada), no dónde estaba el
-        observador.</p>
+        testigo.</p>
       <p>Un aparato que registra una imagen pone los <strong>reflejos de su objetivo</strong> sobre cada luz: copias más débiles y
         desenfocadas sobre la recta que pasa por el centro de la imagen, simétricas respecto a él para el reflejo principal de un teléfono.
         Bajo el instrumento, <strong>A través de</strong> indica qué había delante del objetivo (un filtro, una ventana, un parabrisas, cada
@@ -1290,7 +1290,7 @@ if (docs) {
       <h3>Lugar</h3>
       <p>Un relato nombra un lugar, no da coordenadas. Así que escribe el nombre y pulsa
         <strong>Localizar</strong>: la latitud y la longitud se rellenan con el geocodificador de
-        OpenStreetMap, todos los candidatos siguen en la lista, y elegir otro desplaza al observador. Lo
+        OpenStreetMap, todos los candidatos siguen en la lista, y elegir otro desplaza al testigo. Lo
         que se guarda es el nombre <em>completo</em> que se resolvió, para que un lector posterior
         llegue al mismo punto. Mueve una coordenada a mano y un nombre procedente de una búsqueda se
         vuelve a derivar, o se borra: un nombre que describiera un sitio donde el avistamiento ya no
@@ -1298,13 +1298,13 @@ if (docs) {
         tal cual y nunca se sustituye, aunque ninguna búsqueda lo encuentre.</p>
       <p>La <strong>Orientación</strong> es la dirección hacia la que se mira, la <strong>Inclinación</strong>,
         cuánto hacia arriba o hacia abajo, y la <strong>Altitud</strong> se mide sobre el nivel del mar,
-        con el suelo de ese lugar como mínimo: un observador en los Alpes no está a 0 m. Las fuentes de
+        con el suelo de ese lugar como mínimo: un testigo en los Alpes no está a 0 m. Las fuentes de
         relieve y de imágenes se eligen aquí mismo, bajo las coordenadas cuyo terreno describen.</p>
       <p>Posición, rumbo e inclinación se escriben en el cabezal de reproducción, como un fotograma
-        clave de la trayectoria del observador: ajústalos en otro momento y el observador se desplaza o
+        clave de la trayectoria del testigo: ajústalos en otro momento y el testigo se desplaza o
         gira entre ambos.</p>
       <p>El <strong>mapa</strong> sobre el render hace lo mismo con la posición: haz clic en el
-        terreno y el observador se sitúa allí en el cabezal de reproducción, exactamente como si se
+        terreno y el testigo se sitúa allí en el cabezal de reproducción, exactamente como si se
         hubieran escrito ambas coordenadas. La rueda hace zoom alrededor del puntero, un arrastre mueve
         el terreno, y <strong>+</strong>, <strong>−</strong> y <strong>⤢</strong> (volver a la
         trayectoria completa) están ahí para quien no tenga ni lo uno ni lo otro.</p>
@@ -1313,7 +1313,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Fecha</h3>
       <p>Un inicio, un final, una duración y una <strong>Zona horaria</strong>, que es la regla y no
-        la cifra. Elige la zona propia del observador y el desfase se deriva de las reglas de esa zona
+        la cifra. Elige la zona propia del testigo y el desfase se deriva de las reglas de esa zona
         <em>en la fecha de la observación</em>: Valensole en julio de 1965 da UTC+1, no el UTC+2 de hoy,
         porque Francia no reintrodujo el horario de verano hasta 1976.</p>
       <p>La zona se rellena a partir de las coordenadas, y nunca sustituye a una que tú hayas
@@ -1331,32 +1331,32 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Entorno</h3>
-      <p>Lo que había alrededor del observador, a una distancia real hacia el este y el norte:
+      <p>Lo que había alrededor del testigo, a una distancia real hacia el este y el norte:
         edificios con sus plantas y ventanas, árboles, farolas, vehículos, aeronaves y <strong>otros
-        observadores</strong>. Es lo único que puede poner una cifra a una distancia: si el objeto pasó
+        testigos</strong>. Es lo único que puede poner una cifra a una distancia: si el objeto pasó
         <em>por detrás</em> de ese hangar, estaba al menos así de lejos; si pasó <em>por delante</em>
         de ese árbol, como mucho. Cada cruce acota por un lado la anchura real del objeto para todo el
         registro; el resultado aparece bajo el tamaño aparente, y dice «desconocida» cuando nada cruza
         su línea de visión, que es la respuesta honesta para la mayoría de los avistamientos.</p>
-      <p><strong>El decorado llega solo, donde un lugar ha sido levantado.</strong> Cuando das un lugar al registro (por su nombre, por sus coordenadas o moviendo al observador), el editor pregunta al levantamiento que lo cubre qué hay en cien metros a la redonda, y pone cada árbol, edificio, puente y vano de línea eléctrica en la lista, en su lugar, altura y anchura medidos: en Francia, el LiDAR HD del IGN (un barrido aéreo de todo el país) para árboles y edificios, y su mapa para puentes y líneas aéreas, con su tensión. Nada que pulsar. Una línea bajo la lista dice cuántos se encontraron, y una elección a su lado dice de qué levantamiento viene: <em>IGN LiDAR HD + BD TOPO</em> (por defecto, el que más sabe), el láser solo, el mapa solo, o <em>Archivo</em>, que mantiene el decorado que dice el registro y ya no pide ningún levantamiento, aunque el observador se mueva (la elección es del registro, y remite a su elemento de la pestaña Archivos), o <em>Ninguno</em>, que deja el decorado a tu cargo y quita lo que un levantamiento había traído (Deshacer lo devuelve; lo que colocaste se queda; el navegador recuerda la elección: consultar envía el lugar a ese servicio). Elegir otro levantamiento lo consulta de inmediato sobre el lugar donde está el registro, y sustituye lo que trajo el primero. En otros sitios, y donde ningún levantamiento cubre el lugar, no se pregunta nada y no se dice nada.
-        Lo que se toma es del día del levantamiento, que no es el del registro: consérvalo, muévelo, cámbiale el tamaño o elimínalo, como cualquier otra cosa. De cada tipo no aporta nada donde has colocado alguno tú (lo que colocaste se queda), y nunca se añade a un registro que solo se ha cargado. Mover al observador a otro lugar sustituye lo que un levantamiento aportó para el primero, y nada más.</p>
+      <p><strong>El decorado llega solo, donde un lugar ha sido levantado.</strong> Cuando das un lugar al registro (por su nombre, por sus coordenadas o moviendo al testigo), el editor pregunta al levantamiento que lo cubre qué hay en cien metros a la redonda, y pone cada árbol, edificio, puente y vano de línea eléctrica en la lista, en su lugar, altura y anchura medidos: en Francia, el LiDAR HD del IGN (un barrido aéreo de todo el país) para árboles y edificios, y su mapa para puentes y líneas aéreas, con su tensión. Nada que pulsar. Una línea bajo la lista dice cuántos se encontraron, y una elección a su lado dice de qué levantamiento viene: <em>IGN LiDAR HD + BD TOPO</em> (por defecto, el que más sabe), el láser solo, el mapa solo, o <em>Archivo</em>, que mantiene el decorado que dice el registro y ya no pide ningún levantamiento, aunque el testigo se mueva (la elección es del registro, y remite a su elemento de la pestaña Archivos), o <em>Ninguno</em>, que deja el decorado a tu cargo y quita lo que un levantamiento había traído (Deshacer lo devuelve; lo que colocaste se queda; el navegador recuerda la elección: consultar envía el lugar a ese servicio). Elegir otro levantamiento lo consulta de inmediato sobre el lugar donde está el registro, y sustituye lo que trajo el primero. En otros sitios, y donde ningún levantamiento cubre el lugar, no se pregunta nada y no se dice nada.
+        Lo que se toma es del día del levantamiento, que no es el del registro: consérvalo, muévelo, cámbiale el tamaño o elimínalo, como cualquier otra cosa. De cada tipo no aporta nada donde has colocado alguno tú (lo que colocaste se queda), y nunca se añade a un registro que solo se ha cargado. Mover al testigo a otro lugar sustituye lo que un levantamiento aportó para el primero, y nada más.</p>
       <p>El levantamiento también <strong>nombra</strong> lo que conoce por su nombre. Un edificio toma el nombre de la zona que el mapa le da (<em>Mairie de Saint-Lô</em>, una oficina de correos, un campanario), numerándose las partes de uno; un puente se nombra por la carretera que lleva (<em>Puente (Rue de Carentan)</em>), un vano de línea por su tensión; los demás se numeran como todo lo que añades. En Francia las <strong>carreteras</strong> de la escena vienen del mismo mapa, con sus nombres, en lugar de OpenStreetMap, que con demasiada frecuencia no respondía. Los edificios, como los árboles, se asientan en el suelo más bajo bajo ellos, pues se construyen en la pendiente; y un vano de línea toca el suelo en sus dos postes.</p>
-      <p>El <strong>radio</strong> junto a la elección dice hasta dónde alrededor del observador se consulta el levantamiento, de 20 m a 3 km (100 m por defecto, y el navegador lo recuerda): un radio mayor trae los edificios, puentes y líneas más lejanos, tomados del mapa. El láser, que da los árboles, solo se consulta dentro de 150 m. Fuera de Francia, donde el láser no ha volado, los edificios vienen de OpenStreetMap (todo lo que sus voluntarios escribieron de un edificio se dibuja: altura, tejado, colores; el resto es un edificio ordinario), sin árboles; se elige en la lista de levantamientos para tenerla en cualquier parte.</p>
+      <p>El <strong>radio</strong> junto a la elección dice hasta dónde alrededor del testigo se consulta el levantamiento, de 20 m a 3 km (100 m por defecto, y el navegador lo recuerda): un radio mayor trae los edificios, puentes y líneas más lejanos, tomados del mapa. El láser, que da los árboles, solo se consulta dentro de 150 m. Fuera de Francia, donde el láser no ha volado, los edificios vienen de OpenStreetMap (todo lo que sus voluntarios escribieron de un edificio se dibuja: altura, tejado, colores; el resto es un edificio ordinario), sin árboles; se elige en la lista de levantamientos para tenerla en cualquier parte.</p>
       <p>Las <strong>farolas, semáforos, pasos de peatones y señales</strong> llegan con cualquier levantamiento, de OpenStreetMap; en París las farolas vienen del inventario de la propia ciudad (Paris Data), cada lámpara en su sitio con el color y el flujo de su luz, el naranja de una lámpara de sodio como el blanco de un LED. OpenStreetMap suele ser lento o estar caído: la línea bajo el levantamiento dice entonces que se espera el alumbrado, y lo planta cuando llega, sin que tengas que hacer nada (un paso del historial), o dice que no está disponible por ahora, con un botón <strong>Reintentar</strong>.</p>
       <p>Mientras se busca el decorado, un <strong>indicador de carga</strong> cubre la imagen; elegir «Ninguno» en la lista de levantamientos detiene la espera (lo que el levantamiento responda después se descarta). Lo tomado está <strong>fechado</strong>: la línea de estado da el día del vuelo del láser, de la foto aérea y de la última edición del mapa, y cada objeto conserva el día más reciente del que se extrajo (<code>surveyedOn</code>). Cuando ese día es <strong>posterior a la observación</strong>, una advertencia lo dice, y sigue diciéndolo si después se cambia la fecha de la observación: el decorado es entonces una referencia, no lo que había allí.</p>
       <p>El <strong>tejado</strong> de un edificio también se lee: en el láser, un tejado de dos o cuatro vertientes (y hacia dónde corre su cumbrera) o plano, con el edificio llegando entonces hasta la cumbrera; en la foto aérea, su color (teja, pizarra, zinc), tomado sin el verde de los árboles que lo cubren. Un tejado que el levantamiento no sabe leer sigue siendo una simple caja, no una suposición.</p>
       <p>Los <strong>muros</strong> se dibujan como muros: el color del material que el mapa enuncia para ellos (piedra, ladrillo, hormigón, bloque, madera; un enlucido claro, algo distinto de una casa a otra, donde no enuncia ninguno, es decir, dos edificios de cada cinco), con ventanas en cada planta y una puerta en la planta baja de la cara frontal. Son las ventanas típicas de una fachada, no las de esa casa, y algunas están encendidas cuando el Sol está bien bajo el horizonte: cerca de la mitad por la tarde, casi ninguna de las tres a las cinco de la madrugada, algunas más al amanecer, según la hora del reloj (siempre las mismas ventanas, así que las encendidas a las tres lo están también a las veintiuna). Las horas siguen la encuesta de empleo del tiempo del INSEE (2009-2010: la mitad de las parejas duerme a las 22:40 y la mitad está levantada a las 7:00, nueve de cada diez duermen de 1:00 a 6:00); la curva entre esos puntos, los dos de cada cien siempre despiertos y la mitad de las ventanas encendidas cuando todos están despiertos son hipótesis. Todo lo de los muros y el tejado (su color, muros lisos, la forma del tejado, su altura y su cumbrera) se puede editar después en las propiedades del edificio, como cualquier otro decorado.</p>
       <p><strong>Haz clic en un objeto de la imagen para seleccionarlo:</strong> el grupo Entorno se abre sobre él, enmarcado, listo para moverlo, dimensionarlo o girarlo. Mantén <kbd>Mayús</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Cmd</kbd> al pulsar y lo que gira es la vista, como sobre el suelo desnudo: la manera de girarla desde un bosque, donde cada pulsación cae sobre un árbol.</p>
-      <p><strong>Varios observadores y sus puntos de vista.</strong> Un observador colocado aquí puede
+      <p><strong>Varios testigos y sus puntos de vista.</strong> Un testigo colocado aquí puede
         llevar la URL de su <em>propio</em> registro, y un clic derecho sobre él en la escena ofrece
         verlo: eso carga su relato y te sitúa donde él estaba, mirando hacia donde él miraba.
         Dos personas a cien metros una de otra no vieron lo mismo, y poder pasar de una a otra es lo que
         hace que eso deje de ser una afirmación y se convierta en algo que comprobar. El botón
-        <strong>🎯</strong> hace la versión reducida de lo mismo: gira al observador actual hacia lo
+        <strong>🎯</strong> hace la versión reducida de lo mismo: gira al testigo actual hacia lo
         que esté seleccionado.</p>
-      <p>Publicados juntos, esos registros se convierten en el selector de observador que recibe un
+      <p>Publicados juntos, esos registros se convierten en el selector de testigo que recibe un
         lector: véase <a href="/docs/format/#several-observers-the-case">el caso</a> que los enumera.</p>
-      <p>Más allá de la posición y el tamaño, un objeto tiene las <strong>propiedades de su tipo</strong>, dibujadas según lo que el tipo dice que deja ajustar: plantas, planta donde está el observador y una ventana por lado para un edificio; las ventanas de un coche, cuyo parabrisas y luneta trasera nunca se abren; la luz, el tablero y la barandilla de un puente; los postes y el hilo de una línea aérea. Un campo vacío no dice nada y muestra, en gris, el valor que usa la escena. Un modelo lleva sus propios colores: el <strong>Color</strong> único solo se ofrece para las formas básicas; un modelo puede ofrecer en su lugar el color de una de sus partes —el traje de una figura, las hojas de un árbol— o un interruptor de una de sus partes —el tren de aterrizaje recogido de un avión— y cualquier otro ajuste propio, que aparecen aquí del mismo modo.</p>
+      <p>Más allá de la posición y el tamaño, un objeto tiene las <strong>propiedades de su tipo</strong>, dibujadas según lo que el tipo dice que deja ajustar: plantas, planta donde está el testigo y una ventana por lado para un edificio; las ventanas de un coche, cuyo parabrisas y luneta trasera nunca se abren; la luz, el tablero y la barandilla de un puente; los postes y el hilo de una línea aérea. Un campo vacío no dice nada y muestra, en gris, el valor que usa la escena. Un modelo lleva sus propios colores: el <strong>Color</strong> único solo se ofrece para las formas básicas; un modelo puede ofrecer en su lugar el color de una de sus partes —el traje de una figura, las hojas de un árbol— o un interruptor de una de sus partes —el tren de aterrizaje recogido de un avión— y cualquier otro ajuste propio, que aparecen aquí del mismo modo.</p>
       <p>El decorado también puede <strong>moverse</strong> (un avión que cruza el cielo, un coche que
         pasa) y llevar <strong>luces</strong> con cadencias de destello reales y reglamentarias: balizas
         anticolisión de 40 a 100 por minuto, luces de emergencia de 60 a 120. En una exposición larga
@@ -1364,7 +1364,7 @@ if (docs) {
         intervalos regulares, y así es exactamente como se distingue la fotografía de un avión de línea
         de la de algo que no parpadea.</p>
       <p>Los <strong>juegos de luces ya preparados</strong> que se ofrecen para un objeto son los que convienen al modelo con que se dibuja, a la escala de la máquina: a un avión de línea no se le ofrecen los de un helicóptero, un coche de policía recibe sus balizas. El modelo dice también qué ruido hace una aeronave en vuelo (un A350 se oye como un gran avión, un sustituto de algo cuyo ruido nadie refirió es silencioso) y da su motor a un vehículo.</p>
-      <p>Las <strong>luces de un vehículo</strong> son un ajuste y no un interruptor, porque no todo el mundo las enciende, ni como debe: <strong>apagadas</strong>, <strong>luces de posición</strong> (que muestran el vehículo y no iluminan nada), <strong>luces de cruce</strong>, <strong>luces de carretera</strong> (lejos, estrechas, deslumbrantes) o <strong>faros antiniebla</strong> (bajos y anchos). Se elige en el grupo <em>Estado</em> del objeto, en el instante en que se quiere que cambie: se escribe como un fotograma clave, como el interruptor de las lámparas, y vale hasta el siguiente. Un haz ilumina de verdad la carretera, los arcenes, los árboles y las paredes delante del vehículo. El vehículo en el que va el observador (el <code>vehicle</code> de la grabación) enciende solo las luces de cruce desde el crepúsculo, salvo que el archivo diga otra cosa.</p>
+      <p>Las <strong>luces de un vehículo</strong> son un ajuste y no un interruptor, porque no todo el mundo las enciende, ni como debe: <strong>apagadas</strong>, <strong>luces de posición</strong> (que muestran el vehículo y no iluminan nada), <strong>luces de cruce</strong>, <strong>luces de carretera</strong> (lejos, estrechas, deslumbrantes) o <strong>faros antiniebla</strong> (bajos y anchos). Se elige en el grupo <em>Estado</em> del objeto, en el instante en que se quiere que cambie: se escribe como un fotograma clave, como el interruptor de las lámparas, y vale hasta el siguiente. Un haz ilumina de verdad la carretera, los arcenes, los árboles y las paredes delante del vehículo. El vehículo en el que va el testigo (el <code>vehicle</code> de la grabación) enciende solo las luces de cruce desde el crepúsculo, salvo que el archivo diga otra cosa.</p>
     </div>
 
     <div class="group-doc">
@@ -1374,9 +1374,9 @@ if (docs) {
         reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
         conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
         antes de notarse en el cielo.</p>
-      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> (en <strong>Fuentes de datos</strong>, tras el engranaje arriba a la derecha del grupo, <strong>Tiempo</strong>, en el grupo <strong>Cielo</strong>) lee el tiempo del archivo del registro (dentro de él, o en un archivo junto a él: véase la pestaña Archivos) y ya no lo pide a nadie: los valores siguen siendo los que eran, con el registro del que vienen, y los campos se vuelven editables; cambiado, el tiempo pasa a ser el del observador y el registro deja de nombrarse. Un registro que nombra una fuente se reproduce exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee igual sin conexión.</p>
+      <p>Elegir <strong>Archivo</strong> en lugar de <strong>Open-Meteo</strong> (en <strong>Fuentes de datos</strong>, tras el engranaje arriba a la derecha del grupo, <strong>Tiempo</strong>, en el grupo <strong>Cielo</strong>) lee el tiempo del archivo del registro (dentro de él, o en un archivo junto a él: véase la pestaña Archivos) y ya no lo pide a nadie: los valores siguen siendo los que eran, con el registro del que vienen, y los campos se vuelven editables; cambiado, el tiempo pasa a ser el del testigo y el registro deja de nombrarse. Un registro que nombra una fuente se reproduce exactamente como se compuso y nunca se vuelve a consultar, así que un caso publicado se lee igual sin conexión.</p>
       <p>Una consulta escribe un fotograma clave meteorológico al inicio, en cada hora en punto y al
-        final del registro, cada uno allí donde está el observador en ese momento; la pista se vuelve a
+        final del registro, cada uno allí donde está el testigo en ese momento; la pista se vuelve a
         disponer cuando cambia la duración del registro.</p>
       <p>El grupo tiene tres pestañas propias, con una parte abierta a la vez como los propios grupos:
         <strong>Precipitación</strong> (su tipo y su intensidad, y la casilla
@@ -1385,7 +1385,7 @@ if (docs) {
         <strong>Nubes</strong>, y <strong>Viento</strong>, la dirección hacia la que sopla y su
         velocidad, que es lo que arrastra toda nube que no tenga viento propio.</p>
       <p>Las nubes son la parte <strong>Nubes</strong> de este grupo. Un cielo consultado llega como
-        tres capas, las bandas baja, media y alta del registro; un cielo descrito por el observador
+        tres capas, las bandas baja, media y alta del registro; un cielo descrito por el testigo
         tiene tantas como vio. Cada número del panel se escribe en el registro en cuanto es válido, y la
         primera edición pone en pausa la reproducción, de modo que nada se consigna con el cabezal en
         movimiento.</p>
@@ -1414,12 +1414,12 @@ if (docs) {
         pasó el fenómeno, la que estaba allí y en ningún otro sitio. <strong>Añadir nube individual</strong> coloca una en la capa, delante de donde miras, a la base de la capa.
         Se dibuja como una más de la capa (la misma textura, los mismos bordes) y solo se diferencia de
         sus vecinas en que está exactamente donde tú dices, incluso con la cobertura de la capa al
-        0 %. <strong>Apuntar a la nube</strong> gira al observador hacia ella. <strong>Eliminar nube</strong> la quita.</p>
+        0 %. <strong>Apuntar a la nube</strong> gira al testigo hacia ella. <strong>Eliminar nube</strong> la quita.</p>
       <p>Marca <strong>Seleccionar y arrastrar nubes en el cielo</strong> y la propia imagen se
         convierte en el control: haz clic en una nube para seleccionarla, arrástrala para moverla (en
         el plano que tienes enfrente, de modo que conserva su distancia mientras su rumbo y su altitud
         siguen al puntero, y nunca baja por debajo del suelo). Desmárcalo y los clics vuelven a ser del
-        reproductor. Los campos numéricos hacen el resto, y lo hacen con exactitud: <strong>Posición este</strong> y <strong>Posición norte</strong> en metros desde donde empezó el observador;
+        reproductor. Los campos numéricos hacen el resto, y lo hacen con exactitud: <strong>Posición este</strong> y <strong>Posición norte</strong> en metros desde donde empezó el testigo;
         <strong>Base de la nube</strong>, <strong>Espesor de la nube</strong>, <strong>Anchura de la nube</strong>,
         <strong>Profundidad de la nube</strong> y <strong>Rotación de la nube</strong>; <strong>Densidad de la nube</strong>, y una
         <strong>Oscuridad</strong> que, vacía, es la de la capa. Ponle dos fotogramas clave y deriva,
@@ -1437,12 +1437,12 @@ if (docs) {
         es un problema resuelto, así que la fecha y el lugar bastan para decidir ambas cosas. Indica qué
         más había en ese trozo de cielo: la lluvia y su tasa sobre el fondo esporádico, el cometa y su
         magnitud, cualquier nova o supernova cuya curva de luz registrada cubra esa noche (el botón 🌟
-        gira al observador hacia ella), si la órbita baja
+        gira al testigo hacia ella), si la órbita baja
         seguía iluminada por el Sol, si la Vía Láctea o la luz zodiacal podían siquiera verse.
         A partir de febrero de 2021 también nombra los satélites que realmente cruzaron ese cielo con
         brillo suficiente para ser vistos, el más brillante con la hora de su paso en el reloj del
-        observador, y dice cuándo algunos formaban un tren de Starlink; el botón 🛰 lleva el cabezal a
-        cada paso por turno, del más brillante al más débil, y gira al observador hacia él. 🌠 y ☄
+        testigo, y dice cuándo algunos formaban un tren de Starlink; el botón 🛰 lleva el cabezal a
+        cada paso por turno, del más brillante al más débil, y gira al testigo hacia él. 🌠 y ☄
         hacen lo mismo con el siguiente meteoro y con el cometa. Cuando el instrumento alcanza más allá
         de la magnitud 9, la línea indica que las estrellas solo se dibujan hasta donde llega el
         catálogo de este proyecto; y un arcoíris solo se menciona si se registró lluvia.
@@ -1471,8 +1471,8 @@ if (docs) {
         aparato.</p>
       <p><strong>Frecuencia de muestreo</strong> es la frecuencia con que se lee el puntero durante la
         grabación.</p>
-      <p>El selector encima del render, <strong>Relato</strong>, dice cómo se dibuja y se edita el relato: <em>2D · formas</em>, los ángulos que dibujó el observador, o <em>3D · cuerpos</em>, lo que dijo que eran. Elegir uno abre la parte correspondiente de este grupo, y abrir una parte fija el selector; una lectura de un relato no tiene formas, ni selector. Esas son las <strong>Formas</strong> del grupo: lo que dibujó el observador. Sus
-        <strong>Cuerpos</strong> son lo que el observador dijo que eran esas formas, en 3D: cada cuerpo
+      <p>El selector encima del render, <strong>Relato</strong>, dice cómo se dibuja y se edita el relato: <em>2D · formas</em>, los ángulos que dibujó el testigo, o <em>3D · cuerpos</em>, lo que dijo que eran. Elegir uno abre la parte correspondiente de este grupo, y abrir una parte fija el selector; una lectura de un relato no tiene formas, ni selector. Esas son las <strong>Formas</strong> del grupo: lo que dibujó el testigo. Sus
+        <strong>Cuerpos</strong> son lo que el testigo dijo que eran esas formas, en 3D: cada cuerpo
         nombra las formas que representa y el modelo con que se dibuja, una forma integrada, un modelo
         del catálogo o un archivo glTF en una dirección. La dirección puede ser relativa al propio
         archivo del registro, de modo que un <code>sighting.json</code> y el <code>craft.gltf</code>
@@ -1482,9 +1482,9 @@ if (docs) {
         representa la forma seleccionada, en su dirección, a la distancia a la que la escena la dibuja
         y tan grande como allí la hace su anchura aparente, en un único fotograma clave en el cabezal de
         reproducción; sobre el suelo a esa distancia cuando la línea de visión entra antes en él; sin
-        forma, allí donde mira el observador. 🎯 gira al observador hacia el cuerpo. Un registro puede
+        forma, allí donde mira el testigo. 🎯 gira al testigo hacia el cuerpo. Un registro puede
         contener solo cuerpos: su última forma puede eliminarse. En el recuadro <strong>En</strong>, seguido del instante del cabezal de
-        reproducción, la posición del cuerpo (desde el observador, o en el mundo), su tamaño y su
+        reproducción, la posición del cuerpo (desde el testigo, o en el mundo), su tamaño y su
         actitud se muestran tal como son en ese instante; editar una escribe allí un fotograma clave, y
         así es como un cuerpo recibe su movimiento: mover el cabezal, editar de nuevo. Un fotograma clave
         así no indica nada más, de modo que la luz, la llama y las partes móviles del cuerpo siguen como
@@ -1512,10 +1512,10 @@ if (docs) {
       magnitud y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
       de una luz brillante cerca del horizonte, donde un nombre a secas no lo haría. El Sol, la Luna,
       los planetas y cualquier cometa visible aquella noche responden igual, y también todo lo del
-      entorno: un edificio, un árbol, otro observador.</p>
+      entorno: un edificio, un árbol, otro testigo.</p>
     <p>Lo que oculta el terreno no responde. Una estrella tras una colina es tan imposible de ver como
       una bajo el horizonte, así que no se ofrece ninguna de las dos: una reconstrucción no es una lista
-      de lo que hay en el cielo, es lo que podía verse desde donde estaba el observador.</p>
+      de lo que hay en el cielo, es lo que podía verse desde donde estaba el testigo.</p>
   </div>
 </section>
 
@@ -1529,13 +1529,13 @@ if (docs) {
           segundos ya aparece pintada, en ese estado, desde cero. Para que algo deje de verse, ponle un
           fotograma clave con transparencia 1.</li>
         <li><strong>Lo declarado prevalece sobre lo deducido.</strong> «Entró en una nube» lo afirma el
-          observador, nunca lo calcula la geometría: este formato describe una apariencia en un campo de
+          testigo, nunca lo calcula la geometría: este formato describe una apariencia en un campo de
           visión, no una posición en el espacio, así que nada en él <em>puede</em> saber si una nube se
           interpuso entre ambos.</li>
         <li><strong>En pausa es en pausa.</strong> La lluvia que cae, el centelleo de las estrellas, los
           rayos, los destellos del objetivo, el sonido ambiente: todo se detiene con el reproductor. Una
           reproducción en pausa es un instante de un avistamiento; un tiempo que siguiera corriendo
-          encima sería tu propia habitación, no la tarde del observador.</li>
+          encima sería tu propia habitación, no la tarde del testigo.</li>
         <li><strong>Fuera de la vista, nada funciona.</strong> Una escena que se ha dejado atrás, o en
           un panel cerrado, no dibuja ni calcula nada, y una reproducción en curso se pone en pausa.
           Se vuelve a dibujar cuando regresa, y el botón de reproducción reanuda la reproducción.</li>
@@ -1557,7 +1557,7 @@ if (docs) {
       <p>El sonido se <em>sintetiza</em> a partir de esa descripción, exactamente como la forma se
         dibuja a partir de la suya, sin coste alguno de audio incluido. Un registro que realmente captó
         el sonido puede apuntar en su lugar al archivo de audio. Observa la diferencia entre los dos
-        silencios: <em>ninguno</em> significa que el observador declaró no haber oído nada; la ausencia
+        silencios: <em>ninguno</em> significa que el testigo declaró no haber oído nada; la ausencia
         total de pista sonora significa que nadie se lo preguntó.</p>
       <p>La intensidad y el tono se deslizan de un fotograma clave al siguiente; el tipo y el archivo
         de audio cambian en el fotograma clave. Un archivo de audio alojado en otro sitio debe servirse
@@ -1575,16 +1575,16 @@ if (docs) {
         deslizará después.</p>
       <p>Mientras este grupo está abierto, el lienzo pertenece a la foto seleccionada, con su marco en
         azul discontinuo: <strong>arrastra</strong> sobre ella para girarla (un arrastre fuera de ella
-        sigue girando al observador), usa la <strong>rueda</strong> para cambiar su campo, o escribe
-        <strong>Rumbo</strong>, <strong>Cabeceo</strong>, <strong>Alabeo</strong> y <strong>Campo vertical</strong>, o pulsa <strong>Usar la pose del observador</strong> para partir de ella. Para
+        sigue girando al testigo), usa la <strong>rueda</strong> para cambiar su campo, o escribe
+        <strong>Rumbo</strong>, <strong>Cabeceo</strong>, <strong>Alabeo</strong> y <strong>Campo vertical</strong>, o pulsa <strong>Usar la pose del testigo</strong> para partir de ella. Para
         medir en lugar de calcular a ojo, <strong>Añadir un punto de referencia</strong> prepara dos
         clics: un detalle en la foto y luego el mismo detalle en el render. Dos puntos de referencia
         giran la foto para ajustarla a ellos, tres o más ajustan también su campo; cada uno tiene un
         nombre y un residuo, verde hasta un grado, naranja hasta tres, rojo por encima, y cualquiera de
-        sus extremos puede arrastrarse. <strong>Adoptar como pose del observador</strong> escribe
+        sus extremos puede arrastrarse. <strong>Adoptar como pose del testigo</strong> escribe
         entonces el rumbo, el cabeceo y el alabeo ajustados en la pose del cabezal de reproducción, como
         una medición, con su procedencia. <strong>Fotos a pie de calle cercanas</strong> pide a
-        Panoramax las imágenes tomadas a menos de 300 m del punto del observador, cada una ya alineada en
+        Panoramax las imágenes tomadas a menos de 300 m del punto del testigo, cada una ya alineada en
         rumbo.</p>
       <p><strong>Buscar reflejos</strong> busca en la foto elegida los reflejos fantasma del objetivo:
         las copias tenues de una luz intensa que devuelve el cristal del objetivo, cada una al otro lado
@@ -1603,10 +1603,10 @@ if (docs) {
         muestran sobre la escena y en el mapa con su propio color, discontinuos en el mapa, como del
         investigador y no de la reconstrucción: nada se ajusta a ellos, y cada uno se atribuye al archivo
         de donde viene mientras no diga algo mejor. Renombre uno, indique su <strong>fuente</strong> o
-        elimínelo; el reproductor ofrece un botón para ocultarlos todos. Los nombres se muestran junto a lo que nombran, en la escena y en el mapa; el mapa se ensancha para encuadrar lo que queda cerca del observador (una línea que corre hasta el horizonte se deja correr) y cada fuente figura en los créditos. Las trazas GPS (<code>gx:Track</code>) se leen como líneas.</p>
+        elimínelo; el reproductor ofrece un botón para ocultarlos todos. Los nombres se muestran junto a lo que nombran, en la escena y en el mapa; el mapa se ensancha para encuadrar lo que queda cerca del testigo (una línea que corre hasta el horizonte se deja correr) y cada fuente figura en los créditos. Las trazas GPS (<code>gx:Track</code>) se leen como líneas.</p>
       <p>Una foto solo vale desde un punto, así que alinearla registra también <em>desde dónde</em> se
-        alineó: la posición del observador en el cabezal de reproducción. Durante la reproducción se
-        desvanece cuando el observador se aleja de ese punto (visible del todo a menos de 2 m,
+        alineó: la posición del testigo en el cabezal de reproducción. Durante la reproducción se
+        desvanece cuando el testigo se aleja de ese punto (visible del todo a menos de 2 m,
         desaparecida más allá de 20 m) y vuelve cuando regresa, en lugar de mostrar una comparación que
         ya no se sostiene.</p>
     </div>
@@ -1676,8 +1676,8 @@ if (docs) {
     <p>L'indirizzo può essere il <code>case.json</code> di un caso. L'editor mostra allora <strong>il caso</strong> in alto e, nello stesso contenitore, l'osservazione in modifica in un contenitore a parte. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
     <ul class="plain">
       <li><strong>Il caso</strong> ha un <em>identificativo</em>, un <em>titolo</em> e una data — lo stesso selettore, lo stesso qualificatore e lo stesso testo EDTF dell'inizio di un'osservazione — e <em>Salva</em> in alto a destra.</li>
-      <li><strong>Osservazioni</strong>: un selettore elenca le registrazioni del caso, i resoconti degli osservatori e le letture che se ne fanno, ciascuna una registrazione a sé. Sceglierne una la apre sotto, e ciò che è stato cambiato nelle altre viene conservato.</li>
-      <li>Un resoconto ha un <strong>identificativo</strong> nel caso, con cui una lettura lo designa: proposto a partire dal cognome dell'osservatore (<code>trent</code>, poi <code>trent-2</code> se è già preso) e mostrato in grigio finché non è conservato, o digitato. È fatto di lettere, cifre, trattini e trattini bassi, e nessun altro evento del caso può averlo. Cambiarlo lo cambia in tutte le letture che lo designavano, e non si può svuotare finché una lo fa. Una lettura che designa un identificativo che nessuno ha è segnalata sopra le registrazioni.</li>
+      <li><strong>Osservazioni</strong>: un selettore elenca le registrazioni del caso, i resoconti dei testimoni e le letture che se ne fanno, ciascuna una registrazione a sé. Sceglierne una la apre sotto, e ciò che è stato cambiato nelle altre viene conservato.</li>
+      <li>Un resoconto ha un <strong>identificativo</strong> nel caso, con cui una lettura lo designa: proposto a partire dal cognome del testimone (<code>trent</code>, poi <code>trent-2</code> se è già preso) e mostrato in grigio finché non è conservato, o digitato. È fatto di lettere, cifre, trattini e trattini bassi, e nessun altro evento del caso può averlo. Cambiarlo lo cambia in tutte le letture che lo designavano, e non si può svuotare finché una lo fa. Una lettura che designa un identificativo che nessuno ha è segnalata sopra le registrazioni.</li>
       <li><strong>+</strong> aggiunge una registrazione: vuota, da un file o da un indirizzo. Indichi un resoconto nell'ultimo campo, <em>Interpretazione di</em>, e ciò che si aggiunge è una lettura di esso — un'altra osservazione, che il caso elenca marcata <code>interpretationOf</code>, datata e firmata. Vuota, parte come una copia dell'intera scena del resoconto che legge.</li>
       <li>Il <strong>cestino</strong> toglie dal caso la registrazione mostrata; il suo file non viene cancellato. Un'osservazione che una lettura interpreta ancora non può essere tolta: elimini prima le sue letture. Un caso conserva almeno una registrazione.</li>
       <li><strong>Salva</strong> chiede se salvare anche le osservazioni: sì scrive uno zip del caso e di ogni osservazione accanto, no scrive solo <code>case.json</code>.</li>
@@ -1720,7 +1720,7 @@ if (docs) {
       </li>
     </ol>
     <p class="small">Sotto la barra di riproduzione, una tacca segna ogni fotogramma chiave di ciò che
-      il gruppo aperto modifica (le forme selezionate, l'osservatore, il meteo, il suono; tutti dagli
+      il gruppo aperto modifica (le forme selezionate, il testimone, il meteo, il suono; tutti dagli
       altri gruppi), e una tacca ambra più alta ogni momento con un nome. Un clic a pochi pixel da una di
       esse cade esattamente su di essa, la barra la nomina sotto il puntatore, e
       <strong>◂◆</strong> / <strong>◆▸</strong> vanno alla precedente o alla successiva: così si modifica
@@ -1744,7 +1744,7 @@ if (docs) {
         un <strong>ID</strong>, una <strong>Descrizione</strong>, delle <strong>Etichette</strong>. L'ID è quello
         proprio di questo resoconto, il giorno e poi chi ha visto (<code>1964-04-24-ZamoraLonnie</code>);
         una registrazione non nomina il suo caso, è <a href="/docs/format/#several-observers-the-case">il
-        caso</a> a nominare i suoi resoconti e a dare a una pagina il suo selettore di osservatore.</p>
+        caso</a> a nominare i suoi resoconti e a dare a una pagina il suo selettore di testimone.</p>
       <p><strong>Momenti</strong> dà un nome all'istante della testina di riproduzione (A, B, C…, come
         fanno gli schizzi dei casi), con una frase su ciò che accade in quel momento. Sceglierne uno
         nell'elenco porta lì; <strong>🎯</strong> torna a quello mostrato, cosa che l'elenco non può fare
@@ -1771,7 +1771,7 @@ if (docs) {
         mano che la scena si assesta.</p>
       <p>Il <strong>Rollio</strong> sta qui e non con il luogo, perché dice come era
         <em>tenuto</em> l'apparecchio (una fotocamera storta, una testa inclinata), non dove si trovava
-        l'osservatore.</p>
+        il testimone.</p>
       <p>Un apparecchio che registra un'immagine vi aggiunge i <strong>riflessi del suo obiettivo</strong> su ogni luce: copie più deboli e
         sfocate sulla retta che passa per il centro dell'immagine, simmetriche rispetto a esso per il riflesso principale di un telefono.
         Sotto lo strumento, <strong>Attraverso</strong> dice cosa c'era davanti all'obiettivo (un filtro, una finestra, un parabrezza, ognuno
@@ -1785,7 +1785,7 @@ if (docs) {
       <h3>Luogo</h3>
       <p>Un resoconto nomina un luogo, non fornisce coordinate. Quindi scrivi il nome e premi
         <strong>Localizza</strong>: latitudine e longitudine vengono compilate dal geocodificatore di
-        OpenStreetMap, tutti i candidati restano in elenco, e sceglierne un altro sposta l'osservatore.
+        OpenStreetMap, tutti i candidati restano in elenco, e sceglierne un altro sposta il testimone.
         Ciò che viene salvato è il nome <em>completo</em> che è stato risolto, così che un lettore
         successivo arrivi nello stesso punto. Sposta una coordinata a mano e un nome venuto da una
         ricerca viene ricavato di nuovo, o cancellato: un nome che descrivesse un posto in cui
@@ -1794,14 +1794,14 @@ if (docs) {
         trova.</p>
       <p>L'<strong>Orientamento</strong> è la direzione verso cui si guarda, l'<strong>Inclinazione</strong>
         quanto in alto o in basso, e l'<strong>Altitudine</strong> è sul livello del mare, con l'altezza
-        del terreno in quel punto come minimo: un osservatore sulle Alpi non sta a 0 m. Le fonti del
+        del terreno in quel punto come minimo: un testimone sulle Alpi non sta a 0 m. Le fonti del
         rilievo e delle immagini si scelgono proprio qui, sotto le coordinate di cui descrivono il
         terreno.</p>
       <p>Posizione, direzione e inclinazione vengono scritte alla testina di riproduzione, come un
-        fotogramma chiave della traccia dell'osservatore: impostale in un altro momento e
-        l'osservatore si sposta o si gira tra i due.</p>
+        fotogramma chiave della traccia del testimone: impostale in un altro momento e
+        il testimone si sposta o si gira tra i due.</p>
       <p>La <strong>mappa</strong> sopra il rendering fa lo stesso per la posizione: fai clic sul
-        terreno e l'osservatore si mette lì alla testina di riproduzione, esattamente come se entrambe le
+        terreno e il testimone si mette lì alla testina di riproduzione, esattamente come se entrambe le
         coordinate fossero state digitate. La rotellina zooma attorno al puntatore, un trascinamento
         sposta il terreno, e <strong>+</strong>, <strong>−</strong> e <strong>⤢</strong> (di nuovo
         all'intero percorso) ci sono per chi non ha né l'una né l'altro.</p>
@@ -1810,7 +1810,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Data</h3>
       <p>Un inizio, una fine, una durata e un <strong>Fuso orario</strong>, che è la regola e non il
-        numero. Scegli il fuso dell'osservatore e lo scarto viene ricavato dalle regole di quel fuso
+        numero. Scegli il fuso del testimone e lo scarto viene ricavato dalle regole di quel fuso
         <em>alla data dell'osservazione</em>: Valensole nel luglio 1965 dà UTC+1, non l'UTC+2 di oggi,
         perché la Francia ha reintrodotto l'ora legale solo nel 1976.</p>
       <p>Il fuso viene compilato a partire dalle coordinate, e non sostituisce mai quello che hai
@@ -1824,33 +1824,33 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Ambiente</h3>
-      <p>Ciò che c'era intorno all'osservatore, a una distanza reale verso est e verso nord: edifici con
+      <p>Ciò che c'era intorno al testimone, a una distanza reale verso est e verso nord: edifici con
         i loro piani e le loro finestre, alberi, lampioni, veicoli, aeromobili e <strong>altri
-        osservatori</strong>. È l'unica cosa che possa dare un numero a una distanza: se l'oggetto è
+        testimoni</strong>. È l'unica cosa che possa dare un numero a una distanza: se l'oggetto è
         passato <em>dietro</em> quell'hangar era almeno così lontano, se <em>davanti</em> a
         quell'albero, al massimo. Ogni incrocio restringe da un lato la larghezza reale dell'oggetto per
         tutta la registrazione; il risultato compare sotto la dimensione apparente, e dice «sconosciuta»
         quando nulla attraversa la sua linea di vista, che è la risposta onesta per la maggior parte
         degli avvistamenti.</p>
-      <p><strong>La scenografia arriva da sola, dove un luogo è stato rilevato.</strong> Quando date un luogo alla registrazione (per nome, per coordinate o spostando l'osservatore), l'editor chiede al rilievo che lo copre cosa si trova nel raggio di cento metri, e mette ogni albero, edificio, ponte e campata di linea elettrica nell'elenco, al suo posto, con la sua altezza e larghezza misurate: in Francia, il LiDAR HD dell'IGN (una scansione aerea di tutto il paese) per alberi ed edifici, e la sua carta per ponti e linee aeree, con la loro tensione. Niente da premere. Una riga sotto l'elenco dice quanti ne sono stati trovati, e una scelta accanto dice da quale rilievo viene: <em>IGN LiDAR HD + BD TOPO</em> (di default, quello che ne sa di più), il solo laser, la sola carta, o <em>File</em>, che conserva la scenografia che dice la registrazione e non chiede più alcun rilievo, anche quando l'osservatore si sposta (la scelta è della registrazione, e rimanda al suo elemento della scheda File), o <em>Nessuno</em>, che lascia la scenografia a voi e toglie ciò che un rilievo aveva portato (Annulla lo rimette; ciò che avete collocato resta; il browser ricorda la scelta: chiedere invia il luogo a quel servizio). Scegliere un altro rilievo lo interroga subito sul luogo in cui si trova la registrazione, e sostituisce ciò che il primo aveva portato. Altrove, e dove nessun rilievo copre il luogo, non si chiede nulla e non si dice nulla.
-        Ciò che si prende è del giorno del rilievo, che non è quello della registrazione: teneteli, spostateli, ridimensionateli o eliminateli, come qualsiasi altra cosa. Di ogni tipo non porta nulla dove ne avete collocato voi (ciò che avete collocato resta), e mai aggiunto a una registrazione che è solo caricata. Spostare l'osservatore in un altro luogo sostituisce ciò che un rilievo aveva portato per il primo, e nient'altro.</p>
+      <p><strong>La scenografia arriva da sola, dove un luogo è stato rilevato.</strong> Quando date un luogo alla registrazione (per nome, per coordinate o spostando il testimone), l'editor chiede al rilievo che lo copre cosa si trova nel raggio di cento metri, e mette ogni albero, edificio, ponte e campata di linea elettrica nell'elenco, al suo posto, con la sua altezza e larghezza misurate: in Francia, il LiDAR HD dell'IGN (una scansione aerea di tutto il paese) per alberi ed edifici, e la sua carta per ponti e linee aeree, con la loro tensione. Niente da premere. Una riga sotto l'elenco dice quanti ne sono stati trovati, e una scelta accanto dice da quale rilievo viene: <em>IGN LiDAR HD + BD TOPO</em> (di default, quello che ne sa di più), il solo laser, la sola carta, o <em>File</em>, che conserva la scenografia che dice la registrazione e non chiede più alcun rilievo, anche quando il testimone si sposta (la scelta è della registrazione, e rimanda al suo elemento della scheda File), o <em>Nessuno</em>, che lascia la scenografia a voi e toglie ciò che un rilievo aveva portato (Annulla lo rimette; ciò che avete collocato resta; il browser ricorda la scelta: chiedere invia il luogo a quel servizio). Scegliere un altro rilievo lo interroga subito sul luogo in cui si trova la registrazione, e sostituisce ciò che il primo aveva portato. Altrove, e dove nessun rilievo copre il luogo, non si chiede nulla e non si dice nulla.
+        Ciò che si prende è del giorno del rilievo, che non è quello della registrazione: teneteli, spostateli, ridimensionateli o eliminateli, come qualsiasi altra cosa. Di ogni tipo non porta nulla dove ne avete collocato voi (ciò che avete collocato resta), e mai aggiunto a una registrazione che è solo caricata. Spostare il testimone in un altro luogo sostituisce ciò che un rilievo aveva portato per il primo, e nient'altro.</p>
       <p>Il rilievo <strong>nomina</strong> anche ciò di cui conosce il nome. Un edificio prende il nome della zona che la carta gli dà (<em>Mairie de Saint-Lô</em>, un ufficio postale, un campanile), numerandosi le parti di uno; un ponte è nominato dalla strada che porta (<em>Ponte (Rue de Carentan)</em>), una campata di linea dalla sua tensione; gli altri sono numerati come tutto ciò che aggiungete. In Francia le <strong>strade</strong> della scena vengono dalla stessa carta, con i loro nomi, invece che da OpenStreetMap, che troppo spesso non rispondeva. Gli edifici, come gli alberi, poggiano sul suolo più basso sotto di loro, perché sono costruiti nel pendio; e una campata di linea tocca il suolo ai suoi due pali.</p>
-      <p>Il <strong>raggio</strong> accanto alla scelta dice fino a dove intorno all'osservatore si interroga il rilievo, da 20 m a 3 km (100 m per impostazione predefinita, e il browser lo ricorda): un raggio più ampio porta gli edifici, i ponti e le linee più lontani, presi dalla carta. Il laser, che dà gli alberi, si interroga solo entro 150 m. Fuori dalla Francia, dove il laser non ha volato, gli edifici vengono da OpenStreetMap (tutto ciò che i suoi volontari hanno scritto di un edificio è disegnato: altezza, tetto, colori; il resto è un edificio ordinario), senza alberi; la si sceglie nell'elenco dei rilievi per averla ovunque.</p>
+      <p>Il <strong>raggio</strong> accanto alla scelta dice fino a dove intorno al testimone si interroga il rilievo, da 20 m a 3 km (100 m per impostazione predefinita, e il browser lo ricorda): un raggio più ampio porta gli edifici, i ponti e le linee più lontani, presi dalla carta. Il laser, che dà gli alberi, si interroga solo entro 150 m. Fuori dalla Francia, dove il laser non ha volato, gli edifici vengono da OpenStreetMap (tutto ciò che i suoi volontari hanno scritto di un edificio è disegnato: altezza, tetto, colori; il resto è un edificio ordinario), senza alberi; la si sceglie nell'elenco dei rilievi per averla ovunque.</p>
       <p>I <strong>lampioni, semafori, attraversamenti pedonali e segnali</strong> arrivano con ogni rilievo, da OpenStreetMap; a Parigi i lampioni vengono dall'inventario della città stessa (Paris Data), ogni lampada al suo posto con il colore e il flusso della sua luce, l'arancione di una lampada al sodio come il bianco di un LED. OpenStreetMap è spesso lento o fuori servizio: la riga sotto il rilievo dice allora che l'illuminazione è attesa, e la pianta quando arriva, senza che dobbiate fare nulla (un passo della cronologia), oppure dice che non è disponibile per ora, con un pulsante <strong>Riprova</strong>.</p>
       <p>Mentre la scenografia viene cercata, un <strong>indicatore di caricamento</strong> copre l'immagine; scegliere «Nessuno» nell'elenco dei rilievi interrompe l'attesa (ciò che il rilievo risponde dopo viene scartato). Ciò che è stato preso è <strong>datato</strong>: la riga di stato dà il giorno del volo del laser, della foto aerea e dell'ultima edizione della carta, e ogni oggetto conserva il giorno più recente da cui è tratto (<code>surveyedOn</code>). Quando quel giorno è <strong>successivo all'osservazione</strong>, un avviso lo dice, e continua a dirlo se la data dell'osservazione viene poi cambiata: la scenografia è allora un riferimento, non ciò che c'era.</p>
       <p>Si legge anche il <strong>tetto</strong> di un edificio: dal laser, un tetto a due o quattro falde (e in che verso corre il colmo) o piano, con l'edificio che arriva allora fino al colmo; dalla foto aerea, il suo colore (coppi, ardesia, zinco), preso senza il verde degli alberi che lo coprono. Un tetto che il rilievo non sa leggere resta una semplice scatola, non una supposizione.</p>
       <p>I <strong>muri</strong> si disegnano come muri: il colore del materiale che la carta enuncia per essi (pietra, mattone, calcestruzzo, blocco, legno; un intonaco chiaro, un po' diverso da una casa all'altra, dove non ne enuncia, cioè due edifici su cinque), con finestre a ogni piano e una porta al piano terra della faccia frontale. Sono le finestre tipiche di una facciata, non quelle di quella casa, e alcune sono accese quando il Sole è ben sotto l'orizzonte: circa la metà la sera, quasi nessuna dalle tre alle cinque di notte, qualcuna in più all'alba, secondo l'ora dell'orologio (sempre le stesse finestre, quindi quelle accese alle tre lo sono anche alle ventuno). Le ore seguono l'indagine sull'uso del tempo dell'INSEE (2009-2010: metà delle coppie dorme alle 22:40 e metà è alzata alle 7:00, nove su dieci dormono dall'1:00 alle 6:00); la curva tra quei punti, i due su cento sempre svegli e la metà delle finestre accese quando tutti sono svegli sono ipotesi. Tutto ciò che riguarda i muri e il tetto (il loro colore, muri lisci, la forma del tetto, la sua altezza e il suo colmo) si può poi modificare nelle proprietà dell'edificio, come qualsiasi altra scenografia.</p>
       <p><strong>Fai clic su un oggetto nell'immagine per selezionarlo:</strong> il gruppo Ambiente si apre su di esso, incorniciato, pronto per essere spostato, ridimensionato o ruotato. Tieni premuto <kbd>Maiusc</kbd>, <kbd>Ctrl</kbd>, <kbd>Alt</kbd> o <kbd>Cmd</kbd> mentre premi e a ruotare è la vista, come sul terreno nudo: il modo per ruotarla da sopra un bosco, dove ogni pressione cade su un albero.</p>
-      <p><strong>Più osservatori, e i loro punti di vista.</strong> Un osservatore posizionato qui può
+      <p><strong>Più testimoni, e i loro punti di vista.</strong> Un testimone posizionato qui può
         portare l'URL della sua <em>propria</em> registrazione, e un clic destro su di lui nella scena
         propone di vederla: questo carica il suo resoconto e ti mette dove si trovava lui, guardando
         dove guardava lui. Due persone a cento metri l'una dall'altra non hanno visto la stessa cosa, e
         poter passare dall'una all'altra è ciò che trasforma un'affermazione in qualcosa da verificare.
-        Il pulsante <strong>🎯</strong> fa la versione ridotta della stessa cosa: gira l'osservatore
+        Il pulsante <strong>🎯</strong> fa la versione ridotta della stessa cosa: gira il testimone
         corrente verso ciò che è selezionato.</p>
-      <p>Pubblicate insieme, quelle registrazioni diventano il selettore di osservatore che riceve un
+      <p>Pubblicate insieme, quelle registrazioni diventano il selettore di testimone che riceve un
         lettore: vedere <a href="/docs/format/#several-observers-the-case">il caso</a> che le elenca.</p>
-      <p>Oltre a posizione e dimensione, un oggetto ha le <strong>proprietà del suo tipo</strong>, disegnate secondo ciò che il tipo dice di lasciar regolare: piani, piano in cui si trova l'osservatore e una finestra per lato per un edificio; i finestrini di un'auto, il cui parabrezza e lunotto non si aprono mai; la luce, l'impalcato e il parapetto di un ponte; i pali e il filo di una linea aerea. Un campo vuoto non dice nulla e mostra, in grigio, il valore usato dalla scena. Un modello porta i propri colori: il <strong>Colore</strong> unico è offerto solo per le forme di base; un modello può offrire invece il colore di una sua parte — il costume di una figura, le foglie di un albero — o un interruttore di una sua parte — il carrello retratto di un aereo di linea — e ogni altra impostazione propria, che compaiono qui allo stesso modo.</p>
+      <p>Oltre a posizione e dimensione, un oggetto ha le <strong>proprietà del suo tipo</strong>, disegnate secondo ciò che il tipo dice di lasciar regolare: piani, piano in cui si trova il testimone e una finestra per lato per un edificio; i finestrini di un'auto, il cui parabrezza e lunotto non si aprono mai; la luce, l'impalcato e il parapetto di un ponte; i pali e il filo di una linea aerea. Un campo vuoto non dice nulla e mostra, in grigio, il valore usato dalla scena. Un modello porta i propri colori: il <strong>Colore</strong> unico è offerto solo per le forme di base; un modello può offrire invece il colore di una sua parte — il costume di una figura, le foglie di un albero — o un interruttore di una sua parte — il carrello retratto di un aereo di linea — e ogni altra impostazione propria, che compaiono qui allo stesso modo.</p>
       <p>Anche il decoro può <strong>muoversi</strong> (un aereo che attraversa il cielo, un'auto che
         passa) e portare <strong>luci</strong> con frequenze di lampeggio reali e regolamentari: luci
         anticollisione da 40 a 100 al minuto, luci di emergenza da 60 a 120. In una posa lunga quella
@@ -1858,7 +1858,7 @@ if (docs) {
         intervalli regolari, ed è esattamente così che la fotografia di un aereo di linea si distingue
         da quella di qualcosa che non lampeggia.</p>
       <p>Le <strong>serie di luci già pronte</strong> offerte per un oggetto sono quelle che si addicono al modello con cui è disegnato, in scala con la macchina: a un aereo di linea non si offrono quelle di un elicottero, un'auto della polizia riceve i suoi lampeggianti. Il modello dice anche che rumore fa un aeromobile in volo (un A350 si sente come un grosso aereo, il sostituto di qualcosa il cui rumore nessuno ha riferito è silenzioso) e dà il suo motore a un veicolo.</p>
-      <p>Le <strong>luci di un veicolo</strong> sono una regolazione e non un interruttore, perché non tutti le accendono, né come si dovrebbe: <strong>spente</strong>, <strong>luci di posizione</strong> (che mostrano il veicolo e non illuminano nulla), <strong>anabbaglianti</strong>, <strong>abbaglianti</strong> (lontani, stretti, accecanti) o <strong>fendinebbia</strong> (bassi e larghi). Si sceglie nel gruppo <em>Stato</em> dell'oggetto, nell'istante in cui si vuole che cambi: è scritto come un fotogramma chiave, come l'interruttore delle lampade, e vale fino al successivo. Un fascio illumina davvero la strada, i bordi, gli alberi e i muri davanti al veicolo. Il veicolo su cui viaggia l'osservatore (il <code>vehicle</code> della registrazione) accende da solo gli anabbaglianti dal crepuscolo, salvo che il file dica altro.</p>
+      <p>Le <strong>luci di un veicolo</strong> sono una regolazione e non un interruttore, perché non tutti le accendono, né come si dovrebbe: <strong>spente</strong>, <strong>luci di posizione</strong> (che mostrano il veicolo e non illuminano nulla), <strong>anabbaglianti</strong>, <strong>abbaglianti</strong> (lontani, stretti, accecanti) o <strong>fendinebbia</strong> (bassi e larghi). Si sceglie nel gruppo <em>Stato</em> dell'oggetto, nell'istante in cui si vuole che cambi: è scritto come un fotogramma chiave, come l'interruttore delle lampade, e vale fino al successivo. Un fascio illumina davvero la strada, i bordi, gli alberi e i muri davanti al veicolo. Il veicolo su cui viaggia il testimone (il <code>vehicle</code> della registrazione) accende da solo gli anabbaglianti dal crepuscolo, salvo che il file dica altro.</p>
     </div>
 
     <div class="group-doc">
@@ -1868,9 +1868,9 @@ if (docs) {
         dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
         l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
         cielo.</p>
-      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> (in <strong>Fonti dei dati</strong>, dietro l'ingranaggio in alto a destra del gruppo, <strong>Meteo</strong>, nel gruppo <strong>Cielo</strong>) legge il meteo dal file della registrazione (dentro di essa, o in un file accanto: vedi la scheda File) e non lo chiede più a nessuno: i valori restano quelli che erano, con il rilevamento da cui vengono, e i campi diventano modificabili; modificato, il meteo diventa quello dell'osservatore e il rilevamento non è più nominato. Una registrazione che nomina una fonte viene riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si legge identico anche offline.</p>
+      <p>Scegliere <strong>File</strong> invece di <strong>Open-Meteo</strong> (in <strong>Fonti dei dati</strong>, dietro l'ingranaggio in alto a destra del gruppo, <strong>Meteo</strong>, nel gruppo <strong>Cielo</strong>) legge il meteo dal file della registrazione (dentro di essa, o in un file accanto: vedi la scheda File) e non lo chiede più a nessuno: i valori restano quelli che erano, con il rilevamento da cui vengono, e i campi diventano modificabili; modificato, il meteo diventa quello del testimone e il rilevamento non è più nominato. Una registrazione che nomina una fonte viene riprodotta esattamente come è stata composta e mai più consultata, così un caso pubblicato si legge identico anche offline.</p>
       <p>Una consultazione scrive un fotogramma chiave meteorologico all'inizio, a ogni ora esatta e alla
-        fine della registrazione, ciascuno dove si trova l'osservatore in quel momento; la traccia viene
+        fine della registrazione, ciascuno dove si trova il testimone in quel momento; la traccia viene
         ridisposta quando la durata della registrazione cambia.</p>
       <p>Il gruppo ha tre schede proprie, con una parte aperta alla volta come i gruppi stessi:
         <strong>Precipitazioni</strong> (il loro tipo e la loro intensità, e la casella
@@ -1879,7 +1879,7 @@ if (docs) {
         <strong>Nuvole</strong>, e <strong>Vento</strong>, la direzione verso cui soffia e la sua
         velocità, che è ciò che trasporta ogni nuvola che non ha un vento proprio.</p>
       <p>Le nuvole sono la parte <strong>Nuvole</strong> di questo gruppo. Un cielo ricavato arriva
-        come tre strati, le fasce bassa, media e alta dei dati; un cielo descritto dall'osservatore ne
+        come tre strati, le fasce bassa, media e alta dei dati; un cielo descritto dal testimone ne
         ha quanti lui ne ha visti. Ogni numero del pannello viene scritto nella registrazione non appena
         è valido, e la prima modifica mette in pausa la riproduzione, così nulla viene salvato con la
         testina in movimento.</p>
@@ -1908,13 +1908,13 @@ if (docs) {
         passato il fenomeno, quella che era lì e da nessun'altra parte. <strong>Aggiungi nuvola singola</strong> ne mette una nello strato, davanti a dove stai guardando, alla base dello
         strato. È disegnata come una delle nuvole dello strato (la stessa texture, gli stessi bordi) e si
         distingue dalle vicine solo perché sta esattamente dove dici tu, anche con la copertura dello
-        strato allo 0 %. <strong>Punta la nuvola</strong> gira l'osservatore verso di essa.
+        strato allo 0 %. <strong>Punta la nuvola</strong> gira il testimone verso di essa.
         <strong>Elimina nuvola</strong> la rimuove.</p>
       <p>Spunta <strong>Seleziona e trascina le nuvole nel cielo</strong> e l'immagine stessa diventa
         il comando: fai clic su una nuvola per selezionarla, trascinala per spostarla (nel piano che
         ti sta di fronte, così mantiene la sua distanza mentre la sua direzione e la sua altitudine
         seguono il puntatore, e non scende mai sotto il suolo). Togli la spunta e i clic tornano al
-        lettore. I campi numerici fanno il resto, e lo fanno con esattezza: <strong>Posizione est</strong> e <strong>Posizione nord</strong> in metri dal punto di partenza dell'osservatore, la sua
+        lettore. I campi numerici fanno il resto, e lo fanno con esattezza: <strong>Posizione est</strong> e <strong>Posizione nord</strong> in metri dal punto di partenza del testimone, la sua
         <strong>Base della nuvola</strong>, il suo <strong>Spessore della nuvola</strong>, la sua <strong>Larghezza della nuvola</strong>, la
         sua <strong>Profondità della nuvola</strong> e la sua <strong>Rotazione della nuvola</strong>, la sua
         <strong>Densità della nuvola</strong> e un'<strong>Oscurità</strong> che, lasciata vuota, è quella dello
@@ -1932,12 +1932,12 @@ if (docs) {
         cometa è un problema risolto, quindi la data e il luogo bastano a decidere entrambe. Indica
         cos'altro c'era in quella porzione di cielo: lo sciame e il suo tasso sopra il fondo sporadico,
         la cometa e la sua magnitudine, qualsiasi nova o supernova la cui curva di luce registrata copra
-        quella notte (il pulsante 🌟 gira l'osservatore verso di essa), se l'orbita bassa
+        quella notte (il pulsante 🌟 gira il testimone verso di essa), se l'orbita bassa
         era ancora illuminata dal Sole, se la Via Lattea o la luce zodiacale potevano essere viste.
         Da febbraio 2021 nomina anche i satelliti che hanno davvero attraversato quel cielo abbastanza
         luminosi da essere visti, il più luminoso con l'ora del suo passaggio sull'orologio
-        dell'osservatore, e dice quando alcuni formavano un treno di Starlink; il pulsante 🛰 porta la
-        testina a ogni passaggio a turno, dal più luminoso, e gira l'osservatore verso di esso. 🌠 e ☄
+        del testimone, e dice quando alcuni formavano un treno di Starlink; il pulsante 🛰 porta la
+        testina a ogni passaggio a turno, dal più luminoso, e gira il testimone verso di esso. 🌠 e ☄
         fanno lo stesso per la meteora successiva e per la cometa. Quando lo strumento arriva oltre la
         magnitudine 9, la riga precisa che le stelle sono disegnate solo fin dove arriva il catalogo di
         questo progetto; e un arcobaleno viene citato solo se è stata segnalata pioggia.
@@ -1968,8 +1968,8 @@ if (docs) {
         velivolo.</p>
       <p><strong>Frequenza di campionamento</strong> è quanto spesso viene letto il puntatore durante la
         registrazione.</p>
-      <p>Il selettore sopra il render, <strong>Resoconto</strong>, dice come il resoconto è disegnato e modificato: <em>2D · forme</em>, gli angoli che l'osservatore ha disegnato, o <em>3D · corpi</em>, ciò che ha detto che fossero. Sceglierne uno apre la parte corrispondente di questo gruppo, e aprire una parte imposta il selettore; una lettura di un resoconto non ha forme, né selettore. Queste sono le <strong>Forme</strong> del gruppo: ciò che l'osservatore ha disegnato. I suoi
-        <strong>Corpi</strong> sono ciò che l'osservatore ha detto che quelle forme erano, in 3D: ogni
+      <p>Il selettore sopra il render, <strong>Resoconto</strong>, dice come il resoconto è disegnato e modificato: <em>2D · forme</em>, gli angoli che il testimone ha disegnato, o <em>3D · corpi</em>, ciò che ha detto che fossero. Sceglierne uno apre la parte corrispondente di questo gruppo, e aprire una parte imposta il selettore; una lettura di un resoconto non ha forme, né selettore. Queste sono le <strong>Forme</strong> del gruppo: ciò che il testimone ha disegnato. I suoi
+        <strong>Corpi</strong> sono ciò che il testimone ha detto che quelle forme erano, in 3D: ogni
         corpo nomina le forme che rappresenta e il modello con cui è disegnato, una forma predefinita, un
         modello del catalogo o un file glTF a un indirizzo. L'indirizzo può essere relativo al file della
         registrazione stessa, così un <code>sighting.json</code> e il <code>craft.gltf</code> accanto a
@@ -1979,9 +1979,9 @@ if (docs) {
         rappresenta la forma selezionata, nella sua direzione, alla distanza a cui la scena la disegna e
         grande quanto la rende lì la sua larghezza apparente, in un unico fotogramma chiave alla testina
         di riproduzione; sul terreno a quella distanza quando la linea di vista vi entra prima; senza
-        forma, dove l'osservatore sta guardando. 🎯 gira l'osservatore verso il corpo. Una registrazione
+        forma, dove il testimone sta guardando. 🎯 gira il testimone verso il corpo. Una registrazione
         può contenere solo corpi: la sua ultima forma si può eliminare. Nel riquadro <strong>A</strong>, seguito dall'istante della testina di
-        riproduzione, la posizione del corpo (dall'osservatore, o nel mondo), la dimensione e l'assetto
+        riproduzione, la posizione del corpo (dal testimone, o nel mondo), la dimensione e l'assetto
         sono mostrati come sono in quell'istante; modificarne uno scrive lì un fotogramma chiave, ed è
         così che un corpo riceve il suo movimento: spostare la testina, modificare di nuovo. Un tale
         fotogramma chiave non indica nient'altro, quindi la luce, la fiamma e le parti mobili del corpo
@@ -2009,10 +2009,10 @@ if (docs) {
       magnitudine e quanto era alta: «Venere, mag −4, 8° sopra l'orizzonte» risponde da sola a una
       segnalazione di una luce brillante vicino all'orizzonte, dove un semplice nome non lo farebbe. Il
       Sole, la Luna, i pianeti e qualsiasi cometa visibile quella notte rispondono allo stesso modo, e
-      così tutto ciò che è nell'ambiente: un edificio, un albero, un altro osservatore.</p>
+      così tutto ciò che è nell'ambiente: un edificio, un albero, un altro testimone.</p>
     <p>Ciò che il terreno nasconde non risponde. Una stella dietro una collina è invisibile quanto una
       sotto l'orizzonte, quindi nessuna delle due viene proposta: una ricostruzione non è un elenco di
-      ciò che c'è nel cielo, è ciò che poteva essere visto da dove si trovava l'osservatore.</p>
+      ciò che c'è nel cielo, è ciò che poteva essere visto da dove si trovava il testimone.</p>
   </div>
 </section>
 
@@ -2026,13 +2026,13 @@ if (docs) {
           secondi è già dipinta, in quello stato, da zero. Per far smettere di vedere qualcosa, dagli
           un fotogramma chiave con trasparenza 1.</li>
         <li><strong>Il dichiarato prevale sul dedotto.</strong> «È entrato in una nuvola» è affermato
-          dall'osservatore, mai calcolato dalla geometria: questo formato descrive un'apparenza in un
+          dal testimone, mai calcolato dalla geometria: questo formato descrive un'apparenza in un
           campo visivo, non una posizione nello spazio, quindi nulla in esso <em>può</em> sapere se una
           nuvola si è frapposta.</li>
         <li><strong>In pausa è in pausa.</strong> La pioggia che cade, lo scintillio delle stelle, i
           fulmini, i riflessi dell'obiettivo, il suono ambientale: tutto si ferma con il lettore. Una
           riproduzione in pausa è un istante di un avvistamento; un meteo che continuasse sopra di esso
-          sarebbe la tua stanza, non la serata dell'osservatore.</li>
+          sarebbe la tua stanza, non la serata del testimone.</li>
         <li><strong>Fuori dalla vista, nulla gira.</strong> Una scena che è stata superata scorrendo, o
           in un pannello chiuso, non disegna né calcola nulla, e una riproduzione in corso viene messa
           in pausa. Viene ridisegnata al ritorno, e il pulsante di riproduzione riavvia la riproduzione.</li>
@@ -2054,7 +2054,7 @@ if (docs) {
       <p>Il suono è <em>sintetizzato</em> a partire da quella descrizione, esattamente come la forma è
         disegnata a partire dalla sua, senza alcun costo di audio incluso. Una registrazione che ha
         davvero catturato il suono può invece puntare al file audio. Nota la differenza tra i due
-        silenzi: <em>nessuno</em> significa che l'osservatore ha dichiarato di non aver sentito nulla;
+        silenzi: <em>nessuno</em> significa che il testimone ha dichiarato di non aver sentito nulla;
         nessuna traccia sonora significa che nessuno gliel'ha chiesto.</p>
       <p>Volume e altezza scorrono da un fotogramma chiave al successivo; il tipo e il file audio
         cambiano al fotogramma chiave. Un file audio su un altro sito deve essere servito a qualsiasi
@@ -2072,14 +2072,14 @@ if (docs) {
         l'<strong>Opacità</strong> iniziale: il lettore la farà scorrere in seguito.</p>
       <p>Finché questo gruppo è aperto, la tela appartiene alla foto selezionata, con la cornice
         tratteggiata in blu: <strong>trascina</strong> su di essa per girarla (un trascinamento fuori
-        da essa gira ancora l'osservatore), usa la <strong>rotellina</strong> per cambiarne il campo,
+        da essa gira ancora il testimone), usa la <strong>rotellina</strong> per cambiarne il campo,
         oppure digita <strong>Direzione</strong>, <strong>Beccheggio</strong>, <strong>Rollio</strong>
-        e <strong>Campo verticale</strong>, oppure premi <strong>Usa la posa dell'osservatore</strong> per
+        e <strong>Campo verticale</strong>, oppure premi <strong>Usa la posa del testimone</strong> per
         partire da quella. Per misurare invece di andare a occhio, <strong>Aggiungi un punto di riferimento</strong> prepara due clic: un dettaglio sulla foto, poi lo stesso dettaglio nel
         rendering. Due punti di riferimento girano la foto per farli coincidere, tre o più ne adattano
         anche il campo; ciascuno ha un nome e un residuo, verde entro un grado, arancione entro tre,
-        rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa dell'osservatore</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
-        testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto dell'osservatore,
+        rosso oltre, e ciascuna delle sue estremità si può trascinare. <strong>Adotta come posa del testimone</strong> scrive allora direzione, beccheggio e rollio adattati nella posa alla
+        testina di riproduzione, come una misura, con la sua provenienza. <strong>Foto stradali nei dintorni</strong> chiede a Panoramax le immagini scattate entro 300 m dal punto del testimone,
         ciascuna già allineata in direzione.</p>
       <p><strong>Cerca i riflessi</strong> cerca nella foto scelta i riflessi fantasma dell'obiettivo:
         le copie tenui di una luce intensa che il vetro dell'obiettivo rimanda, ciascuna dall'altra
@@ -2099,10 +2099,10 @@ if (docs) {
         mostrati sulla scena e sulla mappa nel loro colore, tratteggiati sulla mappa, come
         dell'investigatore e non della ricostruzione: nulla vi si adatta, e ciascuno è attribuito al file da
         cui proviene finché non si dice di meglio. Rinominane uno, indica la sua <strong>fonte</strong> o
-        eliminalo; il lettore offre un pulsante per nasconderli tutti. I nomi compaiono accanto a ciò che nominano, sulla scena come sulla mappa; la mappa si allarga per inquadrare ciò che è vicino all'osservatore (una linea che fila verso l'orizzonte è lasciata filare) e ogni fonte figura nei crediti. Le tracce GPS (<code>gx:Track</code>) sono lette come linee.</p>
+        eliminalo; il lettore offre un pulsante per nasconderli tutti. I nomi compaiono accanto a ciò che nominano, sulla scena come sulla mappa; la mappa si allarga per inquadrare ciò che è vicino al testimone (una linea che fila verso l'orizzonte è lasciata filare) e ogni fonte figura nei crediti. Le tracce GPS (<code>gx:Track</code>) sono lette come linee.</p>
       <p>Una foto vale da un solo punto, quindi allinearla registra anche <em>da dove</em> è stata
-        allineata: la posizione dell'osservatore alla testina di riproduzione. Durante la riproduzione
-        svanisce in dissolvenza quando l'osservatore si allontana da quel punto (piena entro 2 m,
+        allineata: la posizione del testimone alla testina di riproduzione. Durante la riproduzione
+        svanisce in dissolvenza quando il testimone si allontana da quel punto (piena entro 2 m,
         scomparsa oltre 20 m) e ricompare quando lui ritorna, invece di mostrare un confronto che non
         regge più.</p>
     </div>

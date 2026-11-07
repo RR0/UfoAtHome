@@ -118,8 +118,8 @@ const announce = (sighting, source, fallbackTitle) => {
 /**
  * What the recording says about itself, above the way into the editor.
  *
- * Read off the player rather than off the file this page fetched: a case with several observers is
- * a case.json, and each observer carries a description of their own, which has to follow the one the
+ * Read off the player rather than off the file this page fetched: a case with several witnesses is
+ * a case.json, and each witness carries a description of their own, which has to follow the one the
  * reader picked. The page's own language first, then English, then whatever the recording has.
  * Plain text, cut into paragraphs on blank lines: a recording is data, not markup.
  */
@@ -135,7 +135,7 @@ const describe = () => {
   // The chips carry it (their Summary box, opened on a click): not twice on the page.
   description.hidden = description.childElementCount === 0 || stage.hasAttribute("show-labels")
 }
-/* The recording the player is showing, as its own address: on a case with several observers, the one picked. */
+/* The recording the player is showing, as its own address: on a case with several witnesses, the one picked. */
 let shownSrc
 stage.addEventListener("observerchange", event => {
   shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
@@ -184,7 +184,7 @@ const answeredButUnreadable = async url => {
    a file came to watch, not to hunt for the button. \`play=false\` in the page's own address turns that
    off, for a link meant to open the recording stopped. */
 /* What the page's own address asks of the player: where the recording opens (\`d=\` a length of time from its start, \`t=\` a time said
-   during the observation), which observer of a case opens first, and the options a shared link carries. See PlayUrl. */
+   during the observation), which witness of a case opens first, and the options a shared link carries. See PlayUrl. */
 for (const [name, value] of playAttributes(location.search)) stage.setAttribute(name, value)
 const playsAtOnce = new URLSearchParams(location.search).get("play") !== "false"
 const startPlaying = () => {
@@ -361,7 +361,7 @@ ${this.form("en")}
       <code>ufoathome.org/play/?file=</code> followed by the address of a reconstruction.
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.
-      Add <code>&amp;d=125</code> (or <code>1:30</code>, <code>1m30s</code>) to open it 125 seconds in, <code>&amp;t=02:33:15</code> to open it at a time said during the observation, <code>&amp;labels=0</code> to hide the summary chips, <code>&amp;map=1</code> to open the observer's map, <code>&amp;moments=0</code> to hide the named moments or <code>&amp;compare=1</code> to compare the account with an interpretation; <a href="/docs/share/">the sharing page</a> writes them for you.</p>
+      Add <code>&amp;d=125</code> (or <code>1:30</code>, <code>1m30s</code>) to open it 125 seconds in, <code>&amp;t=02:33:15</code> to open it at a time said during the observation, <code>&amp;labels=0</code> to hide the summary chips, <code>&amp;map=1</code> to open the witness's map, <code>&amp;moments=0</code> to hide the named moments or <code>&amp;compare=1</code> to compare the account with an interpretation; <a href="/docs/share/">the sharing page</a> writes them for you.</p>
     <p>It is also what every published reconstruction's own <q>i</q> panel hands out, and what the
       older <code>ufoathome.org/&lt;name&gt;</code> links resolve to. A name with no slash is looked
       for among this site's demos first, then as an rr0.org case, read through its
@@ -404,7 +404,7 @@ ${this.form("fr")}
       <code>ufoathome.org/play/?file=</code> suivi de l'adresse d'une reconstitution.
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.
-      Ajoutez <code>&amp;d=125</code> (ou <code>1:30</code>, <code>1m30s</code>) pour l'ouvrir à 125 secondes, <code>&amp;t=02:33:15</code> pour l'ouvrir à une heure dite pendant l'observation, <code>&amp;labels=0</code> pour masquer les chips de résumé, <code>&amp;map=1</code> pour ouvrir la carte de l'observateur, <code>&amp;moments=0</code> pour masquer les moments nommés ou <code>&amp;compare=1</code> pour comparer le récit à une interprétation ; <a href="/docs/share/">la page de partage</a> les écrit pour vous.</p>
+      Ajoutez <code>&amp;d=125</code> (ou <code>1:30</code>, <code>1m30s</code>) pour l'ouvrir à 125 secondes, <code>&amp;t=02:33:15</code> pour l'ouvrir à une heure dite pendant l'observation, <code>&amp;labels=0</code> pour masquer les chips de résumé, <code>&amp;map=1</code> pour ouvrir la carte du témoin, <code>&amp;moments=0</code> pour masquer les moments nommés ou <code>&amp;compare=1</code> pour comparer le récit à une interprétation ; <a href="/docs/share/">la page de partage</a> les écrit pour vous.</p>
     <p>C'est aussi ce que distribue le panneau <q>i</q> de chaque reconstitution publiée, et ce vers
       quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>. Un nom sans barre oblique est cherché
       d'abord parmi les démos de ce site, puis comme dossier de rr0.org, lu par son
@@ -447,7 +447,7 @@ ${this.form("es")}
       <code>ufoathome.org/play/?file=</code> seguido de la dirección de una reconstrucción.
       Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
       en un correo, una publicación, un foro que no admite más que texto.
-      Añade <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) para abrirlo en el segundo 125, <code>&amp;t=02:33:15</code> para abrirlo a una hora dicha durante la observación, <code>&amp;labels=0</code> para ocultar los chips del resumen, <code>&amp;map=1</code> para abrir el mapa del observador, <code>&amp;moments=0</code> para ocultar los momentos con nombre o <code>&amp;compare=1</code> para comparar el relato con una interpretación; <a href="/docs/share/">la página de compartir</a> los escribe por ti.</p>
+      Añade <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) para abrirlo en el segundo 125, <code>&amp;t=02:33:15</code> para abrirlo a una hora dicha durante la observación, <code>&amp;labels=0</code> para ocultar los chips del resumen, <code>&amp;map=1</code> para abrir el mapa del testigo, <code>&amp;moments=0</code> para ocultar los momentos con nombre o <code>&amp;compare=1</code> para comparar el relato con una interpretación; <a href="/docs/share/">la página de compartir</a> los escribe por ti.</p>
     <p>Es también lo que reparte el panel <q>i</q> de cada reconstrucción publicada, y a lo que
       llevan los antiguos enlaces <code>ufoathome.org/&lt;nombre&gt;</code>. Un nombre sin barra se
       busca primero entre las demos de este sitio, y después como caso de rr0.org, leído a través de
@@ -490,7 +490,7 @@ ${this.form("it")}
       <code>ufoathome.org/play/?file=</code> seguito dall'indirizzo di una ricostruzione.
       È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
       in un'email, un post, un forum che accetta solo testo.
-      Aggiungi <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) per aprirlo al secondo 125, <code>&amp;t=02:33:15</code> per aprirlo a un'ora detta durante l'osservazione, <code>&amp;labels=0</code> per nascondere i chip del riepilogo, <code>&amp;map=1</code> per aprire la mappa dell'osservatore, <code>&amp;moments=0</code> per nascondere i momenti nominati o <code>&amp;compare=1</code> per confrontare il resoconto con un'interpretazione; <a href="/docs/share/">la pagina di condivisione</a> li scrive per te.</p>
+      Aggiungi <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) per aprirlo al secondo 125, <code>&amp;t=02:33:15</code> per aprirlo a un'ora detta durante l'osservazione, <code>&amp;labels=0</code> per nascondere i chip del riepilogo, <code>&amp;map=1</code> per aprire la mappa del testimone, <code>&amp;moments=0</code> per nascondere i momenti nominati o <code>&amp;compare=1</code> per confrontare il resoconto con un'interpretazione; <a href="/docs/share/">la pagina di condivisione</a> li scrive per te.</p>
     <p>È anche ciò che distribuisce il pannello <q>i</q> di ogni ricostruzione pubblicata, e ciò a
       cui rimandano i vecchi link <code>ufoathome.org/&lt;nome&gt;</code>. Un nome senza barra viene
       cercato prima tra le demo di questo sito, poi come caso di rr0.org, letto tramite il suo

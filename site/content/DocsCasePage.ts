@@ -277,10 +277,10 @@ export class DocsCasePage extends DocsSection {
           "La dirección de un caso (<code>case.json</code>), o de una sola grabación, que entonces ofrece añadir a un caso.",
           "L'indirizzo di un caso (<code>case.json</code>), o di una sola registrazione, che allora propone di aggiungere a un caso.")],
         ["track", "attribute", said(
-          "The address of the recording to open first, relative to the case; by default the first observer's.",
-          "L'adresse de l'enregistrement à ouvrir d'abord, relative au dossier ; par défaut celui du premier observateur.",
-          "La dirección de la grabación que se abre primero, relativa al caso; por defecto la del primer observador.",
-          "L'indirizzo della registrazione da aprire per prima, relativo al caso; per impostazione predefinita quella del primo osservatore.")],
+          "The address of the recording to open first, relative to the case; by default the first witness's.",
+          "L'adresse de l'enregistrement à ouvrir d'abord, relative au dossier ; par défaut celui du premier témoin.",
+          "La dirección de la grabación que se abre primero, relativa al caso; por defecto la del primer testigo.",
+          "L'indirizzo della registrazione da aprire per prima, relativo al caso; per impostazione predefinita quella del primo testimone.")],
         ["sightingData", "property", said(
           "The recording on show, as a plain object.",
           "L'enregistrement affiché, comme objet simple.",

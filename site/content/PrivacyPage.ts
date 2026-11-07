@@ -21,10 +21,10 @@ export class PrivacyPage implements SitePage {
     navLabel: { en: "Privacy", fr: "Confidentialité", es: "Privacidad", it: "Privacy" },
     title: { en: "Privacy", fr: "Confidentialité", es: "Privacidad", it: "Privacy" },
     description: {
-      en: "What UFO@home keeps, what it sends to third parties and why, and how observers named in a recording can ask for a change.",
-      fr: "Ce qu'UFO@home conserve, ce qu'il envoie à des tiers et pourquoi, et comment un observateur cité dans un enregistrement peut demander une modification.",
-      es: "Qué conserva UFO@home, qué envía a terceros y por qué, y cómo un observador citado en una grabación puede pedir un cambio.",
-      it: "Che cosa conserva UFO@home, che cosa invia a terzi e perché, e come un osservatore citato in una registrazione può chiedere una modifica."
+      en: "What UFO@home keeps, what it sends to third parties and why, and how witnesses named in a recording can ask for a change.",
+      fr: "Ce qu'UFO@home conserve, ce qu'il envoie à des tiers et pourquoi, et comment un témoin cité dans un enregistrement peut demander une modification.",
+      es: "Qué conserva UFO@home, qué envía a terceros y por qué, y cómo un testigo citado en una grabación puede pedir un cambio.",
+      it: "Che cosa conserva UFO@home, che cosa invia a terzi e perché, e come un testimone citato in una registrazione può chiedere una modifica."
     }
   }
 
@@ -53,20 +53,20 @@ export class PrivacyPage implements SitePage {
       name: "Overpass (OpenStreetMap)", host: "overpass-api.de, overpass.kumi.systems, overpass.private.coffee",
       where: { en: "public instances run by volunteers, in Europe", fr: "instances publiques tenues par des bénévoles, en Europe", es: "instancias públicas mantenidas por voluntarios, en Europa", it: "istanze pubbliche gestite da volontari, in Europa" },
       why: {
-        en: "Buildings around the observer, when that scenery is chosen; street lamps, traffic lights, crossings and road signs with every scenery.",
-        fr: "Bâtiments autour de l'observateur, lorsque ce décor est choisi ; lampadaires, feux, passages piétons et panneaux avec tout décor.",
-        es: "Edificios alrededor del observador, cuando se elige ese entorno; farolas, semáforos, pasos de peatones y señales con cualquier entorno.",
-        it: "Edifici intorno all'osservatore, quando si sceglie quell'ambiente; lampioni, semafori, attraversamenti e segnali con ogni ambiente."
+        en: "Buildings around the witness, when that scenery is chosen; street lamps, traffic lights, crossings and road signs with every scenery.",
+        fr: "Bâtiments autour du témoin, lorsque ce décor est choisi ; lampadaires, feux, passages piétons et panneaux avec tout décor.",
+        es: "Edificios alrededor del testigo, cuando se elige ese entorno; farolas, semáforos, pasos de peatones y señales con cualquier entorno.",
+        it: "Edifici intorno al testimone, quando si sceglie quell'ambiente; lampioni, semafori, attraversamenti e segnali con ogni ambiente."
       }
     },
     {
       name: "Paris Data (Ville de Paris)", host: "opendata.paris.fr",
       where: { en: "France (City of Paris)", fr: "France (Ville de Paris)", es: "Francia (Ayuntamiento de París)", it: "Francia (Comune di Parigi)" },
       why: {
-        en: "The city's public lamps, their colour and their flux, around an observer in Paris.",
-        fr: "Les lampadaires de la ville, leur couleur et leur flux, autour d'un observateur à Paris.",
-        es: "Las farolas de la ciudad, su color y su flujo, alrededor de un observador en París.",
-        it: "I lampioni della città, il loro colore e il loro flusso, intorno a un osservatore a Parigi."
+        en: "The city's public lamps, their colour and their flux, around a witness in Paris.",
+        fr: "Les lampadaires de la ville, leur couleur et leur flux, autour d'un témoin à Paris.",
+        es: "Las farolas de la ciudad, su color y su flujo, alrededor de un testigo en París.",
+        it: "I lampioni della città, il loro colore e il loro flusso, intorno a un testimone a Parigi."
       }
     },
     {
@@ -209,7 +209,7 @@ export class PrivacyPage implements SitePage {
       (see the <a href="/faq/">FAQ</a>).</p>
 
     <h2>Nothing is written to a server</h2>
-    <p>UFO@home only reads: what you type, the weather, the ground and the imagery around the observer. It never sends a
+    <p>UFO@home only reads: what you type, the weather, the ground and the imagery around the witness. It never sends a
       recording, a name or a draft to a server of ours, and has no account that could hold one. The only outputs are the ones
       you start yourself: <strong>Save</strong> exports the sighting file to your device, which you can then replay or publish on the site of your
       choice, public or internal.</p>
@@ -229,7 +229,7 @@ export class PrivacyPage implements SitePage {
       back, is your responsibility.</p>
 
     <h2>The demos on this site</h2>
-    <p>RR0 publishes the demos here. An observer is named in them only because they agreed to it with us, or because they published their own account themselves, in an interview for instance; otherwise initials stand for the name. If you are an observer they replay and want a correction, a less precise place or a
+    <p>RR0 publishes the demos here. A witness is named in them only because they agreed to it with us, or because they published their own account themselves, in an interview for instance; otherwise initials stand for the name. If you are a witness they replay and want a correction, a less precise place or a
       withdrawal, write to <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Your rights</h2>
@@ -290,7 +290,7 @@ export class PrivacyPage implements SitePage {
       (voir la <a href="/faq/">FAQ</a>).</p>
 
     <h2>Rien n'est écrit sur un serveur</h2>
-    <p>UFO@home ne fait que lire : ce que vous saisissez, la météo, le sol et l'imagerie autour de l'observateur. Il n'envoie jamais
+    <p>UFO@home ne fait que lire : ce que vous saisissez, la météo, le sol et l'imagerie autour du témoin. Il n'envoie jamais
       un enregistrement, un nom ou un brouillon à un serveur de notre côté, et n'a aucun compte qui pourrait en conserver. Les seules
       sorties sont celles que vous déclenchez vous-même : <strong>Enregistrer</strong> exporte le fichier d'observation sur votre appareil, que vous
       pouvez ensuite rejouer ou publier sur le site de votre choix, public ou interne.</p>
@@ -312,7 +312,7 @@ export class PrivacyPage implements SitePage {
       qui en revient, relèvent de votre responsabilité.</p>
 
     <h2>Les démos de ce site</h2>
-    <p>RR0 publie les démos d'ici. Un observateur n'y est nommé que parce qu'il y a consenti auprès de nous, ou parce qu'il a publié lui-même son témoignage, dans une interview par exemple ; sinon des initiales tiennent lieu de nom. Si vous êtes un observateur dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
+    <p>RR0 publie les démos d'ici. Un témoin n'y est nommé que parce qu'il y a consenti auprès de nous, ou parce qu'il a publié lui-même son témoignage, dans une interview par exemple ; sinon des initiales tiennent lieu de nom. Si vous êtes un témoin dont l'une d'elles rejoue le compte rendu et souhaitez une correction,
       un lieu moins précis ou un retrait, écrivez à <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Vos droits</h2>
@@ -372,7 +372,7 @@ export class PrivacyPage implements SitePage {
       (véanse las <a href="/faq/">preguntas frecuentes</a>).</p>
 
     <h2>No se escribe nada en un servidor</h2>
-    <p>UFO@home solo lee: lo que escribes, el tiempo, el suelo y las imágenes alrededor del observador. Nunca envía una
+    <p>UFO@home solo lee: lo que escribes, el tiempo, el suelo y las imágenes alrededor del testigo. Nunca envía una
       grabación, un nombre o un borrador a un servidor nuestro, y no tiene ninguna cuenta que pudiera guardarlos. Las únicas
       salidas son las que inicias tú mismo: <strong>Guardar</strong> exporta el archivo de la observación a tu dispositivo, que luego puedes
       reproducir o publicar en el sitio que elijas, público o interno.</p>
@@ -392,7 +392,7 @@ export class PrivacyPage implements SitePage {
       elegiste, con tu clave, solo cuando lo pides; lo que envías, y la comprobación de lo que vuelve, son responsabilidad tuya.</p>
 
     <h2>Las demos de este sitio</h2>
-    <p>RR0 publica las demos de aquí. Un observador solo aparece nombrado en ellas porque lo consintió ante nosotros, o porque él mismo publicó su testimonio, en una entrevista por ejemplo; si no, unas iniciales ocupan el lugar del nombre. Si eres un observador cuyo relato reproduce una de ellas y quieres una corrección, un lugar
+    <p>RR0 publica las demos de aquí. Un testigo solo aparece nombrado en ellas porque lo consintió ante nosotros, o porque él mismo publicó su testimonio, en una entrevista por ejemplo; si no, unas iniciales ocupan el lugar del nombre. Si eres un testigo cuyo relato reproduce una de ellas y quieres una corrección, un lugar
       menos preciso o una retirada, escribe a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>Tus derechos</h2>
@@ -452,7 +452,7 @@ export class PrivacyPage implements SitePage {
       (vedi le <a href="/faq/">domande frequenti</a>).</p>
 
     <h2>Non viene scritto nulla su un server</h2>
-    <p>UFO@home si limita a leggere: ciò che scrivi, il meteo, il suolo e le immagini intorno all'osservatore. Non invia mai una
+    <p>UFO@home si limita a leggere: ciò che scrivi, il meteo, il suolo e le immagini intorno al testimone. Non invia mai una
       registrazione, un nome o una bozza a un nostro server, e non ha alcun account che possa conservarli. Le uniche uscite sono
       quelle che avvii tu: <strong>Salva</strong> esporta il file dell'osservazione sul tuo dispositivo, che puoi poi riprodurre o pubblicare sul sito
       che preferisci, pubblico o interno.</p>
@@ -473,7 +473,7 @@ export class PrivacyPage implements SitePage {
       di ciò che ne torna, sono responsabilità tua.</p>
 
     <h2>Le demo di questo sito</h2>
-    <p>RR0 pubblica le demo qui presenti. Un osservatore vi è nominato solo perché ha acconsentito presso di noi, o perché ha pubblicato egli stesso la propria testimonianza, in un'intervista ad esempio; altrimenti le iniziali tengono il posto del nome. Se sei un osservatore il cui resoconto è riprodotto da una di esse e vuoi una correzione,
+    <p>RR0 pubblica le demo qui presenti. Un testimone vi è nominato solo perché ha acconsentito presso di noi, o perché ha pubblicato egli stesso la propria testimonianza, in un'intervista ad esempio; altrimenti le iniziali tengono il posto del nome. Se sei un testimone il cui resoconto è riprodotto da una di esse e vuoi una correzione,
       un luogo meno preciso o un ritiro, scrivi a <a href="mailto:contact@ufoathome.org">contact@ufoathome.org</a>.</p>
 
     <h2>I tuoi diritti</h2>

@@ -61,7 +61,7 @@ let index = 0
 let auto = true
 let slideTimer
 let resumeTimer
-// Whether the stage is in the reader's viewport — see the observer below.
+// Whether the stage is in the reader's viewport — see the witness below.
 let onScreen = true
 
 const ufo = () => stage.scene?.ufoElement

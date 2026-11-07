@@ -24,7 +24,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       that latitude and that longitude. Nothing is a picture of a sky: point at any of it and it
       names itself — “Venus, mag −4, 8° above the horizon”.</p>
     <p>What is drawn from the catalogue stops at magnitude 6.5, and that number is a fact about a
-      <em>observer</em> rather than about the sky: it is how faint a dark-adapted human eye goes.
+      <em>witness</em> rather than about the sky: it is how faint a dark-adapted human eye goes.
       Put something else in front of the same night and the threshold moves with it — see
       <a href="/context/instrument/">the instrument</a>.</p>
     <p>The catalogue follows the same threshold. A naked-eye sky costs 400 kB, down to magnitude
@@ -36,13 +36,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       which is the difference between two constellations.</p>
     <p>The Milky Way and the zodiacal light are integrated along the line of sight rather than
       painted as a texture — which is why they move correctly with the season, the hour and the
-      observer's latitude instead of merely being in the right place once.</p>
+      witness's latitude instead of merely being in the right place once.</p>
 `,
       fr: `    <p>Soleil, Lune et sa phase, planètes et étoiles sont placés par éphémérides pour cet instant,
       cette latitude et cette longitude. Rien n'est une image de ciel : pointez n'importe quoi et
       cela se nomme — « Vénus, mag −4, 8° au-dessus de l'horizon ».</p>
     <p>Ce qui en est dessiné s'arrête à la magnitude 6,5, et ce nombre est un fait sur le
-      <em>observateur</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil humain accoutumé à
+      <em>témoin</em>, pas sur le ciel : c'est la magnitude qu'atteint un œil humain accoutumé à
       l'obscurité. Placez autre chose devant la même nuit et le seuil suit — voir
       <a href="/context/instrument/">l'instrument</a>.</p>
     <p>Le catalogue suit ce même seuil. Un ciel vu à l'œil nu coûte 400 ko, jusqu'à la magnitude
@@ -55,13 +55,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       1006, soit la différence entre deux constellations.</p>
     <p>La Voie lactée et la lumière zodiacale sont intégrées le long de la ligne de visée plutôt que
       plaquées en texture — c'est pourquoi elles bougent correctement avec la saison, l'heure et la
-      latitude de l'observateur, au lieu d'être au bon endroit une fois pour toutes.</p>
+      latitude du témoin, au lieu d'être au bon endroit une fois pour toutes.</p>
 `,
       es: `    <p>El Sol, la Luna y su fase, los planetas y las estrellas se sitúan por efemérides para ese
       instante, esa latitud y esa longitud. Nada es una imagen de un cielo: señala cualquier cosa y
       se nombra a sí misma — «Venus, mag −4, 8° sobre el horizonte».</p>
     <p>Lo que se dibuja del catálogo se detiene en la magnitud 6,5, y ese número es un hecho sobre un
-      <em>observador</em> y no sobre el cielo: es hasta dónde llega un ojo humano adaptado a la
+      <em>testigo</em> y no sobre el cielo: es hasta dónde llega un ojo humano adaptado a la
       oscuridad. Pon otra cosa delante de la misma noche y el umbral se desplaza con ella — mira
       <a href="/context/instrument/">el instrumento</a>.</p>
     <p>El catálogo sigue el mismo umbral. Un cielo a simple vista cuesta 400 kB, hasta la magnitud
@@ -74,13 +74,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       1918, catorce en 1006, que es la diferencia entre dos constelaciones.</p>
     <p>La Vía Láctea y la luz zodiacal se integran a lo largo de la línea de visión en lugar de
       pintarse como una textura — por eso se mueven correctamente con la estación, la hora y la
-      latitud del observador en vez de estar simplemente en el lugar correcto una vez.</p>
+      latitud del testigo en vez de estar simplemente en el lugar correcto una vez.</p>
 `,
       it: `    <p>Sole, Luna e la sua fase, pianeti e stelle sono collocati per effemeridi per quell'istante,
       quella latitudine e quella longitudine. Niente è un'immagine di cielo: punta qualunque cosa e
       si nomina da sé — «Venere, mag −4, 8° sopra l'orizzonte».</p>
     <p>Ciò che viene disegnato dal catalogo si ferma alla magnitudine 6,5, e quel numero è un fatto
-      che riguarda un <em>osservatore</em> e non il cielo: è fin dove arriva un occhio umano adattato
+      che riguarda un <em>testimone</em> e non il cielo: è fin dove arriva un occhio umano adattato
       al buio. Metti qualcos'altro davanti alla stessa notte e la soglia si sposta con esso — vedi
       <a href="/context/instrument/">lo strumento</a>.</p>
     <p>Il catalogo segue la stessa soglia. Un cielo a occhio nudo costa 400 kB, fino alla magnitudine
@@ -93,7 +93,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       1006, cioè la differenza fra due costellazioni.</p>
     <p>La Via Lattea e la luce zodiacale sono integrate lungo la linea di vista invece di essere
       dipinte come una texture — ed è per questo che si muovono correttamente con la stagione, l'ora
-      e la latitudine dell'osservatore invece di trovarsi al posto giusto una volta sola.</p>
+      e la latitudine del testimone invece di trovarsi al posto giusto una volta sola.</p>
 `
     }
   },
@@ -103,7 +103,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     body: {
       en: `    <p>The sky itself is not a colour gradient. Sunlight and moonlight are traced through a
       spherical atmosphere at fifteen wavelengths across what an eye sees, the way light really
-      reaches an observer: scattered once by the air on its way, then again and again, dimmed by
+      reaches a witness: scattered once by the air on its way, then again and again, dimmed by
       what stands in front of it. Three things make up that air. The molecules of the air itself,
       which scatter blue far more than red and make the sky blue. The haze, which whitens the
       horizon and puts a bright aureole around the Sun, and which is thicker on a humid day than a
@@ -125,7 +125,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       measured at the Paranal observatory to within half a magnitude, without ever having been
       fitted to it.</p>
     <p>What reaches the screen is what an eye adapted to that sky makes of it: a night sky is not
-      ten million times darker than a day sky to an observer standing in it, and colour gives way to
+      ten million times darker than a day sky to a witness standing in it, and colour gives way to
       a dim blue-grey as the rods take over from the cones. A camera does none of this, so a
       recording made through one keeps the blue a long exposure really shows. How bright a day and a
       moonless night are shown are the two choices in that chain, and they are stated as choices.</p>
@@ -137,7 +137,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
 `,
       fr: `    <p>Le ciel lui-même n'est pas un dégradé de couleurs. La lumière du Soleil et de la Lune est
       suivie à travers une atmosphère sphérique, à quinze longueurs d'onde couvrant ce que voit un
-      œil, comme elle atteint réellement un observateur : diffusée une fois par l'air en chemin, puis
+      œil, comme elle atteint réellement un témoin : diffusée une fois par l'air en chemin, puis
       encore et encore, atténuée par ce qui se trouve devant. Trois choses composent cet air. Les
       molécules de l'air lui-même, qui diffusent bien plus le bleu que le rouge et font le ciel
       bleu. La brume, qui blanchit l'horizon et met une auréole claire autour du Soleil, et qui est
@@ -159,7 +159,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       de deux tiers de magnitude : l'ombre de la Terre, bas dans le ciel, pendant le crépuscule
       nautique. Et le zénith rejoint à une demi-magnitude près la photométrie du crépuscule mesurée
       à l'observatoire de Paranal, sans jamais avoir été ajusté dessus.</p>
-    <p>Ce qui arrive à l'écran est ce qu'en fait un œil adapté à ce ciel : pour un observateur qui s'y
+    <p>Ce qui arrive à l'écran est ce qu'en fait un œil adapté à ce ciel : pour un témoin qui s'y
       tient, un ciel nocturne n'est pas dix millions de fois plus sombre qu'un ciel de jour, et la
       couleur cède la place à un gris-bleu sombre à mesure que les bâtonnets prennent le relais des
       cônes. Un appareil photo ne fait rien de tout cela : un enregistrement fait à travers lui garde
@@ -173,7 +173,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
 `,
       es: `    <p>El cielo en sí no es un degradado de color. La luz del Sol y de la Luna se sigue a través de
       una atmósfera esférica en quince longitudes de onda que cubren lo que ve un ojo, tal como la
-      luz llega realmente a un observador: dispersada una vez por el aire en su camino, luego una y
+      luz llega realmente a un testigo: dispersada una vez por el aire en su camino, luego una y
       otra vez, atenuada por lo que se interpone. Tres cosas componen ese aire. Las moléculas del
       propio aire, que dispersan el azul mucho más que el rojo y hacen azul el cielo. La bruma, que
       blanquea el horizonte y pone una aureola brillante alrededor del Sol, y que es más espesa en un
@@ -195,7 +195,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       el crepúsculo náutico. Y el cenit coincide a media magnitud con la fotometría del crepúsculo
       medida en el observatorio de Paranal, sin haber sido nunca ajustado a ella.</p>
     <p>Lo que llega a la pantalla es lo que hace de ese cielo un ojo adaptado a él: para un
-      observador que está en él, un cielo nocturno no es diez millones de veces más oscuro que un
+      testigo que está en él, un cielo nocturno no es diez millones de veces más oscuro que un
       cielo diurno, y el color cede el paso a un gris azulado tenue a medida que los bastones toman
       el relevo de los conos. Una cámara no hace nada de esto, así que una grabación hecha a través
       de una conserva el azul que muestra realmente una exposición larga. El brillo con que se
@@ -209,7 +209,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
 `,
       it: `    <p>Il cielo stesso non è una sfumatura di colore. La luce del Sole e della Luna è seguita
       attraverso un'atmosfera sferica a quindici lunghezze d'onda che coprono ciò che vede un occhio,
-      nel modo in cui la luce raggiunge davvero un osservatore: diffusa una volta dall'aria lungo il
+      nel modo in cui la luce raggiunge davvero un testimone: diffusa una volta dall'aria lungo il
       cammino, poi ancora e ancora, attenuata da ciò che le sta davanti. Tre cose compongono
       quell'aria. Le molecole dell'aria stessa, che diffondono il blu molto più del rosso e rendono
       blu il cielo. La foschia, che sbianca l'orizzonte e mette un'aureola luminosa attorno al Sole,
@@ -232,7 +232,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       zenit concorda entro mezza magnitudine con la fotometria del crepuscolo misurata
       all'osservatorio del Paranal, senza esservi mai stato adattato.</p>
     <p>Ciò che arriva sullo schermo è ciò che ne fa un occhio adattato a quel cielo: per un
-      osservatore che vi si trova, un cielo notturno non è dieci milioni di volte più scuro di un cielo
+      testimone che vi si trova, un cielo notturno non è dieci milioni di volte più scuro di un cielo
       diurno, e il colore cede il posto a un grigio-azzurro tenue man mano che i bastoncelli prendono
       il posto dei coni. Una fotocamera non fa nulla di tutto questo, quindi una registrazione fatta
       attraverso di essa conserva il blu che una posa lunga mostra davvero. Quanto luminosi vengono
@@ -262,7 +262,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       2006, reconstructed from Tycho's and Kepler's own comparisons for 1572 and 1604, and held to a
       few chronicled dates for 1054 and 1181; each one says which.</p>
     <p><strong>Eclipses</strong> are never declared. At every instant the Sun's and the Moon's positions
-      as seen from the observer's own place, parallax included, say how much of the Sun's disc the
+      as seen from the witness's own place, parallax included, say how much of the Sun's disc the
       Moon covers; the scene draws that crescent, the daylight it leaves, the corona when nothing is
       left, and the stars and planets the darker sky then allows, and for the second or two either side of totality the beads of light that the Moon's own relief lets through (NASA's LOLA map of its surface, with the libration of the day), and the orange ring round the whole horizon of lit air beyond the Moon's shadow. It is why 11 August 1999 is total at
       Reims and a mere 99&nbsp;% at Paris. Seen bare-eyed, a crescent Sun is still a dazzling one: the
@@ -279,7 +279,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     <p><strong>Recorded fireballs</strong> are events, not rates: since December 2018 the Global
       Meteor Network's cameras have triangulated where each bright one began and ended and how bright
       it peaked, and a recording of that date draws every one that burned during it, from where the
-      observer stood, as bright as its distance makes it.</p>
+      witness stood, as bright as its distance makes it.</p>
     <p><strong>Satellites</strong> get the harder question, because being lit is not the same as
       being seen: the Earth's shadow is computed for the date and hour to say whether one could
       have caught the Sun at all, and how many objects were in orbit on that date is known, and
@@ -290,13 +290,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     <p><strong>Re-entries</strong> are placed by an interpretation, not found: a satellite or rocket
       stage breaking up into burning pieces, on a path somebody established (orbital elements are off
       by minutes in the last orbit). It is placed on the Earth, 70 to 100 km up, and seen through
-      the Earth's curvature from where the observer stood, each piece as bright as its distance
+      the Earth's curvature from where the witness stood, each piece as bright as its distance
       makes it, with its tail along its own path, until it has burned. It glows from its own
       heating, so the Earth's shadow does not put it out. Which re-entries could have been in a
       sky is stated from the record (CORDS since 2000, the satellite catalogue's decay days since
       1957), each with its precision: a sighting on record near enough in time and place, a
       prediction whose window meets the observation, or a bare day. An orbit that never comes within
-      sight of the observer's latitude is never listed.</p>
+      sight of the witness's latitude is never listed.</p>
 `,
       fr: `    <p>Chacun de ces éléments est une explication candidate, donc chacun doit répondre à la même
       question avant d'être dessiné : pouvait-il être visible <em>de là, à ce moment-là</em> ?</p>
@@ -311,7 +311,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       1572 et 1604, et tenu à quelques dates des chroniques pour 1054 et 1181 ; chacune dit ce
       qu'il en est.</p>
     <p>Les <strong>éclipses</strong> ne sont jamais déclarées. À chaque instant, les positions du Soleil
-      et de la Lune vues de la place même de l'observateur, parallaxe comprise, disent quelle part du
+      et de la Lune vues de la place même du témoin, parallaxe comprise, disent quelle part du
       disque solaire la Lune recouvre ; la scène dessine ce croissant, le jour qu'il laisse, la couronne
       quand il ne reste rien, et les étoiles et planètes que le ciel plus sombre permet alors, et pendant la seconde ou deux qui entourent la totalité les grains de lumière que laisse passer le relief même de la Lune (la carte LOLA de la NASA, avec la libration du jour), et l'anneau orangé de tout l'horizon, celui de l'air resté éclairé au-delà de l'ombre de la Lune. C'est ce
       qui rend le 11 août 1999 total à Reims et seulement à 99&nbsp;% à Paris. À l'œil nu, un Soleil en
@@ -329,7 +329,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     <p>Les <strong>bolides enregistrés</strong> sont des événements, pas des taux : depuis décembre
       2018, les caméras du Global Meteor Network triangulent où chaque bolide brillant a commencé et
       fini et quel éclat il a atteint, et un enregistrement de cette date dessine chacun de ceux qui
-      ont brûlé pendant qu'il dure, depuis la place de l'observateur, aussi brillant que sa distance
+      ont brûlé pendant qu'il dure, depuis la place du témoin, aussi brillant que sa distance
       le permet.</p>
     <p>Les <strong>satellites</strong> reçoivent la question la plus difficile, car être éclairé
       n'est pas être vu : l'ombre de la Terre est calculée pour la date et l'heure afin de dire si
@@ -343,14 +343,14 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       trouvées : un satellite ou un étage de fusée se désagrégeant en morceaux qui brûlent, sur un
       chemin que quelqu'un a établi (les éléments orbitaux sont faux de plusieurs minutes sur la
       dernière orbite). La rentrée est placée sur la Terre, entre 70 et 100 km d'altitude, et vue à
-      travers la courbure de la Terre depuis l'endroit où se tenait l'observateur, chaque morceau
+      travers la courbure de la Terre depuis l'endroit où se tenait le témoin, chaque morceau
       aussi brillant que sa distance le permet, avec sa traînée le long de son propre chemin,
       jusqu'à ce qu'il ait brûlé. Elle brille de son propre échauffement : l'ombre de la Terre ne
       l'éteint pas. Les rentrées qui ont pu être dans un ciel sont énoncées depuis le registre (CORDS
       depuis 2000, les jours de rentrée du catalogue des satellites depuis 1957), chacune avec sa
       précision : une observation au registre assez proche dans le temps et l'espace, une prévision
       dont la fenêtre rencontre l'observation, ou un simple jour. Une orbite qui ne passe jamais en
-      vue de la latitude de l'observateur n'est jamais listée.</p>
+      vue de la latitude du témoin n'est jamais listée.</p>
 `,
       es: `    <p>Cada uno de estos es una explicación candidata, así que cada uno debe responder a la misma
       pregunta antes de ser dibujado: ¿podía ser visible <em>desde allí, en ese momento</em>?</p>
@@ -365,7 +365,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       Kepler para 1572 y 1604, y ceñido a unas pocas fechas de las crónicas para 1054 y 1181; cada
       una dice cuál es su caso.</p>
     <p>Los <strong>eclipses</strong> nunca se declaran. En cada instante, las posiciones del Sol y de la
-      Luna vistas desde el lugar mismo del observador, paralaje incluida, dicen qué parte del disco
+      Luna vistas desde el lugar mismo del testigo, paralaje incluida, dicen qué parte del disco
       solar cubre la Luna; la escena dibuja ese creciente, la luz del día que deja, la corona cuando no
       queda nada, y las estrellas y los planetas que permite entonces el cielo más oscuro, y durante uno o dos segundos a cada lado de la totalidad los granos de luz que deja pasar el propio relieve de la Luna (el mapa LOLA de la NASA, con la libración del día), y el anillo anaranjado de todo el horizonte, el del aire que sigue iluminado más allá de la sombra de la Luna. Por eso el
       11 de agosto de 1999 es total en Reims y solo del 99&nbsp;% en París. A simple vista, un Sol en
@@ -382,7 +382,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     <p><strong>Los bólidos registrados</strong> son sucesos, no tasas: desde diciembre de 2018 las
       cámaras de la Global Meteor Network triangulan dónde empezó y terminó cada bólido brillante y qué
       brillo alcanzó, y una grabación de esa fecha dibuja cada uno de los que ardieron mientras dura,
-      desde el lugar del observador, tan brillante como lo permite su distancia.</p>
+      desde el lugar del testigo, tan brillante como lo permite su distancia.</p>
     <p><strong>Los satélites</strong> reciben la pregunta más difícil, porque estar iluminado no es lo
       mismo que ser visto: la sombra de la Tierra se calcula para la fecha y la hora para decir si
       alguno podía siquiera recibir el Sol, y cuántos objetos había en órbita en esa fecha se sabe, y
@@ -395,13 +395,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       encuentran: un satélite o una etapa de cohete que se desintegra en pedazos que arden, sobre un
       camino que alguien estableció (los elementos orbitales yerran en minutos en la última órbita).
       Se sitúa sobre la Tierra, entre 70 y 100 km de altura, y se ve a través de la curvatura de la
-      Tierra desde donde estaba el observador, cada pedazo tan brillante como lo permite su
+      Tierra desde donde estaba el testigo, cada pedazo tan brillante como lo permite su
       distancia, con su estela a lo largo de su propio camino, hasta que ha ardido. Brilla por su
       propio calentamiento: la sombra de la Tierra no la apaga. Las reentradas que pudieron estar en
       un cielo se enuncian desde el registro (CORDS desde 2000, los días de reentrada del catálogo de
       satélites desde 1957), cada una con su precisión: una observación registrada lo bastante
       cercana en tiempo y lugar, una predicción cuya ventana alcanza la observación, o un simple
-      día. Una órbita que nunca pasa a la vista de la latitud del observador nunca se lista.</p>
+      día. Una órbita que nunca pasa a la vista de la latitud del testigo nunca se lista.</p>
 `,
       it: `    <p>Ciascuno di questi è una spiegazione candidata, quindi ciascuno deve rispondere alla stessa
       domanda prima di essere disegnato: poteva essere visibile <em>da lì, in quel momento</em>?</p>
@@ -416,7 +416,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       il 1604, e ancorata a poche date delle cronache per il 1054 e il 1181; ciascuna dice quale sia il
       suo caso.</p>
     <p>Le <strong>eclissi</strong> non sono mai dichiarate. A ogni istante, le posizioni del Sole e della
-      Luna viste dal luogo stesso dell'osservatore, parallasse compresa, dicono quanta parte del disco
+      Luna viste dal luogo stesso del testimone, parallasse compresa, dicono quanta parte del disco
       solare la Luna copre; la scena disegna quella falce, la luce del giorno che lascia, la corona
       quando non resta nulla, e le stelle e i pianeti che il cielo più buio consente allora, e per un secondo o due ai lati della totalità i grani di luce che lascia passare il rilievo stesso della Luna (la mappa LOLA della NASA, con la librazione del giorno), e l'anello arancione di tutto l'orizzonte, quello dell'aria che resta illuminata oltre l'ombra della Luna. Per questo
       l'11 agosto 1999 è totale a Reims e solo al 99&nbsp;% a Parigi. A occhio nudo, un Sole a falce
@@ -432,7 +432,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     <p><strong>I bolidi registrati</strong> sono eventi, non tassi: dal dicembre 2018 le telecamere
       della Global Meteor Network triangolano dove ogni bolide luminoso è iniziato e finito e quale
       luminosità ha raggiunto, e una registrazione di quella data disegna ciascuno di quelli che sono
-      bruciati mentre dura, dal punto dell'osservatore, luminoso quanto la sua distanza consente.</p>
+      bruciati mentre dura, dal punto del testimone, luminoso quanto la sua distanza consente.</p>
     <p><strong>I satelliti</strong> ricevono la domanda più difficile, perché essere illuminati non è
       la stessa cosa che essere visti: l'ombra della Terra è calcolata per la data e l'ora per dire se
       uno di essi poteva anche solo ricevere il Sole, e quanti oggetti fossero in orbita in quella
@@ -445,13 +445,13 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       un satellite o uno stadio di razzo che si disintegra in pezzi che bruciano, su un percorso che
       qualcuno ha stabilito (gli elementi orbitali sbagliano di minuti nell'ultima orbita). È posto
       sulla Terra, tra 70 e 100 km di quota, e visto attraverso la curvatura della Terra dal punto
-      in cui stava l'osservatore, ogni pezzo luminoso quanto la sua distanza consente, con la sua
+      in cui stava il testimone, ogni pezzo luminoso quanto la sua distanza consente, con la sua
       scia lungo il proprio percorso, finché non è bruciato. Brilla del proprio riscaldamento:
       l'ombra della Terra non lo spegne. I rientri che possono essere stati in un cielo sono
       enunciati dal registro (CORDS dal 2000, i giorni di rientro del catalogo dei satelliti dal
       1957), ciascuno con la sua precisione: un'osservazione registrata abbastanza vicina nel tempo e
       nello spazio, una previsione la cui finestra incontra l'osservazione, o un semplice giorno.
-      Un'orbita che non passa mai in vista della latitudine dell'osservatore non è mai elencata.</p>
+      Un'orbita che non passa mai in vista della latitudine del testimone non è mai elencata.</p>
 `
     }
   },
@@ -581,37 +581,37 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     id: "ground",
     title: { en: "The ground", fr: "Le sol", es: "El terreno", it: "Il terreno" },
     body: {
-      en: `    <p>Real relief and aerial imagery are fetched around the observer, along with the decor that got
-      in the way: buildings, trees, streetlights, vehicles, windows and other observers — with
+      en: `    <p>Real relief and aerial imagery are fetched around the witness, along with the decor that got
+      in the way: buildings, trees, streetlights, vehicles, windows and other witnesses — with
       their lights, their flash rates and their tracks.</p>
-    <p>How high the observer stood is looked up from where they stood. The ground under those
+    <p>How high the witness stood is looked up from where they stood. The ground under those
       coordinates comes from a real elevation model, so the altitude on the form is a height above
       sea level whose floor is the ground itself: nobody can be placed under it. And it is not a
       detail — at 1500 m the horizon really is 1.2° lower than it is at sea level, which is enough
       to decide whether something was above it.</p>
 `,
-      fr: `    <p>Relief réel et imagerie aérienne sont chargés autour de l'observateur, avec le décor qui s'est
-      interposé : bâtiments, arbres, lampadaires, véhicules, vitrages et autres observateurs — avec leurs
+      fr: `    <p>Relief réel et imagerie aérienne sont chargés autour du témoin, avec le décor qui s'est
+      interposé : bâtiments, arbres, lampadaires, véhicules, vitrages et autres témoins — avec leurs
       feux, leurs cadences de clignotement et leurs trajectoires.</p>
-    <p>À quelle hauteur l'observateur se tenait se relève d'où il se tenait. Le sol sous ces coordonnées
+    <p>À quelle hauteur le témoin se tenait se relève d'où il se tenait. Le sol sous ces coordonnées
       vient d'un modèle d'élévation réel, si bien que l'altitude du formulaire est une altitude
       au-dessus du niveau de la mer dont le plancher est le sol lui-même : on ne peut placer
       personne dessous. Et ce n'est pas un détail — à 1500 m, l'horizon est réellement 1,2° plus bas
       qu'au niveau de la mer, ce qui suffit à décider si quelque chose était au-dessus de lui.</p>
 `,
-      es: `    <p>El relieve real y las imágenes aéreas se descargan alrededor del observador, junto con el
-      decorado que se interpuso: edificios, árboles, farolas, vehículos, ventanas y otros observadores
+      es: `    <p>El relieve real y las imágenes aéreas se descargan alrededor del testigo, junto con el
+      decorado que se interpuso: edificios, árboles, farolas, vehículos, ventanas y otros testigos
       — con sus luces, sus frecuencias de destello y sus trayectorias.</p>
-    <p>A qué altura estaba el observador se consulta a partir de dónde estaba. El suelo bajo esas
+    <p>A qué altura estaba el testigo se consulta a partir de dónde estaba. El suelo bajo esas
       coordenadas procede de un modelo de elevación real, así que la altitud del formulario es una
       altura sobre el nivel del mar cuyo suelo es el propio terreno: nadie puede quedar por debajo. Y
       no es un detalle — a 1500 m el horizonte está realmente 1,2° más bajo que al nivel del mar, lo
       que basta para decidir si algo estaba por encima de él.</p>
 `,
-      it: `    <p>Il rilievo reale e le immagini aeree vengono scaricati attorno all'osservatore, insieme
-      all'arredo che si è frapposto: edifici, alberi, lampioni, veicoli, finestre e altri osservatori
+      it: `    <p>Il rilievo reale e le immagini aeree vengono scaricati attorno al testimone, insieme
+      all'arredo che si è frapposto: edifici, alberi, lampioni, veicoli, finestre e altri testimoni
       — con le loro luci, le loro frequenze di lampeggio e le loro traiettorie.</p>
-    <p>A che altezza si trovasse l'osservatore si ricava da dove si trovava. Il suolo sotto quelle
+    <p>A che altezza si trovasse il testimone si ricava da dove si trovava. Il suolo sotto quelle
       coordinate viene da un modello di elevazione reale, quindi l'altitudine del modulo è un'altezza
       sul livello del mare il cui pavimento è il terreno stesso: nessuno può esservi collocato sotto.
       E non è un dettaglio — a 1500 m l'orizzonte è davvero 1,2° più basso che al livello del mare, il
@@ -631,9 +631,9 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       aperture and one shutter speed, so there is nothing to choose, and a camera that did not exist
       yet is flagged against the observation's own date.</p>
     <p>And the instrument decides how faint a thing could be recorded at all. That same Instamatic
-      stops at magnitude 4.2 — two short of the observer holding it, which is half of why so many
+      stops at magnitude 4.2 — two short of the witness holding it, which is half of why so many
       “the sky was full of stars” accounts come with an empty black photograph. A 50 mm at f/2 for
-      twenty seconds reaches 9.7, three magnitudes <em>past</em> that observer. Aperture, shutter and
+      twenty seconds reaches 9.7, three magnitudes <em>past</em> that witness. Aperture, shutter and
       focal length settle it against the sky's own brightness.</p>
     <p>A longer pose stops helping once the sky has slid further than the lens can resolve, which is
       why an hour on a tripod is no deeper than five seconds on one — only longer trails.</p>
@@ -651,10 +651,10 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       avait un diaphragme et une vitesse, donc il n'y a rien à choisir, et un appareil qui n'existait
       pas encore est signalé face à la date de l'observation.</p>
     <p>Et c'est l'instrument qui décide de ce qui pouvait être enregistré. Ce même Instamatic
-      s'arrête à la magnitude 4,2 — deux de moins que l'observateur qui le tient, ce qui est la moitié de
+      s'arrête à la magnitude 4,2 — deux de moins que le témoin qui le tient, ce qui est la moitié de
       la raison pour laquelle tant de récits de « ciel plein d'étoiles » s'accompagnent d'une
       photographie noire et vide. Un 50 mm à f/2 pendant vingt secondes atteint 9,7, trois
-      magnitudes <em>au-delà</em> de cet observateur. Diaphragme, pose et focale en décident, face à la
+      magnitudes <em>au-delà</em> de ce témoin. Diaphragme, pose et focale en décident, face à la
       clarté du ciel lui-même.</p>
     <p>Allonger la pose cesse d'aider dès que le ciel a glissé plus loin que ce que l'objectif sait
       séparer : une heure sur trépied ne va pas plus loin que cinq secondes, elle fait seulement des
@@ -674,10 +674,10 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       una velocidad de obturación, así que no hay nada que elegir, y una cámara que aún no existía
       queda señalada frente a la fecha de la propia observación.</p>
     <p>Y el instrumento decide lo débil que podía llegar a registrarse algo. Esa misma Instamatic se
-      detiene en la magnitud 4,2 — dos menos que el observador que la sostiene, lo que explica la
+      detiene en la magnitud 4,2 — dos menos que el testigo que la sostiene, lo que explica la
       mitad de por qué tantos relatos de «el cielo estaba lleno de estrellas» vienen con una
       fotografía negra y vacía. Un 50 mm a f/2 durante veinte segundos llega a 9,7, tres magnitudes
-      <em>más allá</em> de ese observador. La apertura, la obturación y la focal lo deciden frente al
+      <em>más allá</em> de ese testigo. La apertura, la obturación y la focal lo deciden frente al
       propio brillo del cielo.</p>
     <p>Una exposición más larga deja de ayudar en cuanto el cielo se ha desplazado más de lo que el
       objetivo puede resolver, y por eso una hora sobre un trípode no llega más hondo que cinco
@@ -698,10 +698,10 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       fotocamera che non esisteva ancora viene segnalata rispetto alla data dell'osservazione
       stessa.</p>
     <p>Ed è lo strumento a decidere quanto debole potesse essere una cosa per essere registrata. Quella
-      stessa Instamatic si ferma alla magnitudine 4,2 — due in meno dell'osservatore che la tiene, il
+      stessa Instamatic si ferma alla magnitudine 4,2 — due in meno del testimone che la tiene, il
       che spiega metà del perché tanti resoconti di «il cielo era pieno di stelle» arrivino con una
       fotografia nera e vuota. Un 50 mm a f/2 per venti secondi arriva a 9,7, tre magnitudini
-      <em>oltre</em> quell'osservatore. Diaframma, otturatore e focale lo stabiliscono rispetto alla
+      <em>oltre</em> quell'testimone. Diaframma, otturatore e focale lo stabiliscono rispetto alla
       luminosità del cielo stesso.</p>
     <p>Una posa più lunga smette di aiutare appena il cielo è scivolato più di quanto l'obiettivo
       possa risolvere, ed è per questo che un'ora su un treppiede non va più in profondità di cinque
@@ -720,7 +720,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
     body: {
       en: `    <p>Everything above is computed, and a reader looking at the result has no way to tell a faithful
       reconstruction from a plausible one. A photograph of the same place does. A recording can carry
-      pictures of where it happened — an observer's own, an investigator's, a magazine scan, a
+      pictures of where it happened — a witness's own, an investigator's, a magazine scan, a
       street-level capture — each laid over the render at an opacity the reader slides between all
       picture and all render, with the phenomenon drawn over both. Every tree the thirty-metre relief
       smoothed away, every ridge, the actual hedge, is then one picture with the reconstruction.
@@ -739,14 +739,14 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       turn the picture to fit; three or more fit its field too. The residual says how well it fits,
       landmark by landmark, in green, orange or red: one that will not go below a degree is telling
       you the picture was not taken from that spot, or that the relief is wrong there. And a picture
-      that fits gives back the heading the observer actually faced — adopted into their pose with its
+      that fits gives back the heading the witness actually faced — adopted into their pose with its
       provenance written down, where a heading typed in was only their word. Street-level pictures
       taken nearby (Panoramax, open imagery) arrive already lined up in heading, a full turn arriving
       as a panorama.</p>
 `,
       fr: `    <p>Tout ce qui précède est calculé, et un lecteur devant le résultat n'a aucun moyen de
       distinguer une reconstitution fidèle d'une reconstitution vraisemblable. Une photo du même
-      endroit, si. Un enregistrement peut porter des photos des lieux — celle de l'observateur, celle d'un
+      endroit, si. Un enregistrement peut porter des photos des lieux — celle du témoin, celle d'un
       enquêteur, la page d'une revue, une capture de rue — chacune posée sur le rendu à une opacité
       que le lecteur fait glisser entre tout photo et tout rendu, le phénomène dessiné par-dessus.
       Chaque arbre que le relief à trente mètres avait lissé, chaque crête, la vraie haie, ne font
@@ -766,14 +766,14 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       tournent la photo pour les faire coïncider ; trois ou plus ajustent aussi son champ. L'écart
       résiduel dit si elle tient, repère par repère, en vert, orange ou rouge : un repère qui ne
       descend pas sous un degré vous dit que la photo n'a pas été prise de ce point, ou que le
-      relief est faux là. Et une photo qui tient rend le cap que l'observateur avait réellement —
+      relief est faux là. Et une photo qui tient rend le cap que le témoin avait réellement —
       adopté dans sa pose avec sa provenance écrite, là où un cap saisi n'était que sa parole. Les
       photos de rue prises à proximité (Panoramax, imagerie ouverte) arrivent déjà recalées en cap,
       un tour complet arrivant comme panorama.</p>
 `,
       es: `    <p>Todo lo anterior está calculado, y un lector que mira el resultado no tiene forma de
       distinguir una reconstrucción fiel de una verosímil. Una fotografía del mismo lugar sí la tiene.
-      Una grabación puede llevar fotos del lugar donde ocurrió — la del propio observador, la de un
+      Una grabación puede llevar fotos del lugar donde ocurrió — la del propio testigo, la de un
       investigador, el escaneo de una revista, una captura a pie de calle — cada una superpuesta al
       render con una opacidad que el lector desliza entre todo foto y todo render, con el fenómeno
       dibujado sobre ambos. Cada árbol que el relieve de treinta metros había alisado, cada cresta,
@@ -791,14 +791,14 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       giran la foto para que encaje; tres o más ajustan también su campo. El residuo dice lo bien que
       encaja, punto por punto, en verde, naranja o rojo: uno que no baja de un grado te está diciendo
       que la foto no se tomó desde ese lugar, o que el relieve está mal ahí. Y una foto que encaja
-      devuelve el rumbo al que el observador miraba realmente — adoptado en su pose con su procedencia
+      devuelve el rumbo al que el testigo miraba realmente — adoptado en su pose con su procedencia
       anotada, donde un rumbo tecleado era solo su palabra. Las fotos a pie de calle tomadas cerca
       (Panoramax, imágenes abiertas) llegan ya alineadas en rumbo, y una vuelta completa llega como
       panorama.</p>
 `,
       it: `    <p>Tutto ciò che precede è calcolato, e un lettore che guarda il risultato non ha modo di
       distinguere una ricostruzione fedele da una plausibile. Una fotografia dello stesso luogo sì.
-      Una registrazione può portare foto del luogo in cui è accaduto — quella dell'osservatore stesso,
+      Una registrazione può portare foto del luogo in cui è accaduto — quella del testimone stesso,
       quella di un investigatore, la scansione di una rivista, una ripresa a livello strada — ciascuna
       sovrapposta al rendering con un'opacità che il lettore fa scorrere fra tutta foto e tutto
       rendering, con il fenomeno disegnato sopra entrambi. Ogni albero che il rilievo a trenta metri
@@ -816,7 +816,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       essi ruotano la foto perché combaci; tre o più ne adattano anche il campo. Il residuo dice quanto
       bene combacia, punto per punto, in verde, arancione o rosso: uno che non scende sotto un grado ti
       sta dicendo che la foto non è stata scattata da quel punto, o che lì il rilievo è sbagliato. E una
-      foto che combacia restituisce la rotta verso cui l'osservatore era davvero rivolto — adottata
+      foto che combacia restituisce la rotta verso cui il testimone era davvero rivolto — adottata
       nella sua posa con la provenienza annotata, là dove una rotta digitata era solo la sua parola. Le
       foto a livello strada scattate nei dintorni (Panoramax, immagini aperte) arrivano già allineate in
       rotta, e un giro completo arriva come panorama.</p>

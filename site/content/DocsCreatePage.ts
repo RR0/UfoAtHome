@@ -101,7 +101,7 @@ export class DocsCreatePage extends DocsSection {
     <p>The assistant knows nothing about the case but what you give it, and nothing about the
       format but what these pages say. So ask it for the discipline an investigator would keep:</p>
     <pre class="doc-prompt"><code>Here are the documents of a sighting case. Build a UFO@home recording
-of what the observer saw: the JSON file described at
+of what the witness saw: the JSON file described at
 https://ufoathome.org/docs/format/ , checked against
 https://ufoathome.org/schema/1/sighting.schema.json .
 
@@ -109,15 +109,15 @@ https://ufoathome.org/schema/1/sighting.schema.json .
   out as {"value": ..., "basis": "derived", "rationale": "..."} and
   each value you had to choose as "basis": "assumed".
 - The phenomenon is angles only: its direction (aim) and apparent size
-  (angular) at each moment. Metres the observer gave go in
+  (angular) at each moment. Metres the witness gave go in
   "interpretation", never in the shapes.
-- One recording per observer. When there are several, also write the
-  case file that lists them (see "Several observers: the case").
+- One recording per witness. When there are several, also write the
+  case file that lists them (see "Several witnesses: the case").
 - Take people, vehicles, trees and buildings from the catalogue at
   https://ufoathome.org/models/index.json , by id: never invent a model.
 - Say in "summary", in a sentence or two, what the case is about.
 - List the contradictions between the documents, and the questions to
-  put back to the observer or the investigator.</code></pre>
+  put back to the witness or the investigator.</code></pre>
     <p>Two more things worth telling it. What the player works out by itself from the date and the place (the sky, the planets, the Moon and eclipses, the satellites, the relief and the imagery) is not to be written into the file: the page <a href="/docs/format/#sources-and-choices">Sources and choices</a> lists what is read and from where, and what the file has to bring is only what the documents say. And the models are chosen from the <a href="/models/index.json">catalogue</a> by <code>id</code>, which also says which settings each one offers (<code>modelParameters</code>): a person is never drawn as a built-in shape.</p>
     <p>Or install the <strong>UFO@home skill</strong> in your assistant: the same instructions,
       with the method, the format's rules, the schema, an example and a validator that needs only
@@ -131,20 +131,20 @@ https://ufoathome.org/schema/1/sighting.schema.json .
         with the photos it names. Is the phenomenon where the drawings put it, against the right
         trees, at the right height above the horizon? Say what is off, and have it corrected.</li>
       <li><strong>Read the <code>assumed</code> values.</strong> They are the list of what nobody
-        said. Each is a question for the observer, or a place where the reconstruction stands on a
+        said. Each is a question for the witness, or a place where the reconstruction stands on a
         guess.</li>
       <li><strong>Finish in <a href="/edit/">the editor</a></strong> what is easier to do with a mouse than with a
         sentence: moving a building by a few metres, nudging a direction until it sits on the
         photo.</li>
-      <li><strong>Show it to the observer.</strong> The only test that counts is whether they
+      <li><strong>Show it to the witness.</strong> The only test that counts is whether they
         recognise what they saw.</li>
     </ul>
-    <p>An observer who has only their own account can do this inside the editor: type it in the
+    <p>A witness who has only their own account can do this inside the editor: type it in the
       <em>Summary</em> tab, choose what drafts it (Claude today: your own API key, and the
       model), and the editor drafts the rest of the recording from it, sending nothing anywhere but
       to that model.</p>
     <p class="small">An account is personal data. Before handing documents to an online assistant,
-      remove what identifies the observer unless they agreed to it, and check what the service
+      remove what identifies the witness unless they agreed to it, and check what the service
       keeps. And an assistant can be wrong with confidence: the file is only as good as the
       documents behind it and the checking after it.</p>
   </div>
@@ -234,20 +234,20 @@ https://ufoathome.org/schema/1/sighting.schema.json .
         devant les bons arbres, à la bonne hauteur au-dessus de l'horizon ? Dites ce qui cloche, et
         faites-le corriger.</li>
       <li><strong>Lisez les valeurs <code>assumed</code>.</strong> C'est la liste de ce que
-        personne n'a dit. Chacune est une question pour l'observateur, ou un endroit où la
+        personne n'a dit. Chacune est une question pour le témoin, ou un endroit où la
         reconstitution repose sur une supposition.</li>
       <li><strong>Terminez dans <a href="/edit/">l'éditeur</a></strong> ce qui se fait mieux à la souris qu'avec une
         phrase : déplacer un bâtiment de quelques mètres, ajuster une direction jusqu'à ce qu'elle
         tombe sur la photo.</li>
-      <li><strong>Montrez-le à l'observateur.</strong> Le seul test qui compte est qu'il reconnaisse
+      <li><strong>Montrez-le au témoin.</strong> Le seul test qui compte est qu'il reconnaisse
         ce qu'il a vu.</li>
     </ul>
-    <p>Un observateur qui n'a que son propre récit peut le faire dans l'éditeur : il le tape dans
+    <p>Un témoin qui n'a que son propre récit peut le faire dans l'éditeur : il le tape dans
       l'onglet <em>Résumé</em>, choisit ce qui le rédige (Claude aujourd'hui : sa propre clé
       d'API, et le modèle), et l'éditeur rédige le reste de l'enregistrement à partir de lui, sans
       rien envoyer ailleurs qu'à ce modèle.</p>
     <p class="small">Un compte rendu est une donnée personnelle. Avant de confier des documents à un
-      assistant en ligne, retirez ce qui identifie l'observateur s'il n'y a pas consenti, et
+      assistant en ligne, retirez ce qui identifie le témoin s'il n'y a pas consenti, et
       vérifiez ce que le service conserve. Et un assistant peut se tromper avec assurance : le
       fichier ne vaut que par les documents qui le fondent et la vérification qui le suit.</p>
   </div>
@@ -303,7 +303,7 @@ https://ufoathome.org/schema/1/sighting.schema.json .
     <p>El asistente no sabe del caso más que lo que tú le das, ni del formato más que lo que dicen
       estas páginas. Así que pídele la disciplina que mantendría un investigador:</p>
     <pre class="doc-prompt"><code>Aquí están los documentos de un caso de avistamiento. Construye una
-grabación UFO@home de lo que vio el observador: el archivo JSON descrito
+grabación UFO@home de lo que vio el testigo: el archivo JSON descrito
 en https://ufoathome.org/docs/format/ , verificado con
 https://ufoathome.org/schema/1/sighting.schema.json .
 
@@ -311,17 +311,17 @@ https://ufoathome.org/schema/1/sighting.schema.json .
   hayas calculado como {"value": ..., "basis": "derived", "rationale":
   "..."} y cada valor que hayas tenido que elegir con "basis": "assumed".
 - El fenómeno son solo ángulos: su dirección (aim) y su tamaño aparente
-  (angular) en cada momento. Los metros que dio el observador van en
+  (angular) en cada momento. Los metros que dio el testigo van en
   "interpretation", nunca en las formas.
-- Una grabación por observador. Cuando hay varios, escribe también el
-  archivo del caso que los enumera (véase «Varios observadores: el
+- Una grabación por testigo. Cuando hay varios, escribe también el
+  archivo del caso que los enumera (véase «Varios testigos: el
   caso»).
 - Toma las personas, vehículos, árboles y edificios del catálogo
   https://ufoathome.org/models/index.json , por id: nunca inventes
   un modelo.
 - Di en "summary", en una o dos frases, de qué trata el caso.
 - Enumera las contradicciones entre los documentos, y las preguntas que
-  hay que volver a plantear al observador o al investigador.</code></pre>
+  hay que volver a plantear al testigo o al investigador.</code></pre>
     <p>Dos cosas más que conviene decirle. Lo que el reproductor calcula por sí mismo a partir de la fecha y el lugar (el cielo, los planetas, la Luna y los eclipses, los satélites, el relieve y las imágenes) no se escribe en el archivo: la página <a href="/docs/format/#sources-and-choices">Fuentes y decisiones</a> enumera lo que se lee y de dónde, y el archivo solo tiene que aportar lo que dicen los documentos. Y los modelos se eligen del <a href="/models/index.json">catálogo</a> por su <code>id</code>, que dice también qué ajustes ofrece cada uno (<code>modelParameters</code>): una persona nunca se dibuja como forma integrada.</p>
     <p>O instala la <strong>skill de UFO@home</strong> en tu asistente: las mismas instrucciones,
       con el método, las reglas del formato, el esquema, un ejemplo y un validador que solo necesita
@@ -336,20 +336,20 @@ https://ufoathome.org/schema/1/sighting.schema.json .
         los árboles correctos, a la altura correcta sobre el horizonte? Di lo que no encaja, y haz
         que lo corrija.</li>
       <li><strong>Lee los valores <code>assumed</code>.</strong> Son la lista de lo que nadie dijo.
-        Cada uno es una pregunta para el observador, o un punto donde la reconstrucción se apoya en
+        Cada uno es una pregunta para el testigo, o un punto donde la reconstrucción se apoya en
         una suposición.</li>
       <li><strong>Termina en <a href="/edit/">el editor</a></strong> lo que es más fácil hacer con un ratón que con una
         frase: desplazar un edificio unos metros, ajustar una dirección hasta que quede sobre la
         foto.</li>
-      <li><strong>Enséñasela al observador.</strong> La única prueba que cuenta es si reconoce lo que
+      <li><strong>Enséñasela al testigo.</strong> La única prueba que cuenta es si reconoce lo que
         vio.</li>
     </ul>
-    <p>Un observador que solo tiene su propio relato puede hacerlo dentro del editor: lo escribe en
+    <p>Un testigo que solo tiene su propio relato puede hacerlo dentro del editor: lo escribe en
       la pestaña <em>Resumen</em>, elige qué lo redacta (hoy Claude: su propia clave de API, y el
       modelo), y el editor redacta el resto de la grabación a partir de él, sin enviar nada a ningún
       sitio salvo a ese modelo.</p>
     <p class="small">Un relato es un dato personal. Antes de dar documentos a un asistente en línea,
-      quita lo que identifica al observador salvo que haya dado su consentimiento, y comprueba qué
+      quita lo que identifica al testigo salvo que haya dado su consentimiento, y comprueba qué
       conserva el servicio. Y un asistente puede equivocarse con aplomo: el archivo solo vale lo que
       valen los documentos en que se basa y la comprobación posterior.</p>
   </div>
@@ -405,7 +405,7 @@ https://ufoathome.org/schema/1/sighting.schema.json .
     <p>L'assistente non sa del caso se non ciò che gli dai, né del formato se non ciò che dicono
       queste pagine. Chiedigli quindi la disciplina che manterrebbe un investigatore:</p>
     <pre class="doc-prompt"><code>Ecco i documenti di un caso di avvistamento. Costruisci una
-registrazione UFO@home di ciò che l'osservatore ha visto: il file JSON
+registrazione UFO@home di ciò che il testimone ha visto: il file JSON
 descritto su https://ufoathome.org/docs/format/ , verificato con
 https://ufoathome.org/schema/1/sighting.schema.json .
 
@@ -414,16 +414,16 @@ https://ufoathome.org/schema/1/sighting.schema.json .
   e ogni valore che hai dovuto scegliere con "basis": "assumed".
 - Il fenomeno è fatto solo di angoli: la sua direzione (aim) e la sua
   dimensione apparente (angular) in ogni istante. I metri indicati
-  dall'osservatore vanno in "interpretation", mai nelle forme.
-- Una registrazione per osservatore. Quando ce ne sono più d'uno, scrivi
-  anche il file del caso che li elenca (vedi «Più osservatori: il
+  dal testimone vanno in "interpretation", mai nelle forme.
+- Una registrazione per testimone. Quando ce ne sono più d'uno, scrivi
+  anche il file del caso che li elenca (vedi «Più testimoni: il
   caso»).
 - Prendi persone, veicoli, alberi ed edifici dal catalogo
   https://ufoathome.org/models/index.json , per id: non inventare mai
   un modello.
 - Di' in "summary", in una o due frasi, di che cosa tratta il caso.
 - Elenca le contraddizioni tra i documenti, e le domande da riproporre
-  all'osservatore o all'investigatore.</code></pre>
+  al testimone o all'investigatore.</code></pre>
     <p>Altre due cose da dirgli. Ciò che il lettore calcola da sé a partire dalla data e dal luogo (il cielo, i pianeti, la Luna e le eclissi, i satelliti, il rilievo e le immagini) non si scrive nel file: la pagina <a href="/docs/format/#sources-and-choices">Fonti e scelte</a> elenca ciò che è letto e da dove, e il file deve portare solo ciò che dicono i documenti. E i modelli si scelgono dal <a href="/models/index.json">catalogo</a> per <code>id</code>, che dice anche quali impostazioni offre ciascuno (<code>modelParameters</code>): una persona non è mai disegnata come forma integrata.</p>
     <p>Oppure installa la <strong>skill di UFO@home</strong> nel tuo assistente: le stesse
       istruzioni, con il metodo, le regole del formato, lo schema, un esempio e un validatore che
@@ -437,20 +437,20 @@ https://ufoathome.org/schema/1/sighting.schema.json .
         con le foto che nomina. Il fenomeno è dove lo mettono i disegni, davanti agli alberi giusti,
         alla giusta altezza sopra l'orizzonte? Di' che cosa non torna, e fallo correggere.</li>
       <li><strong>Leggi i valori <code>assumed</code>.</strong> Sono l'elenco di ciò che nessuno ha
-        detto. Ognuno è una domanda per l'osservatore, o un punto in cui la ricostruzione poggia su
+        detto. Ognuno è una domanda per il testimone, o un punto in cui la ricostruzione poggia su
         un'ipotesi.</li>
       <li><strong>Completa nell'<a href="/edit/">editor</a></strong> ciò che è più facile fare con il mouse che con una
         frase: spostare un edificio di qualche metro, ritoccare una direzione finché non cade sulla
         foto.</li>
-      <li><strong>Mostrala all'osservatore.</strong> L'unica prova che conta è se riconosce ciò che
+      <li><strong>Mostrala al testimone.</strong> L'unica prova che conta è se riconosce ciò che
         ha visto.</li>
     </ul>
-    <p>Un osservatore che ha solo il proprio resoconto può farlo dentro l'editor: lo scrive nella
+    <p>Un testimone che ha solo il proprio resoconto può farlo dentro l'editor: lo scrive nella
       scheda <em>Riepilogo</em>, sceglie che cosa lo redige (oggi Claude: la propria chiave API, e
       il modello), e l'editor redige il resto della registrazione a partire da esso, senza inviare
       nulla da nessuna parte se non a quel modello.</p>
     <p class="small">Un resoconto è un dato personale. Prima di affidare documenti a un assistente
-      online, togli ciò che identifica l'osservatore a meno che non abbia acconsentito, e verifica
+      online, togli ciò che identifica il testimone a meno che non abbia acconsentito, e verifica
       che cosa conserva il servizio. E un assistente può sbagliare con sicurezza: il file vale quanto
       i documenti su cui si basa e la verifica che lo segue.</p>
   </div>

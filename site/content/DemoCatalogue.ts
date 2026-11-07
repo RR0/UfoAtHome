@@ -104,10 +104,10 @@ export class DemoCatalogue {
           title: { en: "Chiles & Whitted, 1948", fr: "Chiles et Whitted, 1948", es: "Chiles y Whitted, 1948", it: "Chiles e Whitted, 1948" },
           titleIsName: true,
           blurb: {
-            en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch observer.",
-            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer d'observateur.",
-            es: "Noche sobre Alabama, 02:45. Dos pilotos de línea describieron el mismo fenómeno de forma distinta — ábrelo a tamaño completo para cambiar de observador.",
-            it: "Notte sull'Alabama, 02:45. Due piloti di linea descrissero lo stesso fenomeno in modo diverso — aprilo a schermo intero per cambiare osservatore."
+            en: "Night over Alabama, 02:45. Two airline pilots described the same phenomenon differently — open it full size to switch witness.",
+            fr: "Nuit au-dessus de l'Alabama, 02:45. Deux pilotes de ligne ont décrit le même phénomène différemment — ouvrez-le en grand pour changer de témoin.",
+            es: "Noche sobre Alabama, 02:45. Dos pilotos de línea describieron el mismo fenómeno de forma distinta — ábrelo a tamaño completo para cambiar de testigo.",
+            it: "Notte sull'Alabama, 02:45. Due piloti di linea descrissero lo stesso fenomeno in modo diverso — aprilo a schermo intero per cambiare testimone."
           }
         },
         {
@@ -118,10 +118,10 @@ export class DemoCatalogue {
           title: { en: "Valensole, 1965", fr: "Valensole, 1965", es: "Valensole, 1965", it: "Valensole, 1965" },
           titleIsName: true,
           blurb: {
-            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the observer's feet. Two statements of the same witness, the gendarmerie's report of 2 July and his deposition of 18 August — open it full size to switch.",
-            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds de l'observateur. Deux déclarations du même témoin, le procès-verbal du 2 juillet et sa déposition du 18 août — ouvrez-le en grand pour passer de l'une à l'autre.",
-            es: "Primera hora de la mañana en la meseta, 05:45, el Sol salido hace cuarenta minutos y a 7° de altura al nordeste — y el relieve real de ese campo bajo los pies del observador. Dos declaraciones del mismo testigo, el acta del 2 de julio y su declaración del 18 de agosto — ábrelo a tamaño completo para pasar de una a otra.",
-            it: "Primo mattino sull'altopiano, 05:45, il Sole sorto da quaranta minuti e alto 7° a nord-est — e il rilievo reale di quel campo sotto i piedi dell'osservatore. Due dichiarazioni dello stesso testimone, il verbale del 2 luglio e la sua deposizione del 18 agosto — aprilo a schermo intero per passare dall'una all'altra."
+            en: "Early morning on the plateau, 05:45, the Sun forty minutes up and 7° high in the north-east — and the real relief of that field under the witness's feet. Two statements of the same witness, the gendarmerie's report of 2 July and his deposition of 18 August — open it full size to switch.",
+            fr: "Petit matin sur le plateau, 05:45, le Soleil levé depuis quarante minutes, à 7° de hauteur au nord-est — et le relief réel de ce champ sous les pieds du témoin. Deux déclarations du même témoin, le procès-verbal du 2 juillet et sa déposition du 18 août — ouvrez-le en grand pour passer de l'une à l'autre.",
+            es: "Primera hora de la mañana en la meseta, 05:45, el Sol salido hace cuarenta minutos y a 7° de altura al nordeste — y el relieve real de ese campo bajo los pies del testigo. Dos declaraciones del mismo testigo, el acta del 2 de julio y su declaración del 18 de agosto — ábrelo a tamaño completo para pasar de una a otra.",
+            it: "Primo mattino sull'altopiano, 05:45, il Sole sorto da quaranta minuti e alto 7° a nord-est — e il rilievo reale di quel campo sotto i piedi del testimone. Due dichiarazioni dello stesso testimone, il verbale del 2 luglio e la sua deposizione del 18 agosto — aprilo a schermo intero per passare dall'una all'altra."
           }
         },
         {
@@ -200,10 +200,10 @@ export class DemoCatalogue {
           title: { en: "Braine-le-Comte, 2015", fr: "Braine-le-Comte, 2015", es: "Braine-le-Comte, 2015", it: "Braine-le-Comte, 2015" },
           titleIsName: true,
           blurb: {
-            en: "A July night in Hainaut, 00:45, no Moon. Three observers on a lawn, each watching a different part of the sky, see a dark boomerang cross it in ten seconds — with orange lights for one, red lights for another, and none for the third. Open it full size to switch observer.",
-            fr: "Une nuit de juillet dans le Hainaut, 00:45, sans Lune. Trois observateurs sur une pelouse, chacun regardant une partie différente du ciel, voient un boomerang sombre le traverser en dix secondes — avec des lumières orange pour l'un, des lumières rouges pour un autre, et aucune pour le troisième. Ouvrez-le en grand pour changer d'observateur.",
-            es: "Una noche de julio en el Hainaut, 00:45, sin Luna. Tres observadores en un césped, cada uno mirando una parte distinta del cielo, ven cruzarlo un bumerán oscuro en diez segundos — con luces naranjas para uno, luces rojas para otro, y ninguna para el tercero. Ábrelo a tamaño completo para cambiar de observador.",
-            it: "Una notte di luglio nell'Hainaut, 00:45, senza Luna. Tre osservatori su un prato, ciascuno rivolto a una parte diversa del cielo, vedono attraversarlo un boomerang scuro in dieci secondi — con luci arancioni per uno, luci rosse per un altro, e nessuna per il terzo. Aprilo a schermo intero per cambiare osservatore."
+            en: "A July night in Hainaut, 00:45, no Moon. Three witnesses on a lawn, each watching a different part of the sky, see a dark boomerang cross it in ten seconds — with orange lights for one, red lights for another, and none for the third. Open it full size to switch witness.",
+            fr: "Une nuit de juillet dans le Hainaut, 00:45, sans Lune. Trois témoins sur une pelouse, chacun regardant une partie différente du ciel, voient un boomerang sombre le traverser en dix secondes — avec des lumières orange pour l'un, des lumières rouges pour un autre, et aucune pour le troisième. Ouvrez-le en grand pour changer de témoin.",
+            es: "Una noche de julio en el Hainaut, 00:45, sin Luna. Tres testigos en un césped, cada uno mirando una parte distinta del cielo, ven cruzarlo un bumerán oscuro en diez segundos — con luces naranjas para uno, luces rojas para otro, y ninguna para el tercero. Ábrelo a tamaño completo para cambiar de testigo.",
+            it: "Una notte di luglio nell'Hainaut, 00:45, senza Luna. Tre testimoni su un prato, ciascuno rivolto a una parte diversa del cielo, vedono attraversarlo un boomerang scuro in dieci secondi — con luci arancioni per uno, luci rosse per un altro, e nessuna per il terzo. Aprilo a schermo intero per cambiare testimone."
           }
         },
         {
@@ -279,10 +279,10 @@ export class DemoCatalogue {
           title: { en: "Western US Event, 2023", fr: "Western US Event, 2023", es: "Western US Event, 2023", it: "Western US Event, 2023" },
           titleIsName: true,
           blurb: {
-            en: "Dusk in a Nevada valley, 19:00. An orange orb comes on from the east, turns clear and orange in turn, and expels three small red orbs that head south. The case the FBI recreated in two videos, rebuilt here in 3D for all five agents, with the readings tested against them: AARO's decoy flares, an illumination flare, a drone, obstruction lights, gossamer. Open it full size to switch observer and reading.",
-            fr: "Crépuscule dans une vallée du Nevada, 19:00. Une orbe orange arrive de l'est, tour à tour transparente et orange, et expulse trois petites orbes rouges qui partent vers le sud. Le cas que le FBI a reconstitué en deux vidéos, refait ici en 3D pour les cinq agents, avec les lectures confrontées à leurs récits : leurres de l'AARO, fusée éclairante, drone, feux d'obstacle, fils de la Vierge. Ouvrez-le en grand pour changer d'observateur et de lecture.",
-            es: "Anochecer en un valle de Nevada, 19:00. Un orbe naranja llega del este, alternando transparente y naranja, y expulsa tres pequeños orbes rojos que se van hacia el sur. El caso que el FBI recreó en dos vídeos, reconstruido aquí en 3D para los cinco agentes, con las lecturas confrontadas a sus relatos: señuelos de la AARO, bengala de iluminación, dron, luces de obstáculo, hilos de araña. Ábrelo a tamaño completo para cambiar de observador y de lectura.",
-            it: "Crepuscolo in una valle del Nevada, 19:00. Una sfera arancione arriva da est, alternando trasparente e arancione, ed espelle tre piccole sfere rosse che vanno verso sud. Il caso che l'FBI ha ricostruito in due video, rifatto qui in 3D per i cinque agenti, con le letture confrontate ai loro resoconti: esche dell'AARO, razzo illuminante, drone, luci di ostacolo, fili di ragno. Aprilo a schermo intero per cambiare osservatore e lettura."
+            en: "Dusk in a Nevada valley, 19:00. An orange orb comes on from the east, turns clear and orange in turn, and expels three small red orbs that head south. The case the FBI recreated in two videos, rebuilt here in 3D for all five agents, with the readings tested against them: AARO's decoy flares, an illumination flare, a drone, obstruction lights, gossamer. Open it full size to switch witness and reading.",
+            fr: "Crépuscule dans une vallée du Nevada, 19:00. Une orbe orange arrive de l'est, tour à tour transparente et orange, et expulse trois petites orbes rouges qui partent vers le sud. Le cas que le FBI a reconstitué en deux vidéos, refait ici en 3D pour les cinq agents, avec les lectures confrontées à leurs récits : leurres de l'AARO, fusée éclairante, drone, feux d'obstacle, fils de la Vierge. Ouvrez-le en grand pour changer de témoin et de lecture.",
+            es: "Anochecer en un valle de Nevada, 19:00. Un orbe naranja llega del este, alternando transparente y naranja, y expulsa tres pequeños orbes rojos que se van hacia el sur. El caso que el FBI recreó en dos vídeos, reconstruido aquí en 3D para los cinco agentes, con las lecturas confrontadas a sus relatos: señuelos de la AARO, bengala de iluminación, dron, luces de obstáculo, hilos de araña. Ábrelo a tamaño completo para cambiar de testigo y de lectura.",
+            it: "Crepuscolo in una valle del Nevada, 19:00. Una sfera arancione arriva da est, alternando trasparente e arancione, ed espelle tre piccole sfere rosse che vanno verso sud. Il caso che l'FBI ha ricostruito in due video, rifatto qui in 3D per i cinque agenti, con le letture confrontate ai loro resoconti: esche dell'AARO, razzo illuminante, drone, luci di ostacolo, fili di ragno. Aprilo a schermo intero per cambiare testimone e lettura."
           }
         },
         {
@@ -358,10 +358,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-rainbow.json",
           title: { en: "Rainbow", fr: "Arc-en-ciel", es: "Arcoíris", it: "Arcobaleno" },
           blurb: {
-            en: "Rain, a Sun 9° up, a gap in the cloud, an observer facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
-            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un observateur tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux.",
-            es: "Lluvia, un Sol a 9° de altura, un claro en las nubes, un observador de espaldas a él — los cuatro, o nada. Primario, secundario invertido, banda de Alejandro entre ambos.",
-            it: "Pioggia, un Sole alto 9°, uno squarcio tra le nubi, un osservatore che gli volta le spalle — tutti e quattro, o niente. Primario, secondario invertito, banda di Alessandro in mezzo."
+            en: "Rain, a Sun 9° up, a gap in the cloud, a witness facing away from it — all four, or nothing. Primary, secondary reversed, Alexander's band between.",
+            fr: "De la pluie, un Soleil à 9°, une trouée dans les nuages, un témoin tournant le dos — les quatre, ou rien. Primaire, secondaire inversé, bande d'Alexandre entre les deux.",
+            es: "Lluvia, un Sol a 9° de altura, un claro en las nubes, un testigo de espaldas a él — los cuatro, o nada. Primario, secundario invertido, banda de Alejandro entre ambos.",
+            it: "Pioggia, un Sole alto 9°, uno squarcio tra le nubi, un testimone che gli volta le spalle — tutti e quattro, o niente. Primario, secondario invertito, banda di Alessandro in mezzo."
           }
         },
         {
@@ -369,10 +369,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-moonbow.json",
           title: { en: "Moonbow", fr: "Arc lunaire", es: "Arcoíris lunar", it: "Arcobaleno lunare" },
           blurb: {
-            en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what observers describe.",
-            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les observateurs.",
-            es: "La misma geometría bajo una Luna llena a 22° de altura. Demasiado débil para la visión de los colores, así que el ojo ve un arco blanco — que es lo que describen los observadores.",
-            it: "La stessa geometria sotto una Luna piena alta 22°. Troppo debole per la visione dei colori, così l'occhio vede un arco bianco — che è ciò che descrivono gli osservatori."
+            en: "The same geometry under a full Moon 22° up. Too faint for colour vision, so the eye sees a white arc — which is what witnesses describe.",
+            fr: "La même géométrie sous une pleine Lune à 22°. Trop faible pour la vision des couleurs : l'œil voit un arc blanc — c'est ce que décrivent les témoins.",
+            es: "La misma geometría bajo una Luna llena a 22° de altura. Demasiado débil para la visión de los colores, así que el ojo ve un arco blanco — que es lo que describen los testigos.",
+            it: "La stessa geometria sotto una Luna piena alta 22°. Troppo debole per la visione dei colori, così l'occhio vede un arco bianco — che è ciò che descrivono i testimoni."
           }
         },
         {
@@ -517,10 +517,10 @@ export class DemoCatalogue {
           title: { en: "CSG-2, 2022", fr: "CSG-2, 2022", es: "CSG-2, 2022", it: "CSG-2, 2022" },
           titleIsName: true,
           blurb: {
-            en: "31 January 2022, just after sunset: a Falcon 9 launched from Florida climbs past the Bahamas, its exhaust lit high above the dusk. An hour and a half later its upper stage, back over North America, brakes out of orbit and vents its tanks: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals. Open it full size to switch from the launch (an observer assumed in Nassau) to his sky.",
-            fr: "31 janvier 2022, juste après le coucher du Soleil : un Falcon 9 lancé de Floride monte le long des Bahamas, son échappement éclairé très haut au-dessus du crépuscule. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord, freine pour quitter son orbite et vidange ses réservoirs : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales. Ouvrez-le en grand pour passer du lancement (un observateur supposé à Nassau) à son ciel.",
-            es: "31 de enero de 2022, justo después de la puesta del Sol: un Falcon 9 lanzado desde Florida sube junto a las Bahamas, su escape iluminado muy alto sobre el crepúsculo. Hora y media más tarde su segunda etapa, de vuelta sobre América del Norte, frena para salir de su órbita y purga sus depósitos: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales. Ábrelo a tamaño completo para pasar del lanzamiento (un observador supuesto en Nassau) a su cielo.",
-            it: "31 gennaio 2022, subito dopo il tramonto: un Falcon 9 lanciato dalla Florida sale lungo le Bahamas, lo scarico illuminato molto in alto sopra il crepuscolo. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America, frena per lasciare l'orbita e scarica i serbatoi: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali. Aprilo a schermo intero per passare dal lancio (un osservatore supposto a Nassau) al suo cielo."
+            en: "31 January 2022, just after sunset: a Falcon 9 launched from Florida climbs past the Bahamas, its exhaust lit high above the dusk. An hour and a half later its upper stage, back over North America, brakes out of orbit and vents its tanks: Ron Lee sees it due east from Colorado and reports it on SeeSat-L, others photograph spirals. Open it full size to switch from the launch (a witness assumed in Nassau) to his sky.",
+            fr: "31 janvier 2022, juste après le coucher du Soleil : un Falcon 9 lancé de Floride monte le long des Bahamas, son échappement éclairé très haut au-dessus du crépuscule. Une heure et demie plus tard, son deuxième étage, revenu au-dessus de l'Amérique du Nord, freine pour quitter son orbite et vidange ses réservoirs : Ron Lee le voit plein est depuis le Colorado et le rapporte sur SeeSat-L, d'autres photographient des spirales. Ouvrez-le en grand pour passer du lancement (un témoin supposé à Nassau) à son ciel.",
+            es: "31 de enero de 2022, justo después de la puesta del Sol: un Falcon 9 lanzado desde Florida sube junto a las Bahamas, su escape iluminado muy alto sobre el crepúsculo. Hora y media más tarde su segunda etapa, de vuelta sobre América del Norte, frena para salir de su órbita y purga sus depósitos: Ron Lee la ve al este desde Colorado y la cuenta en SeeSat-L, otros fotografían espirales. Ábrelo a tamaño completo para pasar del lanzamiento (un testigo supuesto en Nassau) a su cielo.",
+            it: "31 gennaio 2022, subito dopo il tramonto: un Falcon 9 lanciato dalla Florida sale lungo le Bahamas, lo scarico illuminato molto in alto sopra il crepuscolo. Un'ora e mezza dopo il suo secondo stadio, tornato sopra il Nord America, frena per lasciare l'orbita e scarica i serbatoi: Ron Lee lo vede a est dal Colorado e lo riferisce su SeeSat-L, altri fotografano spirali. Aprilo a schermo intero per passare dal lancio (un testimone supposto a Nassau) al suo cielo."
           }
         },
         {

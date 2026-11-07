@@ -184,7 +184,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>The shape an observer drew, standing in the real sky, horizon, weather and ground of the
+    <p>The shape a witness drew, standing in the real sky, horizon, weather and ground of the
       recording's own date, hour and place, and hidden by whatever stood in front of it — with the
       playback controls under it. This is the element the two others build on.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -203,7 +203,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Hovering it names what is under the pointer — a star with its magnitude and height, a planet,
-      a comet, a building, another observer — and says nothing where the ground hides what you are
+      a comet, a building, another witness — and says nothing where the ground hides what you are
       pointing at.</p>
     <p>The <q>©</q> button in its corner lists the credits of what it shows — the imagery under the
       ground and on the map, the models, the pictures of the place, the sounds. Inside
@@ -231,9 +231,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>property (read)</td><td>The <code>&lt;canvas&gt;</code>, and the renderer painting on it</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>property</td><td>Whether a click toggles playback and a double-click toggles fullscreen (both, or neither). The double-click also puts playback back as it was before its first click. Set false where the canvas is yours for something else</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>property</td><td>Which element the fullscreen button expands. <code>&lt;rr0-scene&gt;</code> sets it to its own stage, so the sky goes fullscreen and not just the overlay. Where the browser offers no fullscreen (an iPhone, an iframe without <code>allow="fullscreen"</code>), the element fills the window instead, and Escape leaves it all the same</td></tr>
-      <tr><td><code>show-observer-map</code></td><td>attribute</td><td>Whether the map of where the observer stood starts open: present opens it, <code>"false"</code> keeps it closed. Absent, the recording decides: its own <code>observerMap</code> when it states one, else open when the observer went somewhere (a walk across a field, a drive, a flight), closed when they stayed where they were. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place</td></tr>
-      <tr><td><code>toggleObserverMap()</code></td><td>method</td><td>What that button does. On the map itself the wheel zooms around the pointer, a drag moves the ground, and its own buttons zoom and go back to the whole path. Zoomed in, it recentres on the observer whenever they reach its edge, so that they never leave it</td></tr>
-      <tr><td><code>observerPlacing</code></td><td>property</td><td>Whether a click on bare ground of the map fires <code>observerplace</code> with <code>{ lat, lng }</code> — off by default, since where the observer stood is the recording's to say. The editor turns it on and writes the position at the playhead</td></tr>
+      <tr><td><code>show-observer-map</code></td><td>attribute</td><td>Whether the map of where the witness stood starts open: present opens it, <code>"false"</code> keeps it closed. Absent, the recording decides: its own <code>observerMap</code> when it states one, else open when the witness went somewhere (a walk across a field, a drive, a flight), closed when they stayed where they were. It decides the map's <em>starting state</em>, not whether it exists: the button is there for every recording that states a place</td></tr>
+      <tr><td><code>toggleObserverMap()</code></td><td>method</td><td>What that button does. On the map itself the wheel zooms around the pointer, a drag moves the ground, and its own buttons zoom and go back to the whole path. Zoomed in, it recentres on the witness whenever they reach its edge, so that they never leave it</td></tr>
+      <tr><td><code>observerPlacing</code></td><td>property</td><td>Whether a click on bare ground of the map fires <code>observerplace</code> with <code>{ lat, lng }</code> — off by default, since where the witness stood is the recording's to say. The editor turns it on and writes the position at the playhead</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribute</td><td>Take the account's named moments off — the ticks along the bar, the caption naming the one being played, and the lettered points on the map. They are on wherever a recording names any, so this is the only way to say otherwise</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>method</td><td>What that button does</td></tr>
     </table>
@@ -256,7 +256,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La forme dessinée par un observateur, debout dans le ciel, l'horizon, la météo et le sol réels de
+    <p>La forme dessinée par un témoin, debout dans le ciel, l'horizon, la météo et le sol réels de
       la date, de l'heure et du lieu de l'enregistrement, cachée par ce qui se tenait devant — avec
       les commandes de lecture en dessous. C'est l'élément sur lequel les deux autres se construisent.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -275,7 +275,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Le survol nomme ce qui est sous le curseur — une étoile avec sa magnitude et sa hauteur, une
-      planète, une comète, un bâtiment, un autre observateur — et ne dit rien là où le sol cache ce que
+      planète, une comète, un bâtiment, un autre témoin — et ne dit rien là où le sol cache ce que
       vous pointez.</p>
     <p>Le bouton <q>©</q> dans son coin liste les crédits de ce qu'il montre — l'imagerie du sol et
       de la carte, les modèles, les photos du lieu, les sons. Dans <code>&lt;rr0-sighting&gt;</code>,
@@ -303,9 +303,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). Le double-clic remet aussi la lecture dans l'état où elle était avant son premier clic. À mettre à false là où le canevas vous sert à autre chose</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche. Là où le navigateur n'offre pas de plein écran (un iPhone, une iframe sans <code>allow="fullscreen"</code>), l'élément remplit la fenêtre à la place, et Échap en sort de même</td></tr>
-      <tr><td><code>show-observer-map</code></td><td>attribut</td><td>Si la carte d'où se tenait l'observateur s'ouvre d'emblée : présent, il l'ouvre, <code>"false"</code> la garde fermée. Absent, l'enregistrement décide : son propre <code>observerMap</code> s'il en énonce un, sinon ouverte quand l'observateur s'est déplacé (une marche à travers champ, un trajet en voiture, un vol), fermée quand il est resté sur place. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu</td></tr>
-      <tr><td><code>toggleObserverMap()</code></td><td>méthode</td><td>Ce que fait ce bouton. Sur la carte elle-même, la molette zoome autour du pointeur, un glisser déplace le terrain, et ses propres boutons zooment et reviennent au trajet entier. Zoomée, elle se recentre sur l'observateur dès qu'il en atteint le bord, pour qu'il n'en sorte jamais</td></tr>
-      <tr><td><code>observerPlacing</code></td><td>propriété</td><td>Si un clic sur le sol de la carte émet <code>observerplace</code> avec <code>{ lat, lng }</code> — désactivé par défaut, car où se tenait l'observateur, c'est à l'enregistrement de le dire. L'éditeur l'active et écrit la position à la tête de lecture</td></tr>
+      <tr><td><code>show-observer-map</code></td><td>attribut</td><td>Si la carte d'où se tenait le témoin s'ouvre d'emblée : présent, il l'ouvre, <code>"false"</code> la garde fermée. Absent, l'enregistrement décide : son propre <code>observerMap</code> s'il en énonce un, sinon ouverte quand le témoin s'est déplacé (une marche à travers champ, un trajet en voiture, un vol), fermée quand il est resté sur place. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu</td></tr>
+      <tr><td><code>toggleObserverMap()</code></td><td>méthode</td><td>Ce que fait ce bouton. Sur la carte elle-même, la molette zoome autour du pointeur, un glisser déplace le terrain, et ses propres boutons zooment et reviennent au trajet entier. Zoomée, elle se recentre sur le témoin dès qu'il en atteint le bord, pour qu'il n'en sorte jamais</td></tr>
+      <tr><td><code>observerPlacing</code></td><td>propriété</td><td>Si un clic sur le sol de la carte émet <code>observerplace</code> avec <code>{ lat, lng }</code> — désactivé par défaut, car où se tenait le témoin, c'est à l'enregistrement de le dire. L'éditeur l'active et écrit la position à la tête de lecture</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribut</td><td>Retirer les moments nommés du récit — les repères sur la barre, la légende qui nomme celui qu'on joue, et les points lettrés sur la carte. Ils sont là partout où un enregistrement en nomme, donc c'est la seule façon de dire le contraire</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
     </table>
@@ -329,7 +329,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       es: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La forma que dibujó un observador, situada en el cielo, el horizonte, el tiempo meteorológico y el suelo
+    <p>La forma que dibujó un testigo, situada en el cielo, el horizonte, el tiempo meteorológico y el suelo
       reales de la fecha, la hora y el lugar de la grabación, y oculta por lo que hubiera delante —
       con los controles de reproducción debajo. Es el elemento sobre el que se construyen los otros dos.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -348,7 +348,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Al pasar el puntero por encima, nombra lo que hay debajo — una estrella con su magnitud y su altura, un planeta,
-      un cometa, un edificio, otro observador — y no dice nada donde el suelo oculta lo que
+      un cometa, un edificio, otro testigo — y no dice nada donde el suelo oculta lo que
       señalas.</p>
     <p>El botón <q>©</q> de su esquina enumera los créditos de lo que muestra — las imágenes del
       suelo y del mapa, los modelos, las fotos del lugar, los sonidos. Dentro de
@@ -376,9 +376,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propiedad (lectura)</td><td>El <code>&lt;canvas&gt;</code>, y el renderizador que pinta en él</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>propiedad</td><td>Si un clic alterna la reproducción y un doble clic alterna la pantalla completa (ambas cosas, o ninguna). El doble clic también devuelve la reproducción al estado en que estaba antes de su primer clic. Ponlo a false donde el lienzo te sirva para otra cosa</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>propiedad</td><td>Qué elemento amplía el botón de pantalla completa. <code>&lt;rr0-scene&gt;</code> lo fija en su propio escenario, para que sea el cielo lo que pase a pantalla completa y no solo la capa superpuesta. Donde el navegador no ofrece pantalla completa (un iPhone, un iframe sin <code>allow="fullscreen"</code>), el elemento llena la ventana en su lugar, y Escape sale de ella igualmente</td></tr>
-      <tr><td><code>show-observer-map</code></td><td>atributo</td><td>Si el mapa de dónde se encontraba el observador empieza abierto: presente, lo abre; <code>"false"</code> lo mantiene cerrado. Ausente, decide la grabación: su propio <code>observerMap</code> si lo indica, y si no abierto cuando el observador se desplazó (un paseo por un campo, un trayecto en coche, un vuelo), cerrado cuando se quedó donde estaba. Decide el <em>estado inicial</em> del mapa, no si existe: el botón está ahí para toda grabación que indique un lugar</td></tr>
-      <tr><td><code>toggleObserverMap()</code></td><td>método</td><td>Lo que hace ese botón. En el propio mapa, la rueda amplía alrededor del puntero, un arrastre desplaza el terreno, y sus propios botones amplían y vuelven al trayecto completo. Ampliado, se recentra en el observador cada vez que este llega a su borde, para que nunca salga de él</td></tr>
-      <tr><td><code>observerPlacing</code></td><td>propiedad</td><td>Si un clic en el suelo despejado del mapa emite <code>observerplace</code> con <code>{ lat, lng }</code> — desactivado por defecto, ya que decir dónde se encontraba el observador corresponde a la grabación. El editor lo activa y escribe la posición en el cabezal de reproducción</td></tr>
+      <tr><td><code>show-observer-map</code></td><td>atributo</td><td>Si el mapa de dónde se encontraba el testigo empieza abierto: presente, lo abre; <code>"false"</code> lo mantiene cerrado. Ausente, decide la grabación: su propio <code>observerMap</code> si lo indica, y si no abierto cuando el testigo se desplazó (un paseo por un campo, un trayecto en coche, un vuelo), cerrado cuando se quedó donde estaba. Decide el <em>estado inicial</em> del mapa, no si existe: el botón está ahí para toda grabación que indique un lugar</td></tr>
+      <tr><td><code>toggleObserverMap()</code></td><td>método</td><td>Lo que hace ese botón. En el propio mapa, la rueda amplía alrededor del puntero, un arrastre desplaza el terreno, y sus propios botones amplían y vuelven al trayecto completo. Ampliado, se recentra en el testigo cada vez que este llega a su borde, para que nunca salga de él</td></tr>
+      <tr><td><code>observerPlacing</code></td><td>propiedad</td><td>Si un clic en el suelo despejado del mapa emite <code>observerplace</code> con <code>{ lat, lng }</code> — desactivado por defecto, ya que decir dónde se encontraba el testigo corresponde a la grabación. El editor lo activa y escribe la posición en el cabezal de reproducción</td></tr>
       <tr><td><code>hide-milestones</code></td><td>atributo</td><td>Quita los momentos con nombre del relato — las marcas a lo largo de la barra, el rótulo que nombra el que se está reproduciendo y los puntos con letra del mapa. Aparecen allí donde una grabación nombra alguno, así que esta es la única manera de indicar lo contrario</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>método</td><td>Lo que hace ese botón</td></tr>
     </table>
@@ -401,7 +401,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       it: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La forma disegnata da un osservatore, collocata nel cielo, nell'orizzonte, nel meteo e nel suolo
+    <p>La forma disegnata da un testimone, collocata nel cielo, nell'orizzonte, nel meteo e nel suolo
       reali della data, dell'ora e del luogo della registrazione, e nascosta da ciò che le stava davanti —
       con i comandi di riproduzione sotto. È l'elemento su cui si costruiscono gli altri due.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
@@ -420,7 +420,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     </table>
     </div>
     <p>Al passaggio del puntatore nomina ciò che c'è sotto — una stella con la sua magnitudine e la sua altezza, un pianeta,
-      una cometa, un edificio, un altro osservatore — e non dice nulla dove il suolo nasconde ciò che stai
+      una cometa, un edificio, un altro testimone — e non dice nulla dove il suolo nasconde ciò che stai
       indicando.</p>
     <p>Il pulsante <q>©</q> nel suo angolo elenca i crediti di ciò che mostra — le immagini del
       suolo e della mappa, i modelli, le foto del luogo, i suoni. Dentro
@@ -448,9 +448,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>proprietà (lettura)</td><td>Il <code>&lt;canvas&gt;</code>, e il renderer che ci dipinge sopra</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>proprietà</td><td>Se un clic avvia o ferma la riproduzione e un doppio clic attiva o disattiva lo schermo intero (entrambe le cose, o nessuna). Il doppio clic riporta anche la riproduzione allo stato in cui era prima del suo primo clic. Impostala a false dove il canvas ti serve per altro</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>proprietà</td><td>Quale elemento viene ingrandito dal pulsante schermo intero. <code>&lt;rr0-scene&gt;</code> la imposta sul proprio palco, così che sia il cielo ad andare a schermo intero e non solo il livello sovrapposto. Dove il browser non offre lo schermo intero (un iPhone, un iframe senza <code>allow="fullscreen"</code>), l'elemento riempie invece la finestra, ed Esc ne esce allo stesso modo</td></tr>
-      <tr><td><code>show-observer-map</code></td><td>attributo</td><td>Se la mappa del punto in cui si trovava l'osservatore parte aperta: presente la apre, <code>"false"</code> la tiene chiusa. Assente, decide la registrazione: il suo <code>observerMap</code> se lo indica, altrimenti aperta quando l'osservatore si è spostato (una camminata in un campo, un tragitto in auto, un volo), chiusa quando è rimasto dov'era. Decide lo <em>stato iniziale</em> della mappa, non se esista: il pulsante c'è per ogni registrazione che indica un luogo</td></tr>
-      <tr><td><code>toggleObserverMap()</code></td><td>metodo</td><td>Ciò che fa quel pulsante. Sulla mappa stessa la rotella ingrandisce attorno al puntatore, un trascinamento sposta il terreno, e i suoi pulsanti ingrandiscono e tornano al percorso intero. Ingrandita, si ricentra sull'osservatore ogni volta che questi ne raggiunge il bordo, perché non ne esca mai</td></tr>
-      <tr><td><code>observerPlacing</code></td><td>proprietà</td><td>Se un clic sul suolo libero della mappa emette <code>observerplace</code> con <code>{ lat, lng }</code> — disattivata per impostazione predefinita, perché dire dove si trovava l'osservatore spetta alla registrazione. L'editor la attiva e scrive la posizione alla testina di riproduzione</td></tr>
+      <tr><td><code>show-observer-map</code></td><td>attributo</td><td>Se la mappa del punto in cui si trovava il testimone parte aperta: presente la apre, <code>"false"</code> la tiene chiusa. Assente, decide la registrazione: il suo <code>observerMap</code> se lo indica, altrimenti aperta quando il testimone si è spostato (una camminata in un campo, un tragitto in auto, un volo), chiusa quando è rimasto dov'era. Decide lo <em>stato iniziale</em> della mappa, non se esista: il pulsante c'è per ogni registrazione che indica un luogo</td></tr>
+      <tr><td><code>toggleObserverMap()</code></td><td>metodo</td><td>Ciò che fa quel pulsante. Sulla mappa stessa la rotella ingrandisce attorno al puntatore, un trascinamento sposta il terreno, e i suoi pulsanti ingrandiscono e tornano al percorso intero. Ingrandita, si ricentra sul testimone ogni volta che questi ne raggiunge il bordo, perché non ne esca mai</td></tr>
+      <tr><td><code>observerPlacing</code></td><td>proprietà</td><td>Se un clic sul suolo libero della mappa emette <code>observerplace</code> con <code>{ lat, lng }</code> — disattivata per impostazione predefinita, perché dire dove si trovava il testimone spetta alla registrazione. L'editor la attiva e scrive la posizione alla testina di riproduzione</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attributo</td><td>Toglie i momenti nominati del resoconto — le tacche lungo la barra, la didascalia che nomina quello in riproduzione e i punti con lettera sulla mappa. Compaiono ovunque una registrazione ne nomini qualcuno, quindi questo è l'unico modo di dire il contrario</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>metodo</td><td>Ciò che fa quel pulsante</td></tr>
     </table>
@@ -484,44 +484,44 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       it: "La vista standard di un avvistamento"
     },
     description: {
-      en: "The standard view of a real account: one observer or several, its toolbar and its members.",
-      fr: "La vue standard d'un compte rendu réel : un ou plusieurs observateurs, sa barre d'outils et ses membres.",
-      es: "La vista estándar de un relato real: uno o varios observadores, su barra de herramientas y sus miembros.",
-      it: "La vista standard di un resoconto reale: uno o più osservatori, la sua barra degli strumenti e i suoi membri."
+      en: "The standard view of a real account: one witness or several, its toolbar and its members.",
+      fr: "La vue standard d'un compte rendu réel : un ou plusieurs témoins, sa barre d'outils et ses membres.",
+      es: "La vista estándar de un relato real: uno o varios testigos, su barra de herramientas y sus miembros.",
+      it: "La vista standard di un resoconto reale: uno o più testimoni, la sua barra degli strumenti e i suoi membri."
     },
     body: {
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>The default for a real sighting, one observer or several. It composes an
+    <p>The default for a real sighting, one witness or several. It composes an
       <code>&lt;rr0-scene&gt;</code> and adds the toolbar: who is testifying, and the <q>i</q> panel
       with the observation's own metadata and its credits, and a share button: the link that replays it, and its embed lines.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a case, and all its observers --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- a case, and all its witnesses --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
       <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several — told apart by their shape. A bare array of recordings is refused: list them as the sighting events of a case</td></tr>
-      <tr><td><code>observerUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code>. Setting it again keeps the observer on show if the new list still has them</td></tr>
+      <tr><td><code>observerUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code>. Setting it again keeps the witness on show if the new list still has them</td></tr>
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>method (async)</td><td>What the attribute triggers</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of chips stating the recording under the picture, boxed by group (summary, observation, position, time, weather, sound, observer): the date said in words with its weekday, and a <q>Description</q> chip that shows the first words of the account and opens the whole text, scrolling past a height cap, in place of the chips. Off by default on the element — the player's own page turns it on — and a reader can open or close it from the <q>i</q> panel</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribute</td><td>The strip of chips stating the recording under the picture, boxed by group (summary, observation, position, time, weather, sound, witness): the date said in words with its weekday, and a <q>Description</q> chip that shows the first words of the account and opens the whole text, scrolling past a height cap, in place of the chips. Off by default on the element — the player's own page turns it on — and a reader can open or close it from the <q>i</q> panel</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
       <tr><td><code>start-time</code></td><td>attribute</td><td>Where the recording opens, as a length of time from its start: seconds (<code>125</code>), <code>1:30</code>, <code>1m30s</code> or an ISO 8601 duration (<code>PT1M30S</code>). Applied once, to the recording the element loads next; a value past the end opens at the end</td></tr>
       <tr><td><code>start-clock</code></td><td>attribute</td><td>Where the recording opens, as a time said during the observation, in its local time: <code>02:33:15</code>, or with the day <code>2026-08-11T02:33:15</code>. The recording's own start places it; it wins over <code>start-time</code> when it can, and is ignored for a recording that does not say its time of day</td></tr>
-      <tr><td><code>compare-account</code></td><td>attribute</td><td>Starts with the observer's account shown beside any interpretation chosen, and measured against it</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribute</td><td>Starts with the witness's account shown beside any interpretation chosen, and measured against it</td></tr>
     </table>
     </div>
-    <p>A recording that names no observer gets no “account by” line at all, which is the accurate
+    <p>A recording that names no witness gets no “account by” line at all, which is the accurate
       thing to say of a sky set up to show a halo.</p>
-    <p>Every observer's recording is fetched as soon as the list is known, so picking another one
+    <p>Every witness's recording is fetched as soon as the list is known, so picking another one
       is immediate. The list names each by its <code>title</code>, else first names and last name,
       else <code>id</code>; one that names nobody is numbered by its place in the list.</p>
     <p>The <q>i</q> panel opens as a popover, which Escape or a click outside closes (a click
       outside only, on a browser without popovers). It states the case, the date, the place, the
       account and the tags; date, place and tags leave it while the <code>show-labels</code> strip
-      already states them. The date is on the observer's own clock (<code>utcOffsetHours</code>, or
+      already states them. The date is on the witness's own clock (<code>utcOffsetHours</code>, or
       one approximated from the longitude), not the reader's. The version at its foot opens this
       observation in the editor. The description leaves it too while the chips show: it is in their
       <q>Summary</q> box, opened with a click.</p>
@@ -536,29 +536,29 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Le choix par défaut pour une observation réelle, à un observateur ou plusieurs. Il compose un
+    <p>Le choix par défaut pour une observation réelle, à un témoin ou plusieurs. Il compose un
       <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
       <q>i</q> avec les métadonnées de l'observation et ses crédits, et un bouton de partage : le lien qui la rejoue, et ses lignes d'intégration.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses observateurs --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses témoins --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme. Un simple tableau d'enregistrements est refusé : listez-les comme événements sighting d'un dossier</td></tr>
-      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code>. Le reposer garde l'observateur affiché si la nouvelle liste le contient encore</td></tr>
+      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code>. Le reposer garde le témoin affiché si la nouvelle liste le contient encore</td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
       <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau de chips qui énoncent l'enregistrement sous l'image, rangés par groupe (résumé, observation, position, moment, météo, son, observateur) : la date dite en toutes lettres avec son jour de la semaine, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier, défilant au-delà d'une hauteur maximale, à la place des chips. Absent par défaut sur l'élément — la page du lecteur l'active — et un lecteur peut l'ouvrir ou le fermer depuis le panneau <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau de chips qui énoncent l'enregistrement sous l'image, rangés par groupe (résumé, observation, position, moment, météo, son, témoin) : la date dite en toutes lettres avec son jour de la semaine, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier, défilant au-delà d'une hauteur maximale, à la place des chips. Absent par défaut sur l'élément — la page du lecteur l'active — et un lecteur peut l'ouvrir ou le fermer depuis le panneau <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
       <tr><td><code>start-time</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une durée depuis son début : des secondes (<code>125</code>), <code>1:30</code>, <code>1m30s</code> ou une durée ISO 8601 (<code>PT1M30S</code>). Appliqué une fois, à l'enregistrement que l'élément charge ensuite ; une valeur au-delà de la fin ouvre à la fin</td></tr>
       <tr><td><code>start-clock</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une heure dite pendant l'observation, à son heure locale : <code>02:33:15</code>, ou avec le jour <code>2026-08-11T02:33:15</code>. Le début de l'enregistrement la place ; elle l'emporte sur <code>start-time</code> quand elle le peut, et est ignorée pour un enregistrement qui ne dit pas son heure</td></tr>
-      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit de l'observateur montré à côté de l'interprétation choisie, et mesuré contre elle</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit du témoin montré à côté de l'interprétation choisie, et mesuré contre elle</td></tr>
     </table>
     </div>
-    <p>Un enregistrement qui ne nomme aucun observateur n'affiche aucune ligne « compte rendu de » — ce qui
+    <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « compte rendu de » — ce qui
       est exact pour un ciel réglé pour montrer un halo.</p>
-    <p>L'enregistrement de chaque observateur est chargé dès que la liste est connue : en choisir
+    <p>L'enregistrement de chaque témoin est chargé dès que la liste est connue : en choisir
       un autre est immédiat. La liste nomme chacun par son <code>title</code>, sinon ses prénoms et
       son nom, sinon son <code>id</code> ; celui qui ne nomme personne est numéroté selon sa place
       dans la liste.</p>
@@ -566,7 +566,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       l'extérieur (seulement un clic à l'extérieur, sur un navigateur sans <i lang="en">popover</i>).
       Il énonce le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags le
       quittent tant que le bandeau <code>show-labels</code> les énonce déjà. La date est à l'heure de
-      l'observateur (<code>utcOffsetHours</code>, ou une heure approchée depuis la longitude), pas à
+      le témoin (<code>utcOffsetHours</code>, ou une heure approchée depuis la longitude), pas à
       celle du lecteur. La version en pied de panneau ouvre cette observation dans l'éditeur. La description le
       quitte aussi tant que les chips sont affichés : elle est dans leur boîte <q>Résumé</q>, qu'un clic ouvre.</p>
     <p>Le bouton <q>Partager</q>, parmi ceux du lecteur, ouvre une seule fenêtre qui donne le lien ou le code d'intégration
@@ -579,35 +579,35 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       es: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La opción por defecto para un avistamiento real, con uno o varios observadores. Compone un
+    <p>La opción por defecto para un avistamiento real, con uno o varios testigos. Compone un
       <code>&lt;rr0-scene&gt;</code> y añade la barra de herramientas: quién da su relato, y el panel <q>i</q>
       con los metadatos propios de la observación y sus créditos, y un botón de compartir: el enlace que la reproduce, y sus líneas de inserción.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, y todos sus observadores --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, y todos sus testigos --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Miembro</th><th>Tipo</th><th>Qué hace</th></tr>
       <tr><td><code>src</code></td><td>atributo</td><td>Una sola grabación, o un <a href="/docs/format/#several-observers-the-case">caso</a> cuyos eventos sighting enumeran varias — se distinguen por su forma. Un simple array de grabaciones se rechaza: enuméralas como los eventos sighting de un caso</td></tr>
-      <tr><td><code>observerUrls</code></td><td>propiedad</td><td>Las grabaciones que mostrar, como simple array de URL, en lugar de <code>src</code>. Volver a asignarla mantiene el observador mostrado si la nueva lista aún lo contiene</td></tr>
+      <tr><td><code>observerUrls</code></td><td>propiedad</td><td>Las grabaciones que mostrar, como simple array de URL, en lugar de <code>src</code>. Volver a asignarla mantiene el testigo mostrado si la nueva lista aún lo contiene</td></tr>
       <tr><td><code>sightingData</code></td><td>propiedad</td><td>Una grabación, asignada directamente — para una página que la tiene en memoria en lugar de en una URL</td></tr>
       <tr><td><code>scene</code></td><td>propiedad (lectura)</td><td>El <code>&lt;rr0-scene&gt;</code> compuesto, y a través de <code>scene.ufoElement</code> los miembros de reproducción</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>método (async)</td><td>Lo que el atributo desencadena</td></tr>
-      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja de chips que enuncian la grabación bajo la imagen, agrupados (resumen, observación, posición, momento, tiempo, sonido, observador): la fecha dicha con palabras y su día de la semana, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero, con desplazamiento pasada una altura máxima, en lugar de los chips. Desactivada por defecto en el elemento — la página del reproductor la activa — y un lector puede abrirla o cerrarla desde el panel <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>atributo</td><td>La franja de chips que enuncian la grabación bajo la imagen, agrupados (resumen, observación, posición, momento, tiempo, sonido, testigo): la fecha dicha con palabras y su día de la semana, y un chip <q>Descripción</q> que muestra las primeras palabras del relato y abre el texto entero, con desplazamiento pasada una altura máxima, en lugar de los chips. Desactivada por defecto en el elemento — la página del reproductor la activa — y un lector puede abrirla o cerrarla desde el panel <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>atributo</td><td>Se transmiten a través del <code>&lt;rr0-scene&gt;</code> compuesto hasta el reproductor que los posee</td></tr>
       <tr><td><code>start-time</code></td><td>atributo</td><td>Dónde se abre la grabación, como una duración desde su inicio: segundos (<code>125</code>), <code>1:30</code>, <code>1m30s</code> o una duración ISO 8601 (<code>PT1M30S</code>). Se aplica una vez, a la grabación que el elemento carga a continuación; un valor más allá del final abre al final</td></tr>
       <tr><td><code>start-clock</code></td><td>atributo</td><td>Dónde se abre la grabación, como una hora dicha durante la observación, en su hora local: <code>02:33:15</code>, o con el día <code>2026-08-11T02:33:15</code>. El inicio de la grabación la sitúa; prevalece sobre <code>start-time</code> cuando puede, y se ignora en una grabación que no dice su hora</td></tr>
-      <tr><td><code>compare-account</code></td><td>atributo</td><td>Empieza con el relato del observador mostrado junto a la interpretación elegida, y medido contra ella</td></tr>
+      <tr><td><code>compare-account</code></td><td>atributo</td><td>Empieza con el relato del testigo mostrado junto a la interpretación elegida, y medido contra ella</td></tr>
     </table>
     </div>
-    <p>Una grabación que no nombra a ningún observador no muestra ninguna línea “relato de”, que es lo exacto
+    <p>Una grabación que no nombra a ningún testigo no muestra ninguna línea “relato de”, que es lo exacto
       que cabe decir de un cielo preparado para mostrar un halo.</p>
-    <p>La grabación de cada observador se carga en cuanto se conoce la lista, así que elegir otra
+    <p>La grabación de cada testigo se carga en cuanto se conoce la lista, así que elegir otra
       es inmediato. La lista nombra a cada uno por su <code>title</code>, si no por sus nombres y apellido,
       si no por su <code>id</code>; uno que no nombra a nadie se numera según su lugar en la lista.</p>
     <p>El panel <q>i</q> se abre como un <i lang="en">popover</i>, que Escape o un clic fuera cierran (solo un clic
       fuera, en un navegador sin <i lang="en">popover</i>). Indica el caso, la fecha, el lugar, el
       relato y las etiquetas; fecha, lugar y etiquetas desaparecen de él mientras la franja <code>show-labels</code>
-      ya los indica. La fecha está en la hora del propio observador (<code>utcOffsetHours</code>, o
+      ya los indica. La fecha está en la hora del propio testigo (<code>utcOffsetHours</code>, o
       una aproximada a partir de la longitud), no en la del lector. La versión al pie abre esta
       observación en el editor. La descripción también lo deja mientras los chips se muestran: está en su caja
       <q>Resumen</q>, que se abre con un clic.</p>
@@ -622,35 +622,35 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       it: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La scelta predefinita per un avvistamento reale, con uno o più osservatori. Compone un
+    <p>La scelta predefinita per un avvistamento reale, con uno o più testimoni. Compone un
       <code>&lt;rr0-scene&gt;</code> e aggiunge la barra degli strumenti: chi rende il resoconto, e il pannello <q>i</q>
       con i metadati propri dell'osservazione e i suoi crediti, e un pulsante di condivisione: il link che la riproduce, e le sue righe di incorporamento.</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
-&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, e tutti i suoi osservatori --&gt;</code></pre>
+&lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un caso, e tutti i suoi testimoni --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Membro</th><th>Tipo</th><th>Cosa fa</th></tr>
       <tr><td><code>src</code></td><td>attributo</td><td>Una sola registrazione, o un <a href="/docs/format/#several-observers-the-case">caso</a> i cui eventi sighting ne elencano diverse — distinti dalla loro forma. Un semplice array di registrazioni viene rifiutato: elencale come eventi sighting di un caso</td></tr>
-      <tr><td><code>observerUrls</code></td><td>proprietà</td><td>Le registrazioni da mostrare, come semplice array di URL, invece di <code>src</code>. Reimpostarla mantiene l'osservatore mostrato se la nuova lista lo contiene ancora</td></tr>
+      <tr><td><code>observerUrls</code></td><td>proprietà</td><td>Le registrazioni da mostrare, come semplice array di URL, invece di <code>src</code>. Reimpostarla mantiene il testimone mostrato se la nuova lista lo contiene ancora</td></tr>
       <tr><td><code>sightingData</code></td><td>proprietà</td><td>Una registrazione, impostata direttamente — per una pagina che ne tiene una in memoria invece che a un URL</td></tr>
       <tr><td><code>scene</code></td><td>proprietà (lettura)</td><td>Il <code>&lt;rr0-scene&gt;</code> composto, e attraverso <code>scene.ufoElement</code> i membri di riproduzione</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>metodo (async)</td><td>Ciò che l'attributo innesca</td></tr>
-      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia di chip che enunciano la registrazione sotto l'immagine, raggruppati (riepilogo, osservazione, posizione, momento, meteo, suono, osservatore): la data detta a parole con il suo giorno della settimana, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero, con scorrimento oltre un'altezza massima, al posto dei chip. Disattivata per impostazione predefinita sull'elemento — la pagina del lettore la attiva — e un lettore può aprirla o chiuderla dal pannello <q>i</q></td></tr>
+      <tr><td><code>show-labels</code></td><td>attributo</td><td>La striscia di chip che enunciano la registrazione sotto l'immagine, raggruppati (riepilogo, osservazione, posizione, momento, meteo, suono, testimone): la data detta a parole con il suo giorno della settimana, e un chip <q>Descrizione</q> che mostra le prime parole del resoconto e apre il testo intero, con scorrimento oltre un'altezza massima, al posto dei chip. Disattivata per impostazione predefinita sull'elemento — la pagina del lettore la attiva — e un lettore può aprirla o chiuderla dal pannello <q>i</q></td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attributo</td><td>Passati attraverso il <code>&lt;rr0-scene&gt;</code> composto fino al lettore che li possiede</td></tr>
       <tr><td><code>start-time</code></td><td>attributo</td><td>Dove si apre la registrazione, come una durata dall'inizio: secondi (<code>125</code>), <code>1:30</code>, <code>1m30s</code> o una durata ISO 8601 (<code>PT1M30S</code>). Applicato una volta, alla registrazione che l'elemento carica dopo; un valore oltre la fine apre alla fine</td></tr>
       <tr><td><code>start-clock</code></td><td>attributo</td><td>Dove si apre la registrazione, come un'ora detta durante l'osservazione, nella sua ora locale: <code>02:33:15</code>, o con il giorno <code>2026-08-11T02:33:15</code>. L'inizio della registrazione la colloca; prevale su <code>start-time</code> quando può, ed è ignorata per una registrazione che non dice la sua ora</td></tr>
-      <tr><td><code>compare-account</code></td><td>attributo</td><td>Parte con il resoconto dell'osservatore mostrato accanto all'interpretazione scelta, e misurato rispetto ad essa</td></tr>
+      <tr><td><code>compare-account</code></td><td>attributo</td><td>Parte con il resoconto del testimone mostrato accanto all'interpretazione scelta, e misurato rispetto ad essa</td></tr>
     </table>
     </div>
-    <p>Una registrazione che non nomina alcun osservatore non ha nessuna riga “resoconto di”, ed è la cosa esatta
+    <p>Una registrazione che non nomina alcun testimone non ha nessuna riga “resoconto di”, ed è la cosa esatta
       da dire di un cielo preparato per mostrare un alone.</p>
-    <p>La registrazione di ogni osservatore viene caricata non appena la lista è nota, quindi sceglierne un'altra
+    <p>La registrazione di ogni testimone viene caricata non appena la lista è nota, quindi sceglierne un'altra
       è immediato. La lista nomina ciascuno con il suo <code>title</code>, altrimenti con nomi e cognome,
       altrimenti con il suo <code>id</code>; uno che non nomina nessuno è numerato secondo il suo posto nella lista.</p>
     <p>Il pannello <q>i</q> si apre come <i lang="en">popover</i>, che Esc o un clic all'esterno chiudono (solo un clic
       all'esterno, su un browser senza <i lang="en">popover</i>). Indica il caso, la data, il luogo, il
       resoconto e i tag; data, luogo e tag ne escono finché la striscia <code>show-labels</code>
-      li indica già. La data è all'ora dell'osservatore stesso (<code>utcOffsetHours</code>, o
+      li indica già. La data è all'ora del testimone stesso (<code>utcOffsetHours</code>, o
       un'ora approssimata dalla longitudine), non a quella del lettore. La versione in fondo apre questa
       osservazione nell'editor. Anche la descrizione lo lascia finché i chip sono mostrati: è nella loro scatola
       <q>Riepilogo</q>, che si apre con un clic.</p>
@@ -667,28 +667,28 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `<div class="table-scroll">
     <table>
       <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
-      <tr><td><code>observerchange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another observer picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its id)</td></tr>
+      <tr><td><code>observerchange</code></td><td>When the recording on show changes: loaded, set through <code>sightingData</code>, or another witness picked from the list. <code>detail.src</code> is its address, empty for a recording set by script</td><td>On this element. It does not bubble: listen on the <code>&lt;rr0-sighting&gt;</code> itself, then read <code>sightingData</code> back off it (its description, its id)</td></tr>
       <tr><td><code>recordingissues</code></td><td>Once a loaded recording has been checked against the format: <code>detail.issues</code> lists what was not played as written (a key nothing reads, a value of the wrong type or outside its list, a value made up because the file left it out), each with its <code>kind</code> and <code>path</code>. Empty when there is nothing to say. The same list is shown over the picture behind a ⚠, and written to the console</td><td>Anywhere above the element: it bubbles out of every shadow root</td></tr>
     </table>
     </div>`,
       fr: `<div class="table-scroll">
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
-      <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre observateur choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant)</td></tr>
+      <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre témoin choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant)</td></tr>
       <tr><td><code>recordingissues</code></td><td>Une fois un enregistrement chargé vérifié contre le format : <code>detail.issues</code> liste ce qui n'a pas été joué comme écrit (une clé que rien ne lit, une valeur du mauvais type ou hors de sa liste, une valeur inventée parce que le fichier l'omettait), chacun avec son <code>kind</code> et son <code>path</code>. Vide quand il n'y a rien à dire. La même liste s'affiche sur l'image derrière un ⚠, et en console</td><td>N'importe où au-dessus de l'élément : il traverse toutes les racines fantômes</td></tr>
     </table>
     </div>`,
       es: `<div class="table-scroll">
     <table>
       <tr><th>Evento</th><th>Cuándo</th><th>Dónde escucharlo</th></tr>
-      <tr><td><code>observerchange</code></td><td>Cuando cambia la grabación mostrada: cargada, asignada mediante <code>sightingData</code>, u otro observador elegido en la lista. <code>detail.src</code> es su dirección, vacía para una grabación asignada por script</td><td>En este elemento. No hace <i lang="en">bubbling</i>: escucha en el propio <code>&lt;rr0-sighting&gt;</code> y luego vuelve a leer su <code>sightingData</code> (su descripción, su id)</td></tr>
+      <tr><td><code>observerchange</code></td><td>Cuando cambia la grabación mostrada: cargada, asignada mediante <code>sightingData</code>, u otro testigo elegido en la lista. <code>detail.src</code> es su dirección, vacía para una grabación asignada por script</td><td>En este elemento. No hace <i lang="en">bubbling</i>: escucha en el propio <code>&lt;rr0-sighting&gt;</code> y luego vuelve a leer su <code>sightingData</code> (su descripción, su id)</td></tr>
       <tr><td><code>recordingissues</code></td><td>Una vez que una grabación cargada se ha comprobado contra el formato: <code>detail.issues</code> enumera lo que no se reprodujo tal como estaba escrito (una clave que nada lee, un valor de tipo erróneo o fuera de su lista, un valor inventado porque el archivo lo omitía), cada uno con su <code>kind</code> y su <code>path</code>. Vacía cuando no hay nada que decir. La misma lista se muestra sobre la imagen tras un ⚠, y se escribe en la consola</td><td>En cualquier parte por encima del elemento: se propaga fuera de todas las raíces shadow</td></tr>
     </table>
     </div>`,
       it: `<div class="table-scroll">
     <table>
       <tr><th>Evento</th><th>Quando</th><th>Dove ascoltarlo</th></tr>
-      <tr><td><code>observerchange</code></td><td>Quando cambia la registrazione mostrata: caricata, impostata tramite <code>sightingData</code>, o un altro osservatore scelto dalla lista. <code>detail.src</code> è il suo indirizzo, vuoto per una registrazione impostata da script</td><td>Su questo elemento. Non fa <i lang="en">bubbling</i>: ascolta sul <code>&lt;rr0-sighting&gt;</code> stesso, poi rileggi il suo <code>sightingData</code> (la sua descrizione, il suo id)</td></tr>
+      <tr><td><code>observerchange</code></td><td>Quando cambia la registrazione mostrata: caricata, impostata tramite <code>sightingData</code>, o un altro testimone scelto dalla lista. <code>detail.src</code> è il suo indirizzo, vuoto per una registrazione impostata da script</td><td>Su questo elemento. Non fa <i lang="en">bubbling</i>: ascolta sul <code>&lt;rr0-sighting&gt;</code> stesso, poi rileggi il suo <code>sightingData</code> (la sua descrizione, il suo id)</td></tr>
       <tr><td><code>recordingissues</code></td><td>Una volta che una registrazione caricata è stata verificata rispetto al formato: <code>detail.issues</code> elenca ciò che non è stato riprodotto come scritto (una chiave che nulla legge, un valore del tipo sbagliato o fuori dalla sua lista, un valore inventato perché il file lo ometteva), ciascuno con il suo <code>kind</code> e il suo <code>path</code>. Vuota quando non c'è nulla da dire. La stessa lista è mostrata sull'immagine dietro un ⚠, e scritta nella console</td><td>Ovunque sopra l'elemento: si propaga fuori da tutte le shadow root</td></tr>
     </table>
     </div>`

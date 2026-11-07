@@ -138,7 +138,7 @@ export class DocsComponentsPage extends DocsSection {
     <h2>What each one is for</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — the phenomenon in the world around it.</strong> The
-        shape an observer drew, its colour and halo and movement, standing in the real sky, horizon,
+        shape a witness drew, its colour and halo and movement, standing in the real sky, horizon,
         weather and ground of a stated date, hour and place — hidden by what stood in front of it.
         Useful on its own too, for a sky with nothing in it at all.</li>
       <li><strong><code>&lt;rr0-sighting&gt;</code> — the account, to watch.</strong>
@@ -149,7 +149,7 @@ export class DocsComponentsPage extends DocsSection {
 
       <li><strong><code>&lt;rr0-case-editor&gt;</code> — a case, to assemble.</strong>
         Holds a <code>&lt;rr0-sighting-editor&gt;</code> and gives it one recording of a
-        <code>case.json</code> at a time: the observers' accounts and the readings of them. It adds, selects and
+        <code>case.json</code> at a time: the witnesses' accounts and the readings of them. It adds, selects and
         deletes them, and exports the case.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — a date, with its precision.</strong>
@@ -205,7 +205,7 @@ sighting.scene.ufoElement.play()  // so playback is two properties away</code></
       moment.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>The shape and its playback, in the real sky and horizon of the recording's own date and place.</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one observer or several, with their toolbar.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>The standard view of a real account: one witness or several, with their toolbar.</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>The whole authoring toolbar, for describing an observation or correcting one.</p></a>
     </div>
 
@@ -261,7 +261,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     <h2>À quoi sert chacun</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — le phénomène dans le monde autour.</strong> La
-        forme dessinée par un observateur, sa couleur, son halo, son mouvement, debout dans le ciel,
+        forme dessinée par un témoin, sa couleur, son halo, son mouvement, debout dans le ciel,
         l'horizon, la météo et le sol réels d'une date, d'une heure et d'un lieu énoncés — cachée par
         ce qui se tenait devant. Utile seul aussi, pour un ciel où il n'y a rien du tout.</li>
       <li><strong><code>&lt;rr0-sighting&gt;</code> — le compte rendu, à regarder.</strong> Une scène, plus
@@ -272,7 +272,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
 
       <li><strong><code>&lt;rr0-case-editor&gt;</code> — un dossier, à assembler.</strong> Contient un
         <code>&lt;rr0-sighting-editor&gt;</code> et lui présente un enregistrement d'un <code>case.json</code> à la fois :
-        les comptes rendus des observateurs et les lectures qu'on en fait. Il les ajoute, les sélectionne et les
+        les comptes rendus des témoins et les lectures qu'on en fait. Il les ajoute, les sélectionne et les
         supprime, et exporte le dossier.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — une date, avec sa précision.</strong> Un sélecteur pour un instant
@@ -330,7 +330,7 @@ sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</c
       au même moment.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forme et sa lecture, dans le vrai ciel et le vrai horizon de la date et du lieu de l'observation.</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un compte rendu réel : un ou plusieurs observateurs, avec leur barre d'outils.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vue standard d'un compte rendu réel : un ou plusieurs témoins, avec leur barre d'outils.</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toute la barre d'outils d'écriture, pour décrire une observation ou en corriger une.</p></a>
     </div>
 
@@ -386,7 +386,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
     <h2>Para qué sirve cada uno</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — el fenómeno en el mundo que lo rodea.</strong> La
-        forma que dibujó un observador, su color, su halo y su movimiento, situada en el cielo, el
+        forma que dibujó un testigo, su color, su halo y su movimiento, situada en el cielo, el
         horizonte, el tiempo y el suelo reales de una fecha, una hora y un lugar declarados — oculta
         por lo que había delante. Útil también por sí solo, para un cielo en el que no hay nada.</li>
       <li><strong><code>&lt;rr0-sighting&gt;</code> — el relato, para verlo.</strong>
@@ -398,7 +398,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
 
       <li><strong><code>&lt;rr0-case-editor&gt;</code> — un caso, para armar.</strong> Contiene un
         <code>&lt;rr0-sighting-editor&gt;</code> y le presenta una grabación de un <code>case.json</code> cada vez: los
-        relatos de los observadores y las lecturas que se hacen de ellos. Los añade, los selecciona y los elimina, y
+        relatos de los testigos y las lecturas que se hacen de ellos. Los añade, los selecciona y los elimina, y
         exporta el caso.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una fecha, con su precisión.</strong> Un selector para un instante
@@ -455,7 +455,7 @@ sighting.scene.ufoElement.play()  // así que la reproducción está a dos propi
       momento.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma y su reproducción, en el cielo y el horizonte reales de la fecha y el lugar del registro.</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista estándar de un relato real: uno o varios observadores, con su barra de herramientas.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista estándar de un relato real: uno o varios testigos, con su barra de herramientas.</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>Toda la barra de herramientas de edición, para describir una observación o corregir una.</p></a>
     </div>
 
@@ -511,7 +511,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
     <h2>A cosa serve ciascuno</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — il fenomeno nel mondo che lo circonda.</strong> La
-        forma disegnata da un osservatore, il suo colore, il suo alone e il suo movimento, collocata nel
+        forma disegnata da un testimone, il suo colore, il suo alone e il suo movimento, collocata nel
         cielo, nell'orizzonte, nel meteo e nel suolo reali di una data, un'ora e un luogo dichiarati —
         nascosta da ciò che stava davanti. Utile anche da sola, per un cielo in cui non c'è niente.</li>
       <li><strong><code>&lt;rr0-sighting&gt;</code> — il resoconto, da guardare.</strong>
@@ -523,7 +523,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
 
       <li><strong><code>&lt;rr0-case-editor&gt;</code> — un caso, da assemblare.</strong> Contiene un
         <code>&lt;rr0-sighting-editor&gt;</code> e gli presenta una registrazione di un <code>case.json</code> alla volta: i
-        resoconti degli osservatori e le letture che se ne fanno. Li aggiunge, li seleziona e li elimina, ed esporta il
+        resoconti dei testimoni e le letture che se ne fanno. Li aggiunge, li seleziona e li elimina, ed esporta il
         caso.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una data, con la sua precisione.</strong> Un selettore per un istante
@@ -581,7 +581,7 @@ sighting.scene.ufoElement.play()  // quindi la riproduzione è a due proprietà 
       momento.</p>
     <div class="uses">
       <a class="use" href="/docs/components/scene/"><h3><code>&lt;rr0-scene&gt;</code></h3><p>La forma e la sua riproduzione, nel cielo e nell'orizzonte reali della data e del luogo della registrazione.</p></a>
-      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista standard di un resoconto reale: uno o più osservatori, con la loro barra degli strumenti.</p></a>
+      <a class="use" href="/docs/components/sighting/"><h3><code>&lt;rr0-sighting&gt;</code></h3><p>La vista standard di un resoconto reale: uno o più testimoni, con la loro barra degli strumenti.</p></a>
       <a class="use" href="/docs/components/edit/"><h3><code>&lt;rr0-sighting-editor&gt;</code></h3><p>L'intera barra degli strumenti di redazione, per descrivere un'osservazione o correggerne una.</p></a>
     </div>
 
