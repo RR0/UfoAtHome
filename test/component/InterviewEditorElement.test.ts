@@ -311,12 +311,12 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(turns[1].querySelector(".said")!.textContent).toBe("In the park.")
     expect(turns[2].classList.contains("is-redacted")).toBe(true)
     // The reason is said, not left to a tooltip.
-    expect((turns[2].querySelector(".redacted .bar") as HTMLElement).dataset.tip).toBe("Passage removed : Private life")
+    expect((turns[2].querySelector(".redacted .bar") as HTMLElement).dataset.tip).toBe("Passage removed: Private life")
     // In the editor, a passage taken out says so where it was (and how many words, when that is known).
     expect(turns[2].querySelector(".redacted")!.textContent).toBe("Passage removed")
     // Only a stretch taken out: the rest is still there, the gap said in its place.
     expect(turns[4].querySelector(".said")!.textContent).toBe("No lights. Passage removed That is all.")
-    expect((turns[4].querySelector(".said .bar") as HTMLElement).dataset.tip).toBe("Passage removed : Place")
+    expect((turns[4].querySelector(".said .bar") as HTMLElement).dataset.tip).toBe("Passage removed: Place")
     expect(turns[4].querySelectorAll(".said .bar")).toHaveLength(1)
     expect(element.shadowRoot!.querySelector("#exchanges .rr0-interview-status")!.textContent).toBe("Not proofread yet by: Q. B.")
     // The time of a turn is its tooltip: nothing of it is in the layout.

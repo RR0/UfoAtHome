@@ -28,6 +28,7 @@ export const interviewMessages_en: InterviewMessages = {
   exchangesTab: "Exchanges",
   exchangesEmpty: "Nothing was said yet.",
   redacted: "Passage removed",
+  colon: ": ",
   proofreadAll: "Proofread by everyone.",
   proofreadPending: "Not proofread yet by: {names}",
   play: "Play",

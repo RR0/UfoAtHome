@@ -117,7 +117,8 @@ const TEMPLATE = `
   #group-summary input[type="text"], #group-transcript input[type="text"] { height: 38px; }
   #group-summary textarea { min-height: 9em; }
   fieldset.witnesses { flex-direction: column; align-items: flex-start; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
-  #group-summary fieldset.witnesses label { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; color: var(--ink); }
+  /* A witness's name stays on one line beside its box: shrunk to its words, the label broke "Q. B." in two. */
+  #group-summary fieldset.witnesses label { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; color: var(--ink); white-space: nowrap; }
   /* The exchanges, one card an intervention, the speaker's colour down its side: a list that scrolls past 520 px (440 on a phone). */
   #exchanges { --rr0-interview-max-height: 520px; --rr0-interview-line: var(--line-strong); }
   #exchanges .rr0-interview-turns { padding-right: 4px; }

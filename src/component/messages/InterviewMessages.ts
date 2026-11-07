@@ -23,6 +23,8 @@ export interface InterviewMessages extends InputFileMessages {
   exchangesEmpty: string
   /** What stands in the place of a passage taken out of the published transcript. */
   redacted: string
+  /** A colon as the language writes one between a heading and what follows it (French puts a no-break space before it). */
+  colon: string
   proofreadAll: string
   /** `{names}` is the speakers who have not approved the transcript yet. */
   proofreadPending: string

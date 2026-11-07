@@ -184,7 +184,7 @@ export class InterviewElement extends HTMLElement {
     const node = document.createElement(tag)
     const bar = document.createElement("span")
     bar.className = "bar"
-    const why = `${this.messages.redacted} : ${this.said.read(reason) ?? ""}`
+    const why = `${this.messages.redacted}${this.messages.colon}${this.said.read(reason) ?? ""}`
     bar.dataset.tip = why
     bar.tabIndex = 0
     bar.setAttribute("role", "img")

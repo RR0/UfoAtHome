@@ -72,7 +72,7 @@ describe("InterviewElement", () => {
     files["https://example.org/time/interview.json"] = interview
     const element = await make({ src: "https://example.org/time/interview.json" })
     const said = element.querySelectorAll(".turn .said")[3]
-    expect((said.querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed : Address")
+    expect((said.querySelector(".bar") as HTMLElement).dataset.tip).toBe("Passage removed: Address")
     expect(said.querySelector("i")!.textContent).toBe("Chicago")
     expect(said.textContent).toBe("He lived in , near Chicago.")
   })

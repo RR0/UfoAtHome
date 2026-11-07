@@ -28,6 +28,7 @@ export const interviewMessages_it: InterviewMessages = {
   exchangesTab: "Scambi",
   exchangesEmpty: "Non è stato ancora detto nulla.",
   redacted: "Passaggio rimosso",
+  colon: ": ",
   proofreadAll: "Rivisto da tutti.",
   proofreadPending: "Non ancora rivisto da: {names}",
   play: "Riproduci",
