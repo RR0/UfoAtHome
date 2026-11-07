@@ -557,6 +557,8 @@ export class InterviewEditorElement extends HTMLElement {
     if (!event) return
     const token = ++this.exchangesToken
     const json = await this.transcriptJson(event)
+    // Drawn in the editor's words: asked for before they had come (an interview opened at a passage as soon as it is made), it waits.
+    await this.ready
     if (token !== this.exchangesToken || this.current !== event) return
     this.drawExchanges(json)
   }
