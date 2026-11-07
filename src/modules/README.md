@@ -15,6 +15,7 @@ Every implementation UFO@home can be given a choice of lives here, one folder pe
 | `models/` | `decorModels` | `render3d/decor/DecorModelProvider.ts` |
 | `sky-events/<kind>/` | `skyEvents` | `sky-events/SkyEventKind.ts` |
 | `interpretations/<kind>/` | `interpretations` | `interpretations/InterpretationKind.ts` |
+| `perception/` | `perception` | `engine/observer/ObserverProvider.ts` |
 
 Each folder has a `*Sources.ts` that lists its built-in implementations as `DataSource` entries (an id, a name, the credit its
 licence requires, and a `create()` that builds it on demand), given to the extension point through

@@ -2294,6 +2294,8 @@ export class SightingEditorElement extends HTMLElement {
     // A catalogue that came or went changes what the model ids of the recording are drawn with.
     if (point === "decorModels") this.sceneElement.setDecorModelProvider(this.decorModelProvider)
     if (point === "skyEvents" || point === "interpretations") this.buildSkyParts()
+    // The observer's perception, whatever a module brought (see ObserverProviders).
+    if (point === "perception") this.perceptionSettings.providers = ObserverProviders.ALL
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {

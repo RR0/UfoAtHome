@@ -25,6 +25,6 @@ export const modulesPanelMessages_fr: ModulesPanelMessages = {
   points: {
     weather: "météo", place: "lieux", timeZone: "fuseaux horaires", narrative: "rédaction", assessment: "évaluations",
     lightPollution: "pollution lumineuse", aircraft: "trafic aérien", upperAir: "air en altitude", elevation: "relief", imagery: "imagerie",
-    surroundings: "environs", interpretations: "interprétations", skyEvents: "événements du ciel", decorModels: "modèles 3D"
+    surroundings: "environs", perception: "perception", interpretations: "interprétations", skyEvents: "événements du ciel", decorModels: "modèles 3D"
   }
 }

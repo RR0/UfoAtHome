@@ -61,7 +61,7 @@ export default ({ manifestUrl }) => ({
   }]
 })`
 
-  private static readonly POINTS = "weather, place, timeZone, narrative, assessment, lightPollution, aircraft, upperAir, elevation, imagery, surroundings, decorModels, skyEvents, interpretations"
+  private static readonly POINTS = "weather, place, timeZone, narrative, assessment, lightPollution, aircraft, upperAir, elevation, imagery, surroundings, decorModels, skyEvents, interpretations, perception"
 
   private static readonly SKY_EVENT = `// A kind of event of the sky: stated in recordings under skyEvents.ballLightning.
 export default ({ three }) => ({

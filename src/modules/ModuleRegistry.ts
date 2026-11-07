@@ -13,6 +13,7 @@ import type { ImageryProvider } from "../render3d/terrain/ImageryProvider.js"
 import type { SurroundingsProvider } from "../render3d/terrain/SurroundingsProvider.js"
 import type { SkyEventKind } from "./sky-events/SkyEventKind.js"
 import type { InterpretationKind } from "./interpretations/InterpretationKind.js"
+import type { ObserverProvider } from "../engine/observer/ObserverProvider.js"
 
 /**
  * What each extension point of UFO@home is a list of: the interface an implementation of that point gives.
@@ -51,6 +52,8 @@ export interface ExtensionPointTypes {
   skyEvents: SkyEventKind
   /** The kinds of interpretation computed into bodies a reading can state (see InterpretationKind): its `id` is the kind's key. */
   interpretations: InterpretationKind
+  /** What bends an observer's perception, with the settings a recording states for it (see ObserverProvider): colour vision, alcohol. */
+  perception: ObserverProvider
 }
 
 export type ExtensionPointId = keyof ExtensionPointTypes
