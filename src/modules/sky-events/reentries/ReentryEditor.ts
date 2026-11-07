@@ -1,3 +1,4 @@
+import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { ReentryParameters } from "./ReentryParameters.js"
 import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
 import type { ParameterHolder } from "../../../engine/interpretation/Parameters.js"
@@ -64,7 +65,11 @@ export class ReentryEditor {
   /** The re-entries the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly ReentryJson[] = []
 
+  /** The part's layout, given with it (see SkyEventKind.editor). */
+  private static readonly STYLE = `.reentry-editor-part { flex-basis: 100%; min-width: 0; } .reentry-editor-part #reentry-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } .reentry-editor-part #reentry-path > .icon-btn, .reentry-editor-part #reentry-curve > .icon-btn { align-self: flex-end; } .reentry-editor-part #reentry-list, .reentry-editor-part #reentry-places, .reentry-editor-part #reentry-fragment-list, .reentry-editor-part #reentry-curve-list { flex-basis: 100%; min-width: 0; } .reentry-editor-part .launch-editor, .reentry-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .reentry-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .reentry-editor-part [hidden] { display: none !important; } .reentry-editor-part select { min-width: 0; width: 100%; } .reentry-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-track { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .reentry-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .reentry-editor-part input, .reentry-editor-part select { max-width: 100%; box-sizing: border-box; } .reentry-editor-part input[type="text"] { width: 12em; } .reentry-editor-part input[data-key="title"] { width: 18em; } .reentry-editor-part label { min-width: 0; max-width: 100%; } .reentry-editor-part input.parameter-derived::placeholder { opacity: .65; } .reentry-editor-part .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }`
+
   constructor(private readonly container: HTMLElement, private readonly host: ReentryEditorHost, language: string) {
+    SkyEventEditorStyle.attach(container, "reentry-editor-part", ReentryEditor.STYLE)
     this.language = language
     this.render()
     void this.setLanguage(language)

@@ -91,8 +91,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setLightning(): void {}
     updateLightning(): void {}
     setSatellites(): void {}
-    setReentries(): void {}
-    setLaunchPlumes(): void {}
     setSkyEvents(): void {}
     pickTrafficAt(): undefined {
       return undefined
@@ -101,9 +99,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     pickRailwayAt(): undefined {
-      return undefined
-    }
-    pickReentryAt(): undefined {
       return undefined
     }
     pickSatelliteAt(): undefined {

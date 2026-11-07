@@ -13,5 +13,6 @@ export const BEAM_KIND: SkyEventKind<BeamJson> = {
   simulation: () => import("./BeamSystem.js").then(({ BeamSystem }) => () => new BeamSystem()),
   editor: () => import("./BeamEditor.js").then(({ BeamEditor }) => (container, host, language) => new BeamEditor(container, host, language)),
   reachM: (beams, centre) => TerrainReach.beamReachFor(beams, centre),
-  describe: (beam, name, distance) => `${name} (${beam.wavelengthNm} nm, ${beam.powerW.toLocaleString()} W), ${distance}`
+  pickKind: "beam",
+  describe: (beam, hit, { name, distance }) => ({ name, detail: `${name} (${beam.wavelengthNm} nm, ${beam.powerW.toLocaleString()} W), ${distance(hit.distanceM ?? 0)}` })
 }

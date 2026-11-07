@@ -1,12 +1,12 @@
 import { AdditiveBlending, BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial } from "three"
 import type { Vector3 } from "three"
 import type { AerialPerspective } from "../../../engine/atmosphere/AerialPerspective.js"
-import type { SkyEventFrame, SkyEventSimulation } from "../SkyEventKind.js"
+import type { SkyEventFrame, SkyEventPickContext, SkyEventSimulation } from "../SkyEventKind.js"
 import { LaserBeamSighting } from "./LaserBeam.js"
 import type { BeamJson, BeamView } from "./LaserBeam.js"
 
 /** What the beams are drawn against, at one instant: the frame every event of the sky is drawn in (see SkyEventFrame). */
-export type BeamFrame = SkyEventFrame
+export type BeamFrame = Pick<SkyEventFrame, "reference" | "origin" | "eastScale" | "siteElevationM" | "eye" | "pixelRad" | "relativeScale" | "air" | "transmittanceTo" | "groundYAt" | "wind">
 
 interface Placed {
   x: number
@@ -84,8 +84,8 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
     return this.segments
   }
 
-  pick(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string; distanceM: number } | undefined {
-    return this.pickAt(origin, direction, toleranceRad)
+  pick(origin: Vector3, direction: Vector3, context: SkyEventPickContext): { id: string; distanceM: number } | undefined {
+    return this.pickAt(origin, direction, context.toleranceRad)
   }
 
   /** Draws `beams` as they are at `t` (ms of the recording). */

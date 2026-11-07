@@ -97,8 +97,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setLightning(): void {}
     updateLightning(): void {}
     setSatellites(): void {}
-    setReentries(): void {}
-    setLaunchPlumes(): void {}
     setSkyEvents(): void {}
     pickTrafficAt(): undefined {
       return undefined
@@ -107,9 +105,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
       return undefined
     }
     pickRailwayAt(): undefined {
-      return undefined
-    }
-    pickReentryAt(): undefined {
       return undefined
     }
     pickSatelliteAt(): undefined {
@@ -254,8 +249,8 @@ describe("a kind of event of the sky a module brings", () => {
     element.sightingData = { version: 3, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }, { id: "b2" }] } }
     const shadow = element.shadowRoot!
     const tabs = [...shadow.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
-    expect(tabs.indexOf("sky-event-beams")).toBeGreaterThan(-1)
-    expect(tabs.indexOf("sky-event-ballLightning")).toBe(tabs.indexOf("sky-reentries") - 1)
+    // The built-in kinds in the registry's order, then the module's.
+    expect(tabs.slice(-4)).toEqual(["sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
     const tab = shadow.querySelector<HTMLButtonElement>('[aria-controls="sky-event-ballLightning"]')!
     expect(tab.textContent).toBe("Ball lightning")
 

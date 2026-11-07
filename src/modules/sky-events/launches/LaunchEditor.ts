@@ -1,3 +1,4 @@
+import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { LaunchParameters } from "./LaunchParameters.js"
 import type { LaunchJetJson, LaunchJetKind, LaunchJson, LaunchVehicle } from "./LaunchPlume.js"
 import { SkyEvents } from "../../../engine/model/SkyEvents.js"
@@ -57,7 +58,11 @@ export class LaunchEditor {
   /** The launches the fields were last filled for, to tell a recording replaced from an edit written. */
   private shown: readonly LaunchJson[] = []
 
+  /** The part's layout, given with it (see SkyEventKind.editor). */
+  private static readonly STYLE = `.launch-editor-part { flex-basis: 100%; min-width: 0; } .launch-editor-part #launch-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } .launch-editor-part .launch-path > .icon-btn { align-self: flex-end; } .launch-editor-part #launch-list, .launch-editor-part #launch-places { flex-basis: 100%; min-width: 0; } .launch-editor-part .launch-editor, .launch-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .launch-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .launch-editor-part [hidden] { display: none !important; } .launch-editor-part select { min-width: 0; width: 100%; } .launch-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .launch-editor-part .launch-track { flex-basis: 100%; margin: 0; } .launch-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .launch-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .launch-editor-part input, .launch-editor-part select { max-width: 100%; box-sizing: border-box; } .launch-editor-part input[type="text"] { width: 12em; } .launch-editor-part #launch-title { width: 18em; } .launch-editor-part label { min-width: 0; max-width: 100%; } .launch-editor-part input.parameter-derived::placeholder { opacity: .65; } .launch-editor-part .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }`
+
   constructor(private readonly container: HTMLElement, private readonly host: LaunchEditorHost, language: string) {
+    SkyEventEditorStyle.attach(container, "launch-editor-part", LaunchEditor.STYLE)
     this.language = language
     // The kind's description is what the form is built from; published so that an asset can refine it.
     if (!ParameterRegistry.of("launch")) LaunchParameters.publish()

@@ -73,7 +73,10 @@ depth of the scene) and what the tooltip says (`describe`). The scene (`SceneRen
 (`SightingEditorElement.syncSkyEventParts`) and the terrain freezer read the list in `sky-events/skyEventSources.ts`, and follow a
 module that adds a kind.
 
-The beams (`sky-events/beams/`) are the pilot. The launches, re-entries and lanterns still have code of their own in the scene and
-the editor, and are to be moved the same way. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
+Built in: the launches (`sky-events/launches/`), the beams (`sky-events/beams/`) and the fireballs and re-entries
+(`sky-events/reentries/`, to which the scene adds the fireballs of the archive). The frame a simulation is given also says where the
+observer really stands, the real instant, the magnitude limit, what the clouds and the air let through, and lets it light the ground
+(`lightFrom`) and dazzle the eye (`glareFrom`); a simulation drawn on the sky's shell says `inSky`. The sky lanterns are not one: they
+are an interpretation (`InterpretationJson.lanterns`, computed into bodies), not a fact of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
 of its own would be a second three.js. The list is explicit, since the whole namespace would keep all of three.js in every
 bundle (+120 kB measured); a class a module needs is a line to add there.

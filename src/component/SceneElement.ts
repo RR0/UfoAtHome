@@ -96,7 +96,6 @@ import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { DecoyFlare } from "../engine/interpretation/DecoyFlare.js"
 import { SkyLantern } from "../engine/interpretation/SkyLantern.js"
 import { GlassWetting, LensGhosts } from "../engine/instrument/LensGhost.js"
-import { LaunchPlumeSighting } from "../modules/sky-events/launches/LaunchPlume.js"
 import { ReentrySighting } from "../modules/sky-events/reentries/Reentry.js"
 import type { GeoPoint, ReentryDetonation, ReentryJson } from "../modules/sky-events/reentries/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
@@ -104,6 +103,8 @@ import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import { ModuleRegistry } from "../modules/ModuleRegistry.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
+import type { SkyEventsJson } from "../engine/model/SkyEvents.js"
+import type { SkyEventKind, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
@@ -171,7 +172,6 @@ const DECOR_TOOLTIP = "{name} — {size}, {distance} away"
 
 /** Hover tooltip of a satellite: see SATELLITE_TOOLTIP's doc. */
 const SATELLITE_TOOLTIP = "{name} — satellite, mag {mag}, {height} km up"
-const REENTRY_TOOLTIP = { name: "Re-entry", piece: "{name} — mag {mag}, {height} km up, {distance} km away", fragment: "{name}, a fragment — mag {mag}, {height} km up, {distance} km away" }
 
 /** What is said of a rocket's plume pointed at: see SceneNames.plumeTooltip. */
 const GHOST_TOOLTIP: GhostTooltipTexts = {
@@ -191,7 +191,6 @@ const AFTERIMAGE_TOOLTIP = {
   name: "Afterimage, in the eye",
   detail: "{name}: where the image of a light brighter than the Sun fell, the retina's pigment is bleached: for a few seconds it goes on glowing, white then coloured, and then what is seen there looks darker. It stays where it is in the field of view whichever way the eye turns, and takes minutes to fade."
 }
-const PLUME_TOOLTIP = { name: "Rocket plume", detail: "{name} — {part}, {distance} away, {height} km up", ascent: "exhaust of the ascent", burn: "exhaust of an engine burn", vent: "vented propellant" }
 
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
 import type { HeadlightMode } from "../engine/model/Headlights.js"
@@ -675,20 +674,10 @@ export class SceneElement extends HTMLElement {
       ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity", DECOR_KIND_NAMES.entity) : undefined)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
-    // An event of the sky shot while the recording runs (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin,
-    // and found only a few pixels round its line. Named by its kind (see SkyEventKind.describe).
-    const skyEvents = this.ufoElement.sighting.skyEvents
-    const eventHit = skyEvents ? this.sceneRenderer.pickSkyEventAt(ndcX, ndcY) : undefined
-    const eventKind = eventHit ? SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).find(kind => kind.key === eventHit.kind) : undefined
-    const event = eventHit && eventKind ? SkyEventKinds.eventsOf(skyEvents, eventKind).find(candidate => candidate.id === eventHit.id) : undefined
-    if (eventHit && eventKind && event) {
-      const name = this.said.read(event.title) || eventKind.fallbackName || this.said.read(eventKind.title) || eventKind.key
-      const distance = this.distanceText(eventHit.distanceM)
-      return {
-        kind: eventKind.key === "beams" ? "beam" : "skyEvent", id: event.id, name,
-        detail: () => eventKind.describe ? eventKind.describe(event, name, distance) : `${name}, ${distance}`
-      }
-    }
+    // An event of the sky that stands in the scene (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin, and
+    // found only a few pixels round its line.
+    const standingEvent = this.skyEventPickAt(ndcX, ndcY, (_kind, simulation) => !simulation.inSky)
+    if (standingEvent) return standingEvent
     // A ghost of the lens, laid over whatever is behind it: a disc in the sky where nothing is, named after the light that makes it.
     const ghost = ghosts ? this.ghostPick(ndcX, ndcY) : undefined
     if (ghost) return ghost
@@ -720,10 +709,10 @@ export class SceneElement extends HTMLElement {
     // An aircraft of the record of air traffic: moving, and a candidate for what was seen.
     const traffic = this.trafficTooltipAt(ndcX, ndcY)
     if (traffic) return { kind: "traffic", name: traffic }
-    // A rocket's plume, lit by a Sun the ground no longer sees (see LaunchJson): what the launch is called, and with Alt which of what the stage
-    // let go this is, how far and how high.
-    const plume = this.plumePickAt(ndcX, ndcY)
-    if (plume) return plume
+    // An event on the sky's shell: a rocket's plume, lit by a Sun the ground no longer sees (see LaunchJson), what the launch is called, and
+    // with Alt which of what the stage let go this is, how far and how high.
+    const skyEvent = this.skyEventPickAt(ndcX, ndcY, (kind, simulation) => simulation.inSky === true && !kind.pickedAfterSatellites)
+    if (skyEvent) return skyEvent
     const satellite = this.sceneRenderer.pickSatelliteAt(ndcX, ndcY)
     if (satellite) {
       return {
@@ -735,8 +724,8 @@ export class SceneElement extends HTMLElement {
       }
     }
     // A burning piece of a re-entry or a fireball, or one of the fragments it shed: what the recording calls it, how bright, how high, how far.
-    const reentry = this.reentryPickAt(ndcX, ndcY)
-    if (reentry) return reentry
+    const crossing = this.skyEventPickAt(ndcX, ndcY, (kind, simulation) => simulation.inSky === true && kind.pickedAfterSatellites === true)
+    if (crossing) return crossing
     // A ring, an arc or a sundog of the ice display: where the traced display has light, named for what made it.
     const optics = this.sceneRenderer.pickOpticsAt(ndcX, ndcY)
     if (optics) {
@@ -874,24 +863,46 @@ export class SceneElement extends HTMLElement {
 
   private glassWetting?: { sighting: Sighting, key: string, wetting: GlassWetting }
 
-  /** The plume of a launch under a point of the picture, by the launch's name, and what part of it with Alt (see pickAt). */
-  private plumePickAt(ndcX: number, ndcY: number): ScenePick | undefined {
-    const launches = this.ufoElement.sighting.skyEvents?.launches
-    const puff = launches?.length ? this.sceneRenderer.pickPlumeAt(ndcX, ndcY) : undefined
-    const launch = puff ? launches?.find(candidate => candidate.id === puff.launchId) : undefined
-    if (!puff || !launch) return undefined
-    const texts = this.naming.names?.plumeTooltip ?? PLUME_TOOLTIP
-    const name = this.said.read(launch.title) || launch.vehicle?.mission || texts.name
-    const part = (): string => {
-      if (puff.release === undefined || puff.release === "burn") return texts.ascent
-      const jet = launch.jets?.find((candidate, index) => `jet:${candidate.id ?? index}` === puff.release)
-      return jet?.kind === "vent" ? texts.vent : texts.burn
-    }
+  /** The events of the sky as the scene shows them: the recording's, with the fireballs a camera network recorded while it runs (see
+   * ensureFireballs) among its re-entries. The same object while neither changes, for the renderer to know nothing did. */
+  private get skyEventsShown(): SkyEventsJson | undefined {
+    return this.skyEventsOf(this.ufoElement.sighting)
+  }
+
+  /** The real instant the recording on show starts at, as the last tick read it. */
+  private skyEventsStartDate?: Date
+
+  private skyEventsMerged?: { stated?: SkyEventsJson, fireballs?: readonly ReentryJson[], shown?: SkyEventsJson }
+
+  private skyEventsOf(sighting: Sighting): SkyEventsJson | undefined {
+    const stated = sighting.skyEvents
+    const fireballs = this.fireballs?.reentries
+    const merged = this.skyEventsMerged
+    if (merged && merged.stated === stated && merged.fireballs === fireballs) return merged.shown
+    const shown = !fireballs?.length ? stated : { ...stated, reentries: [...(stated?.reentries ?? []), ...fireballs] }
+    this.skyEventsMerged = { stated, fireballs, shown }
+    return shown
+  }
+
+  /**
+   * The event of the sky under a point of the picture, among the kinds `which` takes, named by its kind (see SkyEventKind.describe): the
+   * events the recording states, with the fireballs a camera network recorded while it runs (see skyEventsShown).
+   */
+  private skyEventPickAt(ndcX: number, ndcY: number, which: (kind: SkyEventKind, simulation: SkyEventSimulation) => boolean): ScenePick | undefined {
+    const skyEvents = this.skyEventsShown
+    if (!skyEvents) return undefined
+    const hit = this.sceneRenderer.pickSkyEventAt(ndcX, ndcY, which)
+    const kind = hit ? SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source)).find(candidate => candidate.key === hit.kind) : undefined
+    const event = hit && kind ? SkyEventKinds.eventsOf(skyEvents, kind).find(candidate => candidate.id === hit.id) : undefined
+    if (!hit || !kind || !event) return undefined
+    const name = this.said.read(event.title) || kind.fallbackName || this.said.read(kind.title) || kind.key
+    const described = kind.describe?.(event, hit, {
+      said: this.said, name, distance: m => this.distanceText(m), names: this.naming.names as unknown as Record<string, unknown> | undefined
+    })
+    const detail = described?.detail ?? (hit.distanceM !== undefined ? `${name}, ${this.distanceText(hit.distanceM)}` : undefined)
     return {
-      kind: "plume", id: launch.id, name,
-      detail: () => texts.detail.replace("{name}", name).replace("{part}", part())
-        .replace("{distance}", this.distanceText(puff.centre.distanceKm * 1000))
-        .replace("{height}", Math.round(puff.heightKm ?? 0).toLocaleString())
+      kind: (kind.pickKind ?? "skyEvent") as ScenePick["kind"], id: event.id, name: described?.name ?? name,
+      ...(detail !== undefined ? { detail: () => detail } : {})
     }
   }
 
@@ -1045,29 +1056,6 @@ export class SceneElement extends HTMLElement {
     if (previous === undefined || t < previous || t - previous > SceneElement.DETONATION_JUMP_MS || this.ufoElement.playbackState !== "playing") return
     for (const detonation of detonations) {
       if (detonation.t > previous && detonation.t <= t) this.weatherAudio.playDetonation(detonation.loudness)
-    }
-  }
-
-  /** What is said of the piece of a re-entry under a point of the picture (see pickAt). */
-  private reentryPickAt(ndcX: number, ndcY: number): ScenePick | undefined {
-    const picked = this.sceneRenderer.pickReentryAt(ndcX, ndcY)
-    if (!picked) return undefined
-    const texts = this.naming.names?.reentryTooltip ?? REENTRY_TOOLTIP
-    const reentry = this.detonationsFor?.reentries.find(candidate => candidate.id === picked.view.reentryId)
-    const name = (reentry?.title ? this.said.read(reentry.title) : "") || reentry?.object?.name || texts.name
-    const head = picked.view.head
-    // Its height above the ground under it, through the Earth's curvature: a piece 500 km off at 5° is some 60 km up, not 40.
-    const earthKm = 6371
-    const heightKm = Math.sqrt(earthKm ** 2 + head.distanceKm ** 2 + 2 * earthKm * head.distanceKm * Math.sin((head.altitudeDeg * Math.PI) / 180)) - earthKm
-    // A fragment shed by a piece is named after the re-entry it belongs to (see ReentrySighting.shedPieces, which numbers it under its piece).
-    const shed = picked.view.fragmentId.includes(".")
-    return {
-      kind: "reentry",
-      name: (shed ? texts.fragment : texts.piece)
-        .replace("{name}", name)
-        .replace("{mag}", picked.magnitude.toLocaleString(undefined, { maximumFractionDigits: 1 }))
-        .replace("{height}", Math.round(heightKm).toLocaleString())
-        .replace("{distance}", Math.round(head.distanceKm).toLocaleString())
     }
   }
 
@@ -1705,7 +1693,7 @@ export class SceneElement extends HTMLElement {
 
   /** A kind of event of the sky a module brought or took away is drawn, or no longer, at once. */
   private readonly onModulesChanged = (event: Event): void => {
-    if ((event as CustomEvent<string>).detail === "skyEvents") this.sceneRenderer.setSkyEvents(this.ufoElement.sighting.skyEvents, true)
+    if ((event as CustomEvent<string>).detail === "skyEvents") this.sceneRenderer.setSkyEvents(this.skyEventsShown, true, this.skyEventsStartDate)
   }
 
   /**
@@ -2196,9 +2184,8 @@ export class SceneElement extends HTMLElement {
     // The re-entries every instant too: a piece crosses degrees a second. Placed on the Earth, so seen from the observer's real place, not
     // the scene's origin. And the fireballs a camera network recorded during it, drawn the same way at their real instant.
     this.ensureFireballs(startDate)
-    const sky = sighting.skyEvents
-    const burning = [...(sky?.reentries ?? []), ...(this.fireballs?.reentries ?? [])]
-    this.sceneRenderer.setReentries(burning.length === 0 ? [] : ReentrySighting.viewsAt(burning, t, { lat, lng, heightM: observer.elevationM }))
+    const sky = this.skyEventsOf(sighting)
+    const burning = sky?.reentries ?? []
     // And what they were at any earlier instant, for the eye's afterimages to be replayed after a jump (see SceneRenderer.setRetinaHistory):
     // of those bright enough to leave one only. Placing the forty pieces of a break-up at every step of a replay cost a tenth of a second at
     // every seek, for a re-entry that cannot dazzle anybody.
@@ -2209,13 +2196,10 @@ export class SceneElement extends HTMLElement {
       const place = { lat: then?.lat ?? lat, lng: then?.lng ?? lng, heightM: then?.elevationM ?? observer.elevationM }
       return { views: ReentrySighting.viewsAt(dazzling, at, place), pose: then }
     }, sighting)
-    // The events of the sky drawn by their kinds (the beams, and any a module brought): placed and lit by the renderer, which knows where its
-    // scene stands and what its air is.
-    this.sceneRenderer.setSkyEvents(sky)
-    // The plumes of the launches: lit by the Sun at the real date and hour, so with no date there is no light to put on them.
-    const launches = sky?.launches ?? []
-    this.sceneRenderer.setLaunchPlumes(launches.length === 0 || !startDate ? []
-      : LaunchPlumeSighting.viewsAt(launches, t, { lat, lng, heightM: observer.elevationM }, LaunchPlumeSighting.sunDirectionAt(new Date(startDate.getTime() + t))))
+    // The events of the sky drawn by their kinds (see SkyEventKind): the launches, the beams, the re-entries, and any a module brought; placed
+    // and lit by the renderer at this instant, which knows where its scene and its observer stand, what its air is and what date it is.
+    this.skyEventsStartDate = startDate
+    this.sceneRenderer.setSkyEvents(sky, false, startDate)
 
     // Everything above moves with the instant and costs almost nothing; the sky below costs about
     // 8 ms to restate, and an instant that only carries an aeroplane a few pixels further has no

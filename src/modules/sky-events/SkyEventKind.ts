@@ -5,6 +5,7 @@ import type { SaidText } from "../../engine/model/SaidText.js"
 import type { SaidTexts } from "../../engine/model/SaidText.js"
 import type { PositionPlace } from "../../component/ParameterForm.js"
 import type { DataSource } from "../../engine/source/DataSource.js"
+import type { HorizontalPosition } from "../../engine/astronomy/CelestialPositions.js"
 
 /** What every event of the sky states, whatever its kind: an id, unique among the events of its kind in the recording. */
 export interface SkyEventJson {
@@ -34,6 +35,41 @@ export interface SkyEventFrame {
   groundYAt: (x: number, z: number) => number
   /** The wind, metres a second towards the east and towards the north. */
   wind?: { eastMS: number, northMS: number }
+  /** Where the observer really stands now, on the Earth, metres above the sea: what is placed on the Earth (a re-entry 300 km off) is seen
+   * from here, not from the scene's origin. */
+  observer: { lat: number, lng: number, heightM: number }
+  /** The real instant, or undefined when the recording states no date: then nothing lit by the Sun can be lit. */
+  date?: Date
+  /** The faintest magnitude seen now, by this eye or instrument through this sky. */
+  magnitudeLimit: number
+  /** The share of a light from a direction of the sky that the clouds let through. */
+  cloudTransmission(position: HorizontalPosition): number
+  /** What reaches the eye, per channel, in the scene's units, of a source of `magnitude` in that direction, through `through` of the clouds. */
+  arrivingIlluminance(position: HorizontalPosition, magnitude: number, through: number): Rgb
+  /** What the air above the eye lets through of a light from space towards a direction, per channel. */
+  transmittanceFromSpace(position: HorizontalPosition): Rgb
+  /** Lights the ground and the sky with these far sources, as the Moon does (see EmitterLights); what this kind said before is replaced. */
+  lightFrom(sources: readonly { position: HorizontalPosition, magnitude: number }[]): void
+  /** Dazzles the eye round these bright sources, as a star or the Moon does (see Veil); what this kind said before is replaced. */
+  glareFrom(sources: readonly { key: string, position: HorizontalPosition, magnitude: number, fade: number }[]): void
+}
+
+/** What a simulation is given to say what is under the pointer. */
+export interface SkyEventPickContext {
+  /** How far from what is drawn a pointer may be, radians: a few pixels. */
+  toleranceRad: number
+  /** The cosine of the angle within which the nearest of the points in the sky is taken, as a star is. */
+  nearestCos: number
+  /** The sky's own light towards a direction, relative: what something has to stand out from to be seen. */
+  skyLightTowards(direction: Vector3): number
+}
+
+/** An event under the pointer: which, how far along the ray when that is known (else the ground is asked whether it hides it), and what the
+ * kind's own tooltip needs of what was picked. */
+export interface SkyEventHit {
+  id: string
+  distanceM?: number
+  detail?: unknown
 }
 
 /**
@@ -44,14 +80,18 @@ export interface SkyEventFrame {
  * per frame what `object` holds.
  */
 export interface SkyEventSimulation<J extends SkyEventJson = SkyEventJson> {
-  /** What is added to the scene, once. */
+  /** What is added to the scene, once: among the things that stand in the scene, or on the sky's shell (`inSky`). */
   readonly object: Object3D
+  /** Drawn on the sky's shell round the eye, as the stars and the satellites are, rather than in the scene's metres. */
+  readonly inSky?: boolean
+  /** Left out of what the eye's adaptation and the instrument's meter read, as the stars are: points far brighter than their size. */
+  readonly hiddenFromEye?: boolean
   /** Places and lights `events` as they are at `t`, milliseconds of the recording, seen from `frame.eye`. */
   update(events: readonly J[], t: number, frame: SkyEventFrame): void
   /** How many things it draws now: what tells the scene there is something to pick. */
   readonly drawnCount: number
-  /** The event under a ray from the eye, within `toleranceRad` of what is drawn of it, and how far along the ray. */
-  pick?(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string, distanceM: number } | undefined
+  /** The event under a ray from the eye (see SkyEventPickContext). */
+  pick?(origin: Vector3, direction: Vector3, context: SkyEventPickContext): SkyEventHit | undefined
   dispose(): void
 }
 
@@ -101,10 +141,27 @@ export interface SkyEventKind<J extends SkyEventJson = SkyEventJson> {
   editor?(): Promise<(container: HTMLElement, host: SkyEventEditorHost, language: string) => SkyEventEditor>
   /** How far from `centre` they reach, metres: the ground is built that far, and the scene drawn that deep. */
   reachM?(events: readonly J[], centre: { lat: number, lng: number }): number
-  /** What the scene's tooltip says of one, picked `distance` away (a distance already said in words). */
-  describe?(event: J, name: string, distance: string): string
+  /** What the scene's tooltip says of one under the pointer: its name, and a sentence shown on demand (see SkyEventDescribeContext). */
+  describe?(event: J, hit: SkyEventHit, context: SkyEventDescribeContext): { name: string, detail?: string }
+  /** What the scene calls what is under the pointer, for those who style or test it: "beam", "plume", "reentry"; "skyEvent" when absent. */
+  pickKind?: string
+  /** Looked for under the pointer after the satellites rather than before: a point moving across the sky, which a satellite crossing it is
+   * the better answer for. Only for a kind drawn on the sky's shell (see SkyEventSimulation.inSky). */
+  pickedAfterSatellites?: boolean
   /** What it is called when it has no title of its own. */
   fallbackName?: string
+}
+
+/** What a kind's tooltip is said with. */
+export interface SkyEventDescribeContext {
+  /** Reads a text in the reader's language. */
+  said: SaidTexts
+  /** The event's own name, or the kind's when it has none. */
+  name: string
+  /** A distance from the eye as the page writes it: "540 m", "1,7 km". */
+  distance(m: number): string
+  /** The scene's own words in the reader's language (see SceneNames), by key; what a built-in kind's tooltips are taken from. */
+  names?: Readonly<Record<string, unknown>>
 }
 
 /** The kinds of the registry, and the events of one of them a recording states. */

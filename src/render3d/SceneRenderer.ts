@@ -95,7 +95,7 @@ import type { TraceSystem } from "./TraceSystem.js"
 import type { ContrailSystem } from "./ContrailSystem.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
-import type { SkyEventFrame, SkyEventJson, SkyEventKind, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
+import type { SkyEventFrame, SkyEventHit, SkyEventJson, SkyEventKind, SkyEventPickContext, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
 import type { SkyEventsJson } from "../engine/model/SkyEvents.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
@@ -123,9 +123,6 @@ import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { SatelliteField } from "./SatelliteField.js"
-import { PlumeSystem } from "../modules/sky-events/launches/PlumeSystem.js"
-import { ReentrySystem } from "../modules/sky-events/reentries/ReentrySystem.js"
-import type { PlumePuffView } from "../modules/sky-events/launches/LaunchPlume.js"
 import type { ReentryFragmentView } from "../modules/sky-events/reentries/Reentry.js"
 import { LightningBolt } from "./LightningBolt.js"
 import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
@@ -1117,6 +1114,8 @@ export class SceneRenderer {
   private contrailSystemLoading?: Promise<void>
   /** The events of the sky the recording states, drawn by the kinds of the registry (see setSkyEvents). */
   private skyEventsStated?: SkyEventsJson
+  /** The real instant the recording starts at, which the instant of a tick is counted from; undefined for a recording with no date. */
+  private skyEventsStart?: Date
   /** Each kind of event of the sky the scene has had an event of: its events, and its drawing once its code has come. */
   private readonly skyEventLayers = new Map<string, { kind: SkyEventKind, events: readonly SkyEventJson[], simulation?: SkyEventSimulation, loading?: Promise<void> }>()
   /** Where the Sun stands for each trail, by the id of its aircraft — see setContrailSunlight. */
@@ -1404,12 +1403,6 @@ export class SceneRenderer {
   /** The satellites standing in this sky, if the recording's date has element sets — see
    * setSatellites. Built on first use and kept. */
   private satelliteField?: SatelliteField
-  /** The burning pieces of the re-entries an interpretation claims — see setReentries. Built on
-   * first use and kept. */
-  private reentrySystem?: ReentrySystem
-  /** The sunlit exhaust of the rocket launches an interpretation claims — see setLaunchPlumes. Built
-   * on first use and kept. */
-  private plumeSystem?: PlumeSystem
   /** What ice crystals did to the light of the Sun or Moon — see IceHaloEffect. */
   private iceHalos?: IceHaloEffect
   /** The aureole and corona round the Moon — see SourceDiffraction. */
@@ -2689,7 +2682,8 @@ export class SceneRenderer {
    * touched, and the code of a kind is loaded only when there is an event of it to draw. `force` reads the registry again, for a kind a module
    * brought or took away after the events were set.
    */
-  setSkyEvents(events: SkyEventsJson | undefined, force = false): void {
+  setSkyEvents(events: SkyEventsJson | undefined, force = false, startDate?: Date): void {
+    this.skyEventsStart = startDate
     if (events === this.skyEventsStated && !force) return
     this.skyEventsStated = events
     let reachChanged = false
@@ -2701,8 +2695,7 @@ export class SceneRenderer {
       let layer = this.skyEventLayers.get(kind.key)
       if (layer?.kind !== kind && layer) {
         // The same key, now drawn by another kind's code (a module replaced): the old drawing goes.
-        layer.simulation?.dispose()
-        this.skyEventLayers.delete(kind.key)
+        this.disposeSkyEventLayer(kind.key, layer)
         layer = undefined
       }
       if (!layer && stated.length === 0) continue
@@ -2717,8 +2710,7 @@ export class SceneRenderer {
     // A kind no longer in the registry is no longer drawn.
     for (const [key, layer] of this.skyEventLayers) {
       if (known.has(key)) continue
-      layer.simulation?.dispose()
-      this.skyEventLayers.delete(key)
+      this.disposeSkyEventLayer(key, layer)
       reachChanged ||= layer.kind.reachM !== undefined
     }
     // The ground has to reach as far as they go (see buildFarRing).
@@ -2735,11 +2727,42 @@ export class SceneRenderer {
       // Gone meanwhile: a kind removed, a scene disposed.
       if (this.skyEventLayers.get(layer.kind.key) !== layer) return
       const simulation = create()
-      this.scene.add(simulation.object)
+      ;(simulation.inSky ? this.celestialGroup : this.scene).add(simulation.object)
       layer.simulation = simulation
       this.updateSkyEvents()
       this.render()
     }, () => undefined)
+    // The first frame of a recording waits for it, as it waits for a model: a superbolide that came a moment after the sky did was a sky
+    // without it, then a flash.
+    this.holdUntil(layer.loading)
+  }
+
+  /** A kind's drawing gone, with the light and the glare it gave. */
+  private disposeSkyEventLayer(key: string, layer: { simulation?: SkyEventSimulation }): void {
+    layer.simulation?.dispose()
+    this.skyEventLayers.delete(key)
+    this.skyEventLight(key, [])
+    this.skyEventGlare(key, [])
+  }
+
+  /** Lights the ground and the sky with the far sources a kind of event of the sky gives (see SkyEventFrame.lightFrom). */
+  private skyEventLight(key: string, sources: readonly { position: HorizontalPosition, magnitude: number }[]): void {
+    this.emitterLights.set(`skyEvent:${key}`, [], sources.map(source => this.farEmitterOf(source.position, source.magnitude)).filter(emitter => emitter !== undefined))
+    this.refreshSkyFlare()
+  }
+
+  /** The eye's glare round the bright sources a kind of event of the sky gives (see SkyEventFrame.glareFrom). */
+  private skyEventGlare(key: string, sources: readonly { key: string, position: HorizontalPosition, magnitude: number, fade: number }[]): void {
+    const prefix = `skyEvent:${key}:`
+    const glared = new Set<string>()
+    for (const source of sources) {
+      const glareKey = prefix + source.key
+      const { x, y, z } = horizontalToCartesian(source.position.altitudeDeg, source.position.azimuthDeg, BODY_PLACEMENT_RADIUS)
+      const [r, g, b] = this.arrivingIlluminance(source.position, source.magnitude, this.cloudTransmission(source.position))
+      this.setGlare(glareKey, x, y, z, [r * source.fade, g * source.fade, b * source.fade], 0, SceneRenderer.POINT_VEIL_HOLD_DEG)
+      glared.add(glareKey)
+    }
+    for (const glareKey of [...this.glareSprites.keys()]) if (glareKey.startsWith(prefix) && !glared.has(glareKey)) this.disposeGlare(glareKey)
   }
 
   /** How far from `centre` the events of the sky go, metres: the farthest any kind says its events reach. */
@@ -2765,10 +2788,21 @@ export class SceneRenderer {
   private updateSkyEvents(): void {
     const reference = this.decorReferencePose
     if (this.skyEventLayers.size === 0 || reference?.lat === undefined || reference.lng === undefined) return
-    let frame: SkyEventFrame | undefined
-    for (const layer of this.skyEventLayers.values()) {
+    const current = this.decorCurrentPose
+    const observer = {
+      lat: current?.lat ?? reference.lat, lng: current?.lng ?? reference.lng,
+      heightM: current?.lat !== undefined ? current.elevationM ?? 0 : reference.elevationM ?? 0
+    }
+    const date = this.skyEventsStart ? new Date(this.skyEventsStart.getTime() + this.decorTime) : undefined
+    const magnitudeLimit = this.lastAstronomy ? this.magnitudeLimitOf(this.lastAstronomy) : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
+    let frame: Omit<SkyEventFrame, "lightFrom" | "glareFrom"> | undefined
+    for (const [key, layer] of this.skyEventLayers) {
       if (!layer.simulation) continue
       frame ??= {
+        observer, date, magnitudeLimit,
+        cloudTransmission: position => this.cloudTransmission(position),
+        arrivingIlluminance: (position, magnitude, through) => this.arrivingIlluminance(position, magnitude, through),
+        transmittanceFromSpace: position => this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, position.altitudeDeg),
         reference: { lat: reference.lat, lng: reference.lng },
         origin: this.bodyOrigin,
         eastScale: this.bodyEastScale,
@@ -2785,8 +2819,13 @@ export class SceneRenderer {
           northMS: Math.cos(this.weather.windDirectionDeg * DEG_TO_RAD) * this.weather.windSpeed
         }
       }
-      layer.simulation.update(layer.events, this.decorTime, frame)
+      layer.simulation.update(layer.events, this.decorTime, {
+        ...frame,
+        lightFrom: sources => this.skyEventLight(key, sources),
+        glareFrom: sources => this.skyEventGlare(key, sources)
+      })
     }
+    this.render()
   }
 
   /** Builds the trails as they stand at the instant the decor was last placed at. */
@@ -4257,75 +4296,14 @@ export class SceneRenderer {
     this.render()
   }
 
-  /**
-   * Draws the burning pieces of re-entries, as the observer sees them at this instant (see
-   * ReentrySighting.viewsAt): against the same magnitude limit, clouds and air as the satellites.
-   */
-  setReentries(views: ReadonlyArray<ReentryFragmentView>): void {
-    if (views.length === 0 && !this.reentrySystem?.count) return
-    if (!this.reentrySystem) {
-      this.reentrySystem = new ReentrySystem()
-      this.celestialGroup.add(this.reentrySystem.object)
-    }
-    const magnitudeLimit = this.lastAstronomy
-      ? this.magnitudeLimitOf(this.lastAstronomy)
-      : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
-    this.reentrySystem.set(views, magnitudeLimit, position => this.cloudTransmission(position),
-      (position, magnitude) => this.arrivingIlluminance(position, magnitude, 1))
-    // Its heads light the ground, as the Moon does, through the air and the cloud between.
-    this.emitterLights.set("reentries", [], views.map(view => this.farEmitterOf(view.head, view.magnitude)).filter(emitter => emitter !== undefined))
-    this.refreshSkyFlare()
-    // And dazzle the eye as a star or the Moon does (see Veil): a superbolide brighter than the Sun was a few dots without it.
-    const glared = new Set<string>()
-    for (const view of views) {
-      const key = `reentry:${view.reentryId}:${view.fragmentId}`
-      const { x, y, z } = horizontalToCartesian(view.head.altitudeDeg, view.head.azimuthDeg, BODY_PLACEMENT_RADIUS)
-      // Its dazzle goes out with it (see ReentryFragmentView.fade): the veil of a dazzling piece saturates as its dot does.
-      const [r, g, b] = this.arrivingIlluminance(view.head, view.magnitude, this.cloudTransmission(view.head))
-      this.setGlare(key, x, y, z, [r * view.fade, g * view.fade, b * view.fade], 0, SceneRenderer.POINT_VEIL_HOLD_DEG)
-      glared.add(key)
-    }
-    for (const key of [...this.glareSprites.keys()]) if (key.startsWith("reentry:") && !glared.has(key)) this.disposeGlare(key)
-    this.render()
-  }
-
-  /**
-   * Draws the exhaust plumes of rocket launches, as the observer sees them at this instant (see
-   * LaunchPlumeSighting.viewsAt): light the ground has lost and the plume has not, scattered towards
-   * the eye through the air above it and the clouds.
-   */
-  setLaunchPlumes(views: ReadonlyArray<PlumePuffView>): void {
-    if (views.length === 0 && !this.plumeSystem?.count) return
-    if (!this.plumeSystem) {
-      this.plumeSystem = new PlumeSystem()
-      this.celestialGroup.add(this.plumeSystem.object)
-    }
-    this.plumeSystem.set(views, this.relativeScale,
-      position => this.air.transmittanceFromSpace(this.siteElevationM + this.observerElevationM, position.altitudeDeg),
-      position => this.cloudTransmission(position))
-    this.render()
-  }
-
-  /**
-   * The puff of a rocket's plume under a point of the picture (see PlumeSystem.pickAt), where it stands out from the sky behind it, or a few
-   * pixels round a puff too small to land on; not one the ground hides.
-   */
-  pickPlumeAt(ndcX: number, ndcY: number): PlumePuffView | undefined {
-    if (!this.plumeSystem?.count) return undefined
-    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
-    const direction = this.raycaster.ray.direction
-    const puff = this.plumeSystem.pickAt(direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad(), this.skyLightTowards(direction))
-    return puff && this.groundHides(ndcX, ndcY) ? undefined : puff
-  }
-
-  /** How many puffs of a launch's plume are drawn — see setLaunchPlumes. */
+  /** How many puffs of a launch's plume are drawn (see LaunchSimulation). */
   get plumePuffCount(): number {
-    return this.plumeSystem?.count ?? 0
+    return this.skyEventDrawnCount("launches")
   }
 
-  /** How many burning pieces of a re-entry are drawn — see setReentries. */
+  /** How many burning pieces of a re-entry are drawn (see ReentrySimulation). */
   get reentryCount(): number {
-    return this.reentrySystem?.count ?? 0
+    return this.skyEventDrawnCount("reentries")
   }
 
   /**
@@ -4350,15 +4328,6 @@ export class SceneRenderer {
       }
     }
     return best && !this.groundHides(ndcX, ndcY) ? best : undefined
-  }
-
-  /** The drawn piece of a re-entry or a fireball under a screen point, the same angular nearest-neighbour as pickSatelliteAt. */
-  pickReentryAt(ndcX: number, ndcY: number): { view: ReentryFragmentView, magnitude: number } | undefined {
-    if (!this.reentrySystem?.count) return undefined
-    this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
-    const thresholdCos = Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180)
-    const piece = this.reentrySystem.nearest(this.raycaster.ray.direction, thresholdCos)
-    return piece && this.groundHides(ndcX, ndcY) ? undefined : piece
   }
 
   /** The drawn satellite under a screen point, the same angular nearest-neighbour as pickStarAt. */
@@ -5135,7 +5104,8 @@ export class SceneRenderer {
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
       ...this.cabinDecor(), ...this.decorLamps, ...this.bodySystem.group.children.filter(holder => holder.name.startsWith("body:")),
-      ...([this.meteorSystem?.object, this.reentrySystem?.object] as (Object3D | undefined)[]).filter((object): object is Object3D => object !== undefined)]
+      ...([this.meteorSystem?.object] as (Object3D | undefined)[]).filter((object): object is Object3D => object !== undefined),
+      ...[...this.skyEventLayers.values()].filter(layer => layer.simulation?.hiddenFromEye).map(layer => layer.simulation!.object)]
     const scale = this.relativeScale
     const version = this.sceneVersion
     const atMs = this.recordingTimeMs
@@ -6882,17 +6852,25 @@ export class SceneRenderer {
    * The event of the sky under a point of the picture (a beam of light, see BeamSystem.pickAt), within a few pixels of what is drawn of it, and
    * how far it is there; not one the ground or what stands on it hides.
    */
-  pickSkyEventAt(ndcX: number, ndcY: number): { kind: string, id: string, distanceM: number } | undefined {
-    const simulations = [...this.skyEventLayers.values()].filter(layer => layer.simulation?.pick && layer.simulation.drawnCount > 0)
+  pickSkyEventAt(ndcX: number, ndcY: number, which: (kind: SkyEventKind, simulation: SkyEventSimulation) => boolean = () => true): ({ kind: string } & SkyEventHit) | undefined {
+    const simulations = [...this.skyEventLayers.values()].filter(layer => layer.simulation?.pick && layer.simulation.drawnCount > 0 && which(layer.kind, layer.simulation))
     if (simulations.length === 0) return undefined
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const ray = this.raycaster.ray
-    let hit: { kind: string, id: string, distanceM: number } | undefined
+    const context: SkyEventPickContext = {
+      toleranceRad: SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad(),
+      nearestCos: Math.cos((STAR_HOVER_FIELD_FRACTION * this.camera.fov * Math.PI) / 180),
+      skyLightTowards: direction => this.skyLightTowards(direction)
+    }
+    // What stands in the scene at a known distance is taken before what is on the sky's shell behind it.
+    let hit: ({ kind: string } & SkyEventHit) | undefined
     for (const layer of simulations) {
-      const found = layer.simulation!.pick!(ray.origin, ray.direction, SceneRenderer.BEAM_PICK_PIXELS * this.contrailPixelRad())
-      if (found && (!hit || found.distanceM < hit.distanceM)) hit = { kind: layer.kind.key, ...found }
+      const found = layer.simulation!.pick!(ray.origin, ray.direction, context)
+      if (!found) continue
+      if (!hit || (found.distanceM ?? Infinity) < (hit.distanceM ?? Infinity)) hit = { kind: layer.kind.key, ...found }
     }
     if (!hit) return undefined
+    if (hit.distanceM === undefined) return this.groundHides(ndcX, ndcY) ? undefined : hit
     if (this.terrainMesh && this.groundBlocks(ray.origin, ray.direction, hit.distanceM - 1, UFO_OCCLUSION_MIN_DISTANCE_M)) return undefined
     const decor = SceneRenderer.firstSolid(this.raycaster.intersectObjects([...this.decorGroups.values()], true))
     if (decor && decor.distance < hit.distanceM) return undefined
@@ -6973,10 +6951,6 @@ export class SceneRenderer {
     this.cometTail = undefined
     this.satelliteField?.dispose()
     this.satelliteField = undefined
-    this.reentrySystem?.dispose()
-    this.reentrySystem = undefined
-    this.plumeSystem?.dispose()
-    this.plumeSystem = undefined
     this.lightningBolt?.dispose()
     this.lightningBolt = undefined
     for (const mesh of this.bodyMeshes.values()) {

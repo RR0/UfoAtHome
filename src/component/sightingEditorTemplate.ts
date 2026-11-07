@@ -502,9 +502,7 @@ export const html = `
     <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group">Precipitation</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group">Clouds</span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group">Wind</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="sky-launches" aria-expanded="false"><span id="label-launches-subgroup">Launches</span></button>
     <button class="subgroup-tab" type="button" aria-controls="sky-lanterns" aria-expanded="false"><span id="label-lanterns-subgroup">Lanterns</span></button>
-    <button class="subgroup-tab" type="button" aria-controls="sky-reentries" aria-expanded="false"><span id="label-reentries-subgroup">Fireballs</span></button>
   </div>
   <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
     <div class="toolbar">
@@ -548,11 +546,6 @@ export const html = `
   </section>
   <!-- What happened in that sky as facts (see SkyEventsJson), beside the state it was in: neither the decor, which outlasts the
        observation, nor the interpretation, which reads the account. -->
-  <section class="subgroup-panel" id="sky-launches" aria-labelledby="label-launches-subgroup" hidden>
-    <div class="toolbar">
-      <style>#launch-editor { flex-basis: 100%; min-width: 0; } #launch-editor #launch-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } #launch-editor .launch-path > .icon-btn { align-self: flex-end; } #launch-editor #launch-list, #launch-editor #launch-places { flex-basis: 100%; min-width: 0; } #launch-editor .launch-editor, #launch-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #launch-editor .launch-fields { flex-basis: 100%; min-width: 0; } #launch-editor [hidden] { display: none !important; } #launch-editor select { min-width: 0; width: 100%; } #launch-editor .launch-intro { flex-basis: 100%; margin: 0; } #launch-editor .launch-track { flex-basis: 100%; margin: 0; } #launch-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #launch-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #launch-editor input, #launch-editor select { max-width: 100%; box-sizing: border-box; } #launch-editor input[type="text"] { width: 12em; } #launch-editor #launch-title { width: 18em; } #launch-editor label { min-width: 0; max-width: 100%; } #launch-editor input.parameter-derived::placeholder { opacity: .65; } #launch-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="launch-editor"></div>
-    </div>
-  </section>
   <!-- Sky lanterns, a reading of the account (InterpretationJson.lanterns) rather than a fact of its sky, beside the launches it would
        otherwise be taken for: built the first time it is opened (see LanternEditor), with the launches' layout. -->
   <section class="subgroup-panel" id="sky-lanterns" aria-labelledby="label-lanterns-subgroup" hidden>
@@ -560,13 +553,8 @@ export const html = `
       <style>#lantern-editor { flex-basis: 100%; min-width: 0; } #lantern-editor #lantern-list { flex-basis: 100%; min-width: 0; } #lantern-editor .launch-editor, #lantern-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #lantern-editor .launch-fields { flex-basis: 100%; min-width: 0; } #lantern-editor [hidden] { display: none !important; } #lantern-editor select { min-width: 0; width: 100%; } #lantern-editor .launch-intro { flex-basis: 100%; margin: 0; } #lantern-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #lantern-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #lantern-editor input, #lantern-editor select { max-width: 100%; box-sizing: border-box; } #lantern-editor input[type="text"] { width: 12em; } #lantern-editor label { min-width: 0; max-width: 100%; } #lantern-editor input.parameter-derived::placeholder { opacity: .65; }</style><div id="lantern-editor"></div>
     </div>
   </section>
-  <!-- The parts of the kinds of events of the sky the registry holds (see SkyEventKind, SightingEditorElement.syncSkyEventParts) go here, the beams among them. -->
-  <!-- Fireballs and re-entries (SkyEventsJson.reentries), placed on the Earth rather than round the observer: built the first time it is opened (see ReentryEditor), with the launches' layout. -->
-  <section class="subgroup-panel" id="sky-reentries" aria-labelledby="label-reentries-subgroup" hidden>
-    <div class="toolbar">
-      <style>#reentry-editor { flex-basis: 100%; min-width: 0; } #reentry-editor #reentry-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } #reentry-editor #reentry-path > .icon-btn, #reentry-editor #reentry-curve > .icon-btn { align-self: flex-end; } #reentry-editor #reentry-list, #reentry-editor #reentry-places, #reentry-editor #reentry-fragment-list, #reentry-editor #reentry-curve-list { flex-basis: 100%; min-width: 0; } #reentry-editor .launch-editor, #reentry-editor .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } #reentry-editor .launch-fields { flex-basis: 100%; min-width: 0; } #reentry-editor [hidden] { display: none !important; } #reentry-editor select { min-width: 0; width: 100%; } #reentry-editor .launch-intro { flex-basis: 100%; margin: 0; } #reentry-editor .launch-track { flex-basis: 100%; margin: 0; } #reentry-editor .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } #reentry-editor .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } #reentry-editor input, #reentry-editor select { max-width: 100%; box-sizing: border-box; } #reentry-editor input[type="text"] { width: 12em; } #reentry-editor input[data-key="title"] { width: 18em; } #reentry-editor label { min-width: 0; max-width: 100%; } #reentry-editor input.parameter-derived::placeholder { opacity: .65; } #reentry-editor .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }</style><div id="reentry-editor"></div>
-    </div>
-  </section>
+  <!-- The parts of the kinds of events of the sky the registry holds (see SkyEventKind, SightingEditorElement.syncSkyEventParts) go here, before this mark: launches, beams, fireballs. -->
+  <template id="sky-event-parts"></template>
 </section>
 <!-- Its own group rather than a row of the Shape group below: what the object sounded like is
      keyframed on the very same clock as its shape (a craft silent on the ground and heard only as

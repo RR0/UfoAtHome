@@ -1,4 +1,5 @@
 import { BeamParameters } from "./BeamParameters.js"
+import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { LaserBeamSighting } from "./LaserBeam.js"
 import type { BeamJson, BeamLightKey, BeamMoveKey, BeamPoint } from "./LaserBeam.js"
 import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
@@ -78,13 +79,7 @@ export class BeamEditor {
 
   constructor(private readonly container: HTMLElement, private readonly host: BeamEditorHost, language: string) {
     this.language = language
-    container.classList.add("beam-editor")
-    if (!container.parentElement?.querySelector(":scope > style.beam-editor-style")) {
-      const style = container.ownerDocument.createElement("style")
-      style.className = "beam-editor-style"
-      style.textContent = BeamEditor.STYLE
-      container.before(style)
-    }
+    SkyEventEditorStyle.attach(container, "beam-editor", BeamEditor.STYLE)
     if (!ParameterRegistry.of("beam")) BeamParameters.publish()
     this.render()
     void this.setLanguage(language)

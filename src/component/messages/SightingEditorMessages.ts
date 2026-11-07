@@ -319,12 +319,10 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The Phenomenon group's two parts: the shapes drawn, and the bodies they were (see BodyEditor). */
   shapesSubgroup: string
   bodiesSubgroup: string
-  launchesSubgroup: string
-  /** The group of the events of the sky (see SkyEventsJson), and its part for the beams of light. */
+  /** The group of the events of the sky (see SkyEventsJson). */
   sky: string
   /** The gear of a group whose data comes from somewhere, and the title of what it opens: where each kind of the group's data is read from. */
   dataSources: string
-  reentriesSubgroup: string
   /** The Sky group's part of sky lanterns — see LanternEditor. */
   lanternsSubgroup: string
   /** Summary of the group holding what the sighting sounded like — see SoundTrack.ts. */
