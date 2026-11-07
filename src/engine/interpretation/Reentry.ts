@@ -189,6 +189,11 @@ export interface ReentryFragmentView {
   /** Its apparent visual magnitude from here, before any air or cloud: the absolute magnitude moved
    * to its real distance, and faded in or out at the ends of its life. */
   magnitude: number
+  /** How far it has come into its life or still has to go out of it, 0 at either end and 1 between:
+   * the share of its full look to draw. The magnitude alone is not enough, since a display saturates
+   * everything brighter than the brightest stars: faded in magnitude only, a dazzling piece would
+   * stay at full brightness until a tenth of a second before its end. */
+  fade: number
   color: string
   /** The glowing stretch of path behind it, from the head back, oldest last. */
   train: SkyPoint[]
@@ -384,7 +389,7 @@ export class ReentrySighting {
           train.push(ReentrySighting.seenFrom(observer, past))
           if (back >= t - piece.fromT) break
         }
-        views.push({ reentryId: reentry.id, fragmentId: piece.id, head, magnitude, color: piece.color, train })
+        views.push({ reentryId: reentry.id, fragmentId: piece.id, head, magnitude, fade, color: piece.color, train })
       }
     }
     return views

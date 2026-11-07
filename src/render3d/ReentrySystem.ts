@@ -117,12 +117,14 @@ export class ReentrySystem {
       shown++
       this.drawn.push({ direction: ReentrySystem.directionOf(view.head), view, magnitude })
       tint.set(view.color)
-      const brightness = magnitudeToBrightness(magnitude, magnitudeLimit)
+      // Faded on the screen as well as in magnitude (see ReentryFragmentView.fade): it dims and shrinks over its whole fade.
+      const brightness = magnitudeToBrightness(magnitude, magnitudeLimit) * view.fade
       const { x, y, z } = horizontalToCartesian(view.head.altitudeDeg, view.head.azimuthDeg, ReentrySystem.RADIUS)
       const [r, g, b] = light(view.head, magnitude)
+      const shade = view.fade
       // The hue of its own fire on the light that arrives: a share per channel, the brightest kept.
       const peak = Math.max(tint.r, tint.g, tint.b) || 1
-      byTier[starBrightnessTierIndex(brightness)].push({ x, y, z, r: (r * tint.r) / peak, g: (g * tint.g) / peak, b: (b * tint.b) / peak })
+      byTier[starBrightnessTierIndex(brightness)].push({ x, y, z, r: (r * tint.r * shade) / peak, g: (g * tint.g * shade) / peak, b: (b * tint.b * shade) / peak })
       vertex = this.pushTrain(vertex, view.train, brightness, tint)
     }
     this.shown = shown

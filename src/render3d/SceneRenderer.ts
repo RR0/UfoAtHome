@@ -4224,7 +4224,9 @@ export class SceneRenderer {
     for (const view of views) {
       const key = `reentry:${view.reentryId}:${view.fragmentId}`
       const { x, y, z } = horizontalToCartesian(view.head.altitudeDeg, view.head.azimuthDeg, BODY_PLACEMENT_RADIUS)
-      this.setGlare(key, x, y, z, this.arrivingIlluminance(view.head, view.magnitude, this.cloudTransmission(view.head)), 0, SceneRenderer.POINT_VEIL_HOLD_DEG)
+      // Its dazzle goes out with it (see ReentryFragmentView.fade): the veil of a dazzling piece saturates as its dot does.
+      const [r, g, b] = this.arrivingIlluminance(view.head, view.magnitude, this.cloudTransmission(view.head))
+      this.setGlare(key, x, y, z, [r * view.fade, g * view.fade, b * view.fade], 0, SceneRenderer.POINT_VEIL_HOLD_DEG)
       glared.add(key)
     }
     for (const key of [...this.glareSprites.keys()]) if (key.startsWith("reentry:") && !glared.has(key)) this.disposeGlare(key)
