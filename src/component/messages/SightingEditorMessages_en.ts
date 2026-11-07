@@ -92,6 +92,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   frozenUpperAir: "Air aloft",
   frozenMap: "Map photograph",
   fileItemRecording: "Recording",
+  fileItemModules: "Modules",
   fileItemWeather: "Weather",
   fileItemPlace: "Place",
   fileItemLightPollution: "Light pollution",

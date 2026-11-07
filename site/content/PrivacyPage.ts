@@ -187,12 +187,12 @@ export class PrivacyPage implements SitePage {
 
     <h2>What stays on your device</h2>
     <p>The editor uses your browser's local storage for preferences only: the scenery and radius you
-      chose, the model you picked. They never leave your device and need no consent.</p>
+      chose, the model you picked, and the addresses of the modules you added. They never leave your device and need no consent.</p>
     <p>If you choose to have an AI draft your recording from a description, you are asked for a key (for Claude, or for another model later). It is optional: you can write the file by hand, or fill in the editor,
-      and never meet it. It is kept in your browser only, never on a server (there is none of ours that stores anything),
-      and only if you tick the box offering to remember it; otherwise you enter it each time. Unticking it forgets it at once.
-      Be aware that a page that embeds the editor runs it in its own origin: on somebody else's site, anything else
-      running on that site could read a remembered key. Leave the box unticked there.</p>
+      and never meet it. It is never stored: neither in your browser nor on a server (there is none of ours that stores anything). It is
+      kept in the page's memory until you reload it, then typed again.</p>
+    <p>A module you add is read from the address you gave, and one a recording names from the address the recording gives: that
+      server sees the request (address, page, time), as any site does. A module with code runs only if you added it yourself.</p>
     <p>The site can also keep a copy of its pages on your device so that it works without a network.
       That copy is a cache of this site's own files and holds nothing about you.</p>
 
@@ -267,13 +267,12 @@ export class PrivacyPage implements SitePage {
 
     <h2>Ce qui reste sur votre appareil</h2>
     <p>L'éditeur utilise le stockage local de votre navigateur pour les préférences seulement : le décor
-      et le rayon choisis, le modèle retenu. Elles ne quittent jamais votre appareil et ne demandent aucun consentement.</p>
+      et le rayon choisis, le modèle retenu, et les adresses des modules que vous avez ajoutés. Elles ne quittent jamais votre appareil et ne demandent aucun consentement.</p>
     <p>Si vous choisissez de faire rédiger votre enregistrement par une IA à partir d'une description, une clé vous est demandée (pour Claude, ou pour un autre modèle plus tard). C'est facultatif : vous pouvez écrire le fichier
-      à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle reste dans votre navigateur uniquement, jamais sur un serveur
-      (nous n'en avons aucun qui conserve quoi que ce soit), et seulement si vous cochez la case qui propose de la mémoriser ;
-      sinon vous la saisissez à chaque fois. La décocher l'oublie aussitôt. Sachez qu'une page qui intègre l'éditeur l'exécute dans sa
-      propre origine : sur le site de quelqu'un d'autre, tout ce qui s'exécute sur ce site pourrait lire une clé mémorisée.
-      Laissez la case décochée dans ce cas.</p>
+      à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle n'est jamais conservée : ni dans votre navigateur, ni sur un serveur
+      (nous n'en avons aucun qui conserve quoi que ce soit). Elle reste en mémoire dans la page jusqu'à ce que vous la rechargiez, puis se saisit à nouveau.</p>
+    <p>Un module que vous ajoutez est lu à l'adresse que vous avez donnée, et un module qu'un enregistrement nomme à l'adresse que l'enregistrement
+      donne : ce serveur voit la requête (adresse, page, heure), comme tout site. Un module qui contient du code ne s'exécute que si vous l'avez ajouté vous-même.</p>
     <p>Le site peut aussi garder une copie de ses pages sur votre appareil pour fonctionner sans réseau.
       Cette copie est un cache des fichiers du site et ne contient rien sur vous.</p>
 
@@ -350,12 +349,12 @@ export class PrivacyPage implements SitePage {
 
     <h2>Lo que queda en tu dispositivo</h2>
     <p>El editor usa el almacenamiento local de tu navegador solo para preferencias: el entorno y el radio
-      elegidos, el modelo escogido. Nunca salen de tu dispositivo y no requieren consentimiento.</p>
+      elegidos, el modelo escogido, y las direcciones de los módulos que añadiste. Nunca salen de tu dispositivo y no requieren consentimiento.</p>
     <p>Si decides que una IA redacte tu grabación a partir de una descripción, se te pide una clave (para Claude, o para otro modelo más adelante). Es opcional: puedes escribir el archivo a mano, o rellenar el editor,
-      sin encontrarla nunca. Se guarda únicamente en tu navegador, nunca en un servidor (no tenemos ninguno que conserve nada),
-      y solo si marcas la casilla que ofrece recordarla; si no, la introduces cada vez. Desmarcarla la olvida al instante.
-      Ten en cuenta que una página que incorpora el editor lo ejecuta en su propio origen: en el sitio de otra persona,
-      cualquier cosa que se ejecute en ese sitio podría leer una clave recordada. Deja la casilla desmarcada en ese caso.</p>
+      sin encontrarla nunca. Nunca se guarda: ni en tu navegador ni en un servidor (no tenemos ninguno que conserve nada). Se mantiene en
+      la memoria de la página hasta que la recargas, y luego se vuelve a escribir.</p>
+    <p>Un módulo que añades se lee en la dirección que diste, y uno que cita una grabación en la dirección que da la grabación: ese
+      servidor ve la petición (dirección, página, hora), como cualquier sitio. Un módulo con código solo se ejecuta si lo añadiste tú.</p>
     <p>El sitio también puede guardar una copia de sus páginas en tu dispositivo para funcionar sin red.
       Esa copia es una caché de los archivos del propio sitio y no contiene nada sobre ti.</p>
 
@@ -430,12 +429,12 @@ export class PrivacyPage implements SitePage {
 
     <h2>Che cosa resta sul tuo dispositivo</h2>
     <p>L'editor usa l'archiviazione locale del tuo browser solo per le preferenze: l'ambiente e il raggio
-      scelti, il modello selezionato. Non lasciano mai il tuo dispositivo e non richiedono consenso.</p>
+      scelti, il modello selezionato, e gli indirizzi dei moduli che hai aggiunto. Non lasciano mai il tuo dispositivo e non richiedono consenso.</p>
     <p>Se scegli di far redigere la tua registrazione a un'IA a partire da una descrizione, ti viene chiesta una chiave (per Claude, o per un altro modello in futuro). È facoltativa: puoi scrivere il file a mano, o compilare
-      l'editor, senza incontrarla mai. Resta solo nel tuo browser, mai su un server (non ne abbiamo nessuno che conservi qualcosa),
-      e solo se spunti la casella che propone di ricordarla; altrimenti la inserisci ogni volta. Deselezionarla la fa dimenticare subito.
-      Tieni presente che una pagina che incorpora l'editor lo esegue nella propria origine: sul sito di qualcun altro, tutto ciò che
-      vi gira potrebbe leggere una chiave ricordata. In quel caso lascia la casella deselezionata.</p>
+      l'editor, senza incontrarla mai. Non viene mai conservata: né nel tuo browser né su un server (non ne abbiamo nessuno che conservi qualcosa).
+      Resta nella memoria della pagina finché non la ricarichi, poi va inserita di nuovo.</p>
+    <p>Un modulo che aggiungi viene letto all'indirizzo che hai dato, e uno che una registrazione cita all'indirizzo che la registrazione
+      dà: quel server vede la richiesta (indirizzo, pagina, ora), come qualsiasi sito. Un modulo con codice viene eseguito solo se l'hai aggiunto tu.</p>
     <p>Il sito può anche conservare una copia delle sue pagine sul tuo dispositivo per funzionare senza rete.
       Quella copia è una cache dei file del sito stesso e non contiene nulla su di te.</p>
 

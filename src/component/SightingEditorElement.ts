@@ -174,6 +174,8 @@ import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../modules/providers/terrain/terrainSources.js"
 import { DECOR_MODEL_SOURCES } from "../modules/models/decorModelSources.js"
+import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
+import { ModuleRegistry } from "../modules/ModuleRegistry.js"
 import { ModelPicker } from "./ModelPicker.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorTraits } from "../engine/model/DecorTraits.js"
@@ -861,7 +863,7 @@ export class SightingEditorElement extends HTMLElement {
    * aircraft. */
   /** Which catalogue the 3D-model picker offers, and which the scene resolves a named model
    * through — chosen in Data sources like every other real-world source (see refreshSourceRows). */
-  private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
+  private decorModelProvider: DecorModelProvider = new ModelCatalogues()
   private readonly milestoneSelect: HTMLSelectElement
   private readonly milestoneLabelInput: HTMLInputElement
   private readonly milestoneNoteInput: HTMLInputElement
@@ -2281,8 +2283,28 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.addEventListener("change", this.touch, true)
     this.shadow.addEventListener("keydown", this.touchByKey as EventListener, true)
     window.addEventListener("beforeunload", this.warnBeforeLeaving)
+    ModuleRegistry.changes.addEventListener("change", this.onModulesChanged)
+    // The modules the person added (see ModuleSession), loaded with the editor and not waited for: their sources join the pickers as
+    // they come.
+    void import("../modules/ModuleSession.js").then(({ ModuleSession }) => ModuleSession.shared.start(), () => undefined)
     const src = this.getAttribute("src")
     if (src) void this.importFromUrl(src)
+  }
+
+  /**
+   * What fills each picker built by sourcePicker again. Called from the editor's one listener of the registry, which it holds only while it
+   * is connected: a listener per picker on the registry, which outlives every editor, kept each editor ever built.
+   */
+  private readonly relisters: (() => void)[] = []
+
+  /** The pickers, filled again when a module changes the list they offer (see ModuleRegistry). */
+  private readonly onModulesChanged = (event: Event): void => {
+    for (const relist of this.relisters) relist()
+    const point = (event as CustomEvent<string>).detail
+    if (point === "weather") this.fillWeatherProvider()
+    if (point === "surroundings" && this.surveyIds) void this.fillScenerySources()
+    // A catalogue that came or went changes what the model ids of the recording are drawn with.
+    if (point === "decorModels") this.sceneElement.setDecorModelProvider(this.decorModelProvider)
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -2293,6 +2315,7 @@ export class SightingEditorElement extends HTMLElement {
 
   disconnectedCallback(): void {
     window.removeEventListener("beforeunload", this.warnBeforeLeaving)
+    ModuleRegistry.changes.removeEventListener("change", this.onModulesChanged)
     this.shadow.removeEventListener("pointerdown", this.armHistory, true)
     this.shadow.removeEventListener("keydown", this.armHistory as EventListener, true)
     for (const type of ["input", "change", "click", "keyup", "pointerup"]) this.shadow.removeEventListener(type, this.scheduleHistoryRecord, true)
@@ -2336,11 +2359,13 @@ export class SightingEditorElement extends HTMLElement {
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
     // keep writing into the newly-loaded one
     this.ufoElement.sightingData = json
+    this.sceneElement.requireModules(json.modules)
     // The scene takes the shape of the picture the recording was made in, as the shapes' own canvas just did: through the player alone it never heard
     // of the format, and a Roamer's frame was drawn over a sixteen-by-nine sky, every handle and every pick standing off by the difference.
     this.sceneElement.applyFrameFormat()
     this.cloudEditor.reset()
     this.bodyEditor?.sync()
+    this.syncModulesPanel()
     this.syncBodiesShown()
     if (this.isGroupIdOpen("group-shape")) this.showPhenomenonPartWithContent()
     this.eventsPanel.render()
@@ -2755,7 +2780,8 @@ export class SightingEditorElement extends HTMLElement {
     select.replaceChildren(
       new Option(this.messages.fileItemRecording, "recording"),
       ...RecordingSections.NAMES.map(name => new Option(this.sectionFilePanel.itemLabel(name), name)),
-      ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)))
+      ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)),
+      new Option(this.messages.fileItemModules, SightingEditorElement.MODULES_ITEM))
     select.value = picked
     this.showFileItem(select.value)
   }
@@ -2767,11 +2793,14 @@ export class SightingEditorElement extends HTMLElement {
   private showFileItem(item: string): void {
     const annex = (FrozenGroups.NAMES as readonly string[]).includes(item)
     const part = (RecordingSections.NAMES as readonly string[]).includes(item) ? item as RecordingSectionName : undefined
-    this.shadow.getElementById("file-recording")!.hidden = annex || part !== undefined
+    const modules = item === SightingEditorElement.MODULES_ITEM
+    this.shadow.getElementById("file-recording")!.hidden = annex || part !== undefined || modules
     this.shadow.getElementById("frozen-data")!.hidden = !annex
     this.shadow.getElementById("file-section")!.hidden = part === undefined
+    this.shadow.getElementById("file-modules")!.hidden = !modules
+    if (modules) void this.loadModulesPanel()
     // The item's frame unrolls from the picker of the files, as every list's does (see ElementList.glue).
-    for (const id of ["file-recording", "frozen-data", "file-section"]) {
+    for (const id of ["file-recording", "frozen-data", "file-section", "file-modules"]) {
       const frame = this.shadow.getElementById(id)!
       if (!frame.hidden) ElementList.glue(frame)
     }
@@ -2780,13 +2809,42 @@ export class SightingEditorElement extends HTMLElement {
     const section: JsonPath | undefined = annex && this.frozenPanel.isInlineGroup(item as FrozenGroupName) ? ["frozen", item, "src"]
       : part && this.sectionFilePanel.isInline(part) ? SectionFilePanel.pathOf(part)
       : undefined
-    this.fileEditorHost.hidden = (annex || part !== undefined) && section === undefined
+    this.fileEditorHost.hidden = (annex || part !== undefined || modules) && section === undefined
     if (section && this.isGroupIdOpen("group-file")) {
       void this.loadFileEditor().then(editor => {
         this.syncFileEditor(false)
         editor.reveal(section)
       }, () => undefined)
     }
+  }
+
+  /** The Files group's item that lists the modules (see ModulesPanelElement). */
+  private static readonly MODULES_ITEM = "modules"
+  private modulesPanel?: import("./ModulesPanelElement.js").ModulesPanelElement
+  private modulesPanelLoading?: Promise<void>
+
+  /** The Modules item, built the first time it is shown: a chunk of its own. */
+  private loadModulesPanel(): Promise<void> {
+    this.modulesPanelLoading ??= import("./ModulesPanelElement.js").then(({ register, ModulesPanelElement }) => {
+      register()
+      const panel = this.shadow.getElementById("modules-panel") as InstanceType<typeof ModulesPanelElement>
+      this.modulesPanel = panel
+      panel.addEventListener("recordingmoduleschange", () => {
+        const named = panel.recordingModules
+        this.ufoElement.sighting.modules = named.length > 0 ? named : undefined
+        this.syncFileEditor(false)
+      })
+      void panel.setLanguage(this.language)
+      this.syncModulesPanel()
+    })
+    return this.modulesPanelLoading
+  }
+
+  /** The Modules item, said again from the recording on show. */
+  private syncModulesPanel(): void {
+    if (!this.modulesPanel) return
+    this.modulesPanel.base = this.sceneElement.documentUrl
+    this.modulesPanel.recordingModules = this.ufoElement.sighting.modules
   }
 
   /** Whether a part of the recording is read from its file rather than asked of its source (see RecordingSections.fromFile). */
@@ -3399,6 +3457,8 @@ export class SightingEditorElement extends HTMLElement {
    * held in chosenSourceId rather than read back off pickers this is about to replace.
    */
   private refreshSourceRows(): void {
+    // The pickers are built again below: those of the last build are gone.
+    this.relisters.length = 0
     // Who answered is said in the sentence reporting the answer; the source itself is picked with the other data of the place, below.
     this.placeSourceRow.replaceChildren(document.createTextNode(`${this.messages.according} `),
       SightingEditorElement.creditLink(dataSourceById(PLACE_SOURCES, this.chosenSourceId.get("place"))))
@@ -3453,16 +3513,22 @@ export class SightingEditorElement extends HTMLElement {
     const fragment = document.createDocumentFragment()
     const select = document.createElement("select")
     select.id = `${kind}Source`
-    for (const source of sources) {
-      const option = document.createElement("option")
-      option.value = source.id
-      option.textContent = source.name
-      option.title = source.credit
-      select.appendChild(option)
+    const fillOptions = (): void => {
+      select.replaceChildren(...sources.map(source => {
+        const option = document.createElement("option")
+        option.value = source.id
+        option.textContent = source.name
+        option.title = source.credit
+        return option
+      }))
+      // Data the recording can carry frozen is also read from its file: the annex of the Files group, taken at save when it is not yet.
+      if (file) select.appendChild(new Option(this.messages.sourceFile, SightingEditorElement.FILE_SOURCE))
     }
-    // Data the recording can carry frozen is also read from its file: the annex of the Files group, taken at save when it is not yet.
-    if (file) select.appendChild(new Option(this.messages.sourceFile, SightingEditorElement.FILE_SOURCE))
-    const liveId = (): string => this.chosenSourceId.get(kind) ?? sources[0].id
+    fillOptions()
+    const liveId = (): string => {
+      const chosen = this.chosenSourceId.get(kind)
+      return chosen !== undefined && sources.some(source => source.id === chosen) ? chosen : sources[0].id
+    }
     select.value = file?.fromFile() ? SightingEditorElement.FILE_SOURCE : liveId()
     const credit = document.createElement("a")
     credit.className = "source-credit"
@@ -3499,6 +3565,18 @@ export class SightingEditorElement extends HTMLElement {
       select.value = file.fromFile() ? SightingEditorElement.FILE_SOURCE : liveId()
       showCredit()
     })
+    // A module installed or removed changes the list in place (see ModuleRegistry): the options follow it, and a source that went away
+    // gives way to the default, which is then applied.
+    const relist = (): void => {
+      const before = select.value
+      const lost = this.chosenSourceId.has(kind) && !sources.some(source => source.id === this.chosenSourceId.get(kind))
+      if (lost) this.chosenSourceId.delete(kind)
+      fillOptions()
+      select.value = before === SightingEditorElement.FILE_SOURCE && file ? before : liveId()
+      showCredit()
+      if (lost && select.value !== SightingEditorElement.FILE_SOURCE) apply(dataSourceById(sources, select.value))
+    }
+    this.relisters.push(relist)
     fragment.append(select, document.createTextNode(" "), credit, shown)
     return fragment
   }
@@ -3644,7 +3722,7 @@ export class SightingEditorElement extends HTMLElement {
    * are replaced, and what is on screen is rebuilt from the new one (see
    * SceneRenderer.setDecorModelProvider). */
   private applyDecorModelSource(): void {
-    this.decorModelProvider = dataSourceById(DECOR_MODEL_SOURCES, this.chosenSourceId.get("decor-model")).create()
+    this.decorModelProvider = new ModelCatalogues(dataSourceById(DECOR_MODEL_SOURCES, this.chosenSourceId.get("decor-model")).id)
     this.sceneElement.setDecorModelProvider(this.decorModelProvider)
     // What the previous source offered is not what this one does.
     this.decorModelEntries = undefined
@@ -11371,6 +11449,7 @@ export class SightingEditorElement extends HTMLElement {
     void this.beamEditor?.setLanguage(this.language)
     void this.reentryEditor?.setLanguage(this.language)
     void this.lanternEditor?.setLanguage(this.language)
+    void this.modulesPanel?.setLanguage(this.language)
     this.labelTemporalGroup.textContent = messages.temporalGroup
     this.labelFileGroup.textContent = messages.fileGroup
     this.labelLocationGroup.textContent = messages.locationGroup

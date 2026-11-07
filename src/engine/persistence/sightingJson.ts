@@ -163,6 +163,12 @@ export interface SightingRecordingJson {
   /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see FrozenData. Absent means all of it is
    * asked for live. */
   frozen?: FrozenData
+  /**
+   * The modules it needs to be drawn as it was made, by the address of each one's manifest (`ufoathome-module.json`), relative to this
+   * file or absolute: a catalogue a model it names comes from. A reader loads what each manifest states; never its script, unless the
+   * person reading added that module themself. Absent means it needs none.
+   */
+  modules?: string[]
 }
 
 /** A recording in version 1 of the format: its time as the fields of a date, its place as a list of named locations (see SightingMigration). */
@@ -251,7 +257,8 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     interpretation: expanded ? SightingPositions.restatedInterpretation(sighting) : RecordingEvents.writtenInterpretation(sighting, SightingPositions.restatedInterpretation(sighting)),
     variants: sighting.variants.length > 0 ? sighting.variants : undefined,
     skyEvents: SkyEvents.written(sighting.skyEvents),
-    frozen: sighting.frozen
+    frozen: sighting.frozen,
+    modules: sighting.modules?.length ? sighting.modules : undefined
   }
 }
 
@@ -344,6 +351,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.variants = Array.isArray(json.variants) ? json.variants : []
   sighting.skyEvents = stated.skyEvents
   sighting.frozen = json.frozen
+  sighting.modules = Array.isArray(json.modules) ? json.modules.filter((url): url is string => typeof url === "string") : undefined
   sighting.loadIssues = issues
   // Before the shapes are placed: they follow the observer's poses, which the events may be what gives.
   RecordingEvents.expand(sighting)

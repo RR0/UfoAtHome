@@ -15,6 +15,7 @@ import { DocsPage } from "./content/DocsPage.js"
 import { DocsCreatePage } from "./content/DocsCreatePage.js"
 import { DocsFormatPage } from "./content/DocsFormatPage.js"
 import { DocsSharePage } from "./content/DocsSharePage.js"
+import { DocsModulesPage } from "./content/DocsModulesPage.js"
 import { DocsInterviewPage } from "./content/DocsInterviewPage.js"
 import { DocsCasePage } from "./content/DocsCasePage.js"
 import { DocsCreateEventPage } from "./content/DocsCreateEventPage.js"
@@ -99,7 +100,7 @@ class SiteBuilder {
       new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
-      new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsInterviewPage(), new DocsSharePage(),
+      new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsInterviewPage(), new DocsSharePage(), new DocsModulesPage(),
       new FaqPage(),
       new PrivacyPage(),
       // Written as HTML, with its sub-pages as sub-directories — see HtmlPage and HtmlPageTree.

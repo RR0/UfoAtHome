@@ -442,6 +442,10 @@ export const html = `
     <p id="section-annex-state" class="frozen-group-state"></p>
     <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
   </div>
+  <!-- The modules of the page and those the recording names (see ModulesPanelElement): built the first time it is shown. -->
+  <div class="element-list-body" id="file-modules" hidden>
+    <rr0-modules-panel id="modules-panel"></rr0-modules-panel>
+  </div>
   <!-- The recording as text: the recording's own item, and an item kept inside it, its section shown (see showFileItem). -->
   <div id="file-editor" class="file-editor"></div>
 </section>

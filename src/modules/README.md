@@ -47,3 +47,18 @@ ModuleRegistry.install({
 
 Its entries come after the built-in ones at every point. An id another module already gives at the same point is refused,
 for the whole module. `ModuleRegistry.changes` fires `change` with the point's id whenever a point's list changes.
+
+## Modules loaded from an address
+
+A module published elsewhere is a manifest, `ufoathome-module.json` (see `ModuleManifest.ts`): tiles of imagery
+(`contributes.imagery`) or relief (`contributes.elevation`, Terrarium PNG), models (`contributes.models`, entries of the same
+shape as `public/models/index.json`) and, for what needs code, a `script` whose default export returns more contributions.
+
+- `ModuleLoader` fetches and checks a manifest, and imports its script only when asked to.
+- `ModuleSession.shared` is the page's set of modules: those the person added (kept by `ModuleConfig` in localStorage,
+  exported and imported as a file) and those a recording names (`SightingRecordingJson.modules`). A script runs only for a
+  module the person added and has on, never for one a recording names.
+- `models/ModelCatalogues` resolves a model id in every catalogue, the one browsed first: a recording's models are drawn
+  whichever module's catalogue they come from.
+- In the editor: the **Modules** item of the Files group (`component/ModulesPanelElement.ts`). On the site:
+  `/docs/modules/` (`site/content/DocsModulesPage.ts`).

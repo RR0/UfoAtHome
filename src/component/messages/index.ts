@@ -12,6 +12,7 @@ import type { LanternEditorMessages } from "./LanternEditorMessages.js"
 import type { CaseEditorMessages } from "./CaseEditorMessages.js"
 import type { InterviewMessages } from "./InterviewMessages.js"
 import type { ShareMessages } from "./ShareMessages.js"
+import type { ModulesPanelMessages } from "./ModulesPanelMessages.js"
 
 export const UFO_SUPPORTED_LANGUAGES = ["en", "fr", "es", "it"] as const
 export type UfoLanguage = (typeof UFO_SUPPORTED_LANGUAGES)[number]
@@ -180,4 +181,15 @@ export function loadCloudEditorMessages(language: UfoLanguage): Promise<CloudEdi
     case "it": return import("./CloudEditorMessages_it.js").then(m => m.cloudEditorMessages_it)
     default: return Promise.resolve(undefined)
   }
+}
+
+const modulesPanelLoaders: Record<UfoLanguage, () => Promise<ModulesPanelMessages>> = {
+  en: () => import("./ModulesPanelMessages_en.js").then(m => m.modulesPanelMessages_en),
+  fr: () => import("./ModulesPanelMessages_fr.js").then(m => m.modulesPanelMessages_fr),
+  es: () => import("./ModulesPanelMessages_es.js").then(m => m.modulesPanelMessages_es),
+  it: () => import("./ModulesPanelMessages_it.js").then(m => m.modulesPanelMessages_it)
+}
+
+export function loadModulesPanelMessages(language: UfoLanguage): Promise<ModulesPanelMessages> {
+  return modulesPanelLoaders[language]()
 }

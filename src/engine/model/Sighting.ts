@@ -481,6 +481,10 @@ export class Sighting {
    */
   frozen?: FrozenData
 
+  /** The modules it needs to be drawn as it was made (a catalogue its models come from), by the address of each one's manifest: see
+   * SightingRecordingJson.modules. */
+  modules?: string[]
+
   /**
    * How much the observer's body moves the view when they are not walking — see Stance. 1 is a
    * person standing or sitting, 0 an instrument on a tripod or anything else that does not move at

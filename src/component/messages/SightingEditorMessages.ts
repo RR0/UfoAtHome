@@ -181,6 +181,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   frozenMap: string
   /** The recording itself, first in the Files group's picker. */
   fileItemRecording: string
+  /** The Files group's item that lists the modules (see ModulesPanelElement). */
+  fileItemModules: string
   /** The recording's weather, in the Files group's picker. */
   fileItemWeather: string
   /** The recording's place, in the Files group's picker and the Location group's one of data. */

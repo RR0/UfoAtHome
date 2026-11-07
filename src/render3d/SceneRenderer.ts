@@ -147,7 +147,7 @@ import type { DecorObject, StreetLampSpec } from "../engine/model/Decor.js"
 import { resolveDecorGazeAt, resolveDecorHeadlightsAt, resolveDecorLitAt, resolveDecorPlacementAt, canHoldObserver, decorModelOf, DEFAULT_DECOR_MODEL } from "../engine/model/Decor.js"
 import type { DecorModelCredit, DecorModelRef } from "../engine/model/Decor.js"
 import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProvider.js"
-import { DECOR_MODEL_SOURCES } from "../modules/models/decorModelSources.js"
+import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
 import { BodySystem, BODY_OVER_LAYER } from "./BodySystem.js"
 import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
@@ -1051,7 +1051,7 @@ export class SceneRenderer {
   /** Which catalogue resolves a recording's named 3D models — swappable exactly like the terrain's
    * own providers (see setDecorModelProvider), and built from the registry's first entry by
    * default so nothing has to configure it. */
-  private decorModelProvider: DecorModelProvider = DECOR_MODEL_SOURCES[0].create()
+  private decorModelProvider: DecorModelProvider = new ModelCatalogues()
   /** Bumped on every setDecor, so a model still being fetched for a decor list that has since been
    * replaced is dropped instead of being applied to a group that no longer exists. */
   private decorModelToken = 0
@@ -2766,6 +2766,14 @@ export class SceneRenderer {
   }
 
   /** (see entryOfDecorModel) */
+  /**
+   * Keeps the first frame of a recording held until `arrival` settles too: what it needs before it can be drawn whole that is not the
+   * scene's own to fetch (the modules it names, see ModuleSession).
+   */
+  holdUntil(arrival: Promise<unknown>): void {
+    void this.awaitArrival(arrival).catch(() => undefined)
+  }
+
   setDecorModelProvider(provider: DecorModelProvider): void {
     this.decorModelProvider = provider
     const decor = this.decorObjects

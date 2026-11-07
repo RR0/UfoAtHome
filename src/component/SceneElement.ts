@@ -100,6 +100,7 @@ import { LaunchPlumeSighting } from "../engine/interpretation/LaunchPlume.js"
 import { ReentrySighting } from "../engine/interpretation/Reentry.js"
 import type { GeoPoint, ReentryDetonation, ReentryJson } from "../engine/interpretation/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
+import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
@@ -1678,6 +1679,7 @@ export class SceneElement extends HTMLElement {
     // A file of an older version of the format is read as the current one (see SightingMigration).
     const json = SightingMigration.toCurrent(readable)
     this.ufoElement.sightingData = json
+    this.requireModules(json.modules)
     this.upperAirHeardLive = undefined
     this.seekPreview?.recordingChanged(json)
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
@@ -1694,6 +1696,20 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.compileNextFrameOffThread()
     // Also resolves+applies weather at t=0 — see updateAstronomy's own doc comment.
     this.updateAstronomy(0)
+  }
+
+  /**
+   * Loads the modules a recording names (see SightingRecordingJson.modules), the frame held meanwhile, then resolves its models again:
+   * a model id a module's catalogue gives was drawn as its primitive until the catalogue was there. A chunk of its own, loaded only for
+   * a recording that names one. The editor, which gives the recording to the player itself, calls it too.
+   */
+  requireModules(modules: readonly string[] | undefined): void {
+    if (!modules?.length) return
+    const base = this.documentUrl
+    const ready = import("../modules/ModuleSession.js")
+      .then(({ ModuleSession }) => ModuleSession.shared.require(modules, base))
+      .then(() => this.sceneRenderer.setDecorModelProvider(new ModelCatalogues()))
+    this.sceneRenderer.holdUntil(ready)
   }
 
   /** The picture over the seek bar's pointer, drawn by a second scene — see SeekPreview. Built the
