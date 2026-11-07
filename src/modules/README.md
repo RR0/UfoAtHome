@@ -71,7 +71,7 @@ shape as `public/models/index.json`) and, for what needs code, a `script` whose 
 
 A kind of event of the sky (`sky-events/SkyEventKind.ts`) is what a recording states under `skyEvents.<key>`: its code to draw
 (`simulation`, a `SkyEventSimulation` the scene gives the events and the instant at every tick, never drawing itself), to edit
-(`editor`, a part of the editor's Sky group made from the kind's `title`), how far it reaches (`reachM`, for the ground and the
+(`editor`, a part of the editor's Sky group named by the title of its `messages`), how far it reaches (`reachM`, for the ground and the
 depth of the scene) and what the tooltip says (`describe`). The scene (`SceneRenderer.setSkyEvents`), the editor
 (`SightingEditorElement.syncSkyEventParts`) and the terrain freezer read the list in `sky-events/skyEventSources.ts`, and follow a
 module that adds a kind.
@@ -86,7 +86,7 @@ observer really stands, the real instant, the magnitude limit, what the clouds a
 A kind of interpretation (`interpretations/InterpretationKind.ts`) is a reading of an account stated as a few parameters under
 `interpretation.<key>` (in a recording, or in a case's interpretation) and computed into bodies when shown (`bodiesOf`, synchronous):
 the sky lanterns (`interpretations/lanterns/`) and the decoy flares (`interpretations/flares/`). Not a fact of the sky: what somebody
-claims the account saw. Its editor, when it has one, is a part of the Sky group made from its `title`, before the events of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
+claims the account saw. Its editor, when it has one, is a part of the Sky group named by the title of its `messages`, before the events of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
 of its own would be a second three.js. The list is explicit, since the whole namespace would keep all of three.js in every
 bundle (+120 kB measured); a class a module needs is a line to add there.
 
@@ -96,5 +96,6 @@ Whatever an implementation shows a reader takes its words from a `MessageCatalog
 language under a `messages/` folder, loaded only in the reader's, its interface checked by `satisfies` in each language. A kind's
 `messages` holds its title, what one with no title is called and its tooltip's texts; an `ObserverProvider`'s, its heading, hint and
 settings; a set of parameters states keys of a catalog where it would state a label (`ParameterTexts.resolve` puts the words in);
-an editor's part loads its own and draws nothing before (`ready`). No word is written inline, in English or in several languages:
+an editor's part loads its own and draws nothing before (`ready`). A data source's `name` and `credit` are not words of the
+interface: they are what it says of itself, kept as written (see `DataSource`). No word is written inline, in English or in several languages:
 `test/i18n/MessagesGuard.test.ts` fails on one, and on an English module imported up front.
