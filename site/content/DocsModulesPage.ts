@@ -148,7 +148,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       editorHeading: "Adding one in the editor",
       editor: "In the <strong>Files</strong> group, the <strong>Modules</strong> item: type the manifest's address and press <strong>Add</strong>. Your modules are kept in this browser, can be turned off or removed, and saved to a file (<strong>Save my modules</strong>) that loads them elsewhere (<strong>Load modules</strong>).",
       recordingHeading: "A recording that needs one",
-      recording: "A recording that draws a model of a module names it, so that whoever opens it sees the same thing: tick <strong>Named by this recording</strong>, which writes its address in the file. A reader who did not add the module gets what its manifest states, without its script.",
+      recording: "A recording that draws a model of a module names it, so that whoever opens it sees the same thing: the editor writes its address in the file as soon as one of its models is used, relative to the recording when both are on the same site, and <strong>Named by this recording</strong> unticks it. A reader who did not add the module gets what its manifest states, without its script.",
       prHeading: "Into UFO@home itself",
       pr: "An implementation can also join UFO@home: each kind has its folder under <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, whose README says what to write and where to list it. A pull request is welcome."
     },
@@ -174,7 +174,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       editorHeading: "En ajouter un dans l'éditeur",
       editor: "Dans le groupe <strong>Fichiers</strong>, l'élément <strong>Modules</strong> : saisissez l'adresse du manifeste et appuyez sur <strong>Ajouter</strong>. Vos modules sont gardés dans ce navigateur, peuvent être désactivés ou retirés, et enregistrés dans un fichier (<strong>Enregistrer mes modules</strong>) qui les charge ailleurs (<strong>Charger des modules</strong>).",
       recordingHeading: "Un enregistrement qui en a besoin",
-      recording: "Un enregistrement qui dessine un modèle d'un module le nomme, pour que qui l'ouvre voie la même chose : cochez <strong>Nommé par cet enregistrement</strong>, qui écrit son adresse dans le fichier. Un lecteur qui n'a pas ajouté le module en reçoit ce que son manifeste énonce, sans son script.",
+      recording: "Un enregistrement qui dessine un modèle d'un module le nomme, pour que qui l'ouvre voie la même chose : l'éditeur écrit son adresse dans le fichier dès qu'un de ses modèles est utilisé, relative à l'enregistrement quand les deux sont sur le même site, et <strong>Nommé par cet enregistrement</strong> le décoche. Un lecteur qui n'a pas ajouté le module en reçoit ce que son manifeste énonce, sans son script.",
       prHeading: "Dans UFO@home lui-même",
       pr: "Une implémentation peut aussi rejoindre UFO@home : chaque sorte a son dossier sous <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, dont le README dit quoi écrire et où l'inscrire. Une pull request est la bienvenue."
     },
@@ -200,7 +200,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       editorHeading: "Añadir uno en el editor",
       editor: "En el grupo <strong>Archivos</strong>, el elemento <strong>Módulos</strong>: escriba la dirección del manifiesto y pulse <strong>Añadir</strong>. Sus módulos se guardan en este navegador, pueden desactivarse o quitarse, y guardarse en un archivo (<strong>Guardar mis módulos</strong>) que los carga en otro lugar (<strong>Cargar módulos</strong>).",
       recordingHeading: "Una grabación que lo necesita",
-      recording: "Una grabación que dibuja un modelo de un módulo lo cita, para que quien la abra vea lo mismo: marque <strong>Citado por esta grabación</strong>, que escribe su dirección en el archivo. Un lector que no añadió el módulo recibe lo que su manifiesto declara, sin su script.",
+      recording: "Una grabación que dibuja un modelo de un módulo lo cita, para que quien la abra vea lo mismo: el editor escribe su dirección en el archivo en cuanto se usa uno de sus modelos, relativa a la grabación cuando ambos están en el mismo sitio, y <strong>Citado por esta grabación</strong> la desmarca. Un lector que no añadió el módulo recibe lo que su manifiesto declara, sin su script.",
       prHeading: "En el propio UFO@home",
       pr: "Una implementación también puede unirse a UFO@home: cada tipo tiene su carpeta en <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, cuyo README dice qué escribir y dónde registrarlo. Una pull request es bienvenida."
     },
@@ -226,7 +226,7 @@ ${t.fields.map(field => `      <li>${field}</li>`).join("\n")}
       editorHeading: "Aggiungerne uno nell'editor",
       editor: "Nel gruppo <strong>File</strong>, la voce <strong>Moduli</strong>: scrivi l'indirizzo del manifesto e premi <strong>Aggiungi</strong>. I tuoi moduli sono conservati in questo browser, possono essere disattivati o rimossi, e salvati in un file (<strong>Salva i miei moduli</strong>) che li carica altrove (<strong>Carica moduli</strong>).",
       recordingHeading: "Una registrazione che ne ha bisogno",
-      recording: "Una registrazione che disegna un modello di un modulo lo cita, perché chi la apre veda la stessa cosa: spunta <strong>Citato da questa registrazione</strong>, che scrive il suo indirizzo nel file. Un lettore che non ha aggiunto il modulo riceve ciò che il suo manifesto dichiara, senza il suo script.",
+      recording: "Una registrazione che disegna un modello di un modulo lo cita, perché chi la apre veda la stessa cosa: l'editor scrive il suo indirizzo nel file appena uno dei suoi modelli viene usato, relativo alla registrazione quando entrambi sono sullo stesso sito, e <strong>Citato da questa registrazione</strong> lo toglie. Un lettore che non ha aggiunto il modulo riceve ciò che il suo manifesto dichiara, senza il suo script.",
       prHeading: "In UFO@home stesso",
       pr: "Un'implementazione può anche entrare in UFO@home: ogni tipo ha la sua cartella in <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\">src/modules</a>, il cui README dice cosa scrivere e dove registrarlo. Una pull request è benvenuta."
     }

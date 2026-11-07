@@ -62,7 +62,8 @@ shape as `public/models/index.json`) and, for what needs code, a `script` whose 
   exported and imported as a file) and those a recording names (`SightingRecordingJson.modules`). A script runs only for a
   module the person added and has on, never for one a recording names.
 - `models/ModelCatalogues` resolves a model id in every catalogue, the one browsed first: a recording's models are drawn
-  whichever module's catalogue they come from.
+  whichever module's catalogue they come from. After an edit, the editor makes the recording name the module a model it uses
+  comes from (`SightingEditorElement.nameModulesOfModels`, addresses written by `ModuleAddress`), never on mere opening.
 - In the editor: the **Modules** item of the Files group (`component/ModulesPanelElement.ts`). On the site:
   `/docs/modules/` (`site/content/DocsModulesPage.ts`).
 

@@ -242,6 +242,26 @@ afterEach(() => {
   synced.length = 0
 })
 
+describe("a model of a module's catalogue", () => {
+  it("makes the recording name its module once an edit has used it, and not when the recording is only opened", async () => {
+    const url = "https://acme.example/ufoathome-module.json"
+    const catalogue = { attribution: "", entries: async () => [], entry: async (id: string) => id === "acme-saucer" ? { id, kind: "entity", name: "Saucer", url: "https://acme.example/s.glb", credit: { title: "S", license: "CC0" } } as never : undefined }
+    ModuleRegistry.install({ id: "acme", name: "ACME", url, contributes: { decorModels: [{ id: "acme-models", name: "ACME", credit: "©", creditUrl: url, create: () => catalogue }] } })
+    try {
+      const element = mount()
+      element.sightingData = { version: 3, timeline: { keyframes: [] }, decor: [{ id: "s", kind: "entity", eastM: 0, northM: 10, model: { id: "acme-saucer" } }] } as never
+      await new Promise(resolve => setTimeout(resolve, 600))
+      expect(element.sightingData.modules).toBeUndefined()
+
+      element.shadowRoot!.querySelector("input")!.dispatchEvent(new Event("input", { bubbles: true }))
+      await waitFor(() => element.sightingData.modules !== undefined)
+      expect(element.sightingData.modules).toEqual([url])
+    } finally {
+      ModuleRegistry.uninstall("acme")
+    }
+  })
+})
+
 describe("a kind of event of the sky a module brings", () => {
   it("gets a part of the Sky group beside the beams, and its editor when the part is opened", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })

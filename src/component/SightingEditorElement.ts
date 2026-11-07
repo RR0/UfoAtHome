@@ -175,6 +175,7 @@ import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../modules/providers/terrain
 import { DECOR_MODEL_SOURCES } from "../modules/models/decorModelSources.js"
 import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import { ModuleRegistry } from "../modules/ModuleRegistry.js"
+import { ModuleAddress } from "../modules/ModuleAddress.js"
 import { ModelPicker } from "./ModelPicker.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorTraits } from "../engine/model/DecorTraits.js"
@@ -2311,6 +2312,7 @@ export class SightingEditorElement extends HTMLElement {
     this.shadow.removeEventListener("keydown", this.armHistory as EventListener, true)
     for (const type of ["input", "change", "click", "keyup", "pointerup"]) this.shadow.removeEventListener(type, this.scheduleHistoryRecord, true)
     clearTimeout(this.historyTimer)
+    clearTimeout(this.moduleNamingTimer)
     this.shadow.removeEventListener("input", this.touch, true)
     this.shadow.removeEventListener("change", this.touch, true)
     this.shadow.removeEventListener("keydown", this.touchByKey as EventListener, true)
@@ -2535,6 +2537,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private readonly scheduleHistoryRecord = (): void => {
+    this.scheduleModuleNaming()
     if (this.historySnapshot === undefined) return
     clearTimeout(this.historyTimer)
     this.historyTimer = setTimeout(() => this.recordHistory(), 350)
@@ -2807,6 +2810,40 @@ export class SightingEditorElement extends HTMLElement {
         editor.reveal(section)
       }, () => undefined)
     }
+  }
+
+  private moduleNamingTimer?: ReturnType<typeof setTimeout>
+
+  /** After an edit of the author's, once it has settled: see nameModulesOfModels. */
+  private scheduleModuleNaming(): void {
+    clearTimeout(this.moduleNamingTimer)
+    this.moduleNamingTimer = setTimeout(() => void this.nameModulesOfModels(), 400)
+  }
+
+  /**
+   * Makes the recording name the module each of its models comes from, when a module's catalogue is where the editor found it: the
+   * recording would otherwise be drawn with the model's primitive by whoever opens it without that module (see
+   * SightingRecordingJson.modules). Only what an edit of the author's put there: a recording is not changed by being opened. A module once
+   * named stays named; the Modules item of the Files group is where it is unnamed.
+   */
+  private async nameModulesOfModels(): Promise<void> {
+    const catalogues = this.decorModelProvider
+    if (!(catalogues instanceof ModelCatalogues) || ModuleRegistry.installed().length === 0) return
+    const sighting = this.ufoElement.sighting
+    const ids = new Set([...sighting.decor.map(object => object.model?.id), ...(sighting.interpretation?.bodies ?? []).map(body => body.model?.id)]
+      .filter((id): id is string => typeof id === "string"))
+    const base = this.sceneElement.documentUrl
+    let named = sighting.modules
+    for (const id of ids) {
+      const owner = await catalogues.moduleOf(id)
+      const url = owner === undefined ? undefined : ModuleRegistry.installed().find(module => module.id === owner)?.url
+      if (!url || ModuleAddress.names(named, url, base)) continue
+      named = [...(named ?? []), ModuleAddress.of(url, base)]
+    }
+    if (named === sighting.modules || this.ufoElement.sighting !== sighting) return
+    sighting.modules = named
+    this.syncModulesPanel()
+    this.syncFileEditor(false)
   }
 
   /** The Files group's item that lists the modules (see ModulesPanelElement). */
@@ -9356,6 +9393,7 @@ export class SightingEditorElement extends HTMLElement {
     if (this.currentDecorId === id) this.syncDecorVisibility()
     this.refreshDecorList()
     this.ufoElement.refresh()
+    this.scheduleModuleNaming()
   }
 
   /**

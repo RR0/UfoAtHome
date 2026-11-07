@@ -1,4 +1,5 @@
 import { ModuleSession } from "../modules/ModuleSession.js"
+import { ModuleAddress } from "../modules/ModuleAddress.js"
 import type { ModuleState } from "../modules/ModuleSession.js"
 import { MessageStyle } from "./MessageStyle.js"
 import type { ModulesPanelMessages } from "./messages/ModulesPanelMessages.js"
@@ -98,7 +99,7 @@ export class ModulesPanelElement extends HTMLElement {
 
   private setNamed(url: string, named: boolean): void {
     if (named === this.isNamed(url)) return
-    this.named = named ? [...this.named, url] : this.named.filter(candidate => this.absolute(candidate) !== url)
+    this.named = named ? [...this.named, ModuleAddress.of(url, this.recordingBase)] : this.named.filter(candidate => this.absolute(candidate) !== url)
     if (named) void this.session.require([url])
     this.dispatchEvent(new Event("recordingmoduleschange", { bubbles: true }))
     this.render()
