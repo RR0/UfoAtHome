@@ -1,10 +1,10 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_es: EventsMessages = {
-  title: "Eventos del observador",
+  title: "Eventos del testigo",
   phenomenonTitle: "Eventos del fenómeno",
   bodyTitle: "Eventos de {body}",
-  derivedNote: "Las poses del observador se calculan a partir de estos eventos. Mover al observador o girar su mirada a mano escribe poses propias, que prevalecen sobre ellos.",
+  derivedNote: "Las poses del testigo se calculan a partir de estos eventos. Mover al testigo o girar su mirada a mano escribe poses propias, que prevalecen sobre ellos.",
   overriddenNote: "Las poses propias de esta grabación prevalecen sobre sus eventos.",
   derivedShapesNote: "Las formas del relato se calculan a partir de lo que hizo el fenómeno. Dibujarlas a mano escribe formas propias, que prevalecen sobre estos eventos.",
   overriddenShapesNote: "Las formas propias de esta grabación prevalecen sobre los eventos del fenómeno.",
@@ -34,10 +34,10 @@ export const eventsMessages_es: EventsMessages = {
   basisField: "Base",
   howField: "Cómo",
   rationaleField: "Justificación",
-  choices: { "sizeBy.": "siempre la misma", "sizeBy.altitude": "su altura (más pequeño hacia el horizonte)", "side.left": "izquierda", "side.right": "derecha", "seenFrom.": "el suelo (como lo ve el observador)", "seenFrom.craft": "el aparato (como lo diría su piloto)" },
+  choices: { "sizeBy.": "siempre la misma", "sizeBy.altitude": "su altura (más pequeño hacia el horizonte)", "side.left": "izquierda", "side.right": "derecha", "seenFrom.": "el suelo (como lo ve el testigo)", "seenFrom.craft": "el aparato (como lo diría su piloto)" },
   zenith: "cénit",
   lookedAt: "Donde mira",
-  lookedAtHint: "Toma la dirección que mira el observador en el cabezal de lectura",
+  lookedAtHint: "Toma la dirección que mira el testigo en el cabezal de lectura",
   atOnce: "de golpe",
   atOnceHint: "Marcado: el valor sigue siendo el de la fila anterior hasta este instante, y pasa de golpe al de esta fila (un frenazo, un arranque brusco). Sin marcar: llega poco a poco desde la fila anterior.",
   addRow: "Añadir una fila",

@@ -19,6 +19,6 @@ export const launchEditorMessages_en: LaunchEditorMessages = {
   deleteJet: "Remove this jet",
   jetBurn: "Engine burn",
   jetVent: "Propellant vented",
-  addLaunchNowhere: "Give the recording a place first: a launch is put in front of the observer",
+  addLaunchNowhere: "Give the recording a place first: a launch is put in front of the witness",
   derivedNote: "An empty field shows, greyed, the value used: the default, or what the engine implies. Clear a field to go back to it."
 }

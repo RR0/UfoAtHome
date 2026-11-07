@@ -6,7 +6,7 @@ export const lanternEditorMessages_es: LanternEditorMessages = {
   launch: "Farolillos",
   deleteLaunch: "Eliminar estos farolillos",
   addLaunch: "Añadir farolillos",
-  addLaunchNowhere: "Dale primero un lugar a la grabación: los farolillos se sueltan delante del observador",
+  addLaunchNowhere: "Dale primero un lugar a la grabación: los farolillos se sueltan delante del testigo",
   releasesNote: "Estos farolillos indican también {n} soltados uno a uno, conservados tal cual: edítalos en el archivo de la grabación.",
   derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacía un campo para volver a él."
 }

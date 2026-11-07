@@ -19,6 +19,6 @@ export const launchEditorMessages_it: LaunchEditorMessages = {
   deleteJet: "Togliere questo getto",
   jetBurn: "Accensione del motore",
   jetVent: "Propellenti scaricati",
-  addLaunchNowhere: "Dia prima un luogo alla registrazione: un lancio è posto davanti all'osservatore",
+  addLaunchNowhere: "Dia prima un luogo alla registrazione: un lancio è posto davanti al testimone",
   derivedNote: "Un campo vuoto mostra, in grigio, il valore usato: il predefinito, o ciò che implica il motore. Svuota un campo per tornarci."
 }

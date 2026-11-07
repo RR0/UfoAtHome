@@ -174,7 +174,7 @@ export class BodyParameterSets {
       },
       {
         type: "text", key: "outlineNode",
-        label: { en: "Part drawn by the observer", fr: "Partie dessinée par l'observateur", es: "Parte dibujada por el observador", it: "Parte disegnata dall'osservatore" },
+        label: { en: "Part drawn by the witness", fr: "Partie dessinée par le témoin", es: "Parte dibujada por el testigo", it: "Parte disegnata dal testimone" },
         placeholder: { en: "Node of the model, e.g. hull", fr: "Nœud du modèle, par ex. hull", es: "Nodo del modelo, p. ej. hull", it: "Nodo del modello, ad es. hull" }
       }
     ] satisfies ParameterSpec[])
@@ -189,7 +189,7 @@ export class BodyParameterSets {
         type: "choice", key: "mode", required: true,
         label: { en: "Position", fr: "Position", es: "Posición", it: "Posizione" },
         choices: [
-          { value: "observer", label: { en: "From the observer", fr: "Depuis l'observateur", es: "Desde el observador", it: "Dall'osservatore" } },
+          { value: "observer", label: { en: "From the witness", fr: "Depuis le témoin", es: "Desde el testigo", it: "Dal testimone" } },
           { value: "world", label: { en: "In the world", fr: "Dans le monde", es: "En el mundo", it: "Nel mondo" } }
         ]
       },

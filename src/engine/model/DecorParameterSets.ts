@@ -82,8 +82,8 @@ export class DecorParameterSets {
         type: "number", key: "occupiedFloor", min: 0, max: 20, step: 1, effective: () => 0,
         bounds: element => ({ max: floorsOf(element) }),
         label: { en: "Occupied floor", fr: "Étage occupé", es: "Planta ocupada", it: "Piano occupato" },
-        hint: { en: "The floor the observer is on, from 0 (ground floor).", fr: "L'étage où se tient l'observateur, à partir de 0 (rez-de-chaussée).",
-          es: "La planta donde está el observador, desde 0 (planta baja).", it: "Il piano dove si trova l'osservatore, da 0 (pianterreno)." },
+        hint: { en: "The floor the witness is on, from 0 (ground floor).", fr: "L'étage où se tient le témoin, à partir de 0 (rez-de-chaussée).",
+          es: "La planta donde está el testigo, desde 0 (planta baja).", it: "Il piano dove si trova il testimone, da 0 (pianterreno)." },
         group: DecorParameterSets.BUILDING
       }
     ]

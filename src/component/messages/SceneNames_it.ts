@@ -144,7 +144,7 @@ export const sceneNames_it: SceneNames = {
     crossing: "Attraversamento pedonale",
     roadsign: "Segnale stradale",
     vehicle: "Veicolo",
-    observer: "Osservatore",
+    observer: "Testimone",
     aircraft: "Aeromobile",
     entity: "Essere"
   },

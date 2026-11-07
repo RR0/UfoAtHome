@@ -52,7 +52,7 @@ export const html = `
     <!-- An investigator's lines laid over the place (see InvestigatorTrace): offered only when the
          recording carries some, and shown until the reader hides them. -->
     <button id="traces" type="button" title="Investigator's lines" aria-label="Investigator's lines" aria-pressed="true" hidden></button>
-    <button id="observer-map" type="button" title="Observer's position" aria-label="Observer's position" aria-pressed="false" hidden></button>
+    <button id="observer-map" type="button" title="Witness's position" aria-label="Witness's position" aria-pressed="false" hidden></button>
   </div>
   <!-- What in the recording was not played as written (see RecordingIssue): a key nothing reads, a
        value made up because the file left it out. Hidden for a recording with nothing to say, which

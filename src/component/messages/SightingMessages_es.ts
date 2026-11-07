@@ -4,7 +4,7 @@ import { sightingLabels_es } from "./SightingLabels_es.js"
 export const sightingMessages_es: SightingMessages = {
   ...sightingLabels_es,
   accountBy: "Relato de",
-  unnamedObserver: "Observador {n}",
+  unnamedObserver: "Testigo {n}",
   about: "Acerca de",
   close: "Cerrar",
   observation: "Observación",

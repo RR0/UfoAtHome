@@ -372,7 +372,7 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const select = element.shadowRoot!.getElementById("observer") as HTMLSelectElement
-    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Observer 3"])
+    expect([...select.options].map(o => o.textContent)).toEqual(["Clarence Chiles", "w2", "Witness 3"])
   })
 
   it("says nothing at all where a single recording names no observer", async () => {

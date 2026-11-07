@@ -6,7 +6,7 @@ export const lanternEditorMessages_it: LanternEditorMessages = {
   launch: "Lanterne",
   deleteLaunch: "Elimina queste lanterne",
   addLaunch: "Aggiungi lanterne",
-  addLaunchNowhere: "Dai prima un luogo alla registrazione: le lanterne vengono lasciate andare davanti all'osservatore",
+  addLaunchNowhere: "Dai prima un luogo alla registrazione: le lanterne vengono lasciate andare davanti al testimone",
   releasesNote: "Queste lanterne ne indicano anche {n} lasciate andare una per una, mantenute così: modificale nel file della registrazione.",
   derivedNote: "Un campo vuoto mostra, in grigio, il valore usato. Svuota un campo per tornarvi."
 }

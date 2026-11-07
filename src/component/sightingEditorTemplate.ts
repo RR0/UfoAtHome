@@ -100,7 +100,7 @@ export const html = `
        one-line fields makes both harder to read. See SightingEditorElement.draftFromDescription. -->
   <div class="toolbar narrative">
     <label class="wide"><span id="label-description">Description</span>
-      <textarea id="description" rows="4" placeholder="What the observer reported, in their own words"></textarea></label>
+      <textarea id="description" rows="4" placeholder="What the witness reported, in their own words"></textarea></label>
     <!-- Which provider drafts, and the settings it declares (a key, a model…), rendered from the
          provider itself: see NarrativeSetting, and SightingEditorElement.renderNarrativeSettings. -->
     <span class="narrative-source"><span id="label-narrative-source">Drafted by</span> <span id="narrative-source-row"></span></span>
@@ -162,8 +162,8 @@ export const html = `
       <option id="option-source-interview" value="interview">interview in person</option>
       <option id="option-source-telephone" value="telephone">by telephone</option>
       <option id="option-source-questionnaire" value="questionnaire">questionnaire</option>
-      <option id="option-source-letter" value="letter">the observer wrote it</option>
-      <option id="option-source-social-media" value="social-media">the observer posted it online</option>
+      <option id="option-source-letter" value="letter">the witness wrote it</option>
+      <option id="option-source-social-media" value="social-media">the witness posted it online</option>
       <option id="option-source-press" value="press">press or broadcast</option>
     </select></label>
     <label><span id="label-account-url">Source (URL)</span> <input id="accountUrl" type="url" placeholder="https://…"/></label>
@@ -204,7 +204,7 @@ export const html = `
            stood and which way they faced, and this says nothing about either. It is how the device
            was HELD — a camera askew, a head leaned over — which is why it belongs beside the focal
            length and the aperture whose own spikes it turns. -->
-      <label class="adv"><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the observer saw it"/> &deg;</label>
+      <label class="adv"><span id="label-roll">Roll</span> <input id="roll" type="number" min="-180" max="180" step="1" value="0" title="How far the instrument was tilted about its own line of sight — positive clockwise, as the witness saw it"/> &deg;</label>
       <!-- How much the body holding it moves the view at rest — see Sighting.sway: 1 a person, 0 a
            tripod. Blank is the default (1, or 0 for a paralysed observer). -->
       <label class="adv"><span id="label-sway">Sway</span> <input id="sway" type="number" min="0" max="3" step="0.1" placeholder="1"/></label>
@@ -354,7 +354,7 @@ export const html = `
          the number is derived and read-only; leave it on the manual entry and type the number
          yourself, which is all a recording used to be able to say. -->
     <label><span id="label-utc-offset">Time zone</span> <select id="timeZone"></select>
-      <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the observer's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
+      <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5" placeholder="from longitude" title="Hours ahead of UTC on the witness's own clock — legal time, which the longitude cannot know (France was on UTC+1 in 1965)"/> UTC&plusmn;h</label>
     <label><span id="label-duration">Duration</span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
     </div>
     <div class="form-section">
@@ -534,7 +534,7 @@ export const html = `
       <label hidden><span id="label-rare-ice">Rare crystals</span> <input id="rareIceCrystals" class="weather-field" type="range" min="0" max="1" step="0.05" value="0.05"/></label>
       <label hidden><span id="label-cloud-darkness">Cloud darkness</span> <input id="cloudDarkness" class="weather-field" type="range" min="0" max="1" step="0.05" value="0"/></label>
       <label hidden><span id="label-cloud-base">Cloud base</span>
-        <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the observer is under the deck or above it"/> m</label>
+        <input id="cloudBase" class="weather-field" type="number" min="0" max="20000" step="50" placeholder="1000" title="Height of the cloud layer's base above the ground — decides whether the witness is under the deck or above it"/> m</label>
     </div>
   </section>
   <section class="subgroup-panel" id="weather-wind" aria-labelledby="label-wind-group" hidden>
@@ -634,12 +634,12 @@ export const html = `
     <label><span id="label-reference-pitch">Pitch</span> <input id="referencePitch" class="reference-field" type="number" min="-90" max="90" step="0.1"/> &deg;</label>
     <label><span id="label-reference-roll">Roll</span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
     <label><span id="label-reference-fov">Vertical field</span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
-    <button id="reference-use-pose" type="button">Use the observer's pose</button>
+    <button id="reference-use-pose" type="button">Use the witness's pose</button>
     <!-- Lining the picture up on the rendered scene, by hand and by landmarks — see
          SightingEditorElement.canvasMode and PictureRegistration. While this group is open the
          canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and
          a click names a landmark on it, then the same landmark in the render. -->
-    <button id="reference-adopt-pose" type="button">Adopt as the observer's pose</button>
+    <button id="reference-adopt-pose" type="button">Adopt as the witness's pose</button>
     <span id="reference-status" class="apparent-size"></span>
     </div>
     <div class="form-section">
@@ -727,8 +727,8 @@ export const html = `
     <!-- Not a bigger halo: a halo is a coloured fringe, and no fringe reads as painful. This is
          the light's own behaviour — a veil that washes out the field around it, the spikes its
          aperture throws, and a core clipped to white. See BaseShape.brightness. -->
-    <label class="adv"><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the observer said it was — a light you cannot look at does three things a halo never does"/></label>
-    <label class="adv"><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the observer said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
+    <label class="adv"><span id="label-brightness">Brilliance</span> <input id="brightness" type="range" min="0" max="1" step="0.05" value="0" title="How dazzling the witness said it was — a light you cannot look at does three things a halo never does"/></label>
+    <label class="adv"><span id="label-blur">Blur</span> <input id="blur" type="range" min="0" max="1" step="0.05" value="0" title="How indistinct the witness said its edges were — not the lens's own depth of field, which never touches the object here"/></label>
     </div>
     <div class="form-section">
     <h3 class="section-title"><span id="label-section-size">Size and distance</span></h3>
@@ -745,7 +745,7 @@ export const html = `
     <label><span id="label-real-width">Real width</span>
       <input id="realWidth" type="number" min="0" max="30000" step="0.1" title="What that angle is in metres at the distance beside it. Derived, never stored"/> m</label>
     <label><span id="label-object-distance">Distance</span>
-      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the observer's statement"/> m</label>
+      <input id="objectDistance" type="number" min="0" max="30000" step="1" title="How far along its line of sight the shape is drawn — what decides what the decor hides of it. A hypothesis, never the witness's statement"/> m</label>
     <!-- The shape's turn on the drawing (BaseShape.angle), as its handle sets it: clockwise on screen, in degrees. -->
     <label><span id="label-shape-rotation">Rotation</span>
       <input id="shapeRotation" type="number" min="-180" max="180" step="1"/> &deg;</label>

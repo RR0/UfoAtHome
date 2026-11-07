@@ -1681,11 +1681,11 @@ describe("the observer's own map", () => {
     button.click()
     expect(panel.hidden).toBe(false)
     expect(button.getAttribute("aria-pressed")).toBe("true")
-    expect(button.title).toBe("Hide where the observer was")
+    expect(button.title).toBe("Hide where the witness was")
 
     button.click()
     expect(panel.hidden).toBe(true)
-    expect(button.title).toBe("Show where the observer was")
+    expect(button.title).toBe("Show where the witness was")
   })
 
   it("closes itself when the recording it was showing is replaced by one with no place", () => {

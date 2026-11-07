@@ -1,13 +1,13 @@
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 
 export const bodyEditorMessages_fr: BodyEditorMessages = {
-  intro: "Ce que l'observateur a dit que le phénomène était, en 3D : chaque corps représente une ou plusieurs des formes dessinées. Son mouvement vient du fichier.",
+  intro: "Ce que le témoin a dit que le phénomène était, en 3D : chaque corps représente une ou plusieurs des formes dessinées. Son mouvement vient du fichier.",
   interpretationTitle: "Titre de l'interprétation",
   body: "Corps",
-  none: "Aucun corps pour l'instant : l'observateur n'a rien dit de ce que c'était, ou c'est encore à saisir",
+  none: "Aucun corps pour l'instant : le témoin n'a rien dit de ce que c'était, ou c'est encore à saisir",
   deleteBody: "Supprimer le corps",
   addBody: "Ajouter un corps",
-  addBodyHintView: "Là où l'observateur regarde à cet instant",
+  addBodyHintView: "Là où le témoin regarde à cet instant",
   lookAtBody: "Le regarder",
   addBodyHint: "Représentant la forme « {shape} », là où la scène la dessine à cet instant",
   model: "Modèle 3D",

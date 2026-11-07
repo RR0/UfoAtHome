@@ -12,6 +12,6 @@ export const beamEditorMessages_en: BeamEditorMessages = {
   deletePlace: "Remove this point",
   previousPlace: "Previous point",
   nextPlace: "Next point",
-  addBeamNowhere: "Give the recording a place first: a beam is put in front of the observer",
+  addBeamNowhere: "Give the recording a place first: a beam is put in front of the witness",
   derivedNote: "An empty field shows, greyed, the value in use. Clear a field to go back to it."
 }

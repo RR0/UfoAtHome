@@ -6,7 +6,7 @@ export const lanternEditorMessages_en: LanternEditorMessages = {
   launch: "Lanterns",
   deleteLaunch: "Delete these lanterns",
   addLaunch: "Add lanterns",
-  addLaunchNowhere: "Give the recording a place first: lanterns are let go in front of the observer",
+  addLaunchNowhere: "Give the recording a place first: lanterns are let go in front of the witness",
   releasesNote: "These lanterns also state {n} let go one by one, kept as they are: edit them in the recording's file.",
   derivedNote: "An empty field shows, greyed, the value used. Empty a field to go back to it."
 }

@@ -1,10 +1,10 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_it: EventsMessages = {
-  title: "Eventi dell'osservatore",
+  title: "Eventi del testimone",
   phenomenonTitle: "Eventi del fenomeno",
   bodyTitle: "Eventi di {body}",
-  derivedNote: "Le pose dell'osservatore sono calcolate da questi eventi. Spostare l'osservatore o girarne lo sguardo a mano scrive pose proprie, che prevalgono su di essi.",
+  derivedNote: "Le pose del testimone sono calcolate da questi eventi. Spostare il testimone o girarne lo sguardo a mano scrive pose proprie, che prevalgono su di essi.",
   overriddenNote: "Le pose proprie di questa registrazione prevalgono sui suoi eventi.",
   derivedShapesNote: "Le forme del resoconto sono calcolate da ciò che ha fatto il fenomeno. Disegnarle a mano scrive forme proprie, che prevalgono su questi eventi.",
   overriddenShapesNote: "Le forme proprie di questa registrazione prevalgono sugli eventi del fenomeno.",
@@ -34,10 +34,10 @@ export const eventsMessages_it: EventsMessages = {
   basisField: "Base",
   howField: "Come",
   rationaleField: "Motivazione",
-  choices: { "sizeBy.": "sempre la stessa", "sizeBy.altitude": "la sua altezza (più piccolo verso l'orizzonte)", "side.left": "sinistra", "side.right": "destra", "seenFrom.": "il suolo (come lo vede l'osservatore)", "seenFrom.craft": "il velivolo (come lo direbbe il pilota)" },
+  choices: { "sizeBy.": "sempre la stessa", "sizeBy.altitude": "la sua altezza (più piccolo verso l'orizzonte)", "side.left": "sinistra", "side.right": "destra", "seenFrom.": "il suolo (come lo vede il testimone)", "seenFrom.craft": "il velivolo (come lo direbbe il pilota)" },
   zenith: "zenit",
   lookedAt: "Dove guarda",
-  lookedAtHint: "Prende la direzione in cui guarda l'osservatore alla testina di lettura",
+  lookedAtHint: "Prende la direzione in cui guarda il testimone alla testina di lettura",
   atOnce: "di colpo",
   atOnceHint: "Spuntato: il valore resta quello della riga precedente fino a questo istante, poi passa di colpo a quello di questa riga (una frenata, una partenza brusca). Non spuntato: ci arriva gradualmente dalla riga precedente.",
   addRow: "Aggiungi una riga",

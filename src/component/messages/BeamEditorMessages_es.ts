@@ -12,6 +12,6 @@ export const beamEditorMessages_es: BeamEditorMessages = {
   deletePlace: "Quitar este punto",
   previousPlace: "Punto anterior",
   nextPlace: "Punto siguiente",
-  addBeamNowhere: "Dé primero un lugar a la grabación: un haz se coloca delante del observador",
+  addBeamNowhere: "Dé primero un lugar a la grabación: un haz se coloca delante del testigo",
   derivedNote: "Un campo vacío muestra, en gris, el valor usado. Vacíe un campo para volver a él."
 }

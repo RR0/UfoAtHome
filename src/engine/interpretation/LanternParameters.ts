@@ -50,10 +50,10 @@ export class LanternParameters {
         type: "position", key: "site.eastM", secondKey: "site.northM", saidKey: "site.saidPosition", native: "local", step: 1, rangeM: 100000,
         group: LanternParameters.RELEASE,
         label: { en: "Where they are let go", fr: "Lieu du lâcher", es: "Lugar de la suelta", it: "Luogo del rilascio" },
-        hint: { en: "Where they are let go: from the observer, from something else in the scene, or as a latitude and a longitude.",
-          fr: "D'où elles sont lâchées : par rapport à l'observateur, à autre chose dans la scène, ou en latitude et longitude.",
-          es: "Desde dónde se sueltan: respecto al observador, a otra cosa de la escena, o en latitud y longitud.",
-          it: "Da dove vengono lasciate andare: rispetto all'osservatore, a qualcos'altro nella scena, o in latitudine e longitudine." }
+        hint: { en: "Where they are let go: from the witness, from something else in the scene, or as a latitude and a longitude.",
+          fr: "D'où elles sont lâchées : par rapport au témoin, à autre chose dans la scène, ou en latitude et longitude.",
+          es: "Desde dónde se sueltan: respecto al testigo, a otra cosa de la escena, o en latitud y longitud.",
+          it: "Da dove vengono lasciate andare: rispetto al testimone, a qualcos'altro nella scena, o in latitudine e longitudine." }
       },
       {
         type: "number", key: "site.altitudeM", min: -1000, max: 5000, step: 0.1, unit: "m", group: LanternParameters.RELEASE, effective: () => 0,

@@ -34,7 +34,7 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   sourceField: "Source",
   sourceBlank: "A blank recording",
   sourceFile: "An existing recording",
-  observerField: "Observer",
+  observerField: "Witness",
   fileField: "File",
   loadFailed: "That recording could not be read.",
   isACase: "That is a case, not a recording.",

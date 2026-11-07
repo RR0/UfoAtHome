@@ -94,7 +94,7 @@ export class DecorBaseParameterSets {
         visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.lights === true
       },
       {
-        type: "choice", key: "observerSide", label: { en: "Observer location", fr: "Emplacement de l'observateur", es: "Ubicación del observador", it: "Posizione dell'osservatore" },
+        type: "choice", key: "observerSide", label: { en: "Witness location", fr: "Emplacement du témoin", es: "Ubicación del testigo", it: "Posizione del testimone" },
         choices: [], empty: { en: "Not present", fr: "Non présent", es: "No presente", it: "Non presente" },
         optionsOf: (_view, context) => [...((context as DecorBaseContext | undefined)?.seats ?? [])],
         visibleWhen: (_view, context) => (context as DecorBaseContext | undefined)?.traits.observerSide === true

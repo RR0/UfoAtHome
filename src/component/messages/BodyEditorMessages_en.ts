@@ -1,13 +1,13 @@
 import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 
 export const bodyEditorMessages_en: BodyEditorMessages = {
-  intro: "What the observer said the phenomenon was, in 3D: each body stands for one or more of the shapes drawn. Its movement comes from the file.",
+  intro: "What the witness said the phenomenon was, in 3D: each body stands for one or more of the shapes drawn. Its movement comes from the file.",
   interpretationTitle: "Interpretation title",
   body: "Body",
-  none: "No body yet: the observer said nothing of what it was, or it is still to be entered",
+  none: "No body yet: the witness said nothing of what it was, or it is still to be entered",
   deleteBody: "Delete body",
   addBody: "Add a body",
-  addBodyHintView: "Where the observer is looking now",
+  addBodyHintView: "Where the witness is looking now",
   lookAtBody: "Look at it",
   addBodyHint: "Standing for the shape \"{shape}\", where the scene draws it now",
   model: "3D model",

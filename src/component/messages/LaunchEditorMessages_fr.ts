@@ -19,6 +19,6 @@ export const launchEditorMessages_fr: LaunchEditorMessages = {
   deleteJet: "Retirer ce jet",
   jetBurn: "Allumage du moteur",
   jetVent: "Ergols vidangés",
-  addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : un lancement est placé devant l'observateur",
+  addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : un lancement est placé devant le témoin",
   derivedNote: "Un champ vide montre, en grisé, la valeur utilisée : le défaut, ou ce que le moteur implique. Videz un champ pour y revenir."
 }

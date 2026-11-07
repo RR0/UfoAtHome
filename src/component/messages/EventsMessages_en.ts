@@ -1,10 +1,10 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_en: EventsMessages = {
-  title: "Observer's events",
+  title: "Witness's events",
   phenomenonTitle: "Phenomenon's events",
   bodyTitle: "Events of {body}",
-  derivedNote: "The observer's poses are worked out from these events. Moving the observer or turning their gaze by hand writes poses of your own, which win over them.",
+  derivedNote: "The witness's poses are worked out from these events. Moving the witness or turning their gaze by hand writes poses of your own, which win over them.",
   overriddenNote: "This recording's own poses win over its events.",
   derivedShapesNote: "The account's shapes are worked out from what the phenomenon did. Drawing them by hand writes shapes of your own, which win over these events.",
   overriddenShapesNote: "This recording's own shapes win over the phenomenon's events.",
@@ -34,10 +34,10 @@ export const eventsMessages_en: EventsMessages = {
   basisField: "Basis",
   howField: "How",
   rationaleField: "Rationale",
-  choices: { "sizeBy.": "always the same", "sizeBy.altitude": "its altitude (smaller towards the horizon)", "side.left": "left", "side.right": "right", "seenFrom.": "the ground (as the observer sees it)", "seenFrom.craft": "the craft (as its pilot would say it)" },
+  choices: { "sizeBy.": "always the same", "sizeBy.altitude": "its altitude (smaller towards the horizon)", "side.left": "left", "side.right": "right", "seenFrom.": "the ground (as the witness sees it)", "seenFrom.craft": "the craft (as its pilot would say it)" },
   zenith: "zenith",
   lookedAt: "Where they look",
-  lookedAtHint: "Takes the direction the observer looks at the playhead",
+  lookedAtHint: "Takes the direction the witness looks at the playhead",
   atOnce: "at once",
   atOnceHint: "Ticked: the value stays the previous row's until this instant, then becomes this row's at once (braking, a sudden start). Unticked: it gets there gradually from the previous row.",
   addRow: "Add a row",

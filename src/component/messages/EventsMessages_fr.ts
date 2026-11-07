@@ -1,10 +1,10 @@
 import type { EventsMessages } from "./EventsMessages.js"
 
 export const eventsMessages_fr: EventsMessages = {
-  title: "Événements de l'observateur",
+  title: "Événements du témoin",
   phenomenonTitle: "Événements du phénomène",
   bodyTitle: "Événements de {body}",
-  derivedNote: "Les poses de l'observateur sont calculées à partir de ces événements. Déplacer l'observateur ou tourner son regard à la main écrit vos propres poses, qui l'emportent sur eux.",
+  derivedNote: "Les poses du témoin sont calculées à partir de ces événements. Déplacer le témoin ou tourner son regard à la main écrit vos propres poses, qui l'emportent sur eux.",
   overriddenNote: "Les poses propres à cet enregistrement l'emportent sur ses événements.",
   derivedShapesNote: "Les formes du compte rendu sont calculées à partir de ce qu'a fait le phénomène. Les dessiner à la main écrit vos propres formes, qui l'emportent sur ces événements.",
   overriddenShapesNote: "Les formes propres à cet enregistrement l'emportent sur les événements du phénomène.",
@@ -34,10 +34,10 @@ export const eventsMessages_fr: EventsMessages = {
   basisField: "Base",
   howField: "Comment",
   rationaleField: "Justification",
-  choices: { "sizeBy.": "toujours la même", "sizeBy.altitude": "son altitude (plus petit vers l'horizon)", "side.left": "gauche", "side.right": "droite", "seenFrom.": "le sol (comme l'observateur le voit)", "seenFrom.craft": "l'engin (comme son pilote le dirait)" },
+  choices: { "sizeBy.": "toujours la même", "sizeBy.altitude": "son altitude (plus petit vers l'horizon)", "side.left": "gauche", "side.right": "droite", "seenFrom.": "le sol (comme le témoin le voit)", "seenFrom.craft": "l'engin (comme son pilote le dirait)" },
   zenith: "zénith",
   lookedAt: "Là où il regarde",
-  lookedAtHint: "Prend la direction que l'observateur regarde à la tête de lecture",
+  lookedAtHint: "Prend la direction que le témoin regarde à la tête de lecture",
   atOnce: "d'un coup",
   atOnceHint: "Coché : la valeur reste celle de la ligne précédente jusqu'à cet instant, puis passe d'un coup à celle de cette ligne (un freinage, un départ brusque). Décoché : elle y arrive progressivement depuis la ligne précédente.",
   addRow: "Ajouter une ligne",

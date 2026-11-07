@@ -6,7 +6,7 @@ export const lanternEditorMessages_fr: LanternEditorMessages = {
   launch: "Lanternes",
   deleteLaunch: "Supprimer ces lanternes",
   addLaunch: "Ajouter des lanternes",
-  addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : les lanternes sont lâchées devant l'observateur",
+  addLaunchNowhere: "Donnez d'abord un lieu à l'enregistrement : les lanternes sont lâchées devant le témoin",
   releasesNote: "Ces lanternes en indiquent aussi {n} lâchées une à une, gardées telles quelles : modifiez-les dans le fichier de l'enregistrement.",
   derivedNote: "Un champ vide montre, en grisé, la valeur utilisée. Videz un champ pour y revenir."
 }

@@ -12,6 +12,6 @@ export const beamEditorMessages_fr: BeamEditorMessages = {
   deletePlace: "Retirer ce point",
   previousPlace: "Point précédent",
   nextPlace: "Point suivant",
-  addBeamNowhere: "Donnez d'abord un lieu à l'enregistrement : un faisceau est placé devant l'observateur",
+  addBeamNowhere: "Donnez d'abord un lieu à l'enregistrement : un faisceau est placé devant le témoin",
   derivedNote: "Un champ vide montre, en grisé, la valeur utilisée. Videz un champ pour y revenir."
 }
