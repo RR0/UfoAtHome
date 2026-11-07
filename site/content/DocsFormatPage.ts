@@ -1,4 +1,5 @@
 import { DocsSection } from "./DocsSection.js"
+import { FormatVersion } from "../../src/engine/persistence/FormatVersion.js"
 import { tagNames_fr } from "../../src/component/messages/TagNames_fr.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 import { DocsComponentsPage } from "./DocsComponentsPage.js"
@@ -524,7 +525,7 @@ export class DocsFormatPage extends DocsSection {
       or the file for, which is why it is worth writing even when nothing else is.</p>
 
     <h2>Checking a file</h2>
-    <p>The format is also published as a <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
+    <p>The format is also published as a <a href="${new URL(FormatVersion.schemaUrl("sighting")).pathname}">JSON Schema</a>,
       generated from the same types as the player: every key it knows, what each may hold, and the
       words a closed list accepts. A misspelt key or an unknown value fails it. It says nothing
       about what may be left out, which is a question of meaning this page answers. To see the
@@ -1045,7 +1046,7 @@ export class DocsFormatPage extends DocsSection {
       même quand rien d'autre ne l'est.</p>
 
     <h2>Vérifier un fichier</h2>
-    <p>Le format est aussi publié en <a href="/schema/1/sighting.schema.json">JSON Schema</a>, engendré
+    <p>Le format est aussi publié en <a href="${new URL(FormatVersion.schemaUrl("sighting")).pathname}">JSON Schema</a>, engendré
       depuis les mêmes types que le lecteur : toutes les clés qu'il connaît, ce que chacune peut
       contenir, et les mots qu'accepte une liste fermée. Une clé mal orthographiée ou une valeur
       inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
@@ -1554,7 +1555,7 @@ export class DocsFormatPage extends DocsSection {
       preguntar al testigo o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.</p>
 
     <h2>Comprobar un archivo</h2>
-    <p>El formato se publica también como <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
+    <p>El formato se publica también como <a href="${new URL(FormatVersion.schemaUrl("sighting")).pathname}">JSON Schema</a>,
       generado a partir de los mismos tipos que el reproductor: todas las claves que conoce, lo que puede
       contener cada una, y las palabras que acepta una lista cerrada. Una clave mal escrita o un valor
       desconocido no lo superan. No dice nada de lo que puede omitirse, que es una cuestión de sentido que
@@ -2064,7 +2065,7 @@ export class DocsFormatPage extends DocsSection {
       o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.</p>
 
     <h2>Verificare un file</h2>
-    <p>Il formato è pubblicato anche come <a href="/schema/1/sighting.schema.json">JSON Schema</a>,
+    <p>Il formato è pubblicato anche come <a href="${new URL(FormatVersion.schemaUrl("sighting")).pathname}">JSON Schema</a>,
       generato dagli stessi tipi del lettore: ogni chiave che conosce, ciò che ciascuna può
       contenere, e le parole che accetta un elenco chiuso. Una chiave scritta male o un valore
       sconosciuto non lo superano. Non dice nulla di ciò che si può omettere, che è una questione di senso a cui

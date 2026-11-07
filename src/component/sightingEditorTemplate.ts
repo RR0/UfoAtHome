@@ -1323,8 +1323,11 @@ select.weather-field:disabled {
 #narrative-key {
   width: 16em;
 }
+/* As wide as what it says, its placeholder while empty: at a fixed 14em, "only if your key spans several" was cut off, French more so. */
 #narrative-workspace {
-  width: 14em;
+  field-sizing: content;
+  min-width: 14em;
+  max-width: 100%;
 }
 /* A failure has to be visible without opening a console. The status line carries three quite
    different things — working, written, refused — and only the last is a problem, so only the last

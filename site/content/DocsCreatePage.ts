@@ -1,4 +1,5 @@
 import { DocsSection } from "./DocsSection.js"
+import { FormatVersion } from "../../src/engine/persistence/FormatVersion.js"
 import type { PageMeta, Said, SiteLanguage } from "../SitePage.js"
 import { DocsSourcesPage } from "./DocsSourcesPage.js"
 
@@ -103,7 +104,7 @@ export class DocsCreatePage extends DocsSection {
     <pre class="doc-prompt"><code>Here are the documents of a sighting case. Build a UFO@home recording
 of what the witness saw: the JSON file described at
 https://ufoathome.org/docs/format/ , checked against
-https://ufoathome.org/schema/1/sighting.schema.json .
+${FormatVersion.schemaUrl("sighting")} .
 
 - State only what the documents support. Write each value you worked
   out as {"value": ..., "basis": "derived", "rationale": "..."} and
@@ -202,7 +203,7 @@ https://ufoathome.org/schema/1/sighting.schema.json .
     <pre class="doc-prompt"><code>Voici les documents d'un dossier d'observation. Construis un enregistrement
 UFO@home de ce que l'observateur a vu : le fichier JSON décrit sur
 https://ufoathome.org/docs/format/ , vérifié avec
-https://ufoathome.org/schema/1/sighting.schema.json .
+${FormatVersion.schemaUrl("sighting")} .
 
 - N'énonce que ce que les documents appuient. Écris chaque valeur que
   tu as calculée sous la forme {"value": ..., "basis": "derived",
@@ -305,7 +306,7 @@ https://ufoathome.org/schema/1/sighting.schema.json .
     <pre class="doc-prompt"><code>Aquí están los documentos de un caso de avistamiento. Construye una
 grabación UFO@home de lo que vio el testigo: el archivo JSON descrito
 en https://ufoathome.org/docs/format/ , verificado con
-https://ufoathome.org/schema/1/sighting.schema.json .
+${FormatVersion.schemaUrl("sighting")} .
 
 - Indica solo lo que los documentos respaldan. Escribe cada valor que
   hayas calculado como {"value": ..., "basis": "derived", "rationale":
@@ -407,7 +408,7 @@ https://ufoathome.org/schema/1/sighting.schema.json .
     <pre class="doc-prompt"><code>Ecco i documenti di un caso di avvistamento. Costruisci una
 registrazione UFO@home di ciò che il testimone ha visto: il file JSON
 descritto su https://ufoathome.org/docs/format/ , verificato con
-https://ufoathome.org/schema/1/sighting.schema.json .
+${FormatVersion.schemaUrl("sighting")} .
 
 - Indica solo ciò che i documenti sostengono. Scrivi ogni valore che hai
   calcolato come {"value": ..., "basis": "derived", "rationale": "..."}

@@ -66,7 +66,7 @@ export class EditorTheme {
    */
   static fields(scope: string): string {
     return `
-:where(${scope}) :where(input[type="text"], input[type="url"], input[type="number"], input[type="search"], input[type="date"], input[type="time"], input[type="datetime-local"], input:not([type]), select) {
+:where(${scope}) :where(input[type="text"], input[type="url"], input[type="password"], input[type="number"], input[type="search"], input[type="date"], input[type="time"], input[type="datetime-local"], input:not([type]), select) {
   /* 38px tall with its border, in the content box the width is fitted in (see NumberFields, which counts its own room for the padding). */
   height: 36px;
   padding: 0 10px;
