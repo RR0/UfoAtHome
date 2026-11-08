@@ -46,8 +46,8 @@ export class DocsPage implements SitePage {
           "In the case editor, or in the files: who took part, how, and the transcript if you have one."],
         ["/docs/share/", "Share an observation",
           "A link to send, or two lines of HTML on your own page. Both with a working example you can try and copy."],
-        ["/docs/modules/", "Extend UFO@home with modules",
-          "Your own imagery, relief, 3D models or data services: a manifest at an address, loaded in the editor or named by a recording."],
+        ["/docs/modules/", "Add your own modules",
+          "A weather source, a phenomenon drawn in the sky, your imagery, relief or 3D models: how to do it, step by step."],
       ],
       fr: [
         ["/docs/create/", "Créer une observation",
@@ -58,8 +58,8 @@ export class DocsPage implements SitePage {
           "Dans l'éditeur de dossier, ou dans les fichiers : qui y a pris part, comment, et la transcription si vous en avez une."],
         ["/docs/share/", "Partager une observation",
           "Un lien à envoyer, ou deux lignes de HTML sur votre propre page. Les deux avec un exemple qui marche, à essayer et à copier."],
-        ["/docs/modules/", "Étendre UFO@home avec des modules",
-          "Votre imagerie, votre relief, vos modèles 3D ou vos services de données : un manifeste à une adresse, chargé dans l'éditeur ou nommé par un enregistrement."],
+        ["/docs/modules/", "Ajouter vos propres modules",
+          "Une source météo, un phénomène dessiné dans le ciel, votre imagerie, votre relief ou vos modèles 3D : comment faire, pas à pas."],
       ],
       es: [
         ["/docs/create/", "Crear una observación",
@@ -70,8 +70,8 @@ export class DocsPage implements SitePage {
           "En el editor de casos, o en los archivos: quién participó, cómo, y la transcripción si la tienes."],
         ["/docs/share/", "Compartir una observación",
           "Un enlace para enviar, o dos líneas de HTML en tu propia página. Ambos con un ejemplo que funciona, para probar y copiar."],
-        ["/docs/modules/", "Ampliar UFO@home con módulos",
-          "Sus propias imágenes, relieve, modelos 3D o servicios de datos: un manifiesto en una dirección, cargado en el editor o citado por una grabación."],
+        ["/docs/modules/", "Añadir sus propios módulos",
+          "Una fuente meteorológica, un fenómeno dibujado en el cielo, sus imágenes, su relieve o sus modelos 3D: cómo hacerlo, paso a paso."],
       ],
       it: [
         ["/docs/create/", "Creare un'osservazione",
@@ -82,8 +82,8 @@ export class DocsPage implements SitePage {
           "Nell'editor di casi, o nei file: chi ha preso parte, come, e la trascrizione se c'è."],
         ["/docs/share/", "Condividere un'osservazione",
           "Un link da inviare, o due righe di HTML sulla tua pagina. Entrambi con un esempio funzionante da provare e copiare."],
-        ["/docs/modules/", "Estendere UFO@home con moduli",
-          "Le tue immagini, il tuo rilievo, i tuoi modelli 3D o servizi di dati: un manifesto a un indirizzo, caricato nell'editor o citato da una registrazione."],
+        ["/docs/modules/", "Aggiungere i tuoi moduli",
+          "Una fonte meteo, un fenomeno disegnato nel cielo, le tue immagini, il tuo rilievo o i tuoi modelli 3D: come fare, passo dopo passo."],
       ]
     } satisfies Said<ReadonlyArray<Card>>)[language]
     const understanding: ReadonlyArray<Card> = ({
