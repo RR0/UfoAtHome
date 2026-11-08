@@ -173,6 +173,11 @@ export class FrozenDataPanel {
       return
     }
     const { SightingFileEditor } = await import("./SightingFileEditor.js")
+    // Fetched at its own pace: the panel may have gone by then, or moved to another annex, and an editor needs a document to stand in.
+    if (name !== this.shown || !this.editorHost.isConnected) {
+      this.editorFor = undefined
+      return
+    }
     this.editor ??= new SightingFileEditor(this.editorHost, text, edited => this.edited(edited), this.messages.annexEditorLabel,
       { schema: {}, phrases: this.messages.fileSearchPhrases })
   }

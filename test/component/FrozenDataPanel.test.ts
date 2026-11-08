@@ -58,6 +58,17 @@ afterEach(() => {
 })
 
 describe("FrozenDataPanel", () => {
+  it("builds no editor for a panel gone by the time the editor's code has come: it would need a document that may be gone too", async () => {
+    const { root, panel } = mounted(standing(), sources())
+    await panel.prepare("silly-sighting")
+    panel.show("roads")
+    const host = root.querySelector<HTMLElement>("#annex-editor")!
+    root.remove()
+    await import("../../src/component/SightingFileEditor.js")
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(host.childElementCount).toBe(0)
+  })
+
   it("takes the ground at export, names the annexes after the recording, and carries them", async () => {
     const sighting = standing()
     const from = sources()
