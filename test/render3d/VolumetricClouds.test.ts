@@ -1,6 +1,6 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest"
 import { Group, Vector3 } from "three"
-import { CLOUD_EARTH_RADIUS_M as R, cloudRayInterval, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "../../src/render3d/VolumetricClouds.js"
+import { CLOUD_EARTH_RADIUS_M as R, cloudRayInterval, cloudSeed, cloudTransmissionShader, createCloudNoise, VolumetricCloudLayer } from "../../src/render3d/VolumetricClouds.js"
 import { LayeredCloudSystem } from "../../src/render3d/LayeredCloudSystem.js"
 import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import type { CloudLayer } from "../../src/engine/model/CloudLayer.js"
@@ -147,5 +147,24 @@ describe("the cloud noise", () => {
     expect(second).not.toBe(first)
     expect(second.image.data).toBe(first.image.data)
     expect(first.image.data).toHaveLength(64 ** 3)
+  })
+})
+
+describe("how far a deck says its clouds are", () => {
+  const layer: CloudLayer = { id: "deck", type: "cumulus", baseM: 3500, thicknessM: 800, coverage: 0.3, sizeM: 2500, density: 1 }
+  const defines = (deck: VolumetricCloudLayer) => deck.mesh.material.defines?.CLOUDS_BELOW_EYE
+
+  it("says it for a deck below the eye only, the ground under it being behind it", () => {
+    const deck = new VolumetricCloudLayer(createCloudNoise(), 700)
+    deck.update(layer, 1.6)
+    expect(defines(deck)).toBeUndefined()
+    deck.update(layer, 5000)
+    expect(defines(deck)).toBe(1)
+    deck.update(layer, 1.6)
+    expect(defines(deck)).toBeUndefined()
+  })
+
+  it("leaves the phenomena's own reading of the field out of it", () => {
+    expect(cloudTransmissionShader("a_")).not.toContain("projectionMatrix")
   })
 })

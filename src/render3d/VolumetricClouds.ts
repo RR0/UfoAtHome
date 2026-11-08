@@ -6,6 +6,23 @@ const NOISE_SIZE = 64
 /** How many of a layer's own individual clouds its field can be carved around — a uniform array's
  * size, fixed at compile time. */
 export const MAX_HOLES = 8
+
+/**
+ * Whether a deck says how far its clouds really are. A deck is drawn on a shell round the eye, some twenty kilometres out, and its fragments
+ * are tested at that distance: fine looking up, where nothing in the scene stands between the eye and a cloud, and wrong looking down, where
+ * the ground under a cloud nearer than the shell hid it, along a line that followed the edge of what stood within the shell's radius.
+ * Only for a deck below the eye, since a fragment that writes its own depth is no longer spared when something opaque is in front of it.
+ */
+export class CloudDepth {
+  /** Sets it on a deck's material, which is compiled again only when the deck goes from one side of the eye to the other. */
+  static below(material: ShaderMaterial, below: boolean): void {
+    if (below === (material.defines?.CLOUDS_BELOW_EYE !== undefined)) return
+    material.defines ??= {}
+    if (below) material.defines.CLOUDS_BELOW_EYE = 1
+    else delete material.defines.CLOUDS_BELOW_EYE
+    material.needsUpdate = true
+  }
+}
 /** The shader's SLICE: the one slice of the noise every layer reads its weather from. */
 const WEATHER_SLICE = 0.2787
 
@@ -226,6 +243,10 @@ float densityAt(vec3 p) {
   float fade = mix(1.0 - distant, 1.0, smoothstep(0.5, 0.92, coverage));
   return profile * erosion * density * carve * fade;
 }
+// What only the drawn deck needs, not the phenomena's own reading of the field (see cloudTransmissionShader).
+#ifdef CLOUDS_BELOW_EYE
+uniform mat4 projectionMatrix;
+#endif
 void main() {
   vec3 dir = normalize(vCloudDirection);
   vec2 outer = roots(dir.y, baseM + thicknessM);
@@ -248,10 +269,12 @@ void main() {
   float ds = (end - start) / 48.0;
   float transmission = 1.0;
   vec3 radiance = vec3(0.0);
+  float firstM = -1.0;
   for (int i = 0; i < 48; i++) {
     vec3 p = dir * (start + (float(i) + 0.5) * ds);
     float d = densityAt(p);
     if (d > 0.001) {
+      if (firstM < 0.0) firstM = start + (float(i) + 0.5) * ds;
       float lightDepth = 0.0;
       float lightStep = thicknessM / 3.0;
       for (int j = 0; j < 3; j++) {
@@ -286,13 +309,19 @@ void main() {
   float alpha = 1.0 - transmission;
   if (alpha < 0.002) discard;
   gl_FragColor = vec4(radiance / max(0.001, 1.0 - transmission), alpha);
+#ifdef CLOUDS_BELOW_EYE
+  // Where the cloud is, not where its shell is: looking down, the ground under a cloud is behind it however near the shell's radius says.
+  // Never deeper than the shell, which the bodies of the sky stand behind.
+  vec4 cloudClip = projectionMatrix * viewMatrix * vec4(cameraPosition + dir * max(firstM, 1.0), 1.0);
+  gl_FragDepth = min(gl_FragCoord.z, 0.5 * cloudClip.z / cloudClip.w + 0.5);
+#endif
 }`
 
 /** Generate a namespaced transmission function using exactly the displayed density field.
  * A finite distance stops sampling at a phenomenon; clouds behind it cannot hide it.
  */
 export function cloudTransmissionShader(prefix: string): string {
-  const definitions = FRAGMENT.slice(0, FRAGMENT.indexOf("void main()"))
+  const definitions = FRAGMENT.slice(0, FRAGMENT.indexOf("// What only the drawn deck needs"))
     .replace("varying vec3 vCloudDirection;", "")
   const body = `
 float transmissionAt(vec3 dir, float distanceM) {
@@ -374,6 +403,7 @@ export class VolumetricCloudLayer {
     u.seedOffset.value.set((seed % 97) / 97, (seed % 61) / 61, (seed % 37) / 37)
     // An individual cloud stands whatever its layer's cover, nought included.
     this.mesh.visible = u.density.value > 0 && (instance !== undefined || u.coverage.value > 0)
+    CloudDepth.below(this.mesh.material, layer.baseM < eyeM)
   }
 
   /** The shader's own coverageThreshold. */

@@ -7,6 +7,8 @@ import { BackSide, Color, ShaderMaterial, SphereGeometry, Vector3 } from "three"
  */
 
 export interface CloudUniforms {
+  /** How far below the eye the deck is, metres: 0 at or above it (see CloudDepth). */
+  uBelowM: { value: number }
   [uniform: string]: { value: unknown }
   sunDir: { value: Vector3 }
   sunColor: { value: Color }
@@ -280,6 +282,11 @@ uniform float layerHeight;
 uniform vec3 fieldOffset;
 uniform float fibrous;
 varying vec3 vWorldDir;
+#ifdef CLOUDS_BELOW_EYE
+uniform mat4 projectionMatrix;
+/** How far below the eye the deck is, metres. */
+uniform float uBelowM;
+#endif
 // 1 while this deck draws an ice display itself — see IceHaloEffect.hosted — and the display is up.
 uniform float uHaloShown;
 // 1 while this deck is blended as PREMULTIPLIED light (see LayeredCloudSystem.hostHalo), which is
@@ -443,6 +450,12 @@ void main() {
   // Premultiplied, the result is the display's light seen THROUGH the veil, then the veil over
   // what is behind: exactly what the display drawn first and the deck laid over it gave.
   gl_FragColor = uPremultiplied > 0.5 ? vec4(color * alpha + halo * (1.0 - alpha), alpha) : vec4(color, alpha);
+#ifdef CLOUDS_BELOW_EYE
+  // Where the deck is, not where its shell is (see CloudDepth).
+  vec3 toDeck = normalize(vWorldDir);
+  vec4 deckClip = projectionMatrix * viewMatrix * vec4(cameraPosition + toDeck * clamp(uBelowM / max(-toDeck.y, 0.0001), 1.0, 1.0e6), 1.0);
+  gl_FragDepth = min(gl_FragCoord.z, 0.5 * deckClip.z / deckClip.w + 0.5);
+#endif
 }
 `
 
@@ -476,7 +489,8 @@ export function buildCloudMaterial(
     uStrength: { value: 0 },
     uTint: { value: new Vector3(1, 1, 1) },
     uMap: { value: null },
-    uGain: { value: 0 }
+    uGain: { value: 0 },
+    uBelowM: { value: 0 }
   }
   const material = new ShaderMaterial({
     uniforms,

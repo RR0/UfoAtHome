@@ -6,7 +6,7 @@ import type { CloudPick } from "./CloudManipulation.js"
 import type { Weather } from "../engine/model/Weather.js"
 import { buildCloudGeometry, buildCloudMaterial, CloudField } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
-import { CLOUD_EARTH_RADIUS_M, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
+import { CLOUD_EARTH_RADIUS_M, CloudDepth, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
 import { RainbowEffect } from "./RainbowEffect.js"
 import type { IceHaloEffect } from "./IceHaloEffect.js"
 
@@ -85,6 +85,8 @@ export class LayeredCloudSystem {
         deck.uniforms.darkness.value = Math.max(0, Math.min(1, layer.darkness ?? weather.cloudDarkness))
         deck.uniforms.layerHeight.value = Math.max(1, Math.abs(layer.baseM - eyeM) * 0.25 * 1400 / Math.max(50, layer.sizeM))
         deck.uniforms.fibrous.value = layer.type === "cirrus" ? 1 : 0
+        deck.uniforms.uBelowM.value = Math.max(0, eyeM - layer.baseM)
+        CloudDepth.below(deck.surface.material, layer.baseM < eyeM)
       }
     })
     // The strongest ice deck may be another one now, or a new one.
