@@ -374,6 +374,9 @@ a.card:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
 /* Balanced, so a title that wraps splits into two lines of a size rather than a full line and one
    orphaned word — "Un avion de ligne sur une pose de 20" over "s". */
 .demo-card h3 { margin: 0 0 0.3rem; font-size: 1.02rem; text-wrap: balance; }
+/* A title, not a link to spot among others: the picture above it opens the same recording. Still an anchor, for the keyboard. */
+.demo-card h3 a { color: inherit; text-decoration: none; }
+.demo-card h3 a:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
 .demo-card figcaption p { margin: 0; font-size: 0.88rem; color: var(--ink-dim); line-height: 1.5; }
 
 /* ---------------------------------------------------------------- section anchors */
