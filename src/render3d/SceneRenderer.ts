@@ -1560,6 +1560,7 @@ export class SceneRenderer {
    * `headingDeg` undefined (unknown heading) leaves the camera's current yaw untouched rather
    * than snapping it to a default. */
   setObserverPose(pose: ObserverPose): void {
+    this.updateLookPatch(pose)
     // YXZ, so the third component is a rotation about the camera's OWN forward axis once heading
     // and pitch have aimed it — which is exactly what roll is.
     //
@@ -1667,6 +1668,7 @@ export class SceneRenderer {
     this.disposeMesh(this.terrainMesh)
     this.terrainMesh = undefined
     this.dropFarRing()
+    this.dropLookPatch()
     this.terrainOrigin = undefined
     this.terrainMeshOrigin = undefined
     this.terrainAttribution = undefined
@@ -1735,6 +1737,66 @@ export class SceneRenderer {
       place(this.farRing.mesh, this.farRing.origin)
       this.farRing.mesh.position.y = y
     }
+    if (this.lookPatch) place(this.lookPatch.mesh, this.lookPatch.origin)
+  }
+
+  /** The sharp ground round the point someone flying looks at — see TerrainReach.lookPatchFor. */
+  private lookPatch?: { mesh: Mesh, origin: { lat: number, lng: number }, radiusM: number }
+  private lookPatchToken = 0
+  private lookPatchAsked?: { lat: number, lng: number, radiusM: number }
+  /** How far what is looked at may move, as a share of the patch's radius, before another is built round it. */
+  private static readonly LOOK_PATCH_KEPT_SHARE = 0.3
+  /** Over the patch of the place. */
+  private static readonly LOOK_PATCH_RENDER_ORDER = TERRAIN_RENDER_ORDER + 0.1
+
+  /** Builds, keeps or takes down the sharp ground under what is looked at. Plain arithmetic at each pose, until there is something to build. */
+  private updateLookPatch(pose: ObserverPose): void {
+    if (pose.lat === undefined || pose.lng === undefined || !this.terrainMesh || this.terrainProviders.patches) return
+    const wanted = TerrainReach.lookPatchFor(pose.elevationM ?? 0, pose.pitchDeg, this.terrainRadius)
+    if (!wanted) {
+      this.lookPatchAsked = undefined
+      this.lookPatchToken++
+      if (this.lookPatch) {
+        this.disposeMesh(this.lookPatch.mesh)
+        this.lookPatch = undefined
+        this.render()
+      }
+      return
+    }
+    const headingRad = (pose.headingDeg ?? 0) * Math.PI / 180
+    const lat = pose.lat + wanted.distanceM * Math.cos(headingRad) / 111_320
+    const lng = pose.lng + wanted.distanceM * Math.sin(headingRad) / (111_320 * Math.cos(pose.lat * Math.PI / 180))
+    const asked = this.lookPatchAsked
+    if (asked) {
+      const moved = geoToLocalMeters(lat, lng, asked.lat, asked.lng)
+      if (Math.hypot(moved.x, moved.z) < asked.radiusM * SceneRenderer.LOOK_PATCH_KEPT_SHARE) return
+    }
+    this.lookPatchAsked = { lat, lng, radiusM: wanted.radiusM }
+    const token = ++this.lookPatchToken
+    const providers = this.terrainProviders
+    void buildTerrainMesh(lat, lng, { elevation: providers.elevation, imagery: providers.imagery }, wanted.radiusM, undefined, {
+      innerM: 0,
+      referenceElevationM: this.siteElevationM
+    }).then(({ mesh }) => {
+      if (token !== this.lookPatchToken || this.terrainProviders !== providers || !this.terrainMesh) {
+        this.disposeMesh(mesh)
+        return
+      }
+      if (this.lookPatch) this.disposeMesh(this.lookPatch.mesh)
+      mesh.renderOrder = SceneRenderer.LOOK_PATCH_RENDER_ORDER
+      mesh.position.y = this.terrainMesh.position.y
+      const material = mesh.material as MeshLambertMaterial
+      material.polygonOffset = true
+      material.polygonOffsetFactor = -2
+      material.polygonOffsetUnits = -8
+      this.lookPatch = { mesh, origin: { lat, lng }, radiusM: wanted.radiusM }
+      const drift = geoToLocalMeters(lat, lng, pose.lat!, pose.lng!)
+      mesh.position.x = drift.x
+      mesh.position.z = drift.z
+      this.scene.add(mesh)
+      this.compileNextFrameOffThread()
+      this.render()
+    }, error => console.warn("No sharp ground under what is looked at:", error))
   }
 
   setTerrainOrigin(lat?: number, lng?: number, onSettled?: () => void): void {
@@ -1930,6 +1992,14 @@ export class SceneRenderer {
       this.compileNextFrameOffThread()
       this.render()
     }, error => console.warn("Far ground unavailable, the patch of the place stays the only ground:", error))
+  }
+
+  private dropLookPatch(): void {
+    this.lookPatchToken++
+    this.lookPatchAsked = undefined
+    if (!this.lookPatch) return
+    this.disposeMesh(this.lookPatch.mesh)
+    this.lookPatch = undefined
   }
 
   private dropFarRing(): void {

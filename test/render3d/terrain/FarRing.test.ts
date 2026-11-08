@@ -52,6 +52,22 @@ describe("the patch round someone flying", () => {
 
   it("never asks for a network from an aircraft, and never goes past the reach", () => {
     expect(TerrainReach.patchRadiusFor(30000, 500)).toBeGreaterThan(TerrainReach.ROADS_MAX_RADIUS_M)
-    expect(TerrainReach.patchRadiusFor(30000, 11700)).toBe(30000)
+    expect(TerrainReach.patchRadiusFor(30000, 11700)).toBe(12000)
+    expect(TerrainReach.patchRadiusFor(4000, 11700)).toBe(4000)
+  })
+})
+
+describe("the sharp ground under what someone flying looks at", () => {
+  it("is built when it lies past what the patch round them shows sharply", () => {
+    expect(TerrainReach.lookPatchFor(3000, -28, 12000)).toBeUndefined()
+    const near = TerrainReach.lookPatchFor(8000, -28, 12000)
+    expect(near?.distanceM).toBeCloseTo(15046, -1)
+    expect(near?.radiusM).toBeCloseTo(6018, -1)
+  })
+
+  it("is not asked for on the ground, looking level, or past what the air lets through", () => {
+    expect(TerrainReach.lookPatchFor(100, -28, 3000)).toBeUndefined()
+    expect(TerrainReach.lookPatchFor(8000, -1, 12000)).toBeUndefined()
+    expect(TerrainReach.lookPatchFor(11700, -10, 12000)).toBeUndefined()
   })
 })

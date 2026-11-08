@@ -46,6 +46,8 @@ export class TerrainReach {
   private static readonly SHARP_GROUND_HEIGHTS = 4
   /** The least of it: a little over ROADS_MAX_RADIUS_M, for no network to be asked for from an aircraft. */
   private static readonly SHARP_GROUND_MIN_M = 6000
+  /** The most of it: past this a photograph is stretched too thin again, some 19 m a pixel here. What is looked at further off has its own (see lookPatchFor). */
+  private static readonly SHARP_GROUND_MAX_M = 12000
 
   /**
    * How wide the patch of the place is built round an observer whose ground reaches `groundRadiusM`, at `elevationM`. Their whole reach for
@@ -55,7 +57,27 @@ export class TerrainReach {
    */
   static patchRadiusFor(groundRadiusM: number, elevationM: number): number {
     if (elevationM < TerrainReach.AIRBORNE_FROM_M) return groundRadiusM
-    return Math.min(groundRadiusM, Math.max(TerrainReach.SHARP_GROUND_MIN_M, elevationM * TerrainReach.SHARP_GROUND_HEIGHTS))
+    const sharpM = Math.min(TerrainReach.SHARP_GROUND_MAX_M, Math.max(TerrainReach.SHARP_GROUND_MIN_M, elevationM * TerrainReach.SHARP_GROUND_HEIGHTS))
+    return Math.min(groundRadiusM, sharpM)
+  }
+
+  /** How far the look patch reaches, as a share of how far away it is looked at: a telephoto's field and more. */
+  private static readonly LOOK_PATCH_SHARE = 0.4
+  /** Past this share of the patch's radius, what is looked at has left the patch's sharp part. */
+  private static readonly LOOK_WITHIN_SHARE = 0.6
+  /** Looking less steeply down than this, the eye reads no ground point: only the land going off to the horizon. */
+  private static readonly LOOK_DOWN_FROM_DEG = 3
+
+  /**
+   * Whether someone flying looks at ground the patch round them cannot show sharply, and where: high up, a lens aimed down reads ground many
+   * kilometres off, past even a patch of four heights; so that ground gets a sharp patch of its own, round the point looked at.
+   * Undefined when the patch round the observer does.
+   */
+  static lookPatchFor(elevationM: number, pitchDeg: number, patchRadiusM: number): { distanceM: number, radiusM: number } | undefined {
+    if (elevationM < TerrainReach.AIRBORNE_FROM_M || pitchDeg > -TerrainReach.LOOK_DOWN_FROM_DEG) return undefined
+    const distanceM = elevationM / Math.tan(-pitchDeg * Math.PI / 180)
+    if (distanceM <= patchRadiusM * TerrainReach.LOOK_WITHIN_SHARE || distanceM > TerrainReach.MAX_GROUND_VISIBILITY_M) return undefined
+    return { distanceM, radiusM: Math.max(TerrainReach.SHARP_GROUND_MIN_M, distanceM * TerrainReach.LOOK_PATCH_SHARE) }
   }
 
   /** How far an observer goes from the centre of a patch of `radiusM` before another is built: 150 m matters for a 900 m patch and is meaningless for a 30 km one. */
