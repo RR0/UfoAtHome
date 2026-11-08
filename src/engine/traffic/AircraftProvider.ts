@@ -66,8 +66,10 @@ export type AircraftTraffic =
 export interface AircraftTrafficPart {
   traced: number
   seen: number
-  /** The record may have seen more than `seen`: it was asked for no more. */
+  /** The record may have seen more than `seen`: it returned no more. */
   moreSeen: boolean
+  /** The radius `seen` was counted within, km: farther out, nothing was asked. */
+  withinKm: number
 }
 
 /**

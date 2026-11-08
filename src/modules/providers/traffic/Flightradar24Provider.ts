@@ -31,6 +31,8 @@ interface Snapshot {
   t: number
   place: string
   flights: Fr24Flight[]
+  /** The radius the flights were last asked within: the smallest that held enough of them. */
+  withinKm: number
 }
 
 /** An answer of the API that is not the data: why it is not, in the terms an AircraftTraffic says it. */
@@ -58,9 +60,14 @@ export interface Flightradar24ProviderOptions {
  *
  * What it charges shapes what is asked. Its positions are a snapshot of ONE instant, at 8 credits per flight returned, and a flight's
  * whole track costs 40 credits, while the cheapest plan gives 30 000 credits a month and 10 requests a minute. Asking a snapshot per
- * minute of a window would spend the month in a few openings, so a question is one snapshot in the middle of the window (who was
+ * minute of a window would spend the month in a few openings, so a question is one instant in the middle of the window (who was
  * there), then the tracks of the few nearest flights (where they went). Each flight's track being whole, the hour the trails ask for
- * costs nothing more; it holds only the flights of that one snapshot, which the answer says through `partial`.
+ * costs nothing more; it holds only the flights of that one instant, which the answer says through `partial`.
+ *
+ * The nearest have to be asked for by asking near. A snapshot returns no more than the plan allows (measured: 20 on the cheapest,
+ * though `limit` asks for more, a number its documentation does not state), and in no order of distance: over 100 km around Roissy
+ * they were a sample of the box, with 3 of the 9 flights within 20 km. So the radius starts small and only widens while it holds too
+ * few flights, which also pays for no more of them than are needed.
  *
  * A question that nothing has answered yet waits a little, because an editor asks again at each change of the place or the time, and
  * paying for the positions a drag went through is paying for nothing. And there is a ceiling per page, in case something asks in a
@@ -73,9 +80,13 @@ export class Flightradar24Provider implements AircraftProvider {
   static readonly FIRST_MS = Date.UTC(2016, 4, 11)
   /** How far around the observer flights are looked for, km: smaller than the free archive's, since each one found is paid for. */
   static readonly DEFAULT_RADIUS_KM = 100
-  /** The most flights a snapshot returns, hence the most it costs. */
+  /** The radii asked in turn, km, up to the radius of the question. */
+  static readonly RINGS_KM = [25, 50]
+  /** The most flights a snapshot is asked to return, hence the most it can cost. */
   static readonly SNAPSHOT_LIMIT = 60
-  /** How many of them get their track. With the snapshot, this fits in the cheapest plan's 10 requests a minute. */
+  /** The most the cheapest plan returns, measured: as many flights as that may be a sample of more. */
+  static readonly SMALLEST_PLAN_RESULTS = 20
+  /** How many get their track. With one snapshot, this fits in the cheapest plan's 10 requests a minute; a wider radius waits its turn (see paced). */
   static readonly MAX_TRACED = 8
   static readonly CREDITS_PER_SNAPSHOT_FLIGHT = 8
   static readonly CREDITS_PER_TRACK = 40
@@ -83,7 +94,9 @@ export class Flightradar24Provider implements AircraftProvider {
   static readonly CREDITS_FOR_NOTHING = 1
   /** What a page may spend before it stops asking, about one sixth of the cheapest plan's month. */
   static readonly MAX_CREDITS_PER_PAGE = 5000
-  private static readonly WORST_CASE_CREDITS = Flightradar24Provider.SNAPSHOT_LIMIT * Flightradar24Provider.CREDITS_PER_SNAPSHOT_FLIGHT
+  /** Every smaller radius with one flight too few, the widest with all it can return, and the tracks. */
+  private static readonly WORST_CASE_CREDITS = (Flightradar24Provider.MAX_TRACED - 1) * Flightradar24Provider.RINGS_KM.length * Flightradar24Provider.CREDITS_PER_SNAPSHOT_FLIGHT
+    + Flightradar24Provider.SNAPSHOT_LIMIT * Flightradar24Provider.CREDITS_PER_SNAPSHOT_FLIGHT
     + Flightradar24Provider.MAX_TRACED * Flightradar24Provider.CREDITS_PER_TRACK
   private static readonly API = "https://fr24api.flightradar24.com/api"
   /** Flights at 0 ft are on the ground: they would be paid for, and are nobody's light in the sky. */
@@ -136,7 +149,8 @@ export class Flightradar24Provider implements AircraftProvider {
         partial: {
           traced: traced.length,
           seen: snapshot.flights.length,
-          moreSeen: snapshot.flights.length >= Flightradar24Provider.SNAPSHOT_LIMIT
+          moreSeen: snapshot.flights.length >= Flightradar24Provider.SMALLEST_PLAN_RESULTS,
+          withinKm: snapshot.withinKm
         }
       }
     } catch (error) {
@@ -197,7 +211,21 @@ export class Flightradar24Provider implements AircraftProvider {
     return asked
   }
 
+  /** The flights of that instant in the smallest radius that holds enough of them to trace, nearest first. */
   private async askSnapshot(token: string, observer: GeoPoint, t: number, radiusKm: number, place: string): Promise<Snapshot> {
+    const radii = [...Flightradar24Provider.RINGS_KM.filter(ring => ring < radiusKm), radiusKm]
+    let flights: Fr24Flight[] = []
+    let withinKm = radiusKm
+    for (const ring of radii) {
+      withinKm = ring
+      flights = await this.flightsWithin(token, observer, t, ring)
+      if (flights.length >= Flightradar24Provider.MAX_TRACED) break
+    }
+    const distance = (flight: Fr24Flight) => AircraftSighting.groundDistanceKm(observer, { lat: flight.lat, lng: flight.lon })
+    return { t, place, withinKm, flights: [...flights].sort((a, b) => distance(a) - distance(b)) }
+  }
+
+  private async flightsWithin(token: string, observer: GeoPoint, t: number, radiusKm: number): Promise<Fr24Flight[]> {
     const query = new URLSearchParams({
       timestamp: String(Math.floor(t / 1000)),
       bounds: Flightradar24Provider.boundsAround(observer, radiusKm),
@@ -211,11 +239,13 @@ export class Flightradar24Provider implements AircraftProvider {
       const description: AircraftDescription = { type: flight.type || undefined, registration: flight.reg || undefined }
       if (description.type || description.registration) this.descriptions.set(TrafficIds.keyOf(Flightradar24Provider.addressOf(flight)), description)
     }
-    const distance = (flight: Fr24Flight) => AircraftSighting.groundDistanceKm(observer, { lat: flight.lat, lng: flight.lon })
-    return { t, place, flights: [...flights].sort((a, b) => distance(a) - distance(b)) }
+    return flights
   }
 
-  /** The whole recorded track of a flight, asked once. A position the API estimated is left out: it is not what a receiver heard. */
+  /**
+   * The whole recorded track of a flight, asked once. A position the API estimated is left out: it is not what a receiver heard. So is one
+   * at 0 ft, which is how it says the ground, whatever the ground's height: the free archive leaves those out as well.
+   */
   private trackOf(token: string, flight: Fr24Flight): Promise<AircraftPoint[]> {
     let track = this.tracks.get(flight.fr24_id)
     if (!track) {
@@ -224,7 +254,7 @@ export class Flightradar24Provider implements AircraftProvider {
         const points = legs.flatMap(leg => leg.tracks ?? [])
         this.creditsSpent += points.length > 0 ? Flightradar24Provider.CREDITS_PER_TRACK : Flightradar24Provider.CREDITS_FOR_NOTHING
         return points
-          .filter(point => point.source?.toUpperCase() !== "ESTIMATED")
+          .filter(point => point.source?.toUpperCase() !== "ESTIMATED" && point.alt > 0)
           .map(point => ({
             t: Date.parse(point.timestamp),
             lat: point.lat,

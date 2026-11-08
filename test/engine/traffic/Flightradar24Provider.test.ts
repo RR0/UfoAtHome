@@ -35,10 +35,10 @@ describe("Flightradar24Provider", () => {
     expect(calls).toEqual([])
   })
 
-  test("asks one snapshot in the middle of the window, in the air only, with the key and the version the API requires", async () => {
-    const { calls, fetchImpl } = api([])
+  test("asks the middle of the window, in the air only, with the key and the version the API requires", async () => {
+    const { calls, fetchImpl } = api(Array.from({ length: 8 }, (_, i) => flight(`cc00${i}000`, i)))
     await providerOf(fetchImpl).between(PARIS, START, END)
-    expect(calls).toHaveLength(1)
+    expect(calls.filter(call => call.url.pathname.endsWith("/flight-positions/full"))).toHaveLength(1)
     const { url, headers } = calls[0]
     expect(url.origin + url.pathname).toBe("https://fr24api.flightradar24.com/api/historic/flight-positions/full")
     expect(url.searchParams.get("timestamp")).toBe(String((START + END) / 2000))
@@ -52,24 +52,50 @@ describe("Flightradar24Provider", () => {
     expect(east).toBeGreaterThan(PARIS.lng)
   })
 
+  test("widens the radius only while it holds too few flights, and says the one it stopped at", async () => {
+    const widths: number[] = []
+    const { calls, fetchImpl } = api(() => {
+      widths.push(widths.length)
+      return widths.length === 1 ? [flight("aa000000", 1)] : Array.from({ length: 9 }, (_, i) => flight(`dd00${i}000`, i))
+    })
+    const answer = await providerOf(fetchImpl).between(PARIS, START, END)
+    const snapshots = calls.filter(call => call.url.pathname.endsWith("/flight-positions/full"))
+    const spans = snapshots.map(call => { const [north, south] = call.url.searchParams.get("bounds")!.split(",").map(Number); return Math.round((north - south) * 111.32 / 2) })
+    expect(spans).toEqual([25, 50])
+    expect(answer).toMatchObject({ status: "found", partial: { traced: 8, seen: 9, moreSeen: false, withinKm: 50 } })
+  })
+
+  test("goes as far as the question's radius and no further, and asks nothing more of a sky that is empty", async () => {
+    const { calls, fetchImpl } = api([])
+    const answer = await providerOf(fetchImpl).between(PARIS, START, END)
+    expect(calls).toHaveLength(3)
+    expect(answer).toMatchObject({ status: "found", tracks: [], creditsSpent: 3, partial: { seen: 0, withinKm: 100 } })
+  })
+
+  test("as many flights as the smallest plan returns may be a sample of more, and says so", async () => {
+    const { fetchImpl } = api(Array.from({ length: 20 }, (_, i) => flight(`ee0${String(i).padStart(2, "0")}000`, i)))
+    expect(await providerOf(fetchImpl).between(PARIS, START, END)).toMatchObject({ partial: { seen: 20, moreSeen: true, withinKm: 25 } })
+  })
+
   test("traces only the nearest flights, says it, and counts what that cost", async () => {
     const flights = Array.from({ length: 12 }, (_, i) => flight(`aa00${String(i).padStart(2, "0")}00`, 90 - i))
     const { calls, fetchImpl } = api(flights)
     const answer = await providerOf(fetchImpl).between(PARIS, START, END)
     expect(answer.status).toBe("found")
     if (answer.status !== "found") return
-    expect(answer.partial).toEqual({ traced: 8, seen: 12, moreSeen: false })
+    expect(answer.partial).toEqual({ traced: 8, seen: 12, moreSeen: false, withinKm: 25 })
     const asked = calls.filter(call => call.url.pathname.endsWith("/flight-tracks")).map(call => call.url.searchParams.get("flight_id"))
     expect(asked).toEqual(flights.slice(4).reverse().map(f => f.fr24_id))
     expect(answer.creditsSpent).toBe(12 * 8 + 8 * 40)
     expect(answer.tracks).toHaveLength(8)
   })
 
-  test("reads a track in the project's terms, keeping to the window and the radius, without what the API only estimated", async () => {
+  test("reads a track in the project's terms, keeping to the window and the radius, without what the API only estimated or what stood on the ground", async () => {
     const { fetchImpl } = api([flight("abc12300", 5)], () => [
       point(START - 60_000),
       point(START + 30_000),
       point(START + 40_000, { source: "ESTIMATED" }),
+      point(START + 45_000, { alt: 0 }),
       point(START + 50_000, { lon: PARIS.lng + 10 }),
       point(END + 60_000)
     ])
@@ -107,7 +133,7 @@ describe("Flightradar24Provider", () => {
     const latest = provider.between({ ...PARIS, lat: 52 }, START, END)
     expect(await replaced).toEqual({ status: "failed" })
     expect((await latest).status).toBe("found")
-    expect(calls).toHaveLength(1)
+    expect(calls).toHaveLength(3)
     expect(calls[0].url.searchParams.get("bounds")).not.toContain("48.")
   })
 
@@ -149,7 +175,7 @@ describe("Flightradar24Provider", () => {
     await provider.between(PARIS, START, END)
     token = "production"
     await provider.between(PARIS, START, END)
-    expect(calls.map(call => call.headers.Authorization)).toEqual(["Bearer sandbox", "Bearer production"])
+    expect(new Set(calls.map(call => call.headers.Authorization))).toEqual(new Set(["Bearer sandbox", "Bearer production"]))
   })
 
   test("its date range is known without asking", () => {

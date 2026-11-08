@@ -270,7 +270,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sourceKeyHint: string
   /** Why the source of the air traffic did not answer. */
   aircraftProblems: Record<AircraftProblem, string>
-  /** That a paid source gives the track of only some of the flights it saw. {traced}, {seen}. */
+  /** That a paid source gives the track of only some of the flights it saw. {traced}, {seen}, {km}. */
   aircraftPartial: string
   /** What the page has spent so far on a paid source. {credits}. */
   aircraftCredits: string

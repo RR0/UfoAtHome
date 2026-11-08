@@ -173,7 +173,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
     budget: "Cette page a atteint sa limite de dépense : rechargez-la pour continuer.",
     network: "Le service n'a pas pu être joint.",
   },
-  aircraftPartial: "Trace des {traced} vols les plus proches sur les {seen} vus à cet instant : une absence n'exclut rien.",
+  aircraftPartial: "Trace des {traced} vols les plus proches sur les {seen} vus dans un rayon d'environ {km} km à cet instant : une absence n'exclut rien.",
   aircraftCredits: "Environ {credits} crédits dépensés sur cette page.",
   sourceKind: "Données",
   placeNamePlaceholder: "Valensole, France",

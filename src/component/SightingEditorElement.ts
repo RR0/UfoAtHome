@@ -3687,7 +3687,8 @@ export class SightingEditorElement extends HTMLElement {
     if (partial) {
       said.push(this.messages.aircraftPartial
         .replace("{traced}", String(partial.traced))
-        .replace("{seen}", `${partial.seen}${partial.moreSeen ? "+" : ""}`))
+        .replace("{seen}", `${partial.seen}${partial.moreSeen ? "+" : ""}`)
+        .replace("{km}", String(partial.withinKm)))
     }
     if (creditsSpent) said.push(this.messages.aircraftCredits.replace("{credits}", String(creditsSpent)))
     if (problem) MessageStyle.show(this.aircraftStatus, [this.messages.aircraftProblems[problem], ...said].join(" "), "warning")
