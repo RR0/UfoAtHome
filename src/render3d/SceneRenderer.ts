@@ -3696,7 +3696,7 @@ export class SceneRenderer {
 
   /** What the picture is recorded on and how it was exposed — see setMedium. */
   private medium?: { kind: RecordingMedium["kind"], iso: number, autoExposure: boolean, maxIso?: number, metering: MeteringMode, exposureSeconds: number, fNumber: number,
-    development?: RecordingMedium["development"], exposureFollowMs?: number }
+    development?: RecordingMedium["development"], exposureFollowMs?: number, print?: RecordingMedium["print"] }
 
   /**
    * What the picture is recorded on, and the exposure it was given: the shutter, the f-number and
@@ -3710,7 +3710,7 @@ export class SceneRenderer {
       ? {
         kind: medium.kind, iso: iso ?? medium.iso, autoExposure: medium.autoExposure === true && iso === undefined, maxIso: medium.maxIso,
         metering: metering ?? medium.metering ?? "average", exposureSeconds, fNumber, development: medium.development,
-        exposureFollowMs: medium.exposureFollowMs
+        exposureFollowMs: medium.exposureFollowMs, print: medium.print
       }
       : undefined
     if (JSON.stringify(next) === JSON.stringify(this.medium)) return
@@ -4956,6 +4956,7 @@ export class SceneRenderer {
         this.renderOnce(ghosts.frame)
         // Shown until the pose started just below has a film to show (see presentExposure): then not what is shown, and not read back by a
         // pick (the ghost a still pointer named was not found in it).
+        ghosts.setFilmPrint(this.medium?.print, this.decorTime, this.camera.aspect)
         ghosts.develop(this.renderer, ghosts.frame, this.ghostOptics, 1, this.sunBeyondPicture(), !this.poseFollows)
         this.onMapSubjectBounds?.(this.exposureSubjectBounds)
       } else {
@@ -5984,6 +5985,7 @@ export class SceneRenderer {
     this.applyMedium()
     const gain = this.exposureInstants / this.exposureInstantsDone
     const ghosts = this.usableGhostPass()
+    ghosts?.setFilmPrint(this.medium?.print, this.decorTime, this.camera.aspect)
     if (ghosts && this.exposureAccumulation) ghosts.develop(this.renderer, this.exposureAccumulation.developed, this.ghostOptics, gain, this.sunBeyondPicture())
     else this.exposureAccumulation?.develop(this.renderer, gain)
     this.onMapSubjectBounds?.(this.exposureSubjectBounds)

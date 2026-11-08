@@ -1,3 +1,4 @@
+import { FilmPrints, type FilmPrint } from "./FilmPrint.js"
 import type { LensGhost } from "./LensGhost.js"
 import { DigitalSlrs } from "./DigitalSlrs.js"
 import { VisualAids } from "./VisualAids.js"
@@ -126,6 +127,8 @@ export interface RecordingMedium {
   /** How the device develops what its sensor records: "computational" for a phone's default processing, which underexposes to keep the
    * highlights and lifts the rest back (see PhoneDevelopment); a raw sensor's straight line when absent. */
   development?: "computational"
+  /** What the copy that reached us makes of it, for a film seen through one (see FilmPrint). None when absent. */
+  print?: FilmPrint
 }
 
 /**
@@ -379,6 +382,23 @@ export const INSTRUMENTS: Instrument[] = [
     // A colour negative of ISO 100, the film most of these were loaded with; a recording states its
     // own when it knows it (Sighting.iso).
     medium: { kind: "negative", iso: 100 }
+  },
+  {
+    // A cinema camera of the 1970s, as television shows it (see FilmPrints.BROADCAST_35MM): what aerial and documentary films reach us as.
+    // A shutter of 180 degrees at 24 frames a second, and a 4:3 frame, since a broadcast shows no more. The lens is whatever a recording states.
+    id: "cine-35mm-broadcast",
+    category: "camera",
+    name: "35 mm film camera, seen on television",
+    projection: "rectilinear",
+    frame: { widthMm: 21.3, heightMm: 16, focalLengthMm: 50, focalRangeMm: { minMm: 18, maxMm: 300 } },
+    fNumber: 11,
+    fNumberRange: { min: 2, max: 22 },
+    exposureSeconds: 1 / 48,
+    exposureRangeSeconds: { min: 1 / 96, max: 1 / 24 },
+    years: { from: 1950, to: 1995 },
+    apertureBlades: 6,
+    detailUm: 15,
+    medium: { kind: "negative", iso: 100, print: FilmPrints.BROADCAST_35MM }
   },
   {
     // The lens a photographed light is most often taken with, and the one entry here that ZOOMS: a

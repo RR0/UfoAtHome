@@ -120,6 +120,7 @@ export const sceneNames_it: SceneNames = {
     "rectilinear-lens": "Fotocamera, modello sconosciuto",
     "roamer-1-120": "Roamer 1, pellicola 120",
     "instamatic-126": "Instamatic, pellicola 126",
+    "cine-35mm-broadcast": "Cinepresa 35 mm, vista in televisione",
     "slr-35mm-50": "Reflex 35 mm, obiettivo 50 mm",
     "slr-35mm-zoom": "Reflex 35 mm, zoom 70-210 mm",
     "phone-landscape": "Telefono, in orizzontale",

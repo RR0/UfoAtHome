@@ -1,9 +1,10 @@
 import {
   HalfFloatType, LinearFilter, LinearMipmapLinearFilter, Mesh, NoBlending, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2,
-  Vector3, WebGLRenderTarget, type Camera, type WebGLRenderer
+  Vector3, Vector4, WebGLRenderTarget, type Camera, type WebGLRenderer
 } from "three"
 import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
+import { FilmPrints, type FilmFrame, type FilmPrint } from "../engine/instrument/FilmPrint.js"
 
 /**
  * A light brighter than the picture can hold: a half float holds 65 504, and a pixel is given at most a little less (the Sun's disc is
@@ -451,7 +452,16 @@ export class GhostPass {
         uOverlay: { value: null },
         uGhosts: { value: this.ghostLayer.texture },
         uGain: { value: 1 },
-        uKept: { value: 1 }
+        uKept: { value: 1 },
+        uPrintOn: { value: 0 },
+        uPrintContrast: { value: 1 },
+        uPrintTint: { value: new Vector3(1, 1, 1) },
+        uPrintSoftness: { value: 0 },
+        uPrintWeave: { value: new Vector2() },
+        uPrintGrain: { value: 0 },
+        uPrintSeed: { value: 0 },
+        uPrintAspect: { value: 1 },
+        uPrintSpecks: { value: Array.from({ length: FilmPrints.MAX_SPECKS }, () => new Vector4(0, 0, 0, 1)) }
       },
       vertexShader,
       fragmentShader: `
@@ -462,14 +472,63 @@ export class GhostPass {
         uniform sampler2D uGhosts;
         uniform float uGain;
         uniform float uKept;
+        uniform float uPrintOn;
+        uniform float uPrintContrast;
+        uniform vec3 uPrintTint;
+        uniform float uPrintSoftness;
+        uniform vec2 uPrintWeave;
+        uniform float uPrintGrain;
+        uniform float uPrintSeed;
+        uniform float uPrintAspect;
+        uniform vec4 uPrintSpecks[${FilmPrints.MAX_SPECKS}];
         varying vec2 vUv;
+        // What the glass scattered into halos is no longer in each light's own image, nor is what a drop covers.
+        vec3 sceneAt(vec2 at, vec4 texel) {
+          vec4 ghosts = texture2D(uGhosts, at);
+          return texel.rgb * uKept * (1.0 - ghosts.a) + ghosts.rgb;
+        }
+        float printNoise(vec2 at) {
+          return fract(sin(dot(at, vec2(12.9898, 78.233)) + uPrintSeed * 91.7) * 43758.5453);
+        }
+        // What the print makes of the picture as shown (see FilmPrint): its tones and colour, its grain, the dust on this frame.
+        vec3 printed(vec3 shown, vec2 at) {
+          vec3 toned = clamp(0.5 + (shown - 0.5) * uPrintContrast, 0.0, 1.0) * uPrintTint;
+          // A grain a little coarser than a pixel, sampled on a grid of its own.
+          vec2 cell = floor(at * vec2(uPrintAspect, 1.0) * 540.0);
+          toned += (printNoise(cell) + printNoise(cell + 17.0) - 1.0) * 2.45 * uPrintGrain * sqrt(max(0.05, 1.0 - abs(2.0 * dot(toned, vec3(0.3, 0.59, 0.11)) - 1.0)));
+          for (int i = 0; i < ${FilmPrints.MAX_SPECKS}; i++) {
+            vec4 speck = uPrintSpecks[i];
+            if (speck.z <= 0.0) continue;
+            vec2 away = (at - speck.xy) * vec2(uPrintAspect, 1.0) / speck.z;
+            // Not a disc: a bit of fluff, by how far round it is.
+            float rim = 1.0 + 0.35 * sin(atan(away.y, away.x) * 3.0 + speck.x * 40.0);
+            toned *= mix(speck.w, 1.0, smoothstep(0.7 * rim, 1.1 * rim, length(away)));
+          }
+          return toned;
+        }
         void main() {
-          vec4 texel = texture2D(uSource, vUv) * uGain;
-          // What the glass scattered into halos is no longer in each light's own image, nor is what a drop covers.
-          vec4 ghosts = texture2D(uGhosts, vUv);
-          vec3 scene = texel.rgb * uKept * (1.0 - ghosts.a) + ghosts.rgb;
+          vec2 at = vUv + uPrintWeave * uPrintOn;
+          vec4 texel = texture2D(uSource, at) * uGain;
+          vec3 scene = sceneAt(at, texel);
           // A picture with nothing laid over it may not even have cleared its overlay (see EYE_UNIFORMS).
-          gl_FragColor = vec4(finish(scene, texture2D(uOverlay, vUv) * uGain * uHasOverlay, lampOf(texel.a)), 1.0);
+          vec4 overlay = texture2D(uOverlay, vUv) * uGain * uHasOverlay;
+          if (uPrintOn < 0.5) {
+            gl_FragColor = vec4(finish(scene, overlay, lampOf(texel.a)), 1.0);
+            return;
+          }
+          // Softened by a ring of taps round each pixel: what makes the spread a share of the height is its radius.
+          vec2 spread = 1.41 * uPrintSoftness * vec2(1.0 / uPrintAspect, 1.0);
+          vec3 soft = scene;
+          for (int i = 0; i < 8; i++) {
+            float angle = float(i) * 0.7853982;
+            vec2 tap = at + spread * vec2(cos(angle), sin(angle));
+            soft += sceneAt(tap, texture2D(uSource, tap) * uGain);
+          }
+          soft /= 9.0;
+          // What is laid over the picture is not on the print: a film laid over a reconstruction is already its own print.
+          vec3 shown = printed(finish(soft, vec4(0.0), lampOf(texel.a)), at);
+          vec3 laid = overlay.a > 0.001 ? finish(vec3(0.0), vec4(overlay.rgb / overlay.a, 1.0)) : vec3(0.0);
+          gl_FragColor = vec4(mix(shown, laid, overlay.a), 1.0);
         }
       `,
       blending: NoBlending,
@@ -478,6 +537,26 @@ export class GhostPass {
     })
     this.quad = new Mesh(new PlaneGeometry(2, 2), this.copyMaterial)
     this.quadScene.add(this.quad)
+  }
+
+  /** The print the pictures to come are seen through, at the frame of `t` milliseconds (see FilmPrint); undefined for none. */
+  setFilmPrint(print: FilmPrint | undefined, t: number, aspect: number): void {
+    const uniforms = this.developMaterial.uniforms
+    uniforms.uPrintOn.value = print ? 1 : 0
+    if (!print) return
+    const frame: FilmFrame = FilmPrints.frame(print, FilmPrints.frameAt(print, t))
+    uniforms.uPrintContrast.value = print.contrast
+    ;(uniforms.uPrintTint.value as Vector3).set(...print.tint)
+    uniforms.uPrintSoftness.value = print.softness
+    ;(uniforms.uPrintWeave.value as Vector2).set(...frame.weave)
+    uniforms.uPrintGrain.value = print.grain
+    uniforms.uPrintSeed.value = frame.seed
+    uniforms.uPrintAspect.value = aspect
+    const specks = uniforms.uPrintSpecks.value as Vector4[]
+    specks.forEach((speck, i) => {
+      const it = frame.specks[i]
+      speck.set(it?.u ?? 0, it?.v ?? 0, it?.radius ?? 0, it?.kept ?? 1)
+    })
   }
 
   /**
