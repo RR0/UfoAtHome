@@ -1772,11 +1772,11 @@ export class SceneRenderer {
     // on it, tens of kilometres from an aircraft. Built at the flat disc's own radius (see
     // groundRadiusFor), so real relief and imagery reach the horizon instead of stopping a few
     // hundred metres out and leaving the rest of the visible ground a flat haze — the providers
-    // pick a coarser zoom for the wider span on their own (see TileMath.chooseZoomForTileEdge),
-    // which is exactly right: from up there you see more ground, in less detail.
+    // pick a coarser zoom for the wider span on their own (see TileMath.chooseZoomForTileEdge).
+    // From an aircraft that alone made the ground a blur: see TerrainReach.patchRadiusFor.
     // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
     // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
-    const radiusM = frozenRadiusM ?? Math.max(this.groundRadius, this.decorTerrainRadiusM)
+    const radiusM = frozenRadiusM ?? Math.max(TerrainReach.patchRadiusFor(this.groundRadius, this.observerElevationM), this.decorTerrainRadiusM)
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.

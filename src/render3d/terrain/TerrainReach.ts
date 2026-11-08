@@ -40,6 +40,24 @@ export class TerrainReach {
     return Math.max(TerrainReach.GROUND_RADIUS_M, Math.min(horizonM, TerrainReach.MAX_GROUND_VISIBILITY_M))
   }
 
+  /** From this height an observer is flying: what they look at is well below them, and their reach is all the air lets them see. */
+  private static readonly AIRBORNE_FROM_M = 300
+  /** How many of their own heights the sharp ground reaches round someone flying: at 30 degrees below the horizon they look two heights away. */
+  private static readonly SHARP_GROUND_HEIGHTS = 4
+  /** The least of it: a little over ROADS_MAX_RADIUS_M, for no network to be asked for from an aircraft. */
+  private static readonly SHARP_GROUND_MIN_M = 6000
+
+  /**
+   * How wide the patch of the place is built round an observer whose ground reaches `groundRadiusM`, at `elevationM`. Their whole reach for
+   * someone on the ground. For someone flying, not: one photograph of a given size stretched over thirty kilometres each way gives 47 m a
+   * pixel, a field of 250 m five pixels, a blur where a camera at 3 km sees a field pattern. Round them the patch is what they can read,
+   * sharper as they are lower, and the far ring (see needsFarRing, which it then calls for) carries the ground out to their reach.
+   */
+  static patchRadiusFor(groundRadiusM: number, elevationM: number): number {
+    if (elevationM < TerrainReach.AIRBORNE_FROM_M) return groundRadiusM
+    return Math.min(groundRadiusM, Math.max(TerrainReach.SHARP_GROUND_MIN_M, elevationM * TerrainReach.SHARP_GROUND_HEIGHTS))
+  }
+
   /** How far an observer goes from the centre of a patch of `radiusM` before another is built: 150 m matters for a 900 m patch and is meaningless for a 30 km one. */
   static rebuildDistanceFor(radiusM: number): number {
     return TerrainReach.REBUILD_DISTANCE_M * (radiusM / TerrainReach.GROUND_RADIUS_M)

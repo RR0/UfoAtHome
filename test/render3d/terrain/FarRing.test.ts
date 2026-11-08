@@ -37,3 +37,21 @@ describe("ElevationGaps", () => {
     expect([...heights]).toEqual([0, 0, 0, 0])
   })
 })
+
+describe("the patch round someone flying", () => {
+  it("is the whole reach of someone on the ground", () => {
+    expect(TerrainReach.patchRadiusFor(4500, 1.6)).toBe(4500)
+    expect(TerrainReach.patchRadiusFor(30000, 100)).toBe(30000)
+  })
+
+  it("is what they can read from up there, the far ring carrying the rest", () => {
+    const radius = TerrainReach.patchRadiusFor(30000, 3000)
+    expect(radius).toBe(12000)
+    expect(TerrainReach.needsFarRing(radius, 3000, 0)).toBe(true)
+  })
+
+  it("never asks for a network from an aircraft, and never goes past the reach", () => {
+    expect(TerrainReach.patchRadiusFor(30000, 500)).toBeGreaterThan(TerrainReach.ROADS_MAX_RADIUS_M)
+    expect(TerrainReach.patchRadiusFor(30000, 11700)).toBe(30000)
+  })
+})
