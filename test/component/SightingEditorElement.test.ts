@@ -10,6 +10,8 @@ import { ApparentSize } from "../../src/engine/shape/ApparentSize.js"
 import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import type { WeatherProvider } from "../../src/engine/weather/WeatherProvider.js"
 import type { Weather } from "../../src/engine/model/Weather.js"
+import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
+import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
 import { SOUND_KINDS } from "../../src/engine/model/Sound.js"
 import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 import { Comets } from "../../src/engine/astronomy/Comets.js"
@@ -5109,6 +5111,38 @@ describe("SightingEditorElement inferred weather", () => {
     await waitFor(() => element.sightingData.weatherSource !== undefined)
     expect(element.sightingData.weatherSource).toEqual(SOURCE)
     expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.1)
+  })
+
+  it("asks another record again as soon as it is picked, rather than leaving the last one's weather under its name", async () => {
+    const element = await mount(recordProvider())
+    stateDateAndPlace(element)
+    await waitFor(() => element.sightingData.weatherSource !== undefined)
+    const other = { id: "acme-weather", name: "ACME Weather", url: "https://api.acme.example/history" }
+    ModuleRegistry.install({
+      id: "acme",
+      name: "ACME",
+      contributes: {
+        weather: [{
+          id: other.id, name: other.name, credit: "© ACME", creditUrl: "https://acme.example",
+          create: () => ({
+            getWeather: async ({ points }) => ({
+              source: other,
+              samples: points.map(({ time }) => ({ time, weather: { ...DEFAULT_WEATHER, cloudCover: 0.7 } }))
+            })
+          })
+        }]
+      }
+    })
+    try {
+      const picker = weatherField(element, "weatherSource") as HTMLSelectElement
+      picker.value = other.id
+      picker.dispatchEvent(new Event("change"))
+      await waitFor(() => element.sightingData.weatherSource?.id === other.id)
+      expect(element.sightingData.weatherSource).toEqual(other)
+      expect(element.sightingData.weatherTrack?.keyframes[0].weather.cloudCover).toBe(0.7)
+    } finally {
+      ModuleRegistry.uninstall("acme")
+    }
   })
 
   it("keeps the looked-up values and their record when the weather is read from the file, until they are changed", async () => {

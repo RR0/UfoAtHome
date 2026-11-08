@@ -5441,6 +5441,8 @@ export class SightingEditorElement extends HTMLElement {
       if (source.id !== this.chosenSourceId.get("weather")) {
         this.chosenSourceId.set("weather", source.id)
         this.weatherInference = new WeatherInference(source.create())
+        // Another record says another weather: what the last one said is not left standing under this one's name.
+        this.scheduleWeatherLookup(true)
       }
     }
     this.setWeatherFromFile(fromFile)
