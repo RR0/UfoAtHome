@@ -12,31 +12,34 @@ register()
 registerSighting()
 registerScene()
 
-const editor = document.getElementById("editor") as SightingEditorElement
-const loadSampleButton = document.getElementById("load-sample") as HTMLButtonElement
+// What follows wires index.html. The pages that try one recording (*-edit.html, *-try.html) load this only to register the elements above.
+const loadSampleButton = document.getElementById("load-sample") as HTMLButtonElement | null
+if (loadSampleButton) {
+  const editor = document.getElementById("editor") as SightingEditorElement
 
-loadSampleButton.addEventListener("click", async () => {
-  const response = await fetch("/demo-data/example-sighting.json")
-  const json = (await response.json()) as SightingRecordingJson
-  editor.sightingData = json
-})
+  loadSampleButton.addEventListener("click", async () => {
+    const response = await fetch("/demo-data/example-sighting.json")
+    const json = (await response.json()) as SightingRecordingJson
+    editor.sightingData = json
+  })
 
-const scene = document.getElementById("scene") as SceneElement
-scene.setCloudRendering("volume")
-;(document.getElementById("observers") as SightingElement).scene.setCloudRendering("volume")
-const sceneCaseSelect = document.getElementById("scene-case") as HTMLSelectElement
-// The site's own catalogue, not a list kept here: the one kept here named files that had been renamed, and loaded nothing.
-for (const group of new DemoCatalogue().groups) {
-  for (const demo of group.demos) {
-    const option = document.createElement("option")
-    option.value = demo.src
-    option.textContent = demo.title.en
-    sceneCaseSelect.append(option)
+  const scene = document.getElementById("scene") as SceneElement
+  scene.setCloudRendering("volume")
+  ;(document.getElementById("observers") as SightingElement).scene.setCloudRendering("volume")
+  const sceneCaseSelect = document.getElementById("scene-case") as HTMLSelectElement
+  // The site's own catalogue, not a list kept here: the one kept here named files that had been renamed, and loaded nothing.
+  for (const group of new DemoCatalogue().groups) {
+    for (const demo of group.demos) {
+      const option = document.createElement("option")
+      option.value = demo.src
+      option.textContent = demo.title.en
+      sceneCaseSelect.append(option)
+    }
   }
-}
-sceneCaseSelect.value = "/demo-data/observer-chiles.json"
-sceneCaseSelect.addEventListener("change", () => {
-  void scene.loadFromSrc(sceneCaseSelect.value)
-})
+  sceneCaseSelect.value = "/demo-data/observer-chiles.json"
+  sceneCaseSelect.addEventListener("change", () => {
+    void scene.loadFromSrc(sceneCaseSelect.value)
+  })
 
-setupCloudDemo(editor)
+  setupCloudDemo(editor)
+}
