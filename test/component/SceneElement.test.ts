@@ -74,6 +74,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setIndoorLook(): void {}
     setWeather(): void {}
     setDecor(decor: { id: string }[]): void { decorSet.push(decor) }
+    groundAltitudeM = 0
     setDecorPresence(presence: ReadonlyMap<string, { fromMs: number; untilMs: number }>): void { presenceSet.push(presence) }
     setDecorSunlight(): void {}
     setContrails(trails: { id: string; points: { forms: boolean; persistent: boolean }[] }[]): void { contrailsSet.push(trails) }

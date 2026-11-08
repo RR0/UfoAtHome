@@ -2791,7 +2791,7 @@ export class SceneRenderer {
     const current = this.decorCurrentPose
     const observer = {
       lat: current?.lat ?? reference.lat, lng: current?.lng ?? reference.lng,
-      heightM: current?.lat !== undefined ? current.elevationM ?? 0 : reference.elevationM ?? 0
+      heightM: this.siteElevationM + (current?.lat !== undefined ? current.elevationM ?? 0 : reference.elevationM ?? 0)
     }
     const date = this.skyEventsStart ? new Date(this.skyEventsStart.getTime() + this.decorTime) : undefined
     const magnitudeLimit = this.lastAstronomy ? this.magnitudeLimitOf(this.lastAstronomy) : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
@@ -3266,7 +3266,8 @@ export class SceneRenderer {
       // seat moved up and down on it.
       const sharesTheEye = placement.altitudeM > SceneRenderer.AIRBORNE_M && Math.hypot(x, z) < SceneRenderer.CABIN_MATE_RANGE_M
       const groundY = sharesTheEye ? this.poseCameraY - 1.6 - this.poseElevationM : group.userData.footprintGroundY
-      group.position.set(x, groundY + placement.altitudeM, z)
+      const y = object.id.startsWith(TrafficIds.ID_PREFIX) ? SceneRenderer.trafficHeight(placement.altitudeM, group.userData.footprintGroundY) : groundY + placement.altitudeM
+      group.position.set(x, y, z)
       if (object.kind === "crop") {
         const distance = Math.hypot(x, z)
         group.visible = distance <= CROP_VISIBLE_DISTANCE_M
@@ -4200,6 +4201,20 @@ export class SceneRenderer {
   transmittanceTo(x: number, y: number, z: number): Rgb {
     const eye = this.camera.position
     return this.air.transmittance(this.siteElevationM + eye.y, this.siteElevationM + y, Math.hypot(x - eye.x, y - eye.y, z - eye.z))
+  }
+
+  /** The altitude of the ground under the observer, metres above the sea: what a height over that ground has to be added to, to be an altitude. 0 until the relief has come. */
+  get groundAltitudeM(): number {
+    return this.siteElevationM
+  }
+
+  /**
+   * How high an aircraft of a record is drawn, against the ground under the observer (see TrafficDecor.offsetOf): at its altitude and not over the ground beneath
+   * it, which it already includes. Never in the ground, though: what is recorded is a barometric altitude, off by the pressure of the day, and one landing at an
+   * airfield higher than the observer can read lower than the runway.
+   */
+  static trafficHeight(altitudeM: number, groundY: number): number {
+    return Math.max(altitudeM, groundY)
   }
 
   private setSiteElevation(elevationM: number): void {

@@ -50,6 +50,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setIndoorLook(): void {}
     setWeather(): void {}
     setDecor(): void {}
+    groundAltitudeM = 0
     setDecorPresence(): void {}
     setDecorSunlight(): void {}
     setContrails(): void {}

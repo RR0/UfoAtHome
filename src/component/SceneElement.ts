@@ -1015,7 +1015,7 @@ export class SceneElement extends HTMLElement {
     // Not kept: the editor changes a recording in place, and the fireballs of the archive arrive after it. Cheap enough, asked only when
     // the player's button is drawn, the pieces themselves being kept per re-entry (see ReentrySighting.piecesOf).
     return reentries.length > 0 && lat !== undefined && lng !== undefined
-      && ReentrySighting.detonationsOf(reentries, { lat, lng, heightM: pose?.elevationM ?? 0 }).length > 0
+      && ReentrySighting.detonationsOf(reentries, { lat, lng, heightM: this.altitudeOf(pose) }).length > 0
   }
 
   /** The detonations last worked out, and what from (see hearDetonations). */
@@ -2117,7 +2117,7 @@ export class SceneElement extends HTMLElement {
     const lat = pose?.lat ?? DEFAULT_OBSERVER_POSE.lat!
     const lng = pose?.lng ?? DEFAULT_OBSERVER_POSE.lng!
     const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
-    const observer: ObserverGeo = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    const observer: ObserverGeo = { lat, lng, elevationM: this.altitudeOf(pose) }
     // Every instant, like the decor: a satellite crosses a pixel in a fraction of a frame, and a pose
     // long enough to trail the stars trails a satellite across the whole picture.
     this.pushSatellitesAt(startDate, t, observer)
@@ -2134,7 +2134,7 @@ export class SceneElement extends HTMLElement {
     const dazzling = burning.filter(reentry => ReentrySighting.mayDazzle(reentry))
     this.sceneRenderer.setRetinaHistory(dazzling.length === 0 ? undefined : at => {
       const then = resolveObserverPoseAt(sighting, at)
-      const place = { lat: then?.lat ?? lat, lng: then?.lng ?? lng, heightM: then?.elevationM ?? observer.elevationM }
+      const place = { lat: then?.lat ?? lat, lng: then?.lng ?? lng, heightM: then ? this.altitudeOf(then) : observer.elevationM }
       return { views: ReentrySighting.viewsAt(dazzling, at, place), pose: then }
     }, sighting)
     // The events of the sky drawn by their kinds (see SkyEventKind): the launches, the beams, the re-entries, and any a module brought; placed
@@ -2387,7 +2387,7 @@ export class SceneElement extends HTMLElement {
     const spanMs = Math.max((sighting.event.durationSeconds ?? 0) * 1000, this.ufoElement.seekableDuration)
     const startMs = startDate?.getTime()
     const key = startMs === undefined || pose?.lat === undefined || pose.lng === undefined ? ""
-      : `${this.aircraftSource.id}|${startMs}+${spanMs}|${pose.lat.toFixed(3)},${pose.lng.toFixed(3)}|${Math.round(pose.elevationM ?? 0)}`
+      : `${this.aircraftSource.id}|${startMs}+${spanMs}|${pose.lat.toFixed(3)},${pose.lng.toFixed(3)}|${Math.round(pose.elevationM ?? 0)}|${Math.round(this.sceneRenderer.groundAltitudeM)}`
     if (this.traffic?.key === key) return this.traffic.set
     // What was heard of the air aloft was heard for other aircraft, at another place or time: an editor that loaded another recording would
     // otherwise freeze the last one's air into this one.
@@ -2404,7 +2404,8 @@ export class SceneElement extends HTMLElement {
     }
     const asked: NonNullable<SceneElement["traffic"]> = { key, status: "loading", startMs, observer: { lat: pose.lat, lng: pose.lng } }
     this.traffic = asked
-    const observer = { lat: pose.lat, lng: pose.lng, heightM: pose.elevationM ?? 0 }
+    // The aircraft are placed from the ground under the observer, which is what the decor's heights are measured from, whoever stands higher on it.
+    const observer = { lat: pose.lat, lng: pose.lng, heightM: this.sceneRenderer.groundAltitudeM }
     // A minute after the recording, and five before. An aircraft heard only a few seconds after it begins was there before,
     // and the still image of a paused scene at its first instant would otherwise be an empty sky: a minute is the longest gap
     // across which a track is still one flight. And the sound of an aircraft is the sound that left it long before: one forty
@@ -2412,7 +2413,7 @@ export class SceneElement extends HTMLElement {
     // then has to be in the record asked for.
     const after = AircraftSighting.MAX_GAP_S * 1000
     const before = SceneElement.SOUND_LOOKBACK_MS
-    const geo = { lat: pose.lat, lng: pose.lng, elevationM: pose.elevationM ?? 0 }
+    const geo = { lat: pose.lat, lng: pose.lng, elevationM: this.altitudeOf(pose) }
     const build = (runtime: TrafficRuntime, models?: Map<string, AircraftModel>) =>
       runtime.TrafficDecor.from(asked.tracks ?? [], observer, startMs, runtime.TrafficDecor.MAX_OBJECTS, { models, sunElevationAt: point => this.sunElevationAt(point, geo) })
     void provider.between(observer, startMs - before, startMs + spanMs + after).then(async answer => {
@@ -2497,7 +2498,7 @@ export class SceneElement extends HTMLElement {
     if (!runtime) return undefined
     const description = traffic.descriptions?.get(TrafficIds.keyOf(flight))
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
-    const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: this.altitudeOf(pose) }
     // Against the same ambient noise as what is played, so that the label and the sound say the same.
     const ambientDbA = runtime.AmbientNoise.dbA(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
     const info = runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs, { ambientDbA })
@@ -2530,7 +2531,7 @@ export class SceneElement extends HTMLElement {
   private sortOutAudible(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
     if (!asked.set || !asked.observer) return
     // Against the quietest the place could be: the weather only ever adds to it, so what cannot be heard there cannot be heard at all.
-    asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: 0 }, { ambientDbA: runtime.AmbientNoise.BASE_DB_A })
+    asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: this.sceneRenderer.groundAltitudeM }, { ambientDbA: runtime.AmbientNoise.BASE_DB_A })
   }
 
   /**
@@ -2556,7 +2557,7 @@ export class SceneElement extends HTMLElement {
     const here = { lat: pose?.lat ?? origin?.lat, lng: pose?.lng ?? origin?.lng }
     if (here.lat !== undefined && here.lng !== undefined) {
       this.decorAircraftHearing ??= new runtime.DecorAircraftHearing()
-      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
+      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: this.altitudeOf(pose) }, options,
         decor => this.decorModelSounds.get(decor.model?.id ?? "")))
       voices.push(...this.bodyVoices(sighting, t, options, runtime))
       voices.sort((a, b) => b.levelDbA - a.levelDbA)
@@ -2601,7 +2602,7 @@ export class SceneElement extends HTMLElement {
     if (!traffic || !set || !traffic.audible || traffic.startMs === undefined || !traffic.observer) return []
     // Heard against the weather the scene plays, and in proportion to it: an aircraft at the level of the wind is played as loud as the wind bed is.
     // Not only the aircraft that are in the record now: the sound of one that has left it is still arriving.
-    const observer = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: pose?.elevationM ?? 0 }
+    const observer = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: this.altitudeOf(pose) }
     return runtime.TrafficSound.voices(traffic.audible, set.flights, traffic.descriptions ?? new Map(), TrafficIds.keyOf, observer, traffic.startMs + t, options)
   }
 
@@ -2707,10 +2708,18 @@ export class SceneElement extends HTMLElement {
     }
   }
 
+  /**
+   * How high the observer is above the sea, which is what anything computed from where things are in the world has to be told. A pose's `elevationM` is not that: it is
+   * the height over the ground under them, 0 for someone standing on it, and the scene knows the ground's altitude once its relief has come.
+   */
+  private altitudeOf(pose: { elevationM?: number } | undefined): number {
+    return this.sceneRenderer.groundAltitudeM + (pose?.elevationM ?? 0)
+  }
+
   /** Where the observer stands at `atMs`, who may be walking or driving; the place the traffic was asked for when that says nothing. */
   private observerAt(atMs: number, asked: { lat: number; lng: number }): GeoPoint {
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, atMs)
-    return { lat: pose?.lat ?? asked.lat, lng: pose?.lng ?? asked.lng, heightM: pose?.elevationM ?? 0 }
+    return { lat: pose?.lat ?? asked.lat, lng: pose?.lng ?? asked.lng, heightM: this.altitudeOf(pose) }
   }
 
   /** Tells whoever listens that the traffic changed, and draws it. */
@@ -3010,7 +3019,7 @@ export class SceneElement extends HTMLElement {
     const lat = pose?.lat ?? place?.lat
     const lng = pose?.lng ?? place?.lng
     if (!satellites || lat === undefined || lng === undefined) return undefined
-    return satellites.passes.positionsAt(date, { lat, lng, elevationM: pose?.elevationM ?? 0 })
+    return satellites.passes.positionsAt(date, { lat, lng, elevationM: this.altitudeOf(pose) })
   }
 
   satellitePassesDuring(durationMs: number): SatellitePass[] {
@@ -3024,7 +3033,7 @@ export class SceneElement extends HTMLElement {
     const startDate = sightingTimeToDate(sighting.event.time ?? {}, lng, sighting.event.utcOffsetHours)
     if (!startDate) return []
     const spanMs = Math.min(Math.max(durationMs, 0), 4 * 3_600_000)
-    const observer = { lat, lng, elevationM: pose?.elevationM ?? 0 }
+    const observer = { lat, lng, elevationM: this.altitudeOf(pose) }
     const key = JSON.stringify([this.satellitesFor, startDate.getTime(), lat, lng, observer.elevationM, spanMs])
     if (this.satellitePassesMemo?.key === key) return this.satellitePassesMemo.passes
     const stepS = Math.max(10, Math.ceil(spanMs / 1000 / 600))

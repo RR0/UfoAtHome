@@ -81,6 +81,7 @@ export class TrafficDecor {
   }
 
   /** The east/north/up offsets of a point from the observer, metres. */
+  // `observer.heightM` is an altitude above the sea, as the recorded altitude of the point is: the ground under the observer, for the decor (see SceneRenderer.trafficHeight).
   static offsetOf(observer: GeoPoint, point: AircraftPoint): { eastM: number; northM: number; upM: number; altitudeDeg: number; distanceKm: number } {
     const sky = ReentrySighting.seenFrom(observer, { lat: point.lat, lng: point.lng, heightM: point.altitudeFt * TrafficDecor.FT_TO_M })
     const metres = sky.distanceKm * 1000
