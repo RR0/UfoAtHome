@@ -1,3 +1,4 @@
+import { DecorAircraftHearing } from "../../src/engine/place/DecorAircraftHearing.js"
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
 import type { AircraftProvider, AircraftTraffic } from "../../src/engine/traffic/AircraftProvider.js"
@@ -1056,6 +1057,18 @@ describe("SceneElement air traffic", () => {
     afterEach(() => {
       for (const spy of spies) spy.mockRestore()
       spies.length = 0
+    })
+
+    it("gives the ear of the decor's aircraft a height over the ground, as their tracks are, whatever the altitude of the place", async () => {
+      const voices = vi.spyOn(DecorAircraftHearing.prototype, "voices")
+      spies.push(voices)
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      ;(element as unknown as { sceneRenderer: { groundAltitudeM: number } }).sceneRenderer.groundAltitudeM = 1400
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(60_000)
+      expect(voices.mock.calls[voices.mock.calls.length - 1][2].heightM).toBe(0)
     })
 
     it("plays what is heard at the instant shown, from the first tick, once there are aircraft", async () => {

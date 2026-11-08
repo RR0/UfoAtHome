@@ -44,7 +44,8 @@ export class DecorAircraftHearing {
 
   /**
    * The voices of the decor aircraft at `t` (ms from the start of the recording), the loudest first. `modelSound` is what the catalogue says of
-   * a model by its id, when it is known.
+   * a model by its id, when it is known. `observer.heightM` is over the ground, as the altitudes of the decor's tracks are: unlike an aircraft of a record, nothing here is
+   * measured from the sea.
    */
   voices(sighting: Sighting, t: number, observer: { lat: number, lng: number, heightM: number }, options: TrafficSoundOptions = {},
     modelSound: (decor: DecorObject) => AircraftKind | "silent" | undefined = () => undefined): AircraftVoice[] {

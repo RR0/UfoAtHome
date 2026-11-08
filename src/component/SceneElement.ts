@@ -2557,7 +2557,8 @@ export class SceneElement extends HTMLElement {
     const here = { lat: pose?.lat ?? origin?.lat, lng: pose?.lng ?? origin?.lng }
     if (here.lat !== undefined && here.lng !== undefined) {
       this.decorAircraftHearing ??= new runtime.DecorAircraftHearing()
-      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: this.altitudeOf(pose) }, options,
+      // Over the ground, not above the sea, as the heights of the decor are: this is the one ear that is not given an altitude (see DecorAircraftHearing.voices).
+      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
         decor => this.decorModelSounds.get(decor.model?.id ?? "")))
       voices.push(...this.bodyVoices(sighting, t, options, runtime))
       voices.sort((a, b) => b.levelDbA - a.levelDbA)
