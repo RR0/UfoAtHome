@@ -51,7 +51,8 @@ export class Messages {
    * What stands for texts of any depth that have not come yet (objects of texts, lists, texts with placeholders): every text in them
    * empty, every object or list in them blank too, so that an interface built before its words arrive draws nothing rather than failing.
    * For a component that redraws all it shows once its words have come (see SightingEditorElement.applyMessages, and the audits of
-   * test/i18n that check it does), never for words to show. Unlike `none`, a blank text is no string: compare nothing to it.
+   * test/i18n that check it does), never for words to show. Unlike `none`, a blank text is no string: compare nothing to it, and
+   * give it to nothing that takes only strings (Intl.ListFormat throws).
    */
   static blank<T extends object>(): T {
     const blank: object = new Proxy(() => blank, {

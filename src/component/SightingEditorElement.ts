@@ -10408,6 +10408,8 @@ export class SightingEditorElement extends HTMLElement {
    * one nobody standing here saw whatever its magnitude on paper.
    */
   private refreshSkyCandidates(): void {
+    // Nothing to say it with yet: a blank name is no string, and Intl.ListFormat takes only strings (see listed). applyMessages states it.
+    if (!this.worded) return
     this.resetMeteorRankIfSkyChanged()
     const sighting = this.ufoElement.sighting
     const place = sighting.event.place?.[0]
@@ -11790,6 +11792,8 @@ export class SightingEditorElement extends HTMLElement {
     this.syncPlaybackControls()
     this.labelPanels(messages)
     this.refreshFileItems()
+    // A recording opened before the words came, and nothing playing that would ask again.
+    this.refreshSkyCandidates()
   }
 
   /** The header's own labels, and each section's title and the sentence under it, in `messages`. */

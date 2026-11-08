@@ -253,6 +253,28 @@ describe("the sky and the instrument for an eclipse, the Moon and a filter", () 
     typeInto(element, "lng", lng)
   }
 
+  it("waits for its words to say anything of the sky, then says it without being asked again", async () => {
+    const errors: unknown[] = []
+    const onError = (event: ErrorEvent): void => {
+      errors.push(event.error ?? event.message)
+    }
+    window.addEventListener("error", onError)
+    try {
+      const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+      element.weatherProvider = NO_RECORD_PROVIDER
+      document.body.appendChild(element)
+      // Before anything has been awaited: their chunks cannot have come. A sky at dusk, satellites still lit: a list of names (Intl.ListFormat
+      // takes only strings, and a blank name is none), as on the first load of a page that opens on a recording.
+      overPlace(element, "2025-12-30T16:10", "0", "48.99", "2.45")
+      expect(skyLine(element)).toBe("")
+      await element.ready
+      expect(errors).toEqual([])
+      expect(skyLine(element)).not.toBe("")
+    } finally {
+      window.removeEventListener("error", onError)
+    }
+  })
+
   it("puts a solar filter on at the playhead, takes it off later, and says so only where it takes something off", async () => {
     const element = await mount()
     const select = element.shadowRoot!.getElementById("filter") as HTMLSelectElement
