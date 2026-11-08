@@ -2930,6 +2930,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private async loadFile(file: File): Promise<void> {
+    this.showLoadError(undefined)
     try {
       const bytes = new Uint8Array(await new Promise<ArrayBuffer>((resolve, reject) => {
         const reader = new FileReader()
@@ -2955,7 +2956,7 @@ export class SightingEditorElement extends HTMLElement {
       // The recording now open came from a file, not from the address still sitting in the field.
       this.importInput.url = ""
     } catch (error) {
-      window.alert(this.importErrorFor(error))
+      this.showLoadError(error)
     }
   }
 
@@ -3026,6 +3027,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private async loadUrl(url: string): Promise<void> {
+    this.showLoadError(undefined)
     try {
       const fetched = await SightingFetch.recording(url)
       // A case is not a recording: whoever edits cases takes it (see offerCase).
@@ -3054,8 +3056,24 @@ export class SightingEditorElement extends HTMLElement {
       this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
     } catch (error) {
-      window.alert(this.importErrorFor(error))
+      this.showLoadError(error)
     }
+  }
+
+  /** Why the last recording asked for was not loaded, kept to be said again in the words that come after: a `src` can fail before they do. */
+  private loadError?: { error: unknown }
+
+  /**
+   * Says on the editor itself why a recording was not loaded, whichever group is open, until the next one is asked for. A native dialog
+   * says nothing where the host refuses it (see the confirm overlay's reason), and nothing either before the editor's words have come.
+   */
+  private showLoadError(error: unknown): void {
+    this.loadError = error === undefined ? undefined : { error }
+    this.sayLoadError()
+  }
+
+  private sayLoadError(): void {
+    MessageStyle.show(this.shadow.getElementById("load-error") as HTMLElement, this.loadError && this.importErrorFor(this.loadError.error), "error")
   }
 
   /**
@@ -11330,6 +11348,7 @@ export class SightingEditorElement extends HTMLElement {
     } else {
       this.messages = messages
     }
+    this.sayLoadError()
     this.shapeAddMenu.setKinds(this.shapeAddKinds())
     this.contextAddVertexButton.textContent = messages.addVertex
     this.contextDeleteVertexButton.textContent = messages.deleteVertex

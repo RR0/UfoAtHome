@@ -36,6 +36,8 @@ export const html = `
 </header>
 <!-- Why the recording was not saved, when it would be read back as something else than what is meant (see RecordingActors). -->
 <p id="save-refused" class="save-refused" role="alert" hidden></p>
+<!-- Why the recording asked for was not loaded (see SightingEditorElement.showLoadError). -->
+<p id="load-error" class="save-refused" role="alert" hidden></p>
 <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 <div class="scene-card">
 

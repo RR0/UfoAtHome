@@ -2764,16 +2764,32 @@ describe("SightingEditorElement import controls", () => {
     expect(fileInput.value).toBe("")
   })
 
-  it("alerts and leaves sightingData unchanged when the picked file isn't valid JSON", async () => {
+  const loadError = (element: SightingEditorElement): HTMLElement => element.shadowRoot!.getElementById("load-error")!
+
+  it("says so on the editor and leaves sightingData unchanged when the picked file isn't valid JSON", async () => {
     const element = await mount()
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
     const before = element.sightingData
     const fileInput = element.shadowRoot!.getElementById("import-file") as HTMLInputElement
     setFile(fileInput, "not json")
-    await waitFor(() => alertSpy.mock.calls.length > 0)
+    await waitFor(() => !loadError(element).hidden)
 
-    expect(alertSpy).toHaveBeenCalledOnce()
+    expect(loadError(element).textContent).not.toBe("")
+    expect(loadError(element).classList).toContain("message-error")
     expect(element.sightingData).toEqual(before)
+  })
+
+  it("says why a recording failed to load even before the editor's words have come, then takes it back at the next one", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 404 }))
+    const element = document.createElement(ELEMENT_NAME) as SightingEditorElement
+    element.setAttribute("src", "https://example.org/missing.json")
+    document.body.appendChild(element)
+    await element.ready
+    await waitFor(() => !loadError(element).hidden && loadError(element).textContent !== "")
+    expect(loadError(element).textContent).toContain("404")
+
+    const fileInput = element.shadowRoot!.getElementById("import-file") as HTMLInputElement
+    setFile(fileInput, JSON.stringify(element.sightingData))
+    await waitFor(() => loadError(element).hidden)
   })
 
   it("loads a sighting fetched from the URL field", async () => {
@@ -2824,17 +2840,16 @@ describe("SightingEditorElement import controls", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("alerts on a failed fetch (non-ok response)", async () => {
+  it("says what a failed fetch answered (non-ok response)", async () => {
     const element = await mount()
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {})
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 404 }))
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     urlInput.value = "https://example.org/missing.json"
     const loadButton = element.shadowRoot!.getElementById("import-url-button") as HTMLButtonElement
     loadButton.click()
-    await new Promise(resolve => setTimeout(resolve, 0))
+    await waitFor(() => !loadError(element).hidden)
 
-    expect(alertSpy).toHaveBeenCalledOnce()
+    expect(loadError(element).textContent).toContain("404")
   })
 })
 
