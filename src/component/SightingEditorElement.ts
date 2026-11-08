@@ -2290,7 +2290,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly onModulesChanged = (event: Event): void => {
     for (const relist of this.relisters) relist()
     const point = (event as CustomEvent<string>).detail
-    if (point === "weather") this.fillWeatherProvider()
+    if (point === "weather") {
+      this.followWeatherRecord()
+      this.fillWeatherProvider()
+    }
     if (point === "surroundings" && this.surveyIds) void this.fillScenerySources()
     // A catalogue that came or went changes what the model ids of the recording are drawn with.
     if (point === "decorModels") this.sceneElement.setDecorModelProvider(this.decorModelProvider)
@@ -5443,6 +5446,7 @@ export class SightingEditorElement extends HTMLElement {
         this.weatherInference = new WeatherInference(source.create())
         // Another record says another weather: what the last one said is not left standing under this one's name.
         this.scheduleWeatherLookup(true)
+        this.syncWeatherProvider()
       }
     }
     this.setWeatherFromFile(fromFile)
@@ -5474,6 +5478,24 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshFileItems()
   }
 
+  /**
+   * Keeps asking the record the recording's weather came from, whether it was there when the recording was opened or came with its module
+   * after: the default one would answer the next change of date with another record's weather, and be credited for this one's until then.
+   * A record that went with its module is no longer asked: the default one is, the next time something asks.
+   */
+  private followWeatherRecord(): void {
+    const stated = WEATHER_SOURCES.find(source => source.id === this.ufoElement.sighting.weatherSource?.id)
+    const chosen = this.chosenSourceId.get("weather")
+    if (stated && stated.id !== dataSourceById(WEATHER_SOURCES, chosen).id) {
+      if (this.weatherLookupPending) return
+      this.chosenSourceId.set("weather", stated.id)
+      this.weatherInference = new WeatherInference(stated.create())
+    } else if (!stated && chosen !== undefined && !WEATHER_SOURCES.some(source => source.id === chosen)) {
+      this.chosenSourceId.delete("weather")
+      this.weatherInference = new WeatherInference(dataSourceById(WEATHER_SOURCES, undefined).create())
+    }
+  }
+
   /** The weather's picker, as the box under it says: its records, then the file. */
   private fillWeatherProvider(): void {
     this.weatherProviderSelect.replaceChildren(
@@ -5488,12 +5510,22 @@ export class SightingEditorElement extends HTMLElement {
 
   private syncWeatherProvider(): void {
     const fromFile = !this.weatherInferredInput.checked
-    this.weatherProviderSelect.value = fromFile ? SightingEditorElement.FILE_SOURCE : dataSourceById(WEATHER_SOURCES, this.chosenSourceId.get("weather")).id
+    // What answered and no longer can be asked (a module this page does not have, a station the report names) is named as itself: the
+    // default record would be credited with a weather it never gave. The link beside it is that weather's own request.
+    const stated = this.ufoElement.sighting.weatherSource
+    const unlisted = !fromFile && stated !== undefined && !isRecordSource(stated) ? stated : undefined
+    this.weatherProviderSelect.querySelector("option[data-stated]")?.remove()
+    if (unlisted) {
+      const option = new Option(unlisted.name ?? unlisted.id, unlisted.id)
+      option.dataset.stated = ""
+      this.weatherProviderSelect.add(option, this.weatherProviderSelect.options.length - 1)
+    }
+    this.weatherProviderSelect.value = fromFile ? SightingEditorElement.FILE_SOURCE : unlisted ? unlisted.id : dataSourceById(WEATHER_SOURCES, this.chosenSourceId.get("weather")).id
     this.weatherProviderSelect.disabled = this.weatherInferredInput.disabled
     this.weatherProviderSelect.title = this.weatherInferredInput.title
     const record = dataSourceById(WEATHER_SOURCES, this.chosenSourceId.get("weather"))
     const credit = this.shadow.getElementById("weather-credit") as HTMLAnchorElement
-    credit.hidden = fromFile
+    credit.hidden = fromFile || unlisted !== undefined
     credit.href = record.creditUrl
     credit.textContent = record.credit
     this.weatherFileLink.hidden = !fromFile
@@ -5720,6 +5752,7 @@ export class SightingEditorElement extends HTMLElement {
     this.pendingWeatherEdit = undefined
     this.closeFileAsk()
     this.weatherLookupResult = undefined
+    this.followWeatherRecord()
     this.weatherFromRecords = !RecordingSections.fromFile(sighting.frozen, "weather") &&
       (sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0)
     this.syncWeatherSourceState()

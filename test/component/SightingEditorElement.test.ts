@@ -5145,6 +5145,94 @@ describe("SightingEditorElement inferred weather", () => {
     }
   })
 
+  describe("a recording whose weather came from a module's record", () => {
+    const ACME = { id: "acme-weather", name: "ACME Weather", url: "https://api.acme.example/history" }
+    const installAcme = (getWeather = vi.fn<WeatherProvider["getWeather"]>(async ({ points }) => ({
+      source: ACME,
+      samples: points.map(({ time }) => ({ time, weather: { ...DEFAULT_WEATHER, cloudCover: 0.7 } }))
+    }))) => {
+      ModuleRegistry.install({
+        id: "acme",
+        name: "ACME",
+        contributes: {
+          weather: [{ id: ACME.id, name: ACME.name, credit: "© ACME", creditUrl: "https://acme.example/terms", create: () => ({ getWeather }) }]
+        }
+      })
+      return getWeather
+    }
+    afterEach(() => ModuleRegistry.uninstall("acme"))
+
+    /** An editor that opened, its record having said its weather, a recording this module's record answered for. */
+    async function openedFromAcme(): Promise<{ element: SightingEditorElement, record: ReturnType<typeof vi.fn> }> {
+      const record = vi.fn(async () => undefined)
+      const element = await mount({ getWeather: record })
+      stateDateAndPlace(element)
+      await waitFor(() => record.mock.calls.length > 0)
+      const keyframes = [{ t: 0, weather: { ...DEFAULT_WEATHER, cloudCover: 0.7 } }]
+      element.sightingData = { ...element.sightingData, weatherSource: ACME, weatherTrack: { keyframes } }
+      record.mockClear()
+      return { element, record }
+    }
+    const credit = (element: SightingEditorElement) => element.shadowRoot!.getElementById("weather-credit") as HTMLAnchorElement
+    const picker = (element: SightingEditorElement) => weatherField(element, "weatherSource") as HTMLSelectElement
+
+    it("names that record and asks it again when the module is there", async () => {
+      const acme = installAcme()
+      const { element, record } = await openedFromAcme()
+      expect(picker(element).value).toBe(ACME.id)
+      expect(credit(element).hidden).toBe(false)
+      expect(credit(element).textContent).toBe("© ACME")
+
+      setInput(element.shadowRoot!, "lat", "44.5")
+      await waitFor(() => acme.mock.calls.length > 0)
+      expect(record).not.toHaveBeenCalled()
+      expect(element.sightingData.weatherSource).toEqual(ACME)
+    })
+
+    it("credits nobody else while the module is missing, and leaves its weather alone", async () => {
+      const { element, record } = await openedFromAcme()
+      expect(picker(element).value).toBe(ACME.id)
+      expect(picker(element).selectedOptions[0].textContent).toBe(ACME.name)
+      expect(credit(element).hidden).toBe(true)
+      expect(sourceLink(element).href).toBe(ACME.url)
+
+      setInput(element.shadowRoot!, "lat", "44.5")
+      await new Promise(resolve => setTimeout(resolve, 700))
+      expect(record).not.toHaveBeenCalled()
+      expect(element.sightingData.weatherSource).toEqual(ACME)
+    })
+
+    it("follows the module that arrives after the recording", async () => {
+      const { element } = await openedFromAcme()
+      const acme = installAcme()
+      expect(picker(element).value).toBe(ACME.id)
+      expect([...picker(element).options].filter(option => option.value === ACME.id)).toHaveLength(1)
+      expect(credit(element).textContent).toBe("© ACME")
+      setInput(element.shadowRoot!, "lat", "44.5")
+      await waitFor(() => acme.mock.calls.length > 0)
+    })
+
+    it("no longer asks a record once its module is gone", async () => {
+      const acme = installAcme()
+      const { element } = await openedFromAcme()
+      ModuleRegistry.uninstall("acme")
+      expect(picker(element).selectedOptions[0].textContent).toBe(ACME.name)
+      setInput(element.shadowRoot!, "lat", "44.5")
+      await new Promise(resolve => setTimeout(resolve, 700))
+      expect(acme).not.toHaveBeenCalled()
+    })
+
+    it("keeps the record the author picks over the one the recording states", async () => {
+      installAcme()
+      const { element, record } = await openedFromAcme()
+      picker(element).value = "era5"
+      picker(element).dispatchEvent(new Event("change"))
+      expect(picker(element).value).toBe("era5")
+      expect(credit(element).textContent).not.toBe("© ACME")
+      expect(record).not.toHaveBeenCalled()
+    })
+  })
+
   it("keeps the looked-up values and their record when the weather is read from the file, until they are changed", async () => {
     const element = await mount(recordProvider())
     stateDateAndPlace(element)
