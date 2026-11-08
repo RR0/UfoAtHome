@@ -289,6 +289,7 @@ if (docs) {
         it, because the owner of a fixed-focus snapshot camera had nothing to choose. Instruments
         outside the observation's own date are left out of the list, except the one the recording
         already names, which is kept and flagged. A device that records also takes its <strong>sensitivity</strong> (ISO): left empty, a phone sets its own; stated, it is set by hand, as in its manual mode. And a phone's <strong>metering</strong> says how it read the light: the mean of the whole frame (older phones, camcorders), which burns a bright light in a dark frame out to white, or keeping its highlights (recent phones, the default), which keeps a lantern twenty metres off orange and the rest of the night darker.</p>
+      <p><strong>Film</strong>: for a device that takes one, the list offers the films of its format, those not on sale in the year of the recording greyed with their dates. A film gives the speed and how the picture answers light, black and white included. The list holds only what a source dates: a missing film is one nobody has looked up yet. <strong>35 mm film camera, seen on television</strong> adds what such a copy adds: its contrast, softness, dust, weave and grain.</p>
       <p>A camera's frame is letterboxed inside the element at its own proportions, and its field
         becomes the default one; the eye, or a camera of unknown make, is drawn 16:9 with a 60°
         vertical field. Changing the instrument re-projects the shapes: they keep their angles, so
@@ -582,6 +583,7 @@ if (docs) {
         weight. Give it a <strong>name</strong>, a <strong>credit</strong> and its link, say whether it
         was <strong>taken at</strong> an instant of the observation and whether somebody <strong>drew
         on</strong> it, and set its starting <strong>opacity</strong> — the reader slides it afterwards.</p>
+      <p>A <strong>video</strong> is laid over the scene the same way, and follows the timeline: state where it <strong>starts</strong>, which part of its file, and how fast (a broadcast's slow motion). Lining it up at the playhead writes a key, for its camera moves; <strong>Remove the lining up at this instant</strong> takes it back. An address must allow other sites to read it: not a YouTube page.</p>
       <p>While this group is open the canvas belongs to the selected picture, its frame dashed in
         blue: <strong>drag</strong> on it to turn it (a drag outside it still turns the witness),
         <strong>wheel</strong> to change its field, or type
@@ -765,6 +767,7 @@ if (docs) {
         propriétaire d'un appareil à mise au point fixe n'avait rien à choisir. Les instruments
         étrangers à la date de l'observation ne sont pas proposés, sauf celui que l'enregistrement
         nomme déjà, gardé et signalé. Un appareil qui enregistre prend aussi sa <strong>sensibilité</strong> (ISO) : vide, un téléphone la règle lui-même ; indiquée, elle est réglée à la main, comme en mode manuel. Et la <strong>mesure de la lumière</strong> d'un téléphone dit comment il a lu la lumière : la moyenne de toute l'image (anciens téléphones, caméscopes), qui brûle en blanc une lumière vive dans une image sombre, ou en protégeant les hautes lumières (téléphones récents, par défaut), qui garde orange une lanterne à vingt mètres et assombrit le reste de la nuit.</p>
+      <p><strong>Pellicule</strong> : pour un appareil qui en prend une, la liste propose celles de son format, celles qui n'étaient pas en vente l'année de l'enregistrement étant grisées avec leurs dates. Une pellicule donne la sensibilité et la réponse à la lumière, noir et blanc compris. La liste ne contient que ce qu'une source date : une pellicule absente est une pellicule que personne n'a encore cherchée. <strong>Caméra 35 mm, vue à la télévision</strong> ajoute ce qu'ajoute une telle copie : contraste, flou, poussières, tremblement et grain.</p>
       <p>Le cadre d'un appareil est inscrit dans l'élément à ses propres proportions, bandes noires
         comprises, et son champ devient celui par défaut ; l'œil, ou un appareil de modèle inconnu,
         est dessiné en 16:9 avec un champ vertical de 60°. Changer d'instrument reprojette les formes :
@@ -1085,6 +1088,7 @@ if (docs) {
         lien, dites si elle a été <strong>prise à</strong> un instant de l'observation et si quelqu'un a
         fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
         lecteur la fera glisser ensuite.</p>
+      <p>Une <strong>vidéo</strong> se pose de la même façon et suit la timeline : dites où elle <strong>débute</strong>, quelle partie de son fichier et à quelle vitesse (le ralenti d'une diffusion). La recaler au point de lecture écrit une clé, car sa caméra bouge ; <strong>Retirer le recalage de cet instant</strong> la reprend. Son adresse doit autoriser les autres sites à la lire : pas une page YouTube.</p>
       <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
         pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
         le témoin), <strong>molette</strong> pour son
@@ -1270,6 +1274,7 @@ if (docs) {
         cámara compacta de foco fijo no tenía nada que elegir. Los instrumentos ajenos a la fecha de la
         observación quedan fuera de la lista, salvo el que el registro ya nombra, que se conserva y se
         señala. Un aparato que graba toma también su <strong>sensibilidad</strong> (ISO): vacía, un teléfono la ajusta solo; indicada, se ajusta a mano, como en su modo manual. Y la <strong>medición de la luz</strong> de un teléfono dice cómo leyó la luz: la media de toda la imagen (teléfonos antiguos, videocámaras), que quema en blanco una luz viva en una imagen oscura, o protegiendo las altas luces (teléfonos recientes, por defecto), que mantiene naranja un farolillo a veinte metros y oscurece el resto de la noche.</p>
+      <p><strong>Película</strong>: para un aparato que usa una, la lista propone las de su formato, con las que no estaban a la venta el año de la grabación en gris y sus fechas. Una película da la sensibilidad y la respuesta a la luz, blanco y negro incluido. La lista solo contiene lo que una fuente fecha: una película ausente es una que nadie ha buscado todavía. <strong>Cámara de 35 mm, vista en televisión</strong> añade lo que añade una copia así: contraste, desenfoque, polvo, temblor y grano.</p>
       <p>El encuadre de una cámara se inscribe en el elemento con sus propias proporciones, con bandas
         negras, y su campo pasa a ser el predeterminado; el ojo, o una cámara de modelo desconocido, se
         dibuja en 16:9 con un campo vertical de 60°. Cambiar de instrumento reproyecta las formas:
@@ -1578,6 +1583,7 @@ if (docs) {
         enlace, indica si fue tomada en un instante (<strong>Tomada en</strong>) de la observación y si alguien dibujó encima
         (<strong>Dibujo encima</strong>), y ajusta su <strong>Opacidad</strong> inicial: el lector la
         deslizará después.</p>
+      <p>Un <strong>vídeo</strong> se superpone igual y sigue la línea de tiempo: indique dónde <strong>empieza</strong>, qué parte de su archivo y a qué velocidad (la cámara lenta de una emisión). Ajustarlo en el punto de lectura escribe una clave, porque su cámara se mueve; <strong>Quitar el ajuste de este instante</strong> la retira. Su dirección debe permitir que otros sitios lo lean: no una página de YouTube.</p>
       <p>Mientras este grupo está abierto, el lienzo pertenece a la foto seleccionada, con su marco en
         azul discontinuo: <strong>arrastra</strong> sobre ella para girarla (un arrastre fuera de ella
         sigue girando al testigo), usa la <strong>rueda</strong> para cambiar su campo, o escribe
@@ -1767,6 +1773,7 @@ if (docs) {
         perché il proprietario di una compatta a fuoco fisso non aveva nulla da scegliere. Gli strumenti
         estranei alla data dell'osservazione sono esclusi dall'elenco, tranne quello che la
         registrazione nomina già, che viene mantenuto e segnalato. Un apparecchio che registra prende anche la sua <strong>sensibilità</strong> (ISO): vuota, un telefono la regola da sé; indicata, è regolata a mano, come nella sua modalità manuale. E la <strong>misurazione della luce</strong> di un telefono dice come ha letto la luce: la media di tutta l'immagine (telefoni vecchi, videocamere), che brucia in bianco una luce viva in un'immagine scura, o proteggendo le alte luci (telefoni recenti, predefinita), che mantiene arancione una lanterna a venti metri e scurisce il resto della notte.</p>
+      <p><strong>Pellicola</strong>: per un apparecchio che ne usa una, l'elenco propone quelle del suo formato, con quelle non in vendita nell'anno della registrazione in grigio e le loro date. Una pellicola dà la sensibilità e la risposta alla luce, bianco e nero compreso. L'elenco contiene solo ciò che una fonte data: una pellicola assente è una pellicola che nessuno ha ancora cercato. <strong>Cinepresa 35 mm, vista in televisione</strong> aggiunge ciò che aggiunge una tale copia: contrasto, sfocatura, polvere, tremolio e grana.</p>
       <p>L'inquadratura di una fotocamera è inscritta nell'elemento con le sue proporzioni, bande nere
         comprese, e il suo campo diventa quello predefinito; l'occhio, o una fotocamera di modello
         sconosciuto, è disegnato in 16:9 con un campo verticale di 60°. Cambiare strumento riproietta le
@@ -2077,6 +2084,7 @@ if (docs) {
         <strong>Crediti</strong> e il loro link, di' se è stata scattata in un istante (<strong>Scattata a</strong>)
         dell'osservazione e se qualcuno ci ha disegnato sopra (<strong>Disegno sopra</strong>), e impostane
         l'<strong>Opacità</strong> iniziale: il lettore la farà scorrere in seguito.</p>
+      <p>Un <strong>video</strong> si sovrappone allo stesso modo e segue la timeline: indicate dove <strong>inizia</strong>, quale parte del file e a che velocità (il rallentatore di una trasmissione). Allinearlo al punto di lettura scrive una chiave, perché la sua camera si muove; <strong>Togliere l'allineamento di questo istante</strong> la riprende. Il suo indirizzo deve permettere agli altri siti di leggerlo: non una pagina YouTube.</p>
       <p>Finché questo gruppo è aperto, la tela appartiene alla foto selezionata, con la cornice
         tratteggiata in blu: <strong>trascina</strong> su di essa per girarla (un trascinamento fuori
         da essa gira ancora il testimone), usa la <strong>rotellina</strong> per cambiarne il campo,
