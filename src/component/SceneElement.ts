@@ -289,6 +289,9 @@ export class SceneElement extends HTMLElement {
   private readonly hoverTooltip: HTMLElement
   /** The way from a ghost of the lens pointed at to its light — see showGhostPath. */
   private readonly ghostPath: SVGSVGElement
+  private readonly flightMark: SVGSVGElement
+  /** The flight the author chose, which a ring follows on the picture (see markFlight). */
+  private markedFlight?: string
   /** Whether the loader's black screen is up: what is under it is not to be looked at, named or captioned yet. */
   private holding = false
   private resizeObserver?: ResizeObserver
@@ -1095,6 +1098,7 @@ export class SceneElement extends HTMLElement {
         if (this.ghostStillUnder(this.lastHover, now)) this.hoverAt(this.lastHover)
       }
     }
+    this.placeFlightMark()
     // What the player laid over the picture from a body was measured before the body moved.
     this.ufoElement.repaintChrome()
   }
@@ -1161,6 +1165,7 @@ export class SceneElement extends HTMLElement {
     }
     this.hoverTooltip = this.shadow.getElementById("hover-tooltip")!
     this.ghostPath = this.shadow.getElementById("ghost-path") as unknown as SVGSVGElement
+    this.flightMark = this.shadow.getElementById("flight-mark") as unknown as SVGSVGElement
 
     // Created imperatively rather than left inline in the template markup — see
     // SightingEditorElement's constructor for why (an inline tag parsed from
@@ -2676,6 +2681,30 @@ export class SceneElement extends HTMLElement {
     if (!seen) return false
     this.setLookOffset(((((seen.sky.azimuthDeg - pose.headingDeg) % 360) + 540) % 360) - 180, seen.sky.altitudeDeg - (pose.pitchDeg ?? 0))
     return true
+  }
+
+  /**
+   * Rings a flight on the picture, or none. An aircraft can be under a pixel where it really is, and this says where to look without drawing it any
+   * bigger: the ring is laid over the picture, so that it is in no image taken of the scene. Asked for by the editor alone.
+   */
+  markFlight(key: string | undefined): void {
+    this.markedFlight = key
+    this.placeFlightMark()
+  }
+
+  private placeFlightMark(): void {
+    const key = this.markedFlight
+    const point = key === undefined ? undefined : this.sceneRenderer.flightScreenPoint(key)
+    this.flightMark.toggleAttribute("hidden", !point)
+    if (!point) return
+    const canvas = this.sceneCanvas.getBoundingClientRect()
+    const stage = this.stageElement.getBoundingClientRect()
+    const x = canvas.left - stage.left + (point.ndcX + 1) / 2 * canvas.width
+    const y = canvas.top - stage.top + (1 - point.ndcY) / 2 * canvas.height
+    for (const circle of Array.from(this.flightMark.children)) {
+      circle.setAttribute("cx", String(x))
+      circle.setAttribute("cy", String(y))
+    }
   }
 
   /** Where the observer stands at `atMs`, who may be walking or driving; the place the traffic was asked for when that says nothing. */

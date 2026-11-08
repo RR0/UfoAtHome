@@ -166,6 +166,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   aircraftFlightsColumns: { flight: "Volo", distance: "Distanza", direction: "Direzione", height: "Altezza", altitude: "Quota" },
   aircraftFlightsIntro: "Candidati compatibili, mai un'identificazione. Scegline uno per guardare verso di lui.",
   aircraftFlightAim: "Guarda verso questo volo",
+  aircraftFlightMarked: "Cerchiato sull'immagine: sceglilo di nuovo per togliere l'anello",
   aircraftFlightLater: "Non è nel cielo in questo momento: sceglilo per andare a quando c'è",
   aircraftFlightAbsent: "Non è nel cielo durante la registrazione",
   aircraftFlightNotDrawn: "Non disegnato: troppi aerei sono più vicini",

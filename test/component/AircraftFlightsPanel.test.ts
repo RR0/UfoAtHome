@@ -6,6 +6,7 @@ const TEXTS = {
   aircraftFlightsColumns: { flight: "Flight", distance: "Distance", direction: "Direction", height: "Height", altitude: "Altitude" },
   aircraftFlightsIntro: "Candidates",
   aircraftFlightAim: "Look",
+  aircraftFlightMarked: "Ringed",
   aircraftFlightLater: "Later",
   aircraftFlightAbsent: "Absent",
   aircraftFlightNotDrawn: "Not drawn",
@@ -69,11 +70,18 @@ describe("AircraftFlightsPanel", () => {
 
   it("makes its rows again for other flights, and marks the one looked at", () => {
     const { row, shown, container } = panel([inSky])
-    shown.select("a")
+    shown.select("a", TEXTS)
     expect(row("a").getAttribute("aria-selected")).toBe("true")
     shown.show([inSky, later], TEXTS)
     expect(row("a").getAttribute("aria-selected")).toBe("true")
     expect(row("b").getAttribute("aria-selected")).toBe("false")
+    expect(row("a").title).toBe("Ringed")
+    expect(row("b").title).toBe("Later")
+    shown.select(undefined, TEXTS)
+    expect(row("a").title).toBe("Look")
+    shown.select("a", TEXTS)
+    shown.show([later], TEXTS)
+    expect(shown.selectedKey).toBeUndefined()
     shown.show([], TEXTS)
     expect(container.children).toHaveLength(0)
   })

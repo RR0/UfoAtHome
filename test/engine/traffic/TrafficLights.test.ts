@@ -64,3 +64,36 @@ describe("TrafficLights", () => {
     expect(TrafficLights.bodyColor(AircraftModels.of({ category: "B6" }))).toBe("#2c2e33")
   })
 })
+
+describe("TrafficLights.landingLights", () => {
+  const A320 = AircraftModels.of({ type: "A320" })
+  const B738Low = [{ t: 0, altitudeFt: 3000 }, { t: 1000, altitudeFt: 4000 }]
+
+  test("are thrown ahead by an airliner under the height, in a narrow beam", () => {
+    const lights = TrafficLights.landingLights(A320, 30, B738Low)
+    expect(lights.map(light => light.id)).toEqual(["landing-left", "landing-right"])
+    expect(lights[0].beamDeg).toBeLessThan(15)
+    expect(lights[0].offsetM.z).toBeGreaterThan(0)
+    expect(lights[0].intensity).toBe(600)
+  })
+
+  test("are none on a flight that never comes under the height, nor on what carries none", () => {
+    expect(TrafficLights.landingLights(A320, 30, [{ t: 0, altitudeFt: 35000 }])).toEqual([])
+    expect(TrafficLights.landingLights(AircraftModels.of({ category: "B1" }), -10, B738Low)).toEqual([])
+  })
+
+  test("wait for dusk on what is only lit from then, as its other lamps do", () => {
+    const piston = AircraftModels.of({ type: "C172" })
+    expect(TrafficLights.landingLights(piston, 30, B738Low)).toEqual([])
+    expect(TrafficLights.landingLights(piston, -10, B738Low)[0].intensity).toBeLessThan(600)
+  })
+
+  test("are switched as the flight crosses the height, up and down", () => {
+    const climb = [{ t: 0, altitudeFt: 8000 }, { t: 1000, altitudeFt: 12000 }, { t: 2000, altitudeFt: 9000 }]
+    const [light] = TrafficLights.landingLights(A320, 30, climb)
+    expect(light.intensity).toBe(600)
+    expect(light.keyframes).toEqual([{ t: 1000, intensity: 0 }, { t: 2000, intensity: 600 }])
+    const high = [{ t: 0, altitudeFt: 12000 }, { t: 1000, altitudeFt: 9000 }]
+    expect(TrafficLights.landingLights(A320, 30, high)[0].intensity).toBe(0)
+  })
+})

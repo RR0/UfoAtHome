@@ -268,6 +268,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   aircraftFlightsColumns: { flight: string; distance: string; direction: string; height: string; altitude: string }
   aircraftFlightsIntro: string
   aircraftFlightAim: string
+  aircraftFlightMarked: string
   aircraftFlightLater: string
   aircraftFlightAbsent: string
   aircraftFlightNotDrawn: string

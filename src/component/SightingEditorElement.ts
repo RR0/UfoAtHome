@@ -3706,11 +3706,17 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Turns to a flight, going first to when it is there if it is not at this instant. */
   private aimAtFlight(flight: AircraftFlightView): void {
+    if (flight.key === this.aircraftFlights.selectedKey) {
+      this.aircraftFlights.select(undefined, this.messages)
+      this.sceneElement.markFlight(undefined)
+      return
+    }
     if (!flight.sky && flight.firstMs === undefined) return
     const atMs = flight.sky ? this.ufoElement.currentTime : flight.firstMs!
     if (!flight.sky) this.goToMark(atMs)
     this.sceneElement.lookAtFlight(flight.key, atMs)
-    this.aircraftFlights.select(flight.key)
+    this.aircraftFlights.select(flight.key, this.messages)
+    this.sceneElement.markFlight(flight.key)
     this.showAircraftFlights()
   }
 

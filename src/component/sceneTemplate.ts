@@ -31,6 +31,7 @@ export const html = `
   <div id="ufo-slot"></div>
   <!-- The way from a ghost of the lens pointed at to its light (see SceneElement.showGhostPath): drawn over the picture, never in the
        way of the pointer. -->
+  <svg id="flight-mark" class="flight-mark" hidden aria-hidden="true"><circle class="flight-mark-halo" r="14"/><circle class="flight-mark-ring" r="14"/></svg>
   <svg id="ghost-path" class="ghost-path" hidden aria-hidden="true">
     <line class="ghost-path-halo"/><line class="ghost-path-line"/><circle class="ghost-path-centre" r="3"/><circle class="ghost-path-source" r="9"/>
   </svg>
@@ -339,6 +340,29 @@ export const css = `
    identification label (celestial body or decor object name — see SceneElement.
    handlePointerMove), not part of the rendered sky itself, so it sits above everything else and
    ignores pointer events (it must never itself be what a hover/click lands on). */
+/* Which flight of a record the author chose, in the editor: on the picture, not in it, since it is nothing the witness saw. */
+.flight-mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.flight-mark[hidden] {
+  display: none;
+}
+.flight-mark circle {
+  fill: none;
+}
+.flight-mark-halo {
+  stroke: rgb(0 0 0 / 0.55);
+  stroke-width: 3;
+}
+.flight-mark-ring {
+  stroke: #fff;
+  stroke-width: 1.25;
+}
 .ghost-path {
   position: absolute;
   inset: 0;

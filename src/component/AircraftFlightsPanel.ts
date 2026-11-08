@@ -5,6 +5,7 @@ export interface AircraftFlightsTexts {
   aircraftFlightsColumns: { flight: string; distance: string; direction: string; height: string; altitude: string }
   aircraftFlightsIntro: string
   aircraftFlightAim: string
+  aircraftFlightMarked: string
   aircraftFlightLater: string
   aircraftFlightAbsent: string
   aircraftFlightNotDrawn: string
@@ -46,14 +47,20 @@ export class AircraftFlightsPanel {
     for (const flight of flights) this.write(this.rows.get(flight.key)!, flight, texts)
   }
 
-  /** Marks the flight looked at. */
-  select(key: string): void {
+  /** The flight looked at, which the scene rings. */
+  get selectedKey(): string | undefined {
+    return this.selected
+  }
+
+  /** Marks the flight looked at, or none. */
+  select(key: string | undefined, texts: AircraftFlightsTexts): void {
     this.selected = key
-    for (const [rowKey, { row }] of this.rows) row.setAttribute("aria-selected", String(rowKey === key))
+    for (const cells of this.rows.values()) this.write(cells, cells.flight, texts)
   }
 
   private build(flights: readonly AircraftFlightView[], texts: AircraftFlightsTexts): void {
     this.rows = new Map()
+    if (!flights.some(flight => flight.key === this.selected)) this.selected = undefined
     if (flights.length === 0) {
       this.container.replaceChildren()
       return
@@ -75,7 +82,6 @@ export class AircraftFlightsPanel {
     for (const flight of flights) {
       const row = body.insertRow()
       row.dataset.flight = flight.key
-      row.setAttribute("aria-selected", String(flight.key === this.selected))
       const label = row.insertCell()
       const cells = { distance: row.insertCell(), direction: row.insertCell(), height: row.insertCell(), altitude: row.insertCell() }
       row.addEventListener("click", () => {
@@ -104,6 +110,9 @@ export class AircraftFlightsPanel {
     row.classList.toggle("absent", !sky)
     row.setAttribute("aria-disabled", String(!sky && flight.firstMs === undefined))
     const said = sky ? texts.aircraftFlightAim : flight.firstMs !== undefined ? texts.aircraftFlightLater : texts.aircraftFlightAbsent
-    row.title = flight.drawn ? said : `${said}. ${texts.aircraftFlightNotDrawn}`
+    const marked = flight.key === this.selected
+    row.setAttribute("aria-selected", String(marked))
+    const title = marked ? texts.aircraftFlightMarked : said
+    row.title = flight.drawn ? title : `${title}. ${texts.aircraftFlightNotDrawn}`
   }
 }

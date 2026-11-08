@@ -157,7 +157,10 @@ class TrafficDecorSetBuilder {
             // The real model, for when it is near enough for its shape to be seen: the renderer decides that (see SceneRenderer).
             model: TrafficModels.idOf(model.code) ? { id: TrafficModels.idOf(model.code) } : undefined,
             color: TrafficLights.bodyColor(model),
-            lights: TrafficLights.lights(model, sunElevationDeg),
+            lights: [
+              ...TrafficLights.lights(model, sunElevationDeg),
+              ...TrafficLights.landingLights(model, sunElevationDeg, points.map(point => ({ t: point.t - this.startMs, altitudeFt: point.altitudeFt })))
+            ],
             track: keyframes
           },
           presence: { fromMs: keyframes[0].t, untilMs: keyframes[keyframes.length - 1].t },

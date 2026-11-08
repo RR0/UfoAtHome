@@ -4306,6 +4306,17 @@ export class SceneRenderer {
     return this.skyEventDrawnCount("reentries")
   }
 
+  /** Where the aircraft `key` (see TrafficIds.keyOf) is on the picture; undefined when it is not on it: absent then, out of the frame, or behind the ground. */
+    flightScreenPoint(key: string): { ndcX: number; ndcY: number } | undefined {
+    const prefix = `${TrafficIds.ID_PREFIX}${key}-`
+    for (const [id, group] of this.decorGroups) {
+      if (!group.visible || !id.startsWith(prefix)) continue
+      const point = this.screenPointOf(new Vector3().copy(group.position).sub(this.camera.position).normalize())
+      if (point && Math.abs(point.ndcX) <= 1 && Math.abs(point.ndcY) <= 1 && !this.groundHides(point.ndcX, point.ndcY)) return point
+    }
+    return undefined
+  }
+
   /**
    * The aircraft of a record of air traffic under a screen point, by the id of its decor: the one whose direction is nearest the
    * pointer's, within the same angle as a star's. By angle and not by hit: an aircraft ten kilometres off is under a pixel across,
