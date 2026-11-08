@@ -174,6 +174,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   utcOffsetNoZone: "Ninguna zona horaria marca este desfase ese día",
   utcOffsetImplausible:
     "Esta zona horaria no corresponde a la longitud introducida, cuya hora solar es UTC{solar} — aun así, la escena y el registro meteorológico obedecen a lo que se declara aquí. Vacía el campo para deducirla de la longitud.",
+  utcOffsetInconsistent: "Incoherente con el lugar: su zona horaria, {zone}, marcaba UTC{offset} ese día. La escena y el registro meteorológico siguen lo declarado aquí, lo que solo es correcto si la hora se dio con otro reloj (UTC, por ejemplo) o si el lugar no seguía entonces las reglas de esa zona.",
   timeZoneManual: "desconocido",
   altitudeAboveSeaLevel:
     "Altitud del testigo sobre el nivel del mar — el suelo del lugar introducido fija su mínimo: un testigo en los Alpes no está a 0 m.",

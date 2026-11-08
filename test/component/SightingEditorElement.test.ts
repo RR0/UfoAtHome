@@ -6415,7 +6415,7 @@ describe("SightingEditorElement time zone picker", () => {
     expect(element.sightingData.utcOffsetHours).toBe(1) // the last one that a zone reads
   })
 
-  it("shows the zone that reads the offset of a recording that states only a number, without writing it", async () => {
+  it("names no zone for a number alone, with no place to tell which: a list's first would say something nobody said", async () => {
     const element = await mount()
     element.sightingData = {
       version: 1,
@@ -6423,7 +6423,7 @@ describe("SightingEditorElement time zone picker", () => {
       utcOffsetHours: 1,
       timeline: { keyframes: [] }
     }
-    expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).not.toBe("")
+    expect((element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement).value).toBe("")
     expect(element.sightingData.timeZone).toBeUndefined()
     expect(element.sightingData.utcOffsetHours).toBe(1)
   })
@@ -6452,15 +6452,73 @@ describe("SightingEditorElement time zone picker", () => {
       ...extra
     })
 
-    it("does not move a recording whose own offset is stated without a zone: what the author states outranks what a service infers", async () => {
+    const zoneField = (element: SightingEditorElement) => element.shadowRoot!.getElementById("timeZone") as HTMLSelectElement
+    const warning = (element: SightingEditorElement) => element.shadowRoot!.getElementById("time-zone-warning")!
+
+    it("asks the zone of a recording's place as it opens, and shows it for an offset it reads, without writing it", async () => {
       const element = await mount()
       const zoneAt = stubLookup(element)
+      element.sightingData = recording({ utcOffsetHours: 1 }) as never
+      await vi.waitFor(() => expect(zoneField(element).value).toBe("Europe/Paris"), { timeout: 3000 })
+
+      expect(zoneAt).toHaveBeenCalledWith(48.99, 2.45)
+      expect(element.sightingData.timeZone).toBeUndefined()
+      expect(element.sightingData.utcOffsetHours).toBe(1)
+      expect(warning(element).hidden).toBe(true)
+      expect(zoneField(element).classList.contains("inconsistent")).toBe(false)
+    })
+
+    it("flags an offset its place's zone did not read that day, and leaves it as stated", async () => {
+      const element = await mount()
+      stubLookup(element)
       element.sightingData = recording({ utcOffsetHours: 0 }) as never
-      // The first edit of the place, which is what asks where the observer is.
-      setInput(element, "lat", "48.99")
+      await vi.waitFor(() => expect(warning(element).hidden).toBe(false), { timeout: 3000 })
+
+      expect(warning(element).textContent).toContain("Europe/Paris")
+      expect(warning(element).textContent).toContain("UTC+1")
+      expect(offset(element).classList.contains("inconsistent")).toBe(true)
+      expect(element.sightingData.utcOffsetHours).toBe(0)
+      expect(element.sightingData.timeZone).toBeUndefined()
+    })
+
+    it("flags a stated zone that reads another hour than its place's, and keeps it", async () => {
+      const element = await mount()
+      stubLookup(element)
+      element.sightingData = recording({ timeZone: "America/New_York", utcOffsetHours: -5 }) as never
+      await vi.waitFor(() => expect(zoneField(element).classList.contains("inconsistent")).toBe(true), { timeout: 3000 })
+
+      expect(zoneField(element).value).toBe("America/New_York")
+      expect(element.sightingData.timeZone).toBe("America/New_York")
+    })
+
+    it("does not flag a zone of another name that read the same hour as its place's", async () => {
+      const element = await mount()
+      const zoneAt = stubLookup(element)
+      element.sightingData = recording({ timeZone: "Europe/Brussels", utcOffsetHours: 1 }) as never
+      await vi.waitFor(() => expect(zoneAt).toHaveBeenCalled(), { timeout: 3000 })
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(warning(element).hidden).toBe(true)
+    })
+
+    it("does not write a zone into a recording that states neither just because it was opened", async () => {
+      const element = await mount()
+      const zoneAt = stubLookup(element)
+      element.sightingData = recording({}) as never
+      await vi.waitFor(() => expect(zoneAt).toHaveBeenCalled(), { timeout: 3000 })
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(element.sightingData.timeZone).toBeUndefined()
+      expect(element.sightingData.utcOffsetHours).toBeUndefined()
+    })
+
+    it("does not move a stated offset when the place is edited: what the author states outranks what a service infers", async () => {
+      const element = await mount()
+      stubLookup(element)
+      element.sightingData = recording({ utcOffsetHours: 0 }) as never
+      setInput(element, "lat", "47")
       await new Promise(resolve => setTimeout(resolve, 1500))
 
-      expect(zoneAt).not.toHaveBeenCalled()
       expect(element.sightingData.utcOffsetHours).toBe(0)
       expect(element.sightingData.timeZone).toBeUndefined()
     })

@@ -356,6 +356,7 @@ export const html = `
          yourself, which is all a recording used to be able to say. -->
     <label><span id="label-utc-offset"></span> <select id="timeZone"></select>
       <input id="utcOffsetHours" type="number" min="-12" max="14" step="0.5"/> UTC&plusmn;h</label>
+    <span id="time-zone-warning" class="scenery-warning" role="alert" hidden></span>
     <label><span id="label-duration"></span> <rr0-duration-input name="durationSeconds"></rr0-duration-input></label>
     </div>
     <div class="form-section">
@@ -848,6 +849,9 @@ export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.
   flex-wrap: wrap;
   gap: 0.5em;
 }
+/* As wide as the zone it names: America/Denver is not America/Denv. */
+#timeZone { flex: 0 1 auto; field-sizing: content; min-width: 0; max-width: 100%; }
+#utcOffsetHours { flex: 1 1 4em; min-width: 4em; }
 /* A warning, as every message is drawn (see MessageStyle at the end). */
 .scenery-warning {
   flex-basis: 100%;

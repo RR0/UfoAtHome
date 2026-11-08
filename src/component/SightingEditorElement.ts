@@ -425,6 +425,7 @@ export class SightingEditorElement extends HTMLElement {
    * apparentSizeOutput reads back what they actually produce. */
   private readonly utcOffsetInput: HTMLInputElement
   private readonly timeZoneSelect: HTMLSelectElement
+  private readonly timeZoneWarning: HTMLElement
   /** Which service is asked what legal zone a place falls in — see TimeZoneProvider. */
   private readonly timeZoneProvider: TimeZoneProvider = TIME_ZONE_SOURCES[0].create()
   private timeZoneLookupTimer?: ReturnType<typeof setTimeout>
@@ -1223,6 +1224,7 @@ export class SightingEditorElement extends HTMLElement {
     this.shapeRotationInput = this.shadow.getElementById("shapeRotation") as HTMLInputElement
     this.utcOffsetInput = this.shadow.getElementById("utcOffsetHours") as HTMLInputElement
     this.timeZoneSelect = this.shadow.getElementById("timeZone") as HTMLSelectElement
+    this.timeZoneWarning = this.shadow.getElementById("time-zone-warning")!
     this.apparentWidthInput = this.shadow.getElementById("apparentWidth") as HTMLInputElement
     this.realWidthInput = this.shadow.getElementById("realWidth") as HTMLInputElement
     this.objectDistanceInput = this.shadow.getElementById("objectDistance") as HTMLInputElement
@@ -2393,10 +2395,15 @@ export class SightingEditorElement extends HTMLElement {
     this.chooseTimeInputMode()
     this.syncObserverMetadataFields()
     this.offsetIsAuthors = false
+    // What was known of the place of the recording before this one says nothing of this one's.
+    this.placeZone = undefined
+    this.timeZoneLookedUpAt = undefined
     this.refreshTimeZoneOptions()
     this.syncUtcOffsetField()
     this.syncPlaceNameField()
     this.syncGroundElevationField()
+    // Its place's zone is asked at once, to show and to check what it states; never written: a recording that was opened keeps its clock.
+    this.scheduleTimeZoneLookup(false)
     // A recording that is loaded stands where it stands, and its scenery is its own: nothing is asked of the survey.
     const standing = this.plantingCentre()
     this.surroundings.placeLoaded(standing?.lat, standing?.lng)
@@ -3915,9 +3922,9 @@ export class SightingEditorElement extends HTMLElement {
    * is the only way a 1965 sighting comes out at +1 rather than at whatever France is doing this
    * week.
    *
-   * Never overwrites a zone already chosen — the same rule the weather follows: what the author
-   * has stated outranks what a service would infer. Debounced, and skipped for a move too small to
-   * change the answer.
+   * Asked whatever the recording states, since knowing the place's zone is what says whether a stated one fits it (see
+   * updateUtcOffsetValidity). Never overwrites a zone already chosen — the same rule the weather follows: what the author
+   * has stated outranks what a service would infer. Debounced, and skipped for a move too small to change the answer.
    */
   /**
    * Whether the author has already said which clock the observation was on, so that a service must not answer for them: a zone they picked
@@ -3930,25 +3937,30 @@ export class SightingEditorElement extends HTMLElement {
     return event.utcOffsetHours !== undefined
   }
 
-  private scheduleTimeZoneLookup(): void {
+  private scheduleTimeZoneLookup(fills = true): void {
     const lat = this.numberOrUndefined(this.latInput.value)
     const lng = this.numberOrUndefined(this.lngInput.value)
     if (lat === undefined || lng === undefined) return
-    if (this.timeZoneIsStated()) return
     const previous = this.timeZoneLookedUpAt
     if (previous && Math.abs(lat - previous.lat) < SAME_PLACE_DEG && Math.abs(lng - previous.lng) < SAME_PLACE_DEG) return
     clearTimeout(this.timeZoneLookupTimer)
-    this.timeZoneLookupTimer = setTimeout(() => void this.lookUpTimeZone(lat, lng), PLACE_REVERSE_DEBOUNCE_MS)
+    this.timeZoneLookupTimer = setTimeout(() => void this.lookUpTimeZone(lat, lng, fills), PLACE_REVERSE_DEBOUNCE_MS)
   }
 
-  private async lookUpTimeZone(lat: number, lng: number): Promise<void> {
-    this.timeZoneLookedUpAt = { lat, lng }
+  /** `fills`: whether an answer may become the recording's zone; a recording just opened only learns what its place's is. */
+  private async lookUpTimeZone(lat: number, lng: number, fills: boolean): Promise<void> {
+    const asked = { lat, lng }
+    this.timeZoneLookedUpAt = asked
     const zone = await this.timeZoneProvider.zoneAt(lat, lng)
+    // Another place, or another recording, was asked about meanwhile: this answer is not about it.
+    if (this.timeZoneLookedUpAt !== asked) return
     this.placeZone = zone ?? undefined
-    // Re-checked after the await, not only before it: the author may have picked one meanwhile, and
-    // a service's answer must never win over a stated one.
-    if (!zone || this.timeZoneIsStated()) return
-    if (!this.timeZones.available().includes(zone)) return
+    // Checked after the await: the author may have picked one meanwhile, and a service's answer must never win over a stated one.
+    if (!zone || !fills || this.timeZoneIsStated() || !this.timeZones.available().includes(zone)) {
+      this.timeZoneSelect.value = this.zoneShown()
+      this.updateUtcOffsetValidity()
+      return
+    }
     this.autoFilledTimeZone = zone
     this.timeZoneSelect.value = zone
     this.updateTimeZone()
@@ -4229,7 +4241,7 @@ export class SightingEditorElement extends HTMLElement {
   private zoneShown(): string {
     const event = this.ufoElement.sighting.event
     if (event.timeZone) return event.timeZone
-    return event.utcOffsetHours === undefined ? "" : this.preferredZoneFor(event.utcOffsetHours) ?? ""
+    return event.utcOffsetHours === undefined ? "" : this.zoneKnownToRead(event.utcOffsetHours) ?? ""
   }
 
   /**
@@ -4287,19 +4299,26 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * The zone to show for an offset: the one already chosen if it still reads that number, else the one the place was found
-   * in, else a fixed-offset zone (`Etc/GMT-1` is UTC+1), else the first the platform lists. undefined when no zone reads it.
+   * The zone to give a number typed by the author: one that says what they mean if there is one (see zoneKnownToRead), else the first
+   * the platform lists. undefined when no zone reads it.
    */
   private preferredZoneFor(offset: number): string | undefined {
+    return this.zoneKnownToRead(offset) ?? this.timeZones.zonesAt(offset, this.timeZoneReference())[0]
+  }
+
+  /**
+   * A zone with a reason to be named for an offset: the one already chosen if it still reads that number, else the one the place is in,
+   * else a fixed-offset zone (`Etc/GMT-1` is UTC+1). Not any zone that happens to read it: a list's first (America/Bahia_Banderas for
+   * Socorro's UTC-7) would say something about the place that nobody said.
+   */
+  private zoneKnownToRead(offset: number): string | undefined {
     const candidates = this.timeZones.zonesAt(offset, this.timeZoneReference())
-    if (candidates.length === 0) return undefined
     const current = this.ufoElement.sighting.event.timeZone
     if (current && candidates.includes(current)) return current
     if (this.placeZone && candidates.includes(this.placeZone)) return this.placeZone
     // POSIX names the fixed zones the other way round: Etc/GMT-1 is one hour AHEAD of UTC.
     const fixed = Number.isInteger(offset) ? (offset === 0 ? "UTC" : `Etc/GMT${offset > 0 ? "-" : "+"}${Math.abs(offset)}`) : undefined
-    if (fixed && candidates.includes(fixed)) return fixed
-    return candidates[0]
+    return fixed && candidates.includes(fixed) ? fixed : undefined
   }
 
   /**
@@ -6092,6 +6111,22 @@ export class SightingEditorElement extends HTMLElement {
     this.utcOffsetInput.classList.toggle("invalid", implausible)
     this.utcOffsetInput.title = implausible
       ? this.messages.utcOffsetImplausible.replace("{solar}", solar! >= 0 ? `+${solar}` : String(solar))
+      : ""
+    this.showTimeZoneConsistency(implausible)
+  }
+
+  /** Says, in orange, a clock the recording states that the zone of its place did not read that day: it may be right (a time given in UTC, a border that moved), but it has to be seen. */
+  private showTimeZoneConsistency(implausible: boolean): void {
+    const event = this.ufoElement.sighting.event
+    const expected = this.placeZone && event.time?.year !== undefined ? this.timeZones.offsetHoursAt(this.placeZone, event.time) : undefined
+    const declared = event.utcOffsetHours ?? (event.timeZone ? this.timeZones.offsetHoursAt(event.timeZone, this.timeZoneReference()) : undefined)
+    const inconsistent = expected !== undefined && declared !== undefined && declared !== expected
+    // The list only when it names a zone: "unknown" contradicts nothing.
+    this.timeZoneSelect.classList.toggle("inconsistent", inconsistent && this.timeZoneSelect.value !== "")
+    this.utcOffsetInput.classList.toggle("inconsistent", inconsistent && !implausible)
+    this.timeZoneWarning.hidden = !inconsistent
+    this.timeZoneWarning.textContent = inconsistent
+      ? this.messages.utcOffsetInconsistent.replace("{zone}", this.placeZone!).replace("{offset}", expected >= 0 ? `+${expected}` : String(expected))
       : ""
   }
 

@@ -174,6 +174,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   utcOffsetNoZone: "Nessun fuso indica questo scarto quel giorno",
   utcOffsetImplausible:
     "Questo fuso orario non corrisponde alla longitudine inserita, la cui ora solare è UTC{solar} — eppure la scena e il rilevamento meteo obbediscono a ciò che è dichiarato qui. Svuota il campo per ricavarlo dalla longitudine.",
+  utcOffsetInconsistent: "Incoerente con il luogo: il suo fuso, {zone}, indicava UTC{offset} quel giorno. La scena e la registrazione meteo seguono quanto dichiarato qui, il che è giusto solo se l'ora è stata data su un altro orologio (UTC, per esempio) o se il luogo non seguiva allora le regole di quel fuso.",
   timeZoneManual: "sconosciuto",
   altitudeAboveSeaLevel:
     "Altitudine del testimone sul livello del mare — il suolo del luogo inserito ne fissa il minimo: un testimone sulle Alpi non è a 0 m.",

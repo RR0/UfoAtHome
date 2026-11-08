@@ -25,6 +25,7 @@ export class EditorTheme {
   --ok: light-dark(#1f7a44, #8fd7a4);
   --error: light-dark(#c0392b, #ff8a7a);
   --error-bg: light-dark(rgba(192, 57, 43, .09), rgba(255, 138, 122, .12));
+  --warn: light-dark(#b85c00, #ffb066);
   --warn-bg: light-dark(rgba(154, 111, 18, .14), rgba(245, 196, 81, .14));
   --neutral-bg: light-dark(rgba(120, 133, 155, .14), rgba(140, 155, 185, .12));
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -87,6 +88,9 @@ export class EditorTheme {
 }
 :where(${scope}) :where(input, select, textarea):focus-visible { outline: none; border-color: var(--glow-dim); box-shadow: 0 0 0 3px var(--warn-bg); }
 :where(${scope}) :where([aria-invalid="true"], .invalid) { border-color: var(--error); }
+:where(${scope}) :where(.inconsistent) { border-color: var(--warn); }
+/* A list has a rule of its own for its border. */
+${scope} :is(select:not([multiple]):not([size]), .rr0-select).inconsistent { border-color: var(--warn); }
 /* Lists: drawn by InputFont in the tokens above, their chevron 11–16 px from the right edge. */
 ${scope} :is(select:not([multiple]):not([size]), .rr0-select) {
   height: 38px;

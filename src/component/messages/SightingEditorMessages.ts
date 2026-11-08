@@ -284,6 +284,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** A typed offset that no zone reads on the observation's day. */
   utcOffsetNoZone: string
   utcOffsetImplausible: string
+  utcOffsetInconsistent: string
   /** The zone picker's first entry: no zone, type the offset yourself. */
   timeZoneManual: string
   /** Tooltip on the Altitude field once the ground's own height is known — it says what the number

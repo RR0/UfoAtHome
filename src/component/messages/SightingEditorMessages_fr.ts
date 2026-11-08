@@ -174,6 +174,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   utcOffsetNoZone: "Aucun fuseau n'indique ce décalage ce jour-là",
   utcOffsetImplausible:
     "Ce fuseau ne correspond pas à la longitude saisie, dont l'heure solaire est UTC{solar} — la scène et le relevé météo obéissent pourtant à ce qui est déclaré ici. Videz le champ pour le déduire de la longitude.",
+  utcOffsetInconsistent: "Incohérent avec le lieu : son fuseau, {zone}, indiquait UTC{offset} ce jour-là. La scène et la météo suivent ce qui est déclaré ici, ce qui n'est juste que si l'heure a été donnée sur une autre horloge (UTC, par exemple) ou si le lieu ne suivait pas alors les règles de ce fuseau.",
   timeZoneManual: "inconnu",
   altitudeAboveSeaLevel:
     "Altitude du témoin au-dessus du niveau de la mer — le sol du lieu saisi en fixe le minimum : un témoin dans les Alpes n'est pas à 0 m.",

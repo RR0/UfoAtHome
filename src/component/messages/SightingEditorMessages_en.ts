@@ -174,6 +174,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   utcOffsetNoZone: "No time zone reads this offset on that day",
   utcOffsetImplausible:
     "This time zone doesn't match the longitude entered, whose own solar time is UTC{solar} — yet the scene and the weather record both obey what is declared here. Clear the field to derive it from the longitude.",
+  utcOffsetInconsistent: "Inconsistent with the place: its time zone, {zone}, read UTC{offset} on that day. The scene and the weather record obey what is declared here, which is right only if the time was given on another clock (UTC, for instance) or the place did not follow that zone's rules then.",
   timeZoneManual: "unknown",
   altitudeAboveSeaLevel:
     "The witness's altitude above sea level — the ground at the location entered sets its floor: a witness in the Alps is not at 0 m.",
