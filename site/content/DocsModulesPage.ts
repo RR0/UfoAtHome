@@ -299,6 +299,11 @@ export default { title: "Ball lightning", name: "Ball lightning" }`
     <pre data-json="" data-schema="module"><code>${escape(DocsModulesPage.NO_CODE_MANIFEST)}</code></pre>
     ${list(t.noCodeFields)}
 
+    <h2 id="check">${t.checkHeading}</h2>
+    <p>${t.check}</p>
+    ${list(t.checkWhat)}
+    <p>${t.checkLimit}</p>
+
     <h2 id="sharing">${t.shareHeading}</h2>
     <p>${t.share}</p>
     ${list(t.shareCases)}
@@ -328,6 +333,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
     skyHeading: string, sky: string, skyCode: string, skyMessages: string, skyStateStep: string, skyState: string, trySky: string[],
     skyFurtherStep: string, skyFurtherIntro: string, skyFurther: string[], reading: string,
     noCodeHeading: string, noCode: string, noCodeFields: string[],
+    checkHeading: string, check: string, checkWhat: string[], checkLimit: string,
     shareHeading: string, share: string, shareCases: string[],
     pointsHeading: string, points: string, pointsKey: string, pointsWhat: string, pointsInterface: string,
     prHeading: string, pr: string, prSteps: string[], prEnd: string
@@ -394,6 +400,15 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<code>models</code>: glTF or GLB files, each with its type (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), its size and its credit.",
         "An <code>id</code> that UFO@home or another module already gives at the same place is refused, for the whole module: give yours a prefix of your own."
       ],
+      checkHeading: "Check your module",
+      check: "In the <strong>Modules</strong> item of the editor, the <strong>Check</strong> button of your module's line tests it against the contract of what it adds to. It runs where your readers will use it, in the browser, so a service that refuses other sites shows there. It sends a real request to your weather service, using the place and date of the open recording, which is why it only runs when you ask.",
+      checkWhat: [
+        "<strong>Any module:</strong> a key that is not one of the places below, a field missing from an entry, an id given twice, a <code>create</code> that fails or already asks the network, a method the interface requires and yours lacks.",
+        "<strong>A weather source:</strong> one sample per point, in order; values within their bounds; a <code>source</code> with the entry's <code>id</code>, a name and a request.",
+        "<strong>An event of the sky:</strong> <code>key</code> the same as the <code>id</code>, its texts in English and French, an object made with the <code>three</code> given to the script, an <code>update</code> that works with no events, a <code>dispose</code> that takes its object out of the scene.",
+        "<strong>An interpretation:</strong> its texts, and a <code>bodiesOf</code> that returns a list at once, tried on what the open recording states."
+      ],
+      checkLimit: "It says what it could not try, and that matters: a service with no record for that date has not had its values looked at, and an <code>update</code> is only tried with no events, since UFO@home does not know what yours state. It proves neither that your data are right, nor the wind's direction (a wind in the wrong sense stays within its bounds), nor that the module is safe: its script has already run. Those are for your own tests.",
       shareHeading: "Sharing a recording that needs your module",
       share: "A recording names the modules it needs under <code>modules</code>, by their addresses. Opening someone's file must not run someone's code, so a reader gets what the manifest states, and <strong>the script only if they added the module themselves</strong>. What this means, depending on what you brought:",
       shareCases: [
@@ -412,7 +427,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "Put the class in the folder of its type under <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\"><code>src/modules</code></a>.",
         "Add its entry to that folder's <code>*Sources.ts</code>, with its credit and the link its licence asks for.",
         "Take its texts from a <code>MessageCatalog</code>, in all four languages. Add a row to the privacy page if it sends anything anywhere.",
-        "Run <code>npm test</code>."
+        "Run <code>npm test</code>, which also puts every implementation through the same check as the <strong>Check</strong> button."
       ],
       prEnd: "The <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README of that folder</a> gives the details. <a href=\"https://github.com/RR0/UfoAtHome/pulls\">Pull requests</a> are welcome, and so is a question beforehand if you are not sure where something goes."
     },
@@ -478,6 +493,15 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<code>models</code> : des fichiers glTF ou GLB, chacun avec son type (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), sa taille et son crédit.",
         "Un <code>id</code> qu'UFO@home ou un autre module donne déjà au même endroit est refusé, pour tout le module : donnez aux vôtres un préfixe à vous."
       ],
+      checkHeading: "Vérifier votre module",
+      check: "Dans l'élément <strong>Modules</strong> de l'éditeur, le bouton <strong>Vérifier</strong> de la ligne de votre module le confronte au contrat de ce à quoi il ajoute. Il s'exécute là où vos lecteurs l'utiliseront, dans le navigateur : un service qui refuse les autres sites s'y voit. Il envoie une vraie requête à votre service météo, avec le lieu et la date de l'enregistrement ouvert, c'est pourquoi il ne s'exécute que si vous le demandez.",
+      checkWhat: [
+        "<strong>Tout module :</strong> une clé qui n'est pas l'un des endroits ci-dessous, un champ manquant dans une entrée, un id donné deux fois, un <code>create</code> qui échoue ou interroge déjà le réseau, une méthode que l'interface exige et que le vôtre n'a pas.",
+        "<strong>Une source météo :</strong> un échantillon par point, dans l'ordre ; des valeurs dans leurs limites ; une <code>source</code> avec l'<code>id</code> de l'entrée, un nom et une requête.",
+        "<strong>Un événement du ciel :</strong> <code>key</code> identique à l'<code>id</code>, ses textes en anglais et en français, un objet construit avec le <code>three</code> que reçoit le script, un <code>update</code> qui marche sans événement, un <code>dispose</code> qui retire son objet de la scène.",
+        "<strong>Une interprétation :</strong> ses textes, et un <code>bodiesOf</code> qui renvoie une liste aussitôt, essayé sur ce qu'énonce l'enregistrement ouvert."
+      ],
+      checkLimit: "Il dit ce qu'il n'a pas pu essayer, et cela compte : un service sans relevé à cette date n'a pas vu ses valeurs contrôlées, et <code>update</code> n'est essayé que sans événement, puisqu'UFO@home ne sait pas ce que les vôtres énoncent. Il ne prouve ni que vos données sont justes, ni le sens du vent (un vent à l'envers reste dans ses limites), ni que le module est sûr : son script s'est déjà exécuté. Cela relève de vos propres tests.",
       shareHeading: "Partager un enregistrement qui a besoin de votre module",
       share: "Un enregistrement nomme les modules dont il a besoin sous <code>modules</code>, par leurs adresses. Ouvrir le fichier de quelqu'un ne doit pas exécuter le code de quelqu'un : un lecteur reçoit donc ce que le manifeste énonce, et <strong>le script seulement s'il a ajouté le module lui-même</strong>. Ce que cela veut dire selon ce que vous avez apporté :",
       shareCases: [
@@ -496,7 +520,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "Placez la classe dans le dossier de son type sous <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\"><code>src/modules</code></a>.",
         "Ajoutez son entrée au <code>*Sources.ts</code> de ce dossier, avec son crédit et le lien que sa licence demande.",
         "Prenez ses textes dans un <code>MessageCatalog</code>, dans les quatre langues. Ajoutez une ligne à la page de confidentialité si elle envoie quoi que ce soit quelque part.",
-        "Lancez <code>npm test</code>."
+        "Lancez <code>npm test</code>, qui passe aussi chaque implémentation à la même vérification que le bouton <strong>Vérifier</strong>."
       ],
       prEnd: "Le <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README de ce dossier</a> donne le détail. Les <a href=\"https://github.com/RR0/UfoAtHome/pulls\">pull requests</a> sont les bienvenues, et une question avant aussi si vous ne savez pas trop où mettre quelque chose."
     },
@@ -562,6 +586,15 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<code>models</code>: archivos glTF o GLB, cada uno con su tipo (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), su tamaño y su crédito.",
         "Un <code>id</code> que UFO@home u otro módulo ya da en el mismo lugar se rechaza, para todo el módulo: dé a los suyos un prefijo propio."
       ],
+      checkHeading: "Comprobar su módulo",
+      check: "En el elemento <strong>Módulos</strong> del editor, el botón <strong>Comprobar</strong> de la línea de su módulo lo contrasta con el contrato de aquello a lo que añade. Se ejecuta donde lo usarán sus lectores, en el navegador: un servicio que rechaza a otros sitios se ve ahí. Envía una petición real a su servicio meteorológico, con el lugar y la fecha de la grabación abierta, por eso solo se ejecuta si usted lo pide.",
+      checkWhat: [
+        "<strong>Todo módulo:</strong> una clave que no es uno de los lugares de abajo, un campo que falta en una entrada, un id dado dos veces, un <code>create</code> que falla o ya consulta la red, un método que la interfaz exige y el suyo no tiene.",
+        "<strong>Una fuente meteorológica:</strong> una muestra por punto, en orden; valores dentro de sus límites; una <code>source</code> con el <code>id</code> de la entrada, un nombre y una petición.",
+        "<strong>Un evento del cielo:</strong> <code>key</code> igual al <code>id</code>, sus textos en inglés y en francés, un objeto construido con el <code>three</code> que recibe el script, un <code>update</code> que funciona sin eventos, un <code>dispose</code> que saca su objeto de la escena.",
+        "<strong>Una interpretación:</strong> sus textos, y un <code>bodiesOf</code> que devuelve una lista enseguida, probado con lo que declara la grabación abierta."
+      ],
+      checkLimit: "Dice lo que no pudo probar, y eso importa: un servicio sin registro para esa fecha no ha visto comprobados sus valores, y <code>update</code> solo se prueba sin eventos, ya que UFO@home no sabe lo que declaran los suyos. No demuestra ni que sus datos sean correctos, ni el sentido del viento (un viento al revés sigue dentro de sus límites), ni que el módulo sea seguro: su script ya se ha ejecutado. Eso corresponde a sus propias pruebas.",
       shareHeading: "Compartir una grabación que necesita su módulo",
       share: "Una grabación indica los módulos que necesita en <code>modules</code>, por sus direcciones. Abrir el archivo de alguien no debe ejecutar el código de alguien: un lector recibe por tanto lo que declara el manifiesto, y <strong>el script solo si añadió el módulo por sí mismo</strong>. Lo que esto significa según lo que haya aportado:",
       shareCases: [
@@ -580,7 +613,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "Coloque la clase en la carpeta de su tipo en <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\"><code>src/modules</code></a>.",
         "Añada su entrada al <code>*Sources.ts</code> de esa carpeta, con su crédito y el enlace que pide su licencia.",
         "Tome sus textos de un <code>MessageCatalog</code>, en los cuatro idiomas. Añada una fila a la página de privacidad si envía algo a alguna parte.",
-        "Ejecute <code>npm test</code>."
+        "Ejecute <code>npm test</code>, que somete además cada implementación a la misma comprobación que el botón <strong>Comprobar</strong>."
       ],
       prEnd: "El <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README de esa carpeta</a> da los detalles. Las <a href=\"https://github.com/RR0/UfoAtHome/pulls\">pull requests</a> son bienvenidas, y también una pregunta antes si no sabe bien dónde poner algo."
     },
@@ -646,6 +679,15 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<code>models</code>: file glTF o GLB, ognuno con il suo tipo (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), la sua misura e il suo credito.",
         "Un <code>id</code> che UFO@home o un altro modulo dà già nello stesso punto è rifiutato, per tutto il modulo: dai ai tuoi un prefisso tuo."
       ],
+      checkHeading: "Verificare il tuo modulo",
+      check: "Nella voce <strong>Moduli</strong> dell'editor, il pulsante <strong>Verifica</strong> sulla riga del tuo modulo lo confronta con il contratto di ciò a cui aggiunge. Viene eseguito dove lo useranno i tuoi lettori, nel browser: un servizio che rifiuta gli altri siti si vede lì. Invia una vera richiesta al tuo servizio meteo, con il luogo e la data della registrazione aperta, ed è per questo che viene eseguito solo se lo chiedi.",
+      checkWhat: [
+        "<strong>Ogni modulo:</strong> una chiave che non è uno dei punti qui sotto, un campo mancante in una voce, un id dato due volte, un <code>create</code> che fallisce o interroga già la rete, un metodo che l'interfaccia esige e che il tuo non ha.",
+        "<strong>Una fonte meteo:</strong> un campione per punto, in ordine; valori entro i loro limiti; una <code>source</code> con l'<code>id</code> della voce, un nome e una richiesta.",
+        "<strong>Un evento del cielo:</strong> <code>key</code> uguale all'<code>id</code>, i suoi testi in inglese e in francese, un oggetto costruito con il <code>three</code> che lo script riceve, un <code>update</code> che funziona senza eventi, un <code>dispose</code> che toglie il suo oggetto dalla scena.",
+        "<strong>Un'interpretazione:</strong> i suoi testi, e un <code>bodiesOf</code> che restituisce subito un elenco, provato su ciò che la registrazione aperta dichiara."
+      ],
+      checkLimit: "Dice ciò che non ha potuto provare, e questo conta: un servizio senza dati per quella data non ha visto verificati i suoi valori, e <code>update</code> è provato solo senza eventi, poiché UFO@home non sa cosa dichiarano i tuoi. Non dimostra né che i tuoi dati siano giusti, né il senso del vento (un vento al contrario resta nei suoi limiti), né che il modulo sia sicuro: il suo script è già stato eseguito. Questo spetta ai tuoi test.",
       shareHeading: "Condividere una registrazione che ha bisogno del tuo modulo",
       share: "Una registrazione indica i moduli di cui ha bisogno sotto <code>modules</code>, con i loro indirizzi. Aprire il file di qualcuno non deve eseguire il codice di qualcuno: un lettore riceve quindi ciò che il manifesto dichiara, e <strong>lo script solo se ha aggiunto il modulo lui stesso</strong>. Ciò che significa secondo ciò che hai portato:",
       shareCases: [
@@ -664,7 +706,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "Metti la classe nella cartella del suo tipo in <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\"><code>src/modules</code></a>.",
         "Aggiungi la sua voce al <code>*Sources.ts</code> di quella cartella, con il suo credito e il link che la sua licenza chiede.",
         "Prendi i suoi testi da un <code>MessageCatalog</code>, nelle quattro lingue. Aggiungi una riga alla pagina sulla privacy se invia qualcosa da qualche parte.",
-        "Esegui <code>npm test</code>."
+        "Esegui <code>npm test</code>, che sottopone anche ogni implementazione alla stessa verifica del pulsante <strong>Verifica</strong>."
       ],
       prEnd: "Il <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README di quella cartella</a> dà i dettagli. Le <a href=\"https://github.com/RR0/UfoAtHome/pulls\">pull request</a> sono benvenute, e anche una domanda prima se non sai bene dove mettere qualcosa."
     }

@@ -2868,6 +2868,11 @@ export class SightingEditorElement extends HTMLElement {
         this.ufoElement.sighting.modules = named.length > 0 ? named : undefined
         this.syncFileEditor(false)
       })
+      // What a check can try a module on, read when it is asked for: the recording on show then.
+      panel.checkContext = () => ({
+        weatherQuery: this.weatherInference.queryOf(this.ufoElement.sighting),
+        interpretation: this.ufoElement.sighting.interpretation as Readonly<Record<string, unknown>> | undefined
+      })
       void panel.setLanguage(this.language)
       this.syncModulesPanel()
     })

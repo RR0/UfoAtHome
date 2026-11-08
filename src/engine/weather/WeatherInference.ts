@@ -3,7 +3,7 @@ import { resolveObserverPoseAt, sightingDurationMs } from "../model/Sighting.js"
 import { sightingTimeToDate } from "../astronomy/CelestialPositions.js"
 import type { WeatherSource } from "../model/Weather.js"
 import type { WeatherKeyframe } from "../model/WeatherTrack.js"
-import type { WeatherPoint, WeatherProvider } from "./WeatherProvider.js"
+import type { WeatherPoint, WeatherProvider, WeatherQuery } from "./WeatherProvider.js"
 
 const HOUR_MS = 3_600_000
 
@@ -45,20 +45,26 @@ export class WeatherInference {
   constructor(private readonly provider: WeatherProvider) {
   }
 
+  /** What a provider is asked about this sighting, or nothing when it does not say enough to ask (see canInfer). */
+  queryOf(sighting: Sighting): WeatherQuery | undefined {
+    const question = this.questionOf(sighting)
+    if (!question) return undefined
+    const timings = this.sampleTimings(sighting, question.start, sightingDurationMs(sighting.event) ?? 0)
+    return { points: timings.map(timing => this.pointAt(sighting, timing, question.origin)) }
+  }
+
   /** Throws nothing on a failed lookup — a provider error is reported as `failed`, since every
    * caller of this needs to tell those apart from "no such record" anyway. */
   async infer(sighting: Sighting): Promise<WeatherInferenceResult> {
     const question = this.questionOf(sighting)
     if (!question) return { status: "incomplete" }
-    const { origin, start } = question
+    const { start } = question
 
     const durationMs = sightingDurationMs(sighting.event) ?? 0
     const timings = this.sampleTimings(sighting, start, durationMs)
     let observation
     try {
-      observation = await this.provider.getWeather({
-        points: timings.map(timing => this.pointAt(sighting, timing, origin))
-      })
+      observation = await this.provider.getWeather(this.queryOf(sighting)!)
     } catch {
       return { status: "failed", at: start }
     }

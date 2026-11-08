@@ -1,11 +1,12 @@
 import { afterAll, describe, expect, it, vi } from "vitest"
 import type { Group } from "three"
 import { DocsModulesPage } from "../../site/content/DocsModulesPage.js"
+import { ModuleConformance } from "../../src/modules/ModuleConformance.js"
 import { ModuleManifest } from "../../src/modules/ModuleManifest.js"
 import type { ModuleScript } from "../../src/modules/ModuleManifest.js"
 import type { ExtensionPointId } from "../../src/modules/ModuleRegistry.js"
 import { MODULE_THREE } from "../../src/modules/sky-events/ModuleThree.js"
-import type { SkyEventFrame, SkyEventJson, SkyEventKind } from "../../src/modules/sky-events/SkyEventKind.js"
+import type { SkyEventFrame, SkyEventJson, SkyEventKind, SkyEventKindMessages } from "../../src/modules/sky-events/SkyEventKind.js"
 
 /** What the guide shows is run: somebody is going to copy it. */
 describe("the excerpts of the guide to modules", () => {
@@ -76,6 +77,21 @@ describe("the excerpts of the guide to modules", () => {
     expect(simulation.drawnCount).toBe(0)
     expect(ball.visible).toBe(false)
     simulation.dispose()
+  })
+
+  it("passes the check the page tells its readers to run", async () => {
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ cloudPercent: 70, rainMm: 0, windKmh: 36, windFromDeg: 270, thunder: false })))
+    const weather = await scriptOf(DocsModulesPage.WEATHER_SCRIPT)(context)
+    const weatherQuery = { points: [{ lat: 48.8, lng: 2.2, time: new Date("2026-10-09T18:00:00Z") }] }
+    expect(await ModuleConformance.check({ module: { contributes: weather } }, { weatherQuery })).toEqual([])
+
+    const sky = await scriptOf(DocsModulesPage.SKY_SCRIPT)(context)
+    // Its texts are files beside the module, which nothing serves here: what the reader writes from the page's excerpt.
+    const texts = new Function(DocsModulesPage.SKY_MESSAGES.replace("export default", "return"))() as SkyEventKindMessages
+    const source = sky.skyEvents![0]
+    const kind = source.create()
+    const served = { ...source, create: () => ({ ...kind, messages: { load: async () => texts } }) }
+    expect(await ModuleConformance.check({ module: { contributes: { skyEvents: [served] } } })).toEqual([])
   })
 
   it("lists every extension point, each with an interface that exists", () => {

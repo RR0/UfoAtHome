@@ -1,4 +1,5 @@
 import { Messages } from "../../i18n/MessageCatalog.js"
+import type { ConformanceCode } from "../../modules/ModuleConformance.js"
 /** What the Modules item of the Files group says — see ModulesPanelElement. */
 export interface ModulesPanelMessages {
   /** What a module is, above the list. */
@@ -36,6 +37,17 @@ export interface ModulesPanelMessages {
   imported: string
   /** {error} is why the file is not a list of modules. */
   importFailed: string
+  /** The button that checks a module against the contract of what it adds to (see ModuleConformance). */
+  check: string
+  checking: string
+  /** When nothing broke it: that this says nothing of its data being right, or of it being safe. */
+  checkPassed: string
+  /** {error} is why the check itself could not finish. */
+  checkCrashed: string
+  /** A finding with the implementation it is about: {about} and {text}. */
+  checkAbout: string
+  /** What a check found, by its code. {point} is where a module adds, {detail} what the code needs besides. */
+  checks: Record<ConformanceCode, string>
   /** Each extension point, by its id (see ExtensionPointTypes). */
   points: Record<string, string>
 }
