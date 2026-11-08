@@ -6257,8 +6257,9 @@ export class SceneRenderer {
    * The Sun as a light the picture cannot hold (see BrightSource): its disc is drawn at the most a pixel takes (BRIGHTEST_RELATIVE), less
    * than half of what it is on a clear day, and its ghosts, made from the picture's light, carried only what was drawn. What is beyond
    * that most, over its disc, is given back to them, as the
-   * same ghosts (see BrightSource). Undefined when the Sun is not in the picture, or hidden, or no brighter than a pixel holds — the only
-   * light that ever is.
+   * same ghosts (see BrightSource). A Sun out of the picture still strikes the glass, as much as the lens lets it in (see
+   * LensGhosts.offFrameShare). Undefined when the Sun is behind the camera, or hidden, or no brighter than a pixel holds — the only light
+   * that ever is.
    */
   private sunBeyondPicture(): BrightSource | undefined {
     const flare = this.lensFlare
@@ -6269,7 +6270,14 @@ export class SceneRenderer {
     const radius = Math.tan(flare.uniforms.uSourceRadiusDeg.value * Math.PI / 180) / flare.uniforms.uTanHalfFov.value / 2
     const area = Math.PI * radius * radius
     const position = flare.uniforms.uLensPosition.value
-    return { x: position.x, y: position.y, radius, flux: [excess[0] * area, excess[1] * area, excess[2] * area] }
+    const tanHalfFov = flare.uniforms.uTanHalfFov.value
+    const aspect = this.camera.aspect
+    const share = LensGhosts.offFrameShare(
+      Math.atan(Math.hypot(position.x * aspect, position.y) * tanHalfFov) * 180 / Math.PI,
+      Math.atan(Math.hypot(aspect, 1) * tanHalfFov) * 180 / Math.PI
+    )
+    if (share <= 0) return undefined
+    return { x: position.x, y: position.y, radius, flux: [excess[0] * area * share, excess[1] * area * share, excess[2] * area * share] }
   }
 
   /**

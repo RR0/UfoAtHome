@@ -170,6 +170,21 @@ export class LensGhosts {
   static readonly WINDOW: LensGhost = { scale: 1, share: 1.6e-3, blur: 0.002, offset: [0, 0.006], cause: "glass" }
   static readonly WINDSCREEN: LensGhost = { scale: 1, share: 2e-2, blur: 0.003, offset: [0, 0.025], cause: "glass" }
 
+  /**
+   * How far beyond the corner of its frame a lens still takes a light in, degrees: its barrel and its hood cut the rest off. ASSUMED: it
+   * depends on each lens, and on its hood above all. A sensible order of magnitude for an ordinary lens.
+   */
+  static readonly OFF_FRAME_REACH_DEG = 30
+
+  /**
+   * How much of a light out of the picture reaches the glass, 0 to 1, from how far it is off the lens's axis and how far the corner of the
+   * frame is: all of it up to the corner, none past OFF_FRAME_REACH_DEG beyond. What makes a Sun just out of a shot flare it.
+   */
+  static offFrameShare(offAxisDeg: number, cornerDeg: number): number {
+    const x = Math.min(Math.max((offAxisDeg - cornerDeg) / LensGhosts.OFF_FRAME_REACH_DEG, 0), 1)
+    return 1 - x * x * (3 - 2 * x)
+  }
+
   /** The aperture the ghosts' blur is stated at when a lens states none. */
   private static readonly REFERENCE_F_NUMBER = 4
 

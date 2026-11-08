@@ -10,7 +10,8 @@ import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js
  * more than twice that). Its ghosts are made from the picture's light like every other's, and so would carry only what was drawn of it:
  * the light it has beyond that is handed to them here, as the same ghosts (same scales, shares, defocus and fade), and nothing else —
  * what the picture's storage cut, given back. Where it is, in normalised device coordinates, how wide its disc is, as a share of the
- * picture's height, and that light beyond, per channel, times its disc's area in that same unit squared.
+ * picture's height, and that light beyond, per channel, times its disc's area in that same unit squared. It may stand out of the picture:
+ * a lens makes ghosts of what its glass sees, not of what its frame shows.
  */
 export interface BrightSource {
   x: number
@@ -402,8 +403,6 @@ export class GhostPass {
               vec2 centre = 0.5 + uOffset[i] + k * (uBright - 0.5);
               vec2 away = (vUv - centre) * vec2(uSize.x / uSize.y, 1.0);
               float radius = max(uBlur[i] + abs(k) * uBrightRadius, 1.5 / uSize.y);
-              // Faded at the picture's edge as every light's ghosts are (see below).
-              float brightFade = max(2.0 * uBlur[i] * uSize.y / abs(k), 2.0) / uSize.y;
               // A ghost of the glass is the image of the aperture, so the polygon of its blades when there are any — as shaped draws it,
               // turned the same way. This disc is most of what a sun's ghost is: drawn round, it left every ghost round through a lens
               // whose six blades put six spikes on the same Sun. Its light is spread over the polygon's area rather than the circle's.
@@ -416,7 +415,9 @@ export class GhostPass {
                 area = 0.5 * uBlades * sin(sector) / 3.14159265;
               }
               float inside = smoothstep(radius, 0.8 * radius, reach);
-              sum += GhostPass_edgeFade(uBright, brightFade, uSize) * uTint[i] * uShare[i] * uBrightFlux * inside
+              // Not faded at the picture's edge, unlike what follows: this light is known wherever it is, in the picture or out of it (see
+              // SceneRenderer.sunBeyondPicture, which gives what the lens still lets in of a Sun out of it).
+              sum += uTint[i] * uShare[i] * uBrightFlux * inside
                 / (3.14159265 * 0.81 * area * radius * radius);
             }
             // Where in the picture the light that lands here as this ghost came from.

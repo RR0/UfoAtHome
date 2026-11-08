@@ -134,3 +134,16 @@ describe("GlassWetting", () => {
     expect(state.history[19]).toBe(0)
   })
 })
+
+describe("a light out of the picture", () => {
+  it("reaches the glass whole up to the corner of the frame", () => {
+    expect(LensGhosts.offFrameShare(0, 20)).toBe(1)
+    expect(LensGhosts.offFrameShare(20, 20)).toBe(1)
+  })
+
+  it("fades past it, and is gone beyond what the lens takes in", () => {
+    expect(LensGhosts.offFrameShare(20 + LensGhosts.OFF_FRAME_REACH_DEG / 2, 20)).toBeCloseTo(0.5)
+    expect(LensGhosts.offFrameShare(20 + LensGhosts.OFF_FRAME_REACH_DEG, 20)).toBe(0)
+    expect(LensGhosts.offFrameShare(170, 20)).toBe(0)
+  })
+})
