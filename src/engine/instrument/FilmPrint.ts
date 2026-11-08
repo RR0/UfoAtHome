@@ -55,8 +55,8 @@ export class FilmPrints {
    */
   static readonly BROADCAST_35MM: FilmPrint = {
     framesPerSecond: 24,
-    contrast: 1.3,
-    tint: [0.98, 0.97, 0.86],
+    contrast: 1.6,
+    tint: [0.99, 0.98, 0.92],
     softness: 1.6 / 480,
     specksPerFrame: 1.15,
     speckRadius: 1.6 / 480,

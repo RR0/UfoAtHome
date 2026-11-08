@@ -4870,7 +4870,7 @@ export class SightingEditorElement extends HTMLElement {
     if (!pose) return
     this.referenceHeadingInput.value = String(this.rounded(pose.headingDeg ?? 0))
     this.referencePitchInput.value = String(this.rounded(pose.pitchDeg))
-    this.referenceRollInput.value = String(this.rounded(pose.rollDeg ?? 0))
+    this.referenceRollInput.value = String(this.rounded(ReferenceTimeline.rollOfPicture(pose.rollDeg) ?? 0))
     this.referenceFovInput.value = String(this.rounded(pose.fovDeg))
     this.updateReference()
   }
@@ -5363,7 +5363,7 @@ export class SightingEditorElement extends HTMLElement {
     const { headingDeg, pitchDeg, rollDeg } = reference.registration
     this.headingInput.value = String(this.rounded(headingDeg))
     this.pitchInput.value = String(this.rounded(pitchDeg))
-    this.rollInput.value = String(this.rounded(rollDeg ?? 0))
+    this.rollInput.value = String(this.rounded(ReferenceTimeline.rollOfPicture(rollDeg) ?? 0))
     this.updateObserver()
     const t = this.ufoElement.currentTime
     const index = this.ufoElement.sighting.observerTrack.toJSON().keyframes.findIndex(keyframe => keyframe.t === t)

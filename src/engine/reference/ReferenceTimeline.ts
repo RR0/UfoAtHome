@@ -27,6 +27,14 @@ export class ReferenceTimeline {
   private static readonly MIN_RATE = 0.0625
   private static readonly MAX_RATE = 16
 
+  /**
+   * The roll of a picture taken with the camera so held. The two are not the same number: a pose's roll turns the camera itself, a picture's turns its
+   * panel the other way about the same axis, clockwise as it is looked at. Copied as they are, a picture fitted on a tilted camera came out tilted twice.
+   */
+  static rollOfPicture(poseRollDeg: number | undefined): number | undefined {
+    return poseRollDeg ? -poseRollDeg : poseRollDeg
+  }
+
   /** The kind a source says it is, when it says: a video by its file's type or its address's extension, undefined for anything else. */
   static kindOfSource(source: { type?: string, url?: string }): ReferenceKind | undefined {
     if (source.type?.startsWith("video/")) return "video"

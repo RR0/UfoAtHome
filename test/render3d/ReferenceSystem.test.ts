@@ -4,6 +4,7 @@ import type { Mesh } from "three"
 import { ReferenceSystem, REFERENCE_LAYER } from "../../src/render3d/ReferenceSystem.js"
 import type { SceneReference } from "../../src/engine/model/Reference.js"
 import { PhenomenonSystem } from "../../src/render3d/PhenomenonSystem.js"
+import { ReferenceTimeline } from "../../src/engine/reference/ReferenceTimeline.js"
 import { PictureFetchError } from "../../src/engine/reference/PictureFetch.js"
 
 /** A picture whose bytes are already here: 4:3, the shape of a 1968 print. */
@@ -307,5 +308,20 @@ describe("ReferenceSystem", () => {
       await settled()
       expect(system.failureOf("film.mp4")).toEqual({ kind: "notVideo" })
     })
+  })
+
+  it("stands a picture square in the frame of the camera it was taken with, roll included", async () => {
+    const pose = { headingDeg: 30, pitchDeg: -29, rollDeg: -2.5 }
+    const reference = photo({ headingDeg: pose.headingDeg, pitchDeg: pose.pitchDeg, rollDeg: ReferenceTimeline.rollOfPicture(pose.rollDeg), fovDeg: 20 })
+    const system = new ReferenceSystem(new Scene(), () => undefined, loaded(640, 480))
+    system.set([reference])
+    await settled()
+    // As SceneRenderer.setObserverPose aims the camera.
+    const camera = new PerspectiveCamera()
+    const DEG = Math.PI / 180
+    camera.rotation.set(pose.pitchDeg * DEG, -pose.headingDeg * DEG, pose.rollDeg * DEG, "YXZ")
+    const up = system.directionOfPixel(reference, 0.5, 0, new Vector3()).sub(system.directionOfPixel(reference, 0.5, 1, new Vector3())).normalize()
+    const cameraUp = new Vector3(0, 1, 0).applyQuaternion(camera.quaternion)
+    expect(up.distanceTo(cameraUp)).toBeLessThan(1e-6)
   })
 })
