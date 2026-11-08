@@ -69,6 +69,9 @@ export interface Flightradar24ProviderOptions {
  * they were a sample of the box, with 3 of the 9 flights within 20 km. So the radius starts small and only widens while it holds too
  * few flights, which also pays for no more of them than are needed.
  *
+ * Its terms (read 2026-11-08) set what must stay true here: its data is never merged with another record of flights, nor redistributed,
+ * nor stored; it is credited wherever it is shown; and a key is its reader's own, never one shipped in a page for others to use.
+ *
  * A question that nothing has answered yet waits a little, because an editor asks again at each change of the place or the time, and
  * paying for the positions a drag went through is paying for nothing. And there is a ceiling per page, in case something asks in a
  * loop: this is someone's money.

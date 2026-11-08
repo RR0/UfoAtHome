@@ -120,6 +120,16 @@ export class PrivacyPage implements SitePage {
       }
     },
     {
+      name: "Flightradar24", host: "fr24api.flightradar24.com",
+      where: { en: "Sweden", fr: "Suède", es: "Suecia", it: "Svezia" },
+      why: {
+        en: "Only when you choose it as the source of air traffic in the editor: the place and the time of the recording, with your own key.",
+        fr: "Seulement quand vous la choisissez comme source du trafic aérien dans l'éditeur : le lieu et l'heure de l'enregistrement, avec votre propre clé.",
+        es: "Solo cuando la eliges como fuente del tráfico aéreo en el editor: el lugar y la hora de la grabación, con tu propia clave.",
+        it: "Solo quando la scegli come fonte del traffico aereo nell'editor: il luogo e l'ora della registrazione, con la tua chiave."
+      }
+    },
+    {
       name: "Anthropic (Claude)", host: "api.anthropic.com",
       where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
       why: {
@@ -191,6 +201,7 @@ export class PrivacyPage implements SitePage {
     <p>If you choose to have an AI draft your recording from a description, you are asked for a key (for Claude, or for another model later). It is optional: you can write the file by hand, or fill in the editor,
       and never meet it. It is never stored: neither in your browser nor on a server (there is none of ours that stores anything). It is
       kept in the page's memory until you reload it, then typed again.</p>
+    <p>If you choose Flightradar24 as the source of air traffic, you are asked for your own key in the same way, and it is kept the same way: never stored, in the page's memory until you reload it, and sent only to Flightradar24. What it answers stays in that memory too.</p>
     <p>A module you add is read from the address you gave, and one a recording names from the address the recording gives: that
       server sees the request (address, page, time), as any site does. A module with code runs only if you added it yourself. Its <strong>Check</strong> button, when you press it, asks that module's services with the place and date of the open recording.</p>
     <p>The site can also keep a copy of its pages on your device so that it works without a network.
@@ -271,6 +282,7 @@ export class PrivacyPage implements SitePage {
     <p>Si vous choisissez de faire rédiger votre enregistrement par une IA à partir d'une description, une clé vous est demandée (pour Claude, ou pour un autre modèle plus tard). C'est facultatif : vous pouvez écrire le fichier
       à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle n'est jamais conservée : ni dans votre navigateur, ni sur un serveur
       (nous n'en avons aucun qui conserve quoi que ce soit). Elle reste en mémoire dans la page jusqu'à ce que vous la rechargiez, puis se saisit à nouveau.</p>
+    <p>Si vous choisissez Flightradar24 comme source du trafic aérien, votre propre clé vous est demandée de la même façon, et gardée de la même façon : jamais enregistrée, dans la mémoire de la page jusqu'à ce que vous la rechargiez, et envoyée seulement à Flightradar24. Ce qu'elle répond reste aussi dans cette mémoire.</p>
     <p>Un module que vous ajoutez est lu à l'adresse que vous avez donnée, et un module qu'un enregistrement nomme à l'adresse que l'enregistrement
       donne : ce serveur voit la requête (adresse, page, heure), comme tout site. Un module qui contient du code ne s'exécute que si vous l'avez ajouté vous-même. Son bouton <strong>Vérifier</strong>, quand vous l'actionnez, interroge les services de ce module avec le lieu et la date de l'enregistrement ouvert.</p>
     <p>Le site peut aussi garder une copie de ses pages sur votre appareil pour fonctionner sans réseau.
@@ -353,6 +365,7 @@ export class PrivacyPage implements SitePage {
     <p>Si decides que una IA redacte tu grabación a partir de una descripción, se te pide una clave (para Claude, o para otro modelo más adelante). Es opcional: puedes escribir el archivo a mano, o rellenar el editor,
       sin encontrarla nunca. Nunca se guarda: ni en tu navegador ni en un servidor (no tenemos ninguno que conserve nada). Se mantiene en
       la memoria de la página hasta que la recargas, y luego se vuelve a escribir.</p>
+    <p>Si eliges Flightradar24 como fuente del tráfico aéreo, se te pide tu propia clave del mismo modo, y se conserva del mismo modo: nunca se guarda, permanece en la memoria de la página hasta que la recargas y solo se envía a Flightradar24. Lo que responde también se queda en esa memoria.</p>
     <p>Un módulo que añades se lee en la dirección que diste, y uno que cita una grabación en la dirección que da la grabación: ese
       servidor ve la petición (dirección, página, hora), como cualquier sitio. Un módulo con código solo se ejecuta si lo añadiste tú. Su botón <strong>Comprobar</strong>, cuando lo pulsas, consulta los servicios de ese módulo con el lugar y la fecha de la grabación abierta.</p>
     <p>El sitio también puede guardar una copia de sus páginas en tu dispositivo para funcionar sin red.
@@ -433,6 +446,7 @@ export class PrivacyPage implements SitePage {
     <p>Se scegli di far redigere la tua registrazione a un'IA a partire da una descrizione, ti viene chiesta una chiave (per Claude, o per un altro modello in futuro). È facoltativa: puoi scrivere il file a mano, o compilare
       l'editor, senza incontrarla mai. Non viene mai conservata: né nel tuo browser né su un server (non ne abbiamo nessuno che conservi qualcosa).
       Resta nella memoria della pagina finché non la ricarichi, poi va inserita di nuovo.</p>
+    <p>Se scegli Flightradar24 come fonte del traffico aereo, ti viene chiesta la tua chiave allo stesso modo, ed è conservata allo stesso modo: mai salvata, nella memoria della pagina finché non la ricarichi, e inviata solo a Flightradar24. Anche ciò che risponde resta in quella memoria.</p>
     <p>Un modulo che aggiungi viene letto all'indirizzo che hai dato, e uno che una registrazione cita all'indirizzo che la registrazione
       dà: quel server vede la richiesta (indirizzo, pagina, ora), come qualsiasi sito. Un modulo con codice viene eseguito solo se l'hai aggiunto tu. Il suo pulsante <strong>Verifica</strong>, quando lo premi, interroga i servizi di quel modulo con il luogo e la data della registrazione aperta.</p>
     <p>Il sito può anche conservare una copia delle sue pagine sul tuo dispositivo per funzionare senza rete.
