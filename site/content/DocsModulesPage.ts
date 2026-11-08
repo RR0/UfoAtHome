@@ -366,7 +366,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       tryWeather: [
         "Open <a href=\"/edit/\">the editor</a>, in Chrome or Firefox (Safari refuses a local address from a secure page), and state a place and a date: the weather is only asked for once it knows both.",
         "In the <strong>Files</strong> group, choose <strong>Modules</strong>, paste <code>http://localhost:8000/ufoathome-module.json</code> and press <strong>Add</strong>. Your module is listed with what it brings: “weather (1)”.",
-        "In the <strong>Sky</strong> group, choose <strong>ACME Weather</strong> in the weather picker. The values change, and the link beside them is your request."
+        "In the <strong>Sky</strong> group, open <strong>Data sources</strong> with the gear at the top right, and choose <strong>ACME Weather</strong> on the <strong>Weather</strong> line. The values change, and the link beside them is your request."
       ],
       tryTrouble: "If it does not work: a module that cannot be read says why in its line of the list, and for the rest the browser's console tells what your code threw. The usual cause is CORS: <strong>the requests are made by the reader's browser</strong>, so your service must allow other sites to call it. For the same reason, never put a private key in <code>module.js</code>: anyone can read it.",
       publishStep: "4. Publish it",
@@ -459,7 +459,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       tryWeather: [
         "Ouvrez <a href=\"/edit/\">l'éditeur</a>, dans Chrome ou Firefox (Safari refuse une adresse locale depuis une page sécurisée), et indiquez un lieu et une date : la météo n'est demandée qu'une fois les deux connus.",
         "Dans le groupe <strong>Fichiers</strong>, choisissez <strong>Modules</strong>, collez <code>http://localhost:8000/ufoathome-module.json</code> et appuyez sur <strong>Ajouter</strong>. Votre module s'affiche avec ce qu'il apporte : « météo (1) ».",
-        "Dans le groupe <strong>Ciel</strong>, choisissez <strong>ACME Weather</strong> dans le sélecteur de météo. Les valeurs changent, et le lien à côté d'elles est votre requête."
+        "Dans le groupe <strong>Ciel</strong>, ouvrez <strong>Sources des données</strong> par la roue dentée en haut à droite, et choisissez <strong>ACME Weather</strong> sur la ligne <strong>Météo</strong>. Les valeurs changent, et le lien à côté d'elles est votre requête."
       ],
       tryTrouble: "Si ça ne marche pas : un module illisible dit pourquoi sur sa ligne de la liste, et pour le reste, la console du navigateur dit ce que votre code a levé. La cause habituelle est CORS : <strong>les requêtes sont faites par le navigateur du lecteur</strong>, donc votre service doit autoriser les autres sites à l'appeler. Pour la même raison, ne mettez jamais de clé privée dans <code>module.js</code> : tout le monde peut la lire.",
       publishStep: "4. Publier",
@@ -552,7 +552,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       tryWeather: [
         "Abra <a href=\"/edit/\">el editor</a>, en Chrome o Firefox (Safari rechaza una dirección local desde una página segura), e indique un lugar y una fecha: el tiempo solo se pide cuando se conocen ambos.",
         "En el grupo <strong>Archivos</strong>, elija <strong>Módulos</strong>, pegue <code>http://localhost:8000/ufoathome-module.json</code> y pulse <strong>Añadir</strong>. Su módulo aparece con lo que aporta.",
-        "En el grupo <strong>Cielo</strong>, elija <strong>ACME Weather</strong> en el selector de tiempo. Los valores cambian, y el enlace junto a ellos es su petición."
+        "En el grupo <strong>Cielo</strong>, abra <strong>Fuentes de datos</strong> con la rueda dentada de arriba a la derecha, y elija <strong>ACME Weather</strong> en la línea <strong>Meteorología</strong>. Los valores cambian, y el enlace junto a ellos es su petición."
       ],
       tryTrouble: "Si no funciona: un módulo ilegible dice por qué en su línea de la lista, y para lo demás, la consola del navegador dice qué lanzó su código. La causa habitual es CORS: <strong>las peticiones las hace el navegador del lector</strong>, así que su servicio debe permitir que otros sitios lo llamen. Por la misma razón, nunca ponga una clave privada en <code>module.js</code>: cualquiera puede leerla.",
       publishStep: "4. Publicar",
@@ -645,7 +645,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       tryWeather: [
         "Apri <a href=\"/edit/\">l'editor</a>, in Chrome o Firefox (Safari rifiuta un indirizzo locale da una pagina sicura), e indica un luogo e una data: il meteo viene chiesto solo quando sono noti entrambi.",
         "Nel gruppo <strong>File</strong>, scegli <strong>Moduli</strong>, incolla <code>http://localhost:8000/ufoathome-module.json</code> e premi <strong>Aggiungi</strong>. Il tuo modulo appare con ciò che porta.",
-        "Nel gruppo <strong>Cielo</strong>, scegli <strong>ACME Weather</strong> nel selettore del meteo. I valori cambiano, e il link accanto a essi è la tua richiesta."
+        "Nel gruppo <strong>Cielo</strong>, apri <strong>Fonti dei dati</strong> con la rotella in alto a destra, e scegli <strong>ACME Weather</strong> sulla riga <strong>Meteo</strong>. I valori cambiano, e il link accanto a essi è la tua richiesta."
       ],
       tryTrouble: "Se non funziona: un modulo illeggibile dice perché sulla sua riga dell'elenco, e per il resto la console del browser dice cosa ha lanciato il tuo codice. La causa abituale è CORS: <strong>le richieste sono fatte dal browser del lettore</strong>, quindi il tuo servizio deve permettere agli altri siti di chiamarlo. Per lo stesso motivo, non mettere mai una chiave privata in <code>module.js</code>: chiunque può leggerla.",
       publishStep: "4. Pubblicare",

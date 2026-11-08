@@ -192,7 +192,7 @@ export class PrivacyPage implements SitePage {
       and never meet it. It is never stored: neither in your browser nor on a server (there is none of ours that stores anything). It is
       kept in the page's memory until you reload it, then typed again.</p>
     <p>A module you add is read from the address you gave, and one a recording names from the address the recording gives: that
-      server sees the request (address, page, time), as any site does. A module with code runs only if you added it yourself.</p>
+      server sees the request (address, page, time), as any site does. A module with code runs only if you added it yourself. Its <strong>Check</strong> button, when you press it, asks that module's services with the place and date of the open recording.</p>
     <p>The site can also keep a copy of its pages on your device so that it works without a network.
       That copy is a cache of this site's own files and holds nothing about you.</p>
 
@@ -272,7 +272,7 @@ export class PrivacyPage implements SitePage {
       à la main, ou remplir l'éditeur, sans jamais la rencontrer. Elle n'est jamais conservée : ni dans votre navigateur, ni sur un serveur
       (nous n'en avons aucun qui conserve quoi que ce soit). Elle reste en mémoire dans la page jusqu'à ce que vous la rechargiez, puis se saisit à nouveau.</p>
     <p>Un module que vous ajoutez est lu à l'adresse que vous avez donnée, et un module qu'un enregistrement nomme à l'adresse que l'enregistrement
-      donne : ce serveur voit la requête (adresse, page, heure), comme tout site. Un module qui contient du code ne s'exécute que si vous l'avez ajouté vous-même.</p>
+      donne : ce serveur voit la requête (adresse, page, heure), comme tout site. Un module qui contient du code ne s'exécute que si vous l'avez ajouté vous-même. Son bouton <strong>Vérifier</strong>, quand vous l'actionnez, interroge les services de ce module avec le lieu et la date de l'enregistrement ouvert.</p>
     <p>Le site peut aussi garder une copie de ses pages sur votre appareil pour fonctionner sans réseau.
       Cette copie est un cache des fichiers du site et ne contient rien sur vous.</p>
 
@@ -354,7 +354,7 @@ export class PrivacyPage implements SitePage {
       sin encontrarla nunca. Nunca se guarda: ni en tu navegador ni en un servidor (no tenemos ninguno que conserve nada). Se mantiene en
       la memoria de la página hasta que la recargas, y luego se vuelve a escribir.</p>
     <p>Un módulo que añades se lee en la dirección que diste, y uno que cita una grabación en la dirección que da la grabación: ese
-      servidor ve la petición (dirección, página, hora), como cualquier sitio. Un módulo con código solo se ejecuta si lo añadiste tú.</p>
+      servidor ve la petición (dirección, página, hora), como cualquier sitio. Un módulo con código solo se ejecuta si lo añadiste tú. Su botón <strong>Comprobar</strong>, cuando lo pulsas, consulta los servicios de ese módulo con el lugar y la fecha de la grabación abierta.</p>
     <p>El sitio también puede guardar una copia de sus páginas en tu dispositivo para funcionar sin red.
       Esa copia es una caché de los archivos del propio sitio y no contiene nada sobre ti.</p>
 
@@ -434,7 +434,7 @@ export class PrivacyPage implements SitePage {
       l'editor, senza incontrarla mai. Non viene mai conservata: né nel tuo browser né su un server (non ne abbiamo nessuno che conservi qualcosa).
       Resta nella memoria della pagina finché non la ricarichi, poi va inserita di nuovo.</p>
     <p>Un modulo che aggiungi viene letto all'indirizzo che hai dato, e uno che una registrazione cita all'indirizzo che la registrazione
-      dà: quel server vede la richiesta (indirizzo, pagina, ora), come qualsiasi sito. Un modulo con codice viene eseguito solo se l'hai aggiunto tu.</p>
+      dà: quel server vede la richiesta (indirizzo, pagina, ora), come qualsiasi sito. Un modulo con codice viene eseguito solo se l'hai aggiunto tu. Il suo pulsante <strong>Verifica</strong>, quando lo premi, interroga i servizi di quel modulo con il luogo e la data della registrazione aperta.</p>
     <p>Il sito può anche conservare una copia delle sue pagine sul tuo dispositivo per funzionare senza rete.
       Quella copia è una cache dei file del sito stesso e non contiene nulla su di te.</p>
 

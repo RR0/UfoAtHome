@@ -627,6 +627,7 @@ if (docs) {
       <p>The editor knows the format: <kbd>Ctrl</kbd>+<kbd>Space</kbd> lists the keys an object can
         take, with what the model says of each, and the words a key accepts. It is fetched only the
         first time this group is opened, so it costs nothing to those who never leave the form.</p>
+      <p><strong>Modules</strong>, the last item of the picker, adds what others publish: imagery, relief, 3D models, a source of weather, an event of the sky. Paste a module's address and press <strong>Add</strong>: your modules stay in this browser, can be turned off or removed, and can be saved to a file to load elsewhere. <strong>Named by this recording</strong> says the recording needs it. <strong>Check</strong> tries a module against what UFO@home expects of it and says what is wrong and what it could not try, asking its services with the recording's place and date; it says nothing of its data being right, or of it being safe. See <a href="/docs/modules/">how to add your own</a>.</p>
     </div>
   </div>
 </section>
@@ -1132,6 +1133,7 @@ if (docs) {
         peut prendre, avec ce que le modèle en dit, et les mots qu'une clé accepte. Il n'est chargé
         qu'à la première ouverture de ce groupe, donc il ne coûte rien à qui ne quitte pas le
         formulaire.</p>
+      <p><strong>Modules</strong>, le dernier élément du sélecteur, ajoute ce que d'autres publient : imagerie, relief, modèles 3D, source météo, événement du ciel. Collez l'adresse d'un module et appuyez sur <strong>Ajouter</strong> : vos modules restent dans ce navigateur, peuvent être désactivés ou retirés, et enregistrés dans un fichier pour les charger ailleurs. <strong>Nommé par cet enregistrement</strong> dit que l'enregistrement en a besoin. <strong>Vérifier</strong> confronte un module à ce qu'UFO@home attend de lui et dit ce qui ne va pas et ce qui n'a pas pu être essayé, en interrogeant ses services avec le lieu et la date de l'enregistrement ; cela ne dit rien de l'exactitude de ses données ni de sa sûreté. Voir <a href="/docs/modules/">comment ajouter les vôtres</a>.</p>
     </div>
   </div>
 </section>
@@ -1623,6 +1625,7 @@ if (docs) {
         llevar un objeto, con lo que el modelo dice de cada una, y las palabras que admite una
         clave. Solo se descarga la primera vez que se abre este grupo, así que no cuesta nada a quien
         no sale del formulario.</p>
+      <p><strong>Módulos</strong>, el último elemento del selector, añade lo que otros publican: imágenes, relieve, modelos 3D, una fuente meteorológica, un evento del cielo. Pegue la dirección de un módulo y pulse <strong>Añadir</strong>: sus módulos se quedan en este navegador, pueden desactivarse o quitarse, y guardarse en un archivo para cargarlos en otro lugar. <strong>Citado por esta grabación</strong> dice que la grabación lo necesita. <strong>Comprobar</strong> contrasta un módulo con lo que UFO@home espera de él y dice qué falla y qué no pudo probar, consultando sus servicios con el lugar y la fecha de la grabación; no dice nada de la exactitud de sus datos ni de su seguridad. Vea <a href="/docs/modules/">cómo añadir los suyos</a>.</p>
     </div>
   </div>
 </section>
@@ -2119,6 +2122,7 @@ if (docs) {
         oggetto può avere, con ciò che il modello dice di ciascuna, e le parole che una chiave
         accetta. Viene scaricato solo alla prima apertura di questo gruppo, quindi non costa nulla a
         chi non lascia il modulo.</p>
+      <p><strong>Moduli</strong>, l'ultima voce del selettore, aggiunge ciò che altri pubblicano: immagini, rilievo, modelli 3D, una fonte meteo, un evento del cielo. Incolla l'indirizzo di un modulo e premi <strong>Aggiungi</strong>: i tuoi moduli restano in questo browser, possono essere disattivati o rimossi, e salvati in un file per caricarli altrove. <strong>Citato da questa registrazione</strong> dice che la registrazione ne ha bisogno. <strong>Verifica</strong> confronta un modulo con ciò che UFO@home si aspetta da esso e dice cosa non va e cosa non ha potuto provare, interrogando i suoi servizi con il luogo e la data della registrazione; non dice nulla sull'esattezza dei suoi dati né sulla sua sicurezza. Vedi <a href="/docs/modules/">come aggiungere i tuoi</a>.</p>
     </div>
   </div>
 </section>
