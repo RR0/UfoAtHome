@@ -2040,6 +2040,8 @@ export class SceneElement extends HTMLElement {
     // Where the observer is, so a picture taken from somewhere else fades — see SceneReference.from.
     this.sceneRenderer.setReferences(sighting.references,
       pose?.lat !== undefined && pose.lng !== undefined ? { lat: pose.lat, lng: pose.lng } : undefined)
+    // A video follows the timeline itself. Not the instants of a long pose, which are not where the reader is.
+    if (!instant) this.sceneRenderer.setReferencesTime({ t, playing: this.ufoElement.playbackState === "playing", timeScale: this.ufoElement.playbackRate })
     const cloudOrigin = resolveObserverPoseAt(sighting, 0)
     const initialWeather = resolveWeatherAt(sighting, 0)
     // A record knows how much of the sky each layer covered, not where: its clouds are drifted along

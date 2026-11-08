@@ -226,4 +226,86 @@ describe("ReferenceSystem", () => {
     expect(mesh.geometry.type).toBe("SphereGeometry")
     expect((mesh.material as { side: number }).side).toBe(1)
   })
+  describe("a video", () => {
+    function element(duration = 10) {
+      return {
+        currentTime: 0, duration, paused: true, playbackRate: 1, seeking: false,
+        pause() { this.paused = true },
+        play() { this.paused = false; return Promise.resolve() }
+      }
+    }
+
+    function film(extra: Partial<SceneReference> = {}): SceneReference {
+      return { ...photo(), id: "film", kind: "video", src: "film.mp4", ...extra }
+    }
+
+    async function standing(reference: SceneReference, video = element()) {
+      const scene = new Scene()
+      const system = new ReferenceSystem(scene, () => undefined, loaded(), () => Promise.resolve({ texture: new Texture(), width: 640, height: 480, video }))
+      system.set([reference])
+      await settled()
+      return { scene, system, video }
+    }
+
+    it("shows the frame of the instant while the timeline is paused", async () => {
+      const { system, video } = await standing(film({ video: { fromS: 1 } }))
+      system.setTime({ t: 2000, playing: false, timeScale: 1 })
+      expect(video.currentTime).toBeCloseTo(3)
+      expect(video.paused).toBe(true)
+    })
+
+    it("plays with the timeline and stops with it", async () => {
+      const { system, video } = await standing(film())
+      system.setTime({ t: 0, playing: true, timeScale: 1 })
+      expect(video.paused).toBe(false)
+      system.setTime({ t: 0, playing: false, timeScale: 1 })
+      expect(video.paused).toBe(true)
+    })
+
+    it("does not ask for a jump while one is under way", async () => {
+      const { system, video } = await standing(film())
+      video.seeking = true
+      system.setTime({ t: 2000, playing: false, timeScale: 1 })
+      expect(video.currentTime).toBe(0)
+    })
+
+    it("is there only during its own stretch", async () => {
+      const { scene, system, video } = await standing(film({ t: 1000, video: { toS: 2 } }))
+      system.setTime({ t: 0, playing: true, timeScale: 1 })
+      expect(meshOf(scene, "film")!.visible).toBe(false)
+      expect(video.paused).toBe(true)
+      system.setTime({ t: 1500, playing: true, timeScale: 1 })
+      expect(meshOf(scene, "film")!.visible).toBe(true)
+      system.setTime({ t: 3500, playing: true, timeScale: 1 })
+      expect(meshOf(scene, "film")!.visible).toBe(false)
+      expect(video.paused).toBe(true)
+    })
+
+    it("turns with its camera", async () => {
+      const reference = film({ registrationTrack: [{ t: 0, headingDeg: 0, pitchDeg: 0 }, { t: 1000, headingDeg: 90, pitchDeg: 0 }] })
+      const { system } = await standing(reference)
+      const direction = new Vector3()
+      system.setTime({ t: 0, playing: false, timeScale: 1 })
+      expect(aimOf(system.directionOfPixel(reference, 0.5, 0.5, direction)).azimuthDeg).toBeCloseTo(0)
+      system.setTime({ t: 1000, playing: false, timeScale: 1 })
+      expect(aimOf(system.directionOfPixel(reference, 0.5, 0.5, direction)).azimuthDeg).toBeCloseTo(90)
+    })
+
+    it("widens with a key's field, about its own axis", async () => {
+      const reference = film({ registration: { headingDeg: 0, pitchDeg: 0, fovDeg: 20 }, registrationTrack: [{ t: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 40 }] })
+      const { scene, system } = await standing(reference)
+      system.setTime({ t: 0, playing: false, timeScale: 1 })
+      const expected = Math.tan((40 / 2) * Math.PI / 180) / Math.tan((20 / 2) * Math.PI / 180)
+      expect(meshOf(scene, "film")!.scale.x).toBeCloseTo(expected)
+      expect(meshOf(scene, "film")!.scale.z).toBe(1)
+    })
+
+    it("takes another path than a photo's when its address cannot be read", async () => {
+      const scene = new Scene()
+      const system = new ReferenceSystem(scene, () => undefined, loaded(), () => Promise.reject(new PictureFetchError("film.mp4", { kind: "notVideo" })))
+      system.set([film()])
+      await settled()
+      expect(system.failureOf("film.mp4")).toEqual({ kind: "notVideo" })
+    })
+  })
 })

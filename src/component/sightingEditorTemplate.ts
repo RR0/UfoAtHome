@@ -610,17 +610,21 @@ export const html = `
     <div class="form-section">
     <h3 class="section-title"><span id="label-section-picture"></span></h3>
     <label><span id="label-reference-title"></span> <input id="referenceTitle" class="reference-field" type="text"/></label>
-    <span class="input-file-row"><span id="label-reference-src"></span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
+    <span class="input-file-row"><span id="label-reference-src"></span> <rr0-input-file id="reference-source" name="reference-source" accept="image/*,video/*" no-button placeholder="https://…/photo.jpg"></rr0-input-file></span>
     <!-- Why the picture could not be read, right under where it was asked for (see PictureFailure). -->
     <span id="reference-failure" class="reference-failure" role="alert" hidden></span>
     <label><span id="label-reference-kind"></span>
       <select id="referenceKind" class="reference-field">
         <option value="photo" id="reference-kind-photo"></option>
         <option value="panorama" id="reference-kind-panorama"></option>
+        <option value="video" id="reference-kind-video"></option>
       </select></label>
     <label><span id="label-reference-credit"></span> <input id="referenceCredit" class="reference-field" type="text"/></label>
     <label class="adv"><span id="label-reference-credit-url"></span> <input id="referenceCreditUrl" class="reference-field" type="url"/></label>
     <label><span id="label-reference-t"></span> <input id="referenceT" class="reference-field" type="number" min="0" max="86400" step="0.1" placeholder="—"/> s</label>
+    <label class="reference-video-field" hidden><span id="label-reference-video-from"></span> <input id="referenceVideoFrom" class="reference-field" type="number" min="0" step="0.01" placeholder="—"/> s</label>
+    <label class="reference-video-field" hidden><span id="label-reference-video-to"></span> <input id="referenceVideoTo" class="reference-field" type="number" min="0" step="0.01" placeholder="—"/> s</label>
+    <label class="reference-video-field" hidden><span id="label-reference-video-rate"></span> <input id="referenceVideoRate" class="reference-field" type="number" min="0.05" max="16" step="0.01" placeholder="1"/> &times;</label>
     <label><span id="label-reference-drawing"></span> <input id="referenceDrawing" class="reference-field" type="checkbox"/></label>
     <label><span id="label-reference-opacity"></span> <input id="referenceOpacity" class="reference-field" type="range" min="0" max="1" step="0.05" value="0.5"/></label>
     </div>
@@ -631,6 +635,7 @@ export const html = `
     <label><span id="label-reference-roll"></span> <input id="referenceRoll" class="reference-field" type="number" min="-180" max="180" step="0.1"/> &deg;</label>
     <label><span id="label-reference-fov"></span> <input id="referenceFov" class="reference-field" type="number" min="1" max="179" step="0.1"/> &deg;</label>
     <button id="reference-use-pose" type="button"></button>
+    <button id="reference-remove-key" type="button" hidden></button>
     <!-- Lining the picture up on the rendered scene, by hand and by landmarks — see
          SightingEditorElement.canvasMode and PictureRegistration. While this group is open the
          canvas belongs to the selected picture: a drag turns it, the wheel changes its field, and

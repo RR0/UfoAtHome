@@ -78,6 +78,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setContrailSunlight(): void {}
     setReferences(): void {}
     setReferencesShown(): void {}
+    setReferencesTime(): void {}
     setReferenceView(): void {}
     referenceFailure(): undefined {
       return undefined

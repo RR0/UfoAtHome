@@ -3,13 +3,15 @@
  * - "notShared": its site answers, but does not let other sites read it (no CORS header): saving it and adding it as a file works;
  * - "unreachable": no answer at all (a wrong address, a site down, no network);
  * - "status": the site answered with an error (404 for a picture that is not there, 403 for one it refuses);
- * - "notPicture": what came back is not a picture the browser can decode.
+ * - "notPicture": what came back is not a picture the browser can decode;
+ * - "notVideo": what came back is not a video the browser can decode.
  */
 export type PictureFailure =
   | { kind: "notShared" }
   | { kind: "unreachable" }
   | { kind: "status", status: number }
   | { kind: "notPicture" }
+  | { kind: "notVideo" }
 
 /** A picture that could not be read, and why. */
 export class PictureFetchError extends Error {
@@ -39,6 +41,21 @@ export class PictureFetch {
   /** A failure of whatever reading the picture: its own when it was one of these, else that it is not a picture. */
   static failureOf(error: unknown): PictureFailure {
     return error instanceof PictureFetchError ? error.failure : { kind: "notPicture" }
+  }
+
+  /**
+   * Why a video element could not read an address: it says only that it could not, whether the site refused, was not there, or sent what
+   * it cannot decode. Asked without reading the bytes, which are not worth having to learn that.
+   */
+  static async whyVideoUnread(src: string): Promise<PictureFailure> {
+    if (src.startsWith("data:") || src.startsWith("blob:")) return { kind: "notVideo" }
+    let response: Response
+    try {
+      response = await fetch(src, { method: "HEAD" })
+    } catch {
+      return PictureFetch.whyUnread(src)
+    }
+    return response.ok ? { kind: "notVideo" } : { kind: "status", status: response.status }
   }
 
   /**

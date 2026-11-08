@@ -153,7 +153,7 @@ import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.j
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
-import type { ReferenceSystem, ReferenceView } from "./ReferenceSystem.js"
+import type { ReferenceClock, ReferenceSystem, ReferenceView } from "./ReferenceSystem.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 import type { SceneReference } from "../engine/model/Reference.js"
 import type { PhenomenonFrame, PlacedPhenomenon } from "./PhenomenonSystem.js"
@@ -833,6 +833,8 @@ export class SceneRenderer {
   private referencesShown = true
   private readonly referenceViews = new Map<string, ReferenceView>()
   private pendingReferences?: { references: SceneReference[], observerAt?: { lat: number; lng: number } }
+  /** Where the timeline stood last, for pictures that follow it and have not arrived yet — see setReferencesTime. */
+  private referenceClock?: ReferenceClock
   /** Told whenever a picture has arrived or could not be had — see SceneElement.REFERENCES_CHANGE_EVENT. */
   onReferencesSettled?: () => void
   private readonly camera: PerspectiveCamera
@@ -5668,6 +5670,8 @@ export class SceneRenderer {
         this.onReferencesSettled?.()
       })
       this.references = system
+      system.onFrame = () => this.render()
+      if (this.referenceClock) system.setTime(this.referenceClock)
       for (const [id, view] of this.referenceViews) system.setView(id, view)
       system.setShown(this.referencesShown)
       const pending = this.pendingReferences
@@ -5676,6 +5680,12 @@ export class SceneRenderer {
       this.render()
       return system
     })
+  }
+
+  /** Where the timeline stands, for a video of the place — see ReferenceSystem.setTime. Marks no frame: whoever moved the timeline does. */
+  setReferencesTime(clock: ReferenceClock): void {
+    this.referenceClock = clock
+    this.references?.setTime(clock)
   }
 
   /** A loaded picture's aspect — see ReferenceSystem.aspectOf. */

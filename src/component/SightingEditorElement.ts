@@ -138,10 +138,11 @@ import { geoToLocalMeters, localMetersToGeo } from "../render3d/terrain/GeoProje
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
-import type { PictureLandmark, ReferenceKind, SceneReference } from "../engine/model/Reference.js"
+import type { PictureLandmark, ReferenceKind, ReferenceRegistration, ReferenceVideoClip, SceneReference } from "../engine/model/Reference.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { KmlImportResult } from "../engine/interop/KmlImport.js"
 import type { PictureRegistration } from "../engine/reference/PictureRegistration.js"
+import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
 import type { Vector3 } from "three"
 import type { CanvasRenderer } from "../render/CanvasRenderer.js"
 import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
@@ -938,6 +939,10 @@ export class SightingEditorElement extends HTMLElement {
   private readonly referenceCreditInput: HTMLInputElement
   private readonly referenceCreditUrlInput: HTMLInputElement
   private readonly referenceTInput: HTMLInputElement
+  private readonly referenceVideoFromInput: HTMLInputElement
+  private readonly referenceVideoToInput: HTMLInputElement
+  private readonly referenceVideoRateInput: HTMLInputElement
+  private readonly referenceRemoveKeyButton: HTMLButtonElement
   private readonly referenceDrawingInput: HTMLInputElement
   private readonly referenceOpacityInput: HTMLInputElement
   private readonly referenceHeadingInput: HTMLInputElement
@@ -1733,6 +1738,10 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceCreditInput = this.shadow.getElementById("referenceCredit") as HTMLInputElement
     this.referenceCreditUrlInput = this.shadow.getElementById("referenceCreditUrl") as HTMLInputElement
     this.referenceTInput = this.shadow.getElementById("referenceT") as HTMLInputElement
+    this.referenceVideoFromInput = this.shadow.getElementById("referenceVideoFrom") as HTMLInputElement
+    this.referenceVideoToInput = this.shadow.getElementById("referenceVideoTo") as HTMLInputElement
+    this.referenceVideoRateInput = this.shadow.getElementById("referenceVideoRate") as HTMLInputElement
+    this.referenceRemoveKeyButton = this.shadow.getElementById("reference-remove-key") as HTMLButtonElement
     this.referenceDrawingInput = this.shadow.getElementById("referenceDrawing") as HTMLInputElement
     this.referenceOpacityInput = this.shadow.getElementById("referenceOpacity") as HTMLInputElement
     this.referenceHeadingInput = this.shadow.getElementById("referenceHeading") as HTMLInputElement
@@ -1777,7 +1786,7 @@ export class SightingEditorElement extends HTMLElement {
     this.referenceStreetAddButton = this.shadow.getElementById("reference-street-add") as HTMLButtonElement
     this.referenceFields = [
       this.referenceTitleInput, this.referenceKindSelect, this.referenceCreditInput,
-      this.referenceCreditUrlInput, this.referenceTInput, this.referenceDrawingInput, this.referenceOpacityInput,
+      this.referenceCreditUrlInput, this.referenceTInput, this.referenceVideoFromInput, this.referenceVideoToInput, this.referenceVideoRateInput, this.referenceDrawingInput, this.referenceOpacityInput,
       this.referenceHeadingInput, this.referencePitchInput, this.referenceRollInput, this.referenceFovInput
     ]
     this.milestoneSelect = this.shadow.getElementById("milestone") as HTMLSelectElement
@@ -1927,6 +1936,7 @@ export class SightingEditorElement extends HTMLElement {
     this.deleteReferenceButton.addEventListener("click", () => this.deleteReference())
     for (const field of this.referenceFields) field.addEventListener("input", () => this.updateReference())
     this.referenceUsePoseButton.addEventListener("click", () => this.useObserverPoseForReference())
+    this.referenceRemoveKeyButton.addEventListener("click", () => this.removeReferenceKey())
     this.referenceSourceInput.addEventListener("filepick", event => void this.setReferenceSource((event as CustomEvent<InputFilePick>).detail))
     this.addReferenceLandmarkButton.addEventListener("click", () => this.armLandmark())
     this.deleteReferenceLandmarkButton.addEventListener("click", () => this.deleteLandmark())
@@ -1988,6 +1998,7 @@ export class SightingEditorElement extends HTMLElement {
     // it visible to the outside without exposing the nested element itself.
     this.ufoElement.addEventListener("timeupdate", () => {
       this.onSelectionOrTimeChanged()
+      this.syncVideoRegistrationFields()
       this.syncPlaybackControls()
       this.scheduleFileSync()
       this.dispatchEvent(new CustomEvent("sightingchange"))
@@ -4683,11 +4694,58 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.refresh()
     }
     this.referenceOpacityInput.value = String(reference.opacity)
-    this.referenceHeadingInput.value = String(reference.registration.headingDeg)
-    this.referencePitchInput.value = String(reference.registration.pitchDeg)
-    this.referenceRollInput.value = String(reference.registration.rollDeg ?? 0)
-    this.referenceFovInput.value = String(reference.registration.fovDeg)
+    this.syncVideoFields(reference)
+    this.showRegistration(this.registrationShown(reference))
     this.syncReferenceStatus(reference)
+  }
+
+  /** The fields only a video has, shown for one, and what its start is called. */
+  private syncVideoFields(reference: SceneReference): void {
+    const video = reference.kind === "video"
+    for (const field of this.shadow.querySelectorAll<HTMLElement>(".reference-video-field")) field.hidden = !video
+    this.labelReferenceT.textContent = video ? this.messages.referenceVideoT : this.messages.referenceT
+    this.referenceVideoFromInput.value = reference.video?.fromS === undefined ? "" : String(reference.video.fromS)
+    this.referenceVideoToInput.value = reference.video?.toS === undefined ? "" : String(reference.video.toS)
+    this.referenceVideoRateInput.value = reference.video?.rate === undefined ? "" : String(reference.video.rate)
+    this.syncReferenceKeyButton(reference)
+  }
+
+  /** The button that takes back a video's lining up at this instant, there only when it was lined up at this instant. */
+  private syncReferenceKeyButton(reference: SceneReference): void {
+    this.referenceRemoveKeyButton.hidden = reference.kind !== "video" || ReferenceTimeline.keyIndexAt(reference, this.ufoElement.currentTime) < 0
+  }
+
+  /** Which way the fields say the picture points: for a video lined up at several instants, at the playhead, as far as it is worth reading. */
+  private registrationShown(reference: SceneReference): ReferenceRegistration {
+    if (!reference.registrationTrack?.length) return reference.registration
+    const { headingDeg, pitchDeg, rollDeg, fovDeg } = ReferenceTimeline.registrationAt(reference, this.ufoElement.currentTime)
+    return { headingDeg: this.rounded(headingDeg), pitchDeg: this.rounded(pitchDeg), rollDeg: rollDeg === undefined ? undefined : this.rounded(rollDeg), fovDeg: this.rounded(fovDeg) }
+  }
+
+  private showRegistration({ headingDeg, pitchDeg, rollDeg, fovDeg }: ReferenceRegistration): void {
+    this.referenceHeadingInput.value = String(headingDeg)
+    this.referencePitchInput.value = String(pitchDeg)
+    this.referenceRollInput.value = String(rollDeg ?? 0)
+    this.referenceFovInput.value = String(fovDeg)
+  }
+
+  /** The playhead moved: a video lined up at several instants points elsewhere. Nothing for any other picture, at every frame. */
+  private syncVideoRegistrationFields(): void {
+    if (this.currentReferenceId === undefined) return
+    const reference = this.ufoElement.sighting.references.find(candidate => candidate.id === this.currentReferenceId)
+    if (reference?.kind !== "video") return
+    this.syncReferenceKeyButton(reference)
+    if (reference.registrationTrack?.length) this.showRegistration(this.registrationShown(reference))
+  }
+
+  /** Takes back how the selected video was lined up at the playhead. */
+  private removeReferenceKey(): void {
+    const reference = this.ufoElement.sighting.references.find(candidate => candidate.id === this.currentReferenceId)
+    if (!reference) return
+    const without = ReferenceTimeline.withoutKey(reference, this.ufoElement.currentTime)
+    this.ufoElement.sighting.references = this.ufoElement.sighting.references.map(candidate => candidate === reference ? without : candidate)
+    this.syncReferenceFields()
+    this.ufoElement.refresh()
   }
 
   private syncReferenceStatus(reference: SceneReference): void {
@@ -4715,6 +4773,7 @@ export class SightingEditorElement extends HTMLElement {
       case "notShared": return this.messages.referenceNotShared
       case "status": return this.messages.referenceNotFound.replace("{status}", String(failure.status))
       case "notPicture": return this.messages.referenceNotPicture
+      case "notVideo": return this.messages.referenceNotVideo
       default: return this.messages.referenceUnreachable
     }
   }
@@ -4735,12 +4794,32 @@ export class SightingEditorElement extends HTMLElement {
         rollDeg: Number(this.referenceRollInput.value) || undefined,
         fovDeg: Math.min(179, Math.max(1, Number(this.referenceFovInput.value) || DEFAULT_REFERENCE_FOV_DEG))
       }
-      const old = reference.registration
+      const old = this.registrationShown(reference)
       const registered = registration.headingDeg !== old.headingDeg || registration.pitchDeg !== old.pitchDeg ||
         registration.rollDeg !== old.rollDeg || registration.fovDeg !== old.fovDeg
+      const kind = this.referenceKindSelect.value as ReferenceKind
+      if (kind === "video") {
+        // A film's camera moves, and the witness carrying it with it: lining it up says where it pointed at this instant, not from where.
+        const lined = registered ? ReferenceTimeline.withKey(reference, this.ufoElement.currentTime, registration) : reference
+        return {
+          ...lined,
+          kind,
+          src,
+          title: this.said.write(reference.title, this.referenceTitleInput.value, this.writingLanguage),
+          credit: this.stringOrUndefined(this.referenceCreditInput.value),
+          creditUrl: this.stringOrUndefined(this.referenceCreditUrlInput.value),
+          t: seconds === undefined || Number.isNaN(seconds) ? undefined : Math.round(seconds * 1000),
+          video: this.videoClipOfFields(),
+          drawing: this.referenceDrawingInput.checked || undefined,
+          opacity: Number(this.referenceOpacityInput.value),
+          from: undefined
+        }
+      }
       return {
         ...reference,
-        kind: this.referenceKindSelect.value as ReferenceKind,
+        kind,
+        video: undefined,
+        registrationTrack: undefined,
         src,
         title: this.said.write(reference.title, this.referenceTitleInput.value, this.writingLanguage),
         credit: this.stringOrUndefined(this.referenceCreditInput.value),
@@ -4756,8 +4835,27 @@ export class SightingEditorElement extends HTMLElement {
     })
     const current = sighting.references.find(reference => reference.id === this.currentReferenceId)!
     this.referenceSelect.options[this.referenceSelect.selectedIndex]!.textContent = this.referenceLabel(current)
+    this.syncVideoFieldsKeepingInput(current)
     this.syncReferenceStatus(current)
     this.ufoElement.refresh()
+  }
+
+  /** Which part of the file the fields say, undefined when they say nothing. */
+  private videoClipOfFields(): ReferenceVideoClip | undefined {
+    const clip = {
+      fromS: this.numberOrUndefined(this.referenceVideoFromInput.value),
+      toS: this.numberOrUndefined(this.referenceVideoToInput.value),
+      rate: this.numberOrUndefined(this.referenceVideoRateInput.value)
+    }
+    return clip.fromS === undefined && clip.toS === undefined && clip.rate === undefined ? undefined : clip
+  }
+
+  /** A change of kind shows or hides a video's fields; what is being typed in them stays as typed. */
+  private syncVideoFieldsKeepingInput(reference: SceneReference): void {
+    const video = reference.kind === "video"
+    for (const field of this.shadow.querySelectorAll<HTMLElement>(".reference-video-field")) field.hidden = !video
+    this.labelReferenceT.textContent = video ? this.messages.referenceVideoT : this.messages.referenceT
+    this.syncReferenceKeyButton(reference)
   }
 
   /** A picture from the observer's own spot most often looks where they looked: the pose at the
@@ -4835,8 +4933,12 @@ export class SightingEditorElement extends HTMLElement {
       src = pick.url
     }
     const sighting = this.ufoElement.sighting
+    // What it is, when its file or address says: a panorama cannot be told from a photo, so a picture already said to be one stays one.
+    const kindSaid = ReferenceTimeline.kindOfSource(pick.file ? { type: pick.file.type } : { url: pick.url })
     sighting.references = sighting.references.map(reference => reference.id !== id ? reference : {
       ...reference, src,
+      kind: kindSaid === "video" || (kindSaid === "photo" && reference.kind === "video") ? kindSaid : reference.kind,
+      from: kindSaid === "video" ? undefined : reference.from,
       title: reference.title ?? (pick.file ? this.said.write(undefined, pick.file.name.replace(/\.[^.]+$/, ""), this.writingLanguage) : undefined)
     })
     this.touch()
@@ -4866,8 +4968,11 @@ export class SightingEditorElement extends HTMLElement {
     })
   }
 
+  /** The selected picture, pointed as it is at the playhead: what lining it up starts from. */
   private currentReference(): SceneReference | undefined {
-    return this.ufoElement.sighting.references.find(reference => reference.id === this.currentReferenceId)
+    const reference = this.ufoElement.sighting.references.find(candidate => candidate.id === this.currentReferenceId)
+    if (!reference?.registrationTrack?.length) return reference
+    return { ...reference, registration: ReferenceTimeline.registrationAt(reference, this.ufoElement.currentTime) }
   }
 
   private currentLandmarks(): PictureLandmark[] {
@@ -10028,7 +10133,8 @@ export class SightingEditorElement extends HTMLElement {
    */
   private syncFindGhosts(reference: SceneReference | undefined): void {
     const unreadable = !reference?.src || this.sceneElement.referenceFailure(reference.src) !== undefined
-    this.findGhostsButton.disabled = this.searchingGhosts || unreadable
+    // The search reads one still picture, which a video is not.
+    this.findGhostsButton.disabled = this.searchingGhosts || unreadable || reference?.kind === "video"
     this.addReferenceLandmarkButton.disabled = unreadable
     if (unreadable && (this.armingLandmark || this.pendingLandmark)) this.disarmLandmark()
   }
@@ -11794,9 +11900,14 @@ export class SightingEditorElement extends HTMLElement {
     this.labelReferenceKind.textContent = messages.referenceKind
     this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-photo")!.textContent = messages.referencePhoto
     this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-panorama")!.textContent = messages.referencePanorama
+    this.referenceKindSelect.querySelector<HTMLOptionElement>("#reference-kind-video")!.textContent = messages.referenceVideo
+    this.shadow.getElementById("label-reference-video-from")!.textContent = messages.referenceVideoFrom
+    this.shadow.getElementById("label-reference-video-to")!.textContent = messages.referenceVideoTo
+    this.shadow.getElementById("label-reference-video-rate")!.textContent = messages.referenceVideoRate
+    this.referenceRemoveKeyButton.textContent = messages.referenceRemoveKey
     this.labelReferenceCredit.textContent = messages.referenceCredit
     this.labelReferenceCreditUrl.textContent = messages.referenceCreditUrl
-    this.labelReferenceT.textContent = messages.referenceT
+    this.labelReferenceT.textContent = this.currentReference()?.kind === "video" ? messages.referenceVideoT : messages.referenceT
     this.labelReferenceDrawing.textContent = messages.referenceDrawing
     this.labelReferenceOpacity.textContent = messages.referenceOpacity
     this.labelReferenceHeading.textContent = messages.referenceHeading

@@ -503,6 +503,12 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   referenceKind: string
   referencePhoto: string
   referencePanorama: string
+  referenceVideo: string
+  referenceVideoT: string
+  referenceVideoFrom: string
+  referenceVideoTo: string
+  referenceVideoRate: string
+  referenceRemoveKey: string
   referenceCredit: string
   referenceCreditUrl: string
   /** The instant of the timeline the picture was taken at, for one taken during the observation. */
@@ -528,6 +534,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   referenceNotShared: string
   referenceNotFound: string
   referenceNotPicture: string
+  referenceNotVideo: string
   /** Under the picture's fields while its group is open: what the pointer does on the canvas now
    * — see SightingEditorElement.canvasMode. */
   referenceRegisterHint: string

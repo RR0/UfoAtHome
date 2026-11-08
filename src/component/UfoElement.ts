@@ -1310,6 +1310,11 @@ export class UfoElement extends HTMLElement {
     return this.player.playbackState
   }
 
+  /** How many of the timeline's milliseconds pass in one real one — see positionLabel. */
+  get playbackRate(): number {
+    return this.player.playbackRate
+  }
+
   get selectedSourceIds(): ReadonlySet<string> {
     return this.highlightedSourceIds
   }

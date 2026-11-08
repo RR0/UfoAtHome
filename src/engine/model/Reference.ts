@@ -6,10 +6,10 @@ import type { SaidText } from "./SaidText.js"
  * A "photo" is what an ordinary camera makes — a rectilinear image whose field is the lens's — and
  * is laid over the scene as a flat panel at that field. A "panorama" is an equirectangular image
  * covering the whole sphere (a 360° camera, a stitched turn on the spot), and is laid over it as a
- * sphere. A video is a picture that moves and is not here yet: it is a texture that follows the
- * timeline, and the same registration.
+ * sphere. A "video" is a photo that moves: the same panel, showing the frame of the instant the
+ * timeline is at, and turning with the camera that took it (see SceneReference.registrationTrack).
  */
-export type ReferenceKind = "photo" | "panorama"
+export type ReferenceKind = "photo" | "panorama" | "video"
 
 /**
  * Which way the picture was pointed — the whole of what it takes to lay it over the scene, and
@@ -39,6 +39,33 @@ export interface ReferenceRegistration {
    * chosen so that the landmarks line up is as much a measurement as the heading is.
    */
   fovDeg: number
+}
+
+/**
+ * Which way a video's camera was pointed at one instant of the timeline: a film is lined up frame by frame, since what makes it worth
+ * laying over the scene is often how its camera moved against what it filmed. The field is optional: most films keep theirs.
+ */
+export interface ReferenceRegistrationKey {
+  /** The instant of the timeline, milliseconds. */
+  t: number
+  headingDeg: number
+  pitchDeg: number
+  rollDeg?: number
+  /** Absent keeps the field of the reference's own registration. */
+  fovDeg?: number
+}
+
+/**
+ * Which part of a video's file is laid over the scene, and how fast: a film as it reaches us is often an extract of a broadcast, with its
+ * cuts, its replays and its slow motion, of which one stretch is the camera's own.
+ */
+export interface ReferenceVideoClip {
+  /** Where the stretch starts in the file, seconds. Absent is the start of the file. */
+  fromS?: number
+  /** Where it ends in the file, seconds. Absent is the end of the file. */
+  toS?: number
+  /** How many seconds of the file make one second of the observation: 0.5 for a stretch the broadcast slowed down twice. Absent is 1. */
+  rate?: number
 }
 
 /**
@@ -109,6 +136,8 @@ export interface SceneReference {
    * capture years later. The distinction is what the picture can be compared with: a picture of
    * the place is compared with the scene, a picture of the sighting also with the phenomenon, and
    * only at its own instant.
+   *
+   * For a video, the instant of the timeline at which its stretch starts (see video). Absent is the start of the timeline.
    */
   t?: number
   /**
@@ -134,7 +163,17 @@ export interface SceneReference {
    * step between.
    */
   opacity: number
+  /** For a video, which part of its file, and how fast. Absent is all of it, as it is. */
+  video?: ReferenceVideoClip
+  /**
+   * The registration. For a video lined up at several instants, what it starts from: registrationTrack says where it is at each.
+   */
   registration: ReferenceRegistration
+  /**
+   * For a video, which way its camera was pointed at the instants it was lined up at, in the order of the timeline: held before the first
+   * and after the last, interpolated between. Absent means the camera did not move, or nobody has said how.
+   */
+  registrationTrack?: ReferenceRegistrationKey[]
   /** The details it was lined up on — see PictureLandmark. Absent means none named yet. */
   landmarks?: PictureLandmark[]
 }

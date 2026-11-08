@@ -1,6 +1,7 @@
-import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, SphereGeometry, SRGBColorSpace, Texture } from "three"
+import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, SphereGeometry, SRGBColorSpace, Texture, VideoTexture } from "three"
 import type { Camera, Quaternion, Scene, Vector3 } from "three"
-import type { SceneReference } from "../engine/model/Reference.js"
+import type { ReferenceRegistration, SceneReference } from "../engine/model/Reference.js"
+import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { PictureFetch, PictureFetchError } from "../engine/reference/PictureFetch.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
@@ -29,6 +30,26 @@ export interface ReferenceView {
   opacity?: number
 }
 
+/** A picture's pixels, once they have arrived: for a video, the element they keep coming from. */
+export interface ReferencePixels {
+  texture: Texture
+  width: number
+  height: number
+  video?: ReferenceVideoElement
+}
+
+/** What a video's element has to answer to here — all that the tests stand in for. */
+export type ReferenceVideoElement = Pick<HTMLVideoElement, "currentTime" | "duration" | "paused" | "playbackRate" | "seeking" | "pause" | "play">
+
+/** Where the timeline stands, for what follows it — see ReferenceSystem.setTime. */
+export interface ReferenceClock {
+  /** The instant, milliseconds of the timeline. */
+  t: number
+  playing: boolean
+  /** How many of the timeline's milliseconds pass in one real one (see ReferenceTimeline). */
+  timeScale: number
+}
+
 /**
  * The pictures of the place, standing in the scene at the direction each was registered in.
  *
@@ -49,13 +70,16 @@ export interface ReferenceView {
  * observer saw" is worth comparing. A observer who walks away from the spot would take the picture
  * with them, which is right for the far landscape and wrong for the near — so a picture that states
  * where it was taken from (SceneReference.from) fades out as they leave that point: see presenceAt.
+ *
+ * A video is a photo panel that follows the timeline (see setTime): the frame of the instant, pointed as its camera was then. Only shown
+ * during its own stretch, and silent: what is heard is the scene's.
  */
 export class ReferenceSystem {
   private readonly meshes = new Map<string, Mesh<PlaneGeometry | SphereGeometry, MeshBasicMaterial>>()
   /** What each mesh was built from — rebuilt only when the picture or its registration changes. */
   private readonly signatures = new Map<string, string>()
   /** Each picture's own pixels, once they have arrived — the aspect a photo panel is sized from. */
-  private readonly images = new Map<string, { texture: Texture; width: number; height: number }>()
+  private readonly images = new Map<string, ReferencePixels>()
   private readonly loading = new Map<string, Promise<void>>()
   /** Addresses whose bytes could not be had, and why — not asked for again every tick. */
   private readonly failed = new Map<string, PictureFailure>()
@@ -64,6 +88,7 @@ export class ReferenceSystem {
   private shown = true
   /** Where the observer is, for the fade of a picture left behind — see presenceAt. */
   private observerAt?: { lat: number; lng: number }
+  private clock: ReferenceClock = { t: 0, playing: false, timeScale: 1 }
 
   /**
    * Within this many metres of where a picture was taken, it is shown as is: the precision an
@@ -97,7 +122,9 @@ export class ReferenceSystem {
      * drawn again. */
     private readonly onImageLoaded: () => void,
     /** How a picture's bytes are fetched — injectable for the tests, which have no network. */
-    private readonly loadImage: (src: string) => Promise<{ texture: Texture; width: number; height: number }> = ReferenceSystem.fetchImage
+    private readonly loadImage: (src: string) => Promise<ReferencePixels> = ReferenceSystem.fetchImage,
+    /** How a video is opened — injectable as well. Told what to call when it has a new frame to show or has finished a jump. */
+    private readonly loadVideo: (src: string, onFrame: () => void) => Promise<ReferencePixels> = ReferenceSystem.openVideo
   ) {}
 
   /** Replaces the set whole, so a picture that left the recording leaves the scene. */
@@ -114,8 +141,8 @@ export class ReferenceSystem {
     }
     for (const [id, image] of this.images) {
       const reference = references.find(candidate => candidate.id === id)
-      if (reference && reference.src === (image.texture.userData.src as string)) continue
-      image.texture.dispose()
+      if (reference && reference.src === (image.texture.userData.src as string) && (reference.kind === "video") === (image.video !== undefined)) continue
+      ReferenceSystem.release(image)
       this.images.delete(id)
       // Its panel goes with it: a picture whose new address cannot be read must not go on showing the one it replaced.
       const mesh = this.meshes.get(id)
@@ -133,6 +160,16 @@ export class ReferenceSystem {
       }
       this.build(reference, image)
     }
+    this.follow()
+  }
+
+  /**
+   * Where the timeline stands: what a video shows and which way it points depend on it. Cheap to call at every tick, and it costs nothing
+   * to a recording whose pictures do not move.
+   */
+  setTime(clock: ReferenceClock): void {
+    this.clock = clock
+    this.follow()
   }
 
   /** Whether the reader has the pictures on at all — the player's own toggle. */
@@ -182,11 +219,12 @@ export class ReferenceSystem {
   directionOfPixel(reference: SceneReference, u: number, v: number, into: Vector3): Vector3 {
     const image = this.images.get(reference.id)
     const aspect = image ? image.width / image.height : 1
-    const halfHeight = Math.tan((reference.registration.fovDeg / 2) * DEG_TO_RAD)
+    const registration = ReferenceTimeline.registrationAt(reference, this.clock.t)
+    const halfHeight = Math.tan((registration.fovDeg / 2) * DEG_TO_RAD)
     const halfWidth = halfHeight * aspect
     // In the panel's own frame: +x right, +y up, looking down -z.
     into.set((u * 2 - 1) * halfWidth, (1 - v * 2) * halfHeight, -1).normalize()
-    return into.applyQuaternion(ReferenceSystem.orientation(reference))
+    return into.applyQuaternion(ReferenceSystem.orientation(registration))
   }
 
   /** A loaded picture's own width over its height — what lining it up needs, undefined until its
@@ -201,20 +239,50 @@ export class ReferenceSystem {
     return this.failed.get(src)
   }
 
+  /** Each moving picture's frame as it stands: what is shown, and which way it points. */
+  private follow(): void {
+    for (const reference of this.references) {
+      const mesh = this.meshes.get(reference.id)
+      const video = this.images.get(reference.id)?.video
+      if (video) this.sync(reference, video)
+      if (!mesh) continue
+      if (reference.registrationTrack?.length) ReferenceSystem.point(mesh, reference, ReferenceTimeline.registrationAt(reference, this.clock.t))
+      if (reference.kind === "video") this.applyOpacity(mesh, reference.id)
+    }
+  }
+
+  /** Tells a video what to do for the frame the timeline is at — see ReferenceTimeline.command. */
+  private sync(reference: SceneReference, video: ReferenceVideoElement): void {
+    const seconds = ReferenceTimeline.mediaSecondsAt(reference, this.clock.t, this.clock.timeScale, Number.isFinite(video.duration) ? video.duration : undefined)
+    if (seconds === undefined) {
+      if (!video.paused) video.pause()
+      return
+    }
+    const command = ReferenceTimeline.command(video.currentTime, seconds, this.clock.playing, ReferenceTimeline.rateOf(reference))
+    video.playbackRate = command.rate
+    // A jump under way is not asked for again at every tick: its end asks again (see openVideo), from wherever the timeline has got to.
+    if (command.seekS !== undefined && !video.seeking) video.currentTime = command.seekS
+    if (command.play && video.paused) void video.play().catch(() => undefined)
+    if (!command.play && !video.paused) video.pause()
+  }
+
   private load(reference: SceneReference): void {
     const src = reference.src
     if (this.loading.has(reference.id) || this.failed.has(src)) return
-    const promise = this.loadImage(src).then(image => {
+    const isVideo = reference.kind === "video"
+    const arriving = isVideo ? this.loadVideo(src, () => this.onVideoFrame()) : this.loadImage(src)
+    const promise = arriving.then(image => {
       this.loading.delete(reference.id)
       // The recording may have moved on while the bytes were on their way.
       const current = this.references.find(candidate => candidate.id === reference.id)
-      if (!current || current.src !== src) {
-        image.texture.dispose()
+      if (!current || current.src !== src || (current.kind === "video") !== isVideo) {
+        ReferenceSystem.release(image)
         return
       }
       image.texture.userData.src = src
       this.images.set(reference.id, image)
       this.build(current, image)
+      this.follow()
       this.onImageLoaded()
     }, error => {
       this.loading.delete(reference.id)
@@ -225,9 +293,58 @@ export class ReferenceSystem {
     this.loading.set(reference.id, promise)
   }
 
+  /** A video has a new frame, or has finished a jump: from where the timeline has got to meanwhile, and drawn. */
+  private onVideoFrame(): void {
+    this.follow()
+    this.onFrame?.()
+  }
+
+  /** Called when a video has a new frame to draw, which no tick of a paused timeline is coming to draw. */
+  onFrame?: () => void
+
+  /** Opens a video across origins, as WebGL insists, and says why not if it cannot be read. */
+  private static openVideo(src: string, onFrame: () => void): Promise<ReferencePixels> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video")
+      video.crossOrigin = "anonymous"
+      video.muted = true
+      video.playsInline = true
+      video.preload = "auto"
+      video.addEventListener("loadeddata", () => {
+        const texture = new VideoTexture(video)
+        texture.colorSpace = SRGBColorSpace
+        texture.minFilter = LinearFilter
+        texture.magFilter = LinearFilter
+        texture.generateMipmaps = false
+        video.addEventListener("seeked", onFrame)
+        // After three's own callback, which marks the texture: what was drawn then has the new frame.
+        const presented = () => {
+          if (video.paused) onFrame()
+          if (video.src) video.requestVideoFrameCallback(presented)
+        }
+        if ("requestVideoFrameCallback" in video) video.requestVideoFrameCallback(presented)
+        resolve({ texture, width: video.videoWidth, height: video.videoHeight, video })
+      }, { once: true })
+      video.addEventListener("error", () => {
+        void PictureFetch.whyVideoUnread(src).then(failure => reject(new PictureFetchError(src, failure)))
+      }, { once: true })
+      video.src = src
+    })
+  }
+
+  /** Lets go of a picture's pixels: a video element keeps its file and its decoder until it is emptied. */
+  private static release(image: ReferencePixels): void {
+    image.texture.dispose()
+    const video = image.video as HTMLVideoElement | undefined
+    if (!video) return
+    video.pause()
+    video.removeAttribute?.("src")
+    video.load?.()
+  }
+
   /** Fetches the picture's bytes — across origins, which WebGL insists on being allowed — the same
    * way the terrain's imagery is fetched (see xyzImageryRaster). */
-  private static async fetchImage(src: string): Promise<{ texture: Texture; width: number; height: number }> {
+  private static async fetchImage(src: string): Promise<ReferencePixels> {
     const blob = await PictureFetch.blob(src)
     // Flipped as it is decoded, and told so: a bitmap cannot be turned over on its way to the GPU
     // the way a plain image is (UNPACK_FLIP_Y is ignored for one), and a texture that still asks
@@ -245,7 +362,7 @@ export class ReferenceSystem {
     return { texture, width: bitmap.width, height: bitmap.height }
   }
 
-  private build(reference: SceneReference, image: { texture: Texture; width: number; height: number }): void {
+  private build(reference: SceneReference, image: ReferencePixels): void {
     const signature = ReferenceSystem.signatureOf(reference, image)
     let mesh = this.meshes.get(reference.id)
     if (mesh && this.signatures.get(reference.id) === signature) {
@@ -274,7 +391,7 @@ export class ReferenceSystem {
     mesh.frustumCulled = false
     mesh.layers.set(REFERENCE_LAYER)
     mesh.userData.id = reference.id
-    mesh.quaternion.copy(ReferenceSystem.orientation(reference))
+    ReferenceSystem.point(mesh, reference, ReferenceTimeline.registrationAt(reference, this.clock.t))
     this.scene.add(mesh)
     this.meshes.set(reference.id, mesh)
     this.signatures.set(reference.id, signature)
@@ -312,15 +429,30 @@ export class ReferenceSystem {
    * horizontal, then roll about its own axis. Applied in that order on the object, which three
    * composes as intrinsic YXZ — the same order SceneRenderer.setObserverPose gives the camera.
    */
-  private static orientation(reference: SceneReference): Quaternion {
-    const { headingDeg, pitchDeg, rollDeg } = reference.registration
+  private static orientation({ headingDeg, pitchDeg, rollDeg }: ReferenceRegistration): Quaternion {
     const carrier = new Object3D()
     carrier.rotation.set(pitchDeg * DEG_TO_RAD, -headingDeg * DEG_TO_RAD, -(rollDeg ?? 0) * DEG_TO_RAD, "YXZ")
     return carrier.quaternion
   }
 
+  /** Points a panel: its orientation, and its size for a field other than the one it was built at. */
+  private static point(mesh: Mesh, reference: SceneReference, registration: ReferenceRegistration): void {
+    mesh.quaternion.copy(ReferenceSystem.orientation(registration))
+    if (reference.kind === "panorama") return
+    const scale = Math.tan((registration.fovDeg / 2) * DEG_TO_RAD) / Math.tan((reference.registration.fovDeg / 2) * DEG_TO_RAD)
+    mesh.scale.set(scale, scale, 1)
+  }
+
+  /** Whether a picture has something to show at this instant: a video, only during its own stretch. */
+  private inTime(reference: SceneReference): boolean {
+    if (reference.kind !== "video") return true
+    const duration = this.images.get(reference.id)?.video?.duration
+    return ReferenceTimeline.mediaSecondsAt(reference, this.clock.t, this.clock.timeScale, duration !== undefined && Number.isFinite(duration) ? duration : undefined) !== undefined
+  }
+
   private opacityOf(id: string): number {
     const reference = this.references.find(candidate => candidate.id === id)
+    if (reference && !this.inTime(reference)) return 0
     const view = this.views.get(id)
     const presence = reference ? ReferenceSystem.presenceAt(reference, this.observerAt) : 1
     return (view?.opacity ?? reference?.opacity ?? 0) * presence
@@ -347,7 +479,7 @@ export class ReferenceSystem {
     for (const mesh of this.meshes.values()) this.dispose(mesh)
     this.meshes.clear()
     this.signatures.clear()
-    for (const image of this.images.values()) image.texture.dispose()
+    for (const image of this.images.values()) ReferenceSystem.release(image)
     this.images.clear()
   }
 }
