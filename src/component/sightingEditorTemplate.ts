@@ -1080,6 +1080,21 @@ input.invalid {
   color: inherit;
   text-decoration: underline dotted;
 }
+/* The key of a source that needs one, and what that source says back: each on its own line under the picker. */
+.source-key {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  margin-top: 0.4em;
+}
+.source-status {
+  display: block;
+  margin-top: 0.4em;
+}
+.source-key[hidden],
+.source-status:empty {
+  display: none;
+}
 /* Where a source read from the recording's file is: a link to its item of the Files group, as the credit of a source asked live is. */
 /* The survey's radius means nothing while no survey is asked: the labels of the toolbar are flex, which [hidden] alone does not undo. */
 #scenery-radius-row[hidden] {

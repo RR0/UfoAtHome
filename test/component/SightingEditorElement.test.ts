@@ -1,4 +1,5 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
+import { SourceCredentials } from "../../src/engine/source/SourceCredentials.js"
 import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import { Vector3 } from "three"
 import { EditorView } from "@codemirror/view"
@@ -6063,6 +6064,31 @@ describe("SightingEditorElement data sources", () => {
     const kind = element.shadowRoot!.getElementById("decor-source-kind") as HTMLSelectElement
     expect([...kind.options].map(option => option.value)).toEqual(["scenery", "aircraft", "decor-model"])
     expect([...select(element, "aircraft").options].map(option => option.value)).not.toContain("file")
+  })
+
+  it("asks for a key only for a source that needs one, holds it for the page without storing it", async () => {
+    SourceCredentials.forget()
+    const element = await mount()
+    const source = select(element, "aircraft")
+    const key = element.shadowRoot!.getElementById("aircraftSourceKey") as HTMLInputElement
+    expect(source.value).toBe("adsb-lol")
+    expect(key.closest("label")!.hidden).toBe(true)
+
+    source.value = "flightradar24"
+    source.dispatchEvent(new Event("change"))
+    expect(key.closest("label")!.hidden).toBe(false)
+    expect(key.type).toBe("password")
+
+    key.value = "  my-key "
+    key.dispatchEvent(new Event("change"))
+    expect(SourceCredentials.of("flightradar24")).toBe("my-key")
+    expect(JSON.stringify({ ...localStorage })).not.toContain("my-key")
+
+    SourceCredentials.forget()
+    expect(SourceCredentials.of("flightradar24")).toBeUndefined()
+    source.value = "adsb-lol"
+    source.dispatchEvent(new Event("change"))
+    expect(key.closest("label")!.hidden).toBe(true)
   })
 
   it("shows the weather's source and the air aloft's in the Weather group, one at a time", async () => {

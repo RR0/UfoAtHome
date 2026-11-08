@@ -63,7 +63,7 @@ import type { SummaryEntry, SummaryGroup } from "./SightingSummary.js"
 import { UfoElement, registerUfo } from "./UfoElement.js"
 import { TimelineMarks } from "./TimelineMarks.js"
 import type { TimelineMark } from "./TimelineMarks.js"
-import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT, REFERENCES_CHANGE_EVENT } from "./SceneElement.js"
+import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT, REFERENCES_CHANGE_EVENT, AIRCRAFT_CHANGE_EVENT } from "./SceneElement.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
@@ -170,6 +170,7 @@ import { PLACE_SOURCES } from "../modules/providers/place/placeSources.js"
 import { isRecordSource, WEATHER_SOURCES } from "../modules/providers/weather/weatherSources.js"
 import { UPPER_AIR_SOURCES } from "../modules/providers/traffic/upperAirSources.js"
 import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
+import { SourceCredentials } from "../engine/source/SourceCredentials.js"
 import { SOUND_KINDS } from "../engine/model/Sound.js"
 import type { SightingSound, SoundKind } from "../engine/model/Sound.js"
 import { ELEVATION_SOURCES, IMAGERY_SOURCES } from "../modules/providers/terrain/terrainSources.js"
@@ -525,6 +526,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly narrativeSettingsBox: HTMLElement
   /** The inputs the current provider's settings were rendered into, by setting id. */
   private narrativeSettingInputs = new Map<string, HTMLInputElement | HTMLSelectElement>()
+  /** What the source of the air traffic has to say to the reader (see aircraftPicker). */
+  private readonly aircraftStatus = Object.assign(document.createElement("span"), { className: "source-status" })
   private readonly narrativeDraftButton: HTMLButtonElement
   private readonly narrativeStopButton: HTMLButtonElement
   private readonly narrativeStatus: HTMLElement
@@ -1956,6 +1959,7 @@ export class SightingEditorElement extends HTMLElement {
     this.showFireballButton.addEventListener("click", () => this.showNextFireball())
     // The fireballs on record arrive after the line was first stated: the clause has news.
     // A picture that arrived, or could not be had, changes what is said under its fields.
+    this.sceneElement.addEventListener(AIRCRAFT_CHANGE_EVENT, () => this.showAircraftStatus())
     this.sceneElement.addEventListener(REFERENCES_CHANGE_EVENT, () => {
       const reference = this.currentReference()
       if (reference) this.syncReferenceStatus(reference)
@@ -3431,6 +3435,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Forgets the credentials typed on this page, as a reload does. */
   static forgetCredentials(): void {
     SightingEditorElement.pageCredentials.clear()
+    SourceCredentials.forget()
   }
 
   /**
@@ -3564,7 +3569,7 @@ export class SightingEditorElement extends HTMLElement {
     ])
     this.sourcePickers(this.shadow.getElementById("decor-source-rows")!, "decor-source-kind", "decor", [
       ["scenery", this.messages.fileItemDecor, this.shadow.getElementById("scenery-picker")!],
-      ["aircraft", this.messages.sourceAircraft, this.sourcePicker("aircraft", AIRCRAFT_SOURCES, () => this.applyAircraftSource())],
+      ["aircraft", this.messages.sourceAircraft, this.aircraftPicker()],
       ["decor-model", this.messages.decorModel, this.sourcePicker("decor-model", DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())]
     ])
   }
@@ -3573,7 +3578,7 @@ export class SightingEditorElement extends HTMLElement {
    * link beside it. Built in script rather than spelled out in the template because the options ARE
    * the registry: adding a second geocoder, or a third imagery tileset, must not also mean adding
    * markup and element ids for it. */
-  private sourcePicker<T>(kind: string, sources: DataSource<T>[], apply: (source: DataSource<T>) => void, file?: FileChoice): DocumentFragment {
+  private sourcePicker<T>(kind: string, sources: DataSource<T>[], apply: (source: DataSource<T>, keyChanged?: boolean) => void, file?: FileChoice): DocumentFragment {
     const fragment = document.createDocumentFragment()
     const select = document.createElement("select")
     select.id = `${kind}Source`
@@ -3603,9 +3608,32 @@ export class SightingEditorElement extends HTMLElement {
     shown.type = "button"
     shown.className = "link source-file-link"
     shown.addEventListener("click", () => this.openFileItem(file!.item))
+    // For a source that needs the reader's own key. Taken when the field is left, not at each letter: each key may be asked at a price.
+    const keyLabel = document.createElement("label")
+    keyLabel.className = "source-key"
+    const keyInput = document.createElement("input")
+    keyInput.type = "password"
+    keyInput.id = `${kind}SourceKey`
+    keyInput.autocomplete = "off"
+    keyInput.spellcheck = false
+    keyInput.title = this.messages.sourceKeyHint
+    const keyLink = document.createElement("a")
+    keyLink.className = "source-credit"
+    keyLink.target = "_blank"
+    keyLink.rel = "noopener noreferrer"
+    keyLink.textContent = this.messages.sourceKeyGet
+    keyLabel.append(document.createTextNode(`${this.messages.sourceKey} `), keyInput, document.createTextNode(" "), keyLink)
+    keyInput.addEventListener("change", () => {
+      const source = dataSourceById(sources, select.value)
+      SourceCredentials.set(source.id, keyInput.value)
+      apply(source, true)
+    })
     const showCredit = (): void => {
       const fromFile = select.value === SightingEditorElement.FILE_SOURCE
       const source = dataSourceById(sources, fromFile ? liveId() : select.value)
+      keyLabel.hidden = fromFile || !source.keyUrl
+      keyLink.href = source.keyUrl ?? ""
+      keyInput.value = SourceCredentials.of(source.id) ?? ""
       select.title = fromFile ? file!.where() : source.credit
       credit.hidden = fromFile
       credit.href = source.creditUrl
@@ -3641,8 +3669,29 @@ export class SightingEditorElement extends HTMLElement {
       if (lost && select.value !== SightingEditorElement.FILE_SOURCE) apply(dataSourceById(sources, select.value))
     }
     this.relisters.push(relist)
-    fragment.append(select, document.createTextNode(" "), credit, shown)
+    fragment.append(select, document.createTextNode(" "), credit, shown, keyLabel)
     return fragment
+  }
+
+  /** The picker of the air traffic's source, and what its source has to say to the reader: why it did not answer, what it left out, what it cost. */
+  private aircraftPicker(): DocumentFragment {
+    const fragment = this.sourcePicker("aircraft", AIRCRAFT_SOURCES, (_source, keyChanged) => this.applyAircraftSource(keyChanged))
+    fragment.append(this.aircraftStatus)
+    this.showAircraftStatus()
+    return fragment
+  }
+
+  private showAircraftStatus(): void {
+    const { problem, partial, creditsSpent } = this.sceneElement.aircraftState
+    const said: string[] = []
+    if (partial) {
+      said.push(this.messages.aircraftPartial
+        .replace("{traced}", String(partial.traced))
+        .replace("{seen}", `${partial.seen}${partial.moreSeen ? "+" : ""}`))
+    }
+    if (creditsSpent) said.push(this.messages.aircraftCredits.replace("{credits}", String(creditsSpent)))
+    if (problem) MessageStyle.show(this.aircraftStatus, [this.messages.aircraftProblems[problem], ...said].join(" "), "warning")
+    else MessageStyle.show(this.aircraftStatus, said.length > 0 ? said.join(" ") : undefined, "info")
   }
 
   /** A source picker's choice of the recording's files, for frozen groups of the ground (see FrozenData). */
@@ -3776,8 +3825,9 @@ export class SightingEditorElement extends HTMLElement {
 
   /** The air traffic around the observer is read again from the source now chosen — see
    * SceneElement.setAircraftSource, and AircraftProvider on why it is a seam. */
-  private applyAircraftSource(): void {
-    this.sceneElement.setAircraftSource(dataSourceById(AIRCRAFT_SOURCES, this.chosenSourceId.get("aircraft")))
+  private applyAircraftSource(keyChanged = false): void {
+    this.sceneElement.setAircraftSource(dataSourceById(AIRCRAFT_SOURCES, this.chosenSourceId.get("aircraft")), keyChanged)
+    this.showAircraftStatus()
     this.ufoElement.refresh()
   }
 

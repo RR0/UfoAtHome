@@ -49,11 +49,33 @@ export interface AircraftDescription {
  * excludes nothing, and a track is a COMPATIBLE candidate, never an identification.
  */
 export type AircraftTraffic =
-  | { status: "found"; tracks: AircraftTrack[] }
+  | {
+    status: "found"
+    tracks: AircraftTrack[]
+    /** For a record that only gives the track of some of what it saw: the tracks are then not all there was. */
+    partial?: AircraftTrafficPart
+    /** For a record that is paid for: what this page has spent on it so far, as far as can be told from the answers. */
+    creditsSpent?: number
+  }
   /** The record does not hold the whole window (a day not ingested, a date before it begins). */
   | { status: "outside" }
   /** The record could not be read: offline, a server error. Nothing is known. */
-  | { status: "failed" }
+  | { status: "failed"; problem?: AircraftProblem; creditsSpent?: number }
+
+/** How much of what a record saw it was asked to trace. */
+export interface AircraftTrafficPart {
+  traced: number
+  seen: number
+  /** The record may have seen more than `seen`: it was asked for no more. */
+  moreSeen: boolean
+}
+
+/**
+ * Why a record that asks for a key or is paid for did not answer, when the reader can do something about it. "credential": no key, or
+ * one refused. "credits": none left. "rate": too many requests for now. "refused": this question was refused, as a date older than the
+ * plan allows is. "budget": the page reached what it allows itself to spend. "network": it could not be reached.
+ */
+export type AircraftProblem = "credential" | "credits" | "rate" | "refused" | "budget" | "network"
 
 /**
  * Source of the aircraft around an observer — the same "one interface, interchangeable implementations"

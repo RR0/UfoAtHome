@@ -101,7 +101,7 @@ import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
 import type { SkyEventsJson } from "../engine/model/SkyEvents.js"
 import type { SkyEventKind, SkyEventKindMessages, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
-import type { AircraftProvider } from "../engine/traffic/AircraftProvider.js"
+import type { AircraftProvider, AircraftProblem, AircraftTrafficPart } from "../engine/traffic/AircraftProvider.js"
 import { AircraftSighting } from "../engine/traffic/AircraftSighting.js"
 import { AircraftLighting } from "../engine/traffic/AircraftLighting.js"
 import type { AircraftModel } from "../engine/traffic/AircraftModels.js"
@@ -372,7 +372,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
 
@@ -2399,6 +2399,10 @@ export class SceneElement extends HTMLElement {
       if (this.traffic !== asked) return
       if (answer.status !== "found") {
         asked.status = answer.status === "outside" ? "outside" : "unavailable"
+        if (answer.status === "failed") {
+          asked.problem = answer.problem
+          asked.creditsSpent = answer.creditsSpent
+        }
         this.announceTraffic()
         return
       }
@@ -2416,6 +2420,8 @@ export class SceneElement extends HTMLElement {
       if (this.traffic !== asked) return
       asked.status = "ready"
       asked.tracks = answer.tracks
+      asked.partial = answer.partial
+      asked.creditsSpent = answer.creditsSpent
       asked.set = build(runtime)
       this.startAircraftSound(asked, runtime)
       this.announceTraffic()
@@ -2774,9 +2780,12 @@ export class SceneElement extends HTMLElement {
     this.updateAstronomy(this.lastTimeMs)
   }
 
-  /** Points the scene at another source of air traffic and asks it again — see AircraftProvider. */
-  setAircraftSource(source: DataSource<AircraftProvider>): void {
-    if (source.id === this.aircraftSource.id) return
+  /**
+   * Points the scene at another source of air traffic and asks it again — see AircraftProvider. `again` asks even the same source, whose
+   * answer has changed with the key it was just given.
+   */
+  setAircraftSource(source: DataSource<AircraftProvider>, again = false): void {
+    if (!again && source.id === this.aircraftSource.id) return
     this.aircraftSource = source
     this.traffic = undefined
     this.decorMemo = undefined
@@ -2789,12 +2798,15 @@ export class SceneElement extends HTMLElement {
    * aircraft the record gave and how many are drawn (a record of an hour near a big airport holds
    * more than is worth drawing).
    */
-  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; total: number; shown: number; credit: string; creditUrl: string; trailCredit?: { credit: string; creditUrl: string } } {
+  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; total: number; shown: number; credit: string; creditUrl: string; trailCredit?: { credit: string; creditUrl: string } } {
     // Where the air the trails were worked out from comes from, once there are trails.
     const trailSource = this.traffic?.contrails?.length ? this.upperAirSource ?? SceneElement.trafficRuntime?.UPPER_AIR_SOURCES[0] : undefined
     return {
       trailCredit: trailSource && { credit: trailSource.credit, creditUrl: trailSource.creditUrl },
       status: this.traffic?.status ?? "none",
+      problem: this.traffic?.problem,
+      partial: this.traffic?.partial,
+      creditsSpent: this.traffic?.creditsSpent,
       total: this.traffic?.set?.total ?? 0,
       shown: this.traffic?.set?.shown ?? 0,
       credit: this.aircraftSource.credit,

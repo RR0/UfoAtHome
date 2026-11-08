@@ -1,3 +1,4 @@
+import type { AircraftProblem } from "../../engine/traffic/AircraftProvider.js"
 import type { AccountEvaluationMessages } from "../AccountEvaluationFields.js"
 import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
 import type { EventsMessages } from "./EventsMessages.js"
@@ -261,6 +262,18 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sourceAircraft: string
   /** The choice, in a source picker, of the recording's own file rather than a source asked live (see FrozenData). */
   sourceFile: string
+  /** Before the field of the reader's own key, for a source that needs one. */
+  sourceKey: string
+  /** The link to where such a key is had. */
+  sourceKeyGet: string
+  /** What is done with the key. */
+  sourceKeyHint: string
+  /** Why the source of the air traffic did not answer. */
+  aircraftProblems: Record<AircraftProblem, string>
+  /** That a paid source gives the track of only some of the flights it saw. {traced}, {seen}. */
+  aircraftPartial: string
+  /** What the page has spent so far on a paid source. {credits}. */
+  aircraftCredits: string
   /** Before the picker of which kind of data a group's source picker is about. */
   sourceKind: string
   placeNamePlaceholder: string
