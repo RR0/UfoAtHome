@@ -505,6 +505,7 @@ export const html = `
     <button class="subgroup-tab" type="button" aria-controls="weather-precipitation" aria-expanded="true"><span id="label-precipitation-group"></span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-clouds" aria-expanded="false"><span id="label-clouds-group"></span></button>
     <button class="subgroup-tab" type="button" aria-controls="weather-wind" aria-expanded="false"><span id="label-wind-group"></span></button>
+    <button class="subgroup-tab" type="button" aria-controls="weather-aircraft" aria-expanded="false"><span id="label-aircraft-group"></span></button>
   </div>
   <section class="subgroup-panel" id="weather-precipitation" aria-labelledby="label-precipitation-group">
     <div class="toolbar">
@@ -544,6 +545,13 @@ export const html = `
     <div class="toolbar">
       <label><span id="label-wind-direction"></span> <input id="windDirection" class="weather-field" type="number" min="0" max="360" step="1" value="0"/> &deg;</label>
       <label><span id="label-wind-speed"></span> <input id="windSpeed" class="weather-field" type="number" min="0" max="30" step="0.5" value="0"/> m/s</label>
+    </div>
+  </section>
+  <!-- The aircraft a record says were around the witness: searched for like the weather, never written into the recording. -->
+  <section class="subgroup-panel" id="weather-aircraft" aria-labelledby="label-aircraft-group" hidden>
+    <div class="toolbar">
+      <div class="aircraft-source"><label for="aircraftSource" id="label-aircraft-source"></label> <span id="aircraft-source-row" class="source-picker"></span></div>
+      <div id="aircraft-flights"></div>
     </div>
   </section>
   <!-- What happened in that sky as facts (see SkyEventsJson), beside the state it was in: neither the decor, which outlasts the
@@ -1079,6 +1087,49 @@ input.invalid {
 .source-credit {
   color: inherit;
   text-decoration: underline dotted;
+}
+#aircraft-flights, .aircraft-source {
+  flex-basis: 100%;
+  min-width: 0;
+}
+.aircraft-flights-scroll {
+  max-height: 16em;
+  overflow-y: auto;
+}
+.aircraft-flights-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.aircraft-flights-table th {
+  position: sticky;
+  top: 0;
+  text-align: left;
+  font-weight: 500;
+  background: var(--ground-raised);
+}
+.aircraft-flights-table th, .aircraft-flights-table td {
+  padding: 0.2em 0.6em 0.2em 0;
+  white-space: nowrap;
+}
+.aircraft-flights-table td:first-child {
+  white-space: normal;
+}
+.aircraft-flights-table tbody tr {
+  cursor: pointer;
+  border-top: 1px solid var(--line);
+}
+.aircraft-flights-table tbody tr:hover {
+  background: var(--ground-sunken);
+}
+.aircraft-flights-table tbody tr[aria-disabled="true"] {
+  cursor: default;
+}
+.aircraft-flights-table tbody tr.absent {
+  opacity: 0.55;
+}
+.aircraft-flights-table tbody tr[aria-selected="true"] {
+  box-shadow: inset 2px 0 0 var(--ink);
 }
 /* The key of a source that needs one, and what that source says back: each on its own line under the picker. */
 .source-key {

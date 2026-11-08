@@ -64,6 +64,8 @@ import { UfoElement, registerUfo } from "./UfoElement.js"
 import { TimelineMarks } from "./TimelineMarks.js"
 import type { TimelineMark } from "./TimelineMarks.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, SATELLITES_CHANGE_EVENT, FIREBALLS_CHANGE_EVENT, REFERENCES_CHANGE_EVENT, AIRCRAFT_CHANGE_EVENT } from "./SceneElement.js"
+import type { AircraftFlightView } from "./SceneElement.js"
+import { AircraftFlightsPanel } from "./AircraftFlightsPanel.js"
 import type { SatellitePass } from "../engine/astronomy/SatellitePasses.js"
 import { Recorder } from "../engine/record/Recorder.js"
 import { RafSamplingClock } from "../engine/record/SamplingClock.js"
@@ -528,6 +530,9 @@ export class SightingEditorElement extends HTMLElement {
   private narrativeSettingInputs = new Map<string, HTMLInputElement | HTMLSelectElement>()
   /** What the source of the air traffic has to say to the reader (see aircraftPicker). */
   private readonly aircraftStatus = Object.assign(document.createElement("span"), { className: "source-status" })
+  /** The flights a record says were there, in the Sky group's tab of the aircraft. */
+  private readonly aircraftFlights: AircraftFlightsPanel
+  private aircraftFlightsShownAt = 0
   private readonly narrativeDraftButton: HTMLButtonElement
   private readonly narrativeStopButton: HTMLButtonElement
   private readonly narrativeStatus: HTMLElement
@@ -1624,6 +1629,7 @@ export class SightingEditorElement extends HTMLElement {
     this.labelBodiesSubgroup = this.shadow.getElementById("label-bodies-subgroup")!
     this.labelPrecipitationGroup = this.shadow.getElementById("label-precipitation-group")!
     this.labelWindGroup = this.shadow.getElementById("label-wind-group")!
+    this.aircraftFlights = new AircraftFlightsPanel(this.shadow.getElementById("aircraft-flights")!, flight => this.aimAtFlight(flight), azimuthDeg => this.naming.point(azimuthDeg))
     this.labelWeatherInferred = this.shadow.getElementById("label-weather-inferred")!
     this.weatherProviderSelect = this.shadow.getElementById("weatherSource") as HTMLSelectElement
     this.weatherFileLink = this.shadow.getElementById("weather-file-link") as HTMLButtonElement
@@ -3567,9 +3573,10 @@ export class SightingEditorElement extends HTMLElement {
       ["water", this.messages.frozenWater, this.sourcePicker("water", [SightingEditorElement.LIVE_WATER], () => undefined, this.groupChoice(["water"]))],
       ["railways", this.messages.frozenRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
     ])
+    this.shadow.getElementById("label-aircraft-source")!.textContent = this.messages.sourceAircraft
+    this.shadow.getElementById("aircraft-source-row")!.replaceChildren(this.aircraftPicker())
     this.sourcePickers(this.shadow.getElementById("decor-source-rows")!, "decor-source-kind", "decor", [
       ["scenery", this.messages.fileItemDecor, this.shadow.getElementById("scenery-picker")!],
-      ["aircraft", this.messages.sourceAircraft, this.aircraftPicker()],
       ["decor-model", this.messages.decorModel, this.sourcePicker("decor-model", DECOR_MODEL_SOURCES, () => this.applyDecorModelSource())]
     ])
   }
@@ -3681,9 +3688,40 @@ export class SightingEditorElement extends HTMLElement {
     return fragment
   }
 
+  /** Whether the tab of the aircraft is what is showing: nothing is worked out for its list otherwise. */
+  private get aircraftTabOpen(): boolean {
+    return this.isGroupIdOpen("group-weather") && this.shadow.getElementById("weather-aircraft")?.hidden === false
+  }
+
+  /** Shows the flights at the instant on show. While the recording plays that is once a second: an image has better things to do. */
+  private showAircraftFlights(): void {
+    if (!this.aircraftTabOpen) return
+    if (this.ufoElement.playbackState === "playing") {
+      const now = performance.now()
+      if (now - this.aircraftFlightsShownAt < 1000) return
+      this.aircraftFlightsShownAt = now
+    }
+    this.aircraftFlights.show(this.sceneElement.aircraftFlights, this.messages)
+  }
+
+  /** Turns to a flight, going first to when it is there if it is not at this instant. */
+  private aimAtFlight(flight: AircraftFlightView): void {
+    if (!flight.sky && flight.firstMs === undefined) return
+    const atMs = flight.sky ? this.ufoElement.currentTime : flight.firstMs!
+    if (!flight.sky) this.goToMark(atMs)
+    this.sceneElement.lookAtFlight(flight.key, atMs)
+    this.aircraftFlights.select(flight.key)
+    this.showAircraftFlights()
+  }
+
   private showAircraftStatus(): void {
-    const { problem, partial, creditsSpent } = this.sceneElement.aircraftState
+    this.showAircraftFlights()
+    const { status, problem, partial, creditsSpent, total } = this.sceneElement.aircraftState
     const said: string[] = []
+    if (status === "loading") said.push(this.messages.aircraftLoading)
+    if (status === "outside") said.push(this.messages.aircraftOutside)
+    if (status === "unavailable" && !problem) said.push(this.messages.aircraftProblems.network)
+    if (status === "ready" && total === 0) said.push(this.messages.aircraftNone)
     if (partial) {
       said.push(this.messages.aircraftPartial
         .replace("{traced}", String(partial.traced))
@@ -8095,6 +8133,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private onSelectionOrTimeChanged(): void {
+    this.showAircraftFlights()
     if (this.shadow.getElementById("shape-bodies")?.hidden === false) this.bodyEditor?.syncKeyframe()
     // Its own timeline's playhead follows the recording's: only the playhead is placed again (see ReentryEditor.setTime).
     for (const part of this.openSkyParts()) part.editor?.setTime?.(this.ufoElement.currentTime)
@@ -11727,6 +11766,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelCloudsGroup.textContent = messages.cloudsGroup
     this.labelPrecipitationGroup.textContent = messages.precipitationGroup
     this.labelWindGroup.textContent = messages.windGroup
+    this.shadow.getElementById("label-aircraft-group")!.textContent = messages.aircraftGroup
+    this.aircraftFlights.show(this.sceneElement.aircraftFlights, messages, true)
     this.labelWeatherInferred.textContent = messages.weatherInferred
     // Its own title is set by syncWeatherSourceState below, not here: which of the two messages it
     // carries depends on whether a lookup is possible at all.

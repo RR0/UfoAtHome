@@ -262,6 +262,20 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sourceAircraft: string
   /** The choice, in a source picker, of the recording's own file rather than a source asked live (see FrozenData). */
   sourceFile: string
+  /** The Sky group's tab of the aircraft a record says were around the witness. */
+  aircraftGroup: string
+  /** Its list: the head of each column, what a pointed row does, and what is said of a flight that cannot be aimed at or is not drawn. */
+  aircraftFlightsColumns: { flight: string; distance: string; direction: string; height: string; altitude: string }
+  aircraftFlightsIntro: string
+  aircraftFlightAim: string
+  aircraftFlightLater: string
+  aircraftFlightAbsent: string
+  aircraftFlightNotDrawn: string
+  aircraftFlightUnknown: string
+  /** How the search stands. */
+  aircraftLoading: string
+  aircraftOutside: string
+  aircraftNone: string
   /** Before the field of the reader's own key, for a source that needs one. */
   sourceKey: string
   /** The link to where such a key is had. */

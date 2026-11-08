@@ -93,7 +93,7 @@ import { Vector3 } from "three"
 import { BodyPlacement } from "../engine/interpretation/BodyPlacement.js"
 import { GlassWetting, LensGhosts } from "../engine/instrument/LensGhost.js"
 import { ReentrySighting } from "../modules/sky-events/reentries/Reentry.js"
-import type { GeoPoint, ReentryDetonation, ReentryJson } from "../modules/sky-events/reentries/Reentry.js"
+import type { GeoPoint, ReentryDetonation, ReentryJson, SkyPoint } from "../modules/sky-events/reentries/Reentry.js"
 import { AIRCRAFT_SOURCES } from "../modules/providers/traffic/aircraftSources.js"
 import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import { ModuleRegistry } from "../modules/ModuleRegistry.js"
@@ -134,6 +134,21 @@ export const SATELLITES_CHANGE_EVENT = "satellites-change"
 export const FIREBALLS_CHANGE_EVENT = "fireballs-change"
 /** Sent when a picture of the place has arrived, or could not be had (see referenceFailure). */
 export const REFERENCES_CHANGE_EVENT = "references-change"
+/** One flight of the air traffic around the observer, as a list reads it at one instant (see SceneElement.aircraftFlights). */
+export interface AircraftFlightView {
+  key: string
+  /** What it is, as far as the record says: the type's name, else its designator. */
+  type?: string
+  registration?: string
+  /** Where it is in the observer's sky at that instant; undefined when it is not in it: not recorded then, or under the horizon. */
+  sky?: SkyPoint
+  altitudeFt?: number
+  /** The first instant of the recording it is recorded at, ms from its start; undefined when it is only recorded outside the recording. */
+  firstMs?: number
+  /** Whether it is among the aircraft the scene draws, which are the nearest few of a busy record. */
+  drawn: boolean
+}
+
 /** Fired by a scene when the air traffic recorded around its observer for its recording has arrived — see aircraftState. */
 export const AIRCRAFT_CHANGE_EVENT = "aircraft-change"
 /** Fired whenever what the interpretation on show says against the account changes — see
@@ -372,7 +387,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; nearestPassKm?: Map<string, number>; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
 
@@ -2611,6 +2626,62 @@ export class SceneElement extends HTMLElement {
     if (this.interacted) audio.resume()
     audio.setPaused(this.ufoElement.playbackState !== "playing")
     return audio
+  }
+
+  /**
+   * The flights of the record, nearest pass first, as they stand at the instant on show. For a list that has to say who was there and where to
+   * look, since an aircraft in a bright sky is a pixel or two. The order does not depend on the instant, so that the list holds still as it plays.
+   */
+  get aircraftFlights(): AircraftFlightView[] {
+    const traffic = this.traffic
+    if (!traffic?.tracks || traffic.startMs === undefined || !traffic.observer) return []
+    const startMs = traffic.startMs
+    const observer = this.observerAt(this.lastTimeMs, traffic.observer)
+    const drawn = new Set([...(traffic.set?.flights.values() ?? [])].map(flight => TrafficIds.keyOf(flight)))
+    const nearest = traffic.nearestPassKm ??= new Map(traffic.tracks.map(track => [
+      TrafficIds.keyOf(track),
+      Math.min(...track.points.map(point => AircraftSighting.groundDistanceKm(traffic.observer!, point)))
+    ]))
+    const durationMs = this.ufoElement.seekableDuration
+    return [...traffic.tracks]
+      .sort((a, b) => nearest.get(TrafficIds.keyOf(a))! - nearest.get(TrafficIds.keyOf(b))!)
+      .map(track => {
+        const key = TrafficIds.keyOf(track)
+        const description = traffic.descriptions?.get(key)
+        const model = traffic.models?.get(key)
+        const seen = AircraftSighting.seenFrom(track, observer, startMs + this.lastTimeMs)
+        const firstMs = track.points.find(point => point.t >= startMs)?.t
+        return {
+          key,
+          type: model?.basis === "type" ? model.name : description?.type,
+          registration: description?.registration,
+          sky: seen?.sky,
+          altitudeFt: seen?.altitudeFt,
+          firstMs: firstMs !== undefined && firstMs - startMs <= durationMs ? firstMs - startMs : undefined,
+          drawn: drawn.has(key)
+        }
+      })
+  }
+
+  /**
+   * Turns the view toward a flight as it stands at `atMs` from the start of the recording. A look-around, never an edit (see lookToward).
+   * False when it is not in the observer's sky then.
+   */
+  lookAtFlight(key: string, atMs = this.lastTimeMs): boolean {
+    const traffic = this.traffic
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, atMs)
+    const track = traffic?.tracks?.find(candidate => TrafficIds.keyOf(candidate) === key)
+    if (!traffic?.observer || traffic.startMs === undefined || !track || pose?.headingDeg === undefined) return false
+    const seen = AircraftSighting.seenFrom(track, this.observerAt(atMs, traffic.observer), traffic.startMs + atMs)
+    if (!seen) return false
+    this.setLookOffset(((((seen.sky.azimuthDeg - pose.headingDeg) % 360) + 540) % 360) - 180, seen.sky.altitudeDeg - (pose.pitchDeg ?? 0))
+    return true
+  }
+
+  /** Where the observer stands at `atMs`, who may be walking or driving; the place the traffic was asked for when that says nothing. */
+  private observerAt(atMs: number, asked: { lat: number; lng: number }): GeoPoint {
+    const pose = resolveObserverPoseAt(this.ufoElement.sighting, atMs)
+    return { lat: pose?.lat ?? asked.lat, lng: pose?.lng ?? asked.lng, heightM: pose?.elevationM ?? 0 }
   }
 
   /** Tells whoever listens that the traffic changed, and draws it. */

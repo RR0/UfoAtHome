@@ -6059,10 +6059,17 @@ describe("SightingEditorElement data sources", () => {
     expect([...select(element, "elevation").options].map(option => option.value)).toContain("file")
   })
 
-  it("shows the scenery's survey, the air traffic's source and the models' in the Environment group, one at a time", async () => {
+  it("shows the scenery's survey and the models' in the Environment group, one at a time", async () => {
     const element = await mount()
     const kind = element.shadowRoot!.getElementById("decor-source-kind") as HTMLSelectElement
-    expect([...kind.options].map(option => option.value)).toEqual(["scenery", "aircraft", "decor-model"])
+    expect([...kind.options].map(option => option.value)).toEqual(["scenery", "decor-model"])
+  })
+
+  it("has the air traffic's source in a tab of the Sky group, with no file to read it from: it is searched for, never written", async () => {
+    const element = await mount()
+    const shadow = element.shadowRoot!
+    expect(shadow.querySelector("#weather-aircraft #aircraftSource")).not.toBeNull()
+    expect(shadow.querySelector('#weather-tabs [aria-controls="weather-aircraft"]')).not.toBeNull()
     expect([...select(element, "aircraft").options].map(option => option.value)).not.toContain("file")
   })
 
