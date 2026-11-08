@@ -196,6 +196,7 @@ export const html = `
         <output id="focal-fov" class="apparent-size inline" for="focalLength"></output></label>
       <label class="adv"><span id="label-f-number"></span> f/<input id="fNumber" type="number" min="0.7" max="64" step="0.1"/></label>
       <label class="adv"><span id="label-exposure"></span> <input id="exposureSeconds" type="text" inputmode="decimal" size="7" placeholder="1/250"/> s</label>
+      <label><span id="label-film-stock"></span> <select id="filmStock"></select></label>
       <label class="adv"><span id="label-iso"></span> ISO <input id="iso" type="number" min="1" max="409600" step="1"/></label>
       <label class="adv"><span id="label-metering"></span> <select id="metering">
         <option value="" id="metering-device"></option><option value="average" id="metering-average"></option>

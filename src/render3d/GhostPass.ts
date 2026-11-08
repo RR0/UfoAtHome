@@ -453,6 +453,7 @@ export class GhostPass {
         uGhosts: { value: this.ghostLayer.texture },
         uGain: { value: 1 },
         uKept: { value: 1 },
+        uMonochrome: { value: 0 },
         uPrintOn: { value: 0 },
         uPrintContrast: { value: 1 },
         uPrintTint: { value: new Vector3(1, 1, 1) },
@@ -472,6 +473,7 @@ export class GhostPass {
         uniform sampler2D uGhosts;
         uniform float uGain;
         uniform float uKept;
+        uniform float uMonochrome;
         uniform float uPrintOn;
         uniform float uPrintContrast;
         uniform vec3 uPrintTint;
@@ -510,6 +512,8 @@ export class GhostPass {
           vec2 at = vUv + uPrintWeave * uPrintOn;
           vec4 texel = texture2D(uSource, at) * uGain;
           vec3 scene = sceneAt(at, texel);
+          // A film with no colour takes the light of each pixel, as its emulsion weighs it: what the eye weighs, near enough.
+          if (uMonochrome > 0.5) scene = vec3(dot(scene, vec3(0.2126, 0.7152, 0.0722)));
           // A picture with nothing laid over it may not even have cleared its overlay (see EYE_UNIFORMS).
           vec4 overlay = texture2D(uOverlay, vUv) * uGain * uHasOverlay;
           if (uPrintOn < 0.5) {
@@ -525,6 +529,7 @@ export class GhostPass {
             soft += sceneAt(tap, texture2D(uSource, tap) * uGain);
           }
           soft /= 9.0;
+          if (uMonochrome > 0.5) soft = vec3(dot(soft, vec3(0.2126, 0.7152, 0.0722)));
           // What is laid over the picture is not on the print: a film laid over a reconstruction is already its own print.
           vec3 shown = printed(finish(soft, vec4(0.0), lampOf(texel.a)), at);
           vec3 laid = overlay.a > 0.001 ? finish(vec3(0.0), vec4(overlay.rgb / overlay.a, 1.0)) : vec3(0.0);
@@ -540,8 +545,9 @@ export class GhostPass {
   }
 
   /** The print the pictures to come are seen through, at the frame of `t` milliseconds (see FilmPrint); undefined for none. */
-  setFilmPrint(print: FilmPrint | undefined, t: number, aspect: number): void {
+  setFilmPrint(print: FilmPrint | undefined, t: number, aspect: number, monochrome = false): void {
     const uniforms = this.developMaterial.uniforms
+    uniforms.uMonochrome.value = monochrome ? 1 : 0
     uniforms.uPrintOn.value = print ? 1 : 0
     if (!print) return
     const frame: FilmFrame = FilmPrints.frame(print, FilmPrints.frameAt(print, t))

@@ -131,6 +131,8 @@ export interface SightingRecordingJson {
   /** The speed of the film or sensor this picture was taken on — see Sighting.iso. Absent means the
    * device's own (Instrument.medium). */
   iso?: number
+  /** The film it was taken on — see Sighting.film. Absent means nobody says. */
+  film?: string
   /** How the device metered the light it exposed by — see Sighting.metering. Absent means the device's own. */
   metering?: MeteringMode
   /** How often a keyframe is taken, ms — see Sighting.sampleMs. Absent means each way of taking them keeps its own. */
@@ -249,6 +251,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     instrument: sighting.instrumentId,
     exposureSeconds: sighting.exposureSeconds,
     iso: sighting.iso,
+    film: sighting.film,
     metering: sighting.metering,
     sampleMs: sighting.sampleMs,
     lens: sighting.lens,
@@ -337,6 +340,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.sources = json.sources
   sighting.sway = json.sway
   sighting.iso = json.iso
+  sighting.film = json.film
   sighting.metering = json.metering
   sighting.sampleMs = json.sampleMs
   sighting.lens = json.lens

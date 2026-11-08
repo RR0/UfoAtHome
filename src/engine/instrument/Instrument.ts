@@ -1,4 +1,5 @@
 import { FilmPrints, type FilmPrint } from "./FilmPrint.js"
+import type { FilmFormat } from "./FilmStock.js"
 import type { LensGhost } from "./LensGhost.js"
 import { DigitalSlrs } from "./DigitalSlrs.js"
 import { VisualAids } from "./VisualAids.js"
@@ -127,6 +128,8 @@ export interface RecordingMedium {
   /** How the device develops what its sensor records: "computational" for a phone's default processing, which underexposes to keep the
    * highlights and lifts the rest back (see PhoneDevelopment); a raw sensor's straight line when absent. */
   development?: "computational"
+  /** Whether it records no colour: a black and white film. */
+  monochrome?: boolean
   /** What the copy that reached us makes of it, for a film seen through one (see FilmPrint). None when absent. */
   print?: FilmPrint
 }
@@ -152,6 +155,8 @@ export interface VisualAid {
 export type InstrumentCategory = "eye" | "camera" | "dslr" | "phone" | "video" | "binoculars" | "telescope"
 
 export interface Instrument {
+  /** The film it takes, for what takes one (see FilmStocks). */
+  filmFormat?: FilmFormat
   /** What kind of thing it is — how a picker groups it. */
   category: InstrumentCategory
   /** Stable id — what a case file names, and what an unknown value falls back from. */
@@ -311,6 +316,7 @@ export const INSTRUMENTS: Instrument[] = [
     // works from (Condon's plates are 800 x 645 pixels, so 74 x 60 mm), the negative having been
     // cut narrower than the 6 x 9 the maker gave: 41 degrees across rather than 48.
     id: "roamer-1-120",
+    filmFormat: "120",
     category: "camera",
     name: "Roamer 1, 120 film",
     projection: "rectilinear",
@@ -333,6 +339,7 @@ export const INSTRUMENTS: Instrument[] = [
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a
     // 43 mm lens (the Instamatic 100's own), so 36 degrees of field each way.
     id: "instamatic-126",
+    filmFormat: "126",
     category: "camera",
     name: "Instamatic, 126 film",
     projection: "rectilinear",
@@ -357,6 +364,7 @@ export const INSTRUMENTS: Instrument[] = [
     // body, giving the narrow 27-degree vertical field that is why a photographed light so often
     // has nothing recognisable beside it in the frame.
     id: "slr-35mm-50",
+    filmFormat: "135",
     category: "camera",
     name: "35 mm SLR, 50 mm lens",
     projection: "rectilinear",
@@ -387,6 +395,7 @@ export const INSTRUMENTS: Instrument[] = [
     // A cinema camera of the 1970s, as television shows it (see FilmPrints.BROADCAST_35MM): what aerial and documentary films reach us as.
     // A shutter of 180 degrees at 24 frames a second, and a 4:3 frame, since a broadcast shows no more. The lens is whatever a recording states.
     id: "cine-35mm-broadcast",
+    filmFormat: "35mm-cine",
     category: "camera",
     name: "35 mm film camera, seen on television",
     projection: "rectilinear",
@@ -406,6 +415,7 @@ export const INSTRUMENTS: Instrument[] = [
     // the reason a distant aircraft can fill a frame — and the reason a hand-held shot at 210 mm
     // shakes.
     id: "slr-35mm-zoom",
+    filmFormat: "135",
     category: "camera",
     name: "35 mm SLR, 70-210 mm zoom",
     projection: "rectilinear",

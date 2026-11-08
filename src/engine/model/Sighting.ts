@@ -530,6 +530,11 @@ export class Sighting {
    */
   iso?: number
   /**
+   * The film the picture was taken on, when it is known (see FilmStocks): what gives the device its speed, unless `iso` says otherwise, and its
+   * answer to light. Not readonly, same reasoning as account above.
+   */
+  film?: string
+  /**
    * How the device read the light it exposed the picture by, when it set its own exposure (see MeteringMode): absent means the device's
    * own (Instrument.medium.metering). Meaningless for an eye, and for a device whose exposure was set by hand: a stated `iso` on a phone
    * is its manual mode, which meters nothing.

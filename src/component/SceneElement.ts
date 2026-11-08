@@ -21,6 +21,7 @@ import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
 import { FrozenGroups } from "../engine/model/FrozenData.js"
 import type { FrozenData } from "../engine/model/FrozenData.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
+import { FilmStocks } from "../engine/instrument/FilmStock.js"
 import { FrozenUpperAirProvider } from "../engine/traffic/FrozenUpperAirProvider.js"
 import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/FrozenUpperAirProvider.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
@@ -2074,7 +2075,7 @@ export class SceneElement extends HTMLElement {
     )
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
-    this.sceneRenderer.setMedium(sighting.instrument.medium, sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso, sighting.metering)
+    this.sceneRenderer.setMedium(FilmStocks.mediumOf(sighting.instrument.medium, FilmStocks.byId(sighting.film)), sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso, sighting.metering)
     // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
     // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
     this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens,

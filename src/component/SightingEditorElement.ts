@@ -143,6 +143,8 @@ import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import type { KmlImportResult } from "../engine/interop/KmlImport.js"
 import type { PictureRegistration } from "../engine/reference/PictureRegistration.js"
 import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
+import { FilmStocks } from "../engine/instrument/FilmStock.js"
+import type { Sighting } from "../engine/model/Sighting.js"
 import type { Vector3 } from "three"
 import type { CanvasRenderer } from "../render/CanvasRenderer.js"
 import type { PicturePoint } from "../engine/reference/PictureRegistration.js"
@@ -566,6 +568,7 @@ export class SightingEditorElement extends HTMLElement {
   /** What the picture was taken through, and what was on that glass — see Sighting.lens. */
   private readonly lensGlassSelect: HTMLSelectElement
   private readonly isoInput: HTMLInputElement
+  private readonly filmStockSelect: HTMLSelectElement
   private readonly meteringSelect: HTMLSelectElement
   private readonly lensDropsInput: HTMLInputElement
   private readonly lensCondensationInput: HTMLInputElement
@@ -1349,6 +1352,7 @@ export class SightingEditorElement extends HTMLElement {
     this.swayInput = this.shadow.getElementById("sway") as HTMLInputElement
     this.lensGlassSelect = this.shadow.getElementById("lens-glass") as HTMLSelectElement
     this.isoInput = this.shadow.getElementById("iso") as HTMLInputElement
+    this.filmStockSelect = this.shadow.getElementById("filmStock") as HTMLSelectElement
     this.meteringSelect = this.shadow.getElementById("metering") as HTMLSelectElement
     this.lensDropsInput = this.shadow.getElementById("lens-drops") as HTMLInputElement
     this.lensCondensationInput = this.shadow.getElementById("lens-condensation") as HTMLInputElement
@@ -2056,6 +2060,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     // The film's speed and how the device metered are the recording's, not a pose's: one for the whole of it.
     this.isoInput.addEventListener("input", () => this.updateExposureSettings())
+    this.filmStockSelect.addEventListener("change", () => this.updateExposureSettings())
     this.meteringSelect.addEventListener("change", () => this.updateExposureSettings())
     // Told before the fields' own listeners above, since it made them first: how the place was said is known when it is written.
     this.observerPosition.addEventListener("positionchange", event => {
@@ -8730,7 +8735,9 @@ export class SightingEditorElement extends HTMLElement {
     // A speed and a way of metering are a device's that records: a film or a sensor. Metering is only that of one setting its own exposure.
     const medium = instrument.medium
     if (this.isoInput !== this.shadow.activeElement) this.isoInput.value = sighting.iso === undefined ? "" : String(sighting.iso)
-    this.isoInput.placeholder = medium ? (medium.autoExposure ? "auto" : String(medium.iso)) : ""
+    this.syncFilmStocks(sighting, instrument)
+    const stock = FilmStocks.byId(sighting.film)
+    this.isoInput.placeholder = medium ? (medium.autoExposure ? "auto" : String(stock?.iso ?? medium.iso)) : ""
     this.setRowVisible(this.isoInput, medium !== undefined)
     this.meteringSelect.value = sighting.metering ?? ""
     this.setRowVisible(this.meteringSelect, medium?.autoExposure === true)
@@ -10140,10 +10147,44 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Writes what the lens fields say onto the recording: undefined when they say nothing at all. */
+  /**
+   * The films this device could have held, for the year of the recording: those of its format, what was not on sale that year greyed with its dates
+   * (see Instruments.unavailability, the same rule). The recording's own stays takable, said to be out of period: a date does not rewrite an account.
+   */
+  private syncFilmStocks(sighting: Sighting, instrument: Instrument): void {
+    const stocks = FilmStocks.forInstrument(instrument)
+    this.setRowVisible(this.filmStockSelect, stocks.length > 0)
+    const year = sighting.event.time?.year ?? undefined
+    const key = `${instrument.id}|${year}|${sighting.film}|${this.messages.filmStockAny}`
+    if (this.filmStockKey === key) return
+    this.filmStockKey = key
+    this.filmStockSelect.innerHTML = ""
+    const add = (value: string, text: string, disabled = false) => {
+      const option = document.createElement("option")
+      option.value = value
+      option.textContent = text
+      option.disabled = disabled
+      this.filmStockSelect.appendChild(option)
+    }
+    add("", this.messages.filmStockAny)
+    const dated = stocks.map(stock => ({ stock, gap: FilmStocks.gap(stock, instrument, year) }))
+    for (const { stock } of dated.filter(entry => !entry.gap)) add(stock.id, stock.name)
+    for (const { stock, gap } of dated.filter(entry => entry.gap)) {
+      const reason = gap!.kind === "before" ? this.messages.filmStockNotYet.replace("{from}", String(gap!.from)) : this.messages.filmStockNoLonger.replace("{to}", String((gap as { to: number }).to))
+      add(stock.id, `${stock.name} (${reason})`, stock.id !== sighting.film)
+    }
+    this.filmStockSelect.value = sighting.film ?? ""
+  }
+
+  /** What the list of films was last built for. */
+  private filmStockKey?: string
+
   /** Writes the film's speed and how the device metered (see Sighting.iso, Sighting.metering) onto the recording. */
   private updateExposureSettings(): void {
     const sighting = this.ufoElement.sighting
     sighting.iso = this.numberOrUndefined(this.isoInput.value)
+    sighting.film = this.filmStockSelect.value || undefined
+    this.isoInput.placeholder = String(FilmStocks.byId(sighting.film)?.iso ?? sighting.instrument.medium?.iso ?? "")
     const metering = this.meteringSelect.value
     sighting.metering = metering === "average" || metering === "highlights" ? metering : undefined
     this.meteringSelect.disabled = sighting.iso !== undefined
@@ -11730,6 +11771,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelSway.textContent = messages.sway
     this.swayInput.title = messages.swayTitle
     this.label("label-iso", messages.iso)
+    this.label("label-film-stock", messages.filmStock)
+    this.filmStockKey = undefined
     this.isoInput.title = messages.isoTitle
     this.label("label-metering", messages.metering)
     this.meteringSelect.title = messages.meteringTitle

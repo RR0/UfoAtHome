@@ -503,6 +503,10 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   referenceKind: string
   referencePhoto: string
   referencePanorama: string
+  filmStock: string
+  filmStockAny: string
+  filmStockNotYet: string
+  filmStockNoLonger: string
   referenceVideo: string
   referenceVideoT: string
   referenceVideoFrom: string
