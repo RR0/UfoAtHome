@@ -960,17 +960,21 @@ export class SceneElement extends HTMLElement {
   }
 
   private showHoverTooltip(event: { clientX: number, clientY: number }, text: string): void {
-    this.hoverTooltip.textContent = text
-    this.hoverTooltip.hidden = false
-    // Positioned relative to #stage (the tooltip's own offsetParent), not the page — clientX/Y are
-    // page-relative, so subtracting the stage's own origin converts them to that local frame.
-    const stageRect = this.stageElement.getBoundingClientRect()
-    // Pushed back inside the picture when it would run off its right edge, which a sentence-long
-    // tooltip near the right does; the pointer stays on the spot it names, the text just sits left.
-    const wanted = event.clientX - stageRect.left + 12
-    const overflow = wanted + this.hoverTooltip.offsetWidth - stageRect.width
-    this.hoverTooltip.style.left = `${overflow > 0 ? Math.max(0, wanted - overflow - 4) : wanted}px`
-    this.hoverTooltip.style.top = `${event.clientY - stageRect.top + 12}px`
+    const tooltip = this.hoverTooltip
+    tooltip.textContent = text
+    tooltip.hidden = false
+    // In the top layer, once open: hidden stays what hides it again. Not every browser, nor the tests' DOM, has popovers: it is then only a fixed box, and the
+    // selector below would throw.
+    if (typeof tooltip.showPopover === "function" && !tooltip.matches(":popover-open")) tooltip.showPopover()
+    const { innerWidth, innerHeight } = window
+    // Beside the pointer, and kept in the window: to its left near the right edge, above it near the bottom, the pointer staying on the spot it names.
+    const gap = 12
+    const margin = 4
+    const left = Math.min(event.clientX + gap, innerWidth - tooltip.offsetWidth - margin)
+    const below = event.clientY + gap
+    const top = below + tooltip.offsetHeight + margin > innerHeight ? event.clientY - gap - tooltip.offsetHeight : below
+    tooltip.style.left = `${Math.max(margin, left)}px`
+    tooltip.style.top = `${Math.max(margin, top)}px`
   }
 
   private readonly handlePointerLeave = () => {

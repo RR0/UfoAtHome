@@ -5813,10 +5813,8 @@ export class SightingEditorElement extends HTMLElement {
     this.labelWeatherInferred.title = inferredTitle
     this.syncWeatherProvider()
     const sourced = inferred && source !== undefined
-    // "From [ERA5 (Open-Meteo)] © Copernicus/ECMWF, 2026-08-21 15:30 UTC" — the record that
-    // answered is named by a picker, not a static line, for the same reason the geocoder is (see
-    // sourcePicker): which record answered is part of the answer. The instant carries the link,
-    // because it points at the exact request that produced these values, not at a home page.
+    // "ERA5 (Open-Meteo), 2026-08-21 15:30 UTC": which record answered is part of the answer, and its picker is behind the gear, so it is said here.
+    // The line is a link, because it points at the exact request that produced these values, not at a home page.
     this.weatherSourceLink.hidden = !sourced
     if (sourced) {
       this.weatherSourceRow.hidden = false
@@ -5824,7 +5822,7 @@ export class SightingEditorElement extends HTMLElement {
       // picker naming the record read as a second "from" immediately after it.
       this.weatherSourceText.textContent = ""
       this.weatherSourceLink.href = source!.url
-      this.weatherSourceLink.textContent = this.observationInstantLabel()
+      this.weatherSourceLink.textContent = [source!.name, this.observationInstantLabel()].filter(Boolean).join(", ")
       return
     }
     const status = !canLookUp ? this.weatherUnavailableMessage() : inferred ? this.weatherStatusMessage() : ""
@@ -5868,13 +5866,13 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  /** ", 1965-07-01 04:00 UTC" — the instant the shown values describe, stated back so a wrong time
+  /** "1965-07-01 04:00 UTC": the instant the shown values describe, stated back so a wrong time
    * zone (the one thing a longitude cannot guess, see SightingEvent.utcOffsetHours) is visible
    * here rather than only in the rendered sky. Empty when there's no date to state. */
   private observationInstantLabel(): string {
     const event = this.ufoElement.sighting.event
     const instant = event.time && sightingTimeToDate(event.time, event.place?.[0]?.lng ?? 0, event.utcOffsetHours)
-    return instant ? `, ${instant.toISOString().slice(0, 16).replace("T", " ")} UTC` : ""
+    return instant ? `${instant.toISOString().slice(0, 16).replace("T", " ")} UTC` : ""
   }
 
   /** Decides, for a freshly loaded recording, who owns its weather: the record when the file names

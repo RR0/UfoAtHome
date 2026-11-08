@@ -60,7 +60,7 @@ const TEMPLATE = `
   .group-tabs { --tab-line: color-mix(in srgb, CanvasText 35%, transparent); --tab-surface: color-mix(in srgb, CanvasText 5%, Canvas);
     --tab-recessed: color-mix(in srgb, CanvasText 11%, Canvas); --tab-accent: #4a9eff;
     display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0; margin: 0; padding: 0; border-bottom: 1px solid var(--tab-line); }
-  .group-tab { font: inherit; font-weight: 600; cursor: pointer; color: color-mix(in srgb, CanvasText 70%, transparent); background: var(--tab-recessed);
+  .group-tab { -webkit-user-select: none; user-select: none; font: inherit; font-weight: 600; cursor: pointer; color: color-mix(in srgb, CanvasText 70%, transparent); background: var(--tab-recessed);
     border: 1px solid var(--tab-line); border-radius: 8px 8px 0 0; padding: .4em .6em; margin: 0 0 -1px -1px; position: relative; }
   .group-tab:hover { color: CanvasText; background: color-mix(in srgb, CanvasText 16%, Canvas); }
   .group-tab[aria-expanded="true"] { color: CanvasText; background: var(--tab-surface); border-bottom-color: var(--tab-surface); box-shadow: inset 0 2px 0 var(--tab-accent); z-index: 1; }

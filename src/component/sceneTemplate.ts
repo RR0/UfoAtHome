@@ -35,7 +35,7 @@ export const html = `
   <svg id="ghost-path" class="ghost-path" hidden aria-hidden="true">
     <line class="ghost-path-halo"/><line class="ghost-path-line"/><circle class="ghost-path-centre" r="3"/><circle class="ghost-path-source" r="9"/>
   </svg>
-  <div id="hover-tooltip" class="hover-tooltip" hidden></div>
+  <div id="hover-tooltip" class="hover-tooltip" popover="manual" hidden></div>
   <button id="credits-button" class="credits-btn" type="button" popovertarget="credits-panel" aria-label="Credits" title="Credits">©</button>
   <div id="credits-panel" class="credits-panel" popover>
     <ul id="credits-list" class="credits-list"></ul>
@@ -397,11 +397,16 @@ export const css = `
 .stage.minified .ghost-path {
   display: none !important;
 }
+/* In the top layer, as a popover: a label several lines long, at the foot of the picture, used to pass under the playback bar and be cut off by the form below. */
 .hover-tooltip {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  border: 0;
+  overflow: visible;
+  width: max-content;
   padding: 0.2em 0.5em;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.88);
   color: #fff;
   font-family: sans-serif;
   font-size: 0.85em;
@@ -410,6 +415,6 @@ export const css = `
   /* Kept on the lines it is given (the label of an aircraft has several), and wrapped where a line is
      longer than the picture can hold: what an optical feature says of itself runs to a sentence. */
   white-space: pre-wrap;
-  max-width: min(24em, 70%);
+  max-width: min(24em, 90vw);
 }
 `

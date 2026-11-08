@@ -1275,6 +1275,8 @@ select.weather-field:disabled {
   cursor: default;
 }
 .group-tab, .subgroup-tab {
+  -webkit-user-select: none;
+  user-select: none;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
