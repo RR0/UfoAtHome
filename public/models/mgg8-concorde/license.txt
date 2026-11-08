@@ -1,0 +1,8 @@
+Model Information:
+* title:	Concorde — British Airways G-BOAC
+* source:	https://sketchfab.com/3d-models/concorde-british-airways-g-boac-0b2c4ae2e7cb49f692551820af782285
+* author:	mgg8 (https://sketchfab.com/mgg8)
+
+Model License:
+* license type:	CC0-1.0 (http://creativecommons.org/publicdomain/zero/1.0/)
+* requirements:	Credit is not mandatory. Commercial use is allowed.

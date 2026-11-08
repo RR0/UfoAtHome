@@ -1562,6 +1562,23 @@
         "license": "CC BY 4.0",
         "sourceUrl": "https://sketchfab.com/3d-models/us-capitol-building-d4049804543d4d49813767d2e9b72664"
       }
+    },
+    {
+      "id": "mgg8-concorde-g-boac-gear-up",
+      "kind": "aircraft",
+      "name": "Concorde, British Airways G-BOAC, gear up",
+      "parameters": {
+        "lightRigs": ["airliner"]
+      },
+      "file": "mgg8-concorde/concorde-g-boac-gear-up.glb",
+      "headingOffsetDeg": 180,
+      "sizeM": { "widthM": 25.64, "lengthM": 61.66, "heightM": 9.74 },
+      "credit": {
+        "title": "Concorde — British Airways G-BOAC (gear taken off, see scripts/build-concorde-gear-up.mjs)",
+        "author": "mgg8",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/concorde-british-airways-g-boac-0b2c4ae2e7cb49f692551820af782285"
+      }
     }
   ]
 }
