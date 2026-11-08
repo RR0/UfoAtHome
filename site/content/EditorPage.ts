@@ -811,7 +811,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Date</h3>
+      <h3>Chronologie</h3>
       <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
         non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
@@ -830,7 +830,7 @@ if (docs) {
     </div>
 
     <div class="group-doc">
-      <h3>Environnement</h3>
+      <h3>Décor</h3>
       <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
         et <strong>d'autres témoins</strong>. C'est la seule chose qui puisse mettre un nombre sur

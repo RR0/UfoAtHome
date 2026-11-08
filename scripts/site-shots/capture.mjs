@@ -60,7 +60,7 @@ async function highlight(page, locator) {
   }, { x: b.x, y: b.y, w: b.width, h: b.height, color: HIGHLIGHT })
 }
 
-const browser = await chromium.launch({ headless: false, args: ["--lang=en-US"] })
+const browser = await chromium.launch({ headless: false, channel: "chrome", args: ["--lang=en-US"] })
 try {
   for (const language of languages) {
     const context = await browser.newContext({ locale: LOCALES[language], viewport: { width: 640, height: 900 }, deviceScaleFactor: 2 })

@@ -2,32 +2,43 @@
 // worth showing. Where it is placed on the site is site/Shots.ts, by the same `name`.
 
 const EDIT = "/edit/"
+
+/** A recording, for what a recording's editor shows: given a case, the editor opens the case's own, whose tabs come first. */
+const RECORDING = "?file=/demo-data/observer-socorro.json"
 const CASE = "?file=/demo-data/case-socorro.json"
 
-/** The editor's group tabs, in the order the manual lists them. */
-const GROUPS = ["summary", "observer", "location", "environment", "moment", "weather", "sound", "pictures", "phenomenon", "file"]
+/** The panel each of the editor's group tabs opens. By that and not by rank: the tabs have been reordered and the editor of a case put before them. */
+const GROUPS = {
+  summary: "group-observation", observer: "group-observer", location: "group-location", moment: "group-temporal", environment: "group-decor",
+  weather: "group-weather", phenomenon: "group-shape", sound: "group-sound", pictures: "group-reference", file: "group-file"
+}
+const groupTab = (page, name) => page.locator(`.group-tab[aria-controls="${GROUPS[name]}"]`)
 
 /** Opens a group of the editor and frames its tab bar and panel together. */
 const group = (name) => ({
   name: `edit-${name}`,
   page: EDIT,
-  query: CASE,
+  query: RECORDING,
   async take(tools) {
     const { page } = tools
-    const index = GROUPS.indexOf(name)
-    await page.locator(".group-tab").nth(index).click()
+    // Wide enough for what the fields hold: at the width of the text column they are cut off.
+    await page.setViewportSize({ width: 1000, height: 1100 })
+    // A click on a group already open closes it, and one is open from the start.
+    if (await groupTab(page, name).getAttribute("aria-expanded") !== "true") await groupTab(page, name).click()
     await page.waitForTimeout(800)
-    // The phenomenon group is the scene itself: framed down to its playback bar.
-    const panel = name === "phenomenon" ? page.locator("input[type=range]:visible").last() : page.locator("section.group-panel:visible").first()
-    const active = page.locator(".group-tab").nth(index)
-    await tools.highlight(page, active)
-    return { region: [page.locator(".group-tabs").first(), panel] }
+    const panel = page.locator(`#${GROUPS[name]}`)
+    // Taken from a local copy of the site, whose address the field would show.
+    if (name === "file") await panel.locator("input").evaluateAll(inputs => {
+      for (const input of inputs) if (input.value.includes("localhost")) input.value = new URL(input.value).pathname.replace(/^/, "https://ufoathome.org")
+    })
+    await tools.highlight(page, groupTab(page, name))
+    return { region: [groupTab(page, name).locator(".."), panel], pad: 0 }
   }
 })
 
 /** Opens the Phenomenon group, then the editor of a shape by clicking its chip, which is how one is reached. */
 const shapeEditor = async (page) => {
-  await page.locator(".group-tab").nth(GROUPS.indexOf("phenomenon")).click()
+  await groupTab(page, "phenomenon").click()
   await page.waitForTimeout(1500)
   await page.locator("button.param-chip", { hasText: /Object|Objet|Objeto|Oggetto/ }).first().click()
   await page.waitForTimeout(1500)
@@ -152,14 +163,14 @@ export const SHOTS = [
   scene("scene-weather", "sky-test-storm"),
   scene("scene-ground", "observer-socorro"),
   scene("scene-instrument", "instrument-instamatic"),
-  ...GROUPS.map(group),
+  ...Object.keys(GROUPS).map(group),
   {
     // "Say when and where": the place field and what it fills in.
     name: "edit-locate",
     page: EDIT,
-    query: CASE,
+    query: RECORDING,
     async take({ page, highlight, boxOf }) {
-      await page.locator(".group-tab").nth(GROUPS.indexOf("location")).click()
+      await groupTab(page, "location").click()
       await page.waitForTimeout(600)
       const panel = page.locator("section.group-panel:visible").first()
       const inputs = panel.locator("input")
@@ -174,7 +185,7 @@ export const SHOTS = [
     // "Draw it": the shape editor, an oval or a polygon to choose first.
     name: "edit-draw",
     page: EDIT,
-    query: CASE,
+    query: RECORDING,
     async take({ page, highlight }) {
       const panel = await shapeEditor(page)
       await highlight(page, panel.locator("button", { hasText: /Oval|Ovale|Óvalo/ }).first())
@@ -186,11 +197,14 @@ export const SHOTS = [
     // "Give it a movement": the playback bar, a tick for each keyframe of what the open group edits.
     name: "edit-keyframes",
     page: EDIT,
-    query: CASE,
+    query: RECORDING,
     async take({ page, highlight, boxOf }) {
-      await page.locator(".group-tab").nth(GROUPS.indexOf("phenomenon")).click()
+      await groupTab(page, "phenomenon").click()
       await page.waitForTimeout(1500)
-      const bar = page.locator("input[type=range]:visible").last()
+      // The playback bar, which shows while the picture is pointed at; the Phenomenon group has sliders of its own.
+      await page.locator("canvas:visible").first().hover()
+      await page.waitForTimeout(400)
+      const bar = page.locator("#seek")
       await highlight(page, bar)
       const row = await boxOf([bar], 14)
       const scene = await boxOf([page.locator("rr0-sighting-editor canvas:visible, canvas:visible").first()], 0)

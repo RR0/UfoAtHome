@@ -83,19 +83,19 @@ export class Shots {
     {
       page: "edit", after: "location", name: "edit-location",
       caption: {
-        en: "Location: where the observer stood, and the sources of relief and imagery around.",
-        fr: "Lieu : où se tenait l'observateur, et les sources du relief et des images autour.",
-        es: "Lugar: dónde estaba el observador, y las fuentes del relieve y de las imágenes alrededor.",
-        it: "Luogo: dove si trovava l'osservatore, e le fonti del rilievo e delle immagini intorno."
+        en: "Location: where the witness stood, and the sources of relief and imagery around.",
+        fr: "Lieu : où se tenait le témoin, et les sources du relief et des images autour.",
+        es: "Lugar: dónde estaba el testigo, y las fuentes del relieve y de las imágenes alrededor.",
+        it: "Luogo: dove si trovava il testimone, e le fonti del rilievo e delle immagini intorno."
       }
     },
     {
       page: "edit", after: "environment", name: "edit-environment",
       caption: {
-        en: "Environment: what surrounded the observer.",
-        fr: "Décor : ce qui entourait l'observateur.",
-        es: "Entorno: lo que rodeaba al observador.",
-        it: "Ambiente: ciò che circondava l'osservatore."
+        en: "Environment: what surrounded the witness.",
+        fr: "Décor : ce qui entourait le témoin.",
+        es: "Entorno: lo que rodeaba al testigo.",
+        it: "Ambiente: ciò che circondava il testimone."
       }
     },
     {
@@ -137,10 +137,10 @@ export class Shots {
     {
       page: "edit", after: "phenomenon", name: "edit-phenomenon",
       caption: {
-        en: "Phenomenon: the scene itself, with the map and the moments of the account.",
-        fr: "Phénomène : la scène elle-même, avec la carte et les moments du récit.",
-        es: "Fenómeno: la escena misma, con el mapa y los momentos del relato.",
-        it: "Fenomeno: la scena stessa, con la mappa e i momenti del resoconto."
+        en: "Phenomenon: what the witness described, as shapes as they saw them or as bodies in space.",
+        fr: "Phénomène : ce que le témoin a décrit, en formes telles qu'il les a vues ou en corps dans l'espace.",
+        es: "Fenómeno: lo que el testigo describió, como formas tal como las vio o como cuerpos en el espacio.",
+        it: "Fenomeno: ciò che il testimone ha descritto, come forme così come le ha viste o come corpi nello spazio."
       }
     },
     {
@@ -236,10 +236,10 @@ export class Shots {
     {
       page: "docs/create", after: "1-in-the-editor", name: "edit-phenomenon",
       caption: {
-        en: "The editor, here on the scene of a recording.",
-        fr: "L'éditeur, ici sur la scène d'un enregistrement.",
-        es: "El editor, aquí sobre la escena de un registro.",
-        it: "L'editor, qui sulla scena di una registrazione."
+        en: "The editor, here on the Phenomenon group of a recording.",
+        fr: "L'éditeur, ici sur le groupe Phénomène d'un enregistrement.",
+        es: "El editor, aquí en el grupo Fenómeno de un registro.",
+        it: "L'editor, qui sul gruppo Fenomeno di una registrazione."
       }
     }
 ,
