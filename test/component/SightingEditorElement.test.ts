@@ -3,7 +3,7 @@ import { SourceCredentials } from "../../src/engine/source/SourceCredentials.js"
 import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import { Vector3 } from "three"
 import { EditorView } from "@codemirror/view"
-import { register, ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
+import { register, ELEMENT_NAME } from "../../src/component/SightingEditorElement.js"
 import type { SightingEditorElement } from "../../src/component/SightingEditorElement.js"
 import type { PolygonShape, Shape } from "../../src/engine/shape/Shape.js"
 import { ShapeHandles } from "../../src/engine/shape/ShapeHandles.js"
@@ -303,27 +303,6 @@ async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
 }
 
 
-
-describe("the name this element had before 0.42.0", () => {
-  afterEach(() => {
-    document.body.innerHTML = ""
-  })
-
-  // Pages were loading it as <rr0-ufo-recorder> before <rr0-sighting-editor> existed, and a rename
-  // that breaks them punishes whoever used the thing early.
-  it("still upgrades, and to the same element", () => {
-    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
-    document.body.appendChild(legacy)
-    expect(legacy.shadowRoot).not.toBeNull()
-    expect(customElements.get(LEGACY_ELEMENT_NAME)!.prototype).toBeInstanceOf(customElements.get(ELEMENT_NAME)!)
-  })
-
-  it("brings its toolbar with it", () => {
-    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
-    document.body.appendChild(legacy)
-    expect(legacy.shadowRoot!.getElementById("group-tabs")).not.toBeNull()
-  })
-})
 
 describe("SightingEditorElement appearance toolbar", () => {
   afterEach(() => {

@@ -13322,25 +13322,6 @@ interface SkyPart {
 
 export const ELEMENT_NAME = "rr0-sighting-editor"
 
-/**
- * What this element was called until 0.42.0, still registered and still working.
- *
- * "Recorder" had stopped describing it. Recording — the button and its sampling rate — is one
- * control among some fifty, and everything else in the project already called this thing an
- * editor: the page is "the editor", the button says Export, the documentation page is "create an
- * observation". It was also the last tag still carrying "ufo" as its subject, next to the
- * <rr0-sighting> it edits.
- *
- * Kept because pages were loading it under this name before the new one existed, and a rename
- * that breaks them punishes whoever used the thing early.
- */
-export const LEGACY_ELEMENT_NAME = "rr0-ufo-recorder"
-
-/** Only so that the legacy name has a constructor of its own to be defined with: customElements
- * refuses the same class twice, and there is nothing to add. */
-class LegacyRecorderElement extends SightingEditorElement {
-}
-
 export function register(): void {
   registerDateInput()
   registerPositionInput()
@@ -13351,8 +13332,5 @@ export function register(): void {
   registerUfo()
   if (!customElements.get(ELEMENT_NAME)) {
     customElements.define(ELEMENT_NAME, SightingEditorElement)
-  }
-  if (!customElements.get(LEGACY_ELEMENT_NAME)) {
-    customElements.define(LEGACY_ELEMENT_NAME, LegacyRecorderElement)
   }
 }

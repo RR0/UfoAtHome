@@ -1568,30 +1568,10 @@ export const SIGHTING_ELEMENT_NAME = "rr0-sighting"
  * `sightingData`, or another observer picked. Read `sightingData` back off the element. */
 export const OBSERVER_CHANGE_EVENT = "observerchange"
 
-/**
- * What this element was called until 0.41.0, still registered and still working.
- *
- * The name was wrong by then: the element takes several observers and lets a reader move between
- * their points of view, so it is not AN eyeobserver, it is the sighting seen through whichever one
- * you pick — and everything around it already said so (a sighting.json, a ?file= parameter, a
- * `sighting` attribute on <rr0-ufo>). But pages were loading it under the old name before the new
- * one existed, and a rename that breaks them is a rename that punishes the people who used the
- * thing early. Both names, one element, indefinitely.
- */
-export const LEGACY_ELEMENT_NAME = "rr0-eyeobserver"
-
-/** Only so that the legacy name has a constructor of its own to be defined with: customElements
- * refuses the same class twice, and there is nothing to add. */
-class LegacySightingElement extends SightingElement {
-}
-
 export function registerSighting(): void {
   registerScene()
   ShareDialogElement.register()
   if (!customElements.get(SIGHTING_ELEMENT_NAME)) {
     customElements.define(SIGHTING_ELEMENT_NAME, SightingElement)
-  }
-  if (!customElements.get(LEGACY_ELEMENT_NAME)) {
-    customElements.define(LEGACY_ELEMENT_NAME, LegacySightingElement)
   }
 }

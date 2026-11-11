@@ -202,7 +202,6 @@ class SiteBuilder {
       // under both, which the host de-duplicates on upload.
       await cp(join(this.root, dir), join(this.out, "lib", version), { recursive: true })
     }
-    await this.writeLegacyBundle()
     await this.writeOfflineKit(layout, version, rendered)
 
     await this.writeNetlifyFiles(layout)
@@ -258,36 +257,6 @@ class SiteBuilder {
       ...closure, JSON.stringify(precache)])
     const template = await readFile(join(this.root, "site", "assets", "sw.js"), "utf8")
     await writeFile(join(this.out, "sw.js"), await kit.worker(template, precache, build), "utf8")
-  }
-
-  /**
-   * The addresses the elements were published at before they were renamed, kept working under the
-   * names they now have.
-   *
-   * A module and not a redirect: pages already load this exact URL in a `<script type="module">`
-   * — rr0.org's own case files among them — and a re-export is the one form of forwarding that
-   * costs nothing and cannot go wrong on a cross-origin fetch, which is how every one of those
-   * pages reaches it. The bundle it points at registers both tag names (see SightingElement), so
-   * a page written against the old name keeps working without changing a character.
-   */
-  private async writeLegacyBundle(): Promise<void> {
-    const renamed: ReadonlyArray<readonly [string, string, string, string?]> = [
-      ["rr0-eyewitness.mjs", "rr0-sighting.mjs", "0.41.0"],
-      ["rr0-ufo-recorder.mjs", "rr0-sighting-editor.mjs", "0.42.0"],
-      // Not a rename but a withdrawal: the bare playback element stopped being a component in
-      // 0.54.0, once the phenomenon was drawn in the scene rather than over it. The scene bundle
-      // still registers the tag as its own inner layer, so a page that loaded this goes on working.
-      ["rr0-ufo.mjs", "rr0-scene.mjs", "0.54.0", "Withdrawn as a component in 0.54.0, when the phenomenon moved into the scene; served by"]
-    ]
-    for (const [was, is, version, note] of renamed) {
-      await writeFile(
-        join(this.out, "lib", was),
-        `/* ${note ?? `Renamed to ${is} in ${version}.`} ${note ? is + "." : ""} This address goes on working: the bundle it loads\n`
-        + `   registers the old tag name as well as the new one. */\n`
-        + `export * from "./${is}"\n`,
-        "utf8"
-      )
-    }
   }
 
   /**

@@ -1,5 +1,5 @@
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
-import { registerSighting, SIGHTING_ELEMENT_NAME, LEGACY_ELEMENT_NAME } from "../../src/component/SightingElement.js"
+import { registerSighting, SIGHTING_ELEMENT_NAME } from "../../src/component/SightingElement.js"
 import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import { loadSceneNames, loadSightingMessages, loadTagNames } from "../../src/component/messages/index.js"
 import type { SightingElement } from "../../src/component/SightingElement.js"
@@ -193,28 +193,6 @@ beforeAll(() => {
 // CodeMirror, which the share dialog loads for the embed code, measures text with ranges jsdom lacks.
 Range.prototype.getClientRects ??= () => [] as unknown as DOMRectList
 Range.prototype.getBoundingClientRect ??= () => new DOMRect()
-
-describe("the name this element had before 0.41.0", () => {
-  afterEach(() => {
-    document.body.innerHTML = ""
-  })
-
-  // Pages were loading it as <rr0-eyeobserver> before <rr0-sighting> existed — rr0.org's own case
-  // files among them — and a rename that breaks them punishes whoever used the thing early.
-  it("still upgrades, and to the same element", () => {
-    const legacy = document.createElement(LEGACY_ELEMENT_NAME)
-    document.body.appendChild(legacy)
-    expect(legacy.shadowRoot).not.toBeNull()
-    expect(customElements.get(LEGACY_ELEMENT_NAME)!.prototype)
-      .toBeInstanceOf(customElements.get(SIGHTING_ELEMENT_NAME)!)
-  })
-
-  it("reads a recording the same way the new name does", () => {
-    const legacy = document.createElement(LEGACY_ELEMENT_NAME) as SightingElement
-    document.body.appendChild(legacy)
-    expect(legacy.shadowRoot!.querySelector("rr0-scene")).not.toBeNull()
-  })
-})
 
 function mount(): SightingElement {
   const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
