@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as Astronomy from 'astronomy-engine'
+import { Euler, Quaternion, Vector3 } from 'three'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const frames = JSON.parse(readFileSync(join(here, 's4b.json')))
@@ -56,6 +57,45 @@ const latAt = ms => LAT + northOf(ms) / 111320, lngAt = ms => LNG + eastOf(ms) /
 const track = keys.map(k => { const p = planeAt(k.t), u = ((p.left + p.right) / 2 - 320) / 240 * TAN, v = (240 - (p.y - 8)) / 240 * TAN
   const az = (heading + Math.atan(u) / D2R) * D2R, alt = (k.pitchDeg + Math.atan(v) / D2R) * D2R
   return { t: k.t, eastM: round(eastOf(k.t) + distanceM * Math.cos(alt) * Math.sin(az), 2), northM: round(northOf(k.t) + distanceM * Math.cos(alt) * Math.cos(az), 2), altitudeM: round(ALT_M + 1.6 + distanceM * Math.sin(alt), 2), headingDeg: round(COURSE_DEG, 2) } }) // fitted on the overlay: its nose a little further from the camera, the middle of the white a little under the fuselage's
+// The orb, as the film shows it: the account. Nobody is known to have seen it in flight; it is what the frames hold, so its directions are
+// MEASURED and nothing else is said of it (no distance, no size in metres). Found frame by frame among the faint compact blobs of s4b.json:
+// coming down and back up on the column x ≈ 444 (A, B), then rising above the fuselage (D). Between the two it crosses the dark band under the
+// wing, where this copy at its own speed does not separate it from the band; the slow motion of the documentary shows it sliding there towards
+// the nose (x 441 to 458), which the interpolation between the two keeps.
+const OUT_OF_PICTURE = (x, y) => x < 0 || x > 640 || y < 0 || y > 480
+const orbRows = (() => {
+  const rows = []
+  let previous = { x: 441.8, y: 41.9 }
+  for (const frame of frames) {
+    const rising = frame.t >= 8.5 && frame.t <= 8.8
+    if (!(frame.t <= 7.06 || rising)) continue
+    const candidates = frame.blobs.filter(b => b.n < 120 && b.mx - b.bg > 20 && (rising ? b.x > 455 && b.x < 475 && b.y < 250 : b.x > 425 && b.x < 480))
+    if (!rising) candidates.sort((a, b) => Math.hypot(a.x - previous.x, a.y - previous.y) - Math.hypot(b.x - previous.x, b.y - previous.y))
+    const blob = candidates[0]
+    if (!blob || OUT_OF_PICTURE(blob.x, blob.y) || (!rising && Math.hypot(blob.x - previous.x, blob.y - previous.y) > 60)) continue
+    if (!rising) previous = blob
+    rows.push({ t: frame.t, x: blob.x, y: blob.y, n: blob.n })
+  }
+  return rows
+})()
+// A pixel of the film as a direction of the sky: through the panel the reference is drawn on (ReferenceSystem: its height spans the field, the
+// registration turns it as intrinsic YXZ), under the registration at that instant, interpolated as ReferenceTimeline.registrationAt does.
+const pitchAtMs = ms => { const after = keys.findIndex(k => k.t > ms), a = keys[Math.max(after - 1, 0)], b = keys[after === -1 ? keys.length - 1 : after]; const s = b.t > a.t ? Math.min(Math.max((ms - a.t) / (b.t - a.t), 0), 1) : 0; return a.pitchDeg + (b.pitchDeg - a.pitchDeg) * s }
+const aimOfPixel = (x, y, ms) => {
+  const height = 2 * TAN, width = height * 640 / 480
+  const direction = new Vector3((x / 640 - 0.5) * width, (0.5 - y / 480) * height, -1).normalize()
+  direction.applyQuaternion(new Quaternion().setFromEuler(new Euler(pitchAtMs(ms) * D2R, -heading * D2R, ROLL_DEG * D2R, 'YXZ')))
+  return { azimuthDeg: round(((Math.atan2(direction.x, -direction.z) / D2R) + 360) % 360, 3), altitudeDeg: round(Math.asin(direction.y) / D2R, 3) }
+}
+const orbSizes = orbRows.map(r => 2 * Math.sqrt(r.n / Math.PI)).sort((a, b) => a - b)
+const orbDeg = round(orbSizes[Math.floor(orbSizes.length / 2)] * FOV_V / 480, 3)
+const ORB_TITLE = { fr: 'Orbe', en: 'Orb', es: 'Orbe', it: 'Sfera' }
+const orbKeys = orbRows.filter((r, i) => r.t > 8 || i % 2 === 0 || i === orbRows.length - 1).map(r => {
+  const ms = Math.round((r.t - FROM_S) / RATE * 1000)
+  return { t: ms, shapes: [{ sourceId: 'orb', shape: { aim: { value: aimOfPixel(r.x, r.y, ms), basis: 'derived', rationale: `Measured on the film: where it shows it at ${r.t.toFixed(2)} s of the file: (${r.x.toFixed(1)}, ${r.y.toFixed(1)}) of its 640 × 480, under the film's registration then.` }, kind: 'oval', angular: { widthDeg: orbDeg, heightDeg: orbDeg }, color: '#eef3f2', title: ORB_TITLE } }] }
+})
+const lastOrbMs = orbKeys[orbKeys.length - 1].t
+const timeline = { keyframes: [...orbKeys, { t: lastOrbMs + 40, shapes: [] }], order: ['orb'], groups: [] }
 const recording = {
   version: 4,
   id: 'concorde-1976',
@@ -90,9 +130,12 @@ const recording = {
   observerTrack: { keyframes: keys.map(k => ({ t: k.t, pose: { lat: round(latAt(k.t), 8), lng: round(lngAt(k.t), 8), elevationM: ALT_M, headingDeg: round(heading), pitchDeg: k.pitchDeg, rollDeg: ROLL_DEG, fovDeg: FOV_V, fNumber: Number(process.env.F ?? 18) } })) },
   // What the film shows: fields under a clear air, no cloud in any frame. Stated, so that no record of a supposed date is asked for.
   weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudLayers: [], relativeHumidity: {"value": 0.85, "basis": "assumed", "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"}, visibilityKm: {"value": 8, "basis": "derived", "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"} } }] },
-  timeline: { keyframes: [{ t: 0, shapes: [] }], order: [], groups: [] },
+  timeline,
   decor: [{ id: 'concorde', kind: 'aircraft', title: { fr: 'Concorde', en: 'Concorde' }, eastM: track[0].eastM, northM: track[0].northM, headingDeg: track[0].headingDeg, sizeM: { widthM: 25.64, lengthM: 61.66, heightM: 9.74 }, model: { id: 'mgg8-concorde-g-boac-gear-up' }, track }],
   references: [film('film', 0, FROM_S, TO_S, { fr: 'Le film', en: 'The film' }, keys)]
 }
-writeFileSync(process.env.OUT ?? join(here, '..', '..', '..', '..', 'public', 'demo-data', 'observer-concorde-1976.json'), JSON.stringify(recording, null, 1))
+const OUT = process.env.OUT ?? join(here, '..', '..', '..', '..', 'public', 'demo-data', 'observer-concorde-1976.json')
+// What was added to the recording by hand after it was built, in the editor (its share picture, its pinned snapshots), is kept.
+try { const before = JSON.parse(readFileSync(OUT)); for (const key of ['image', 'snapshots']) if (before[key] !== undefined) recording[key] = before[key] } catch { /* no recording yet */ }
+writeFileSync(OUT, JSON.stringify(recording, null, 1))
 console.log({ distanceM: round(distanceM, 1), speedMS: round(speedMS, 1), groundMPerPx: round(groundMPerPx, 2), durationS: round(durationS), sunAz: round(sun.azimuth, 1), sunAlt: round(sun.altitude, 1), heading: round(heading, 1), pitchRange: [Math.min(...keys.map(k => k.pitchDeg)), Math.max(...keys.map(k => k.pitchDeg))], keys: keys.length })

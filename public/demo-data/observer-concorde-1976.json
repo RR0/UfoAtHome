@@ -1,7 +1,6 @@
 {
  "version": 4,
  "id": "concorde-1976",
- "image": "https://ufoathome.org/demo-data/share/concorde-1976.jpg",
  "summaryTime": 2.2,
  "observer": {
   "id": "BritishAirwaysFilmUnit",
@@ -813,8 +812,16 @@
     "weather": {
      "cloudCover": 0,
      "cloudLayers": [],
-     "relativeHumidity": {"value": 0.85, "basis": "assumed", "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"},
-     "visibilityKm": {"value": 8, "basis": "derived", "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"}
+     "relativeHumidity": {
+      "value": 0.85,
+      "basis": "assumed",
+      "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"
+     },
+     "visibilityKm": {
+      "value": 8,
+      "basis": "derived",
+      "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"
+     }
     }
    }
   ]
@@ -822,11 +829,1303 @@
  "timeline": {
   "keyframes": [
    {
-    "t": 0,
+    "t": 33,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.426,
+         "altitudeDeg": -21.204
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.28 s of the file: (441.8, 41.9) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 100,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.32,
+         "altitudeDeg": -22.065
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.35 s of the file: (441.1, 64.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 167,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.294,
+         "altitudeDeg": -22.411
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.42 s of the file: (441.4, 75.4) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 234,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.227,
+         "altitudeDeg": -23.321
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.48 s of the file: (441.8, 100.0) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 300,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.144,
+         "altitudeDeg": -24.23
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.55 s of the file: (441.9, 124.6) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 367,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.105,
+         "altitudeDeg": -24.604
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.62 s of the file: (442.1, 136.9) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 467,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.955,
+         "altitudeDeg": -25.758
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.72 s of the file: (441.5, 169.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 734,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.833,
+         "altitudeDeg": -27.982
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 4.98 s of the file: (443.0, 223.0) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 801,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.869,
+         "altitudeDeg": -28.293
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.05 s of the file: (444.3, 230.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 868,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.764,
+         "altitudeDeg": -28.848
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.12 s of the file: (443.2, 244.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 934,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.682,
+         "altitudeDeg": -29.435
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.18 s of the file: (442.7, 259.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1001,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.645,
+         "altitudeDeg": -29.814
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.25 s of the file: (442.8, 269.4) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1068,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.568,
+         "altitudeDeg": -30.244
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.32 s of the file: (442.2, 281.2) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1134,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.512,
+         "altitudeDeg": -30.659
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.38 s of the file: (442.0, 292.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1201,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.461,
+         "altitudeDeg": -30.955
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.45 s of the file: (441.7, 300.9) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1268,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.406,
+         "altitudeDeg": -31.357
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.52 s of the file: (441.6, 312.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1335,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.345,
+         "altitudeDeg": -31.752
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.58 s of the file: (441.4, 324.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1401,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.339,
+         "altitudeDeg": -31.927
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.65 s of the file: (441.9, 330.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1468,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.286,
+         "altitudeDeg": -32.199
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.72 s of the file: (441.8, 340.3) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1535,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.254,
+         "altitudeDeg": -32.44
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.79 s of the file: (442.1, 349.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1602,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.229,
+         "altitudeDeg": -32.525
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.85 s of the file: (442.3, 355.8) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1668,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.153,
+         "altitudeDeg": -32.548
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.92 s of the file: (441.6, 362.3) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1735,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.139,
+         "altitudeDeg": -32.647
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 5.99 s of the file: (442.3, 370.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1802,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.117,
+         "altitudeDeg": -32.539
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.05 s of the file: (442.4, 373.6) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1869,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.121,
+         "altitudeDeg": -32.369
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.12 s of the file: (442.8, 374.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 1935,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.116,
+         "altitudeDeg": -32.205
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.18 s of the file: (442.9, 374.6) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2002,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.121,
+         "altitudeDeg": -32.045
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.25 s of the file: (443.1, 374.0) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2069,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.148,
+         "altitudeDeg": -31.632
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.32 s of the file: (442.9, 364.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2135,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.21,
+         "altitudeDeg": -31.211
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.38 s of the file: (443.2, 353.8) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2202,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.239,
+         "altitudeDeg": -30.85
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.45 s of the file: (442.8, 343.2) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2269,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.32,
+         "altitudeDeg": -30.294
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.52 s of the file: (443.0, 327.2) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2336,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.365,
+         "altitudeDeg": -29.92
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.59 s of the file: (442.9, 316.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2402,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.424,
+         "altitudeDeg": -29.663
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.65 s of the file: (443.4, 308.2) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2469,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.447,
+         "altitudeDeg": -29.355
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.72 s of the file: (443.1, 299.5) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2536,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.472,
+         "altitudeDeg": -29.089
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.79 s of the file: (442.9, 291.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2603,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.487,
+         "altitudeDeg": -28.872
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.85 s of the file: (442.6, 285.0) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2669,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.53,
+         "altitudeDeg": -28.62
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.92 s of the file: (442.7, 276.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2736,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.585,
+         "altitudeDeg": -28.273
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 6.99 s of the file: (442.9, 266.1) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 2803,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 36.586,
+         "altitudeDeg": -28.152
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 7.05 s of the file: (442.4, 261.0) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 4271,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.614,
+         "altitudeDeg": -26.574
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 8.52 s of the file: (464.1, 243.6) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 4304,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.615,
+         "altitudeDeg": -26.41
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 8.55 s of the file: (464.4, 244.2) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 4471,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.816,
+         "altitudeDeg": -24.374
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 8.72 s of the file: (465.7, 199.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 4505,
+    "shapes": [
+     {
+      "sourceId": "orb",
+      "shape": {
+       "aim": {
+        "value": {
+         "azimuthDeg": 37.939,
+         "altitudeDeg": -23.901
+        },
+        "basis": "derived",
+        "rationale": "Measured on the film: where it shows it at 8.76 s of the file: (467.5, 187.7) of its 640 × 480, under the film's registration then."
+       },
+       "kind": "oval",
+       "angular": {
+        "widthDeg": 0.355,
+        "heightDeg": 0.355
+       },
+       "color": "#eef3f2",
+       "title": {
+        "fr": "Orbe",
+        "en": "Orb",
+        "es": "Orbe",
+        "it": "Sfera"
+       }
+      }
+     }
+    ]
+   },
+   {
+    "t": 4545,
     "shapes": []
    }
   ],
-  "order": [],
+  "order": [
+   "orb"
+  ],
   "groups": []
  },
  "decor": [
@@ -1581,6 +2880,7 @@
    ]
   }
  ],
+ "image": "https://ufoathome.org/demo-data/share/concorde-1976.jpg",
  "snapshots": {
   "relief": {
    "src": "observer-concorde-1976.relief.zip",

@@ -1,0 +1,21 @@
+{
+ "id": "Concorde1976",
+ "title": "Concorde",
+ "summary": {
+  "en": "1976 (supposed June), over southern England (supposed). British Airways films Concorde from a Learjet through the Astrovision periscope camera; a pale orb on the film comes down beside the aircraft, turns back as the camera does, crosses under the wing and rises above the fuselage. No one is known to have seen it in flight: the film is the account.",
+  "fr": "1976 (juin supposé), au-dessus du sud de l'Angleterre (supposé). British Airways filme le Concorde depuis un Learjet par la caméra périscope Astrovision ; sur le film, une orbe pâle descend près de l'avion, repart quand la caméra repart, passe sous l'aile et remonte au-dessus du fuselage. Personne n'est connu pour l'avoir vue en vol : le film est le compte rendu.",
+  "es": "1976 (junio supuesto), sobre el sur de Inglaterra (supuesto). British Airways filma el Concorde desde un Learjet con la cámara periscópica Astrovision; en la película, un orbe pálido baja junto al avión, vuelve a subir cuando lo hace la cámara, pasa bajo el ala y asciende sobre el fuselaje. No se sabe de nadie que lo viera en vuelo: la película es el relato.",
+  "it": "1976 (giugno supposto), sopra l'Inghilterra meridionale (supposto). British Airways filma il Concorde da un Learjet con la cinepresa a periscopio Astrovision; sul film, una sfera pallida scende accanto all'aereo, risale quando lo fa la camera, passa sotto l'ala e sale sopra la fusoliera. Non si sa di nessuno che l'abbia vista in volo: il film è il resoconto."
+ },
+ "time": "1976",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "film",
+   "time": "1976",
+   "title": "British Airways Film Unit",
+   "url": "observer-concorde-1976.json"
+  }
+ ]
+}
