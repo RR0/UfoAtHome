@@ -232,6 +232,10 @@ const SOUND_PREVIEW_MS = 2500
 
 /** The least a body's frame spans on the canvas, px, so its handles stay apart — see bodyCanvasBounds. */
 const MIN_BODY_FRAME_PX = 40
+/** How far inside the picture's edge a frame's handles are kept, for the pointer to land on them: a handle's half width and a margin. */
+const REACH_INSET_PX = 10
+/** The room the rotation handle takes above a frame's top edge (ShapeHandles' own offset, with the handle). */
+const ROTATE_REACH_PX = 30
 
 /** Where a new body stands along its shape's line of sight when the scene draws that shape at no
  * particular distance: close enough to be looked over before it is sent out to where it belongs,
@@ -12682,7 +12686,35 @@ export class SightingEditorElement extends HTMLElement {
     const height = Math.max(MIN_BODY_FRAME_PX, ((box.maxY - box.minY) / 2) * canvas.height)
     const centreX = ((box.minX + box.maxX) / 2 + 1) / 2 * canvas.width
     const centreY = (1 - (box.minY + box.maxY) / 2) / 2 * canvas.height
-    return { x: centreX - width / 2, y: centreY - height / 2, width, height }
+    return this.withinReach({ x: centreX - width / 2, y: centreY - height / 2, width, height })
+  }
+
+  /**
+   * A frame brought inside what the pointer can reach on the picture: its handles are where it is grabbed, and a frame wider than the
+   * picture had its corners off the canvas and its bottom ones under the player's controls, which take the pointer there. The Concorde
+   * seen from a few hundred metres, a box of 62 by 26 metres, left only its top edge to turn and stretch it by, and a press anywhere
+   * else carried it or turned the view. Only where it overflows: a frame that fits is drawn where it is.
+   */
+  private withinReach(bounds: ShapeBounds): ShapeBounds {
+    const canvas = this.ufoElement.canvasElement
+    const rect = canvas.getBoundingClientRect()
+    const scale = rect.height > 0 ? canvas.height / rect.height : 1
+    // The editor's own playback row over the picture, or the player's controls when it shows them: whichever reaches higher.
+    const bars = [this.shadow.querySelector(".playback-row"), this.ufoElement.shadowRoot?.querySelector(".controls")]
+      .map(bar => bar?.getBoundingClientRect())
+      .filter((bar): bar is DOMRect => bar !== undefined && bar.height > 0 && bar.top < rect.bottom && bar.bottom > rect.top)
+    const covered = bars.reduce((most, bar) => Math.max(most, (rect.bottom - bar.top) * scale), 0)
+    const left = REACH_INSET_PX
+    const top = REACH_INSET_PX + ROTATE_REACH_PX
+    const right = canvas.width - REACH_INSET_PX
+    const bottom = canvas.height - covered - REACH_INSET_PX
+    const x0 = Math.max(bounds.x, left)
+    const y0 = Math.max(bounds.y, top)
+    const x1 = Math.min(bounds.x + bounds.width, right)
+    const y1 = Math.min(bounds.y + bounds.height, bottom)
+    // A frame wholly off the reachable part keeps its own place: there is nothing on the picture to bring in.
+    if (x1 - x0 < MIN_BODY_FRAME_PX || y1 - y0 < MIN_BODY_FRAME_PX) return bounds
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 }
   }
 
   /** The body on show, framed with the shapes' own handles: corners to size it as a whole, sides to
