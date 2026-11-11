@@ -61,6 +61,8 @@ export class TerrainSnapshotTaker {
     const endMs = Math.max(sighting.observerTrack.duration, sighting.timeline.duration, 0)
     const patches: SnapshotPatch[] = []
     let current: SnapshotPatch | undefined
+    // Patches built round someone flying, whose far ring the scene builds whatever the relief (see TerrainReach.patchRadiusFor).
+    const flown = new Set<SnapshotPatch>()
     const serves = (patch: SnapshotPatch, lat: number, lng: number, radiusM: number) => {
       if (Math.abs(patch.radiusM - radiusM) >= radiusM * 0.1) return false
       const { x, z } = geoToLocalMeters(lat, lng, patch.lat, patch.lng)
@@ -69,14 +71,19 @@ export class TerrainSnapshotTaker {
     for (let t = 0; ; t = Math.min(endMs, t + TerrainSnapshotTaker.STEP_MS)) {
       const pose = resolveObserverPoseAt(sighting, t)
       if (pose?.lat !== undefined && pose.lng !== undefined) {
-        const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM)
+        const groundRadiusM = TerrainReach.groundRadiusFor(pose.elevationM ?? 0)
+        const patchRadiusM = TerrainReach.patchRadiusFor(groundRadiusM, pose.elevationM ?? 0)
+        const radiusM = Math.max(patchRadiusM, reachM)
         if (!current || !serves(current, pose.lat, pose.lng, radiusM)) {
           current = patches.find(patch => serves(patch, pose.lat!, pose.lng!, radiusM))
           if (!current) patches.push(current = { lat: pose.lat, lng: pose.lng, radiusM })
         }
+        if (radiusM < groundRadiusM) flown.add(current)
       }
       if (t >= endMs) break
     }
+    // The far ring round a patch built round someone flying: the patch is only what they read sharply, the ring the rest of what they see.
+    for (const patch of flown) patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
     // The far ring round a patch, where the beams the recording claims go past it (see SceneRenderer.buildFarRing). Not where the eye only overlooks
     // lower ground: that is known from the relief, which is what is being frozen; a frozen scene then has the patches and no ring.
     const kinds = SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source))
@@ -84,6 +91,7 @@ export class TerrainSnapshotTaker {
     if (kinds.length > 0) {
       const reachM = (centre: { lat: number, lng: number }) => Math.max(...kinds.map(kind => kind.reachM!(SkyEventKinds.eventsOf(sighting.skyEvents, kind), centre)))
       for (const patch of [...patches]) {
+        if (patch.far || flown.has(patch)) continue
         if (TerrainReach.needsFarRing(patch.radiusM, 0, reachM(patch))) {
           patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
         }

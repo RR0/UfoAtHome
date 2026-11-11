@@ -203,6 +203,13 @@ describe("TerrainSnapshotTaker.plan", () => {
   })
 })
 
+describe("TerrainSnapshotTaker.plan, someone flying", () => {
+  it("takes the sharp patch the scene builds round them, and the far ring round it", () => {
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] }, observerTrack: { keyframes: [{ t: 0, pose: { ...SILLY, elevationM: 3000, headingDeg: 0, pitchDeg: -30, fovDeg: 20 } }] } })
+    expect(TerrainSnapshotTaker.plan(sighting)).toEqual([{ ...SILLY, radiusM: 12000 }, { ...SILLY, radiusM: 30000, far: true }])
+  })
+})
+
 describe("SnapshotUpperAirProvider", () => {
   it("gives the answer heard for the same request, or for a window holding it, and fails otherwise", async () => {
     const answer = { status: "found" as const, samples: [], source: { id: "om", name: "Open-Meteo", url: "https://x" } }
