@@ -1939,6 +1939,19 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.togglePlayPause()
       this.syncPlaybackControls()
     })
+    // The sound, which the player's own button no longer reaches here (its controls are hidden in favour of this row): the same
+    // mute and volume, as the player holds them, and told back whenever they change (see syncSoundControls).
+    const mute = this.shadow.getElementById("editor-mute") as HTMLButtonElement
+    const volume = this.shadow.getElementById("editor-volume") as HTMLInputElement
+    mute.addEventListener("click", () => {
+      this.sceneElement.resumeWeatherAudio()
+      this.ufoElement.toggleMuted()
+    })
+    volume.addEventListener("input", () => {
+      this.sceneElement.resumeWeatherAudio()
+      this.ufoElement.volume = Number(volume.value)
+    })
+    this.ufoElement.addEventListener("mutedchange", () => this.syncSoundControls())
     this.seekInput.addEventListener("input", () => (this.ufoElement.currentTime = this.timelineMarks.snap(Number(this.seekInput.value))))
     this.previousMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.previous(this.ufoElement.currentTime)))
     this.nextMarkButton.addEventListener("click", () => this.goToMark(this.timelineMarks.next(this.ufoElement.currentTime)))
@@ -6263,11 +6276,31 @@ export class SightingEditorElement extends HTMLElement {
    * positionLabel's own doc comment for the bug this avoids: a naive mm:ss of the raw values once
    * genuinely showed the wrong total and ticked at the wrong real-time speed whenever the declared
    * duration didn't match the raw recording length — normally the case). */
+  /** The row's sound as the player holds it: a muted speaker that cannot be pressed, and no volume, when there is nothing to hear. */
+  private syncSoundControls(): void {
+    const mute = this.shadow.getElementById("editor-mute") as HTMLButtonElement | null
+    const volume = this.shadow.getElementById("editor-volume") as HTMLInputElement | null
+    if (!mute || !volume) return
+    const audible = this.ufoElement.audible
+    const muted = !audible || this.ufoElement.muted
+    mute.disabled = !audible
+    volume.hidden = !audible
+    mute.innerHTML = muted ? PlayerIcons.MUTED : PlayerIcons.VOLUME
+    const label = !audible ? this.messages.noSound : this.ufoElement.muted ? this.messages.unmute : this.messages.mute
+    mute.title = label ?? ""
+    mute.setAttribute("aria-label", label ?? "")
+    mute.setAttribute("aria-pressed", String(muted))
+    volume.title = this.messages.volume ?? ""
+    volume.setAttribute("aria-label", this.messages.volume ?? "")
+    volume.value = String(this.ufoElement.muted ? 0 : this.ufoElement.volume)
+  }
+
   private syncPlaybackControls(): void {
     // Runs on every timeupdate, which is exactly when the seekable span can have changed.
     this.ensureWeatherTrackSpan()
     const isPlaying = this.ufoElement.playbackState === "playing"
     const hasDuration = this.ufoElement.seekableDuration > 0
+    this.syncSoundControls()
     Icons.show(this.playPauseButton, isPlaying ? "⏸" : "▶")
     this.playPauseButton.disabled = !hasDuration
     const label = !hasDuration ? this.messages.noDuration : isPlaying ? this.messages.pause : this.messages.play

@@ -2897,6 +2897,30 @@ describe("SightingEditorElement sound keyframes over time", () => {
     expect(shadow.getElementById("sound-pitch-value")!.textContent).toBe("900 Hz")
   })
 
+  it("mutes and sets the volume from its own playback row, the player's button being hidden with its controls", async () => {
+    const element = await mount()
+    const shadow = element.shadowRoot!
+    const mute = shadow.getElementById("editor-mute") as HTMLButtonElement
+    const volume = shadow.getElementById("editor-volume") as HTMLInputElement
+    element.sightingData = { version: 1, durationSeconds: 10, timeline: { keyframes: [] } }
+    // Nothing to hear: a muted speaker that cannot be pressed, and no volume.
+    expect([mute.disabled, volume.hidden]).toEqual([true, true])
+    element.sightingData = {
+      version: 1, durationSeconds: 10, timeline: { keyframes: [] },
+      soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 1, pitchHz: 100 } }] }
+    }
+    const ufo = nestedUfo(element) as unknown as { muted: boolean, volume: number }
+    expect([mute.disabled, volume.hidden]).toEqual([false, false])
+    mute.click()
+    expect(ufo.muted).toBe(true)
+    expect(mute.getAttribute("aria-pressed")).toBe("true")
+    mute.click()
+    volume.value = "0.4"
+    volume.dispatchEvent(new Event("input"))
+    expect(ufo.volume).toBe(0.4)
+    expect(mute.getAttribute("aria-pressed")).toBe("false")
+  })
+
   it("disables the fields a silent sighting has no use for, and the pitch a real recording carries itself", async () => {
     const element = await mount()
     element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }

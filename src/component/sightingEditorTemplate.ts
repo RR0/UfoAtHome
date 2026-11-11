@@ -51,6 +51,11 @@ export const html = `
 <div id="ufo-slot"></div>
 <div class="toolbar playback-row">
   <button id="play-pause" type="button" class="icon-btn" data-icon="▶">${Icons.PLAY}</button>
+  <!-- The sound: the player's own button is hidden here with its controls (see SightingEditorElement.syncSoundControls), and stands where the player has it: between play and the time. -->
+  <div class="editor-volume">
+    <button id="editor-mute" type="button" class="icon-btn" aria-pressed="false"></button>
+    <input id="editor-volume" type="range" min="0" max="1" step="0.05" value="1"/>
+  </div>
   <span id="time-start" class="time-label">0:00</span>
   <button id="previous-mark" type="button" class="icon-btn">${Icons.PREVIOUS_MARK}</button>
   <!-- The keyframes of what the open group edits, and the named moments — see TimelineMarks. -->
@@ -2183,6 +2188,10 @@ ${EditorTheme.fields(".app")}
 .scene-card > .render-line { top: 10px; right: 10px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 0; background: none; }
 .scene-card > .render-line .scene-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; margin: 0; }
 .scene-card > :is(.render-line, .playback-row) :is(button, input[type="range"]) { color: #e8ecf4; }
+/* The sound's slider folds beside its button until the pointer or the keyboard is on either, as the player's does. */
+.editor-volume { display: flex; align-items: center; }
+.editor-volume input[type="range"] { width: 0; min-width: 0; margin: 0; opacity: 0; transition: width 0.15s ease, margin 0.15s ease, opacity 0.15s ease; }
+.editor-volume:is(:hover, :focus-within) input[type="range"]:not([hidden]) { width: 4.5em; margin: 0 0.4em; opacity: 1; }
 .scene-card > .render-line button {
   background: rgba(7, 10, 18, .66); border: 1px solid rgba(255, 255, 255, .18); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }

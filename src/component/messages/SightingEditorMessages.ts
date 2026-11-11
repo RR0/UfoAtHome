@@ -110,6 +110,11 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * hidden here in favor of this external row) for consistent wording. */
   play: string
   pause: string
+  /** The playback row's sound: the same words as UfoMessages's, for the player's own button is hidden here with its controls. */
+  mute: string
+  unmute: string
+  volume: string
+  noSound: string
   noDuration: string
   /** The playback row's jumps between the marks under its bar — see TimelineMarks. */
   previousKeyframe: string

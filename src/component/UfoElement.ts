@@ -3171,6 +3171,11 @@ export class UfoElement extends HTMLElement {
    */
   ambientSound?: (sighting: Sighting) => boolean
 
+  /** Whether the recording has anything to hear (see hasSound): what decides whether a sound control can be pressed, here or in an editor's. */
+  get audible(): boolean {
+    return this.hasSound
+  }
+
   /** Whether the recording has anything to hear: a sound track, or what the scene plays around it. None at all means nobody was asked, which is not silence. */
   private get hasSound(): boolean {
     return this.currentSighting.soundTrack.allKeyframes.length > 0 || this.ambientSound?.(this.currentSighting) === true
