@@ -181,6 +181,11 @@ const TEMPLATE = `
   .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
   .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
   .event-card:only-child::after { display: none; }
+  /* A reading, under the observation it reads: set in, joined to it by an elbow rather than a dot of the rail of time of its own. */
+  .event-card.event-child { margin-left: 28px; }
+  .event-card.event-child::before { top: calc(-1px - var(--gap)); left: -17px; width: 14px; height: calc(var(--dot-y) + var(--gap)); transform: none;
+    border: 0; border-left: 1.5px solid var(--line-strong); border-bottom: 1.5px solid var(--line-strong); border-radius: 0 0 0 8px; background: none; }
+  .event-card.event-child::after { left: calc(var(--rail) - 24px - 1px - 28px); }
   .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links" "findings findings findings";
     align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 8px 12px 14px; }
   .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
@@ -950,8 +955,12 @@ export class CaseEditorElement extends HTMLElement {
     const known = Provenance.strip(account.recording).provenance
     const rangeOf = (path: string) => known.at(path)?.range
     const time = rangeOf("time"), lat = rangeOf("place.locations.0.lat"), lng = rangeOf("place.locations.0.lng")
+    // The hour, by the light: the nearest of that day at which the reading's Sun, with its place and heading as they are now, lights the
+    // scene as the picture shows it.
+    const lighting = Provenance.strip(account.recording).recording.lighting
     this.editor.setReadingBounds({
       ...(typeof time === "string" ? { time } : {}),
+      ...(lighting ? { hour: (asked: SightingTime) => ReadingCheck.nearestLit(lighting, asked, this.editor.sightingData) } : {}),
       ...(Array.isArray(lat) ? { lat } : {}),
       ...(Array.isArray(lng) ? { lng } : {})
     })
@@ -1197,11 +1206,24 @@ export class CaseEditorElement extends HTMLElement {
   private renderEvents(session: CaseSession, events: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[]): void {
     const m = this.messages
     const list = this.byId("event-list")
-    list.replaceChildren(...events.map(({ item, index }) => {
+    // A reading is shown under the observation it reads, as a part of it: it need not say whose it is. Under the first it reads when it
+    // reads several, the others said on it; on its own, in its time, when it reads none the case lists.
+    const accountOf = (item: { track?: CaseTrack }) => item.track?.kind === "reading" ? session.accountOf(item.track) : undefined
+    const listed = new Set(events.map(({ item }) => item.track).filter((track): track is CaseTrack => track !== undefined))
+    const nested = (item: { track?: CaseTrack }) => { const account = accountOf(item); return account !== undefined && listed.has(account) }
+    const ordered: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number, child: boolean }[] = []
+    for (const entry of events) {
+      if (nested(entry.item)) continue
+      ordered.push({ ...entry, child: false })
+      if (entry.item.track?.kind === "observer") {
+        for (const reading of events) if (nested(reading.item) && accountOf(reading.item) === entry.item.track) ordered.push({ ...reading, child: true })
+      }
+    }
+    list.replaceChildren(...ordered.map(({ item, index, child }) => {
       const kind = this.kindOf(item)
       const event = (item.track?.event ?? item.interview)!
       const card = document.createElement("li")
-      card.className = "event-card"
+      card.className = child ? "event-card event-child" : "event-card"
       card.dataset.kind = kind
       const pill = document.createElement("span")
       pill.className = "kind-pill"
@@ -1227,11 +1249,13 @@ export class CaseEditorElement extends HTMLElement {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
           .map(interview => this.optionLabel({ interview }, 0))
         if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}${told.join(", ")}`)
-        const readings = session.readingsOf(item.track).length
-        if (readings > 0) said.push(m.readingsCount.replace("{n}", String(readings)))
       } else if (item.track) {
-        const account = session.accountOf(item.track)
-        if (account) said.push(`${m.interpretationOf}${m.colon}${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
+        // Under the observation it reads, it says only the others it reads too; on its own, all of them.
+        const under = child ? session.accountOf(item.track) : undefined
+        const others = [item.track.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
+          .map(id => session.tracks.find(other => other.kind === "observer" && (other.event.id === id || other.recording?.id === id)))
+          .filter((other): other is CaseTrack => other !== undefined && other !== under)
+        if (others.length > 0) said.push(`${under ? m.interpretationAlsoOf : m.interpretationOf}${m.colon}${others.map(other => this.optionLabel({ track: other }, session.tracks.indexOf(other))).join(", ")}`)
       }
       links.textContent = said.join(" · ")
       const findings = item.track?.kind === "reading" ? this.findingsOf(item.track) : undefined

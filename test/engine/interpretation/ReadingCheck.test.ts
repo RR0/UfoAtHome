@@ -77,6 +77,23 @@ describe("A reading set against the observation it reads", () => {
     expect(ReadingCheck.findingsOf(assumed, reading)).toEqual([])
   })
 
+  it("brings an hour the light rules out to the nearest of that day it allows, which the heading moves", () => {
+    const lighting = { sunFromViewDeg: { fromDeg: 105, toDeg: 285 }, sunAltitudeDeg: { minDeg: 5, maxDeg: 90 } }
+    const midnight = { year: 1976, month: 6, day: 15, hour: 0, minute: 0 }
+    const lit = Check.nearestLit(lighting, midnight, account())!
+    // The Sun behind a camera looking at 31° is an afternoon one: the first minute of it, nearer midnight than its last.
+    expect(lit.hour).toBeGreaterThanOrEqual(9)
+    expect(lit.hour).toBeLessThanOrEqual(12)
+    expect(Check.lights(lighting, Check.sunOf(lit, account())!)).toBe(true)
+    expect(Check.lights(lighting, Check.sunOf({ ...lit, minute: lit.minute! - 1 }, account())!)).toBe(false)
+    // An hour it allows stays as it is.
+    const afternoon = { year: 1976, month: 6, day: 15, hour: 16, minute: 0 }
+    expect(Check.nearestLit(lighting, afternoon, account())).toBe(afternoon)
+    // Looking the other way, the morning is the one allowed.
+    const turned = readingOf(json => { json.observerTrack!.keyframes![0].pose!.headingDeg = 211 })
+    expect(Check.nearestLit(lighting, afternoon, turned)!.hour).toBeLessThan(16)
+  })
+
   it("reads an EDTF interval each end as wide as it is said", () => {
     expect(Check.withinInterval(new Date(Date.UTC(1976, 6, 31, 23, 0)), "1976-06/1976-07")).toBe(true)
     expect(Check.withinInterval(new Date(Date.UTC(1976, 7, 1, 0, 30)), "1976-06/1976-07")).toBe(false)

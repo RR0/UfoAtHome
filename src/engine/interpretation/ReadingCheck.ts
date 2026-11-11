@@ -1,10 +1,13 @@
 import { computeBodyPosition, sightingTimeToDate } from "../astronomy/CelestialPositions.js"
-import { parseEdtfTime } from "../model/Sighting.js"
+import { parseEdtfTime, type SightingTime } from "../model/Sighting.js"
 import { TimeSpan } from "../model/TimeSpan.js"
 import { Provenance, type ProvenanceEntry } from "../persistence/Provenance.js"
 import type { SightingLighting, SightingRecordingJson } from "../persistence/sightingJson.js"
 import type { FindingGround, ReadingFinding } from "./Interpretation.js"
 import type { ReadingCheckTexts } from "./messages/ReadingCheckTexts.js"
+
+/** Where an instrument stood and looked, and the clock it kept (see ReadingCheck.standOf). */
+interface Stand { lat: number, lng: number, elevationM: number, headingDeg: number, utcOffsetHours?: number }
 
 /** A value of the observation a reading may move, by where it is in the recording, and what it is called. */
 const PLACES: readonly { path: string, what: "latitude" | "longitude" }[] = [
@@ -94,21 +97,13 @@ export class ReadingCheck {
   }
 
   private lightingFinding(lighting: SightingLighting, entry: ProvenanceEntry | undefined, reading: SightingRecordingJson): ReadingFinding | undefined {
-    const pose = reading.observerTrack?.keyframes?.[0]?.pose
-    const location = reading.place?.locations?.[0] as { lat?: number, lng?: number } | undefined
-    const lat = pose?.lat ?? location?.lat
-    const lng = pose?.lng ?? location?.lng
     const time = reading.time ? parseEdtfTime(reading.time) : undefined
-    if (lat === undefined || lng === undefined || !time || pose?.headingDeg === undefined) return undefined
-    const date = sightingTimeToDate(time, lng, reading.utcOffsetHours)
-    if (!date) return undefined
-    const sun = computeBodyPosition("Sun", date, { lat, lng, elevationM: pose.elevationM ?? 0 })
-    const bearing = ((sun.azimuthDeg - pose.headingDeg) % 360 + 360) % 360
+    const sun = time ? ReadingCheck.sunOf(time, reading) : undefined
+    if (!sun) return undefined
+    const { bearing } = sun
     const { fromDeg: from, toDeg: to } = lighting.sunFromViewDeg ?? { fromDeg: 0, toDeg: 360 }
-    const inBearing = lighting.sunFromViewDeg ? ReadingCheck.onArc(bearing, from, to) : true
     const { minDeg: low, maxDeg: high } = lighting.sunAltitudeDeg ?? { minDeg: -90, maxDeg: 90 }
-    const inAltitude = sun.altitudeDeg >= low && sun.altitudeDeg <= high
-    const holds = inBearing && inAltitude
+    const holds = ReadingCheck.lights(lighting, sun)
     const ground: FindingGround = entry?.basis === "assumed" ? "supposed" : "established"
     const round = (value: number) => Math.round(value)
     return {
@@ -118,6 +113,69 @@ export class ReadingCheck {
       }),
       outcome: holds ? "holds" : "fails", against: ground, path: "lighting", ...(entry?.rationale ? { rationale: entry.rationale } : {})
     }
+  }
+
+  /** Where a reading's instrument stood and looked at the start, and the clock it kept: what puts its Sun where it is. */
+  private static standOf(reading: SightingRecordingJson): Stand | undefined {
+    const stripped = Provenance.strip(reading).recording
+    const pose = stripped.observerTrack?.keyframes?.[0]?.pose
+    const location = stripped.place?.locations?.[0] as { lat?: number, lng?: number } | undefined
+    const lat = pose?.lat ?? location?.lat
+    const lng = pose?.lng ?? location?.lng
+    if (lat === undefined || lng === undefined || pose?.headingDeg === undefined) return undefined
+    return { lat, lng, elevationM: pose.elevationM ?? 0, headingDeg: pose.headingDeg, utcOffsetHours: stripped.utcOffsetHours }
+  }
+
+  /**
+   * Where the Sun was for a reading at `time`: its bearing from the way the instrument looked at the start, and its height. Undefined for
+   * a time with no hour, or a reading that does not say where it stood or looked.
+   */
+  static sunOf(time: SightingTime, reading: SightingRecordingJson): { bearing: number, altitudeDeg: number } | undefined {
+    const stand = ReadingCheck.standOf(reading)
+    return stand ? ReadingCheck.sunFrom(time, stand) : undefined
+  }
+
+  private static sunFrom(time: SightingTime, stand: Stand): { bearing: number, altitudeDeg: number } | undefined {
+    if (time.hour === undefined) return undefined
+    const date = sightingTimeToDate(time, stand.lng, stand.utcOffsetHours)
+    if (!date) return undefined
+    const sun = computeBodyPosition("Sun", date, stand)
+    return { bearing: ((sun.azimuthDeg - stand.headingDeg) % 360 + 360) % 360, altitudeDeg: sun.altitudeDeg }
+  }
+
+  /** Whether a Sun there lights the scene as `lighting` says the picture shows it. */
+  static lights(lighting: SightingLighting, sun: { bearing: number, altitudeDeg: number }): boolean {
+    const inBearing = lighting.sunFromViewDeg ? ReadingCheck.onArc(sun.bearing, lighting.sunFromViewDeg.fromDeg, lighting.sunFromViewDeg.toDeg) : true
+    const inAltitude = !lighting.sunAltitudeDeg || (sun.altitudeDeg >= lighting.sunAltitudeDeg.minDeg && sun.altitudeDeg <= lighting.sunAltitudeDeg.maxDeg)
+    return inBearing && inAltitude
+  }
+
+  /**
+   * The time of the same day nearest `time`, to the minute, at which the reading's Sun lights the scene as the picture shows it: what an
+   * hour of a reading is brought back to, its date, place and heading as the reading has them, so that moving one of those moves the
+   * hours it allows. `time` itself when it does; undefined when no minute of that day does, or nothing says where the Sun was.
+   */
+  static nearestLit(lighting: SightingLighting, time: SightingTime, reading: SightingRecordingJson): SightingTime | undefined {
+    const at = (minutes: number): SightingTime => ({ ...time, hour: Math.floor(minutes / 60), minute: minutes % 60, second: undefined, raw: undefined })
+    const stand = ReadingCheck.standOf(reading)
+    if (!stand) return undefined
+    const lit = (minutes: number) => {
+      const sun = ReadingCheck.sunFrom(at(minutes), stand)
+      return sun !== undefined && ReadingCheck.lights(lighting, sun)
+    }
+    if (time.hour === undefined) return undefined
+    const asked = time.hour * 60 + (time.minute ?? 0)
+    if (lit(asked)) return time
+    // Every five minutes, then the minute of the edge nearest the one asked.
+    const STEP = 5
+    let best: number | undefined
+    for (let minutes = 0; minutes < 24 * 60; minutes += STEP) {
+      if (lit(minutes) && (best === undefined || Math.abs(minutes - asked) < Math.abs(best - asked))) best = minutes
+    }
+    if (best === undefined) return undefined
+    const towards = asked < best ? -1 : 1
+    while (best + towards >= 0 && best + towards < 24 * 60 && lit(best + towards) && Math.abs(best + towards - asked) < Math.abs(best - asked)) best += towards
+    return at(best)
   }
 
   /** Whether `angle` is on the arc that runs clockwise from `from` to `to`, all in degrees. */

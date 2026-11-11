@@ -67,6 +67,7 @@ export const caseEditorMessages_it: CaseEditorMessages = {
   add: "Aggiungi",
   addHint: "Aggiungi un evento",
   interpretationOf: "Interpretazione di",
+  interpretationAlsoOf: "Legge anche",
   colon: ": ",
   quoted: "«{text}»",
   interpretationOfNone: "—",

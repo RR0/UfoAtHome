@@ -826,9 +826,10 @@ export class SightingEditorElement extends HTMLElement {
    * back to the nearer bound before it is applied. What the bounds alone cannot say (the Sun the date, the place and the heading put
    * together) is for markBeyondKnown. None given, a field is free again.
    */
-  setReadingBounds(bounds: { time?: string, lat?: [number, number], lng?: [number, number] }): void {
+  setReadingBounds(bounds: { time?: string, hour?: (time: SightingTime) => SightingTime | undefined, lat?: [number, number], lng?: [number, number] }): void {
     const date = this.shadow.querySelector<DateInputElement>('rr0-date-input[name="obs-time"]')
-    date?.setBounds(bounds.time ? TimeSpan.boundsOf(bounds.time) : undefined)
+    const span = bounds.time ? TimeSpan.boundsOf(bounds.time) : undefined
+    date?.setBounds(span ? { ...span, ...(bounds.hour ? { adjust: bounds.hour } : {}) } : undefined)
     for (const [id, range] of [["lat", bounds.lat], ["lng", bounds.lng]] as const) {
       const field = this.shadow.getElementById(id) as HTMLInputElement | null
       if (!field) continue

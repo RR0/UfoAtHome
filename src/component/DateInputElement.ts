@@ -1,4 +1,5 @@
 import type { SightingTime } from "../engine/model/Sighting.js"
+import type { DateBounds } from "./EdtfDateField.js"
 import { HostLocale } from "../i18n/locale.js"
 import { EdtfDateField } from "./EdtfDateField.js"
 import { HelpPopover } from "./HelpPopover.js"
@@ -151,7 +152,7 @@ export class DateInputElement extends HTMLElement {
   }
 
   /** How far the date may go (see EdtfDateField.setBounds): none, any date. */
-  setBounds(bounds: { min: SightingTime, max: SightingTime } | undefined): void {
+  setBounds(bounds: DateBounds | undefined): void {
     this.field.setBounds(bounds)
   }
 

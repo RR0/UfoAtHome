@@ -83,6 +83,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   add: string
   addHint: string
   interpretationOf: string
+  /** A reading listed under the observation it reads, of the others it reads too. */
+  interpretationAlsoOf: string
   /** A colon as the language writes one between a heading and what follows it (French puts a no-break space before it). */
   colon: string
   /** A quotation as the language marks one, `{text}` standing for it. */

@@ -2,6 +2,14 @@ import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import { TimeSpan } from "../engine/model/TimeSpan.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 
+/** How far a date may go (see EdtfDateField.setBounds). */
+export interface DateBounds {
+  min: SightingTime
+  max: SightingTime
+  /** What else brings a date within, once it is within `min` and `max`: undefined leaves it as it is. */
+  adjust?: (time: SightingTime) => SightingTime | undefined
+}
+
 /** What a date field says in words. */
 /** The words a time is said with: how a doubt reads, and the seasons. */
 export type TimeWords = Pick<EdtfDateFieldMessages, "timeQualifierApproximate" | "timeQualifierUncertain" | "timeQualifierBoth" | "timeSeasonSpring" | "timeSeasonSummer" | "timeSeasonAutumn" | "timeSeasonWinter">
@@ -90,23 +98,24 @@ export class EdtfDateField {
   /**
    * How far the date may go, when something else decides it (a reading may move an account's date only within what is known of it, see
    * ReadingCheck): the first and the last instant, as wall-clock times. The picker offers no day beyond them, and a date entered beyond
-   * is brought back to the nearer of the two. None: any date.
+   * is brought back to the nearer of the two. `adjust`, when given, then brings it to what else allows (the hours of that day a reading's
+   * Sun lights the scene in), or leaves it when nothing does. None: any date.
    */
-  setBounds(bounds: { min: SightingTime, max: SightingTime } | undefined): void {
+  setBounds(bounds: DateBounds | undefined): void {
     this.bounds = bounds
     const { picker } = this.parts
     picker.min = bounds ? EdtfDateField.pickerValueOf(bounds.min) : ""
     picker.max = bounds ? EdtfDateField.pickerValueOf(bounds.max) : ""
   }
 
-  private bounds?: { min: SightingTime, max: SightingTime }
+  private bounds?: DateBounds
 
   /** `time` brought within the bounds: a time wholly before them is their first instant, one wholly after their last. */
   private bounded(time: SightingTime): SightingTime {
     if (!this.bounds) return time
-    if (TimeSpan.latestOf(time) < TimeSpan.earliestOf(this.bounds.min)) return this.bounds.min
-    if (TimeSpan.earliestOf(time) > TimeSpan.earliestOf(this.bounds.max)) return this.bounds.max
-    return time
+    const dated = TimeSpan.latestOf(time) < TimeSpan.earliestOf(this.bounds.min) ? this.bounds.min
+      : TimeSpan.earliestOf(time) > TimeSpan.earliestOf(this.bounds.max) ? this.bounds.max : time
+    return this.bounds.adjust?.(dated) ?? dated
   }
 
   /** Whether the date is said as a precise instant, in the picker, rather than in EDTF. */

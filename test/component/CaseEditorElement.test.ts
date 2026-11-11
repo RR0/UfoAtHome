@@ -903,6 +903,9 @@ describe("CaseEditorElement's events", () => {
     const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")]
     // A reading nobody dated takes the time of the account it reads: not before it.
     expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Observation of An account", "Undated", "A model"])
+    // Under the account it reads, as a part of it, saying no more whose it is.
+    expect(cards.map(card => card.classList.contains("event-child"))).toEqual([false, true, true])
+    expect(cards[1].querySelector(".event-links")!.textContent).not.toContain("Interpretation of")
     const undated = cards[1]
     // It fails only against a supposition, and could not be tested on one point: not settled, orange.
     expect(undated.dataset.verdict).toBe("unsettled")
