@@ -125,8 +125,9 @@ const recording = {
   }] },
   // What the film shows of the light: the side of the fuselage and of the fin towards the camera is lit. The aircraft flies at 105° from
   // the way the camera looks (fitted on the film), so the Sun was on the camera's side of its vertical plane: 105° to 285° from the
-  // camera's heading, and above the horizon. It binds a reading's date, hour, place and heading together, not each on its own.
-  lighting: { value: { sunFromViewDeg: { fromDeg: 105, toDeg: 285 }, sunAltitudeDeg: { minDeg: 0, maxDeg: 90 } }, basis: 'derived', rationale: "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading" },
+  // camera's heading. And in full daylight: the aircraft's white is neutral on the film (244, no warm cast, measured) and the ground is in
+  // full light, where a Sun under some 15° reddens and dims it. It binds a reading's date, hour, place and heading together, not each on its own.
+  lighting: { value: { sunFromViewDeg: { fromDeg: 105, toDeg: 285 }, sunAltitudeDeg: { minDeg: 15, maxDeg: 90 } }, basis: 'derived', rationale: "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading; the aircraft's white neutral (244) and the ground in full light, which a Sun under some 15° would redden and dim" },
   description: {
     fr: "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",
     en: "British Airways' Concorde filmed from a Learjet through the Astrovision periscope camera, and the orb that goes with it. Measured on the film: the camera's tilt, the ground sliding by, the copy's contrast, softness and dust. Fitted on the film: the Concorde's attitude. Supposed: date, hour, place, height, lens, film stock, hence where the Sun is. Alan Tanner, of the film's crew, sees in it a reflection of the Sun in the periscope.",

@@ -163,31 +163,35 @@ const TEMPLATE = `
   .event-card, .kind-pill { --kind: var(--glow-solid); --kind-bg: var(--warn-bg); }
   :is(.event-card, .kind-pill)[data-kind="interview"] { --kind: var(--sky); --kind-bg: light-dark(rgba(18, 96, 143, .12), rgba(127, 212, 255, .14)); }
   :is(.event-card, .kind-pill)[data-kind="reading"] { --kind: var(--ink-faint); --kind-bg: var(--neutral-bg); }
-  /* The line runs through the centre of every dot: each card draws its own stretch of it, from the card above to the card below,
-     the first from its dot down and the last down to its dot. Both are placed from the card's outer edge, past its 1px border.
-     The dot stands level with the kind's pill: the card's middle while the card is one row, the pill's line once it wraps. */
+  /* The line runs through the centre of every dot: each observation, interview or reading on its own draws its own stretch of it, from
+     the one above to the one below, the first from its dot down and the last down to its dot, and none when it is the only one. Both are
+     placed from the card's outer edge, past its 1px border. The dot stands level with the kind's pill: the card's middle while the card
+     is one row, the pill's line once it wraps. */
   .event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
-  .event-card {
-    --dot-y: 50%;
-    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 52px;
-    border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground);
-  }
-  .event-card::before, .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); }
-  .event-card::before {
+  .event-entry { display: grid; gap: var(--gap); }
+  .event-card { --dot-y: 50%; position: relative; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground); }
+  .event-entry > .event-card::before, .event-entry > .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); }
+  .event-entry > .event-card::before {
     z-index: 1; top: calc(var(--dot-y) - 1px); box-sizing: border-box; width: 13px; height: 13px; transform: translate(-50%, -50%);
     border: 2px solid var(--kind); border-radius: 50%; background: var(--ground-raised);
   }
-  .event-card::after { top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--line-strong); }
-  .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
-  .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
-  .event-card:only-child::after { display: none; }
-  /* A reading, under the observation it reads: set in, joined to it by an elbow rather than a dot of the rail of time of its own. */
-  .event-card.event-child { margin-left: 28px; }
-  .event-card.event-child::before { top: calc(-1px - var(--gap)); left: -17px; width: 14px; height: calc(var(--dot-y) + var(--gap)); transform: none;
-    border: 0; border-left: 1.5px solid var(--line-strong); border-bottom: 1.5px solid var(--line-strong); border-radius: 0 0 0 8px; background: none; }
-  .event-card.event-child::after { left: calc(var(--rail) - 24px - 1px - 28px); }
+  .event-entry > .event-card::after { top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--line-strong); }
+  .event-entry:first-child > .event-card::after { top: calc(var(--dot-y) - 1px); }
+  .event-entry:last-child > .event-card::after { bottom: calc(100% - var(--dot-y) - 1px); }
+  .event-entry:only-child > .event-card::after { display: none; }
+  /* The readings of an observation, under it, set in: each joined to it by an elbow off one stem that runs down from it to the last, and
+     the rail of time running on past them to the next event when one follows. */
+  .event-children { --stem: -14px; --elbow-y: 23px; position: relative; display: grid; gap: var(--gap); margin: 0 0 0 28px; padding: 0; list-style: none; }
+  .event-entry:not(:last-child) > .event-children::after {
+    content: ""; position: absolute; left: calc(var(--rail) - 24px - 28px); top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2);
+    width: 1px; transform: translateX(-50%); background: var(--line-strong);
+  }
+  .event-child::before, .event-child:not(:last-child)::after { content: ""; position: absolute; left: var(--stem); border-left: 1.5px solid var(--line-strong); }
+  .event-child::before { top: calc(-1px - var(--gap)); width: 12px; height: calc(var(--elbow-y) + var(--gap)); border-bottom: 1.5px solid var(--line-strong); border-radius: 0 0 0 8px; }
+  .event-child:not(:last-child)::after { top: calc(var(--elbow-y) - 1px); bottom: calc(-1px - var(--gap)); }
+  .event-child .event-body { align-items: start; }
   .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links" "findings findings findings";
-    align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 8px 12px 14px; }
+    align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 14px 12px 14px; }
   .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
   .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   /* The title opens the event, and the whole card with it: its hit area is stretched over the card, the removal standing above it. */
@@ -198,7 +202,8 @@ const TEMPLATE = `
   .event-card:has(.event-open:hover) { background: var(--ground-sunken); }
   .event-card:has(.event-open:focus-visible) { outline: 2px solid var(--sky); outline-offset: 2px; }
   .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
-  .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
+  /* Clear of the removal, in the corner above it. */
+  .event-links { grid-area: links; margin-right: 24px; font-size: 13px; color: var(--ink-dim); }
   .event-links:empty { display: none; }
   /* What a reading's findings come to, as the editor's groups say what their fields do: red when it contradicts what is established, orange
      when it is not settled, green when it holds (see ReadingVerdict). */
@@ -217,8 +222,9 @@ const TEMPLATE = `
   .findings li[data-outcome="holds"] .finding-mark { color: var(--ok); }
   .findings li[data-outcome="fails"] .finding-mark { color: var(--error); }
   .findings li[data-outcome="untested"] .finding-mark { color: var(--ink-faint); }
-  .event-delete { position: relative; z-index: 1; display: grid; place-items: center; width: auto; height: auto; min-width: 0; min-height: 0; padding: 0;
-    border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; color: var(--ink-dim); }
+  /* The removal, in the card's top right corner rather than a column of its own: what the card says has its whole width below it. */
+  .event-delete { position: absolute; top: 6px; right: 6px; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; min-width: 0; min-height: 0;
+    padding: 0; border: 0; border-radius: 6px; background: none; color: var(--ink-dim); }
   .event-delete:hover:not(:disabled) { color: var(--error); }
   /* The event open: the way back to the case, and the events before and after. */
   .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
@@ -232,7 +238,7 @@ const TEMPLATE = `
     /* Narrow, as the handoff's mobile view: the pill above the title, "Open" beside the title, or under what the event is linked to
        when it says something; the removal keeps its column. */
     .event-card { --dot-y: 24px; }
-    .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "main" "links"; gap: 6px 10px; }
+    .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "main" "links" "findings"; gap: 6px 10px; }
     .editor-head { flex-wrap: wrap; }
     .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
   }
@@ -1219,10 +1225,10 @@ export class CaseEditorElement extends HTMLElement {
         for (const reading of events) if (nested(reading.item) && accountOf(reading.item) === entry.item.track) ordered.push({ ...reading, child: true })
       }
     }
-    list.replaceChildren(...ordered.map(({ item, index, child }) => {
+    const cards = ordered.map(({ item, index, child }) => {
       const kind = this.kindOf(item)
       const event = (item.track?.event ?? item.interview)!
-      const card = document.createElement("li")
+      const card = document.createElement(child ? "li" : "div")
       card.className = child ? "event-card event-child" : "event-card"
       card.dataset.kind = kind
       const pill = document.createElement("span")
@@ -1279,8 +1285,28 @@ export class CaseEditorElement extends HTMLElement {
       body.append(pill, main, links)
       if (findings && findings.length > 0) body.append(this.findingsList(findings))
       card.append(body, remove)
-      return card
-    }))
+      return { card, child }
+    })
+    // Each observation, interview or reading on its own is an entry of the list, its readings listed within it.
+    const entries: HTMLLIElement[] = []
+    for (const { card, child } of cards) {
+      if (!child) {
+        const entry = document.createElement("li")
+        entry.className = "event-entry"
+        entry.append(card)
+        entries.push(entry)
+        continue
+      }
+      const entry = entries[entries.length - 1]!
+      let children = entry.querySelector<HTMLOListElement>(":scope > .event-children")
+      if (!children) {
+        children = document.createElement("ol")
+        children.className = "event-children"
+        entry.append(children)
+      }
+      children.append(card)
+    }
+    list.replaceChildren(...entries)
   }
 
   /**

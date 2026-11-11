@@ -77,12 +77,12 @@
     "toDeg": 285
    },
    "sunAltitudeDeg": {
-    "minDeg": 0,
+    "minDeg": 15,
     "maxDeg": 90
    }
   },
   "basis": "derived",
-  "rationale": "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading"
+  "rationale": "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading; the aircraft's white neutral (244) and the ground in full light, which a Sun under some 15° would redden and dim"
  },
  "description": {
   "fr": "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",
