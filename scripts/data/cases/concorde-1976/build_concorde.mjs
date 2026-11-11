@@ -164,6 +164,8 @@ for (const reading of READINGS) {
     tags: [...account.tags, 'interpretation'],
     ...(reading.lens ? { lens: reading.lens } : {}),
     timeline: { keyframes: [], order: [], groups: [] },
+    // The film is there to be compared with, not laid over what the reading claims: drawn at full opacity it hid it. Its slider brings it back.
+    references: account.references.map(reference => ({ ...reference, opacity: 0 })),
     interpretation: { title: reading.title, bodies, findings: reading.findings }
   }, null, 1))
   caseEvents.push({ type: 'event', eventType: 'sighting', id: reading.id, interpretationOf: 'film', ...(reading.time ? { time: reading.time } : {}), by: reading.by, title: reading.title, url: file })
