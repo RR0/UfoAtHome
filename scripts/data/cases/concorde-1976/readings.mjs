@@ -1,0 +1,249 @@
+// The readings of the Concorde film: every explanation published for the orb, and the ones this case raised, each with what it was set
+// against and what that gave. A reading that fails is kept: it shows the explanation was examined, and why it does not hold.
+// The measures cited are on the 640 × 480 file (s4b.json and the slow motion, see the case's notes); "established" is what the film shows,
+// "supposed" what the account assumed for want of a record (the date, the hour, the place, the height, the heading, hence the Sun).
+
+const held = (text, against = 'established') => ({ text, outcome: 'holds', against })
+const fails = (text, against = 'established') => ({ text, outcome: 'fails', against })
+const untested = text => ({ text, outcome: 'untested' })
+
+const SUN_SUPPOSED = {
+  fr: "Avec le Soleil supposé (38° de haut, 130° à gauche du cap de la caméra), aucun reflet ne tombe dans le cadre : l'heure, le cap et la date sont supposés.",
+  en: "With the supposed Sun (38° high, 130° left of the camera's heading), no ghost falls in the frame: the hour, the heading and the date are supposed.",
+  es: "Con el Sol supuesto (38° de altura, 130° a la izquierda del rumbo de la cámara), ningún reflejo cae en el encuadre: la hora, el rumbo y la fecha son supuestos.",
+  it: "Con il Sole supposto (38° di altezza, 130° a sinistra della rotta della camera), nessun riflesso cade nell'inquadratura: l'ora, la rotta e la data sono supposte."
+}
+const TIED_TO_CAMERA = {
+  fr: "Liée à la caméra : l'orbe repart vers le haut à un dixième de seconde de la caméra.",
+  en: "Tied to the camera: the orb turns back up within a tenth of a second of the camera.",
+  es: "Ligado a la cámara: el orbe vuelve a subir a una décima de segundo de la cámara.",
+  it: "Legata alla camera: la sfera risale a un decimo di secondo dalla camera."
+}
+const ADDS_LIGHT = {
+  fr: "Elle ajoute de la lumière, à peu près autant sur tout fond (+99 sur un fond sous 100, +84 de 100 à 130), et passe devant la bande sombre sous l'aile.",
+  en: "It adds light, about as much over any ground (+99 over a ground under 100, +84 from 100 to 130), and passes in front of the dark band under the wing.",
+  es: "Añade luz, casi la misma sobre cualquier fondo (+99 sobre un fondo bajo 100, +84 de 100 a 130), y pasa por delante de la banda oscura bajo el ala.",
+  it: "Aggiunge luce, più o meno la stessa su ogni sfondo (+99 su uno sfondo sotto 100, +84 da 100 a 130), e passa davanti alla banda scura sotto l'ala."
+}
+const BLURRED = {
+  fr: "Floue, comme ce qui est tout près de l'objectif.",
+  en: "Blurred, as what is right by the lens is.",
+  es: "Borroso, como lo que está junto al objetivo.",
+  it: "Sfocata, come ciò che è vicinissimo all'obiettivo."
+}
+
+export const READINGS = [
+  {
+    id: 'lens-ghost',
+    by: [{ title: 'UFO@home' }],
+    time: '2026-11-08',
+    title: {
+      fr: "Reflet du Soleil hors cadre dans un objectif simple",
+      en: "A ghost of the Sun, out of the frame, in a plain lens",
+      es: "Un reflejo del Sol, fuera del encuadre, en un objetivo simple",
+      it: "Un riflesso del Sole, fuori inquadratura, in un obiettivo semplice"
+    },
+    findings: [
+      held(TIED_TO_CAMERA), held(ADDS_LIGHT),
+      fails({
+        fr: "Un reflet d'objectif se déplace d'un facteur fixe fois le mouvement de sa source ; l'orbe suit la caméra d'un facteur qui va de 1,1 à 8,3 selon le tronçon.",
+        en: "A lens ghost moves by a fixed factor times its source's motion; the orb follows the camera by a factor running from 1.1 to 8.3 from one stretch to the next.",
+        es: "Un reflejo de objetivo se mueve un factor fijo por el movimiento de su fuente; el orbe sigue a la cámara con un factor que va de 1,1 a 8,3 según el tramo.",
+        it: "Un riflesso d'obiettivo si sposta di un fattore fisso per il moto della sua sorgente; la sfera segue la camera con un fattore che va da 1,1 a 8,3 secondo il tratto."
+      }),
+      fails({
+        fr: "Sa descente demanderait un facteur d'environ +4,4 ; ceux d'un objectif de caméra vont de −1,4 à +0,65.",
+        en: "Its descent would need a factor of about +4.4; a camera lens's run from −1.4 to +0.65.",
+        es: "Su descenso requeriría un factor de unos +4,4; los de un objetivo de cámara van de −1,4 a +0,65.",
+        it: "La sua discesa richiederebbe un fattore di circa +4,4; quelli di un obiettivo da camera vanno da −1,4 a +0,65."
+      }),
+      fails(SUN_SUPPOSED, 'supposed')
+    ]
+  },
+  {
+    id: 'periscope',
+    by: [{ firstNames: ['Alan'], lastName: 'Tanner' }],
+    title: {
+      fr: "Reflet interne dans le périscope Astrovision : le Soleil, hors champ à gauche, frappe l'élément frontal",
+      en: "An internal reflection in the Astrovision periscope: the Sun, out of the field to the left, strikes the front element",
+      es: "Un reflejo interno en el periscopio Astrovision: el Sol, fuera de campo a la izquierda, incide en el elemento frontal",
+      it: "Un riflesso interno nel periscopio Astrovision: il Sole, fuori campo a sinistra, colpisce l'elemento frontale"
+    },
+    findings: [
+      held(TIED_TO_CAMERA), held(ADDS_LIGHT),
+      untested({
+        fr: "Les prismes et la stabilisation d'un périscope n'obéissent pas au facteur fixe d'un objectif simple ; leur géométrie n'est pas connue, et Patrick Gross attribue à la stabilisation le trajet propre du reflet.",
+        en: "A periscope's prisms and stabiliser need not keep a plain lens's fixed factor; their geometry is not known, and Patrick Gross puts the ghost's own path down to the stabiliser.",
+        es: "Los prismas y la estabilización de un periscopio no tienen por qué respetar el factor fijo de un objetivo simple; su geometría no se conoce, y Patrick Gross atribuye a la estabilización el recorrido propio del reflejo.",
+        it: "I prismi e lo stabilizzatore di un periscopio non rispettano per forza il fattore fisso di un obiettivo semplice; la loro geometria non è nota, e Patrick Gross attribuisce allo stabilizzatore il percorso proprio del riflesso."
+      }),
+      fails({
+        fr: "Le Soleil supposé est à 130° à gauche du cap, hors de portée de tout élément frontal ; l'heure, le cap et la date sont supposés, et l'éclairage du fuselage sur le film les a fixés ainsi.",
+        en: "The supposed Sun is 130° left of the heading, beyond any front element's reach; the hour, the heading and the date are supposed, and the fuselage's lighting on the film is what set them so.",
+        es: "El Sol supuesto está a 130° a la izquierda del rumbo, fuera del alcance de cualquier elemento frontal; la hora, el rumbo y la fecha son supuestos, y la iluminación del fuselaje en la película los fijó así.",
+        it: "Il Sole supposto è a 130° a sinistra della rotta, fuori dalla portata di qualsiasi elemento frontale; l'ora, la rotta e la data sono supposte, e l'illuminazione della fusoliera sul film le ha fissate così."
+      }, 'supposed')
+    ]
+  },
+  {
+    id: 'window',
+    by: [{ people: 'BeauJerome' }],
+    time: '2026-11-08',
+    lens: { glass: 'window' },
+    title: {
+      fr: "Reflet sur une vitre : celle du Learjet, ou la fenêtre extérieure du périscope",
+      en: "A reflection on a pane: the Learjet's, or the periscope's outer window",
+      es: "Un reflejo en un cristal: el del Learjet, o la ventana exterior del periscopio",
+      it: "Un riflesso su un vetro: quello del Learjet, o la finestra esterna del periscopio"
+    },
+    findings: [
+      held({
+        fr: "Un reflet sur une vitre suit la rotation de la caméra par rapport au porteur, pas par rapport au sol : un trajet sans lien avec la scène est attendu, comme celui de l'orbe.",
+        en: "A reflection on a pane follows the camera's turn against the carrier, not against the ground: a path unrelated to the scene is to be expected, as the orb's is.",
+        es: "Un reflejo en un cristal sigue el giro de la cámara respecto al portador, no respecto al suelo: cabe esperar un recorrido sin relación con la escena, como el del orbe.",
+        it: "Un riflesso su un vetro segue la rotazione della camera rispetto al vettore, non rispetto al suolo: è atteso un percorso senza legame con la scena, come quello della sfera."
+      }),
+      held(ADDS_LIGHT),
+      untested({
+        fr: "Le tester demanderait l'attitude du Learjet, que le film ne donne pas ; ces mesures ne le distinguent pas d'un reflet dans le périscope.",
+        en: "Testing it would take the Learjet's attitude, which the film does not give; these measures cannot tell it from a reflection in the periscope.",
+        es: "Probarlo requeriría la actitud del Learjet, que la película no da; estas medidas no lo distinguen de un reflejo en el periscopio.",
+        it: "Verificarlo richiederebbe l'assetto del Learjet, che il film non dà; queste misure non lo distinguono da un riflesso nel periscopio."
+      })
+    ]
+  },
+  {
+    id: 'glint',
+    by: [{ title: 'Peter_Morris (Straight Dope)' }],
+    time: '2008-08',
+    title: {
+      fr: "Reflet d'un éclat du Soleil sur le Concorde, sa carrosserie blanche ou son pare-brise",
+      en: "A ghost of a glint of the Sun on Concorde, its white body or its windscreen",
+      es: "Un reflejo de un destello del Sol en el Concorde, su fuselaje blanco o su parabrisas",
+      it: "Un riflesso di un bagliore del Sole sul Concorde, la sua fusoliera bianca o il parabrezza"
+    },
+    findings: [
+      fails({
+        fr: "Un reflet suit sa source d'un même facteur dans les deux directions ; sur 83 images, l'orbe suit l'avion de −0,39 en largeur et de +1,59 en hauteur.",
+        en: "A ghost follows its source by one factor both ways; over 83 frames the orb follows the aircraft by −0.39 across and +1.59 up.",
+        es: "Un reflejo sigue a su fuente con un mismo factor en ambas direcciones; en 83 imágenes, el orbe sigue al avión con −0,39 a lo ancho y +1,59 a lo alto.",
+        it: "Un riflesso segue la sua sorgente con uno stesso fattore nelle due direzioni; su 83 fotogrammi la sfera segue l'aereo di −0,39 in larghezza e +1,59 in altezza."
+      }),
+      fails({
+        fr: "L'orbe repart vers le haut vers 6,15 s du fichier, quand l'avion descend encore dans l'image jusqu'à 6,4 s.",
+        en: "The orb turns back up at about 6.15 s of the file, while the aircraft goes on down the picture until 6.4 s.",
+        es: "El orbe vuelve a subir hacia 6,15 s del archivo, cuando el avión sigue bajando en la imagen hasta 6,4 s.",
+        it: "La sfera risale verso 6,15 s del file, mentre l'aereo continua a scendere nell'immagine fino a 6,4 s."
+      }),
+      fails({
+        fr: "Aucun éclat sur le pare-brise dans les images examinées : le poste de pilotage reste sombre, et le reste de l'avion est saturé en blanc.",
+        en: "No glint on the windscreen in the frames examined: the flight deck stays dark, and the rest of the aircraft is saturated white.",
+        es: "Ningún destello en el parabrisas en las imágenes examinadas: la cabina sigue oscura, y el resto del avión está saturado de blanco.",
+        it: "Nessun bagliore sul parabrezza nei fotogrammi esaminati: la cabina resta scura, e il resto dell'aereo è saturo di bianco."
+      })
+    ]
+  },
+  {
+    id: 'drop',
+    by: [{ title: 'GuanoLad (Straight Dope)' }],
+    time: '2008-08',
+    lens: { glass: 'window', drops: 0.05 },
+    title: {
+      fr: "Goutte d'eau sur la vitre, poussée par le vent ou les vibrations",
+      en: "A drop of water on the pane, driven by the wind or the vibration",
+      es: "Una gota de agua en el cristal, empujada por el viento o las vibraciones",
+      it: "Una goccia d'acqua sul vetro, spinta dal vento o dalle vibrazioni"
+    },
+    findings: [
+      held(BLURRED),
+      fails({
+        fr: "Le vent relatif pousse une goutte dans un sens ; l'orbe descend puis remonte sur la même colonne, à 0,6 px près sur 377 px.",
+        en: "The airflow drives a drop one way; the orb goes down then back up the same column, to 0.6 px over 377 px.",
+        es: "El viento relativo empuja una gota en un sentido; el orbe baja y vuelve a subir por la misma columna, con 0,6 px de diferencia en 377 px.",
+        it: "Il vento relativo spinge una goccia in un senso; la sfera scende e risale sulla stessa colonna, a 0,6 px su 377 px."
+      }),
+      untested({
+        fr: "Une goutte qui remonterait sous l'effet des vibrations reste à décrire : personne n'a dit comment.",
+        en: "A drop the vibration would carry back up is still to be described: nobody has said how.",
+        es: "Una gota que las vibraciones harían subir queda por describir: nadie ha dicho cómo.",
+        it: "Una goccia che le vibrazioni farebbero risalire resta da descrivere: nessuno ha detto come."
+      })
+    ]
+  },
+  {
+    id: 'dust',
+    by: [{ title: 'Manduck (Straight Dope)' }, { title: 'Telemark (Straight Dope)' }],
+    time: '2008-08',
+    title: {
+      fr: "Poussière ou insecte près de l'objectif",
+      en: "Dust or an insect close to the lens",
+      es: "Polvo o un insecto cerca del objetivo",
+      it: "Polvere o un insetto vicino all'obiettivo"
+    },
+    findings: [
+      held(BLURRED), held(TIED_TO_CAMERA),
+      untested({
+        fr: "Elle ajoute de la lumière sur fond sombre (+99) : une particule ne le peut qu'éclairée par le Soleil, à l'ombre elle assombrirait ; où était le Soleil n'est pas connu.",
+        en: "It adds light over a dark ground (+99): a particle can only do so lit by the Sun, in shadow it would darken; where the Sun was is not known.",
+        es: "Añade luz sobre fondo oscuro (+99): una partícula solo puede hacerlo iluminada por el Sol, a la sombra oscurecería; no se sabe dónde estaba el Sol.",
+        it: "Aggiunge luce su uno sfondo scuro (+99): una particella può farlo solo illuminata dal Sole, all'ombra scurirebbe; dove fosse il Sole non è noto."
+      })
+    ]
+  },
+  {
+    id: 'film-defect',
+    by: [{ title: 'beowulff (Straight Dope)' }],
+    time: '2008-08',
+    title: {
+      fr: "Défaut de la pellicule : poussière dans le couloir, rayure",
+      en: "A flaw of the film: dust in the gate, a scratch",
+      es: "Un defecto de la película: polvo en la ventanilla, una raya",
+      it: "Un difetto della pellicola: polvere nel quadruccio, un graffio"
+    },
+    findings: [
+      fails({
+        fr: "Les poussières de cette copie ne durent qu'une image (1,15 par image) ; l'orbe suit un trajet continu pendant environ 80 images.",
+        en: "This copy's dust lasts one frame (1.15 a frame); the orb follows one continuous path for some 80 frames.",
+        es: "El polvo de esta copia dura una imagen (1,15 por imagen); el orbe sigue un recorrido continuo durante unas 80 imágenes.",
+        it: "La polvere di questa copia dura un fotogramma (1,15 per fotogramma); la sfera segue un percorso continuo per circa 80 fotogrammi."
+      }),
+      fails({
+        fr: "Un cheveu ou une poussière du couloir reste fixe dans le cadre ; l'orbe le parcourt sur 377 px.",
+        en: "A hair or a speck in the gate stays put in the frame; the orb travels 377 px across it.",
+        es: "Un pelo o una mota en la ventanilla queda fijo en el encuadre; el orbe lo recorre en 377 px.",
+        it: "Un pelo o un granello nel quadruccio resta fisso nell'inquadratura; la sfera lo percorre per 377 px."
+      })
+    ]
+  },
+  {
+    id: 'object',
+    by: [{ title: 'UFO video channels' }],
+    title: {
+      fr: "Un objet réel près du Concorde, une « sonde »",
+      en: "A real object near Concorde, a \"probe\"",
+      es: "Un objeto real cerca del Concorde, una «sonda»",
+      it: "Un oggetto reale vicino al Concorde, una «sonda»"
+    },
+    distanceM: 100,
+    findings: [
+      held({
+        fr: "Elle passe devant la bande sombre sous l'aile : devant le Concorde, pas derrière comme certains le voient.",
+        en: "It passes in front of the dark band under the wing: in front of Concorde, not behind it as some see it.",
+        es: "Pasa por delante de la banda oscura bajo el ala: delante del Concorde, no detrás como algunos lo ven.",
+        it: "Passa davanti alla banda scura sotto l'ala: davanti al Concorde, non dietro come alcuni la vedono."
+      }),
+      untested({
+        fr: "Sa distance ne se mesure pas sur le film : placée ici à 100 m (supposé), elle mesurerait 0,6 m.",
+        en: "Its distance cannot be measured on the film: placed here at 100 m (supposed), it would be 0.6 m across.",
+        es: "Su distancia no se mide en la película: situado aquí a 100 m (supuesto), mediría 0,6 m.",
+        it: "La sua distanza non si misura sul film: posta qui a 100 m (supposto), misurerebbe 0,6 m."
+      }),
+      untested({
+        fr: "Ses demi-tours tombent à un dixième de seconde de ceux de la caméra : une coïncidence qu'un objet indépendant laisse à expliquer.",
+        en: "Its turns fall within a tenth of a second of the camera's: a coincidence an independent object leaves to be explained.",
+        es: "Sus cambios de sentido caen a una décima de segundo de los de la cámara: una coincidencia que un objeto independiente deja por explicar.",
+        it: "Le sue inversioni cadono a un decimo di secondo da quelle della camera: una coincidenza che un oggetto indipendente lascia da spiegare."
+      })
+    ]
+  }
+]

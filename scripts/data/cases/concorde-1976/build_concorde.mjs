@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as Astronomy from 'astronomy-engine'
 import { Euler, Quaternion, Vector3 } from 'three'
+import { READINGS } from './readings.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const frames = JSON.parse(readFileSync(join(here, 's4b.json')))
@@ -138,4 +139,36 @@ const OUT = process.env.OUT ?? join(here, '..', '..', '..', '..', 'public', 'dem
 // What was added to the recording by hand after it was built, in the editor (its share picture, its pinned snapshots), is kept.
 try { const before = JSON.parse(readFileSync(OUT)); for (const key of ['image', 'snapshots']) if (before[key] !== undefined) recording[key] = before[key] } catch { /* no recording yet */ }
 writeFileSync(OUT, JSON.stringify(recording, null, 1))
+
+// The readings, each a recording of its own (the account's place, time, pose, film and decor; no phenomenon of its own, since what it
+// claims is in its `interpretation`), and the case that lists them beside the film (see readings.mjs for what each says and found).
+const DEMO = dirname(OUT)
+const ORB_SIZE_RAD = orbDeg * D2R
+const caseEvents = [{ type: 'event', eventType: 'sighting', id: 'film', time: '1976', title: 'British Airways Film Unit', url: 'observer-concorde-1976.json' }]
+for (const reading of READINGS) {
+  const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = recording
+  const bodies = reading.distanceM === undefined ? [] : [{
+    id: 'orb', title: ORB_TITLE, explains: ['orb'], model: { id: 'sphere' },
+    track: [
+      ...orbKeys.map((key, index) => ({
+        t: key.t, ...(index === 0 ? { present: true } : {}), ...key.shapes[0].shape.aim.value, distanceM: reading.distanceM,
+        ...(index === 0 ? { sizeM: { widthM: round(reading.distanceM * ORB_SIZE_RAD, 2), lengthM: round(reading.distanceM * ORB_SIZE_RAD, 2), heightM: round(reading.distanceM * ORB_SIZE_RAD, 2) }, appearance: { color: '#f4f6f5', albedo: 0.8 } } : {})
+      })),
+      { t: lastOrbMs + 40, present: false }
+    ]
+  }]
+  const file = `interpretation-concorde-1976-${reading.id}.json`
+  writeFileSync(join(DEMO, file), JSON.stringify({
+    ...account,
+    id: `concorde-1976-${reading.id}`,
+    tags: [...account.tags, 'interpretation'],
+    ...(reading.lens ? { lens: reading.lens } : {}),
+    timeline: { keyframes: [], order: [], groups: [] },
+    interpretation: { title: reading.title, bodies, findings: reading.findings }
+  }, null, 1))
+  caseEvents.push({ type: 'event', eventType: 'sighting', id: reading.id, interpretationOf: 'film', ...(reading.time ? { time: reading.time } : {}), by: reading.by, title: reading.title, url: file })
+}
+const CASE = join(DEMO, 'case-concorde-1976.json')
+const caseJson = JSON.parse(readFileSync(CASE))
+writeFileSync(CASE, JSON.stringify({ ...caseJson, events: caseEvents }, null, 1) + '\n')
 console.log({ distanceM: round(distanceM, 1), speedMS: round(speedMS, 1), groundMPerPx: round(groundMPerPx, 2), durationS: round(durationS), sunAz: round(sun.azimuth, 1), sunAlt: round(sun.altitude, 1), heading: round(heading, 1), pitchRange: [Math.min(...keys.map(k => k.pitchDeg)), Math.max(...keys.map(k => k.pitchDeg))], keys: keys.length })

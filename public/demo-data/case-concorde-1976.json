@@ -16,6 +16,162 @@
    "time": "1976",
    "title": "British Airways Film Unit",
    "url": "observer-concorde-1976.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "lens-ghost",
+   "interpretationOf": "film",
+   "time": "2026-11-08",
+   "by": [
+    {
+     "title": "UFO@home"
+    }
+   ],
+   "title": {
+    "fr": "Reflet du Soleil hors cadre dans un objectif simple",
+    "en": "A ghost of the Sun, out of the frame, in a plain lens",
+    "es": "Un reflejo del Sol, fuera del encuadre, en un objetivo simple",
+    "it": "Un riflesso del Sole, fuori inquadratura, in un obiettivo semplice"
+   },
+   "url": "interpretation-concorde-1976-lens-ghost.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "periscope",
+   "interpretationOf": "film",
+   "by": [
+    {
+     "firstNames": [
+      "Alan"
+     ],
+     "lastName": "Tanner"
+    }
+   ],
+   "title": {
+    "fr": "Reflet interne dans le périscope Astrovision : le Soleil, hors champ à gauche, frappe l'élément frontal",
+    "en": "An internal reflection in the Astrovision periscope: the Sun, out of the field to the left, strikes the front element",
+    "es": "Un reflejo interno en el periscopio Astrovision: el Sol, fuera de campo a la izquierda, incide en el elemento frontal",
+    "it": "Un riflesso interno nel periscopio Astrovision: il Sole, fuori campo a sinistra, colpisce l'elemento frontale"
+   },
+   "url": "interpretation-concorde-1976-periscope.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "window",
+   "interpretationOf": "film",
+   "time": "2026-11-08",
+   "by": [
+    {
+     "people": "BeauJerome"
+    }
+   ],
+   "title": {
+    "fr": "Reflet sur une vitre : celle du Learjet, ou la fenêtre extérieure du périscope",
+    "en": "A reflection on a pane: the Learjet's, or the periscope's outer window",
+    "es": "Un reflejo en un cristal: el del Learjet, o la ventana exterior del periscopio",
+    "it": "Un riflesso su un vetro: quello del Learjet, o la finestra esterna del periscopio"
+   },
+   "url": "interpretation-concorde-1976-window.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "glint",
+   "interpretationOf": "film",
+   "time": "2008-08",
+   "by": [
+    {
+     "title": "Peter_Morris (Straight Dope)"
+    }
+   ],
+   "title": {
+    "fr": "Reflet d'un éclat du Soleil sur le Concorde, sa carrosserie blanche ou son pare-brise",
+    "en": "A ghost of a glint of the Sun on Concorde, its white body or its windscreen",
+    "es": "Un reflejo de un destello del Sol en el Concorde, su fuselaje blanco o su parabrisas",
+    "it": "Un riflesso di un bagliore del Sole sul Concorde, la sua fusoliera bianca o il parabrezza"
+   },
+   "url": "interpretation-concorde-1976-glint.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "drop",
+   "interpretationOf": "film",
+   "time": "2008-08",
+   "by": [
+    {
+     "title": "GuanoLad (Straight Dope)"
+    }
+   ],
+   "title": {
+    "fr": "Goutte d'eau sur la vitre, poussée par le vent ou les vibrations",
+    "en": "A drop of water on the pane, driven by the wind or the vibration",
+    "es": "Una gota de agua en el cristal, empujada por el viento o las vibraciones",
+    "it": "Una goccia d'acqua sul vetro, spinta dal vento o dalle vibrazioni"
+   },
+   "url": "interpretation-concorde-1976-drop.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "dust",
+   "interpretationOf": "film",
+   "time": "2008-08",
+   "by": [
+    {
+     "title": "Manduck (Straight Dope)"
+    },
+    {
+     "title": "Telemark (Straight Dope)"
+    }
+   ],
+   "title": {
+    "fr": "Poussière ou insecte près de l'objectif",
+    "en": "Dust or an insect close to the lens",
+    "es": "Polvo o un insecto cerca del objetivo",
+    "it": "Polvere o un insetto vicino all'obiettivo"
+   },
+   "url": "interpretation-concorde-1976-dust.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "film-defect",
+   "interpretationOf": "film",
+   "time": "2008-08",
+   "by": [
+    {
+     "title": "beowulff (Straight Dope)"
+    }
+   ],
+   "title": {
+    "fr": "Défaut de la pellicule : poussière dans le couloir, rayure",
+    "en": "A flaw of the film: dust in the gate, a scratch",
+    "es": "Un defecto de la película: polvo en la ventanilla, una raya",
+    "it": "Un difetto della pellicola: polvere nel quadruccio, un graffio"
+   },
+   "url": "interpretation-concorde-1976-film-defect.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "object",
+   "interpretationOf": "film",
+   "by": [
+    {
+     "title": "UFO video channels"
+    }
+   ],
+   "title": {
+    "fr": "Un objet réel près du Concorde, une « sonde »",
+    "en": "A real object near Concorde, a \"probe\"",
+    "es": "Un objeto real cerca del Concorde, una «sonda»",
+    "it": "Un oggetto reale vicino al Concorde, una «sonda»"
+   },
+   "url": "interpretation-concorde-1976-object.json"
   }
  ]
 }

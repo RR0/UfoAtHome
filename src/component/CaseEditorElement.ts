@@ -11,6 +11,8 @@ import type { ShareMessages } from "./messages/ShareMessages.js"
 import { AppLocation } from "./AppLocation.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
+import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
+import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
 import { CaseSession } from "./CaseSession.js"
@@ -176,7 +178,7 @@ const TEMPLATE = `
   .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
   .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
   .event-card:only-child::after { display: none; }
-  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links";
+  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links" "findings findings findings";
     align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 8px 12px 14px; }
   .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
   .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -190,6 +192,23 @@ const TEMPLATE = `
   .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
   .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
   .event-links:empty { display: none; }
+  /* What a reading's findings come to, as the editor's groups say what their fields do: red when it contradicts what is established, orange
+     when it is not settled, green when it holds (see ReadingVerdict). */
+  .event-card[data-verdict="incompatible"] { border-color: var(--error); }
+  .event-card[data-verdict="unsettled"] { border-color: var(--glow-solid); }
+  .event-card[data-verdict="compatible"] { border-color: var(--ok); }
+  .event-card[data-verdict] { border-width: 1.5px; }
+  .verdict { font-weight: 700; }
+  .event-card[data-verdict="incompatible"] .verdict { color: var(--error); }
+  .event-card[data-verdict="unsettled"] .verdict { color: var(--warn); }
+  .event-card[data-verdict="compatible"] .verdict { color: var(--ok); }
+  .findings { grid-area: findings; margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
+  .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
+  .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
+  .finding-mark { font-weight: 700; text-align: center; }
+  .findings li[data-outcome="holds"] .finding-mark { color: var(--ok); }
+  .findings li[data-outcome="fails"] .finding-mark { color: var(--error); }
+  .findings li[data-outcome="untested"] .finding-mark { color: var(--ink-faint); }
   .event-delete { position: relative; z-index: 1; display: grid; place-items: center; width: auto; height: auto; min-width: 0; min-height: 0; padding: 0;
     border: 0; border-left: 1px solid var(--line-strong); border-radius: 0 10px 10px 0; background: none; color: var(--ink-dim); }
   .event-delete:hover:not(:disabled) { color: var(--error); }
@@ -1059,9 +1078,19 @@ export class CaseEditorElement extends HTMLElement {
   /** The events, in the order of time, with where each stands in `items` (which the picker lists them by). */
   private eventsInTime(session: CaseSession): { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[] {
     const items = this.items(session) as { track?: CaseTrack, interview?: InterviewEvent }[]
-    const timeOf = (item: { track?: CaseTrack, interview?: InterviewEvent }) => String((item.track?.event ?? item.interview)?.time ?? "")
-    // Stable: events of the same time, or of none, stay in the order the case lists them.
-    return items.map((item, index) => ({ item, index })).sort((a, b) => timeOf(a.item).localeCompare(timeOf(b.item)))
+    // A reading nobody dated came after the account it reads at least: it takes its time, where undated it stood before the very observation
+    // it is a reading of.
+    const timeOf = (item: { track?: CaseTrack, interview?: InterviewEvent }): string => {
+      const own = (item.track?.event ?? item.interview)?.time
+      if (own !== undefined && own !== "") return String(own)
+      const account = item.track?.kind === "reading" ? session.accountOf(item.track) : undefined
+      return account ? String(account.event.time ?? "") : ""
+    }
+    // At the same time, an account before the readings of it; otherwise stable: events of the same time, or of none, stay in the order the
+    // case lists them.
+    const reads = (item: { track?: CaseTrack }) => item.track?.kind === "reading" ? 1 : 0
+    return items.map((item, index) => ({ item, index }))
+      .sort((a, b) => timeOf(a.item).localeCompare(timeOf(b.item)) || reads(a.item) - reads(b.item))
   }
 
   /** The named moments of an observation, as an interview links to them (see InterviewMoment). */
@@ -1169,6 +1198,15 @@ export class CaseEditorElement extends HTMLElement {
         if (account) said.push(`${m.interpretationOf}${m.colon}${this.optionLabel({ track: account }, session.tracks.indexOf(account))}`)
       }
       links.textContent = said.join(" · ")
+      const findings = item.track?.kind === "reading" ? this.findingsOf(item.track) : undefined
+      const verdict = ReadingVerdicts.of(findings)
+      if (verdict) {
+        card.dataset.verdict = verdict
+        const chip = document.createElement("span")
+        chip.className = "verdict"
+        chip.textContent = m.readingVerdict[verdict]
+        links.prepend(chip, ...(said.length > 0 ? [document.createTextNode(" · ")] : []))
+      }
       const remove = document.createElement("button")
       remove.type = "button"
       remove.className = "icon-btn event-delete"
@@ -1179,9 +1217,54 @@ export class CaseEditorElement extends HTMLElement {
       const body = document.createElement("div")
       body.className = "event-body"
       body.append(pill, main, links)
+      if (findings && findings.length > 0) body.append(this.findingsList(findings))
       card.append(body, remove)
       return card
     }))
+  }
+
+  /**
+   * What a reading found, once its recording is read: a reading is fetched when it is opened, and its card is drawn before that, so it is
+   * fetched for the card and the list drawn again then. Nothing while it is on its way, or when it could not be read.
+   */
+  private findingsOf(track: CaseTrack): ReadingFinding[] | undefined {
+    if (!track.recording) {
+      if (!this.fetchingFindings.has(track)) {
+        this.fetchingFindings.add(track)
+        this.loadTrack(track).then(() => this.refreshOverview(), () => undefined)
+      }
+      return undefined
+    }
+    return track.recording.interpretation?.findings
+  }
+
+  private readonly fetchingFindings = new WeakSet<CaseTrack>()
+
+  /** A reading's tests, each with its mark (holds ✓, fails ✗, could not be made ?) and, for a failure, what it failed against. */
+  private findingsList(findings: readonly ReadingFinding[]): HTMLUListElement {
+    const m = this.messages
+    const list = document.createElement("ul")
+    list.className = "findings"
+    for (const finding of findings) {
+      const line = document.createElement("li")
+      line.dataset.outcome = finding.outcome
+      const mark = document.createElement("span")
+      mark.className = "finding-mark"
+      mark.textContent = { holds: "✓", fails: "✗", untested: "?" }[finding.outcome]
+      mark.title = m.findingOutcome[finding.outcome]
+      mark.setAttribute("aria-label", m.findingOutcome[finding.outcome])
+      const text = document.createElement("span")
+      text.textContent = this.said.read(finding.text as never) ?? ""
+      line.append(mark, text)
+      if (finding.outcome === "fails") {
+        const against = document.createElement("span")
+        against.className = "finding-against"
+        against.textContent = ` (${m.findingAgainst[finding.against ?? "established"]})`
+        line.append(against)
+      }
+      list.append(line)
+    }
+    return list
   }
 
   /** Opens the event listed `index` in the picker: the list goes, and the event takes its place. */

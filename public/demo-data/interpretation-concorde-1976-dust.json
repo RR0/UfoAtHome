@@ -1,0 +1,1585 @@
+{
+ "version": 4,
+ "id": "concorde-1976-dust",
+ "summaryTime": 2.2,
+ "observer": {
+  "id": "BritishAirwaysFilmUnit",
+  "title": "British Airways Film Unit"
+ },
+ "sources": [
+  {
+   "title": "Analysis of Concorde UFO footage",
+   "url": "https://www.youtube.com/watch?v=qgxHICb7ceg",
+   "publication": {
+    "publisher": "YouTube (allcoded)",
+    "time": "2015-03-12"
+   }
+  },
+  {
+   "title": "Concorde and UFO",
+   "url": "https://www.youtube.com/watch?v=scQNEUNjIFc",
+   "publication": {
+    "publisher": "YouTube (carlos barria)",
+    "time": "2022-02-13"
+   }
+  },
+  {
+   "title": "UFOs at close sight: aircraft",
+   "url": "https://ufologie.patrickgross.org/htm/vidair.htm",
+   "publication": {
+    "publisher": "Patrick Gross"
+   }
+  }
+ ],
+ "tags": [
+  "Concorde",
+  "lens flare",
+  "Astrovision",
+  "interpretation"
+ ],
+ "time": "1976-06-15T16:00:00",
+ "utcOffsetHours": 0,
+ "durationSeconds": 5.35,
+ "place": {
+  "name": "Southern England (supposed)",
+  "locations": [
+   {
+    "lat": 51,
+    "lng": -1.5
+   }
+  ]
+ },
+ "description": {
+  "fr": "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",
+  "en": "British Airways' Concorde filmed from a Learjet through the Astrovision periscope camera, and the orb that goes with it. Measured on the film: the camera's tilt, the ground sliding by, the copy's contrast, softness and dust. Fitted on the film: the Concorde's attitude. Supposed: date, hour, place, height, lens, film stock, hence where the Sun is. Alan Tanner, of the film's crew, sees in it a reflection of the Sun in the periscope.",
+  "es": "El Concorde de British Airways filmado desde un Learjet con la cámara periscópica Astrovision, y el orbe que lo acompaña. Medidos en la película: la inclinación de la cámara, el desfile del suelo, el contraste, la nitidez y el polvo de la copia. Ajustada en la película: la actitud del Concorde. Supuestos: fecha, hora, lugar, altitud, focal, película, y por tanto la posición del Sol. Alan Tanner, del equipo de la película, ve en él un reflejo del Sol en el periscopio.",
+  "it": "Il Concorde di British Airways filmato da un Learjet con la cinepresa a periscopio Astrovision, e la sfera che lo accompagna. Misurati sul film: l'inclinazione della camera, lo scorrere del suolo, il contrasto, la nitidezza e la polvere della copia. Adattato sul film: l'assetto del Concorde. Supposti: data, ora, luogo, altitudine, focale, pellicola, e quindi la posizione del Sole. Alan Tanner, della troupe del film, vi vede un riflesso del Sole nel periscopio."
+ },
+ "instrument": "cine-35mm-broadcast",
+ "film": "eastman-5247-1974",
+ "exposureSeconds": 0.020833333333333332,
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 51,
+     "lng": -1.5,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.946,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 100,
+    "pose": {
+     "lat": 50.99992482,
+     "lng": -1.49988435,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.85,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 200,
+    "pose": {
+     "lat": 50.99984964,
+     "lng": -1.4997687,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.694,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 300,
+    "pose": {
+     "lat": 50.99977446,
+     "lng": -1.49965304,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.526,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 400,
+    "pose": {
+     "lat": 50.99969928,
+     "lng": -1.49953739,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.319,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 500,
+    "pose": {
+     "lat": 50.9996241,
+     "lng": -1.49942174,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.118,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 600,
+    "pose": {
+     "lat": 50.99954892,
+     "lng": -1.49930609,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.11,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 700,
+    "pose": {
+     "lat": 50.99947374,
+     "lng": -1.49919044,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.164,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 800,
+    "pose": {
+     "lat": 50.99939856,
+     "lng": -1.49907479,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.18,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 900,
+    "pose": {
+     "lat": 50.99932338,
+     "lng": -1.49895913,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.14,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1000,
+    "pose": {
+     "lat": 50.9992482,
+     "lng": -1.49884348,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.063,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1100,
+    "pose": {
+     "lat": 50.99917302,
+     "lng": -1.49872783,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.972,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1200,
+    "pose": {
+     "lat": 50.99909784,
+     "lng": -1.49861218,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.892,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1300,
+    "pose": {
+     "lat": 50.99902266,
+     "lng": -1.49849653,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.77,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1400,
+    "pose": {
+     "lat": 50.99894748,
+     "lng": -1.49838088,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.63,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1500,
+    "pose": {
+     "lat": 50.9988723,
+     "lng": -1.49826522,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.428,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1600,
+    "pose": {
+     "lat": 50.99879712,
+     "lng": -1.49814957,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.179,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1700,
+    "pose": {
+     "lat": 50.99872194,
+     "lng": -1.49803392,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.807,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1800,
+    "pose": {
+     "lat": 50.99864676,
+     "lng": -1.49791827,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.451,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 1900,
+    "pose": {
+     "lat": 50.99857159,
+     "lng": -1.49780262,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.139,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2000,
+    "pose": {
+     "lat": 50.99849641,
+     "lng": -1.49768697,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.931,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2100,
+    "pose": {
+     "lat": 50.99842123,
+     "lng": -1.49757131,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.89,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2200,
+    "pose": {
+     "lat": 50.99834605,
+     "lng": -1.49745566,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.01,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2300,
+    "pose": {
+     "lat": 50.99827087,
+     "lng": -1.49734001,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.172,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2400,
+    "pose": {
+     "lat": 50.99819569,
+     "lng": -1.49722436,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.28,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2500,
+    "pose": {
+     "lat": 50.99812051,
+     "lng": -1.49710871,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.364,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2600,
+    "pose": {
+     "lat": 50.99804533,
+     "lng": -1.49699306,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.458,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2700,
+    "pose": {
+     "lat": 50.99797015,
+     "lng": -1.4968774,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.601,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2800,
+    "pose": {
+     "lat": 50.99789497,
+     "lng": -1.49676175,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.743,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 2900,
+    "pose": {
+     "lat": 50.99781979,
+     "lng": -1.4966461,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.842,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3000,
+    "pose": {
+     "lat": 50.99774461,
+     "lng": -1.49653045,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.845,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3100,
+    "pose": {
+     "lat": 50.99766943,
+     "lng": -1.4964148,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.83,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3200,
+    "pose": {
+     "lat": 50.99759425,
+     "lng": -1.49629915,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.836,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3300,
+    "pose": {
+     "lat": 50.99751907,
+     "lng": -1.49618349,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.859,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3400,
+    "pose": {
+     "lat": 50.99744389,
+     "lng": -1.49606784,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.894,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3500,
+    "pose": {
+     "lat": 50.99736871,
+     "lng": -1.49595219,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.995,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3600,
+    "pose": {
+     "lat": 50.99729353,
+     "lng": -1.49583654,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.202,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3700,
+    "pose": {
+     "lat": 50.99721835,
+     "lng": -1.49572089,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.468,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3800,
+    "pose": {
+     "lat": 50.99714317,
+     "lng": -1.49560524,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.671,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 3900,
+    "pose": {
+     "lat": 50.99706799,
+     "lng": -1.49548958,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.716,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4000,
+    "pose": {
+     "lat": 50.99699281,
+     "lng": -1.49537393,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.485,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4100,
+    "pose": {
+     "lat": 50.99691763,
+     "lng": -1.49525828,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.917,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4200,
+    "pose": {
+     "lat": 50.99684245,
+     "lng": -1.49514263,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.266,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4300,
+    "pose": {
+     "lat": 50.99676727,
+     "lng": -1.49502698,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.638,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4400,
+    "pose": {
+     "lat": 50.99669209,
+     "lng": -1.49491133,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.411,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4500,
+    "pose": {
+     "lat": 50.99661691,
+     "lng": -1.49479567,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.459,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4600,
+    "pose": {
+     "lat": 50.99654173,
+     "lng": -1.49468002,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.607,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4700,
+    "pose": {
+     "lat": 50.99646655,
+     "lng": -1.49456437,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.855,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4800,
+    "pose": {
+     "lat": 50.99639137,
+     "lng": -1.49444872,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.144,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 4900,
+    "pose": {
+     "lat": 50.99631619,
+     "lng": -1.49433307,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.361,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 5000,
+    "pose": {
+     "lat": 50.99624101,
+     "lng": -1.49421741,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.442,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 5100,
+    "pose": {
+     "lat": 50.99616583,
+     "lng": -1.49410176,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.441,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 5200,
+    "pose": {
+     "lat": 50.99609065,
+     "lng": -1.49398611,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.41,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   },
+   {
+    "t": 5300,
+    "pose": {
+     "lat": 50.99601547,
+     "lng": -1.49387046,
+     "elevationM": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.381,
+     "rollDeg": -7.2,
+     "fovDeg": 20,
+     "fNumber": 18
+    }
+   }
+  ]
+ },
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": 0,
+     "cloudLayers": [],
+     "relativeHumidity": {
+      "value": 0.85,
+      "basis": "assumed",
+      "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"
+     },
+     "visibilityKm": {
+      "value": 8,
+      "basis": "derived",
+      "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"
+     }
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [],
+  "order": [],
+  "groups": []
+ },
+ "decor": [
+  {
+   "id": "concorde",
+   "kind": "aircraft",
+   "title": {
+    "fr": "Concorde",
+    "en": "Concorde"
+   },
+   "eastM": 73.56,
+   "northM": 117.27,
+   "headingDeg": 135.93,
+   "sizeM": {
+    "widthM": 25.64,
+    "lengthM": 61.66,
+    "heightM": 9.74
+   },
+   "model": {
+    "id": "mgg8-concorde-g-boac-gear-up"
+   },
+   "track": [
+    {
+     "t": 0,
+     "eastM": 73.56,
+     "northM": 117.27,
+     "altitudeM": 2932.47,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 100,
+     "eastM": 81.68,
+     "northM": 108.9,
+     "altitudeM": 2932.47,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 200,
+     "eastM": 89.8,
+     "northM": 100.51,
+     "altitudeM": 2932.47,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 300,
+     "eastM": 97.9,
+     "northM": 92.09,
+     "altitudeM": 2932.37,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 400,
+     "eastM": 106.06,
+     "northM": 83.75,
+     "altitudeM": 2932.49,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 500,
+     "eastM": 114.27,
+     "northM": 75.5,
+     "altitudeM": 2932.8,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 600,
+     "eastM": 122.41,
+     "northM": 67.12,
+     "altitudeM": 2932.83,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 700,
+     "eastM": 130.56,
+     "northM": 58.77,
+     "altitudeM": 2932.9,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 800,
+     "eastM": 138.7,
+     "northM": 50.4,
+     "altitudeM": 2932.94,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 900,
+     "eastM": 146.79,
+     "northM": 41.99,
+     "altitudeM": 2932.86,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1000,
+     "eastM": 154.9,
+     "northM": 33.59,
+     "altitudeM": 2932.82,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1100,
+     "eastM": 162.98,
+     "northM": 25.2,
+     "altitudeM": 2932.76,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1200,
+     "eastM": 171.06,
+     "northM": 16.81,
+     "altitudeM": 2932.69,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1300,
+     "eastM": 179.14,
+     "northM": 8.42,
+     "altitudeM": 2932.64,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1400,
+     "eastM": 187.22,
+     "northM": 0.04,
+     "altitudeM": 2932.59,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1500,
+     "eastM": 195.25,
+     "northM": -8.4,
+     "altitudeM": 2932.39,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1600,
+     "eastM": 203.3,
+     "northM": -16.81,
+     "altitudeM": 2932.27,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1700,
+     "eastM": 211.33,
+     "northM": -25.22,
+     "altitudeM": 2932.13,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1800,
+     "eastM": 219.38,
+     "northM": -33.6,
+     "altitudeM": 2932.07,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 1900,
+     "eastM": 227.42,
+     "northM": -41.98,
+     "altitudeM": 2931.97,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2000,
+     "eastM": 235.43,
+     "northM": -50.39,
+     "altitudeM": 2931.81,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2100,
+     "eastM": 243.47,
+     "northM": -58.73,
+     "altitudeM": 2931.79,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2200,
+     "eastM": 251.52,
+     "northM": -67.07,
+     "altitudeM": 2931.79,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2300,
+     "eastM": 259.53,
+     "northM": -75.37,
+     "altitudeM": 2931.8,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2400,
+     "eastM": 267.53,
+     "northM": -83.69,
+     "altitudeM": 2931.77,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2500,
+     "eastM": 275.51,
+     "northM": -92.02,
+     "altitudeM": 2931.71,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2600,
+     "eastM": 283.47,
+     "northM": -100.32,
+     "altitudeM": 2931.68,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2700,
+     "eastM": 291.38,
+     "northM": -108.61,
+     "altitudeM": 2931.61,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2800,
+     "eastM": 299.3,
+     "northM": -116.91,
+     "altitudeM": 2931.54,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 2900,
+     "eastM": 307.13,
+     "northM": -125.14,
+     "altitudeM": 2931.49,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3000,
+     "eastM": 314.93,
+     "northM": -133.41,
+     "altitudeM": 2931.36,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3100,
+     "eastM": 322.82,
+     "northM": -141.73,
+     "altitudeM": 2931.21,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3200,
+     "eastM": 330.71,
+     "northM": -150.02,
+     "altitudeM": 2931.13,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3300,
+     "eastM": 338.63,
+     "northM": -158.34,
+     "altitudeM": 2931.03,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3400,
+     "eastM": 346.66,
+     "northM": -166.73,
+     "altitudeM": 2930.93,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3500,
+     "eastM": 354.73,
+     "northM": -175.1,
+     "altitudeM": 2930.89,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3600,
+     "eastM": 362.73,
+     "northM": -183.45,
+     "altitudeM": 2930.81,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3700,
+     "eastM": 370.77,
+     "northM": -191.79,
+     "altitudeM": 2930.8,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3800,
+     "eastM": 378.74,
+     "northM": -200.13,
+     "altitudeM": 2930.72,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 3900,
+     "eastM": 386.61,
+     "northM": -208.51,
+     "altitudeM": 2930.48,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4000,
+     "eastM": 394.4,
+     "northM": -216.85,
+     "altitudeM": 2930.21,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4100,
+     "eastM": 402.16,
+     "northM": -225.26,
+     "altitudeM": 2929.81,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4200,
+     "eastM": 409.96,
+     "northM": -233.61,
+     "altitudeM": 2929.54,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4300,
+     "eastM": 417.78,
+     "northM": -242.06,
+     "altitudeM": 2929.15,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4400,
+     "eastM": 425.73,
+     "northM": -250.37,
+     "altitudeM": 2929.09,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4500,
+     "eastM": 433.73,
+     "northM": -258.74,
+     "altitudeM": 2928.99,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4600,
+     "eastM": 441.73,
+     "northM": -267.11,
+     "altitudeM": 2928.89,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4700,
+     "eastM": 449.72,
+     "northM": -275.52,
+     "altitudeM": 2928.73,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4800,
+     "eastM": 457.67,
+     "northM": -283.88,
+     "altitudeM": 2928.6,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 4900,
+     "eastM": 465.96,
+     "northM": -292.44,
+     "altitudeM": 2928.47,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 5000,
+     "eastM": 474.25,
+     "northM": -301.04,
+     "altitudeM": 2928.27,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 5100,
+     "eastM": 482.57,
+     "northM": -309.64,
+     "altitudeM": 2928.11,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 5200,
+     "eastM": 490.95,
+     "northM": -318.02,
+     "altitudeM": 2928.35,
+     "headingDeg": 135.93
+    },
+    {
+     "t": 5300,
+     "eastM": 499.65,
+     "northM": -326.23,
+     "altitudeM": 2929.17,
+     "headingDeg": 135.93
+    }
+   ]
+  }
+ ],
+ "references": [
+  {
+   "id": "film",
+   "kind": "video",
+   "src": "/demo-data/concorde-1976-tlc.mp4",
+   "title": {
+    "fr": "Le film",
+    "en": "The film"
+   },
+   "credit": "British Airways Film Unit, as TLC broadcast it (copy posted on YouTube by allcoded)",
+   "creditUrl": "https://www.youtube.com/watch?v=qgxHICb7ceg",
+   "opacity": 1,
+   "t": 0,
+   "video": {
+    "fromS": 4.25,
+    "toS": 9.6
+   },
+   "registration": {
+    "headingDeg": 30.928,
+    "pitchDeg": -28.946,
+    "rollDeg": 7.2,
+    "fovDeg": 20
+   },
+   "registrationTrack": [
+    {
+     "t": 0,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.946,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 100,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.85,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 200,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.694,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 300,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.526,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 400,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.319,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 500,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.118,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 600,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.11,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 700,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.164,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 800,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.18,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 900,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.14,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1000,
+     "headingDeg": 30.928,
+     "pitchDeg": -28.063,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1100,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.972,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1200,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.892,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1300,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.77,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1400,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.63,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1500,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.428,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1600,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.179,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1700,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.807,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1800,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.451,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 1900,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.139,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2000,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.931,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2100,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.89,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2200,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.01,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2300,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.172,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2400,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.28,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2500,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.364,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2600,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.458,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2700,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.601,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2800,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.743,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 2900,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.842,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.845,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3100,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.83,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3200,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.836,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3300,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.859,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3400,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.894,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3500,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.995,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3600,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.202,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3700,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.468,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3800,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.671,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 3900,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.716,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4000,
+     "headingDeg": 30.928,
+     "pitchDeg": -27.485,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4100,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.917,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4200,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.266,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4300,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.638,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4400,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.411,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4500,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.459,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4600,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.607,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4700,
+     "headingDeg": 30.928,
+     "pitchDeg": -25.855,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4800,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.144,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 4900,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.361,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 5000,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.442,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 5100,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.441,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 5200,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.41,
+     "rollDeg": 7.2
+    },
+    {
+     "t": 5300,
+     "headingDeg": 30.928,
+     "pitchDeg": -26.381,
+     "rollDeg": 7.2
+    }
+   ]
+  }
+ ],
+ "interpretation": {
+  "title": {
+   "fr": "Poussière ou insecte près de l'objectif",
+   "en": "Dust or an insect close to the lens",
+   "es": "Polvo o un insecto cerca del objetivo",
+   "it": "Polvere o un insetto vicino all'obiettivo"
+  },
+  "bodies": [],
+  "findings": [
+   {
+    "text": {
+     "fr": "Floue, comme ce qui est tout près de l'objectif.",
+     "en": "Blurred, as what is right by the lens is.",
+     "es": "Borroso, como lo que está junto al objetivo.",
+     "it": "Sfocata, come ciò che è vicinissimo all'obiettivo."
+    },
+    "outcome": "holds",
+    "against": "established"
+   },
+   {
+    "text": {
+     "fr": "Liée à la caméra : l'orbe repart vers le haut à un dixième de seconde de la caméra.",
+     "en": "Tied to the camera: the orb turns back up within a tenth of a second of the camera.",
+     "es": "Ligado a la cámara: el orbe vuelve a subir a una décima de segundo de la cámara.",
+     "it": "Legata alla camera: la sfera risale a un decimo di secondo dalla camera."
+    },
+    "outcome": "holds",
+    "against": "established"
+   },
+   {
+    "text": {
+     "fr": "Elle ajoute de la lumière sur fond sombre (+99) : une particule ne le peut qu'éclairée par le Soleil, à l'ombre elle assombrirait ; où était le Soleil n'est pas connu.",
+     "en": "It adds light over a dark ground (+99): a particle can only do so lit by the Sun, in shadow it would darken; where the Sun was is not known.",
+     "es": "Añade luz sobre fondo oscuro (+99): una partícula solo puede hacerlo iluminada por el Sol, a la sombra oscurecería; no se sabe dónde estaba el Sol.",
+     "it": "Aggiunge luce su uno sfondo scuro (+99): una particella può farlo solo illuminata dal Sole, all'ombra scurirebbe; dove fosse il Sole non è noto."
+    },
+    "outcome": "untested"
+   }
+  ]
+ }
+}

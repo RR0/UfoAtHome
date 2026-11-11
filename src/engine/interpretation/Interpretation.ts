@@ -43,8 +43,36 @@ export interface InterpretationJson {
    * changes: the variant is the transformation, kept so it can be replayed and computed again when the error model changes.
    */
   variant?: VariantJson
+  /**
+   * What was found when the claim was set against what is known of the observation: each test it was put to and how it came out. A claim
+   * that failed one is still a claim that was made, and is kept, with this, to show that it was examined and what that gave: see
+   * ReadingVerdict for what the findings come to.
+   */
+  findings?: ReadingFinding[]
   /** What a kind of interpretation a module brings states, under that kind's key (see InterpretationKind): computed into bodies when shown. */
   [kind: string]: unknown
+}
+
+/** How a test of a claim came out: it holds, it fails, or it could not be made with what is known. */
+export type FindingOutcome = "holds" | "fails" | "untested"
+
+/**
+ * What a claim was set against: an ESTABLISHED element of the observation (a value stated or derived, a measure on the picture, a date
+ * that is known), or one that is only SUPPOSED (a value the recording assumed for want of a record). A claim that fails against an
+ * established element is in head-on contradiction with the observation; one that fails against a supposition only says the supposition
+ * and the claim cannot both hold.
+ */
+export type FindingGround = "established" | "supposed"
+
+/** One test a claim was put to. */
+export interface ReadingFinding {
+  /** What was tested and what it gave, in a sentence: "the orb follows the aircraft by −0.39 across and +1.59 up; a ghost has one factor". */
+  text: SaidText
+  outcome: FindingOutcome
+  /** What it was set against. Meaningless for a test that could not be made. */
+  against?: FindingGround
+  /** Where the measure or the argument comes from, when it is not the text itself. */
+  rationale?: string
 }
 
 /** What makes an interpretation a variant of the account — see InterpretationJson.variant. */

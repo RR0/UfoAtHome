@@ -176,14 +176,14 @@ export class CaseFile {
     // Any value may be written with its provenance beside it, as in a recording (see Provenance);
     // what the scene reads is the bare value.
     if (event.bodies) {
-      return CaseFile.withModelsFrom(Provenance.strip({ title: event.title, bodies: event.bodies ?? [], smoke: event.smoke, ...InterpretationKinds.computedPart(event as unknown as InterpretationJson, InterpretationRegistry.kinds()) }).recording, caseUrl)
+      return CaseFile.withModelsFrom(Provenance.strip({ title: event.title, bodies: event.bodies ?? [], smoke: event.smoke, findings: event.findings as InterpretationJson["findings"], ...InterpretationKinds.computedPart(event as unknown as InterpretationJson, InterpretationRegistry.kinds()) }).recording, caseUrl)
     }
     if (!event.url) return { title: event.title, bodies: [] }
     const fileUrl = new URL(event.url, caseUrl).href
     const file = await fetchJson(fileUrl) as InterpretationJson & { interpretation?: InterpretationJson }
     // A recording keeps its bodies in its own `interpretation`; an older file is the interpretation.
     const stated = "timeline" in file && file.interpretation ? file.interpretation : file
-    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, ...InterpretationKinds.computedPart(stated, InterpretationRegistry.kinds()) }).recording, fileUrl)
+    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, findings: stated.findings, ...InterpretationKinds.computedPart(stated, InterpretationRegistry.kinds()) }).recording, fileUrl)
   }
 
   /** An interpretation with its bodies' model addresses made absolute against the file that states

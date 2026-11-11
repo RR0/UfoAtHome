@@ -856,6 +856,42 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("case-overview")!.hidden).toBe(false)
   })
 
+  it("says on a reading's card what its findings come to, each test with its mark, the failed ones with what they failed against", async () => {
+    const found = {
+      ...reading,
+      interpretation: {
+        ...reading.interpretation,
+        findings: [
+          { text: { en: "Tied to the camera" }, outcome: "holds", against: "established" },
+          { text: { en: "The Sun is not where it needs it" }, outcome: "fails", against: "supposed" },
+          { text: { en: "The aircraft's attitude is not known" }, outcome: "untested" }
+        ]
+      }
+    }
+    files["https://example.org/d/found.json"] = found
+    const element = await open(undefined, {
+      events: [
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", time: "2013-04", title: { en: "A model" }, url: "reading.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", title: { en: "Undated" }, url: "found.json" },
+        { type: "event", eventType: "sighting", time: "1950", title: "An account", url: "account.json" }
+      ]
+    })
+    await wait()
+    const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")]
+    // A reading nobody dated takes the time of the account it reads: not before it.
+    expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Observation of An account", "Undated", "A model"])
+    const undated = cards[1]
+    // It fails only against a supposition, and could not be tested on one point: not settled, orange.
+    expect(undated.dataset.verdict).toBe("unsettled")
+    expect(undated.querySelector(".verdict")!.textContent).toBe("Not settled")
+    expect([...undated.querySelectorAll(".findings li")].map(line => (line as HTMLElement).dataset.outcome)).toEqual(["holds", "fails", "untested"])
+    expect(undated.querySelectorAll(".finding-mark")[1].textContent).toBe("✗")
+    expect(undated.querySelector(".finding-against")!.textContent).toContain("against a supposition")
+    // A reading with no findings has no verdict: untested is not sound.
+    expect(cards[2].dataset.verdict).toBeUndefined()
+    expect(cards[2].querySelector(".findings")).toBeNull()
+  })
+
   it("offers Save only when the case is not saved, and says nothing else of it in its header", async () => {
     const element = await open()
     const root = element.shadowRoot!

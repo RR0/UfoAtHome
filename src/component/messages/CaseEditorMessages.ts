@@ -24,6 +24,12 @@ export interface CaseEditorMessages extends InputFileMessages {
   /** A reading's kind, on its pill; and how many readings an account has. */
   kindReading: string
   readingsCount: string
+  /** What a reading's findings come to (see ReadingVerdict), as said on its card. */
+  readingVerdict: { incompatible: string, unsettled: string, compatible: string }
+  /** How each test of a reading came out, said to whoever cannot see its mark. */
+  findingOutcome: { holds: string, fails: string, untested: string }
+  /** What a failed test was set against. */
+  findingAgainst: { established: string, supposed: string }
   untitledObservation: string
   deleteRecording: string
   deleteReadingQuestion: string
