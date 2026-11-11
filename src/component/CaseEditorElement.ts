@@ -144,6 +144,13 @@ const TEMPLATE = `
   .case-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px 16px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
   .case-fields > :is(label, .field) { display: flex; flex-direction: column; align-items: stretch; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
   .case-fields > .wide { grid-column: 1 / -1; }
+  /* How the date is said (precise, imprecise) reads as part of its label, "Date imprécise", on the label's line: under it, it pushed the date's
+     field a line below the id's beside it. */
+  .case-fields > .field { display: grid; grid-template-columns: auto 1fr; column-gap: .35em; row-gap: 6px; align-items: baseline; }
+  .case-fields > .field > rr0-date-input { display: contents; }
+  .case-fields > .field > span { grid-row: 1; grid-column: 1; }
+  .case-fields > .field .edtf-mode { grid-row: 1; grid-column: 2; justify-self: start; min-height: 0; }
+  .case-fields > .field .edtf-field { grid-row: 2; grid-column: 1 / -1; }
   .case-fields input[type="text"] { box-sizing: border-box; width: 100%; height: 38px; font-weight: 400; }
   .events-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 12px; }
   .section-title { margin: 0; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
