@@ -24,8 +24,11 @@ export interface BrightSource {
 /** A ghost found under a point of the picture (see GhostPass.pickAt): which, and where in the picture the light that makes it is. */
 export interface GhostHit {
   ghost: LensGhost
-  /** Where its light is, in normalised device coordinates. */
+  /** Where its light is, in normalised device coordinates: out of the picture for a light it could not hold (see BrightSource). */
   source: { x: number, y: number }
+  /** Whether its light is the one the picture could not hold (the Sun, see BrightSource), found where its ghost is drawn from it rather
+   * than read back round its light in the picture, which it may well be out of. */
+  beyond?: boolean
 }
 
 /**
@@ -625,7 +628,7 @@ export class GhostPass {
    *
    * `exposure` is what the medium multiplies the picture's light by (see EYE_UNIFORMS.uMediumExposure).
    */
-  pickAt(renderer: WebGLRenderer, ndcX: number, ndcY: number, optics: LensOptics, exposure: number): GhostHit | undefined {
+  pickAt(renderer: WebGLRenderer, ndcX: number, ndcY: number, optics: LensOptics, exposure: number, bright?: BrightSource): GhostHit | undefined {
     const width = this.mips.width, height = this.mips.height
     const at = (x: number, y: number) => ({ x: Math.round((x + 1) / 2 * width), y: Math.round((y + 1) / 2 * height) })
     const here = at(ndcX, ndcY)
@@ -649,6 +652,24 @@ export class GhostPass {
       if (response < GhostPass.VISIBLE_RESPONSE || ghostLight < 0.3 * under.mean) continue
       if (!best || response > best.score) {
         best = { score: response, hit: { ghost, source: { x: window.brightest.x / width * 2 - 1, y: window.brightest.y / height * 2 - 1 } } }
+      }
+    }
+    // The ghosts of the light the picture could not hold, as the drawing lays them (see the bright source's disc in the ghosts' shader): a
+    // disc round its place scaled by the ghost's factor, wherever that light is. Out of the frame, the Sun's ghost stood on the screen and
+    // was never named, its light being looked for in a picture that does not hold it.
+    if (bright && bright.flux[1] > 0) {
+      const aspect = width / height
+      for (const ghost of optics.ghosts) {
+        if (LensGhosts.scatters(ghost)) continue
+        const k = ghost.scale
+        const [offsetX, offsetY] = ghost.offset ?? [0, 0]
+        const centreX = 2 * offsetX + k * bright.x, centreY = 2 * offsetY + k * bright.y
+        const radius = Math.max(ghost.blur + Math.abs(k) * bright.radius, 1.5 / height)
+        const away = Math.hypot((ndcX - centreX) / 2 * aspect, (ndcY - centreY) / 2)
+        if (away > radius) continue
+        const response = 0.18 * ghost.share * bright.flux[1] / (Math.PI * 0.81 * radius * radius) * exposure
+        if (response < GhostPass.VISIBLE_RESPONSE) continue
+        if (!best || response > best.score) best = { score: response, hit: { ghost, source: { x: bright.x, y: bright.y }, beyond: true } }
       }
     }
     return best?.hit

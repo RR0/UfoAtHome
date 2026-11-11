@@ -64,7 +64,7 @@ export const READINGS = [
     id: 'periscope',
     // Its best case: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
     // height the light allows), a periscope head taking light that far out, and the ghost that lays it on the orb at the first instant.
-    sun: { fromViewDeg: 285, altitudeDeg: 15.5 },
+    sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
     periscope: { reachDeg: 90, share: 2e-3, blur: 0.009 },
     by: [{ firstNames: ['Alan'], lastName: 'Tanner' }],
     title: {
@@ -92,7 +92,8 @@ export const READINGS = [
         en: "Simulated at its best (the Sun as near the front as the light allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a periscope taking light that far out; the ghost laid on the orb at the first instant, factor −0.008): the ghost moves no more than 7 px in the frame, where the orb travels 333. It stays 257 px from it at the median, 339 at most. A ghost of a fixed factor cannot do it; what is left is a periscope whose prisms keep no fixed factor.",
         es: "Simulado en su mejor caso (el Sol tan cerca del frente como permite la iluminación, a 285° de la mira y 15,5° de altura, a 85° del eje; un periscopio que recibe la luz hasta ahí; el reflejo puesto sobre el orbe en el primer instante, factor −0,008): el reflejo no se mueve más de 7 px en el encuadre, cuando el orbe recorre 333. Queda a 257 px de él en la mediana, 339 como mucho. Un reflejo de factor fijo no puede; queda un periscopio cuyos prismas no guardan un factor fijo.",
         it: "Simulato nel caso migliore (il Sole il più vicino al fronte che l'illuminazione consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un periscopio che riceve la luce fin lì; il riflesso posto sulla sfera al primo istante, fattore −0,008): il riflesso non si sposta più di 7 px nell'inquadratura, mentre la sfera ne percorre 333. Resta a 257 px da essa in mediana, 339 al massimo. Un riflesso a fattore fisso non può; resta un periscopio i cui prismi non mantengono un fattore fisso."
-      })
+      // What fails is the fixed factor the simulation supposes, not what Tanner says: his prisms need not keep one (see the finding above).
+      }, 'supposed')
     ]
   },
   {

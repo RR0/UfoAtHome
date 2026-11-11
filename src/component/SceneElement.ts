@@ -725,7 +725,8 @@ export class SceneElement extends HTMLElement {
     const hit = this.sceneRenderer.pickGhostAt(ndcX, ndcY)
     if (!hit) return undefined
     const texts = this.naming.names.ghostTooltip
-    const light = this.lightOfGhost(hit.source.x, hit.source.y) ?? undefined
+    // The light the picture could not hold is the Sun, maybe out of the frame: named as such, not looked for in the picture.
+    const light = hit.beyond ? { kind: "sky" as const, id: "sun", name: this.bodyName("sun") } : this.lightOfGhost(hit.source.x, hit.source.y) ?? undefined
     // A star's label carries its magnitude and height: its name is what comes before them.
     const lightName = (light?.kind === "star" ? light.name.split(" — ")[0] : light?.name) ?? texts.unnamed
     const ghost = hit.ghost
@@ -737,7 +738,7 @@ export class SceneElement extends HTMLElement {
       detail: () => texts.detail.replace("{name}", name).replace("{cause}", texts.causes[ghost.cause ?? "lens"]).replace("{where}", where),
       // From the ghost's own centre, which is its light's place scaled about the centre of the picture: the pointer is only somewhere on
       // it, and the ghost moves with its light.
-      path: { from: { x: ghost.scale * hit.source.x, y: ghost.scale * hit.source.y }, to: hit.source }
+      path: { from: { x: 2 * (ghost.offset?.[0] ?? 0) + ghost.scale * hit.source.x, y: 2 * (ghost.offset?.[1] ?? 0) + ghost.scale * hit.source.y }, to: hit.source }
     }
   }
 

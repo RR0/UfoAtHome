@@ -214,7 +214,7 @@ const glintBody = ({ luminanceCdM2, sizeM }) => ({
 const periscopeLens = ({ reachDeg, share, blur }, { sunPixel, orbPixel }) => {
   const scale = (orbPixel.x - 320) / (sunPixel.x - 320)
   const offsetY = (240 - orbPixel.y) / 480 - scale * (240 - sunPixel.y) / 480
-  return { reachDeg, ghosts: [{ scale: round(scale, 6), share, blur, offset: [0, round(offsetY, 5)], cause: 'glass' }] }
+  return { reachDeg, ghosts: [{ scale: round(scale, 6), share, blur, offset: [0, round(offsetY, 5)], cause: 'lens' }] }
 }
 
 for (const reading of READINGS) {

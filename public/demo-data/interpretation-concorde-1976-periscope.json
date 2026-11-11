@@ -101,7 +101,7 @@
      "lat": 51,
      "lng": -1.5,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.946,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -111,10 +111,10 @@
    {
     "t": 100,
     "pose": {
-     "lat": 50.99996768,
-     "lng": -1.49984186,
+     "lat": 50.99996681,
+     "lng": -1.49984231,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.85,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -124,10 +124,10 @@
    {
     "t": 200,
     "pose": {
-     "lat": 50.99993535,
-     "lng": -1.49968372,
+     "lat": 50.99993362,
+     "lng": -1.49968463,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.694,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -137,10 +137,10 @@
    {
     "t": 300,
     "pose": {
-     "lat": 50.99990303,
-     "lng": -1.49952558,
+     "lat": 50.99990043,
+     "lng": -1.49952694,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.526,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -150,10 +150,10 @@
    {
     "t": 400,
     "pose": {
-     "lat": 50.99987071,
-     "lng": -1.49936744,
+     "lat": 50.99986724,
+     "lng": -1.49936926,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.319,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -163,10 +163,10 @@
    {
     "t": 500,
     "pose": {
-     "lat": 50.99983838,
-     "lng": -1.4992093,
+     "lat": 50.99983405,
+     "lng": -1.49921157,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.118,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -176,10 +176,10 @@
    {
     "t": 600,
     "pose": {
-     "lat": 50.99980606,
-     "lng": -1.49905116,
+     "lat": 50.99980085,
+     "lng": -1.49905388,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.11,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -189,10 +189,10 @@
    {
     "t": 700,
     "pose": {
-     "lat": 50.99977373,
-     "lng": -1.49889302,
+     "lat": 50.99976766,
+     "lng": -1.4988962,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.164,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -202,10 +202,10 @@
    {
     "t": 800,
     "pose": {
-     "lat": 50.99974141,
-     "lng": -1.49873488,
+     "lat": 50.99973447,
+     "lng": -1.49873851,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.18,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -215,10 +215,10 @@
    {
     "t": 900,
     "pose": {
-     "lat": 50.99970909,
-     "lng": -1.49857674,
+     "lat": 50.99970128,
+     "lng": -1.49858083,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.14,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -228,10 +228,10 @@
    {
     "t": 1000,
     "pose": {
-     "lat": 50.99967676,
-     "lng": -1.4984186,
+     "lat": 50.99966809,
+     "lng": -1.49842314,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.063,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -241,10 +241,10 @@
    {
     "t": 1100,
     "pose": {
-     "lat": 50.99964444,
-     "lng": -1.49826046,
+     "lat": 50.9996349,
+     "lng": -1.49826546,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.972,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -254,10 +254,10 @@
    {
     "t": 1200,
     "pose": {
-     "lat": 50.99961212,
-     "lng": -1.49810232,
+     "lat": 50.99960171,
+     "lng": -1.49810777,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.892,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -267,10 +267,10 @@
    {
     "t": 1300,
     "pose": {
-     "lat": 50.99957979,
-     "lng": -1.49794418,
+     "lat": 50.99956852,
+     "lng": -1.49795008,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.77,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -280,10 +280,10 @@
    {
     "t": 1400,
     "pose": {
-     "lat": 50.99954747,
-     "lng": -1.49778604,
+     "lat": 50.99953533,
+     "lng": -1.4977924,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.63,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -293,10 +293,10 @@
    {
     "t": 1500,
     "pose": {
-     "lat": 50.99951515,
-     "lng": -1.4976279,
+     "lat": 50.99950214,
+     "lng": -1.49763471,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.428,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -306,10 +306,10 @@
    {
     "t": 1600,
     "pose": {
-     "lat": 50.99948282,
-     "lng": -1.49746976,
+     "lat": 50.99946895,
+     "lng": -1.49747703,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.179,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -319,10 +319,10 @@
    {
     "t": 1700,
     "pose": {
-     "lat": 50.9994505,
-     "lng": -1.49731162,
+     "lat": 50.99943576,
+     "lng": -1.49731934,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.807,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -332,10 +332,10 @@
    {
     "t": 1800,
     "pose": {
-     "lat": 50.99941818,
-     "lng": -1.49715348,
+     "lat": 50.99940256,
+     "lng": -1.49716165,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.451,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -345,10 +345,10 @@
    {
     "t": 1900,
     "pose": {
-     "lat": 50.99938585,
-     "lng": -1.49699534,
+     "lat": 50.99936937,
+     "lng": -1.49700397,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.139,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -358,10 +358,10 @@
    {
     "t": 2000,
     "pose": {
-     "lat": 50.99935353,
-     "lng": -1.4968372,
+     "lat": 50.99933618,
+     "lng": -1.49684628,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.931,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -371,10 +371,10 @@
    {
     "t": 2100,
     "pose": {
-     "lat": 50.9993212,
-     "lng": -1.49667906,
+     "lat": 50.99930299,
+     "lng": -1.4966886,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.89,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -384,10 +384,10 @@
    {
     "t": 2200,
     "pose": {
-     "lat": 50.99928888,
-     "lng": -1.49652092,
+     "lat": 50.9992698,
+     "lng": -1.49653091,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.01,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -397,10 +397,10 @@
    {
     "t": 2300,
     "pose": {
-     "lat": 50.99925656,
-     "lng": -1.49636278,
+     "lat": 50.99923661,
+     "lng": -1.49637322,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.172,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -410,10 +410,10 @@
    {
     "t": 2400,
     "pose": {
-     "lat": 50.99922423,
-     "lng": -1.49620464,
+     "lat": 50.99920342,
+     "lng": -1.49621554,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.28,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -423,10 +423,10 @@
    {
     "t": 2500,
     "pose": {
-     "lat": 50.99919191,
-     "lng": -1.4960465,
+     "lat": 50.99917023,
+     "lng": -1.49605785,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.364,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -436,10 +436,10 @@
    {
     "t": 2600,
     "pose": {
-     "lat": 50.99915959,
-     "lng": -1.49588836,
+     "lat": 50.99913704,
+     "lng": -1.49590017,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.458,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -449,10 +449,10 @@
    {
     "t": 2700,
     "pose": {
-     "lat": 50.99912726,
-     "lng": -1.49573022,
+     "lat": 50.99910385,
+     "lng": -1.49574248,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.601,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -462,10 +462,10 @@
    {
     "t": 2800,
     "pose": {
-     "lat": 50.99909494,
-     "lng": -1.49557208,
+     "lat": 50.99907066,
+     "lng": -1.49558479,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.743,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -475,10 +475,10 @@
    {
     "t": 2900,
     "pose": {
-     "lat": 50.99906262,
-     "lng": -1.49541394,
+     "lat": 50.99903747,
+     "lng": -1.49542711,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.842,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -488,10 +488,10 @@
    {
     "t": 3000,
     "pose": {
-     "lat": 50.99903029,
-     "lng": -1.4952558,
+     "lat": 50.99900427,
+     "lng": -1.49526942,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.845,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -501,10 +501,10 @@
    {
     "t": 3100,
     "pose": {
-     "lat": 50.99899797,
-     "lng": -1.49509766,
+     "lat": 50.99897108,
+     "lng": -1.49511174,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.83,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -514,10 +514,10 @@
    {
     "t": 3200,
     "pose": {
-     "lat": 50.99896564,
-     "lng": -1.49493952,
+     "lat": 50.99893789,
+     "lng": -1.49495405,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.836,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -527,10 +527,10 @@
    {
     "t": 3300,
     "pose": {
-     "lat": 50.99893332,
-     "lng": -1.49478138,
+     "lat": 50.9989047,
+     "lng": -1.49479637,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.859,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -540,10 +540,10 @@
    {
     "t": 3400,
     "pose": {
-     "lat": 50.998901,
-     "lng": -1.49462324,
+     "lat": 50.99887151,
+     "lng": -1.49463868,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.894,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -553,10 +553,10 @@
    {
     "t": 3500,
     "pose": {
-     "lat": 50.99886867,
-     "lng": -1.4944651,
+     "lat": 50.99883832,
+     "lng": -1.49448099,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.995,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -566,10 +566,10 @@
    {
     "t": 3600,
     "pose": {
-     "lat": 50.99883635,
-     "lng": -1.49430696,
+     "lat": 50.99880513,
+     "lng": -1.49432331,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.202,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -579,10 +579,10 @@
    {
     "t": 3700,
     "pose": {
-     "lat": 50.99880403,
-     "lng": -1.49414882,
+     "lat": 50.99877194,
+     "lng": -1.49416562,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.468,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -592,10 +592,10 @@
    {
     "t": 3800,
     "pose": {
-     "lat": 50.9987717,
-     "lng": -1.49399067,
+     "lat": 50.99873875,
+     "lng": -1.49400794,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.671,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -605,10 +605,10 @@
    {
     "t": 3900,
     "pose": {
-     "lat": 50.99873938,
-     "lng": -1.49383253,
+     "lat": 50.99870556,
+     "lng": -1.49385025,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.716,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -618,10 +618,10 @@
    {
     "t": 4000,
     "pose": {
-     "lat": 50.99870706,
-     "lng": -1.49367439,
+     "lat": 50.99867237,
+     "lng": -1.49369256,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.485,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -631,10 +631,10 @@
    {
     "t": 4100,
     "pose": {
-     "lat": 50.99867473,
-     "lng": -1.49351625,
+     "lat": 50.99863918,
+     "lng": -1.49353488,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.917,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -644,10 +644,10 @@
    {
     "t": 4200,
     "pose": {
-     "lat": 50.99864241,
-     "lng": -1.49335811,
+     "lat": 50.99860598,
+     "lng": -1.49337719,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.266,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -657,10 +657,10 @@
    {
     "t": 4300,
     "pose": {
-     "lat": 50.99861008,
-     "lng": -1.49319997,
+     "lat": 50.99857279,
+     "lng": -1.49321951,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.638,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -670,10 +670,10 @@
    {
     "t": 4400,
     "pose": {
-     "lat": 50.99857776,
-     "lng": -1.49304183,
+     "lat": 50.9985396,
+     "lng": -1.49306182,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.411,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -683,10 +683,10 @@
    {
     "t": 4500,
     "pose": {
-     "lat": 50.99854544,
-     "lng": -1.49288369,
+     "lat": 50.99850641,
+     "lng": -1.49290413,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.459,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -696,10 +696,10 @@
    {
     "t": 4600,
     "pose": {
-     "lat": 50.99851311,
-     "lng": -1.49272555,
+     "lat": 50.99847322,
+     "lng": -1.49274645,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.607,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -709,10 +709,10 @@
    {
     "t": 4700,
     "pose": {
-     "lat": 50.99848079,
-     "lng": -1.49256741,
+     "lat": 50.99844003,
+     "lng": -1.49258876,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.855,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -722,10 +722,10 @@
    {
     "t": 4800,
     "pose": {
-     "lat": 50.99844847,
-     "lng": -1.49240927,
+     "lat": 50.99840684,
+     "lng": -1.49243108,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.144,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -735,10 +735,10 @@
    {
     "t": 4900,
     "pose": {
-     "lat": 50.99841614,
-     "lng": -1.49225113,
+     "lat": 50.99837365,
+     "lng": -1.49227339,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.361,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -748,10 +748,10 @@
    {
     "t": 5000,
     "pose": {
-     "lat": 50.99838382,
-     "lng": -1.49209299,
+     "lat": 50.99834046,
+     "lng": -1.49211571,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.442,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -761,10 +761,10 @@
    {
     "t": 5100,
     "pose": {
-     "lat": 50.9983515,
-     "lng": -1.49193485,
+     "lat": 50.99830727,
+     "lng": -1.49195802,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.441,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -774,10 +774,10 @@
    {
     "t": 5200,
     "pose": {
-     "lat": 50.99831917,
-     "lng": -1.49177671,
+     "lat": 50.99827408,
+     "lng": -1.49180033,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.41,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -787,10 +787,10 @@
    {
     "t": 5300,
     "pose": {
-     "lat": 50.99828685,
-     "lng": -1.49161857,
+     "lat": 50.99824089,
+     "lng": -1.49164265,
      "elevationM": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.381,
      "rollDeg": -7.2,
      "fovDeg": 20,
@@ -833,9 +833,9 @@
     "fr": "Concorde",
     "en": "Concorde"
    },
-   "eastM": 10.05,
-   "northM": 138.07,
-   "headingDeg": 107.99,
+   "eastM": 11.26,
+   "northM": 137.98,
+   "headingDeg": 108.49,
    "sizeM": {
     "widthM": 25.64,
     "lengthM": 61.66,
@@ -847,381 +847,381 @@
    "track": [
     {
      "t": 0,
-     "eastM": 10.05,
-     "northM": 138.07,
+     "eastM": 11.26,
+     "northM": 137.98,
      "altitudeM": 2932.47,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 100,
-     "eastM": 21.15,
-     "northM": 134.47,
+     "eastM": 22.32,
+     "northM": 134.28,
      "altitudeM": 2932.47,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 200,
-     "eastM": 32.25,
-     "northM": 130.87,
+     "eastM": 33.39,
+     "northM": 130.59,
      "altitudeM": 2932.47,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 300,
-     "eastM": 43.35,
-     "northM": 127.22,
+     "eastM": 44.46,
+     "northM": 126.84,
      "altitudeM": 2932.37,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 400,
-     "eastM": 54.46,
-     "northM": 123.68,
+     "eastM": 55.54,
+     "northM": 123.2,
      "altitudeM": 2932.49,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 500,
-     "eastM": 65.58,
-     "northM": 120.23,
+     "eastM": 66.63,
+     "northM": 119.66,
      "altitudeM": 2932.8,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 600,
-     "eastM": 76.71,
-     "northM": 116.65,
+     "eastM": 77.72,
+     "northM": 115.98,
      "altitudeM": 2932.83,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 700,
-     "eastM": 87.81,
-     "northM": 113.08,
+     "eastM": 88.8,
+     "northM": 112.31,
      "altitudeM": 2932.9,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 800,
-     "eastM": 98.93,
-     "northM": 109.5,
+     "eastM": 99.88,
+     "northM": 108.63,
      "altitudeM": 2932.94,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 900,
-     "eastM": 110.02,
-     "northM": 105.86,
+     "eastM": 110.94,
+     "northM": 104.9,
      "altitudeM": 2932.86,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1000,
-     "eastM": 121.11,
-     "northM": 102.25,
+     "eastM": 122,
+     "northM": 101.18,
      "altitudeM": 2932.82,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1100,
-     "eastM": 132.18,
-     "northM": 98.62,
+     "eastM": 133.04,
+     "northM": 97.46,
      "altitudeM": 2932.76,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1200,
-     "eastM": 143.25,
-     "northM": 94.99,
+     "eastM": 144.07,
+     "northM": 93.73,
      "altitudeM": 2932.69,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1300,
-     "eastM": 154.32,
-     "northM": 91.36,
+     "eastM": 155.11,
+     "northM": 90.01,
      "altitudeM": 2932.64,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1400,
-     "eastM": 165.39,
-     "northM": 87.74,
+     "eastM": 166.15,
+     "northM": 86.29,
      "altitudeM": 2932.59,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1500,
-     "eastM": 176.44,
-     "northM": 84.04,
+     "eastM": 177.16,
+     "northM": 82.5,
      "altitudeM": 2932.39,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1600,
-     "eastM": 187.48,
-     "northM": 80.39,
+     "eastM": 188.18,
+     "northM": 78.75,
      "altitudeM": 2932.27,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1700,
-     "eastM": 198.52,
-     "northM": 76.72,
+     "eastM": 199.18,
+     "northM": 74.99,
      "altitudeM": 2932.13,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1800,
-     "eastM": 209.56,
-     "northM": 73.09,
+     "eastM": 210.19,
+     "northM": 71.26,
      "altitudeM": 2932.07,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 1900,
-     "eastM": 220.59,
-     "northM": 69.45,
+     "eastM": 221.19,
+     "northM": 67.52,
      "altitudeM": 2931.97,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2000,
-     "eastM": 231.61,
-     "northM": 65.78,
+     "eastM": 232.17,
+     "northM": 63.75,
      "altitudeM": 2931.81,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2100,
-     "eastM": 242.61,
-     "northM": 62.17,
+     "eastM": 243.14,
+     "northM": 60.05,
      "altitudeM": 2931.79,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2200,
-     "eastM": 253.63,
-     "northM": 58.58,
+     "eastM": 254.13,
+     "northM": 56.36,
      "altitudeM": 2931.79,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2300,
-     "eastM": 264.6,
-     "northM": 55,
+     "eastM": 265.07,
+     "northM": 52.68,
      "altitudeM": 2931.8,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2400,
-     "eastM": 275.56,
-     "northM": 51.39,
+     "eastM": 276,
+     "northM": 48.98,
      "altitudeM": 2931.77,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2500,
-     "eastM": 286.51,
-     "northM": 47.77,
+     "eastM": 286.92,
+     "northM": 45.27,
      "altitudeM": 2931.71,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2600,
-     "eastM": 297.44,
-     "northM": 44.16,
+     "eastM": 297.81,
+     "northM": 41.57,
      "altitudeM": 2931.68,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2700,
-     "eastM": 308.31,
-     "northM": 40.54,
+     "eastM": 308.65,
+     "northM": 37.85,
      "altitudeM": 2931.61,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2800,
-     "eastM": 319.19,
-     "northM": 36.92,
+     "eastM": 319.5,
+     "northM": 34.14,
      "altitudeM": 2931.54,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 2900,
-     "eastM": 329.97,
-     "northM": 33.32,
+     "eastM": 330.24,
+     "northM": 30.44,
      "altitudeM": 2931.49,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3000,
-     "eastM": 340.73,
-     "northM": 29.67,
+     "eastM": 340.98,
+     "northM": 26.7,
      "altitudeM": 2931.36,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3100,
-     "eastM": 351.6,
-     "northM": 26.01,
+     "eastM": 351.81,
+     "northM": 22.94,
      "altitudeM": 2931.21,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3200,
-     "eastM": 362.46,
-     "northM": 22.39,
+     "eastM": 362.64,
+     "northM": 19.22,
      "altitudeM": 2931.13,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3300,
-     "eastM": 373.35,
-     "northM": 18.75,
+     "eastM": 373.5,
+     "northM": 15.49,
      "altitudeM": 2931.03,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3400,
-     "eastM": 384.37,
-     "northM": 15.1,
+     "eastM": 384.49,
+     "northM": 11.74,
      "altitudeM": 2930.93,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3500,
-     "eastM": 395.43,
-     "northM": 11.49,
+     "eastM": 395.51,
+     "northM": 8.03,
      "altitudeM": 2930.89,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3600,
-     "eastM": 406.4,
-     "northM": 7.85,
+     "eastM": 406.46,
+     "northM": 4.3,
      "altitudeM": 2930.81,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3700,
-     "eastM": 417.42,
-     "northM": 4.25,
+     "eastM": 417.44,
+     "northM": 0.61,
      "altitudeM": 2930.8,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3800,
-     "eastM": 428.37,
-     "northM": 0.62,
+     "eastM": 428.36,
+     "northM": -3.12,
      "altitudeM": 2930.72,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 3900,
-     "eastM": 439.24,
-     "northM": -3.1,
+     "eastM": 439.2,
+     "northM": -6.93,
      "altitudeM": 2930.48,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4000,
-     "eastM": 450.03,
-     "northM": -6.82,
+     "eastM": 449.96,
+     "northM": -10.74,
      "altitudeM": 2930.21,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4100,
-     "eastM": 460.83,
-     "northM": -10.61,
+     "eastM": 460.72,
+     "northM": -14.63,
      "altitudeM": 2929.81,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4200,
-     "eastM": 471.63,
-     "northM": -14.34,
+     "eastM": 471.49,
+     "northM": -18.45,
      "altitudeM": 2929.54,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4300,
-     "eastM": 482.5,
-     "northM": -18.13,
+     "eastM": 482.32,
+     "northM": -22.34,
      "altitudeM": 2929.15,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4400,
-     "eastM": 493.42,
-     "northM": -21.76,
+     "eastM": 493.21,
+     "northM": -26.06,
      "altitudeM": 2929.09,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4500,
-     "eastM": 504.4,
-     "northM": -25.4,
+     "eastM": 504.16,
+     "northM": -29.81,
      "altitudeM": 2928.99,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4600,
-     "eastM": 515.39,
-     "northM": -29.05,
+     "eastM": 515.12,
+     "northM": -33.55,
      "altitudeM": 2928.89,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4700,
-     "eastM": 526.39,
-     "northM": -32.73,
+     "eastM": 526.09,
+     "northM": -37.32,
      "altitudeM": 2928.73,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4800,
-     "eastM": 537.34,
-     "northM": -36.39,
+     "eastM": 537,
+     "northM": -41.08,
      "altitudeM": 2928.6,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 4900,
-     "eastM": 548.66,
-     "northM": -40.07,
+     "eastM": 548.29,
+     "northM": -44.86,
      "altitudeM": 2928.47,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 5000,
-     "eastM": 560.02,
-     "northM": -43.79,
+     "eastM": 559.61,
+     "northM": -48.68,
      "altitudeM": 2928.27,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 5100,
-     "eastM": 571.39,
-     "northM": -47.49,
+     "eastM": 570.96,
+     "northM": -52.48,
      "altitudeM": 2928.11,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 5200,
-     "eastM": 582.73,
-     "northM": -50.97,
+     "eastM": 582.26,
+     "northM": -56.05,
      "altitudeM": 2928.35,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     },
     {
      "t": 5300,
-     "eastM": 594.26,
-     "northM": -54.15,
+     "eastM": 593.76,
+     "northM": -59.33,
      "altitudeM": 2929.17,
-     "headingDeg": 107.99
+     "headingDeg": 108.49
     }
    ]
   }
@@ -1244,7 +1244,7 @@
     "toS": 9.6
    },
    "registration": {
-    "headingDeg": 2.993,
+    "headingDeg": 3.493,
     "pitchDeg": -28.946,
     "rollDeg": 7.2,
     "fovDeg": 20
@@ -1252,325 +1252,325 @@
    "registrationTrack": [
     {
      "t": 0,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.946,
      "rollDeg": 7.2
     },
     {
      "t": 100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.85,
      "rollDeg": 7.2
     },
     {
      "t": 200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.694,
      "rollDeg": 7.2
     },
     {
      "t": 300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.526,
      "rollDeg": 7.2
     },
     {
      "t": 400,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.319,
      "rollDeg": 7.2
     },
     {
      "t": 500,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.118,
      "rollDeg": 7.2
     },
     {
      "t": 600,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.11,
      "rollDeg": 7.2
     },
     {
      "t": 700,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.164,
      "rollDeg": 7.2
     },
     {
      "t": 800,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.18,
      "rollDeg": 7.2
     },
     {
      "t": 900,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.14,
      "rollDeg": 7.2
     },
     {
      "t": 1000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -28.063,
      "rollDeg": 7.2
     },
     {
      "t": 1100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.972,
      "rollDeg": 7.2
     },
     {
      "t": 1200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.892,
      "rollDeg": 7.2
     },
     {
      "t": 1300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.77,
      "rollDeg": 7.2
     },
     {
      "t": 1400,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.63,
      "rollDeg": 7.2
     },
     {
      "t": 1500,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.428,
      "rollDeg": 7.2
     },
     {
      "t": 1600,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.179,
      "rollDeg": 7.2
     },
     {
      "t": 1700,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.807,
      "rollDeg": 7.2
     },
     {
      "t": 1800,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.451,
      "rollDeg": 7.2
     },
     {
      "t": 1900,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.139,
      "rollDeg": 7.2
     },
     {
      "t": 2000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.931,
      "rollDeg": 7.2
     },
     {
      "t": 2100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.89,
      "rollDeg": 7.2
     },
     {
      "t": 2200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.01,
      "rollDeg": 7.2
     },
     {
      "t": 2300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.172,
      "rollDeg": 7.2
     },
     {
      "t": 2400,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.28,
      "rollDeg": 7.2
     },
     {
      "t": 2500,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.364,
      "rollDeg": 7.2
     },
     {
      "t": 2600,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.458,
      "rollDeg": 7.2
     },
     {
      "t": 2700,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.601,
      "rollDeg": 7.2
     },
     {
      "t": 2800,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.743,
      "rollDeg": 7.2
     },
     {
      "t": 2900,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.842,
      "rollDeg": 7.2
     },
     {
      "t": 3000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.845,
      "rollDeg": 7.2
     },
     {
      "t": 3100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.83,
      "rollDeg": 7.2
     },
     {
      "t": 3200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.836,
      "rollDeg": 7.2
     },
     {
      "t": 3300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.859,
      "rollDeg": 7.2
     },
     {
      "t": 3400,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.894,
      "rollDeg": 7.2
     },
     {
      "t": 3500,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.995,
      "rollDeg": 7.2
     },
     {
      "t": 3600,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.202,
      "rollDeg": 7.2
     },
     {
      "t": 3700,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.468,
      "rollDeg": 7.2
     },
     {
      "t": 3800,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.671,
      "rollDeg": 7.2
     },
     {
      "t": 3900,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.716,
      "rollDeg": 7.2
     },
     {
      "t": 4000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -27.485,
      "rollDeg": 7.2
     },
     {
      "t": 4100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.917,
      "rollDeg": 7.2
     },
     {
      "t": 4200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.266,
      "rollDeg": 7.2
     },
     {
      "t": 4300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.638,
      "rollDeg": 7.2
     },
     {
      "t": 4400,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.411,
      "rollDeg": 7.2
     },
     {
      "t": 4500,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.459,
      "rollDeg": 7.2
     },
     {
      "t": 4600,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.607,
      "rollDeg": 7.2
     },
     {
      "t": 4700,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -25.855,
      "rollDeg": 7.2
     },
     {
      "t": 4800,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.144,
      "rollDeg": 7.2
     },
     {
      "t": 4900,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.361,
      "rollDeg": 7.2
     },
     {
      "t": 5000,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.442,
      "rollDeg": 7.2
     },
     {
      "t": 5100,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.441,
      "rollDeg": 7.2
     },
     {
      "t": 5200,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.41,
      "rollDeg": 7.2
     },
     {
      "t": 5300,
-     "headingDeg": 2.993,
+     "headingDeg": 3.493,
      "pitchDeg": -26.381,
      "rollDeg": 7.2
     }
@@ -1581,14 +1581,14 @@
   "reachDeg": 90,
   "ghosts": [
    {
-    "scale": -0.008116,
+    "scale": -0.007446,
     "share": 0.002,
     "blur": 0.009,
     "offset": [
      0,
-     0.47492
+     0.47373
     ],
-    "cause": "glass"
+    "cause": "lens"
    }
   ]
  },
@@ -1648,7 +1648,7 @@
      "it": "Simulato nel caso migliore (il Sole il più vicino al fronte che l'illuminazione consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un periscopio che riceve la luce fin lì; il riflesso posto sulla sfera al primo istante, fattore −0,008): il riflesso non si sposta più di 7 px nell'inquadratura, mentre la sfera ne percorre 333. Resta a 257 px da essa in mediana, 339 al massimo. Un riflesso a fattore fisso non può; resta un periscopio i cui prismi non mantengono un fattore fisso."
     },
     "outcome": "fails",
-    "against": "established"
+    "against": "supposed"
    }
   ]
  }

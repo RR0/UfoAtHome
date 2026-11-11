@@ -6174,7 +6174,7 @@ export class SceneRenderer {
 
   pickGhostAt(ndcX: number, ndcY: number): GhostHit | undefined {
     if (!this.ghostPass || !this.ghostOptics.ghosts.length) return undefined
-    return this.ghostPass.pickAt(this.renderer, ndcX, ndcY, this.ghostOptics, EYE_UNIFORMS.uMediumExposure.value)
+    return this.ghostPass.pickAt(this.renderer, ndcX, ndcY, this.ghostOptics, EYE_UNIFORMS.uMediumExposure.value, this.sunBeyondPicture())
   }
 
   /** Whether a drop on the glass the picture is taken through is under a point of it (see GhostPass.dropAt): what then stands between the
