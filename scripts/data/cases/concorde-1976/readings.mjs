@@ -114,6 +114,9 @@ export const READINGS = [
   },
   {
     id: 'glint',
+    // Its best case: the glint there all along, as bright as the Sun's disc (1.6e9 cd/m²) in glass reflecting 5 % of it, the image of the
+    // Sun in a curved pane some 0.3 m across at 155 m (a few pixels).
+    glint: { luminanceCdM2: 8e7, sizeM: 0.3 },
     by: [{ title: 'Peter_Morris (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -140,6 +143,12 @@ export const READINGS = [
         en: "No glint on the windscreen in the frames examined: the flight deck stays dark, and the rest of the aircraft is saturated white.",
         es: "Ningún destello en el parabrisas en las imágenes examinadas: la cabina sigue oscura, y el resto del avión está saturado de blanco.",
         it: "Nessun bagliore sul parabrezza nei fotogrammi esaminati: la cabina resta scura, e il resto dell'aereo è saturo di bianco."
+      }),
+      fails({
+        fr: "Simulé dans son meilleur cas, un éclat au pare-brise tout le plan : ses reflets par l'objectif (facteurs de −1,4 à +0,65) restent à 90 px de l'orbe en médiane (de 21 à 160 px), et ne parcourent pas plus de 75 px, quand l'orbe en parcourt 377.",
+        en: "Simulated at its best, a glint on the windscreen all through the shot: its ghosts through the lens (factors −1.4 to +0.65) stay 90 px from the orb at the median (21 to 160 px), and travel no more than 75 px, where the orb travels 377.",
+        es: "Simulado en su mejor caso, un destello en el parabrisas durante todo el plano: sus reflejos por el objetivo (factores de −1,4 a +0,65) quedan a 90 px del orbe en la mediana (de 21 a 160 px), y no recorren más de 75 px, cuando el orbe recorre 377.",
+        it: "Simulato nel caso migliore, un bagliore sul parabrezza per tutta la ripresa: i suoi riflessi attraverso l'obiettivo (fattori da −1,4 a +0,65) restano a 90 px dalla sfera in mediana (da 21 a 160 px), e non percorrono più di 75 px, mentre la sfera ne percorre 377."
       })
     ]
   },

@@ -145,9 +145,26 @@ writeFileSync(OUT, JSON.stringify(recording, null, 1))
 const DEMO = dirname(OUT)
 const ORB_SIZE_RAD = orbDeg * D2R
 const caseEvents = [{ type: 'event', eventType: 'sighting', id: 'film', time: '1976', title: 'British Airways Film Unit', url: 'observer-concorde-1976.json' }]
+// The glint a reading claims on the aircraft: a point as bright as the Sun reflected in glass, where the film shows the windscreen (the
+// dark cockpit, MEASURED at 4.5 s: 93 % of the aircraft's length from its tail, 21.5 px above the middle of its white, for an aircraft
+// 541 px long), carried with the aircraft frame by frame as the film shows it, at the aircraft's distance. The lens's ghosts are not
+// stated: the camera's own are drawn from every light of the picture (see GhostPass), this one with them.
+const WINDSCREEN_ALONG = (581 - 78) / (619 - 78), WINDSCREEN_ABOVE_PX = 21.5, WINDSCREEN_LENGTH_PX = 619 - 78
+const glintBody = ({ luminanceCdM2, sizeM }) => ({
+  id: 'glint',
+  title: { fr: "L'éclat du Soleil au pare-brise (supposé)", en: "The Sun's glint on the windscreen (supposed)", es: 'El destello del Sol en el parabrisas (supuesto)', it: 'Il bagliore del Sole sul parabrezza (supposto)' },
+  explains: [], model: { id: 'sphere' },
+  track: [
+    ...keys.map((key, index) => {
+      const p = planeAt(key.t), length = p.right - p.left
+      const aim = aimOfPixel(p.left + WINDSCREEN_ALONG * length, p.y - WINDSCREEN_ABOVE_PX * length / WINDSCREEN_LENGTH_PX, key.t)
+      return { t: key.t, ...(index === 0 ? { present: true, sizeM: { widthM: sizeM, lengthM: sizeM, heightM: sizeM }, appearance: { color: '#ffffff', luminanceCdM2 } } : {}), ...aim, distanceM: round(distanceM, 1) }
+    })
+  ]
+})
 for (const reading of READINGS) {
   const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = recording
-  const bodies = reading.distanceM === undefined ? [] : [{
+  const bodies = reading.glint ? [glintBody(reading.glint)] : reading.distanceM === undefined ? [] : [{
     id: 'orb', title: ORB_TITLE, explains: ['orb'], model: { id: 'sphere' },
     track: [
       ...orbKeys.map((key, index) => ({

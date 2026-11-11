@@ -1549,7 +1549,357 @@
    "es": "Un reflejo de un destello del Sol en el Concorde, su fuselaje blanco o su parabrisas",
    "it": "Un riflesso di un bagliore del Sole sul Concorde, la sua fusoliera bianca o il parabrezza"
   },
-  "bodies": [],
+  "bodies": [
+   {
+    "id": "glint",
+    "title": {
+     "fr": "L'éclat du Soleil au pare-brise (supposé)",
+     "en": "The Sun's glint on the windscreen (supposed)",
+     "es": "El destello del Sol en el parabrisas (supuesto)",
+     "it": "Il bagliore del Sole sul parabrezza (supposto)"
+    },
+    "explains": [],
+    "model": {
+     "id": "sphere"
+    },
+    "track": [
+     {
+      "t": 0,
+      "present": true,
+      "sizeM": {
+       "widthM": 0.3,
+       "lengthM": 0.3,
+       "heightM": 0.3
+      },
+      "appearance": {
+       "color": "#ffffff",
+       "luminanceCdM2": 80000000
+      },
+      "azimuthDeg": 43.412,
+      "altitudeDeg": -26.81,
+      "distanceM": 154.7
+     },
+     {
+      "t": 100,
+      "azimuthDeg": 43.401,
+      "altitudeDeg": -26.808,
+      "distanceM": 154.7
+     },
+     {
+      "t": 200,
+      "azimuthDeg": 43.382,
+      "altitudeDeg": -26.811,
+      "distanceM": 154.7
+     },
+     {
+      "t": 300,
+      "azimuthDeg": 43.36,
+      "altitudeDeg": -26.855,
+      "distanceM": 154.7
+     },
+     {
+      "t": 400,
+      "azimuthDeg": 43.336,
+      "altitudeDeg": -26.807,
+      "distanceM": 154.7
+     },
+     {
+      "t": 500,
+      "azimuthDeg": 43.315,
+      "altitudeDeg": -26.684,
+      "distanceM": 154.7
+     },
+     {
+      "t": 600,
+      "azimuthDeg": 43.316,
+      "altitudeDeg": -26.671,
+      "distanceM": 154.7
+     },
+     {
+      "t": 700,
+      "azimuthDeg": 43.326,
+      "altitudeDeg": -26.644,
+      "distanceM": 154.7
+     },
+     {
+      "t": 800,
+      "azimuthDeg": 43.33,
+      "altitudeDeg": -26.63,
+      "distanceM": 154.7
+     },
+     {
+      "t": 900,
+      "azimuthDeg": 43.325,
+      "altitudeDeg": -26.662,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1000,
+      "azimuthDeg": 43.316,
+      "altitudeDeg": -26.678,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1100,
+      "azimuthDeg": 43.303,
+      "altitudeDeg": -26.704,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1200,
+      "azimuthDeg": 43.291,
+      "altitudeDeg": -26.73,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1300,
+      "azimuthDeg": 43.273,
+      "altitudeDeg": -26.753,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1400,
+      "azimuthDeg": 43.254,
+      "altitudeDeg": -26.775,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1500,
+      "azimuthDeg": 43.223,
+      "altitudeDeg": -26.854,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1600,
+      "azimuthDeg": 43.186,
+      "altitudeDeg": -26.904,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1700,
+      "azimuthDeg": 43.131,
+      "altitudeDeg": -26.96,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1800,
+      "azimuthDeg": 43.078,
+      "altitudeDeg": -26.986,
+      "distanceM": 154.7
+     },
+     {
+      "t": 1900,
+      "azimuthDeg": 43.03,
+      "altitudeDeg": -27.026,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2000,
+      "azimuthDeg": 42.995,
+      "altitudeDeg": -27.09,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2100,
+      "azimuthDeg": 42.984,
+      "altitudeDeg": -27.096,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2200,
+      "azimuthDeg": 42.998,
+      "altitudeDeg": -27.094,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2300,
+      "azimuthDeg": 43.014,
+      "altitudeDeg": -27.083,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2400,
+      "azimuthDeg": 43.019,
+      "altitudeDeg": -27.093,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2500,
+      "azimuthDeg": 43.006,
+      "altitudeDeg": -27.114,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2600,
+      "azimuthDeg": 42.981,
+      "altitudeDeg": -27.124,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2700,
+      "azimuthDeg": 42.943,
+      "altitudeDeg": -27.146,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2800,
+      "azimuthDeg": 42.892,
+      "altitudeDeg": -27.17,
+      "distanceM": 154.7
+     },
+     {
+      "t": 2900,
+      "azimuthDeg": 42.825,
+      "altitudeDeg": -27.182,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3000,
+      "azimuthDeg": 42.742,
+      "altitudeDeg": -27.229,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3100,
+      "azimuthDeg": 42.672,
+      "altitudeDeg": -27.286,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3200,
+      "azimuthDeg": 42.611,
+      "altitudeDeg": -27.313,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3300,
+      "azimuthDeg": 42.562,
+      "altitudeDeg": -27.348,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3400,
+      "azimuthDeg": 42.532,
+      "altitudeDeg": -27.392,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3500,
+      "azimuthDeg": 42.539,
+      "altitudeDeg": -27.405,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3600,
+      "azimuthDeg": 42.55,
+      "altitudeDeg": -27.435,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3700,
+      "azimuthDeg": 42.575,
+      "altitudeDeg": -27.436,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3800,
+      "azimuthDeg": 42.563,
+      "altitudeDeg": -27.466,
+      "distanceM": 154.7
+     },
+     {
+      "t": 3900,
+      "azimuthDeg": 42.503,
+      "altitudeDeg": -27.562,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4000,
+      "azimuthDeg": 42.333,
+      "altitudeDeg": -27.667,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4100,
+      "azimuthDeg": 42.15,
+      "altitudeDeg": -27.831,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4200,
+      "azimuthDeg": 41.947,
+      "altitudeDeg": -27.936,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4300,
+      "azimuthDeg": 41.776,
+      "altitudeDeg": -28.096,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4400,
+      "azimuthDeg": 41.673,
+      "altitudeDeg": -28.121,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4500,
+      "azimuthDeg": 41.651,
+      "altitudeDeg": -28.159,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4600,
+      "azimuthDeg": 41.599,
+      "altitudeDeg": -28.199,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4700,
+      "azimuthDeg": 41.569,
+      "altitudeDeg": -28.265,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4800,
+      "azimuthDeg": 41.493,
+      "altitudeDeg": -28.319,
+      "distanceM": 154.7
+     },
+     {
+      "t": 4900,
+      "azimuthDeg": 41.742,
+      "altitudeDeg": -28.371,
+      "distanceM": 154.7
+     },
+     {
+      "t": 5000,
+      "azimuthDeg": 41.992,
+      "altitudeDeg": -28.453,
+      "distanceM": 154.7
+     },
+     {
+      "t": 5100,
+      "azimuthDeg": 42.248,
+      "altitudeDeg": -28.518,
+      "distanceM": 154.7
+     },
+     {
+      "t": 5200,
+      "azimuthDeg": 42.466,
+      "altitudeDeg": -28.413,
+      "distanceM": 154.7
+     },
+     {
+      "t": 5300,
+      "azimuthDeg": 42.842,
+      "altitudeDeg": -28.07,
+      "distanceM": 154.7
+     }
+    ]
+   }
+  ],
   "findings": [
    {
     "text": {
@@ -1577,6 +1927,16 @@
      "en": "No glint on the windscreen in the frames examined: the flight deck stays dark, and the rest of the aircraft is saturated white.",
      "es": "Ningún destello en el parabrisas en las imágenes examinadas: la cabina sigue oscura, y el resto del avión está saturado de blanco.",
      "it": "Nessun bagliore sul parabrezza nei fotogrammi esaminati: la cabina resta scura, e il resto dell'aereo è saturo di bianco."
+    },
+    "outcome": "fails",
+    "against": "established"
+   },
+   {
+    "text": {
+     "fr": "Simulé dans son meilleur cas, un éclat au pare-brise tout le plan : ses reflets par l'objectif (facteurs de −1,4 à +0,65) restent à 90 px de l'orbe en médiane (de 21 à 160 px), et ne parcourent pas plus de 75 px, quand l'orbe en parcourt 377.",
+     "en": "Simulated at its best, a glint on the windscreen all through the shot: its ghosts through the lens (factors −1.4 to +0.65) stay 90 px from the orb at the median (21 to 160 px), and travel no more than 75 px, where the orb travels 377.",
+     "es": "Simulado en su mejor caso, un destello en el parabrisas durante todo el plano: sus reflejos por el objetivo (factores de −1,4 a +0,65) quedan a 90 px del orbe en la mediana (de 21 a 160 px), y no recorren más de 75 px, cuando el orbe recorre 377.",
+     "it": "Simulato nel caso migliore, un bagliore sul parabrezza per tutta la ripresa: i suoi riflessi attraverso l'obiettivo (fattori da −1,4 a +0,65) restano a 90 px dalla sfera in mediana (da 21 a 160 px), e non percorrono più di 75 px, mentre la sfera ne percorre 377."
     },
     "outcome": "fails",
     "against": "established"
