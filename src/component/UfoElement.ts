@@ -1474,7 +1474,13 @@ export class UfoElement extends HTMLElement {
   private updateReferences(): void {
     const references = this.currentSighting.references
     if (!this.referenceOpacityTouched && references.length > 0) {
-      this.referenceOpacityInput.value = String(references[0]!.opacity)
+      const opacity = String(references[0]!.opacity)
+      // Told to the scene too, as a move of the slider is: one recording followed by another that states its picture otherwise (a reading
+      // that hides the film it compares with) kept the first one's opacity in the scene while the slider showed the second's.
+      if (this.referenceOpacityInput.value !== opacity) {
+        this.referenceOpacityInput.value = opacity
+        if (!this.severalReferences) this.dispatchReferenceView()
+      }
     }
     // What the reader chose for a picture stays while the picture is there; a picture gone takes its view with it.
     for (const id of [...this.referenceViews.keys()]) if (!references.some(reference => reference.id === id)) this.referenceViews.delete(id)

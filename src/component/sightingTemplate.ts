@@ -75,6 +75,12 @@ export const html = `
   <span id="confrontation-heading" class="confrontation-heading"></span>
   <ul id="confrontation-list"></ul>
 </div>
+<!-- What the reading of the case on show was tested against, and what that gave (see ReadingVerdict): its verdict, then each finding. Only
+     while a reading is, and one that has findings. -->
+<div id="reading-findings" class="reading-findings" hidden>
+  <button id="reading-chip" type="button" class="reading-chip" aria-expanded="false" aria-controls="reading-findings-list"><span class="dot"></span><span id="reading-verdict" class="reading-verdict"></span></button>
+  <ul id="reading-findings-list" hidden></ul>
+</div>
 <!-- The variants the recording keeps (see InterpretationJson.variant): one chip a candidate, with
      its verdict, leading to it; and, while one is on show, each value it moves, the account's struck
      beside the variant's. The account itself never changes. -->
@@ -215,6 +221,49 @@ export const css = `
 .confrontation .disagrees {
   color: #d33;
 }
+.reading-findings {
+  margin-top: 0.4em;
+  font-size: 0.85em;
+}
+.reading-findings[hidden] {
+  display: none;
+}
+/* A chip, as the description's: its verdict and how many tests, the tests themselves a click away. */
+.reading-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.1em 0.7em;
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.reading-chip[aria-expanded="true"] { background: color-mix(in srgb, currentColor 10%, transparent); }
+.reading-chip .dot { width: 0.6em; height: 0.6em; border-radius: 50%; background: currentColor; }
+.reading-findings[data-verdict="incompatible"] .dot { background: #e04848; }
+.reading-findings[data-verdict="unsettled"] .dot { background: #e08a2c; }
+.reading-findings[data-verdict="compatible"] .dot { background: #2e9d5b; }
+.reading-findings ul[hidden] { display: none; }
+.reading-findings ul {
+  margin: 0.2em 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.15em;
+}
+.reading-findings li {
+  display: grid;
+  grid-template-columns: 1.2em minmax(0, 1fr);
+  column-gap: 0.3em;
+}
+.reading-findings .finding-mark { font-weight: 700; text-align: center; }
+.reading-findings li[data-outcome="holds"] .finding-mark { color: #2e8b3e; }
+.reading-findings li[data-outcome="fails"] .finding-mark { color: #d33; }
+.reading-findings li[data-outcome="untested"] .finding-mark { opacity: 0.6; }
+.reading-findings .finding-against { grid-column: 2; opacity: 0.7; }
 /* The toggles the playback layer lends this toolbar (see UfoElement.hostControls): the look they
    have in the picture's corner, at the toolbar's own scale. */
 .scene-controls {

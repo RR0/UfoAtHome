@@ -416,6 +416,8 @@ describe("What the summary shows is what the file holds, and the other way round
     tabs(element)[2].click()
     await wait(200)
     await load(element, "call.txt", "[00:00:05] BeauJerome: Where were you?\n[00:00:09] Q. B.: In the park.\n[00:00:20] BeauJerome: And then?\n[00:00:25] Q. B.: It left.")
+    // Read in its own time, which a loaded machine stretches past the load's fixed wait.
+    for (let tries = 0; element.transcriptText === undefined && tries < 50; tries++) await wait(100)
     const json = JSON.parse(element.transcriptText!) as { segments: { speaker: string, start: number, text: string }[], speakers: Record<string, unknown>, transcription: { note: string } }
     expect(json.segments.map(segment => [segment.speaker, segment.start, segment.text])).toEqual([
       ["interviewer", 5, "Where were you?"], ["witness", 9, "In the park."], ["interviewer", 20, "And then?"], ["witness", 25, "It left."]

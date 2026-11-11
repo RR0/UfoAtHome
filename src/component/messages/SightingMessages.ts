@@ -55,6 +55,16 @@ export interface SightingMessages extends SightingLabels {
   confrontation: string
   /** `{deg}` degrees between the direction the observer gave and the one the body is in. */
   confrontationDirection: string
+  /** What a reading of the case on show comes to (see ReadingVerdict), how each test of it came out, and what a failed one failed against. */
+  readingVerdict: { incompatible: string, unsettled: string, compatible: string }
+  findingOutcome: { holds: string, fails: string, untested: string }
+  findingAgainst: { established: string, supposed: string }
+  /** The reading's chip: its verdict and how many tests it was put to. */
+  readingChip: string
+  /** What the reading's chip is called in the Summary's box. */
+  readingLabel: string
+  /** The same, for a reading put to one test only. */
+  readingChipOne: string
   /** `{ratio}`: how many times wider (or taller) the body looks than the observer said. */
   confrontationWidth: string
   confrontationHeight: string

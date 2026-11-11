@@ -5,6 +5,9 @@ import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
+import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
+import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import type { CaseJson } from "../engine/persistence/caseJson.js"
 import type { AgentRef, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import type { ConfrontationReading } from "../engine/interpretation/BodyConfrontation.js"
@@ -123,6 +126,16 @@ export class SightingElement extends HTMLElement {
   private readonly infoPanel: HTMLElement
   private readonly infoAppLink: HTMLAnchorElement
   private readonly editLink: HTMLAnchorElement
+  /** What the reading of the case on show was tested against (see showReadingFindings). */
+  private readonly readingFindingsElement: HTMLElement
+  /** What sets a reading against its account, in the reader's language: none before the words have come. */
+  private readingCheck?: ReadingCheck
+  /** Whether the scene plays the recording of a reading rather than the account's (see chooseInterpretation). */
+  private readingScene = false
+  /** The reading on show as a chip of the Summary's (see showReadingFindings): none for the account, a variant, an untested reading. */
+  private readingEntry?: SummaryEntry
+  /** A verdict's colour, as the case editor draws a reading's card and the variant chips their dot. */
+  private static readonly VERDICT_COLOURS = { incompatible: "#e04848", unsettled: "#e08a2c", compatible: "#2e9d5b" } as const
   private readonly infoObservationHeading: HTMLElement
   private readonly infoObservationList: HTMLElement
   private readonly infoCreditsToggle: HTMLButtonElement
@@ -269,6 +282,14 @@ export class SightingElement extends HTMLElement {
     this.confrontationElement = this.shadow.getElementById("confrontation")!
     this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
     this.confrontationList = this.shadow.getElementById("confrontation-list")!
+    this.readingFindingsElement = this.shadow.getElementById("reading-findings")!
+    // Its tests a click away, as the description's text is from its chip: under the picture they ran to a screenful.
+    const readingChip = this.shadow.getElementById("reading-chip")!
+    readingChip.addEventListener("click", () => {
+      const open = readingChip.getAttribute("aria-expanded") !== "true"
+      readingChip.setAttribute("aria-expanded", String(open))
+      this.shadow.getElementById("reading-findings-list")!.hidden = !open
+    })
     this.compareButton = this.shadow.getElementById("compare-account") as HTMLButtonElement
     this.variantChips = this.shadow.getElementById("variant-chips")!
     this.variantMoved = this.shadow.getElementById("variant-moved")!
@@ -341,13 +362,14 @@ export class SightingElement extends HTMLElement {
     const preferences = HostLocale.preferencesFor(this)
     this.preferences = preferences
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, tagNames, sceneNames] = await Promise.all([SIGHTING_MESSAGES.load(language), loadTagNames(language), loadSceneNames(language)])
+    const [messages, tagNames, sceneNames, checkWords] = await Promise.all([SIGHTING_MESSAGES.load(language), loadTagNames(language), loadSceneNames(language), READING_CHECK_TEXTS.load(language)])
     // Superseded by a later decision (the element was connected while this one was loading).
     if (token !== this.localeToken) return
     // A first language counts as a change: nothing was said before (see messages).
     const changed = language !== this.language || this.messages === undefined
     this.language = language
     this.messages = messages
+    this.readingCheck = new ReadingCheck(checkWords)
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
     this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags, { messages: this.messages, locale: language })
@@ -632,12 +654,7 @@ export class SightingElement extends HTMLElement {
 
   /** The address of the recording of the reading chosen in the menu, when one is (see offerInterpretations). */
   private shownTrackUrl(): string | undefined {
-    const source = this.caseSource
-    const entry = this.entries.find(e => e.src === this.currentSrc)
-    const chosen = /^case-(\d+)$/.exec(this.interpretationSelect.value)
-    if (!source || !entry || !chosen) return undefined
-    const event = CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id))[Number(chosen[1])]
-    return event?.url ? new URL(event.url, source.url).href : undefined
+    return this.readingUrlOf(this.interpretationSelect.value)
   }
 
   /**
@@ -939,13 +956,111 @@ export class SightingElement extends HTMLElement {
       console.warn(`<rr0-sighting>: could not read interpretation "${value}":`, error)
       return undefined
     }) : undefined
+    const readingUrl = this.readingUrlOf(value)
+    const reading = readingUrl ? await SightingFetch.recording(readingUrl).catch(() => undefined) as SightingRecordingJson | undefined : undefined
     if (token !== this.interpretationToken) return
+    const entry = this.entries.find(e => e.src === this.currentSrc)
+    // A reading is the observation as whoever reads it holds it, in its own recording: another Sun, another lens, a heading moved. It is
+    // shown whole, the account's phenomenon drawn in it to be compared with; only its bodies, laid over the account's scene, showed
+    // nothing of most of the Concorde's. A reading that changes nothing of the scene but its bodies keeps the account's, not built again.
+    const scene = entry && reading && "timeline" in reading && SightingElement.changesTheScene(entry.sighting, reading)
+      ? { ...reading, timeline: reading.timeline.keyframes?.length ? reading.timeline : entry.sighting.timeline } : undefined
+    if (scene && readingUrl) this.showScene(scene, readingUrl)
+    else if (this.readingScene && entry) this.showScene(entry.sighting, entry.src, true)
+    this.readingScene = scene !== undefined
     this.sceneElement.interpretation = interpretation
+    this.showReadingFindings(entry, reading)
     this.editLink.href = this.editorUrl()
     this.dispatchEvent(new CustomEvent("interpretationchange", { detail: { track: this.shownTrackUrl() } }))
     this.updateCompareButton()
     this.showConfrontation(this.sceneElement.confrontation)
     this.showVariantMoved()
+  }
+
+  /** The address of the recording of the reading of the case a menu value names (`case-N`), if it has one. */
+  private readingUrlOf(value: string): string | undefined {
+    const source = this.caseSource
+    const entry = this.entries.find(e => e.src === this.currentSrc)
+    const chosen = /^case-(\d+)$/.exec(value)
+    if (!source || !entry || !chosen) return undefined
+    const event = CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id))[Number(chosen[1])]
+    return event?.url ? new URL(event.url, source.url).href : undefined
+  }
+
+  /** What of a recording makes its scene: a reading that changes none of it but its bodies is drawn in the account's. */
+  private static readonly SCENE_FIELDS = ["time", "utcOffsetHours", "place", "observerTrack", "weatherTrack", "decor", "instrument", "lens", "film",
+    "exposureSeconds", "iso", "references", "lighting", "lightPollution", "vehicle"] as const
+
+  private static changesTheScene(account: SightingRecordingJson, reading: SightingRecordingJson): boolean {
+    const of = (json: SightingRecordingJson) => JSON.stringify(SightingElement.SCENE_FIELDS.map(field => (json as unknown as Record<string, unknown>)[field]))
+    return of(account) !== of(reading)
+  }
+
+  /** Puts a recording in the scene where the playhead is, its models' addresses relative to where it was read from. */
+  private showScene(recording: SightingRecordingJson, src: string, account = false): void {
+    const t = this.sceneElement.ufoElement.currentTime
+    this.sceneElement.documentUrl = src ? new URL(src, location.href).href : undefined
+    // Its own cover, while play has not been asked: the account's picture (else the case's) for the account, a reading's own if it has one,
+    // and none otherwise, so that what is shown is the reading's scene rather than the account's picture standing over it.
+    const up = !this.sceneElement.ufoElement.playRequested
+    const base = src ? new URL(src, location.href).href : undefined
+    if (recording.image) this.sceneElement.showPoster(recording.image, base, up)
+    else if (account) this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url, up)
+    else this.sceneElement.showPoster(undefined, undefined, up)
+    this.sceneElement.sightingData = recording
+    this.sceneElement.ufoElement.currentTime = t
+  }
+
+  /**
+   * What the reading on show was tested against, under the picture: its verdict (red, orange or green, as the case editor draws its card)
+   * and each finding, those written in it and those that come of setting it against its account by themselves (see ReadingCheck). Hidden
+   * for the account, a variant, or a reading nobody has tested.
+   */
+  private showReadingFindings(entry: ObserverEntry | undefined, reading: SightingRecordingJson | undefined): void {
+    const box = this.readingFindingsElement
+    const m = this.messages
+    const written = reading?.interpretation?.findings ?? []
+    const checked = entry && reading && this.readingCheck ? this.readingCheck.findingsOf(entry.sighting, reading) : []
+    const findings = [...written, ...checked]
+    const verdict = ReadingVerdicts.of(findings)
+    // In the strip of chips when it is shown (see refreshParamSummary), as a chip of the Summary's; under the picture otherwise.
+    this.readingEntry = m && verdict ? {
+      group: "summary", field: "reading", label: m.readingLabel, unit: "", fromSource: false,
+      value: (findings.length === 1 ? m.readingChipOne : m.readingChip).replace("{verdict}", m.readingVerdict[verdict]).replace("{n}", String(findings.length)),
+      color: SightingElement.VERDICT_COLOURS[verdict],
+      full: findings.map(finding => `${{ holds: "✓", fails: "✗", untested: "?" }[finding.outcome]} ${this.said.read(finding.text as never) ?? ""}`
+        + (finding.outcome === "fails" ? ` (${m.findingAgainst[finding.against ?? "established"]})` : "")).join("\n")
+    } : undefined
+    // Drawn again whatever the strip's last signature: the reading is not part of what it is made from.
+    this.summarySignature = "\u0000"
+    this.refreshParamSummary()
+    box.hidden = !m || !verdict || this.labelsShown
+    if (!m || !verdict) return
+    box.dataset.verdict = verdict
+    box.querySelector("#reading-verdict")!.textContent = (findings.length === 1 ? m.readingChipOne : m.readingChip).replace("{verdict}", m.readingVerdict[verdict]).replace("{n}", String(findings.length))
+    const list = box.querySelector<HTMLElement>("#reading-findings-list")!
+    // Another reading opens folded, its chip saying what it comes to.
+    box.querySelector("#reading-chip")!.setAttribute("aria-expanded", "false")
+    list.hidden = true
+    list.replaceChildren(...findings.map(finding => {
+      const line = document.createElement("li")
+      line.dataset.outcome = finding.outcome
+      const mark = document.createElement("span")
+      mark.className = "finding-mark"
+      mark.textContent = { holds: "✓", fails: "✗", untested: "?" }[finding.outcome]
+      mark.title = m.findingOutcome[finding.outcome]
+      mark.setAttribute("aria-label", m.findingOutcome[finding.outcome])
+      const text = document.createElement("span")
+      text.textContent = this.said.read(finding.text as never) ?? ""
+      line.append(mark, text)
+      if (finding.outcome === "fails") {
+        const against = document.createElement("span")
+        against.className = "finding-against"
+        against.textContent = `(${m.findingAgainst[finding.against ?? "established"]})`
+        line.append(against)
+      }
+      return line
+    }))
   }
 
   /** Who made a claim, as a reader would name them: a person's id, which RR0 writes last name first
@@ -1027,6 +1142,7 @@ export class SightingElement extends HTMLElement {
     // Another recording: shown once it is whole, not built in view — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene()
     this.sceneElement.sightingData = entry.sighting
+    this.readingScene = false
     if (this.startPending) {
       this.startPending = false
       const seconds = this.startSeconds(entry)
@@ -1348,6 +1464,8 @@ export class SightingElement extends HTMLElement {
    * back to, so a label is a statement and not a way in. */
   private refreshParamSummary(): void {
     this.paramSummary.hidden = !this.labelsShown
+    // The reading's chip is in the strip when the strip is shown, under the picture when it is not (see showReadingFindings).
+    this.readingFindingsElement.hidden = !this.readingEntry || this.labelsShown
     if (!this.labelsShown) {
       this.paramSummary.replaceChildren()
       this.summarySignature = ""
@@ -1362,8 +1480,14 @@ export class SightingElement extends HTMLElement {
     // The assessments last: it is what was made of the recording, and reads after it. They come
     // from the assessors rather than from the file, so they are held here and appended (see
     // runAssessments) instead of being emitted by the summary.
+    const stated = this.summaryBuilder?.entriesFor(sighting, this.sceneElement.ufoElement.currentTime, { roadGradeDeg: this.sceneElement.roadGradeDeg }) ?? []
+    // The reading on show, in the Summary's box after the description: what it comes to, its tests a click away as the description's text.
+    const lastSummary = stated.map(entry => entry.group).lastIndexOf("summary")
+    const reading = this.readingEntry ? [this.readingEntry] : []
     const entries = [
-      ...(this.summaryBuilder?.entriesFor(sighting, this.sceneElement.ufoElement.currentTime, { roadGradeDeg: this.sceneElement.roadGradeDeg }) ?? []),
+      ...stated.slice(0, lastSummary + 1),
+      ...reading,
+      ...stated.slice(lastSummary + 1),
       ...this.assessmentEntries
     ]
     const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.full ?? ""}${entry.fromSource ? "*" : ""}`).join("|")
@@ -1414,13 +1538,15 @@ export class SightingElement extends HTMLElement {
 
   /** The whole description on show in place of the chips, while one has been opened from its chip. */
   private openDescription: string | undefined
+  /** The name of the chip whose text is open (the description's, a reading's): what the open text is headed with. */
+  private openDescriptionTitle: string | undefined
 
   private syncDescription(entries: SummaryEntry[]): void {
     // A description that is no longer the recording's (another observer, another language) closes.
     if (this.openDescription !== undefined && !entries.some(entry => entry.full === this.openDescription)) {
       this.openDescription = undefined
     }
-    SummaryDescription.sync(this.paramSummary, this.openDescription, (this.messages?.summaryDescription ?? ""),
+    SummaryDescription.sync(this.paramSummary, this.openDescription, this.openDescriptionTitle ?? (this.messages?.summaryDescription ?? ""),
       (this.messages?.closeDescription ?? ""), () => {
         this.openDescription = undefined
         this.syncDescription(entries)
@@ -1437,6 +1563,7 @@ export class SightingElement extends HTMLElement {
       item.setAttribute("role", "button")
       const open = () => {
         this.openDescription = entry.full
+        this.openDescriptionTitle = entry.label
         this.syncDescription([entry])
       }
       item.addEventListener("click", open)

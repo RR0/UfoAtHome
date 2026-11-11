@@ -464,6 +464,48 @@ describe("SightingElement", () => {
     expect(element.scene.interpretation?.title).toBe("Own")
   })
 
+  it("shows a reading of the case whole, in its own recording, with what it was tested against, and the account again after", async () => {
+    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }] }
+    const johnUrl = new URL("john.json", location.href).href
+    const readingUrl = new URL("reading.json", location.href).href
+    // Another hour, which is the reading's claim: its scene is not the account's.
+    const reading = {
+      ...withId, id: "reading", time: "1948-07-24T05:00", timeline: { keyframes: [] },
+      interpretation: { title: "Later", bodies: [], findings: [{ text: { en: "The Sun is too low" }, outcome: "fails", against: "supposed" }] }
+    }
+    stubFetch({
+      "case.json": { events: [{ ...sightingEvent("john.json"), id: "chiles" }, { type: "event", eventType: "sighting", interpretationOf: "chiles", title: "Later", url: "reading.json" }] },
+      [johnUrl]: withId, [readingUrl]: reading
+    })
+    const element = await connect("case.json")
+    const shadow = element.shadowRoot!
+    const select = shadow.getElementById("interpretation") as HTMLSelectElement
+    const findings = shadow.getElementById("reading-findings") as HTMLElement
+    expect(findings.hidden).toBe(true)
+    select.value = "case-0"
+    select.dispatchEvent(new Event("change"))
+    await waitFor(() => element.scene.ufoElement.sighting.id === "reading")
+    // Drawn with the account's phenomenon, to be compared with: the reading states none of its own.
+    expect(element.scene.ufoElement.sighting.timeline.allKeyframes.length).toBe(johnSighting.timeline.keyframes.length)
+    expect(findings.hidden).toBe(false)
+    expect(findings.dataset.verdict).toBe("unsettled")
+    // In a chip, as the description: its verdict and how many tests, the tests a click away.
+    const chip = shadow.getElementById("reading-chip") as HTMLButtonElement
+    expect(chip.textContent).toBe("Not settled · 1 finding")
+    const list = shadow.getElementById("reading-findings-list") as HTMLElement
+    expect(list.hidden).toBe(true)
+    chip.click()
+    expect(list.hidden).toBe(false)
+    expect(findings.querySelector("li")!.textContent).toContain("The Sun is too low")
+    // Editing opens the reading shown, in its case.
+    expect(element.editorHref).toContain(encodeURIComponent(readingUrl))
+
+    select.value = "account"
+    select.dispatchEvent(new Event("change"))
+    await waitFor(() => element.scene.ufoElement.sighting.id === "1948-07-24-ChilesClarence")
+    expect(findings.hidden).toBe(true)
+  })
+
   it("offers the variants the recording keeps, by verdict, as chips under the render that strike what each moves", async () => {
     const variant = (candidate: string, verdict: string, cost: number) => ({
       title: `Variant: ${candidate}`, bodies: [],
