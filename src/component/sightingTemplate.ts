@@ -565,9 +565,14 @@ ${SummaryDescription.CSS}
 .share-scope[hidden], .share-scope label[hidden] {
   display: none;
 }
+/* As wide as what it names, and no wider than the dialog: "T1, at the GEIPAN simulation" is not "T1, at the GEIPAN simulatior". */
+.share-scope label {
+  max-width: 100%;
+}
 .share-scope select {
   font: inherit;
-  max-width: 14em;
+  field-sizing: content;
+  max-width: 100%;
 }
 .share-flags {
   display: grid;
