@@ -13182,6 +13182,7 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
     // Alt held: the view of this instant alone (see ObserverKeyframe.viewOnly), the camera's turn to and from it left out of the picture —
     // a pose drawn over a camera whipped round between keys a tenth of a second apart smeared the whole scene. Let go: a key like any other.
+    this.showViewDragHint(event.altKey)
     const track = this.ufoElement.sighting.observerTrack
     const t = this.ufoElement.currentTime
     const key = track.allKeyframes.find(keyframe => keyframe.t === t)
@@ -13191,6 +13192,19 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
+  /**
+   * Says over the scene, while its view is turned by a drag, what Alt does to the key the drag sets (see ObserverKeyframe.viewOnly): the one
+   * thing about the gesture that nothing else on the screen tells. `altKey` undefined takes the saying away, at the end of the drag.
+   */
+  private showViewDragHint(altKey: boolean | undefined): void {
+    const hint = this.shadow.getElementById("view-drag-hint")
+    if (!hint) return
+    hint.hidden = altKey === undefined
+    if (altKey === undefined) return
+    hint.textContent = altKey ? this.messages.viewDragHintHeld : this.messages.viewDragHint
+    hint.toggleAttribute("data-held", altKey)
+  }
+
   private endDrag(): void {
     if (this.referenceDragState) {
       this.endReferenceDrag()
@@ -13198,6 +13212,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     if (!this.dragState && !this.cameraDragState) return
     if (this.cameraDragState && !this.cameraDragState.insideDecor) this.sceneElement.setCompassForced(false)
+    this.showViewDragHint(undefined)
     this.dragState = undefined
     this.cameraDragState = undefined
     // Back to whatever the pointer was over before the drag started (see hoverCursor) — the next

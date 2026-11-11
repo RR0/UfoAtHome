@@ -371,6 +371,10 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   expandTracks: string
   /** The grip under the scene: what dragging it does. */
   resizeScene: string
+  /** Said over the scene while its view is turned by a drag: what Alt does to the key it sets (see ObserverKeyframe.viewOnly), and that it
+   * does it while held. */
+  viewDragHint: string
+  viewDragHintHeld: string
   /** The recording is not saved, and why: "{reasons}" the reasons below, joined. */
   saveRefused: string
   /** An id of several things of the recording: {id}, and {kinds} what has it. */

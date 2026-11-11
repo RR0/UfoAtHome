@@ -2266,6 +2266,26 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     expect(element.sightingData.timeline.keyframes[0].shapes[0].shape.bounds).toEqual({ x: 100, y: 100, width: 20, height: 20 })
   })
 
+  it("with Alt held, a landscape drag sets the view of its instant alone, and says so while it turns", async () => {
+    const element = await mount()
+    element.sightingData = oneShapeJson()
+    const canvas = nestedCanvas(element)
+    const hint = element.shadowRoot!.getElementById("view-drag-hint")!
+    canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 300, clientY: 300 }))
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 340, clientY: 300 }))
+    // While the view turns: what Alt would do.
+    expect(hint.hidden).toBe(false)
+    expect(hint.hasAttribute("data-held")).toBe(false)
+    document.dispatchEvent(new MouseEvent("pointermove", { clientX: 400, clientY: 300, altKey: true }))
+    expect(hint.hasAttribute("data-held")).toBe(true)
+    document.dispatchEvent(new MouseEvent("pointerup", { clientX: 400, clientY: 300, altKey: true }))
+    expect(hint.hidden).toBe(true)
+    expect(element.sightingData.observerTrack?.keyframes[0].viewOnly).toBe(true)
+    // Again without Alt: a key like any other.
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 320, y: 300 })
+    expect(element.sightingData.observerTrack?.keyframes[0].viewOnly).toBeUndefined()
+  })
+
   it("a landscape drag wraps heading past 360 back to 0, same as typing it", async () => {
     const element = await mount()
     element.sightingData = {

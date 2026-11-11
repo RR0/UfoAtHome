@@ -231,6 +231,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   events: eventsMessages_en,
   expandTracks: "Expand the tracks",
   resizeScene: "Drag to make the scene taller or shorter (double-click: back to its own size)",
+  viewDragHint: "Alt: the view of this instant alone, not smeared by the pose",
+  viewDragHintHeld: "The view of this instant alone: the camera's turn is not smeared",
   saveRefused: "Not saved: {reasons}.",
   duplicateId: "“{id}” is the id of several things ({kinds})",
   unknownWho: "event no. {n} ({kind}) is about “{id}”, which nothing has as its id",

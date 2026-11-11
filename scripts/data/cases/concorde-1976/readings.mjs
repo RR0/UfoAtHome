@@ -57,7 +57,13 @@ export const READINGS = [
         es: "Su descenso requeriría un factor de unos +4,4; los de un objetivo de cámara van de −1,4 a +0,65.",
         it: "La sua discesa richiederebbe un fattore di circa +4,4; quelli di un obiettivo da camera vanno da −1,4 a +0,65."
       }),
-      fails(SUN_SUPPOSED, 'supposed')
+      fails(SUN_SUPPOSED, 'supposed'),
+      fails({
+        fr: "Rien ne se voit, et pas seulement avec ce Soleil : pour éclairer l'avion comme le film, le Soleil devait être à au moins 75° de l'axe (85° au plus près, à 15° de haut), quels que soient la date, l'heure, le lieu ou le cap ; la lumière d'un objectif simple ne porte ses reflets qu'à 43° de l'axe (30° au-delà du cadre, supposé). Aucun reflet n'entre dans le cadre.",
+        en: "Nothing shows, and not only with this Sun: to light the aircraft as the film does, the Sun had to be at least 75° off the axis (85° at the nearest, 15° high), whatever the date, the hour, the place or the heading; a plain lens throws ghosts of light no further than 43° off its axis (30° beyond the frame, supposed). No ghost comes into the frame.",
+        es: "No se ve nada, y no solo con este Sol: para iluminar el avión como la película, el Sol tenía que estar al menos a 75° del eje (85° como mínimo, a 15° de altura), cualesquiera que sean la fecha, la hora, el lugar o el rumbo; un objetivo simple solo da reflejos de una luz a 43° de su eje como mucho (30° más allá del encuadre, supuesto). Ningún reflejo entra en el encuadre.",
+        it: "Non si vede nulla, e non solo con questo Sole: per illuminare l'aereo come il film, il Sole doveva essere ad almeno 75° dall'asse (85° al più vicino, a 15° di altezza), qualunque siano la data, l'ora, il luogo o la rotta; un obiettivo semplice dà riflessi di una luce solo fino a 43° dal suo asse (30° oltre l'inquadratura, supposto). Nessun riflesso entra nell'inquadratura."
+      }, 'supposed')
     ]
   },
   {

@@ -231,6 +231,8 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   events: eventsMessages_es,
   expandTracks: "Desplegar las pistas",
   resizeScene: "Arrastrar para agrandar o reducir la escena (doble clic: tamaño original)",
+  viewDragHint: "Alt: la vista de este solo instante, sin barrido de la exposición",
+  viewDragHintHeld: "La vista de este solo instante: el giro de la cámara no se barre",
   saveRefused: "No guardado: {reasons}.",
   duplicateId: "«{id}» es el id de varias cosas ({kinds})",
   unknownWho: "el evento n.º {n} ({kind}) trata de «{id}», que nada tiene como id",

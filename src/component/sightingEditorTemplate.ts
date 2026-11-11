@@ -49,6 +49,8 @@ export const html = `
 <div id="scene-controls" class="scene-controls"></div>
 </div>
 <div id="ufo-slot"></div>
+<!-- What Alt does while the view is turned by a drag (see SightingEditorElement.showViewDragHint). -->
+<p id="view-drag-hint" class="view-drag-hint" role="status" hidden></p>
 <div class="toolbar playback-row">
   <button id="play-pause" type="button" class="icon-btn" data-icon="▶">${Icons.PLAY}</button>
   <!-- The sound: the player's own button is hidden here with its controls (see SightingEditorElement.syncSoundControls), and stands where the player has it: between play and the time. -->
@@ -2181,6 +2183,10 @@ ${EditorTheme.fields(".app")}
 /* The scene, with nothing over it at rest (see the design handoff, §3.2): its toggles and its timeline show while the pointer is
    over it, while one of them has the focus, and for a moment after a touch (data-shown, see SightingEditorElement.showOverlays). */
 .scene-card { position: relative; }
+.scene-card > .view-drag-hint { position: absolute; z-index: 4; top: 10px; left: 10px; max-width: calc(100% - 80px); margin: 0; padding: 4px 9px;
+  border-radius: 6px; background: rgba(0, 0, 0, .62); color: #e8ecf4; font: 500 12px/1.4 var(--sans); pointer-events: none; }
+.scene-card > .view-drag-hint[data-held] { background: rgba(0, 0, 0, .72); color: #fff; font-weight: 600; }
+.scene-card > .view-drag-hint[hidden] { display: none; }
 .scene-card > .render-line, .scene-card > .playback-row {
   position: absolute; z-index: 4; opacity: 0; pointer-events: none; transition: opacity .15s ease;
 }
