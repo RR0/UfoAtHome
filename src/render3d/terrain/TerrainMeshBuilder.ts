@@ -8,6 +8,7 @@ import { geoToLocalMeters, localMetersToGeo } from "./GeoProjection.js"
 import { fractionWithinBounds } from "./TileMath.js"
 import type { WaterProvider, WaterSurface } from "./WaterProvider.js"
 import { WaterBeds } from "./WaterBeds.js"
+import { TerrainReach } from "./TerrainReach.js"
 
 /**
  * How many quads across the patch, and so how far apart its vertices stand: 900 m of radius over
@@ -134,8 +135,9 @@ export async function buildTerrainMesh(
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
   const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
-  // Asked at once, with the ground: a refusal is no water, and never a failed patch.
-  const waterAsked = ring ? undefined : providers.water?.getWater(bounds).catch((error: unknown) => {
+  // Asked at once, with the ground: a refusal is no water, and never a failed patch. Not for a patch past ROADS_MAX_RADIUS_M (someone flying):
+  // at its tens of metres a pixel a bed is not worth pressing, and the scene's snapshots hold no water for it either (see TerrainSnapshotTaker).
+  const waterAsked = ring || radiusM > TerrainReach.ROADS_MAX_RADIUS_M ? undefined : providers.water?.getWater(bounds).catch((error: unknown) => {
     console.warn("Water unavailable, drawing none:", error)
     return [] as WaterSurface[]
   })

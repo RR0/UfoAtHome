@@ -150,6 +150,15 @@ describe("buildTerrainMesh and a source with a finer ground", () => {
     await expect(buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: lopsided, imagery: new BlankImagery() })).rejects.toThrow(/square/)
   })
 
+  it("asks for no water for a patch built round someone flying, which no snapshot holds either", async () => {
+    let asked = 0
+    const water: WaterProvider = { attribution: "test water", getWater: async () => { asked++; return [] } }
+    await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: new FlatElevation(), imagery: new BlankImagery(), water }, 12000)
+    expect(asked).toBe(0)
+    await buildTerrainMesh(OBSERVER_LAT, OBSERVER_LNG, { elevation: new FlatElevation(), imagery: new BlankImagery(), water }, 900)
+    expect(asked).toBe(1)
+  })
+
   it("presses the ground inside the water a map draws down to its level, and hands the water on to be drawn", async () => {
     // A pond east of the observer, 200 m to 400 m out, on ground that dips to 3 m below the plateau in its middle.
     const pond = (east: number, north: number) => ({ lat: OBSERVER_LAT + north / 111320, lng: OBSERVER_LNG + east / (111320 * Math.cos(OBSERVER_LAT * Math.PI / 180)) })
