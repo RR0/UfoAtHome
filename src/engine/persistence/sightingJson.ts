@@ -139,6 +139,8 @@ export interface SightingRecordingJson {
   sampleMs?: number
   /** See Sighting.lens. */
   lens?: LensStateJson
+  /** What the picture shows of the light it was taken in — see SightingLighting. Absent: nothing is said of it. */
+  lighting?: SightingLighting
   /** How bright the night sky is at the place, towns and all: the zenith of a moonless night in
    * magnitudes per square arcsecond, a Sky Quality Meter's reading or the World Atlas's "SQM" figure
    * (Falchi et al. 2016) — see Sighting.lightPollution. 22.0 is a natural sky. Absent means a natural sky. */
@@ -261,6 +263,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     metering: sighting.metering,
     sampleMs: sighting.sampleMs,
     lens: sighting.lens,
+    lighting: sighting.lighting,
     lightPollution: sighting.lightPollution,
     observerMap: sighting.observerMap,
     interpretation: expanded ? SightingPositions.restatedInterpretation(sighting) : RecordingEvents.writtenInterpretation(sighting, SightingPositions.restatedInterpretation(sighting)),
@@ -350,6 +353,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.metering = json.metering
   sighting.sampleMs = json.sampleMs
   sighting.lens = json.lens
+  sighting.lighting = json.lighting
   sighting.lightPollution = json.lightPollution
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
@@ -401,4 +405,19 @@ class SightingJsonPlaces {
     const name = locations.find(location => location.name)?.name
     return { ...(name === undefined ? {} : { name }), locations: locations.map(({ lat, lng }) => ({ lat, lng })) }
   }
+}
+
+/**
+ * What a picture shows of the light it was taken in, when that says where the Sun was: a side lit and a side in shade, a shadow cast.
+ *
+ * It is the picture's to say, and it binds whoever reads the observation: a reading may move the date, the hour, the place or the way
+ * the instrument looked within what is known of each, but the Sun they put together has to light the scene as the picture shows it (see
+ * ReadingCheck). So the date, the hour and the place are not bounded each on its own by it: moving one moves what the others may be.
+ */
+export interface SightingLighting {
+  /** Where the Sun was, degrees clockwise from the way the instrument looked (its heading at the start): from `fromDeg` clockwise to
+   * `toDeg`, so that { fromDeg: 105, toDeg: 285 } is the half of the sky behind it, on its right and on its left. */
+  sunFromViewDeg?: { fromDeg: number, toDeg: number }
+  /** How high the Sun was above the horizon, degrees. */
+  sunAltitudeDeg?: { minDeg: number, maxDeg: number }
 }

@@ -40,7 +40,17 @@ export interface StatedValue<T = unknown> {
    * is what selects the law of its error. Absent means an unqualified estimate.
    */
   how?: string
+  /**
+   * How far what is known lets it be, when that is less than nothing and more than the value: a number's least and greatest
+   * (`[50.5, 51.6]`), or a time's EDTF interval (`"1976-06/1976-07"`, the sources' June or July). The value is the one chosen within it
+   * to draw the scene; a reading of the observation may move it anywhere within it, and contradicts what is known beyond (see
+   * ReadingCheck). Absent: a stated, derived or measured value is what is known; an assumed one is free.
+   */
+  range?: ValueRange
 }
+
+/** See StatedValue.range. */
+export type ValueRange = [number, number] | string
 
 /** What is known about one path, once the value has been taken out of it. */
 export interface ProvenanceEntry {
@@ -48,6 +58,8 @@ export interface ProvenanceEntry {
   rationale?: string
   /** See StatedValue.how. */
   how?: string
+  /** See StatedValue.range. */
+  range?: ValueRange
   /**
    * The value this was said ABOUT, kept so the saying can expire.
    *
@@ -107,7 +119,7 @@ export class Provenance {
   /** Records what is known about `path`. A "stated" entry with no rationale is dropped rather than
    * stored: it is the default, and writing it would put noise in every file. */
   set(path: string, entry: ProvenanceEntry): void {
-    if (entry.basis === "stated" && entry.rationale === undefined && entry.how === undefined) {
+    if (entry.basis === "stated" && entry.rationale === undefined && entry.how === undefined && entry.range === undefined) {
       this.entries.delete(path)
     } else {
       this.entries.set(path, entry)
@@ -170,7 +182,8 @@ export class Provenance {
         value,
         ...(entry.basis === "stated" ? {} : { basis: entry.basis }),
         ...(entry.rationale === undefined ? {} : { rationale: entry.rationale }),
-        ...(entry.how === undefined ? {} : { how: entry.how })
+        ...(entry.how === undefined ? {} : { how: entry.how }),
+        ...(entry.range === undefined ? {} : { range: entry.range })
       } satisfies StatedValue
     }
     return restored as unknown as T
@@ -191,6 +204,7 @@ export class Provenance {
         basis: value.basis ?? "stated",
         ...(value.rationale === undefined ? {} : { rationale: value.rationale }),
         ...(value.how === undefined ? {} : { how: value.how }),
+        ...(value.range === undefined ? {} : { range: value.range }),
         of: value.value
       })
       // Recur: a wrapped object may hold wrapped fields of its own.

@@ -78,10 +78,10 @@ export const READINGS = [
         it: "I prismi e lo stabilizzatore di un periscopio non rispettano per forza il fattore fisso di un obiettivo semplice; la loro geometria non è nota, e Patrick Gross attribuisce allo stabilizzatore il percorso proprio del riflesso."
       }),
       fails({
-        fr: "Le Soleil supposé est à 130° à gauche du cap, hors de portée de tout élément frontal ; l'heure, le cap et la date sont supposés, et l'éclairage du fuselage sur le film les a fixés ainsi.",
-        en: "The supposed Sun is 130° left of the heading, beyond any front element's reach; the hour, the heading and the date are supposed, and the fuselage's lighting on the film is what set them so.",
-        es: "El Sol supuesto está a 130° a la izquierda del rumbo, fuera del alcance de cualquier elemento frontal; la hora, el rumbo y la fecha son supuestos, y la iluminación del fuselaje en la película los fijó así.",
-        it: "Il Sole supposto è a 130° a sinistra della rotta, fuori dalla portata di qualsiasi elemento frontale; l'ora, la rotta e la data sono supposte, e l'illuminazione della fusoliera sul film le ha fissate così."
+        fr: "Pour éclairer l'avion comme le film (du côté de la caméra), le Soleil devait être à 105°-285° de la direction de visée, soit au moins 75° de l'axe, quelles que soient la date, l'heure, le lieu ou le cap : le périscope devrait recevoir une lumière aussi oblique sur son élément frontal. La portée supposée par le moteur s'arrête à 43° de l'axe (30° au-delà du cadre) ; celle d'un Astrovision n'est pas connue.",
+        en: "To light the aircraft as the film does (on the camera's side), the Sun had to be 105° to 285° from the way the camera looked, at least 75° off its axis, whatever the date, the hour, the place or the heading: the periscope would have to take light that oblique on its front element. The reach the engine supposes stops at 43° off the axis (30° beyond the frame); an Astrovision's is not known.",
+        es: "Para iluminar el avión como la película (del lado de la cámara), el Sol tenía que estar a 105°-285° de la dirección de mira, al menos a 75° del eje, cualesquiera que sean la fecha, la hora, el lugar o el rumbo: el periscopio tendría que recibir una luz tan oblicua en su elemento frontal. El alcance que supone el motor se detiene a 43° del eje (30° más allá del encuadre); el de un Astrovision no se conoce.",
+        it: "Per illuminare l'aereo come il film (dal lato della camera), il Sole doveva essere a 105°-285° dalla direzione di mira, almeno a 75° dall'asse, qualunque siano la data, l'ora, il luogo o la rotta: il periscopio dovrebbe ricevere una luce così obliqua sul suo elemento frontale. La portata che il motore suppone si ferma a 43° dall'asse (30° oltre l'inquadratura); quella di un Astrovision non è nota."
       }, 'supposed')
     ]
   },

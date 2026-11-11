@@ -12,6 +12,8 @@ import { AppLocation } from "./AppLocation.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
+import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
+import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
@@ -419,6 +421,8 @@ export class CaseEditorElement extends HTMLElement {
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
+    // A reading edited is set against its account again: what it took beyond what is known shows on the fields at once.
+    this.editor.addEventListener("sightingchange", () => this.checkReading())
     // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
     this.editor.guardsLeaving = false
     // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
@@ -603,11 +607,12 @@ export class CaseEditorElement extends HTMLElement {
     const token = ++this.localeToken
     const preferences = HostLocale.preferencesFor(this)
     const language = selectLocale(preferences, UFO_SUPPORTED_LANGUAGES) as UfoLanguage
-    const [messages, editorMessages] = await Promise.all([CASE_EDITOR_MESSAGES.load(language), SIGHTING_EDITOR_MESSAGES.load(language)])
+    const [messages, editorMessages, checkWords] = await Promise.all([CASE_EDITOR_MESSAGES.load(language), SIGHTING_EDITOR_MESSAGES.load(language), READING_CHECK_TEXTS.load(language)])
     if (token !== this.localeToken) return
     this.said = new SaidTexts(preferences)
     this.language = language
     this.messages = messages
+    this.readingCheck = new ReadingCheck(checkWords)
     this.caseDate.messages = editorMessages
     this.editorMessages = editorMessages
     this.applyMessages()
@@ -913,6 +918,7 @@ export class CaseEditorElement extends HTMLElement {
       this.editor.readings = readings.filter(reading => reading.recording?.interpretation?.bodies.length || InterpretationKinds.computes(reading.recording?.interpretation, InterpretationRegistry.kinds()))
         .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: reading.recording!.interpretation! }))
       this.editor.sightingData = structuredClone(track.recording!)
+      this.checkReading()
       // What the editor holds right after loading is what "changed" is measured from: it does not
       // write a recording back byte for byte, and a track only looked at is not one to write.
       if (fresh) session.keep(track, this.editor.sightingData, true)
@@ -925,6 +931,25 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   private passagesToken = 0
+
+  /**
+   * Marks on the reading on show the fields of the values it took beyond what is known of its account's (see ReadingCheck): its time and
+   * place outside their ranges, and the hour for a Sun that does not light the scene as the picture does (the hour is what moving the
+   * Sun usually means, though the place and the heading move it too, as the field's title says). Nothing on an account.
+   */
+  private checkReading(): void {
+    const track = this.current
+    const account = track && this.session ? this.session.accountOf(track) : undefined
+    if (!track || track.kind !== "reading" || !account?.recording) {
+      this.editor.markBeyondKnown([])
+      return
+    }
+    const failed = (this.readingCheck?.findingsOf(account.recording, this.editor.sightingData) ?? []).filter(finding => finding.outcome === "fails" && finding.path)
+    this.editor.markBeyondKnown(failed.map(finding => ({
+      path: finding.path === "lighting" ? "time" : finding.path!,
+      why: this.said.read(finding.text as never) ?? ""
+    })))
+  }
 
   /** The transcript of an interview of the case as an object: what the author edited, else the file at its address (relative to the case). */
   private async transcriptOf(interview: InterviewEvent): Promise<InterviewJson | undefined> {
@@ -1228,17 +1253,27 @@ export class CaseEditorElement extends HTMLElement {
    * fetched for the card and the list drawn again then. Nothing while it is on its way, or when it could not be read.
    */
   private findingsOf(track: CaseTrack): ReadingFinding[] | undefined {
-    if (!track.recording) {
-      if (!this.fetchingFindings.has(track)) {
-        this.fetchingFindings.add(track)
-        this.loadTrack(track).then(() => this.refreshOverview(), () => undefined)
+    const account = this.session?.accountOf(track)
+    const missing = [track, account].filter((needed): needed is CaseTrack => needed !== undefined && !needed.recording)
+    if (missing.length > 0) {
+      for (const needed of missing) {
+        if (this.fetchingFindings.has(needed)) continue
+        this.fetchingFindings.add(needed)
+        this.loadTrack(needed).then(() => this.refreshOverview(), () => undefined)
       }
-      return undefined
+      if (!track.recording) return undefined
     }
-    return track.recording.interpretation?.findings
+    const written = track.recording!.interpretation?.findings ?? []
+    // What comes of it by itself, set against the account it reads: its values within what is known of the account's, its Sun lighting
+    // the scene as the picture does (see ReadingCheck). Written first, the author's own tests.
+    const checked = account?.recording && this.readingCheck ? this.readingCheck.findingsOf(account.recording, track.recording!) : []
+    return [...written, ...checked]
   }
 
   private readonly fetchingFindings = new WeakSet<CaseTrack>()
+
+  /** What sets a reading against its account, in the reader's language: none before the words have come. */
+  private readingCheck?: ReadingCheck
 
   /** A reading's tests, each with its mark (holds ✓, fails ✗, could not be made ?) and, for a failure, what it failed against. */
   private findingsList(findings: readonly ReadingFinding[]): HTMLUListElement {

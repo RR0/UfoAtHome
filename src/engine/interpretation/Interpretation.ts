@@ -73,6 +73,9 @@ export interface ReadingFinding {
   against?: FindingGround
   /** Where the measure or the argument comes from, when it is not the text itself. */
   rationale?: string
+  /** The value of the recording it is about, as a path ("time", "place.locations.0.lat", "lighting"), when it is about one: the field an
+   * editor marks when it fails. */
+  path?: string
 }
 
 /** What makes an interpretation a variant of the account — see InterpretationJson.variant. */

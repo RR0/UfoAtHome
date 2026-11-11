@@ -37,17 +37,52 @@
   "Astrovision",
   "interpretation"
  ],
- "time": "1976-06-15T16:00:00",
+ "time": {
+  "value": "1976-06-15T16:00:00",
+  "basis": "assumed",
+  "range": "1976-06/1976-07",
+  "rationale": "June 1976 (Patrick Gross), June or July in other sources; the day is supposed, the hour chosen for the light on the aircraft"
+ },
  "utcOffsetHours": 0,
  "durationSeconds": 5.35,
  "place": {
   "name": "Southern England (supposed)",
   "locations": [
    {
-    "lat": 51,
-    "lng": -1.5
+    "lat": {
+     "value": 51,
+     "basis": "assumed",
+     "range": [
+      50,
+      52
+     ],
+     "rationale": "\"Over southern England\": the coast to the Midlands"
+    },
+    "lng": {
+     "value": -1.5,
+     "basis": "assumed",
+     "range": [
+      -5.7,
+      1.8
+     ],
+     "rationale": "\"Over southern England\": Cornwall to Kent"
+    }
    }
   ]
+ },
+ "lighting": {
+  "value": {
+   "sunFromViewDeg": {
+    "fromDeg": 105,
+    "toDeg": 285
+   },
+   "sunAltitudeDeg": {
+    "minDeg": 0,
+    "maxDeg": 90
+   }
+  },
+  "basis": "derived",
+  "rationale": "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading"
  },
  "description": {
   "fr": "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",
@@ -1582,10 +1617,10 @@
    },
    {
     "text": {
-     "fr": "Le Soleil supposé est à 130° à gauche du cap, hors de portée de tout élément frontal ; l'heure, le cap et la date sont supposés, et l'éclairage du fuselage sur le film les a fixés ainsi.",
-     "en": "The supposed Sun is 130° left of the heading, beyond any front element's reach; the hour, the heading and the date are supposed, and the fuselage's lighting on the film is what set them so.",
-     "es": "El Sol supuesto está a 130° a la izquierda del rumbo, fuera del alcance de cualquier elemento frontal; la hora, el rumbo y la fecha son supuestos, y la iluminación del fuselaje en la película los fijó así.",
-     "it": "Il Sole supposto è a 130° a sinistra della rotta, fuori dalla portata di qualsiasi elemento frontale; l'ora, la rotta e la data sono supposte, e l'illuminazione della fusoliera sul film le ha fissate così."
+     "fr": "Pour éclairer l'avion comme le film (du côté de la caméra), le Soleil devait être à 105°-285° de la direction de visée, soit au moins 75° de l'axe, quelles que soient la date, l'heure, le lieu ou le cap : le périscope devrait recevoir une lumière aussi oblique sur son élément frontal. La portée supposée par le moteur s'arrête à 43° de l'axe (30° au-delà du cadre) ; celle d'un Astrovision n'est pas connue.",
+     "en": "To light the aircraft as the film does (on the camera's side), the Sun had to be 105° to 285° from the way the camera looked, at least 75° off its axis, whatever the date, the hour, the place or the heading: the periscope would have to take light that oblique on its front element. The reach the engine supposes stops at 43° off the axis (30° beyond the frame); an Astrovision's is not known.",
+     "es": "Para iluminar el avión como la película (del lado de la cámara), el Sol tenía que estar a 105°-285° de la dirección de mira, al menos a 75° del eje, cualesquiera que sean la fecha, la hora, el lugar o el rumbo: el periscopio tendría que recibir una luz tan oblicua en su elemento frontal. El alcance que supone el motor se detiene a 43° del eje (30° más allá del encuadre); el de un Astrovision no se conoce.",
+     "it": "Per illuminare l'aereo come il film (dal lato della camera), il Sole doveva essere a 105°-285° dalla direzione di mira, almeno a 75° dall'asse, qualunque siano la data, l'ora, il luogo o la rotta: il periscopio dovrebbe ricevere una luce così obliqua sul suo elemento frontale. La portata che il motore suppone si ferma a 43° dall'asse (30° oltre l'inquadratura); quella di un Astrovision non è nota."
     },
     "outcome": "fails",
     "against": "supposed"

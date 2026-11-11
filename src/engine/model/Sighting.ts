@@ -1,5 +1,6 @@
 import { DurationText } from "./DurationText.js"
 import type { LensStateJson } from "../instrument/LensGhost.js"
+import type { SightingLighting } from "../persistence/sightingJson.js"
 import type { ObserverVehicle } from "./Vehicle.js"
 import { Timeline } from "./Timeline.js"
 import { ObserverTrack } from "./ObserverTrack.js"
@@ -546,6 +547,9 @@ export class Sighting {
    * the recording leaves on an unsheltered glass. Meaningless for an eye.
    */
   lens?: LensStateJson
+
+  /** What the picture shows of the light it was taken in — see SightingLighting. */
+  lighting?: SightingLighting
 
   /**
    * The vehicle the observer was in, when it is not drawn — see ObserverVehicle. Heard from inside,

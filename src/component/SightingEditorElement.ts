@@ -788,6 +788,39 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private isReading = false
+
+  /** The fields of the values a recording names by path (see ReadingFinding.path): what a reading may only move within what is known. */
+  private static readonly FIELDS_OF_PATH: Record<string, readonly string[]> = {
+    "time": ["obs-time", "obs-time-native"],
+    "place.locations.0.lat": ["lat"],
+    "place.locations.0.lng": ["lng"]
+  }
+
+  /**
+   * Marks invalid the fields of the values a reading took beyond what is known of the account's (see ReadingCheck), each with why: their
+   * group shows it in red, as for any field in error. Set by whoever holds the account (see CaseEditorElement); what was marked before and
+   * is no longer is cleared, and nothing else of a field's own validity is touched.
+   */
+  markBeyondKnown(beyond: readonly { path: string, why: string }[]): void {
+    for (const { field, title } of this.markedBeyondKnown) {
+      field.removeAttribute("aria-invalid")
+      if (title === null) field.removeAttribute("title")
+      else field.setAttribute("title", title)
+    }
+    this.markedBeyondKnown = []
+    for (const { path, why } of beyond) {
+      for (const id of SightingEditorElement.FIELDS_OF_PATH[path] ?? []) {
+        const field = this.shadow.getElementById(id)
+        if (!field) continue
+        this.markedBeyondKnown.push({ field, title: field.getAttribute("title") })
+        field.setAttribute("aria-invalid", "true")
+        field.setAttribute("title", why)
+      }
+    }
+  }
+
+  /** The fields markBeyondKnown marked, each with the title it had before. */
+  private markedBeyondKnown: { field: HTMLElement, title: string | null }[] = []
   /** The shapes a body of this recording can stand for when they are not its own: those of the account it reads. */
   accountShapeIds?: readonly string[]
   private readonly labelNarrativeSource: HTMLElement

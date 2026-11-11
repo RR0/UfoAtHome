@@ -37,17 +37,52 @@
   "Astrovision",
   "interpretation"
  ],
- "time": "1976-06-15T16:00:00",
+ "time": {
+  "value": "1976-06-15T16:00:00",
+  "basis": "assumed",
+  "range": "1976-06/1976-07",
+  "rationale": "June 1976 (Patrick Gross), June or July in other sources; the day is supposed, the hour chosen for the light on the aircraft"
+ },
  "utcOffsetHours": 0,
  "durationSeconds": 5.35,
  "place": {
   "name": "Southern England (supposed)",
   "locations": [
    {
-    "lat": 51,
-    "lng": -1.5
+    "lat": {
+     "value": 51,
+     "basis": "assumed",
+     "range": [
+      50,
+      52
+     ],
+     "rationale": "\"Over southern England\": the coast to the Midlands"
+    },
+    "lng": {
+     "value": -1.5,
+     "basis": "assumed",
+     "range": [
+      -5.7,
+      1.8
+     ],
+     "rationale": "\"Over southern England\": Cornwall to Kent"
+    }
    }
   ]
+ },
+ "lighting": {
+  "value": {
+   "sunFromViewDeg": {
+    "fromDeg": 105,
+    "toDeg": 285
+   },
+   "sunAltitudeDeg": {
+    "minDeg": 0,
+    "maxDeg": 90
+   }
+  },
+  "basis": "derived",
+  "rationale": "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading"
  },
  "description": {
   "fr": "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",

@@ -856,6 +856,26 @@ describe("CaseEditorElement's events", () => {
     expect(root.getElementById("case-overview")!.hidden).toBe(false)
   })
 
+  it("marks on a reading the time it took beyond what is known of its account's, and clears it once back within", async () => {
+    files["https://example.org/d/dated.json"] = { ...account, time: { value: "1976-06-15T16:00", basis: "assumed", range: "1976-06/1976-07" } }
+    files["https://example.org/d/late.json"] = { ...reading, time: "1976-09-01T16:00" }
+    const element = await open("late.json", {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1976", title: "An account", url: "dated.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", title: { en: "Late" }, url: "late.json" }
+      ]
+    })
+    await wait()
+    const editor = element.sightingEditor
+    const field = editor.shadowRoot!.getElementById("obs-time")!
+    // September, where the sources give June or July: what is known contradicted, on the field, with why.
+    expect(field.getAttribute("aria-invalid")).toBe("true")
+    expect(field.getAttribute("title")).toContain("1976-06/1976-07")
+    editor.sightingData = { ...editor.sightingData, time: "1976-07-02T16:00" }
+    editor.dispatchEvent(new CustomEvent("sightingchange"))
+    expect(field.hasAttribute("aria-invalid")).toBe(false)
+  })
+
   it("says on a reading's card what its findings come to, each test with its mark, the failed ones with what they failed against", async () => {
     const found = {
       ...reading,

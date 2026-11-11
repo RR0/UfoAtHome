@@ -114,10 +114,19 @@ const recording = {
     { t: 4250, label: 'D', note: { en: 'It shows again above the fuselage, rising, as the shot ends.', fr: 'Elle réapparaît au-dessus du fuselage, en montant, à la fin du plan.', es: 'Reaparece sobre el fuselaje, subiendo, al final del plano.', it: 'Riappare sopra la fusoliera, salendo, alla fine della ripresa.' } }
   ],
   tags: ['Concorde', 'lens flare', 'Astrovision'],
-  time: date.toISOString().slice(0, 19),
+  // Only the year and, by the sources, the month are known (Patrick Gross: June 1976; others June or July): the day and the hour are the
+  // ones chosen within, the hour for the light (see lighting). A reading may move them within those two months.
+  time: { value: date.toISOString().slice(0, 19), basis: 'assumed', range: '1976-06/1976-07', rationale: 'June 1976 (Patrick Gross), June or July in other sources; the day is supposed, the hour chosen for the light on the aircraft' },
   utcOffsetHours: 0,
   durationSeconds: round(durationS),
-  place: { name: "Southern England (supposed)", locations: [{ lat: LAT, lng: LNG }] },
+  place: { name: "Southern England (supposed)", locations: [{
+    lat: { value: LAT, basis: 'assumed', range: [50, 52], rationale: '"Over southern England": the coast to the Midlands' },
+    lng: { value: LNG, basis: 'assumed', range: [-5.7, 1.8], rationale: '"Over southern England": Cornwall to Kent' }
+  }] },
+  // What the film shows of the light: the side of the fuselage and of the fin towards the camera is lit. The aircraft flies at 105° from
+  // the way the camera looks (fitted on the film), so the Sun was on the camera's side of its vertical plane: 105° to 285° from the
+  // camera's heading, and above the horizon. It binds a reading's date, hour, place and heading together, not each on its own.
+  lighting: { value: { sunFromViewDeg: { fromDeg: 105, toDeg: 285 }, sunAltitudeDeg: { minDeg: 0, maxDeg: 90 } }, basis: 'derived', rationale: "The fuselage and the fin lit on the camera's side, the aircraft flying at 105° from the camera's heading" },
   description: {
     fr: "Le Concorde de British Airways filmé depuis un Learjet par la caméra périscope Astrovision, et l'orbe qui l'accompagne. Mesurés sur le film : l'inclinaison de la caméra, le défilement du sol, le contraste, la netteté et les poussières de la copie. Ajustés sur le film : l'attitude du Concorde. Supposés : date, heure, lieu, altitude, focale, pellicule, et donc la place du Soleil. Alan Tanner, de l'équipe du film, y voit un reflet du Soleil dans le périscope.",
     en: "British Airways' Concorde filmed from a Learjet through the Astrovision periscope camera, and the orb that goes with it. Measured on the film: the camera's tilt, the ground sliding by, the copy's contrast, softness and dust. Fitted on the film: the Concorde's attitude. Supposed: date, hour, place, height, lens, film stock, hence where the Sun is. Alan Tanner, of the film's crew, sees in it a reflection of the Sun in the periscope.",
