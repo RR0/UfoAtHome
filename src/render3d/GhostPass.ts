@@ -520,15 +520,21 @@ export class GhostPass {
             gl_FragColor = vec4(finish(scene, overlay, lampOf(texel.a)), 1.0);
             return;
           }
-          // Softened by a ring of taps round each pixel: what makes the spread a share of the height is its radius.
-          vec2 spread = 1.41 * uPrintSoftness * vec2(1.0 / uPrintAspect, 1.0);
-          vec3 soft = scene;
+          // Softened as a print is, by a Gaussian of the print's spread (its sigma, a share of the height): the pixel, then two rings
+          // of taps, each weighed by what the Gaussian holds over its own annulus (0-0.5, 0.5-1.5, 1.5-2.5 sigma). A single ring of
+          // eight taps used to stand in for it, and drew eight copies of every edge a few pixels apart: an aircraft that read as shaken.
+          vec2 sigma = uPrintSoftness * vec2(1.0 / uPrintAspect, 1.0);
+          vec3 soft = scene * 0.12290;
           for (int i = 0; i < 8; i++) {
             float angle = float(i) * 0.7853982;
-            vec2 tap = at + spread * vec2(cos(angle), sin(angle));
-            soft += sceneAt(tap, texture2D(uSource, tap) * uGain);
+            vec2 tap = at + sigma * vec2(cos(angle), sin(angle));
+            soft += sceneAt(tap, texture2D(uSource, tap) * uGain) * 0.07294;
           }
-          soft /= 9.0;
+          for (int i = 0; i < 12; i++) {
+            float angle = float(i) * 0.5235988 + 0.2617994;
+            vec2 tap = at + 2.0 * sigma * vec2(cos(angle), sin(angle));
+            soft += sceneAt(tap, texture2D(uSource, tap) * uGain) * 0.02447;
+          }
           if (uMonochrome > 0.5) soft = vec3(dot(soft, vec3(0.2126, 0.7152, 0.0722)));
           // What is laid over the picture is not on the print: a film laid over a reconstruction is already its own print.
           vec3 shown = printed(finish(soft, vec4(0.0), lampOf(texel.a)), at);
