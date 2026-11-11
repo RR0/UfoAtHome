@@ -146,4 +146,17 @@ describe("a light out of the picture", () => {
     expect(LensGhosts.offFrameShare(20 + LensGhosts.OFF_FRAME_REACH_DEG, 20)).toBe(0)
     expect(LensGhosts.offFrameShare(170, 20)).toBe(0)
   })
+
+  it("reaches further through an optic whose front stands out in the open, as far as the recording says", () => {
+    expect(LensGhosts.offFrameShare(85, 17, 90)).toBeGreaterThan(0.1)
+    expect(LensGhosts.offFrameShare(85, 17)).toBe(0)
+    const camera = Instruments.byId("cine-35mm-broadcast")
+    const plain = LensGhosts.optics(camera, 11, undefined)
+    const periscope = LensGhosts.optics(camera, 11, { reachDeg: 90, ghosts: [{ scale: -0.008, share: 2e-3, blur: 0.009, offset: [0, 0.47], cause: "glass" }] })
+    expect(plain.reachDeg).toBe(LensGhosts.OFF_FRAME_REACH_DEG)
+    expect(periscope.reachDeg).toBe(90)
+    // The periscope's ghost besides the lens's own.
+    expect(periscope.ghosts.length).toBe(plain.ghosts.length + 1)
+    expect(periscope.ghosts.at(-1)).toMatchObject({ scale: -0.008, offset: [0, 0.47] })
+  })
 })

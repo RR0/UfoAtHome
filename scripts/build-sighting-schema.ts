@@ -151,6 +151,10 @@ class SchemaBuilder {
     if (single.flags & ts.TypeFlags.StringLike) {
       return { ...field, type: "string" }
     }
+    // A tuple ([r, g, b], [x, y]) is an array too, of a fixed length: written as one in a file, and no object with keys of its own.
+    if (this.checker.isTupleType(single)) {
+      return { ...field, type: "array" }
+    }
     if (this.checker.isArrayType(single)) {
       const element = this.checker.getTypeArguments(single as ts.TypeReference)[0]
       // An array of objects is offered as its element: what a reader needs inside `place: [{…}]`

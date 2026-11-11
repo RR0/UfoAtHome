@@ -62,6 +62,10 @@ export const READINGS = [
   },
   {
     id: 'periscope',
+    // Its best case: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
+    // height the light allows), a periscope head taking light that far out, and the ghost that lays it on the orb at the first instant.
+    sun: { fromViewDeg: 285, altitudeDeg: 15.5 },
+    periscope: { reachDeg: 90, share: 2e-3, blur: 0.009 },
     by: [{ firstNames: ['Alan'], lastName: 'Tanner' }],
     title: {
       fr: "Reflet interne dans le périscope Astrovision : le Soleil, hors champ à gauche, frappe l'élément frontal",
@@ -82,7 +86,13 @@ export const READINGS = [
         en: "To light the aircraft as the film does (on the camera's side), the Sun had to be 105° to 285° from the way the camera looked, at least 75° off its axis, whatever the date, the hour, the place or the heading: the periscope would have to take light that oblique on its front element. The reach the engine supposes stops at 43° off the axis (30° beyond the frame); an Astrovision's is not known.",
         es: "Para iluminar el avión como la película (del lado de la cámara), el Sol tenía que estar a 105°-285° de la dirección de mira, al menos a 75° del eje, cualesquiera que sean la fecha, la hora, el lugar o el rumbo: el periscopio tendría que recibir una luz tan oblicua en su elemento frontal. El alcance que supone el motor se detiene a 43° del eje (30° más allá del encuadre); el de un Astrovision no se conoce.",
         it: "Per illuminare l'aereo come il film (dal lato della camera), il Sole doveva essere a 105°-285° dalla direzione di mira, almeno a 75° dall'asse, qualunque siano la data, l'ora, il luogo o la rotta: il periscopio dovrebbe ricevere una luce così obliqua sul suo elemento frontale. La portata che il motore suppone si ferma a 43° dall'asse (30° oltre l'inquadratura); quella di un Astrovision non è nota."
-      }, 'supposed')
+      }, 'supposed'),
+      fails({
+        fr: "Simulé dans son meilleur cas (le Soleil au plus près que l'éclairage permet, à 285° de la visée et 15,5° de haut, 85° de l'axe ; un périscope qui reçoit la lumière jusque-là ; le reflet posé sur l'orbe au premier instant, facteur −0,008) : le reflet ne bouge que de 7 px dans le cadre, quand l'orbe en parcourt 333. Il reste à 257 px d'elle en médiane, 339 au plus. Un reflet de facteur fixe ne le peut pas ; reste un périscope dont les prismes ne gardent pas de facteur fixe.",
+        en: "Simulated at its best (the Sun as near the front as the light allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a periscope taking light that far out; the ghost laid on the orb at the first instant, factor −0.008): the ghost moves no more than 7 px in the frame, where the orb travels 333. It stays 257 px from it at the median, 339 at most. A ghost of a fixed factor cannot do it; what is left is a periscope whose prisms keep no fixed factor.",
+        es: "Simulado en su mejor caso (el Sol tan cerca del frente como permite la iluminación, a 285° de la mira y 15,5° de altura, a 85° del eje; un periscopio que recibe la luz hasta ahí; el reflejo puesto sobre el orbe en el primer instante, factor −0,008): el reflejo no se mueve más de 7 px en el encuadre, cuando el orbe recorre 333. Queda a 257 px de él en la mediana, 339 como mucho. Un reflejo de factor fijo no puede; queda un periscopio cuyos prismas no guardan un factor fijo.",
+        it: "Simulato nel caso migliore (il Sole il più vicino al fronte che l'illuminazione consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un periscopio che riceve la luce fin lì; il riflesso posto sulla sfera al primo istante, fattore −0,008): il riflesso non si sposta più di 7 px nell'inquadratura, mentre la sfera ne percorre 333. Resta a 257 px da essa in mediana, 339 al massimo. Un riflesso a fattore fisso non può; resta un periscopio i cui prismi non mantengono un fattore fisso."
+      })
     ]
   },
   {

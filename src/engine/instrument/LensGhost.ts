@@ -52,6 +52,16 @@ export interface LensStateJson {
   dirt?: number
   /** Whether the outermost glass was out of the rain or snow: under a roof, behind a windscreen whose wipers run. */
   sheltered?: boolean
+  /**
+   * The ghosts of an optic set before the lens, as stated: a periscope's mirror and prisms, whose geometry no catalogue holds. Added to the
+   * lens's own; each as LensGhost says, its blur at the lens's reference aperture.
+   */
+  ghosts?: LensGhost[]
+  /**
+   * How far beyond the corner of the frame, degrees, a light still strikes the front glass and throws its ghosts: OFF_FRAME_REACH_DEG for a
+   * lens, more for an optic whose front stands out in the open, as a periscope's head. Absent: a lens's.
+   */
+  reachDeg?: number
 }
 
 /** What the scene needs of the lens to lay its ghosts over a picture. */
@@ -75,6 +85,8 @@ export interface LensOptics {
   still: boolean
   /** How readily drops run down the glass, 0 to 1: a pane's run in streams, a lens's small curved front holds them. */
   running: number
+  /** How far beyond the frame's corner a light still strikes the front glass, degrees (see LensStateJson.reachDeg). */
+  reachDeg: number
 }
 
 /**
@@ -121,7 +133,7 @@ export interface RainExposure {
 export class LensGhosts {
 
   /** What an eye lays over its picture: nothing. */
-  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impacts: 0, history: [], still: false, running: 0 }
+  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impacts: 0, history: [], still: false, running: 0, reachDeg: 30 }
 
   /**
    * A phone: few elements, but a sensor and its cover glass close behind them, which send back a ghost mirrored through the centre, small
@@ -180,8 +192,8 @@ export class LensGhosts {
    * How much of a light out of the picture reaches the glass, 0 to 1, from how far it is off the lens's axis and how far the corner of the
    * frame is: all of it up to the corner, none past OFF_FRAME_REACH_DEG beyond. What makes a Sun just out of a shot flare it.
    */
-  static offFrameShare(offAxisDeg: number, cornerDeg: number): number {
-    const x = Math.min(Math.max((offAxisDeg - cornerDeg) / LensGhosts.OFF_FRAME_REACH_DEG, 0), 1)
+  static offFrameShare(offAxisDeg: number, cornerDeg: number, reachDeg: number = LensGhosts.OFF_FRAME_REACH_DEG): number {
+    const x = Math.min(Math.max((offAxisDeg - cornerDeg) / reachDeg, 0), 1)
     return 1 - x * x * (3 - 2 * x)
   }
 
@@ -216,7 +228,7 @@ export class LensGhosts {
     // A ghost of the glass is an image of the aperture: as wide as the aperture is open.
     const reference = instrument.fNumber ?? LensGhosts.REFERENCE_F_NUMBER
     const set = fNumber ?? reference
-    const ghosts: LensGhost[] = own.map(ghost => ({ ...ghost, blur: ghost.blur * reference / set }))
+    const ghosts: LensGhost[] = [...own, ...(lens?.ghosts ?? [])].map(ghost => ({ ...ghost, blur: ghost.blur * reference / set }))
     if (lens?.glass === "filter") ghosts.push({ ...LensGhosts.FILTER })
     else if (lens?.glass === "window") ghosts.push({ ...LensGhosts.WINDOW })
     else if (lens?.glass === "windscreen") ghosts.push({ ...LensGhosts.WINDSCREEN })
@@ -243,7 +255,10 @@ export class LensGhosts {
     // follows too (see Instruments.bladesShowing), so that a Sun is starred exactly when its ghosts have corners.
     const blades = Instruments.bladesShowing(instrument, fNumber) >= 0.5 ? instrument.apertureBlades ?? 0 : 0
     const running = lens?.glass === "window" || lens?.glass === "windscreen" ? 1 : 0.25
-    return { ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impacts, history, still: lens?.drops !== undefined, running }
+    return {
+      ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impacts, history, still: lens?.drops !== undefined, running,
+      reachDeg: lens?.reachDeg ?? LensGhosts.OFF_FRAME_REACH_DEG
+    }
   }
 
   /** Whether drops land on the glass from the rain, rather than being stated or kept off it. */

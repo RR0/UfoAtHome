@@ -6360,7 +6360,8 @@ export class SceneRenderer {
     const aspect = this.camera.aspect
     const share = LensGhosts.offFrameShare(
       Math.atan(Math.hypot(position.x * aspect, position.y) * tanHalfFov) * 180 / Math.PI,
-      Math.atan(Math.hypot(aspect, 1) * tanHalfFov) * 180 / Math.PI
+      Math.atan(Math.hypot(aspect, 1) * tanHalfFov) * 180 / Math.PI,
+      this.ghostOptics.reachDeg
     )
     if (share <= 0) return undefined
     return { x: position.x, y: position.y, radius, flux: [excess[0] * area * share, excess[1] * area * share, excess[2] * area * share] }

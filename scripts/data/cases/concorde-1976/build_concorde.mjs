@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as Astronomy from 'astronomy-engine'
 import { Euler, Quaternion, Vector3 } from 'three'
+import { execFileSync } from 'node:child_process'
 import { READINGS } from './readings.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -150,6 +151,39 @@ const OUT = process.env.OUT ?? join(here, '..', '..', '..', '..', 'public', 'dem
 try { const before = JSON.parse(readFileSync(OUT)); for (const key of ['image', 'snapshots']) if (before[key] !== undefined) recording[key] = before[key] } catch { /* no recording yet */ }
 writeFileSync(OUT, JSON.stringify(recording, null, 1))
 
+// Where the Sun falls in the picture at `ms`, in pixels of the 640 × 480 film, under the camera's pose then: far out of it for a Sun off
+// the frame. What a reading that states a ghost of it needs, said by a run of this script for that reading's Sun (see below).
+const sunPixelAt = ms => {
+  const D = Math.PI / 180, az = sun.azimuth * D, alt = sun.altitude * D
+  const toCamera = new Quaternion().setFromEuler(new Euler(pitchAtMs(ms) * D, -heading * D, ROLL_DEG * D, 'YXZ')).invert()
+  const c = new Vector3(Math.sin(az) * Math.cos(alt), Math.sin(alt), -Math.cos(az) * Math.cos(alt)).applyQuaternion(toCamera)
+  return { x: 320 + (c.x / -c.z) / (TAN * 640 / 480) * 320, y: 240 - (c.y / -c.z) / TAN * 240, ahead: c.z < 0 }
+}
+if (process.env.ONLY_ACCOUNT) {
+  console.log(JSON.stringify({ sunPixel: sunPixelAt(orbKeys[0].t), orbPixel: { x: orbRows[0].x, y: orbRows[0].y }, sun: { azimuth: sun.azimuth, altitude: sun.altitude }, heading, along: orbRows.map(row => ({ t: row.t, orb: { x: row.x, y: row.y }, sun: sunPixelAt(Math.round((row.t - FROM_S) / RATE * 1000)) })) }))
+  process.exit(0)
+}
+
+/**
+ * The account again under another Sun, for a reading that needs one: the hour of that day at which the Sun stands `altitudeDeg` high in
+ * the afternoon, and the camera's heading that puts it `fromViewDeg` from where the camera looks. Everything that hangs on the heading
+ * (the decor, the film's registration, the flight) is laid out again with it, by a run of this very script.
+ */
+const accountUnderSun = ({ fromViewDeg, altitudeDeg }) => {
+  let hours = 12
+  for (let minutes = 12 * 60; minutes < 22 * 60; minutes++) {
+    const at = new Date(Date.UTC(1976, 5, 15, 0, minutes))
+    const eq2 = Astronomy.Equator('Sun', at, observer, true, true)
+    if (Astronomy.Horizon(at, observer, eq2.ra, eq2.dec, 'normal').altitude < altitudeDeg) break
+    hours = minutes / 60
+  }
+  const out = join(process.env.TMPDIR ?? '/tmp', `concorde-sun-${fromViewDeg}-${altitudeDeg}.json`)
+  const said = execFileSync(process.execPath, [fileURLToPath(import.meta.url)], {
+    env: { ...process.env, OUT: out, ONLY_ACCOUNT: '1', HOURS_UTC: String(hours), SUN_LEFT: String((360 - fromViewDeg) % 360) }, encoding: 'utf8'
+  })
+  return { account: JSON.parse(readFileSync(out, 'utf8')), ...JSON.parse(said.trim().split('\n').pop()) }
+}
+
 // The readings, each a recording of its own (the account's place, time, pose, film and decor; no phenomenon of its own, since what it
 // claims is in its `interpretation`), and the case that lists them beside the film (see readings.mjs for what each says and found).
 const DEMO = dirname(OUT)
@@ -172,8 +206,22 @@ const glintBody = ({ luminanceCdM2, sizeM }) => ({
     })
   ]
 })
+/**
+ * The ghost a periscope would have to throw for the orb to be it, at its best: the one factor that lays the Sun's ghost on the orb at the
+ * first instant (with the offset that the factor cannot give in height), and the reach that lets a Sun that far off the frame in at all.
+ * Not measured: what the hypothesis needs, to be seen against the film the rest of the shot.
+ */
+const periscopeLens = ({ reachDeg, share, blur }, { sunPixel, orbPixel }) => {
+  const scale = (orbPixel.x - 320) / (sunPixel.x - 320)
+  const offsetY = (240 - orbPixel.y) / 480 - scale * (240 - sunPixel.y) / 480
+  return { reachDeg, ghosts: [{ scale: round(scale, 6), share, blur, offset: [0, round(offsetY, 5)], cause: 'glass' }] }
+}
+
 for (const reading of READINGS) {
-  const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = recording
+  // A reading that moves the Sun is the account laid out again under it; its ghost, placed on the orb at the first instant.
+  const moved = reading.sun ? accountUnderSun(reading.sun) : undefined
+  const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = moved ? moved.account : recording
+  const lens = moved && reading.periscope ? periscopeLens(reading.periscope, moved) : reading.lens
   const bodies = reading.glint ? [glintBody(reading.glint)] : reading.distanceM === undefined ? [] : [{
     id: 'orb', title: ORB_TITLE, explains: ['orb'], model: { id: 'sphere' },
     track: [
@@ -189,7 +237,7 @@ for (const reading of READINGS) {
     ...account,
     id: `concorde-1976-${reading.id}`,
     tags: [...account.tags, 'interpretation'],
-    ...(reading.lens ? { lens: reading.lens } : {}),
+    ...(lens ? { lens } : {}),
     timeline: { keyframes: [], order: [], groups: [] },
     // The film is there to be compared with, not laid over what the reading claims: drawn at full opacity it hid it. Its slider brings it back.
     references: account.references.map(reference => ({ ...reference, opacity: 0 })),
