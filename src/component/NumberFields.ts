@@ -23,7 +23,9 @@ export class NumberFields {
       // Sized again at every call, since a field whose bounds change with what it is showing (the
       // focal length, which is a field of view for an eye) is re-fitted then; listened to once.
       field.style.width = `calc(${NumberFields.charsFor(field)}ch + ${NumberFields.CHROME})`
-      NumberFields.hold(field, true)
+      // Its floor only if it is not being typed in: an editor re-fits its fields at every change it
+      // makes, and the very first digit typed is one (a "5" on its way to "50" became the lens's 18).
+      NumberFields.hold(field, !NumberFields.isFocused(field))
       if (field.dataset.held === "") continue
       field.dataset.held = ""
       field.addEventListener("input", () => NumberFields.hold(field))
@@ -45,6 +47,12 @@ export class NumberFields {
     if (held === field.value) return
     field.value = held
     field.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+
+  /** Whether the field has the focus, inside a shadow root as much as in the page. */
+  private static isFocused(field: HTMLInputElement): boolean {
+    const root = field.getRootNode() as Document | ShadowRoot
+    return root.activeElement === field
   }
 
   /** What a field's typed value becomes once held to its bounds and its step's own decimals. An

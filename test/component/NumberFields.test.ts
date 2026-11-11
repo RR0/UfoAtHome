@@ -70,4 +70,24 @@ describe("What a number field takes", () => {
     expect(seen).toEqual(["999999", "179"])
     field.remove()
   })
+
+  it("leaves the field being typed in above its minimum when it is fitted again", () => {
+    // The editor re-fits its fields at every change it makes: the first digit typed is one.
+    const host = document.createElement("div")
+    document.body.appendChild(host)
+    const root = host.attachShadow({ mode: "open" })
+    const field = document.createElement("input")
+    field.type = "number"
+    Object.assign(field, { min: "18", max: "300", step: "0.1" })
+    root.appendChild(field)
+    NumberFields.fit(root)
+    field.focus()
+    field.value = "5"
+    NumberFields.fit(root)
+    expect(field.value).toBe("5")
+    field.blur()
+    NumberFields.fit(root)
+    expect(field.value).toBe("18")
+    host.remove()
+  })
 })
