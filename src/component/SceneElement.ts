@@ -1970,8 +1970,12 @@ export class SceneElement extends HTMLElement {
     // exactly this for a strobe by integrating the lit fraction of an interval rather than asking
     // "is it on?" (see LightRig's lightOnFractionBetween); the sky has no equivalent yet, and until
     // it does a long pose under a shower under-reports the meteors it would really hold.
+    // A turn of the camera that comes from a key set for its instant alone (see ObserverKeyframe.viewOnly) is not part of the picture:
+    // the camera stands still through the pose, pointed as it is at the instant shown.
+    const viewAt = this.ufoElement.sighting.observerTrack.turnIsViewOnly(window.fromMs, t) ? t : undefined
     this.sceneRenderer.setExposure(instants, instant =>
       this.applySceneAt(window.fromMs + (window.ms * instant) / (instants - 1), {
+        viewAt,
         // The sky is restated only on the instants the SKY asks for, which is what makes a
         // scene-driven pose affordable at all: restating it costs about 8 ms and moving the decor
         // costs a twentieth of one, and a pose sampled 300 times for an aeroplane must not rebuild
@@ -2011,7 +2015,7 @@ export class SceneElement extends HTMLElement {
   /** Everything the scene has to be told to stand at one instant — the whole of what this element
    * pushes into the renderer. Called once for an ordinary frame, and once per instant of a pose long
    * enough that the sky itself moved across it (see updateAstronomy). */
-  private applySceneAt(t: number, instant?: { sky: boolean; stepMs: number }): void {
+  private applySceneAt(t: number, instant?: { sky: boolean; stepMs: number; viewAt?: number }): void {
     const sighting = this.ufoElement.sighting
     if (!instant) this.sceneRenderer.setRecordingTime(t)
     // Resolved here (not left to the sightingData setter's one-time call, or an explicit nudge on
@@ -2057,7 +2061,11 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setCloudOffset(cloudOffsetAt(t, sighting.weatherTrack, initialWeather, cloudOrigin, pose, undefined, preroll), layerOffsets)
     // The view is raised by the grade of the road being driven (see RoadGrade): the file says where they looked in the
     // vehicle's frame, and a climb tilts that whole frame.
-    this.sceneRenderer.setObserverPose(pose ? { ...pose, pitchDeg: pose.pitchDeg + this.roadGradeAt(sighting, t) } : DEFAULT_OBSERVER_POSE)
+    // Pointed as at the instant shown, for an instant of a pose whose turn is not part of the picture (see updateAstronomy): where it is
+    // is where it is then, the way it looks is the instant's.
+    const view = instant?.viewAt !== undefined ? resolveObserverPoseAt(sighting, instant.viewAt) : undefined
+    const looking = pose && view ? { ...pose, headingDeg: view.headingDeg, pitchDeg: view.pitchDeg, rollDeg: view.rollDeg, fovDeg: view.fovDeg } : pose
+    this.sceneRenderer.setObserverPose(looking ? { ...looking, pitchDeg: looking.pitchDeg + this.roadGradeAt(sighting, instant?.viewAt ?? t) } : DEFAULT_OBSERVER_POSE)
     this.sceneRenderer.setLensOptics(this.lensOpticsAt(t))
     // What that instrument could actually have RECORDED, which is a second thing entirely from how
     // it maps an angle: an Instamatic's ninetieth of a second reaches two magnitudes short of the

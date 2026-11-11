@@ -13180,6 +13180,15 @@ export class SightingEditorElement extends HTMLElement {
     this.headingInput.value = String(this.rounded(headingDeg))
     this.pitchInput.value = String(this.rounded(pitchDeg))
     this.updateObserver()
+    // Alt held: the view of this instant alone (see ObserverKeyframe.viewOnly), the camera's turn to and from it left out of the picture —
+    // a pose drawn over a camera whipped round between keys a tenth of a second apart smeared the whole scene. Let go: a key like any other.
+    const track = this.ufoElement.sighting.observerTrack
+    const t = this.ufoElement.currentTime
+    const key = track.allKeyframes.find(keyframe => keyframe.t === t)
+    if (key && (key.viewOnly === true) !== event.altKey) {
+      track.setViewOnly(t, event.altKey)
+      this.ufoElement.refresh()
+    }
   }
 
   private endDrag(): void {

@@ -95,6 +95,13 @@ export interface ObserverPose {
 export interface ObserverKeyframe {
   t: number
   pose: ObserverPose
+  /**
+   * Whether this key sets the view for its instant alone, by hand (Alt held with the drag that turned it): the camera's turn to it and from
+   * it, towards keys a few hundredths of a second away, is not part of the picture. A pose over it is drawn as if the camera had stood
+   * still, pointed as it is at the instant shown; elsewhere, a turn of the camera within the shutter's opening smears the picture as it
+   * would have. Absent: a key like any other.
+   */
+  viewOnly?: boolean
 }
 
 export interface ObserverTrackJson {
@@ -285,13 +292,40 @@ export class HumanMotion {
 export class ObserverTrack {
   private readonly keyframes: ObserverKeyframe[] = []
 
-  addKeyframe(t: number, pose: ObserverPose): void {
+  /** @param viewOnly See ObserverKeyframe.viewOnly; absent, a key already at `t` keeps what it said of it. */
+  addKeyframe(t: number, pose: ObserverPose, viewOnly?: boolean): void {
     const index = this.findInsertIndex(t)
-    if (this.keyframes[index]?.t === t) {
-      this.keyframes[index] = { t, pose }
+    const existing = this.keyframes[index]?.t === t ? this.keyframes[index] : undefined
+    const only = viewOnly ?? existing?.viewOnly
+    const keyframe: ObserverKeyframe = only ? { t, pose, viewOnly: true } : { t, pose }
+    if (existing) {
+      this.keyframes[index] = keyframe
     } else {
-      this.keyframes.splice(index, 0, { t, pose })
+      this.keyframes.splice(index, 0, keyframe)
     }
+  }
+
+  /** Says whether the key at `t`, if there is one, sets the view for its instant alone (see ObserverKeyframe.viewOnly). */
+  setViewOnly(t: number, viewOnly: boolean): void {
+    const index = this.findInsertIndex(t)
+    const existing = this.keyframes[index]
+    if (existing?.t !== t) return
+    this.keyframes[index] = viewOnly ? { ...existing, viewOnly: true } : { t: existing.t, pose: existing.pose }
+  }
+
+  /**
+   * Whether the camera's turn between `fromT` and `toT` is not part of the picture: a key set for its instant alone (see
+   * ObserverKeyframe.viewOnly) bounds or lies in that stretch — the keys at or before its start, within it, and at or after its end.
+   */
+  turnIsViewOnly(fromT: number, toT: number): boolean {
+    if (this.keyframes.length === 0) return false
+    const first = Math.max(0, this.findInsertIndex(fromT) - (this.keyframes[this.findInsertIndex(fromT)]?.t === fromT ? 0 : 1))
+    for (let i = first; i < this.keyframes.length; i++) {
+      const keyframe = this.keyframes[i]
+      if (keyframe.viewOnly) return true
+      if (keyframe.t >= toT) break
+    }
+    return false
   }
 
   /** Removes every keyframe. */
@@ -438,7 +472,7 @@ export class ObserverTrack {
   static fromJSON(json: ObserverTrackJson): ObserverTrack {
     const track = new ObserverTrack()
     for (const keyframe of json.keyframes) {
-      track.addKeyframe(keyframe.t, keyframe.pose)
+      track.addKeyframe(keyframe.t, keyframe.pose, keyframe.viewOnly)
     }
     return track
   }
