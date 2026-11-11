@@ -511,7 +511,7 @@ def titled(title):
 
 def surroundings():
     """What stands round the spot he sent a map link to, as the IGN's surveys (LiDAR HD for the trees, BD TOPO for the buildings, the
-    bridges and the lines) saw it, frozen by scripts/fetch-surroundings.ts: where each is, how high and how wide. The tops of the trees
+    bridges and the lines) saw it, snapshots by scripts/fetch-surroundings.ts: where each is, how high and how wide. The tops of the trees
     to the south are his horizon (\"ils dessinent l'horizon visible\"), and a big one 16 m to the north-north-east hides the sky up to 36
     degrees for azimuths 5 to 40."""
     found = json.loads(SURROUNDINGS.read_text())

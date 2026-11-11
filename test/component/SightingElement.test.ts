@@ -302,7 +302,7 @@ describe("SightingElement", () => {
     select.value = "whitted.json"
     select.dispatchEvent(new Event("change"))
     expect(seen).toEqual(["chiles.json", "whitted.json"])
-    expect(element.sightingData).toEqual({ ...janeSighting, version: 3 })
+    expect(element.sightingData).toEqual({ ...janeSighting, version: 4 })
   })
 
   it("shows the live select, not plain text, once there's more than one observer", async () => {
@@ -964,7 +964,7 @@ describe("SightingElement sharing", () => {
     ;(findDeep(shadow, "share-button") as HTMLButtonElement).click()
     const dialog = dialogOf(shadow)
     const copy = dialog.getElementById("copy") as HTMLButtonElement
-    expect(copy.parentElement).toBe(dialog.getElementById("freeze")!.closest("label")!.parentElement)
+    expect(copy.parentElement).toBe(dialog.getElementById("pin")!.closest("label")!.parentElement)
     copy.click()
     await Promise.resolve()
     expect(writeText).toHaveBeenLastCalledWith((dialog.getElementById("link") as HTMLTextAreaElement).value)
@@ -1014,7 +1014,7 @@ describe("SightingElement embed markup", () => {
     const dialog = await openEmbed()
     const markup = () => (dialog.getElementById("embed-markup") as HTMLTextAreaElement).value
     const link = () => (dialog.getElementById("link") as HTMLTextAreaElement).value
-    const freeze = dialog.getElementById("freeze") as HTMLInputElement
+    const freeze = dialog.getElementById("pin") as HTMLInputElement
     expect(freeze.checked).toBe(false)
     expect(markup()).not.toContain("jsdelivr")
     expect(link()).not.toContain("v=")

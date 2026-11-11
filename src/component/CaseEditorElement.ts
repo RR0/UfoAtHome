@@ -1581,7 +1581,7 @@ export class CaseEditorElement extends HTMLElement {
       if (source === "blank") {
         const stem = (observer || "observation").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "observation"
         recording = {
-          version: 3,
+          version: 4,
           id: `${when ? `${when}-` : ""}${stem}`,
           ...(observer ? { observer: { title: observer } } : {}),
           ...(when ? { time: when } : {}),

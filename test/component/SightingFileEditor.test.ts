@@ -6,7 +6,7 @@ describe("SightingFileEditor.changeBetween", () => {
   const apply = (from: string, change: { from: number, to: number, insert: string }) => from.slice(0, change.from) + change.insert + from.slice(change.to)
 
   it("replaces only what lies between what the two texts begin and end with", () => {
-    const before = `{\n  "headingDeg": 110,\n  "frozen": "${"x".repeat(1000)}"\n}`
+    const before = `{\n  "headingDeg": 110,\n  "snapshots": "${"x".repeat(1000)}"\n}`
     const after = before.replace("110", "145")
     const change = SightingFileEditor.changeBetween(before, after)
     expect(change).toEqual({ from: before.indexOf("110") + 1, to: before.indexOf("110") + 3, insert: "45" })

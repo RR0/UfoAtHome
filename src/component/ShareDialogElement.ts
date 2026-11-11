@@ -185,7 +185,7 @@ const TEMPLATE = `
   gap: 0.8em;
   margin-top: 0.6em;
 }
-.share-freeze {
+.share-pin {
   font-size: 0.9em;
 }
 .share-actions .share-copy {
@@ -235,7 +235,7 @@ const TEMPLATE = `
   </div>
   <div class="share-actions">
     <!-- Unticked, what is shared follows each release; ticked, it keeps this one for good (see EmbedScript). -->
-    <label class="share-freeze"><input id="freeze" type="checkbox"/> <span id="freeze-label"></span></label>
+    <label class="share-pin"><input id="pin" type="checkbox"/> <span id="pin-label"></span></label>
     <!-- Copies what is on show: the link, or the code. -->
     <button id="copy" class="share-copy" type="button"></button>
   </div>
@@ -273,7 +273,7 @@ export class ShareDialogElement extends HTMLElement {
   private readonly embedBox: HTMLElement
   private readonly linkOption: HTMLButtonElement
   private readonly embedOption: HTMLButtonElement
-  private readonly freeze: HTMLInputElement
+  private readonly pin: HTMLInputElement
   private readonly embedMarkup: HTMLTextAreaElement
   private readonly noteElement: HTMLElement
   private codeEditor?: ShareCodeEditor
@@ -291,7 +291,7 @@ export class ShareDialogElement extends HTMLElement {
     this.embedBox = byId("embed-box")
     this.linkOption = byId("link-option")
     this.embedOption = byId("embed-option")
-    this.freeze = byId("freeze")
+    this.pin = byId("pin")
     this.embedMarkup = byId("embed-markup")
     this.noteElement = byId("note")
     byId("close").addEventListener("click", () => this.close())
@@ -301,7 +301,7 @@ export class ShareDialogElement extends HTMLElement {
     })
     this.linkOption.addEventListener("click", () => this.show("link"))
     this.embedOption.addEventListener("click", () => this.show("embed"))
-    this.freeze.addEventListener("change", () => this.refresh())
+    this.pin.addEventListener("change", () => this.refresh())
     this.copyButton.addEventListener("click", () => void (this.embedBox.hidden
       ? this.copy(this.linkField.value, this.linkField)
       : this.copy(this.codeEditor?.text ?? this.embedMarkup.value, this.embedMarkup)))
@@ -351,10 +351,10 @@ export class ShareDialogElement extends HTMLElement {
   refresh(): void {
     const subject = this.subject
     if (!subject) return
-    const frozen = this.freeze.checked
-    this.linkField.value = frozen ? EmbedScript.frozenLink(subject.link(), __APP_VERSION__) : subject.link()
+    const pinned = this.pin.checked
+    this.linkField.value = pinned ? EmbedScript.pinnedLink(subject.link(), __APP_VERSION__) : subject.link()
     this.fitLink()
-    const script = frozen ? EmbedScript.frozen(subject.module, __APP_VERSION__) : EmbedScript.current(subject.module, import.meta.url, AppLocation.home())
+    const script = pinned ? EmbedScript.pinned(subject.module, __APP_VERSION__) : EmbedScript.current(subject.module, import.meta.url, AppLocation.home())
     const markup = `<script type="module" src="${script}"></script>\n${subject.element()}`
     this.embedMarkup.value = markup
     if (this.codeEditor) this.codeEditor.text = markup
@@ -368,8 +368,8 @@ export class ShareDialogElement extends HTMLElement {
     text("link-label", m.link)
     text("embed-label", m.embed)
     text("copy", m.copy)
-    text("freeze-label", m.freeze.replace("{version}", __APP_VERSION__))
-    this.freeze.parentElement!.title = m.freezeHint
+    text("pin-label", m.pin.replace("{version}", __APP_VERSION__))
+    this.pin.parentElement!.title = m.pinHint
     this.shadow.getElementById("close")!.setAttribute("aria-label", m.close)
     this.linkField.setAttribute("aria-label", m.link)
   }

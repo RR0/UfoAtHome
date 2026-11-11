@@ -41,7 +41,7 @@ export class EmbedScript {
   static readonly VERSION_PARAMETER = "v"
 
   /** Whether `module` (an entry module's name, without `.mjs`) is one a page or an embed can freeze. */
-  static freezable(module: string): module is EmbeddedModule {
+  static pinnable(module: string): module is EmbeddedModule {
     return module in EmbedScript.DIRECTORIES
   }
 
@@ -49,14 +49,14 @@ export class EmbedScript {
    * A link to one of the site's pages, asking it for the components of `version`: the page is the site's own, as it is now, and
    * what it plays or edits with is that version, loaded from the package as published on npm.
    */
-  static frozenLink(link: string, version: string): string {
+  static pinnedLink(link: string, version: string): string {
     const url = new URL(link)
     url.searchParams.set(EmbedScript.VERSION_PARAMETER, version)
     return url.href
   }
 
   /** The component of `version` for good, as published on npm. */
-  static frozen(module: EmbeddedModule, version: string): string {
+  static pinned(module: EmbeddedModule, version: string): string {
     return `${EmbedScript.CDN}/${EmbedScript.PACKAGE}@${version}/${EmbedScript.DIRECTORIES[module]}/${module}.mjs`
   }
 }

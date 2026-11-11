@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "sky-test-chelyabinsk",
  "image": "https://ufoathome.org/demo-data/share/sky-test-chelyabinsk.jpg",
  "tags": [
@@ -1130,7 +1130,7 @@
    }
   ]
  },
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "sky-test-chelyabinsk.relief.zip",
    "takenOn": "2026-11-01",

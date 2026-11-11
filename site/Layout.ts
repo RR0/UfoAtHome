@@ -159,8 +159,8 @@ export class Layout {
   /**
    * What loads a page's modules, before its own script runs (which uses the elements they define).
    *
-   * This version's copy (see versioned), unless the address asks for another (`?v=0.135.0`, what a frozen link adds: see
-   * EmbedScript.frozenLink): the player and the editor of that version then come from the package as published on npm, the page
+   * This version's copy (see versioned), unless the address asks for another (`?v=0.135.0`, what a pinned link adds: see
+   * EmbedScript.pinnedLink): the player and the editor of that version then come from the package as published on npm, the page
    * around them staying today's. Imported rather than written as a script tag, since which one is only known from the address; the
    * head preloads this version's copy, so the usual case starts fetching as early as a tag would. A version that cannot be loaded
    * (none published under that number) falls back to this one, said on the console.
@@ -169,15 +169,15 @@ export class Layout {
     if (sources.length === 0) return ""
     const entries = sources.map(src => {
       const name = src.split("/").pop()!.replace(/\.mjs$/, "")
-      const frozen = EmbedScript.freezable(name) ? EmbedScript.frozen(name, "\u0000").split("\u0000") : undefined
-      return { local: this.versioned(src), frozen }
+      const pinned = EmbedScript.pinnable(name) ? EmbedScript.pinned(name, "\u0000").split("\u0000") : undefined
+      return { local: this.versioned(src), pinned }
     })
     return `{
   const asked = new URLSearchParams(location.search).get(${JSON.stringify(EmbedScript.VERSION_PARAMETER)})
-  const frozen = asked !== null && /^\\d+\\.\\d+\\.\\d+$/.test(asked) && asked !== ${JSON.stringify(this.version)} ? asked : undefined
-  await Promise.all(${JSON.stringify(entries)}.map(entry => frozen && entry.frozen
-    ? import(entry.frozen.join(frozen)).catch(error => {
-      console.warn("UFO@home " + frozen + " could not be loaded; this version is used instead.", error)
+  const pinnedVersion = asked !== null && /^\\d+\\.\\d+\\.\\d+$/.test(asked) && asked !== ${JSON.stringify(this.version)} ? asked : undefined
+  await Promise.all(${JSON.stringify(entries)}.map(entry => pinnedVersion && entry.pinned
+    ? import(entry.pinned.join(pinnedVersion)).catch(error => {
+      console.warn("UFO@home " + pinnedVersion + " could not be loaded; this version is used instead.", error)
       return import(entry.local)
     })
     : import(entry.local)))

@@ -5,7 +5,7 @@ import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/s
 import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const recording = (): SightingRecordingJson => ({
-  version: 3,
+  version: 4,
   time: "1964-04-24T17:45",
   id: "socorro",
   observer: { id: "zamora", title: "Lonnie Zamora" },
@@ -65,12 +65,12 @@ describe("RecordingDigest", () => {
   it("says nothing about an empty editor", () => {
     // An empty recording is not a statement, and offering its emptiness would invite it to be read
     // as one.
-    expect(RecordingDigest.of({ version: 3, timeline: { keyframes: [] } })).toBeUndefined()
+    expect(RecordingDigest.of({ version: 4, timeline: { keyframes: [] } })).toBeUndefined()
   })
 
   it("omits an angle or a direction a shape never stated", () => {
     const bare: SightingRecordingJson = {
-      version: 3,
+      version: 4,
       timeline: {
         keyframes: [{
           t: 0,
@@ -107,7 +107,7 @@ describe("DraftRecording", () => {
     // into a drawing (SightingShapes.toBounds/toPosition) read a box before replacing it — so one
     // that asserts nothing has to be there for them to read.
     const draft = {
-      version: 3 as const,
+      version: 4 as const,
       time: "1964",
       timeline: {
         keyframes: [{

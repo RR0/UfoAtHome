@@ -163,7 +163,7 @@ describe("RecordingEvents", () => {
 
   it("lights a light from an event, for as long as it says, and dark again after", () => {
     const sighting = fromSightingJson({
-      version: 3, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 20,
+      version: 4, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 20,
       interpretation: { bodies: [{ id: "car", model: { id: "ellipsoid" }, groups: [{ id: "beacons", members: ["blue", "red"] }],
         track: [{ t: 0, eastM: 0, northM: 10, onGround: true, lights: { blue: 0, red: 0 } }] }] },
       events: [
@@ -187,7 +187,7 @@ describe("RecordingEvents", () => {
   it("switches the lamps of a decor object from the events about them, one or a group, and writes back the events alone", () => {
     const steady = { kind: "steady" } as const
     const json = {
-      version: 3, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 60,
+      version: 4, observer: { id: "o" }, timeline: { keyframes: [] }, durationSeconds: 60,
       decor: [{ id: "plane", kind: "aircraft", eastM: 0, northM: 500, headingDeg: 0,
         groups: [{ id: "strobes", members: ["strobe-port", "strobe-starboard"] }],
         lights: [

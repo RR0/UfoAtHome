@@ -78,7 +78,7 @@ import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 import type { BrightStar } from "../engine/astronomy/brightStarCatalog.js"
 import { defaultTerrainProviders } from "./terrain/defaultTerrainProviders.js"
 import type { TerrainProviders } from "./terrain/defaultTerrainProviders.js"
-import type { TerrainPatchIndex } from "./terrain/frozen/FrozenPatches.js"
+import type { TerrainPatchIndex } from "./terrain/snapshot/SnapshotPatches.js"
 import { TerrainReach } from "./terrain/TerrainReach.js"
 import { boundsAroundObserver, buildTerrainMesh } from "./terrain/TerrainMeshBuilder.js"
 import { RoadSystem } from "./RoadSystem.js"
@@ -1804,7 +1804,7 @@ export class SceneRenderer {
     // Where the ground was frozen, the patch built is the frozen one nearest the observer, at its own size (see TerrainPatchIndex), and
     // nothing is built until the list of them is in hand.
     const patches = this.terrainProviders.patches
-    let frozenRadiusM: number | undefined
+    let snapshotRadiusM: number | undefined
     if (patches) {
       if (!patches.loaded) {
         // For the LAST place asked for, not the first: a recording opened at a later instant asks first for its start, then for where the observer
@@ -1827,7 +1827,7 @@ export class SceneRenderer {
       if (patch) {
         lat = patch.lat
         lng = patch.lng
-        frozenRadiusM = patch.radiusM
+        snapshotRadiusM = patch.radiusM
       }
     }
     // How much ground the observer can actually see is what the patch has to cover: 900 m standing
@@ -1838,7 +1838,7 @@ export class SceneRenderer {
     // From an aircraft that alone made the ground a blur: see TerrainReach.patchRadiusFor.
     // The ground disc, the sky and the haze keep the radius of the observer's reach; the patch of real ground may be wider where a still observer has scenery out
     // beyond it (see terrainReachFor), so that what stands there stands on the relief and not on the flat disc.
-    const radiusM = frozenRadiusM ?? Math.max(TerrainReach.patchRadiusFor(this.groundRadius, this.observerElevationM), this.decorTerrainRadiusM)
+    const radiusM = snapshotRadiusM ?? Math.max(TerrainReach.patchRadiusFor(this.groundRadius, this.observerElevationM), this.decorTerrainRadiusM)
     if (this.terrainOrigin && Math.abs(this.terrainRadius - radiusM) < radiusM * 0.1) {
       const { x, z } = geoToLocalMeters(lat, lng, this.terrainOrigin.lat, this.terrainOrigin.lng)
       // Scaled to the patch itself: 150 m matters for a 900 m patch and is meaningless for a 30 km one.
@@ -1954,12 +1954,12 @@ export class SceneRenderer {
       if (Math.hypot(x, z) < nearRadiusM * SceneRenderer.FAR_RING_KEPT_SHARE) return
     }
     const patches = this.terrainProviders.patches
-    const frozen = patches?.farRingOf?.(lat, lng)
-    if (patches && !frozen) {
+    const snapshots = patches?.farRingOf?.(lat, lng)
+    if (patches && !snapshots) {
       this.dropFarRing()
       return
     }
-    const radiusM = frozen?.radiusM ?? TerrainReach.FAR_RING_RADIUS_M
+    const radiusM = snapshots?.radiusM ?? TerrainReach.FAR_RING_RADIUS_M
     const token = ++this.farRingToken
     const providers = this.terrainProviders
     // Waited for as the patch is (see awaitArrival): a scene shown before it came showed the band of blue the ring is there to cover, and its first

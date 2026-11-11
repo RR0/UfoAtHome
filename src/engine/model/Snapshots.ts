@@ -1,5 +1,5 @@
 /**
- * The groups of data a scene asks a survey or a record for as it plays, each of which a recording can carry frozen beside it.
+ * The groups of data a scene asks a survey or a record for as it plays, each of which a recording can carry as a snapshot beside it: a copy of what its source answered, taken on a given day.
  *
  * - relief: the ground's height, as the elevation source answered for each patch of ground the scene builds;
  * - imagery: the photograph of the ground draped over it, as the tiles the imagery source served;
@@ -7,16 +7,16 @@
  * - upperAir: the air at the levels the aircraft fly at, which decides their trails;
  * - map: the photograph under the observer map, as the tiles the imagery source served for the ground the map is fitted to.
  *
- * What is not here is frozen already, in the recording itself: the weather (weatherTrack), the scenery (decor), the place, the time zone and
+ * What is not here is written already, in the recording itself: the weather (weatherTrack), the scenery (decor), the place, the time zone and
  * the light pollution are looked up while the recording is made, and written into it.
  */
-export type FrozenGroupName = "relief" | "imagery" | "roads" | "water" | "railways" | "upperAir" | "map"
+export type SnapshotGroupName = "relief" | "imagery" | "roads" | "water" | "railways" | "upperAir" | "map"
 
 /** The groups laid on a patch of ground. */
-export type FrozenTerrainGroupName = Exclude<FrozenGroupName, "upperAir" | "map">
+export type SnapshotTerrainGroupName = Exclude<SnapshotGroupName, "upperAir" | "map">
 
-/** One group, frozen: where its annex is, and when and from whom it was taken. Or a group asked of its source at every play, and never frozen. */
-export interface FrozenGroup {
+/** One group's snapshot: where its annex is, and when and from whom it was taken. Or a group asked of its source at every play, of which no snapshot is taken. */
+export interface Snapshot {
   /**
    * The annex holding it, relative to the recording's own file (as a model's `url` is), or a `data:` URL for an annex kept inside the
    * recording itself. Absent for a group asked live.
@@ -36,43 +36,43 @@ export interface FrozenGroup {
 }
 
 /**
- * What a recording carries of the data its scene would otherwise ask third parties for (see FrozenGroupName), in files beside it.
+ * What a recording carries of the data its scene would otherwise ask third parties for (see SnapshotGroupName), in files beside it.
  *
  * A recording that is finished must play the same way in ten years, and without asking anybody for anything: the IGN, Esri or Overpass
  * may answer differently, or not at all, and a reader of a case dossier never asked them. So what was taken while it was made is kept,
  * and a group with no annex is the one group still asked for live.
  */
-export interface FrozenData {
+export interface Snapshots {
   /** Every group asked of its source at every play, and nothing taken at save: off (absent) by default. */
   live?: boolean
-  relief?: FrozenGroup
-  imagery?: FrozenGroup
-  roads?: FrozenGroup
-  water?: FrozenGroup
-  railways?: FrozenGroup
-  upperAir?: FrozenGroup
-  map?: FrozenGroup
+  relief?: Snapshot
+  imagery?: Snapshot
+  roads?: Snapshot
+  water?: Snapshot
+  railways?: Snapshot
+  upperAir?: Snapshot
+  map?: Snapshot
   /**
    * Where the weather is kept, when it is not inside the recording (its `weatherTrack` and `weatherSource`): an annex holding them,
    * read as the recording is loaded (see RecordingSections). Absent, the weather is the recording's own.
    */
-  weather?: FrozenGroup
+  weather?: Snapshot
   /**
    * The place's name and coordinates (`place`), read from the recording's file rather than looked up by a geocoder when present: inside the
    * recording, or in the annex `src` names. Absent, the editor names the place by the geocoder as the observer moves.
    */
-  place?: FrozenGroup
+  place?: Snapshot
   /**
    * The night sky's figure (`lightPollution`), read from the recording's file rather than looked up in the atlas when present: inside the
    * recording, or in the annex `src` names. Absent, the editor reads it from the atlas as the observer moves.
    */
-  lightPollution?: FrozenGroup
+  lightPollution?: Snapshot
   /**
    * The scenery (`decor`), read from the recording's file rather than taken again from a survey of the place as the observer moves, when
    * present: inside the recording, or in the annex `src` names. The annex holds only what a survey gave (the objects with an `origin`, see
    * DecorObject.origin): what the observer or the author stated stays in the recording, which is the account and not the survey's.
    */
-  decor?: FrozenGroup
+  decor?: Snapshot
 }
 
 /** The parts of a recording's own text that it may keep in a file beside it rather than inside it. */
@@ -105,7 +105,7 @@ export class RecordingSections {
 
   /**
    * What of a recording (as its JSON) a section's annex holds: the section's keys, and of the scenery only what a survey gave, since the
-   * objects the observer or the author stated are the account's own and stay in it (see FrozenData.decor).
+   * objects the observer or the author stated are the account's own and stay in it (see Snapshots.decor).
    */
   static taken(name: RecordingSectionName, json: Record<string, unknown>): Record<string, unknown> {
     const taken: Record<string, unknown> = {}
@@ -148,41 +148,41 @@ export class RecordingSections {
   }
 
   /** Whether the section is read from the recording's file rather than asked of its source: said for the place and the night sky. */
-  static fromFile(data: FrozenData | undefined, name: RecordingSectionName): boolean {
+  static fromFile(data: Snapshots | undefined, name: RecordingSectionName): boolean {
     return data?.[name] !== undefined && data[name]!.live !== true
   }
 }
 
 /** A group the scene reads from its annex. */
-export type HeldGroup = FrozenGroup & { src: string }
+export type HeldGroup = Snapshot & { src: string }
 
-/** What can be asked of a recording's frozen data, group by group. */
-export class FrozenGroups {
-  static readonly NAMES: readonly FrozenGroupName[] = ["relief", "imagery", "roads", "water", "railways", "upperAir", "map"]
+/** What can be asked of a recording's snapshots, group by group. */
+export class SnapshotGroups {
+  static readonly NAMES: readonly SnapshotGroupName[] = ["relief", "imagery", "roads", "water", "railways", "upperAir", "map"]
   /** Those laid on a patch of ground, and therefore taken for each patch the scene builds. */
-  static readonly TERRAIN: readonly FrozenTerrainGroupName[] = ["relief", "imagery", "roads", "water", "railways"]
+  static readonly TERRAIN: readonly SnapshotTerrainGroupName[] = ["relief", "imagery", "roads", "water", "railways"]
 
   /** The group as the scene reads it: its annex, or undefined when it is asked for live (no annex, `live`, or a `refresh` asked). */
-  static held(data: FrozenData | undefined, name: FrozenGroupName): HeldGroup | undefined {
+  static held(data: Snapshots | undefined, name: SnapshotGroupName): HeldGroup | undefined {
     if (!data || data.live) return undefined
     const group = data[name]
     return group && !group.live && !group.refresh && group.src !== undefined ? group as HeldGroup : undefined
   }
 
   /** Whether the group is asked of its source at every play: chosen so for itself, or for every group. Never taken at save, then. */
-  static isLive(data: FrozenData | undefined, name: FrozenGroupName): boolean {
+  static isLive(data: Snapshots | undefined, name: SnapshotGroupName): boolean {
     return data?.live === true || data?.[name]?.live === true
   }
 
   /** The annex's file name for a recording saved as `base` (its file name without `.json`). */
-  static annexName(base: string, name: FrozenGroupName): string {
+  static annexName(base: string, name: SnapshotGroupName): string {
     const extension = name === "relief" || name === "imagery" || name === "map" ? "zip" : "json"
     const kebab = name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
     return `${base}.${kebab}.${extension}`
   }
 
-  /** Whether the recording says anything at all about frozen data. */
-  static isEmpty(data: FrozenData | undefined): boolean {
-    return !data || (!data.live && FrozenGroups.NAMES.every(name => !data[name]) && RecordingSections.NAMES.every(name => !data[name]))
+  /** Whether the recording says anything at all about snapshots. */
+  static isEmpty(data: Snapshots | undefined): boolean {
+    return !data || (!data.live && SnapshotGroups.NAMES.every(name => !data[name]) && RecordingSections.NAMES.every(name => !data[name]))
   }
 }

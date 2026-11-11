@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2026-09-28-GreenstreetSteven",
  "image": "https://ufoathome.org/demo-data/share/mission-viejo.jpg",
  "summaryTime": 1.09,
@@ -4058,7 +4058,7 @@
   "name": "Open-Meteo (forecast model, past hours)",
   "url": "https://api.open-meteo.com/v1/forecast?latitude=33.60&longitude=-117.672&hourly=cloud_cover,precipitation,wind_speed_10m,wind_direction_10m,relative_humidity_2m&start_date=2026-09-29&end_date=2026-09-29&timezone=UTC"
  },
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-mission-viejo.relief.zip",
    "takenOn": "2026-10-20",

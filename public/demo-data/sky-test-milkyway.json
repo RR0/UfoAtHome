@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "sky-test-milkyway",
   "image": "https://ufoathome.org/demo-data/share/sky-test-milkyway.jpg",
   "summaryTime": 8,
@@ -106,7 +106,7 @@
     "keyframes": []
   },
   "decor": [],
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "sky-test-milkyway.relief.zip",
       "takenOn": "2026-10-20",

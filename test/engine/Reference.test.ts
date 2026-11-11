@@ -16,7 +16,7 @@ const picture: SceneReference = {
 }
 
 function recording(references?: SceneReference[]): SightingRecordingJson {
-  return { version: 3, timeline: { keyframes: [] }, references }
+  return { version: 4, timeline: { keyframes: [] }, references }
 }
 
 describe("a recording's pictures of the place", () => {

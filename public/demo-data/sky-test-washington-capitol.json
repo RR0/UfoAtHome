@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "sky-test-washington-capitol",
  "image": "https://ufoathome.org/demo-data/share/sky-test-washington-capitol.jpg",
  "summaryTime": 6,
@@ -843,7 +843,7 @@
    ]
   }
  ],
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "sky-test-washington-capitol.relief.zip",
    "takenOn": "2026-11-01",

@@ -42,14 +42,14 @@ describe("SectionFilePanel", () => {
     expect(panel.itemLabel("weather")).toBe("Weather")
     panel.setStorage("weather", false)
     expect(changed).toHaveBeenCalledWith("weather")
-    expect(sighting.frozen?.weather).toEqual({ src: "x-sighting.weather.json" })
+    expect(sighting.snapshots?.weather).toEqual({ src: "x-sighting.weather.json" })
     const annex = panel.annex("weather")!
     expect(annex.src).toBe("x-sighting.weather.json")
     expect(JSON.parse(new TextDecoder().decode(annex.bytes)).weatherTrack.keyframes[0].weather.cloudCover).toBe(0.3)
     expect(source.url).toBe("https://example.org/d/x-sighting.weather.json")
     // The recording's own file given as where it is: kept inside the recording again.
     await panel.take("weather", { url: "x.json" })
-    expect(sighting.frozen).toEqual({ weather: {} })
+    expect(sighting.snapshots).toEqual({ weather: {} })
   })
 
   it("takes the weather of a file the author picks, and refuses one with none", async () => {
@@ -72,7 +72,7 @@ describe("SectionFilePanel", () => {
     const place = [{ lat: 44.98, lng: 2.92, name: "Cussac" }]
     await panel.take("place", { file: new File([JSON.stringify({ version: 1, place })], "p.json") })
     expect(sighting.event.place?.[0]).toMatchObject({ lat: 44.98, name: "Cussac" })
-    expect(sighting.frozen?.place).toEqual({})
+    expect(sighting.snapshots?.place).toEqual({})
     const lightPollution = { value: 21.2, basis: "derived", rationale: "World Atlas 2015", of: 21.2 }
     await panel.take("lightPollution", { file: new File([JSON.stringify({ version: 1, lightPollution })], "l.json") })
     expect(sighting.lightPollution).toBe(21.2)
@@ -81,7 +81,7 @@ describe("SectionFilePanel", () => {
     panel.setStorage("lightPollution", false)
     expect(JSON.parse(new TextDecoder().decode(panel.annex("lightPollution")!.bytes)).lightPollution).toMatchObject({ value: 21.2, basis: "derived" })
     panel.setStorage("lightPollution", true)
-    expect(sighting.frozen?.lightPollution).toEqual({})
+    expect(sighting.snapshots?.lightPollution).toEqual({})
   })
 
   it("saves a section kept inside the recording as an annex of its own", () => {

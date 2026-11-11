@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "sky-test-moon-aureole",
   "image": "https://ufoathome.org/demo-data/share/sky-test-moon-aureole.jpg",
   "description": {
@@ -75,7 +75,7 @@
     ]
   },
   "decor": [],
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "sky-test-moon-aureole.relief.zip",
       "takenOn": "2026-10-20",

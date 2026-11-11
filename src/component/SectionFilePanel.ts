@@ -1,5 +1,5 @@
-import type { FrozenData, RecordingSectionName, SectionAnnex } from "../engine/model/FrozenData.js"
-import { FrozenGroups, RecordingSections } from "../engine/model/FrozenData.js"
+import type { Snapshots, RecordingSectionName, SectionAnnex } from "../engine/model/Snapshots.js"
+import { SnapshotGroups, RecordingSections } from "../engine/model/Snapshots.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
 import { SightingMigration } from "../engine/persistence/SightingMigration.js"
@@ -14,7 +14,7 @@ export interface SectionFileHost {
   sighting(): Sighting
   /** Where the recording was read from, which its annexes are relative to. */
   documentUrl(): string | undefined
-  /** The recording's own file name without `.json` (see FrozenDataHost.base). */
+  /** The recording's own file name without `.json` (see SnapshotsHost.base). */
   base(): string
   /** The recording's own file, absolute: where a section kept inside it is. */
   masterUrl(): string
@@ -69,7 +69,7 @@ export class SectionFilePanel {
 
   /** Where the section is kept: an annex's address, or undefined inside the recording. */
   private srcOf(name: RecordingSectionName): string | undefined {
-    return this.host.sighting().frozen?.[name]?.src
+    return this.host.sighting().snapshots?.[name]?.src
   }
 
   /** What the Files group's picker says of a section: what it is. Where it is is its source's to say. */
@@ -122,11 +122,11 @@ export class SectionFilePanel {
 
   /** Keeps a section inside the recording, or in an annex beside it named after the recording. Read from the file either way. */
   setStorage(name: RecordingSectionName, inline: boolean): void {
-    const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-    if (inline === (frozen[name]?.src === undefined)) return
-    const { src: _src, ...rest } = frozen[name] ?? {}
-    frozen[name] = inline ? rest : { ...rest, src: RecordingSections.annexName(this.host.base(), name) }
-    this.write(name, frozen)
+    const snapshots: Snapshots = { ...(this.host.sighting().snapshots ?? {}) }
+    if (inline === (snapshots[name]?.src === undefined)) return
+    const { src: _src, ...rest } = snapshots[name] ?? {}
+    snapshots[name] = inline ? rest : { ...rest, src: RecordingSections.annexName(this.host.base(), name) }
+    this.write(name, snapshots)
   }
 
   /** The annex of a section kept beside the recording, as it now stands: what Save writes there. */
@@ -138,7 +138,7 @@ export class SectionFilePanel {
   /** The section's keys as the recording states them, with what it says of where they came from. */
   private bytesOf(name: RecordingSectionName): Uint8Array {
     const json = toSightingJson(this.host.sighting()) as unknown as Record<string, unknown>
-    const { takenOn, attribution } = this.host.sighting().frozen?.[name] ?? {}
+    const { takenOn, attribution } = this.host.sighting().snapshots?.[name] ?? {}
     const annex: SectionAnnex = { version: FormatVersion.CURRENT.sighting, takenOn, attribution, ...RecordingSections.taken(name, json) }
     return new TextEncoder().encode(JSON.stringify(annex))
   }
@@ -167,10 +167,10 @@ export class SectionFilePanel {
         await fetch(this.resolve(pick.url), { method: "HEAD" }).then(response => { if (!response.ok) throw new Error(String(response.status)) })
       } catch {
         // Nothing there yet: the section goes there as it is.
-        const frozen: FrozenData = { ...(this.host.sighting().frozen ?? {}) }
-        frozen[name] = { ...(frozen[name] ?? {}), src: pick.url }
+        const snapshots: Snapshots = { ...(this.host.sighting().snapshots ?? {}) }
+        snapshots[name] = { ...(snapshots[name] ?? {}), src: pick.url }
         MessageStyle.show(this.note, undefined)
-        this.write(name, frozen)
+        this.write(name, snapshots)
         return
       }
     }
@@ -193,15 +193,15 @@ export class SectionFilePanel {
     else for (const key of RecordingSections.KEYS[name]) merged[key] = given[key]
     const read = fromSightingJson(merged as unknown as SightingRecordingJson)
     SectionFilePanel.copy(name, read, sighting)
-    const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
-    if (pick.url) frozen[name] = { ...(frozen[name] ?? {}), src: pick.url }
-    else frozen[name] = frozen[name] ?? {}
+    const snapshots: Snapshots = { ...(sighting.snapshots ?? {}) }
+    if (pick.url) snapshots[name] = { ...(snapshots[name] ?? {}), src: pick.url }
+    else snapshots[name] = snapshots[name] ?? {}
     MessageStyle.show(this.note, undefined)
-    this.write(name, frozen)
+    this.write(name, snapshots)
   }
 
-  private write(name: RecordingSectionName, frozen: FrozenData): void {
-    this.host.sighting().frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+  private write(name: RecordingSectionName, snapshots: Snapshots): void {
+    this.host.sighting().snapshots = SnapshotGroups.isEmpty(snapshots) ? undefined : snapshots
     this.render()
     this.host.changed(name)
   }

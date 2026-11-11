@@ -253,7 +253,7 @@ describe("a model of a module's catalogue", () => {
     ModuleRegistry.install({ id: "acme", name: "ACME", url, contributes: { decorModels: [{ id: "acme-models", name: "ACME", credit: "©", creditUrl: url, create: () => catalogue }] } })
     try {
       const element = await mount()
-      element.sightingData = { version: 3, timeline: { keyframes: [] }, decor: [{ id: "s", kind: "entity", eastM: 0, northM: 10, model: { id: "acme-saucer" } }] } as never
+      element.sightingData = { version: 4, timeline: { keyframes: [] }, decor: [{ id: "s", kind: "entity", eastM: 0, northM: 10, model: { id: "acme-saucer" } }] } as never
       await new Promise(resolve => setTimeout(resolve, 600))
       expect(element.sightingData.modules).toBeUndefined()
 
@@ -270,7 +270,7 @@ describe("a kind of event of the sky a module brings", () => {
   it("gets a part of the Sky group beside the beams, and its editor when the part is opened", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })
     const element = await mount()
-    element.sightingData = { version: 3, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }, { id: "b2" }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }, { id: "b2" }] } }
     const shadow = element.shadowRoot!
     const tabs = [...shadow.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
     // The built-in kinds in the registry's order, then the module's.
@@ -301,7 +301,7 @@ describe("a kind of event of the sky a module brings", () => {
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: { skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }] } })
     const element = await mount()
-    element.sightingData = { version: 3, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, skyEvents: { ballLightning: [{ id: "b1" }] } }
     expect(element.shadowRoot!.getElementById("sky-event-ballLightning")).not.toBeNull()
 
     ModuleRegistry.uninstall("ball-lightning")

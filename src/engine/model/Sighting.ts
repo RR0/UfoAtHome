@@ -26,7 +26,7 @@ import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { SkyEventsJson } from "./SkyEvents.js"
 import type { Account } from "./Account.js"
-import type { FrozenData } from "./FrozenData.js"
+import type { Snapshots } from "./Snapshots.js"
 import { Level2Date } from "@rr0/time/core"
 import { Level2DateParser } from "@rr0/time/parsers"
 import type { RecordingEventJson } from "../events/RecordingEvent.js"
@@ -477,9 +477,9 @@ export class Sighting {
 
   /**
    * The data its scene would otherwise ask third parties for as it plays (the relief, the photograph of the ground, the roads…), kept in
-   * annexes beside the recording's file — see FrozenData. Absent is every group asked for live, as every recording made before this did.
+   * annexes beside the recording's file — see Snapshots. Absent is every group asked for live, as every recording made before this did.
    */
-  frozen?: FrozenData
+  snapshots?: Snapshots
 
   /** The modules it needs to be drawn as it was made (a catalogue its models come from), by the address of each one's manifest: see
    * SightingRecordingJson.modules. */

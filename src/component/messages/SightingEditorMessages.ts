@@ -167,19 +167,19 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    */
   export: string
   /**
-   * The data the recording carries frozen beside it (see FrozenData): the title, its explanation, the choice of asking everything live, the
+   * The data the recording carries frozen beside it (see Snapshots): the title, its explanation, the choice of asking everything live, the
    * name of each group, what is said of one (`{date}` the day it was taken), and the button taking one again.
    */
-  frozenTitle: string
-  frozenHint: string
-  frozenLive: string
-  frozenRelief: string
-  frozenImagery: string
-  frozenRoads: string
-  frozenWater: string
-  frozenRailways: string
-  frozenUpperAir: string
-  frozenMap: string
+  snapshotTitle: string
+  snapshotHint: string
+  snapshotLive: string
+  snapshotRelief: string
+  snapshotImagery: string
+  snapshotRoads: string
+  snapshotWater: string
+  snapshotRailways: string
+  snapshotUpperAir: string
+  snapshotMap: string
   /** The recording itself, first in the Files group's picker. */
   fileItemRecording: string
   /** The Files group's item that lists the modules (see ModulesPanelElement). */
@@ -202,18 +202,18 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   annexEditorLabel: string
   /** Said when a file given as an annex is not one. */
   annexUnreadable: string
-  frozenTakenOn: string
-  frozenPending: string
-  frozenLiveState: string
-  frozenRefresh: string
+  snapshotTakenOn: string
+  snapshotPending: string
+  snapshotLiveState: string
+  snapshotRefresh: string
   /** While a group is being taken: `{group}`, and `{done}` patches of `{of}`. */
-  frozenTaking: string
+  snapshotTaking: string
   /** A group whose source did not answer: `{group}`. */
-  frozenFailed: string
+  snapshotFailed: string
   /** An annex the recording names and that could not be read: `{file}`. */
-  frozenMissing: string
+  snapshotMissing: string
   /** After an export with annexes: `{count}` of them, `{size}` the archive's. */
-  frozenExported: string
+  snapshotExported: string
   /** What the editor says before a recording that names or locates a person leaves the author's hands (see IdentityGuard). `{value}` is what was found. */
   identityHint: string
   identityAsk: string
@@ -260,7 +260,7 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sourceImagery: string
   /** The label of the air traffic source picker: where the aircraft around the observer are read from. */
   sourceAircraft: string
-  /** The choice, in a source picker, of the recording's own file rather than a source asked live (see FrozenData). */
+  /** The choice, in a source picker, of the recording's own file rather than a source asked live (see Snapshots). */
   sourceFile: string
   /** The Sky group's tab of the aircraft a record says were around the witness. */
   aircraftGroup: string

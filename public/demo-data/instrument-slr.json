@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "instrument-slr",
   "image": "https://ufoathome.org/demo-data/share/instrument-slr.jpg",
   "time": "1964-04-24T17:50",
@@ -1203,7 +1203,7 @@
     "url": "https://archive-api.open-meteo.com/v1/archive?latitude=34.0425&longitude=-106.897778&start_date=1964-04-25&end_date=1964-04-25&hourly=cloud_cover%2Ccloud_cover_low%2Ccloud_cover_mid%2Ccloud_cover_high%2Cprecipitation%2Csnowfall%2Cweather_code%2Cwind_speed_10m%2Cwind_direction_10m%2Ctemperature_2m%2Cdew_point_2m&wind_speed_unit=ms&timezone=UTC"
   },
   "instrument": "slr-35mm-50",
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "instrument-slr.relief.zip",
       "takenOn": "2026-10-20",

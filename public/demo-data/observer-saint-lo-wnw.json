@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2026-08-11-SaintLo",
  "image": "https://ufoathome.org/demo-data/share/saint-lo-wnw.jpg",
  "tags": [
@@ -27614,7 +27614,7 @@
    }
   }
  ],
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-saint-lo-wnw.relief.zip",
    "takenOn": "2026-11-01",

@@ -326,7 +326,7 @@ export class CaseSession {
       tags: _tags, timeline: _timeline, milestones: _milestones, interpretation: _interpretation, ...scene } = structuredClone(base)
     void [_id, _version, _observer, _account, _description, _sources, _tags, _timeline, _milestones, _interpretation]
     const recording = {
-      version: 3,
+      version: 4,
       id: `${base.id ?? stem}-interpretation-${number}`,
       ...scene,
       tags: ["interpretation"],

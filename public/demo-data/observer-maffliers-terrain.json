@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2012-06-29-Maffliers-terrain-only",
  "image": "https://ufoathome.org/demo-data/share/maffliers-terrain.jpg",
  "time": "2012-06-29T06:06",
@@ -1393,7 +1393,7 @@
    }
   }
  ],
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-maffliers-terrain.relief.zip",
    "takenOn": "2026-11-01",

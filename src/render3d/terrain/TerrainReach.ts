@@ -4,7 +4,7 @@ import { geoToLocalMeters } from "./GeoProjection.js"
 
 /**
  * How much real ground a scene builds round its observer, and when it builds more: the rules SceneRenderer builds its patches by, apart so
- * that what works out the patches a recording plays through (see TerrainFreezer) follows the very same ones.
+ * that what works out the patches a recording plays through (see TerrainSnapshotTaker) follows the very same ones.
  */
 export class TerrainReach {
   /** The ground disc's radius at eye level, metres. */

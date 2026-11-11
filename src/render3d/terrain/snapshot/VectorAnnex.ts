@@ -2,10 +2,10 @@ import type { GeoBounds } from "../GeoBounds.js"
 import type { RoadProvider, RoadWay } from "../RoadProvider.js"
 import type { WaterProvider, WaterSurface } from "../WaterProvider.js"
 import type { RailwayLine, RailwayProvider } from "../RailwayProvider.js"
-import { FrozenPatches, type FrozenPatch } from "./FrozenPatches.js"
+import { SnapshotPatches, type SnapshotPatch } from "./SnapshotPatches.js"
 
 /** What was laid on one patch: its ways, its water or its tracks. */
-export interface FrozenVectorPatch<T> extends FrozenPatch {
+export interface SnapshotVectorPatch<T> extends SnapshotPatch {
   items: T[]
 }
 
@@ -19,11 +19,11 @@ export interface VectorAnnexData<T> {
   attribution: string
   /** For roads and railways: whether they are today's (see RoadProvider.contemporary), which freezing them does not change. */
   contemporary?: boolean
-  patches: FrozenVectorPatch<T>[]
+  patches: SnapshotVectorPatch<T>[]
 }
 
 /** The items of the patch asked for, of an annex still on its way. */
-class FrozenVectorReader<T> {
+class SnapshotVectorReader<T> {
   attributionRead?: string
   contemporaryRead?: boolean
 
@@ -35,15 +35,15 @@ class FrozenVectorReader<T> {
     const annex = await this.annex
     this.attributionRead = annex.attribution
     this.contemporaryRead = annex.contemporary
-    return annex.patches.find(patch => FrozenPatches.sameBounds(FrozenPatches.boundsOf(patch), bounds))?.items ?? []
+    return annex.patches.find(patch => SnapshotPatches.sameBounds(SnapshotPatches.boundsOf(patch), bounds))?.items ?? []
   }
 }
 
-export class FrozenRoadProvider implements RoadProvider {
-  private readonly reader: FrozenVectorReader<RoadWay>
+export class SnapshotRoadProvider implements RoadProvider {
+  private readonly reader: SnapshotVectorReader<RoadWay>
 
   constructor(annex: Promise<VectorAnnexData<RoadWay>>, private readonly attributionStated = "") {
-    this.reader = new FrozenVectorReader(annex)
+    this.reader = new SnapshotVectorReader(annex)
   }
 
   get attribution(): string {
@@ -59,11 +59,11 @@ export class FrozenRoadProvider implements RoadProvider {
   }
 }
 
-export class FrozenWaterProvider implements WaterProvider {
-  private readonly reader: FrozenVectorReader<WaterSurface>
+export class SnapshotWaterProvider implements WaterProvider {
+  private readonly reader: SnapshotVectorReader<WaterSurface>
 
   constructor(annex: Promise<VectorAnnexData<WaterSurface>>, private readonly attributionStated = "") {
-    this.reader = new FrozenVectorReader(annex)
+    this.reader = new SnapshotVectorReader(annex)
   }
 
   get attribution(): string {
@@ -75,11 +75,11 @@ export class FrozenWaterProvider implements WaterProvider {
   }
 }
 
-export class FrozenRailwayProvider implements RailwayProvider {
-  private readonly reader: FrozenVectorReader<RailwayLine>
+export class SnapshotRailwayProvider implements RailwayProvider {
+  private readonly reader: SnapshotVectorReader<RailwayLine>
 
   constructor(annex: Promise<VectorAnnexData<RailwayLine>>, private readonly attributionStated = "") {
-    this.reader = new FrozenVectorReader(annex)
+    this.reader = new SnapshotVectorReader(annex)
   }
 
   get attribution(): string {

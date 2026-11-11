@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "sky-test-satellites",
   "image": "https://ufoathome.org/demo-data/share/sky-test-satellites.jpg",
   "summaryTime": 46,
@@ -85,7 +85,7 @@
     "keyframes": []
   },
   "decor": [],
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "sky-test-satellites.relief.zip",
       "takenOn": "2026-10-20",

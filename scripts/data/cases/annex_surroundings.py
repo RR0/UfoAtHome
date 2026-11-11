@@ -1,5 +1,5 @@
 """Moves the surveyed scenery of demo recordings (the decor objects with an `origin`) into an annex beside each, `<base>.decor.json`, which
-`frozen.decor` names: the survey of a place is not the account, and is frozen as the roads and the relief are (see FrozenData.decor).
+`snapshots.decor` names: the survey of a place is not the account, and is snapshots as the roads and the relief are (see Snapshots.decor).
 
     python3 scripts/data/cases/annex_surroundings.py <surroundings.json> <recording.json>...
 

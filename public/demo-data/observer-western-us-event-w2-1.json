@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2023-10-14-WesternUSEvent-W2-1",
  "description": {
   "en": "In October 2023, my partner and I were tasked to survey an area for individuals launching drones. My partner and I were positioned in a valley, with mountain ranges to the west and east and more distant ranges to the north; we had teams positioned throughout the area as well. The weather was clear; we sat [and] watched the sunset as dusk transitioned into darkness. At approximately 1900 hours, I observed a bright circular orb-like light approximately 35-45 degrees above the northern/northeastern horizon. Originally, the light was not dissimilar to that of a luminescent planet observed in the night sky but grew slowly brighter. The bright orb-like light had a smaller red orb-like light within it. As the bright orb-like light grew larger, it expelled three or four red lights from it. The red lights accelerated instantly and maneuvered with perfect, smooth coordination into a horizontal formation. The red lights were approximately 1/15 the size of the orb-like light. [...] Following the expulsion of the smaller red lights, the bright orb-like light dimmed and faded from sight. From approximately 1900 hours to approximately 1930 hours, I witnessed the process repeat approximately five times across the northern, northeastern, and eastern horizon. Our teams confirmed they observed the same objects. The last grouping of red lights moved in a horizonal pattern to the southern horizon where they remained the rest of the evening. The three red lights were all aligned and remained equally spaced. From approximately 1930 hours until approximately 2300 hours, the red lights hovered above the southern horizon. The red lights sometime dipped below the horizon, out of sight but consistently rose back up. At approximately 2300 hours we departed the area. There were no acoustics, interreference or physiological effects experienced during the incident.",
@@ -1702,7 +1702,7 @@
  ],
  "durationText": "PT30M~",
  "image": "https://ufoathome.org/demo-data/share/western-us-event-w2-1.jpg",
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-western-us-event-w2-1.relief.zip",
    "takenOn": "2026-10-25",

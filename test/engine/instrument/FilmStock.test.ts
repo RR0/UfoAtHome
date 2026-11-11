@@ -74,7 +74,7 @@ describe("a stock in a device", () => {
   })
 
   it("round-trips through the file", () => {
-    const sighting = fromSightingJson({ version: 3, timeline: { keyframes: [] }, instrument: "slr-35mm-50", film: "kodachrome-64" })
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] }, instrument: "slr-35mm-50", film: "kodachrome-64" })
     expect(sighting.film).toBe("kodachrome-64")
     expect(toSightingJson(sighting).film).toBe("kodachrome-64")
   })

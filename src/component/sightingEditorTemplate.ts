@@ -394,7 +394,7 @@ export const html = `
      component could carry and most authors never need it. -->
 <section class="group-panel" id="group-file" aria-labelledby="label-file-group" hidden>
   <!-- The files the recording is made of, one picked at a time as every list of the editor is (see ElementList): the recording itself, and
-       the annexes it carries frozen beside it so that it plays without asking third parties (see FrozenData, FrozenDataPanel). -->
+       the annexes it carries snapshots beside it so that it plays without asking third parties (see Snapshots, SnapshotsPanel). -->
   <div class="element-list-row" id="file-item-row">
     <label class="element-list-picker"><select id="file-item" aria-labelledby="label-file-group"></select></label>
   </div>
@@ -427,24 +427,24 @@ export const html = `
   </div>
   <!-- One annex: where it is (a file of its own, or the recording itself when it is kept inside it), when and from whom it was taken, its text
        when it is one. -->
-  <div class="element-list-body frozen-data" id="frozen-data" hidden>
+  <div class="element-list-body snapshot-data" id="snapshot-data" hidden>
     <div class="toolbar">
       <span class="input-file-row"><span id="label-annex-source"></span> <rr0-input-file id="annex-source" name="annex-source" no-button placeholder="https://…"></rr0-input-file></span>
       <button id="annex-export" type="button"></button>
     </div>
-    <p class="row"><span id="frozen-state" class="frozen-group-state"></span> <button id="frozen-refresh" type="button"></button></p>
-    <p id="frozen-note" class="frozen-note" hidden role="status"></p>
+    <p class="row"><span id="snapshot-state" class="snapshot-group-state"></span> <button id="snapshot-refresh" type="button"></button></p>
+    <p id="snapshot-note" class="snapshot-note" hidden role="status"></p>
     <div id="annex-editor" class="file-editor" hidden></div>
   </div>
   <!-- A part of the recording's own text (its weather, its place, its night sky): inside the recording, or in an annex beside it (see
        SectionFilePanel). Its text is the recording's own. -->
-  <div class="element-list-body frozen-data" id="file-section" hidden>
+  <div class="element-list-body snapshot-data" id="file-section" hidden>
     <div class="toolbar">
       <span class="input-file-row"><span id="label-section-annex-source"></span> <rr0-input-file id="section-annex-source" name="section-annex-source" no-button accept="application/json,.json" placeholder="https://…/sighting.weather.json"></rr0-input-file></span>
       <button id="section-annex-export" type="button"></button>
     </div>
-    <p id="section-annex-state" class="frozen-group-state"></p>
-    <p id="section-annex-note" class="frozen-note" hidden role="status"></p>
+    <p id="section-annex-state" class="snapshot-group-state"></p>
+    <p id="section-annex-note" class="snapshot-note" hidden role="status"></p>
   </div>
   <!-- The modules of the page and those the recording names (see ModulesPanelElement): built the first time it is shown. -->
   <div class="element-list-body" id="file-modules" hidden>
@@ -1551,13 +1551,13 @@ select.weather-field:disabled {
 .file-note {
   margin: 0.5em 0;
 }
-.frozen-data {
+.snapshot-data {
   margin-bottom: 0.5em;
   /* Its content starts at the top of the frame, as every list's does: a paragraph's own margins made the first line taller, and the
      toolbar on it was centred lower in the annexes than in the recording. */
   align-items: flex-start;
 }
-.frozen-data > p {
+.snapshot-data > p {
   margin: 0;
 }
 .annex-storage {
@@ -1566,7 +1566,7 @@ select.weather-field:disabled {
   align-items: center;
   gap: 0.3em 1em;
 }
-.frozen-note {
+.snapshot-note {
   margin: 0.3em 0 0;
 }
 #observer-identity-hint {
@@ -1929,7 +1929,7 @@ select.weather-field:disabled {
   background: light-dark(#eef, #3a3d46);
 }
 ${MessageStyle.rules(
-  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".frozen-note", ".frozen-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro", ".cloud-panel > p", ".cloud-panel details > p"],
+  ["#scenery-status", ".apparent-size", ".place-status", ".ground-elevation", ".weather-source", ".file-note", ".snapshot-note", ".snapshot-group-state", "#observer-identity-hint", "#narrative-status", "#cloud-status", "#body-key-note", "#body-editor .body-intro", ".launch-intro", ".cloud-panel > p", ".cloud-panel details > p"],
   [".scenery-warning"],
   ["#narrative-status.error", ".reference-failure", ".save-refused"]
 )}

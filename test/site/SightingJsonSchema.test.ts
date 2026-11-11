@@ -32,7 +32,7 @@ describe("sighting.schema.json", () => {
 
   it("accepts any value wrapped with its provenance", () => {
     expect(validate({
-      version: 3,
+      version: 4,
       timeline: { keyframes: [] },
       durationSeconds: { value: 15, basis: "derived", rationale: "13-18 s in the synthesis" }
     })).toBe(true)
@@ -64,6 +64,6 @@ describe("the format page's examples", () => {
   })
 
   it("rejects a version of the format it does not describe", () => {
-    expect(validate({ version: 4, timeline: { keyframes: [] } })).toBe(false)
+    expect(validate({ version: 5, timeline: { keyframes: [] } })).toBe(false)
   })
 })

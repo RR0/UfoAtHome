@@ -13,14 +13,14 @@ describe("EmbedScript", () => {
   })
 
   it("gives the site's current component when it runs from a frozen copy", () => {
-    expect(EmbedScript.current("rr0-sighting", EmbedScript.frozen("rr0-sighting", "0.134.0"), "https://ufoathome.org"))
+    expect(EmbedScript.current("rr0-sighting", EmbedScript.pinned("rr0-sighting", "0.134.0"), "https://ufoathome.org"))
       .toBe("https://ufoathome.org/lib/rr0-sighting.mjs")
   })
 
   it("freezes a version as published on npm", () => {
-    expect(EmbedScript.frozen("rr0-sighting", "0.134.0"))
+    expect(EmbedScript.pinned("rr0-sighting", "0.134.0"))
       .toBe("https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting/rr0-sighting.mjs")
-    expect(EmbedScript.frozen("rr0-sighting-editor", "0.134.0"))
+    expect(EmbedScript.pinned("rr0-sighting-editor", "0.134.0"))
       .toBe("https://cdn.jsdelivr.net/npm/@rr0/ufoathome@0.134.0/dist-embed-sighting-editor/rr0-sighting-editor.mjs")
   })
 })

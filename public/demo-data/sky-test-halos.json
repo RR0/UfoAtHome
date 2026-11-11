@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "sky-test-halos",
   "image": "https://ufoathome.org/demo-data/share/sky-test-halos.jpg",
   "tags": [
@@ -236,7 +236,7 @@
       }
     }
   ],
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "sky-test-halos.relief.zip",
       "takenOn": "2026-10-30",

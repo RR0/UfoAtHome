@@ -26,7 +26,7 @@ import type { SceneReference } from "../model/Reference.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import { SkyEvents, type SkyEventsJson } from "../model/SkyEvents.js"
-import type { FrozenData } from "../model/FrozenData.js"
+import type { Snapshots } from "../model/Snapshots.js"
 import { sortedMilestones } from "../model/Milestone.js"
 import { SightingShapes } from "./SightingShapes.js"
 import { SightingPositions } from "./SightingPositions.js"
@@ -47,11 +47,11 @@ import { RecordingEvents } from "../events/RecordingEvents.js"
  * consumers all read plain values. What the types say is what a reader gets.
  */
 export interface SightingRecordingJson {
-  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/3/sighting.schema.json. Not read. */
+  /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/4/sighting.schema.json. Not read. */
   $schema?: string
-  /** The version of the format this file is written in (see FormatVersion): 3. A file of an older version is read through
+  /** The version of the format this file is written in (see FormatVersion): 4. A file of an older version is read through
    * SightingMigration; one of a newer version is refused, not misread. */
-  version: 3
+  version: 4
   /** Which account this is, unique across every recording anywhere: the day it happened, then
    * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
    * interpretations name it by — see Sighting.id. */
@@ -162,9 +162,9 @@ export interface SightingRecordingJson {
   variants?: InterpretationJson[]
   /** What happened in the sky while it runs, as facts (a laser shot, a launch, a re-entry) — see SkyEventsJson. Absent means none was stated. */
   skyEvents?: SkyEventsJson
-  /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see FrozenData. Absent means all of it is
+  /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see Snapshots. Absent means all of it is
    * asked for live. */
-  frozen?: FrozenData
+  snapshots?: Snapshots
   /**
    * The modules it needs to be drawn as it was made, by the address of each one's manifest (`ufoathome-module.json`), relative to this
    * file or absolute: a catalogue a model it names comes from. A reader loads what each manifest states; never its script, unless the
@@ -174,22 +174,28 @@ export interface SightingRecordingJson {
 }
 
 /** A recording in version 1 of the format: its time as the fields of a date, its place as a list of named locations (see SightingMigration). */
-export type SightingRecordingJsonV1 = Omit<SightingRecordingJson, "version" | "time" | "endTime" | "place"> & {
+export type SightingRecordingJsonV1 = Omit<SightingRecordingJsonV3, "version" | "time" | "endTime" | "place"> & {
   version?: 1
   time?: SightingTime
   endTime?: SightingTime
   place?: SightingLocation[]
 }
 
+/** A recording in version 3 of the format: its snapshots under the name `frozen` (see SightingMigration). */
+export type SightingRecordingJsonV3 = Omit<SightingRecordingJson, "version" | "snapshots"> & {
+  version: 3
+  frozen?: Snapshots
+}
+
 /** A recording in version 2 of the format: its groups of shapes as lists of members, its events' `who` "observer" or "phenomenon" (see
  * SightingMigration). */
-export type SightingRecordingJsonV2 = Omit<SightingRecordingJson, "version" | "timeline"> & {
+export type SightingRecordingJsonV2 = Omit<SightingRecordingJsonV3, "version" | "timeline"> & {
   version: 2
   timeline: Omit<TimelineJson, "groups"> & { groups?: string[][] }
 }
 
 /** What a recording may be read from: the current version of the format, or an older one, migrated as it is read. */
-export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV2 | SightingRecordingJsonV1
+export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV3 | SightingRecordingJsonV2 | SightingRecordingJsonV1
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
@@ -210,7 +216,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
   // see BaseShape.aim. Same rule as the angle above: the drawing is the newer statement.
   SightingShapes.toAim(sighting)
   return {
-    version: 3,
+    version: 4,
     id: sighting.id,
     time: SightingJsonDates.write(sighting.event.time),
     endTime: SightingJsonDates.write(sighting.event.endTime),
@@ -260,7 +266,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     interpretation: expanded ? SightingPositions.restatedInterpretation(sighting) : RecordingEvents.writtenInterpretation(sighting, SightingPositions.restatedInterpretation(sighting)),
     variants: sighting.variants.length > 0 ? sighting.variants : undefined,
     skyEvents: SkyEvents.written(sighting.skyEvents),
-    frozen: sighting.frozen,
+    snapshots: sighting.snapshots,
     modules: sighting.modules?.length ? sighting.modules : undefined
   }
 }
@@ -354,7 +360,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.interpretation = stated.interpretation
   sighting.variants = Array.isArray(json.variants) ? json.variants : []
   sighting.skyEvents = stated.skyEvents
-  sighting.frozen = json.frozen
+  sighting.snapshots = json.snapshots
   sighting.modules = Array.isArray(json.modules) ? json.modules.filter((url): url is string => typeof url === "string") : undefined
   sighting.loadIssues = issues
   // Before the shapes are placed: they follow the observer's poses, which the events may be what gives.

@@ -48,7 +48,7 @@ describe("kinds of interpretation", () => {
     install()
     const read = await CaseFile.interpretationOf({ eventType: "interpretation", bodies: [], balloons: [{ id: "b", burstM: 2 }] } as never, "https://example.org/case.json", async () => ({}))
     expect(read.balloons).toEqual([{ id: "b", burstM: 2 }])
-    const written = JSON.parse(JSON.stringify(toSightingJson(fromSightingJson({ version: 3, timeline: { keyframes: [] }, interpretation: { bodies: [], balloons: [{ id: "b", burstM: 2 }] } } as never))))
+    const written = JSON.parse(JSON.stringify(toSightingJson(fromSightingJson({ version: 4, timeline: { keyframes: [] }, interpretation: { bodies: [], balloons: [{ id: "b", burstM: 2 }] } } as never))))
     expect(written.interpretation.balloons).toEqual([{ id: "b", burstM: 2 }])
   })
 })

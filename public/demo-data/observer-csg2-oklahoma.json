@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "observer-csg2-oklahoma",
   "image": "https://ufoathome.org/demo-data/share/csg2-oklahoma.jpg",
   "observer": {
@@ -2112,7 +2112,7 @@
       }
     ]
   },
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "observer-csg2-oklahoma.relief.zip",
       "takenOn": "2026-11-01",

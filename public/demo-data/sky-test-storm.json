@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "sky-test-storm",
   "image": "https://ufoathome.org/demo-data/share/sky-test-storm.jpg",
   "summaryTime": 1,
@@ -96,7 +96,7 @@
     "keyframes": []
   },
   "decor": [],
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "sky-test-storm.relief.zip",
       "takenOn": "2026-10-20",

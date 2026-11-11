@@ -2,10 +2,10 @@ import type { GeoBounds } from "../GeoBounds.js"
 import type { ImageryProvider, ImageryTexture } from "../ImageryProvider.js"
 import { dataSourceById } from "../../../engine/source/DataSource.js"
 import { IMAGERY_SOURCES } from "../../../modules/providers/terrain/terrainSources.js"
-import type { FrozenPatch } from "./FrozenPatches.js"
+import type { SnapshotPatch } from "./SnapshotPatches.js"
 
 /** One tile as its source served it. */
-interface FrozenTile {
+interface SnapshotTile {
   bytes: Uint8Array
   type: string
 }
@@ -16,15 +16,15 @@ export interface ImageryAnnexData {
   /** Which of IMAGERY_SOURCES served the tiles: the one that is asked to stitch them again, with the same addresses. */
   source: string
   attribution: string
-  patches: FrozenPatch[]
-  /** The observer map's annex (see FrozenMapImagery): the ground its photograph was asked for, and at how many pixels. No patch then. */
-  map?: FrozenMapGround
+  patches: SnapshotPatch[]
+  /** The observer map's annex (see SnapshotMapImagery): the ground its photograph was asked for, and at how many pixels. No patch then. */
+  map?: SnapshotMapGround
   /** By the address they were asked at. */
-  tiles: Map<string, FrozenTile>
+  tiles: Map<string, SnapshotTile>
 }
 
 /** What the observer map asked its photograph for. */
-export interface FrozenMapGround {
+export interface SnapshotMapGround {
   bounds: GeoBounds
   pixels: number
 }
@@ -34,8 +34,8 @@ interface ImageryIndexFile {
   takenOn: string
   source: string
   attribution: string
-  patches: FrozenPatch[]
-  map?: FrozenMapGround
+  patches: SnapshotPatch[]
+  map?: SnapshotMapGround
   tiles: Record<string, { file: string, type: string }>
 }
 
@@ -46,7 +46,7 @@ interface ImageryIndexFile {
  * share are kept once; and a tile is the source's own file, written again as it came, where a picture would be drawn and compressed again.
  */
 export class TileRecorder {
-  readonly tiles = new Map<string, FrozenTile>()
+  readonly tiles = new Map<string, SnapshotTile>()
 
   constructor(private readonly fetchImpl: typeof fetch = fetch.bind(globalThis)) {
   }
@@ -84,7 +84,7 @@ export class ImageryAnnex {
     const indexBytes = files["index.json"]
     if (!indexBytes) throw new Error("An imagery annex without its index")
     const index = JSON.parse(new TextDecoder().decode(indexBytes)) as ImageryIndexFile
-    const tiles = new Map<string, FrozenTile>()
+    const tiles = new Map<string, SnapshotTile>()
     for (const [url, { file, type }] of Object.entries(index.tiles)) {
       const bytes = files[file]
       if (bytes) tiles.set(url, { bytes, type })
@@ -98,7 +98,7 @@ export class ImageryAnnex {
  * them. A tile the annex does not hold is not asked for either: it answers as a tile that does not exist does (404), and the patch is then the
  * flat ground a refused photograph always gave.
  */
-export class FrozenImageryProvider implements ImageryProvider {
+export class SnapshotImageryProvider implements ImageryProvider {
   private provider?: Promise<ImageryProvider>
   private attributionRead?: string
 
@@ -112,13 +112,13 @@ export class FrozenImageryProvider implements ImageryProvider {
   async getImageryTexture(bounds: GeoBounds, resolution: { width: number; height: number }): Promise<ImageryTexture> {
     const provider = await (this.provider ??= this.annex.then(annex => {
       this.attributionRead = annex.attribution
-      return dataSourceById(IMAGERY_SOURCES, annex.source).create(FrozenImageryProvider.fetchFrom(annex.tiles))
+      return dataSourceById(IMAGERY_SOURCES, annex.source).create(SnapshotImageryProvider.fetchFrom(annex.tiles))
     }))
     return provider.getImageryTexture(bounds, resolution)
   }
 
   /** A fetch answered from the tiles alone. */
-  static fetchFrom(tiles: ReadonlyMap<string, FrozenTile>): typeof fetch {
+  static fetchFrom(tiles: ReadonlyMap<string, SnapshotTile>): typeof fetch {
     return async input => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
       const tile = tiles.get(url)
@@ -129,14 +129,14 @@ export class FrozenImageryProvider implements ImageryProvider {
 }
 
 /**
- * The observer map's photograph as it was frozen (see FrozenData's `map`): the ground it was taken of, stitched again from the tiles its source
+ * The observer map's photograph as it was frozen (see Snapshots's `map`): the ground it was taken of, stitched again from the tiles its source
  * served, by that source, and asked of nobody.
  *
  * The map asks for nothing else while it reads this. Its ground is the box the annex was taken of, whatever the reader then does with the map:
  * a zoom into it shows the same photograph larger, and the ground beyond it, zoomed out, is left blank. Asking live for a sharper or a wider one
  * would be the request to a third party that freezing exists to spare.
  */
-export class FrozenMapImagery {
+export class SnapshotMapImagery {
   private picture?: Promise<ImageryTexture>
   private attributionRead?: string
 
@@ -152,7 +152,7 @@ export class FrozenMapImagery {
     return this.picture ??= this.annex.then(annex => {
       if (!annex.map) throw new Error("An imagery annex that holds no map")
       this.attributionRead = annex.attribution
-      const provider = dataSourceById(IMAGERY_SOURCES, annex.source).create(FrozenImageryProvider.fetchFrom(annex.tiles))
+      const provider = dataSourceById(IMAGERY_SOURCES, annex.source).create(SnapshotImageryProvider.fetchFrom(annex.tiles))
       return provider.getImageryTexture(annex.map.bounds, { width: annex.map.pixels, height: annex.map.pixels })
     })
   }

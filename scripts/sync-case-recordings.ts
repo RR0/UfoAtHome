@@ -132,7 +132,7 @@ class CaseRecordingSync {
 
   /**
    * The recordings, each followed by the files it names by an address relative to itself: the annexes its frozen data and its own sections
-   * are kept in (relief, imagery, roads… see FrozenData), and the pictures laid over its scene. Read relative to the recording, they have to
+   * are kept in (relief, imagery, roads… see Snapshots), and the pictures laid over its scene. Read relative to the recording, they have to
    * sit beside it on both hosts, and a recording copied without them asks for files the dossier does not have: Cussac's ground, synced with
    * its frozen data and not its annexes, came out without its photograph on rr0.org.
    */
@@ -148,11 +148,11 @@ class CaseRecordingSync {
       add(recording)
       if (!recording.published.endsWith(".json")) continue
       const json = JSON.parse(readFileSync(path.join(this.here, recording.published), "utf8")) as {
-        frozen?: Record<string, { src?: unknown } | boolean | undefined>
+        snapshots?: Record<string, { src?: unknown } | boolean | undefined>
         references?: { src?: unknown }[]
       }
       const named = [
-        ...Object.values(json.frozen ?? {}).map(group => typeof group === "object" ? group?.src : undefined),
+        ...Object.values(json.snapshots ?? {}).map(group => typeof group === "object" ? group?.src : undefined),
         ...(json.references ?? []).map(reference => reference.src)
       ]
       for (const src of named) {

@@ -5,7 +5,7 @@ import { fromSightingJson, type SightingRecordingJsonV1 } from "../../../src/eng
 describe("SightingMigration", () => {
 
   it("leaves a recording of the current version as it is, the same object", () => {
-    const current = { version: 3 as const, time: "1964-04-24T17:50", timeline: { keyframes: [] } }
+    const current = { version: 4 as const, time: "1964-04-24T17:50", timeline: { keyframes: [] } }
     expect(SightingMigration.toCurrent(current)).toBe(current)
   })
 
@@ -15,7 +15,7 @@ describe("SightingMigration", () => {
       endTime: { year: 1964, month: 4, day: 24, hour: 17, minute: 52 },
       timeline: { keyframes: [] }
     } as SightingRecordingJsonV1)
-    expect(migrated).toMatchObject({ version: 3, time: "1967-08-29T10:30~", endTime: "1964-04-24T17:52" })
+    expect(migrated).toMatchObject({ version: 4, time: "1967-08-29T10:30~", endTime: "1964-04-24T17:52" })
   })
 
   it("keeps what a time said of where it came from, its own or one of its fields'", () => {
@@ -59,5 +59,14 @@ describe("SightingMigration", () => {
     })
     expect(sighting.event.time).toMatchObject({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
     expect(sighting.event.place).toEqual([{ lat: 32.3792, lng: -86.3077, name: "Montgomery, Alabama" }])
+  })
+
+  it("calls snapshots what version 3 called frozen, where it stood among the keys", () => {
+    const frozen = { relief: { src: "a.relief.zip", takenOn: "2026-10-20" } }
+    const migrated = SightingMigration.toCurrent({ version: 3, frozen, decor: [], timeline: { keyframes: [] } } as never) as unknown as Record<string, unknown>
+    expect(migrated.version).toBe(4)
+    expect(migrated.snapshots).toEqual(frozen)
+    expect("frozen" in migrated).toBe(false)
+    expect(Object.keys(migrated)).toEqual(["version", "snapshots", "decor", "timeline"])
   })
 })

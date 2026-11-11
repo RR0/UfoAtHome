@@ -1,6 +1,6 @@
 import type { Sighting } from "../../../engine/model/Sighting.js"
 import { resolveObserverPoseAt } from "../../../engine/model/Sighting.js"
-import type { FrozenTerrainGroupName } from "../../../engine/model/FrozenData.js"
+import type { SnapshotTerrainGroupName } from "../../../engine/model/Snapshots.js"
 import { dataSourceById } from "../../../engine/source/DataSource.js"
 import { TerrainReach } from "../TerrainReach.js"
 import { geoToLocalMeters } from "../GeoProjection.js"
@@ -10,10 +10,10 @@ import type { WaterProvider } from "../WaterProvider.js"
 import type { RailwayProvider } from "../RailwayProvider.js"
 import { ASKED_GRID_SIZE, IMAGERY_RESOLUTION } from "../TerrainMeshBuilder.js"
 import { IMAGERY_SOURCES } from "../../../modules/providers/terrain/terrainSources.js"
-import { FrozenPatches, type FrozenPatch } from "./FrozenPatches.js"
-import { ReliefAnnex, type FrozenReliefPatch } from "./ReliefAnnex.js"
+import { SnapshotPatches, type SnapshotPatch } from "./SnapshotPatches.js"
+import { ReliefAnnex, type SnapshotReliefPatch } from "./ReliefAnnex.js"
 import { ImageryAnnex, TileRecorder } from "./ImageryAnnex.js"
-import type { FrozenVectorPatch, VectorAnnexData } from "./VectorAnnex.js"
+import type { SnapshotVectorPatch, VectorAnnexData } from "./VectorAnnex.js"
 import { ObserverPath } from "../../../engine/place/ObserverPath.js"
 import { ObserverMapView } from "../../../render/ObserverMapView.js"
 import type { GeoBounds } from "../GeoBounds.js"
@@ -21,7 +21,7 @@ import { SKY_EVENT_SOURCES } from "../../../modules/sky-events/skyEventSources.j
 import { SkyEventKinds } from "../../../modules/sky-events/SkyEventKind.js"
 
 /** Where each group is taken from: the sources the scene asks live. */
-export interface FreezerSources {
+export interface SnapshotSources {
   elevation: ElevationProvider
   /** Its credit, as its licence words it (see ELEVATION_SOURCES): the elevation providers have none of their own. */
   elevationCredit: string
@@ -33,7 +33,7 @@ export interface FreezerSources {
 }
 
 /** What freezing one group gives: the annex's bytes, and what the recording says of it. */
-export interface FrozenAnnex {
+export interface SnapshotAnnex {
   bytes: Uint8Array
   attribution: string
   takenOn: string
@@ -44,9 +44,9 @@ export interface FrozenAnnex {
 
 /**
  * The patches of ground a recording plays through, and what is laid on them taken from their sources, once: what its annexes are made of
- * (see FrozenData).
+ * (see Snapshots).
  */
-export class TerrainFreezer {
+export class TerrainSnapshotTaker {
   /** The playhead's step through the recording while the patches are worked out: 100 ms is 3 m at motorway speed, nothing next to 150. */
   private static readonly STEP_MS = 100
 
@@ -55,18 +55,18 @@ export class TerrainFreezer {
    * one round the first place, and another wherever the observer has gone the rebuild distance from the last one, or climbed enough to see
    * farther. A patch already in the list that would serve again (a drive back the same way) is not taken twice.
    */
-  static plan(sighting: Sighting): FrozenPatch[] {
-    const route = TerrainFreezer.routeOf(sighting)
+  static plan(sighting: Sighting): SnapshotPatch[] {
+    const route = TerrainSnapshotTaker.routeOf(sighting)
     const reachM = TerrainReach.decorReachFor(sighting.decor, route)
     const endMs = Math.max(sighting.observerTrack.duration, sighting.timeline.duration, 0)
-    const patches: FrozenPatch[] = []
-    let current: FrozenPatch | undefined
-    const serves = (patch: FrozenPatch, lat: number, lng: number, radiusM: number) => {
+    const patches: SnapshotPatch[] = []
+    let current: SnapshotPatch | undefined
+    const serves = (patch: SnapshotPatch, lat: number, lng: number, radiusM: number) => {
       if (Math.abs(patch.radiusM - radiusM) >= radiusM * 0.1) return false
       const { x, z } = geoToLocalMeters(lat, lng, patch.lat, patch.lng)
       return Math.hypot(x, z) < TerrainReach.rebuildDistanceFor(radiusM)
     }
-    for (let t = 0; ; t = Math.min(endMs, t + TerrainFreezer.STEP_MS)) {
+    for (let t = 0; ; t = Math.min(endMs, t + TerrainSnapshotTaker.STEP_MS)) {
       const pose = resolveObserverPoseAt(sighting, t)
       if (pose?.lat !== undefined && pose.lng !== undefined) {
         const radiusM = Math.max(TerrainReach.groundRadiusFor(pose.elevationM ?? 0), reachM)
@@ -100,20 +100,20 @@ export class TerrainFreezer {
   }
 
   /** Takes `group` for every patch of `patches` from `sources`, asking for each exactly what the scene asks. `onPatch` is told of each done. */
-  static async freeze(group: FrozenTerrainGroupName, sighting: Sighting, patches: readonly FrozenPatch[], sources: FreezerSources,
-                      onPatch?: (done: number, of: number) => void): Promise<FrozenAnnex | undefined> {
+  static async freeze(group: SnapshotTerrainGroupName, sighting: Sighting, patches: readonly SnapshotPatch[], sources: SnapshotSources,
+                      onPatch?: (done: number, of: number) => void): Promise<SnapshotAnnex | undefined> {
     const takenOn = new Date().toISOString().slice(0, 10)
     const report = (done: number) => onPatch?.(done, patches.length)
     switch (group) {
       case "relief": {
-        const route = TerrainFreezer.routeOf(sighting)
-        const taken: FrozenReliefPatch[] = []
+        const route = TerrainSnapshotTaker.routeOf(sighting)
+        const taken: SnapshotReliefPatch[] = []
         for (const [i, patch] of patches.entries()) {
           try {
-            const grid = await sources.elevation.getElevationGrid(FrozenPatches.boundsOf(patch), { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }, { route })
+            const grid = await sources.elevation.getElevationGrid(SnapshotPatches.boundsOf(patch), { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }, { route })
             taken.push({ ...patch, grid })
           } catch (error) {
-            console.warn("Relief not frozen for a patch:", error)
+            console.warn("Relief not snapshots for a patch:", error)
           }
           report(i + 1)
         }
@@ -129,10 +129,10 @@ export class TerrainFreezer {
         let answered = 0
         for (const [i, patch] of patches.entries()) {
           try {
-            await provider.getImageryTexture(FrozenPatches.boundsOf(patch), { width: IMAGERY_RESOLUTION, height: IMAGERY_RESOLUTION })
+            await provider.getImageryTexture(SnapshotPatches.boundsOf(patch), { width: IMAGERY_RESOLUTION, height: IMAGERY_RESOLUTION })
             answered++
           } catch (error) {
-            console.warn("Imagery not frozen for a patch:", error)
+            console.warn("Imagery not snapshots for a patch:", error)
           }
           report(i + 1)
         }
@@ -142,11 +142,11 @@ export class TerrainFreezer {
         return { bytes, attribution, takenOn, answered, patches: patches.length }
       }
       case "roads":
-        return TerrainFreezer.vector(sources.roads, patches, takenOn, report, (provider, bounds) => provider.getRoads(bounds), provider => provider.contemporary)
+        return TerrainSnapshotTaker.vector(sources.roads, patches, takenOn, report, (provider, bounds) => provider.getRoads(bounds), provider => provider.contemporary)
       case "water":
-        return TerrainFreezer.vector(sources.water, patches, takenOn, report, (provider, bounds) => provider.getWater(bounds))
+        return TerrainSnapshotTaker.vector(sources.water, patches, takenOn, report, (provider, bounds) => provider.getWater(bounds))
       case "railways":
-        return TerrainFreezer.vector(sources.railways, patches, takenOn, report, (provider, bounds) => provider.getRailways(bounds), provider => provider.contemporary)
+        return TerrainSnapshotTaker.vector(sources.railways, patches, takenOn, report, (provider, bounds) => provider.getRailways(bounds), provider => provider.contemporary)
     }
   }
 
@@ -159,9 +159,9 @@ export class TerrainFreezer {
     return path && ObserverMapView.fitted(path, sighting.traces.flatMap(trace => trace.points))
   }
 
-  /** Takes the observer map's photograph (see FrozenMapImagery) from the imagery source `source` (an id of IMAGERY_SOURCES), as the map asks for it. */
-  static async freezeMap(sighting: Sighting, source: string): Promise<FrozenAnnex | undefined> {
-    const bounds = TerrainFreezer.mapGround(sighting)
+  /** Takes the observer map's photograph (see SnapshotMapImagery) from the imagery source `source` (an id of IMAGERY_SOURCES), as the map asks for it. */
+  static async freezeMap(sighting: Sighting, source: string): Promise<SnapshotAnnex | undefined> {
+    const bounds = TerrainSnapshotTaker.mapGround(sighting)
     if (!bounds) return undefined
     const takenOn = new Date().toISOString().slice(0, 10)
     const recorder = new TileRecorder()
@@ -171,7 +171,7 @@ export class TerrainFreezer {
     try {
       await provider.getImageryTexture(bounds, { width: pixels, height: pixels })
     } catch (error) {
-      console.warn("Map imagery not frozen:", error)
+      console.warn("Map imagery not snapshots:", error)
       return undefined
     }
     const attribution = provider.attribution
@@ -184,17 +184,17 @@ export class TerrainFreezer {
    * does not ask for either (see TerrainReach.ROADS_MAX_RADIUS_M).
    */
   private static async vector<P extends { attribution: string }, T>(
-    provider: P | undefined, patches: readonly FrozenPatch[], takenOn: string, report: (done: number) => void,
-    ask: (provider: P, bounds: ReturnType<typeof FrozenPatches.boundsOf>) => Promise<T[]>, contemporary?: (provider: P) => boolean
-  ): Promise<FrozenAnnex | undefined> {
+    provider: P | undefined, patches: readonly SnapshotPatch[], takenOn: string, report: (done: number) => void,
+    ask: (provider: P, bounds: ReturnType<typeof SnapshotPatches.boundsOf>) => Promise<T[]>, contemporary?: (provider: P) => boolean
+  ): Promise<SnapshotAnnex | undefined> {
     if (!provider) return undefined
-    const taken: FrozenVectorPatch<T>[] = []
+    const taken: SnapshotVectorPatch<T>[] = []
     for (const [i, patch] of patches.entries()) {
       if (patch.radiusM <= TerrainReach.ROADS_MAX_RADIUS_M) {
         try {
-          taken.push({ ...patch, items: await ask(provider, FrozenPatches.boundsOf(patch)) })
+          taken.push({ ...patch, items: await ask(provider, SnapshotPatches.boundsOf(patch)) })
         } catch (error) {
-          console.warn("Not frozen for a patch:", error)
+          console.warn("Not snapshots for a patch:", error)
         }
       }
       report(i + 1)

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Check a frozen demo</title>
+  <title>Check a demo's snapshots</title>
   <style>
     body { margin: 0; }
     rr0-sighting { display: block; width: 100vw; height: 90vh; }
@@ -10,9 +10,9 @@
 </head>
 <body>
 <!--
-  Plays one recording and says what its page asked of any server but this one: none, for a recording whose third-party data is frozen.
+  Plays one recording and says what its page asked of any server but this one: none, for a recording whose third-party data is snapshots.
 
-    /scripts/freeze/verify.html?src=/demo-data/observer-cussac.json
+    /scripts/snapshot/verify.html?src=/demo-data/observer-cussac.json
 
   then, once the scene has settled, `thirdParty()` in the console.
 -->
@@ -30,7 +30,7 @@
   window.thirdParty = () => {
     const entries = performance.getEntriesByType("resource")
     const own = entries.filter(entry => new URL(entry.name).host === location.host)
-    return { own: own.length, frozen: own.filter(entry => /\.(relief|imagery|map)\.zip|\.(roads|water|railways|upper-air)\.json/.test(entry.name)).map(entry => entry.name.split("/").pop()),
+    return { own: own.length, snapshots: own.filter(entry => /\.(relief|imagery|map)\.zip|\.(roads|water|railways|upper-air)\.json/.test(entry.name)).map(entry => entry.name.split("/").pop()),
       thirdParty: entries.filter(entry => new URL(entry.name).host !== location.host && !entry.name.startsWith("data:") && !entry.name.startsWith("blob:")).map(entry => entry.name) }
   }
 </script>

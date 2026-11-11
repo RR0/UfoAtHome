@@ -9,9 +9,9 @@ export interface ShareMessages {
   copy: string
   copied: string
   /** Embedding this version for good rather than the current one; `{version}` is this one. */
-  freeze: string
+  pin: string
   /** What freezing does, said when the pointer rests on it. */
-  freezeHint: string
+  pinHint: string
   /** Said in an editor whose changes are not saved: what is shared is the file at its address, not what is on screen. */
   unsaved: string
   /** Why an editor cannot share: what it holds has no address (a new recording, a file picked from the disk). */

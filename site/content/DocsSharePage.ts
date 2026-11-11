@@ -318,12 +318,12 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p class="small">The script's address has no version in it, so your page follows each release
       without being edited: browsers ask on every visit whether it changed, and the answer costs
       nothing while it has not.</p>
-    <p class="small">To keep the rendering you checked instead, tick <strong>Freeze version</strong>
+    <p class="small">To keep the rendering you checked instead, tick <strong>Pin version</strong>
       in the share dialog: the script then comes from the package as published on npm, served by
       jsDelivr, which keeps every version:
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Your page then gets none of the later fixes, but it reads recordings written
       for later versions as long as their format has not changed (see
-      <a href="/docs/format/">the format's versions</a>). The box freezes the link too: it then ends
+      <a href="/docs/format/">the format's versions</a>). The box pins the link too: it then ends
       with <code>&amp;v=<var>version</var></code>, and the page it opens, today's, loads that version's
       player or editor from the same place.</p>
   </div>
@@ -441,12 +441,12 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p class="small">L'adresse du script ne porte pas de version : votre page suit donc chaque
       version sans être modifiée. Les navigateurs demandent à chaque visite s'il a changé, et la
       réponse ne coûte rien tant qu'il n'a pas changé.</p>
-    <p class="small">Pour garder plutôt le rendu que vous avez vérifié, cochez <strong>Figer la
+    <p class="small">Pour garder plutôt le rendu que vous avez vérifié, cochez <strong>Épingler la
       version</strong> dans la boîte de partage : le script vient alors du paquet publié sur npm,
       servi par jsDelivr, qui garde toutes les versions :
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Votre page ne reçoit plus les corrections ultérieures, mais lit les
       enregistrements écrits pour des versions plus récentes tant que leur format n'a pas changé
-      (voir <a href="/docs/format/">les versions du format</a>). La case fige aussi le lien : il se
+      (voir <a href="/docs/format/">les versions du format</a>). La case épingle aussi le lien : il se
       termine alors par <code>&amp;v=<var>version</var></code>, et la page qu'il ouvre, celle du jour,
       charge le lecteur ou l'éditeur de cette version au même endroit.</p>
   </div>
@@ -691,12 +691,12 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     <p class="small">L'indirizzo dello script non contiene una versione, quindi la tua pagina
       segue ogni rilascio senza essere modificata: i browser chiedono a ogni visita se è cambiato, e
       la risposta non costa nulla finché non è cambiato.</p>
-    <p class="small">Per mantenere invece la resa che hai verificato, seleziona <strong>Bloccare la
+    <p class="small">Per mantenere invece la resa che hai verificato, seleziona <strong>Fissare la
       versione</strong> nella finestra di condivisione: lo script viene allora dal pacchetto
       pubblicato su npm, servito da jsDelivr, che conserva tutte le versioni:
       <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. La tua pagina non riceve più le correzioni successive, ma legge le
       registrazioni scritte per versioni più recenti finché il loro formato non è cambiato (vedi
-      <a href="/docs/format/">le versioni del formato</a>). La casella blocca anche il link: termina
+      <a href="/docs/format/">le versioni del formato</a>). La casella fissa anche il link: termina
       allora con <code>&amp;v=<var>version</var></code>, e la pagina che apre, quella di oggi, carica il
       lettore o l'editor di quella versione dallo stesso posto.</p>
   </div>

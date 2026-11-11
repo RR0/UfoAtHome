@@ -440,7 +440,7 @@ describe("the scenery taken from a survey of the place", () => {
       await waitFor(() => (element.sightingData.decor ?? []).length === 3)
       select.value = "file"
       select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
-      expect(element.sightingData.frozen?.decor).toEqual({})
+      expect(element.sightingData.snapshots?.decor).toEqual({})
       expect(localStorage.getItem(KEY)).toBeNull()
       expect(shadow.getElementById("scenery-file-link")!.hidden).toBe(false)
       element.surroundingsProvider = surveyOf({ trees: [], buildings: [], bridges: [], lines: [] })

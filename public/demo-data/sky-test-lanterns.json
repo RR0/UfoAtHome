@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "sky-test-lanterns",
  "summaryTime": 115,
  "image": "https://ufoathome.org/demo-data/share/sky-test-lanterns.jpg",
@@ -8418,7 +8418,7 @@
    }
   ]
  },
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "sky-test-lanterns.relief.zip",
    "takenOn": "2026-11-01",

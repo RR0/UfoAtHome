@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { RecordingSections } from "../../src/engine/model/FrozenData.js"
+import { RecordingSections } from "../../src/engine/model/Snapshots.js"
 
 describe("RecordingSections", () => {
   const van = { id: "van", kind: "car" }
@@ -22,7 +22,7 @@ describe("RecordingSections", () => {
   it("puts the annex's scenery back after the stated one, replacing any surveyed object the recording still holds", () => {
     const stale = { id: "ign-lidar-topo-9", kind: "tree", origin: "ign-lidar-topo" }
     const json: Record<string, unknown> = { decor: [van, stale] }
-    RecordingSections.put("decor", json, { version: 3, decor: [tree] })
+    RecordingSections.put("decor", json, { version: 4, decor: [tree] })
     expect(json.decor).toEqual([van, tree])
   })
 

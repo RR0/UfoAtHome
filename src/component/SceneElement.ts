@@ -15,15 +15,15 @@ import { SeekPreview } from "./SeekPreview.js"
 import type { PreviewableScene } from "./SeekPreview.js"
 import type { TerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
 import { defaultTerrainProviders } from "../render3d/terrain/defaultTerrainProviders.js"
-import { FrozenTerrain } from "../render3d/terrain/frozen/FrozenTerrain.js"
-import type { FrozenMapImagery } from "../render3d/terrain/frozen/ImageryAnnex.js"
-import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
-import { FrozenGroups } from "../engine/model/FrozenData.js"
-import type { FrozenData } from "../engine/model/FrozenData.js"
+import { SnapshotTerrain } from "../render3d/terrain/snapshot/SnapshotTerrain.js"
+import type { SnapshotMapImagery } from "../render3d/terrain/snapshot/ImageryAnnex.js"
+import { SnapshotAnnexes } from "../render3d/terrain/snapshot/SnapshotAnnexes.js"
+import { SnapshotGroups } from "../engine/model/Snapshots.js"
+import type { Snapshots } from "../engine/model/Snapshots.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
 import { FilmStocks } from "../engine/instrument/FilmStock.js"
-import { FrozenUpperAirProvider } from "../engine/traffic/FrozenUpperAirProvider.js"
-import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/FrozenUpperAirProvider.js"
+import { SnapshotUpperAirProvider } from "../engine/traffic/SnapshotUpperAirProvider.js"
+import type { UpperAirAnnexData, UpperAirHeard } from "../engine/traffic/SnapshotUpperAirProvider.js"
 import type { DecorModelProvider } from "../render3d/decor/DecorModelProvider.js"
 import type { DecorModelCredit } from "../engine/model/Decor.js"
 import type { DecorSunlight, SceneAstronomy, SceneComet, SceneNova } from "../render3d/SceneRenderer.js"
@@ -1179,7 +1179,7 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.classList.add("ufo-overlay")
     // The phenomena stand in the scene below, not on the overlay — see UfoElement.paintsShapes.
     this.ufoElement.paintsShapes = false
-    this.ufoElement.observerMapFrozenSource = frozen => this.frozenMapOf(frozen)
+    this.ufoElement.observerMapSnapshotSource = snapshots => this.snapshotMapOf(snapshots)
     // Attributes set before this element upgraded are already on it — attributeChangedCallback has
     // not fired for them, since the nested player did not exist yet.
     this.forwardPlayerAttributes()
@@ -1752,27 +1752,27 @@ export class SceneElement extends HTMLElement {
    * Same "expose the nested renderer to a composing wrapper" arrangement as the getters above. */
   setTerrainProviders(providers: TerrainProviders): void {
     this.liveTerrainProviders = providers
-    this.frozenKey = undefined
-    this.applyFrozen(this.ufoElement.sighting.frozen)
+    this.snapshotKey = undefined
+    this.applySnapshots(this.ufoElement.sighting.snapshots)
   }
 
   /** The sources the ground is asked of live: the editor's choice, or the renderer's default. What a group the recording froze replaces. */
   private liveTerrainProviders?: TerrainProviders
-  /** What the ground was last composed from (see applyFrozen): the recording's frozen data, its address, and what the page holds unsaved. */
-  private frozenKey?: string = "none"
+  /** What the ground was last composed from (see applySnapshots): the recording's frozen data, its address, and what the page holds unsaved. */
+  private snapshotKey?: string = "none"
 
   /**
-   * Has the ground read from the recording's annexes what the recording froze, and asked live for the rest (see FrozenTerrain). Cheap when
+   * Has the ground read from the recording's annexes what the recording froze, and asked live for the rest (see SnapshotTerrain). Cheap when
    * nothing changed, and nothing is rebuilt then: called at every tick, as an edit of the file may change it.
    */
-  private applyFrozen(frozen: FrozenData | undefined): void {
-    const key = FrozenGroups.isEmpty(frozen) ? "none" : `${JSON.stringify(frozen)}\n${this.documentUrl ?? ""}\n${FrozenAnnexes.generation}`
-    if (key === this.frozenKey) return
-    const refreshUpperAir = this.frozenKey !== undefined && this.traffic?.set !== undefined
-    this.frozenKey = key
-    this.sceneRenderer.setTerrainProviders(FrozenTerrain.providers(frozen, this.documentUrl, this.liveTerrainProviders ?? defaultTerrainProviders()))
+  private applySnapshots(snapshots: Snapshots | undefined): void {
+    const key = SnapshotGroups.isEmpty(snapshots) ? "none" : `${JSON.stringify(snapshots)}\n${this.documentUrl ?? ""}\n${SnapshotAnnexes.generation}`
+    if (key === this.snapshotKey) return
+    const refreshUpperAir = this.snapshotKey !== undefined && this.traffic?.set !== undefined
+    this.snapshotKey = key
+    this.sceneRenderer.setTerrainProviders(SnapshotTerrain.providers(snapshots, this.documentUrl, this.liveTerrainProviders ?? defaultTerrainProviders()))
     // The observer map's photograph too, which the map otherwise asks Esri for whenever it opens.
-    this.ufoElement.observerMapFrozen = this.frozenMapOf(frozen)
+    this.ufoElement.observerMapSnapshot = this.snapshotMapOf(snapshots)
     // The air aloft may now be another annex's, or asked live.
     if (refreshUpperAir) {
       this.traffic = undefined
@@ -1781,15 +1781,15 @@ export class SceneElement extends HTMLElement {
   }
 
   /** The observer map's frozen photograph, one per annex and per state of what the page holds unsaved: the map keeps the one it has otherwise. */
-  private frozenMapOf(frozen: FrozenData | undefined): FrozenMapImagery | undefined {
-    const group = FrozenGroups.held(frozen, "map")
+  private snapshotMapOf(snapshots: Snapshots | undefined): SnapshotMapImagery | undefined {
+    const group = SnapshotGroups.held(snapshots, "map")
     if (!group) return undefined
-    const key = `${FrozenAnnexes.address(group.src, this.documentUrl)}\n${FrozenAnnexes.generation}`
-    if (this.frozenMap?.key !== key) this.frozenMap = { key, imagery: FrozenTerrain.map(group, this.documentUrl) }
-    return this.frozenMap.imagery
+    const key = `${SnapshotAnnexes.address(group.src, this.documentUrl)}\n${SnapshotAnnexes.generation}`
+    if (this.snapshotMap?.key !== key) this.snapshotMap = { key, imagery: SnapshotTerrain.map(group, this.documentUrl) }
+    return this.snapshotMap.imagery
   }
 
-  private frozenMap?: { key: string, imagery: FrozenMapImagery }
+  private snapshotMap?: { key: string, imagery: SnapshotMapImagery }
 
   /** Relays a change of 3D-model catalogue through to the renderer — see its
    * setDecorModelProvider. Same arrangement as setTerrainProviders above. */
@@ -2106,7 +2106,7 @@ export class SceneElement extends HTMLElement {
     // opened hanging two and a half metres over its field after Wilcox, and came down only when
     // play was pressed. The decor is re-anchored by the renderer itself at that moment (see
     // SceneRenderer.setTerrainOrigin); the bodies are this element's, so this is where it happens.
-    this.applyFrozen(sighting.frozen)
+    this.applySnapshots(sighting.snapshots)
     this.sceneRenderer.setObserverRoute(this.routeOf(sighting.observerTrack))
     this.sceneRenderer.setObserverHeadlights(this.observerHeadlightsAt(sighting, t))
     this.sceneRenderer.setTerrainOrigin(pose?.lat, pose?.lng, () => {
@@ -2824,12 +2824,12 @@ export class SceneElement extends HTMLElement {
    */
   private async readUpperAir(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime, fromMs: number, untilMs: number): Promise<void> {
     if (!asked.observer) return
-    const held = FrozenGroups.held(this.ufoElement.sighting.frozen, "upperAir")
+    const held = SnapshotGroups.held(this.ufoElement.sighting.snapshots, "upperAir")
     let provider: UpperAirProvider | undefined
     if (held) {
-      const address = FrozenAnnexes.address(held.src, this.documentUrl)
+      const address = SnapshotAnnexes.address(held.src, this.documentUrl)
       provider = SceneElement.upperAirProviders.get(address)
-      if (!provider) SceneElement.upperAirProviders.set(address, provider = new FrozenUpperAirProvider(FrozenAnnexes.json<UpperAirAnnexData>(address)))
+      if (!provider) SceneElement.upperAirProviders.set(address, provider = new SnapshotUpperAirProvider(SnapshotAnnexes.json<UpperAirAnnexData>(address)))
     } else {
       const source = this.upperAirSource ?? runtime.UPPER_AIR_SOURCES[0]
       provider = SceneElement.upperAirProviders.get(source.id)
@@ -2883,7 +2883,7 @@ export class SceneElement extends HTMLElement {
 
   private upperAirHeardLive?: UpperAirHeard
 
-  /** The last answer of a live record of the air aloft, with what it was asked: what an editor freezes (see FrozenUpperAirProvider). */
+  /** The last answer of a live record of the air aloft, with what it was asked: what an editor freezes (see SnapshotUpperAirProvider). */
   get upperAirHeard(): UpperAirHeard | undefined {
     return this.upperAirHeardLive
   }

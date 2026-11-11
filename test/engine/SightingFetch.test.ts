@@ -35,9 +35,9 @@ describe("SightingFetch", () => {
   it("puts back in a recording the weather it keeps beside it, and plays with its own when that cannot be read", async () => {
     const weatherTrack = { keyframes: [{ t: 0, weather: { cloudCover: 0.4 } }] }
     const files: Record<string, unknown> = {
-      [`${OTHER}/d/s.json`]: { version: 1, frozen: { weather: { src: "s.weather.json" } } },
+      [`${OTHER}/d/s.json`]: { version: 1, snapshots: { weather: { src: "s.weather.json" } } },
       [`${OTHER}/d/s.weather.json`]: { version: 1, weatherTrack, weatherSource: { id: "era5", name: "ERA5", url: "u" } },
-      [`${OTHER}/d/t.json`]: { version: 1, weatherTrack: { keyframes: [] }, frozen: { weather: { src: "gone.json" } } }
+      [`${OTHER}/d/t.json`]: { version: 1, weatherTrack: { keyframes: [] }, snapshots: { weather: { src: "gone.json" } } }
     }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url in files ? respond(files[url]) : respond(undefined, false, 404)))
     expect(await SightingFetch.recording(`${OTHER}/d/s.json`)).toMatchObject({ weatherTrack, weatherSource: { id: "era5" } })
@@ -48,8 +48,8 @@ describe("SightingFetch", () => {
     const van = { id: "van", kind: "car", eastM: 0, northM: 0 }
     const tree = { id: "ign-lidar-topo-1", kind: "tree", eastM: 9, northM: 15, origin: "ign-lidar-topo" }
     const files: Record<string, unknown> = {
-      [`${OTHER}/d/s.json`]: { version: 3, decor: [van], frozen: { decor: { src: "s.decor.json", takenOn: "2026-10-23" } } },
-      [`${OTHER}/d/s.decor.json`]: { version: 3, decor: [tree] }
+      [`${OTHER}/d/s.json`]: { version: 4, decor: [van], snapshots: { decor: { src: "s.decor.json", takenOn: "2026-10-23" } } },
+      [`${OTHER}/d/s.decor.json`]: { version: 4, decor: [tree] }
     }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url in files ? respond(files[url]) : respond(undefined, false, 404)))
     expect((await SightingFetch.recording(`${OTHER}/d/s.json`) as { decor: unknown[] }).decor).toEqual([van, tree])

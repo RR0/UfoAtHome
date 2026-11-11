@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "id": "observer-csg2-nassau",
   "image": "https://ufoathome.org/demo-data/share/csg2-nassau.jpg",
   "observer": {
@@ -897,7 +897,7 @@
       }
     ]
   },
-  "frozen": {
+  "snapshots": {
     "relief": {
       "src": "observer-csg2-nassau.relief.zip",
       "takenOn": "2026-11-01",

@@ -126,7 +126,7 @@ describe("telling a video from its source", () => {
 describe("a video in a recording", () => {
   it("round-trips through the file", () => {
     const reference = film({ t: 500, video: { fromS: 1.54, toS: 5.6, rate: 0.5 }, registrationTrack: [{ t: 0, headingDeg: 1, pitchDeg: 2 }] })
-    const sighting = fromSightingJson({ version: 3, timeline: { keyframes: [] }, references: [reference] })
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] }, references: [reference] })
     expect(sighting.references).toEqual([reference])
     expect(toSightingJson(sighting).references).toEqual([reference])
   })

@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2023-10-15-WesternUSEvent-W5-3-AARO-flares",
  "description": {
   "en": "We continued to hike west up the road and saw the large orb again, at 1937, but to our left - in front of [redacted]. I don't recall if this had any smaller released, and the large orb lasted about 10 seconds again. There was a similar white flash of light in the sky more southwest.",
@@ -290,7 +290,7 @@
   ]
  },
  "image": "https://ufoathome.org/demo-data/share/western-us-event-w5-3.jpg",
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-western-us-event-w5-1.relief.zip",
    "takenOn": "2026-10-25",

@@ -191,11 +191,11 @@ import { DecorSystem } from "../render3d/DecorSystem.js"
 import { GroundElevation } from "../render3d/terrain/ElevationProvider.js"
 import { TimeZones } from "../engine/time/TimeZones.js"
 import { dataSourceById } from "../engine/source/DataSource.js"
-import { FrozenDataPanel } from "./FrozenDataPanel.js"
+import { SnapshotsPanel } from "./SnapshotsPanel.js"
 import { SectionFilePanel } from "./SectionFilePanel.js"
-import { FrozenGroups, RecordingSections, type FrozenData, type FrozenGroupName, type RecordingSectionName } from "../engine/model/FrozenData.js"
-import { FrozenAnnexes } from "../render3d/terrain/frozen/FrozenAnnexes.js"
-import type { FreezerSources } from "../render3d/terrain/frozen/TerrainFreezer.js"
+import { SnapshotGroups, RecordingSections, type Snapshots, type SnapshotGroupName, type RecordingSectionName } from "../engine/model/Snapshots.js"
+import { SnapshotAnnexes } from "../render3d/terrain/snapshot/SnapshotAnnexes.js"
+import type { SnapshotSources } from "../render3d/terrain/snapshot/TerrainSnapshotTaker.js"
 import { defaultRailwayProvider, defaultRoadProvider, defaultWaterProvider } from "../render3d/terrain/defaultTerrainProviders.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import type { PlaceMatch, PlaceProvider } from "../engine/place/PlaceProvider.js"
@@ -517,7 +517,7 @@ export class SightingEditorElement extends HTMLElement {
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
-  private readonly frozenPanel: FrozenDataPanel
+  private readonly snapshotsPanel: SnapshotsPanel
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
   private readonly sectionFilePanel: SectionFilePanel
   private readonly eventsPanel: EventsPanel
@@ -1510,10 +1510,10 @@ export class SightingEditorElement extends HTMLElement {
     this.labelFileGroup = this.shadow.getElementById("label-file-group")!
     this.fileEditorHost = this.shadow.getElementById("file-editor")!
     this.fileNote = this.shadow.getElementById("file-note")!
-    this.frozenPanel = new FrozenDataPanel(this.shadow.getElementById("frozen-data")!, {
+    this.snapshotsPanel = new SnapshotsPanel(this.shadow.getElementById("snapshot-data")!, {
       sighting: () => this.ufoElement.sighting,
       documentUrl: () => this.sceneElement.documentUrl,
-      sources: () => this.freezerSources(),
+      sources: () => this.snapshotSources(),
       upperAirHeard: () => this.sceneElement.upperAirHeard,
       changed: () => {
         this.touch()
@@ -1597,7 +1597,7 @@ export class SightingEditorElement extends HTMLElement {
     this.fileItemSelect = this.shadow.getElementById("file-item") as HTMLSelectElement
     this.fileItemSelect.addEventListener("change", () => this.showFileItem(this.fileItemSelect.value))
     // Blank until the editor's words come (see applyMessages), as the rest of the editor is.
-    this.frozenPanel.localize(this.messages)
+    this.snapshotsPanel.localize(this.messages)
     this.sectionFilePanel.localize(this.messages)
     this.refreshFileItems()
     this.fileAsk = this.shadow.getElementById("file-ask") as HTMLDialogElement
@@ -2435,7 +2435,7 @@ export class SightingEditorElement extends HTMLElement {
     this.surroundings.placeLoaded(standing?.lat, standing?.lng)
     this.syncSceneryPicker()
     this.syncWeatherOwnership()
-    this.frozenPanel.render()
+    this.snapshotsPanel.render()
     this.refreshFileItems()
     // Weather itself is resynced by onSelectionOrTimeChanged() above (syncWeatherFromTimeline) —
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
@@ -2750,17 +2750,17 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Downloads the recording as a file, once its author has seen what it states. With the data it carries frozen (see FrozenDataPanel),
+   * Downloads the recording as a file, once its author has seen what it states. With the data it carries frozen (see SnapshotsPanel),
    * taken first where it has to be: then one zip, of the recording and its annexes as they are to stand beside each other.
    */
   private async downloadJson(): Promise<void> {
     const base = this.fileBase()
     let annexes = new Map<string, Uint8Array>()
     // At once when there is nothing to take or to carry: a recording with no place stands on no ground.
-    if (this.frozenPanel.hasWork()) {
+    if (this.snapshotsPanel.hasWork()) {
       this.exportButton.disabled = true
       try {
-        annexes = await this.frozenPanel.prepare(base)
+        annexes = await this.snapshotsPanel.prepare(base)
       } finally {
         this.exportButton.disabled = false
       }
@@ -2785,7 +2785,7 @@ export class SightingEditorElement extends HTMLElement {
       // Stored, not deflated: the annexes are compressed already, each its own way.
       const zip = zipSync(archive, { level: 0 })
       this.download(new Blob([zip as BlobPart], { type: "application/zip" }), `${base}.zip`)
-      this.showFileNote(this.messages.frozenExported.replaceAll("{count}", String(annexes.size)).replaceAll("{size}", FrozenDataPanel.size(zip.length)))
+      this.showFileNote(this.messages.snapshotExported.replaceAll("{count}", String(annexes.size)).replaceAll("{size}", SnapshotsPanel.size(zip.length)))
     }
     this.markClean()
   }
@@ -2813,7 +2813,7 @@ export class SightingEditorElement extends HTMLElement {
     select.replaceChildren(
       new Option(this.messages.fileItemRecording, "recording"),
       ...RecordingSections.NAMES.map(name => new Option(this.sectionFilePanel.itemLabel(name), name)),
-      ...FrozenGroups.NAMES.map(name => new Option(this.frozenPanel.itemLabel(name), name)),
+      ...SnapshotGroups.NAMES.map(name => new Option(this.snapshotsPanel.itemLabel(name), name)),
       new Option(this.messages.fileItemModules, SightingEditorElement.MODULES_ITEM))
     select.value = picked
     this.showFileItem(select.value)
@@ -2824,22 +2824,22 @@ export class SightingEditorElement extends HTMLElement {
    * recording, and under an item kept inside it, with that item's section shown: its file is the recording's own.
    */
   private showFileItem(item: string): void {
-    const annex = (FrozenGroups.NAMES as readonly string[]).includes(item)
+    const annex = (SnapshotGroups.NAMES as readonly string[]).includes(item)
     const part = (RecordingSections.NAMES as readonly string[]).includes(item) ? item as RecordingSectionName : undefined
     const modules = item === SightingEditorElement.MODULES_ITEM
     this.shadow.getElementById("file-recording")!.hidden = annex || part !== undefined || modules
-    this.shadow.getElementById("frozen-data")!.hidden = !annex
+    this.shadow.getElementById("snapshot-data")!.hidden = !annex
     this.shadow.getElementById("file-section")!.hidden = part === undefined
     this.shadow.getElementById("file-modules")!.hidden = !modules
     if (modules) void this.loadModulesPanel()
     // The item's frame unrolls from the picker of the files, as every list's does (see ElementList.glue).
-    for (const id of ["file-recording", "frozen-data", "file-section", "file-modules"]) {
+    for (const id of ["file-recording", "snapshot-data", "file-section", "file-modules"]) {
       const frame = this.shadow.getElementById(id)!
       if (!frame.hidden) ElementList.glue(frame)
     }
-    if (annex) this.frozenPanel.show(item as FrozenGroupName)
+    if (annex) this.snapshotsPanel.show(item as SnapshotGroupName)
     if (part) this.sectionFilePanel.show(part)
-    const section: JsonPath | undefined = annex && this.frozenPanel.isInlineGroup(item as FrozenGroupName) ? ["frozen", item, "src"]
+    const section: JsonPath | undefined = annex && this.snapshotsPanel.isInlineGroup(item as SnapshotGroupName) ? ["snapshots", item, "src"]
       : part && this.sectionFilePanel.isInline(part) ? SectionFilePanel.pathOf(part)
       : undefined
     this.fileEditorHost.hidden = (annex || part !== undefined || modules) && section === undefined
@@ -2921,7 +2921,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Whether a part of the recording is read from its file rather than asked of its source (see RecordingSections.fromFile). */
   private sectionFromFile(name: "place" | "lightPollution" | "decor"): boolean {
-    return RecordingSections.fromFile(this.ufoElement.sighting.frozen, name)
+    return RecordingSections.fromFile(this.ufoElement.sighting.snapshots, name)
   }
 
   /** The recording's own file, absolute: the address it was read from, or the file it is saved as. */
@@ -2944,7 +2944,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /** Where each frozen group is taken from: the sources chosen in the Position group, and the scene's own for the rest. */
-  private freezerSources(): FreezerSources {
+  private snapshotSources(): SnapshotSources {
     const elevation = dataSourceById(ELEVATION_SOURCES, this.chosenSourceId.get("elevation"))
     return {
       elevation: elevation.create(),
@@ -2976,7 +2976,7 @@ export class SightingEditorElement extends HTMLElement {
         reader.onerror = () => reject(reader.error)
         reader.readAsArrayBuffer(file)
       }))
-      FrozenAnnexes.release()
+      SnapshotAnnexes.release()
       const text = await this.recordingText(bytes)
       const json = JSON.parse(text) as SightingRecordingJson
       if (CaseFile.isCase(json)) {
@@ -3000,7 +3000,7 @@ export class SightingEditorElement extends HTMLElement {
 
   /**
    * The recording's text, from a file that is the recording itself or a zip of it and its annexes (what Save writes when the recording carries
-   * frozen data). The annexes of a zip are held for the scene, at the addresses the recording names them by (see FrozenAnnexes).
+   * frozen data). The annexes of a zip are held for the scene, at the addresses the recording names them by (see SnapshotAnnexes).
    */
   private async recordingText(bytes: Uint8Array): Promise<string> {
     // "PK", the start of every zip.
@@ -3012,14 +3012,14 @@ export class SightingEditorElement extends HTMLElement {
     if (!name) throw new Error("No recording in this archive")
     const folder = name.includes("/") ? name.slice(0, name.lastIndexOf("/") + 1) : ""
     for (const [path, content] of Object.entries(files)) {
-      if (path !== name && path.startsWith(folder)) FrozenAnnexes.hold(FrozenAnnexes.address(path.slice(folder.length), undefined), content)
+      if (path !== name && path.startsWith(folder)) SnapshotAnnexes.hold(SnapshotAnnexes.address(path.slice(folder.length), undefined), content)
     }
     const text = strFromU8(files[name])
     // What it keeps of its own text beside it is put back in it, as a player does (see SightingFetch.recording).
-    const json = JSON.parse(text) as Record<string, unknown> & { frozen?: Record<string, { src?: string } | undefined> }
+    const json = JSON.parse(text) as Record<string, unknown> & { snapshots?: Record<string, { src?: string } | undefined> }
     let put = false
     for (const section of RecordingSections.NAMES) {
-      const src = json.frozen?.[section]?.src
+      const src = json.snapshots?.[section]?.src
       const file = src !== undefined ? files[folder + src] : undefined
       if (!file) continue
       const kept = SightingMigration.toCurrent(JSON.parse(strFromU8(file)) as Record<string, unknown>)
@@ -3081,7 +3081,7 @@ export class SightingEditorElement extends HTMLElement {
       }
       const json = fetched as SightingRecordingJson
       // Its annexes are beside it, not what the editor held for the last one.
-      FrozenAnnexes.release()
+      SnapshotAnnexes.release()
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
@@ -3558,7 +3558,7 @@ export class SightingEditorElement extends HTMLElement {
     this.fillWeatherProvider()
     this.sourcePickers(this.shadow.getElementById("weather-source-rows")!, "weather-source-kind", "weather", [
       ["weather", this.messages.fileItemWeather, this.shadow.getElementById("weather-picker")!],
-      ["upper-air", this.messages.frozenUpperAir, this.sourcePicker("upper-air", UPPER_AIR_SOURCES, () => undefined, this.groupChoice(["upperAir"]))]
+      ["upper-air", this.messages.snapshotUpperAir, this.sourcePicker("upper-air", UPPER_AIR_SOURCES, () => undefined, this.groupChoice(["upperAir"]))]
     ])
     this.lightPollutionSourceRow.replaceChildren(document.createTextNode(`${this.messages.according} `),
       SightingEditorElement.creditLink(dataSourceById(LIGHT_POLLUTION_SOURCES, this.chosenSourceId.get("light-pollution"))))
@@ -3585,9 +3585,9 @@ export class SightingEditorElement extends HTMLElement {
       }, this.sectionChoice("lightPollution", () => this.scheduleLightPollutionLookup()))],
       ["elevation", this.messages.sourceElevation, this.sourcePicker("elevation", ELEVATION_SOURCES, () => this.applyTerrainSources(), this.groupChoice(["relief"]))],
       ["imagery", this.messages.sourceImagery, this.sourcePicker("imagery", IMAGERY_SOURCES, () => this.applyTerrainSources(), this.groupChoice(["imagery", "map"]))],
-      ["roads", this.messages.frozenRoads, this.sourcePicker("roads", [SightingEditorElement.LIVE_ROADS], () => undefined, this.groupChoice(["roads"]))],
-      ["water", this.messages.frozenWater, this.sourcePicker("water", [SightingEditorElement.LIVE_WATER], () => undefined, this.groupChoice(["water"]))],
-      ["railways", this.messages.frozenRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
+      ["roads", this.messages.snapshotRoads, this.sourcePicker("roads", [SightingEditorElement.LIVE_ROADS], () => undefined, this.groupChoice(["roads"]))],
+      ["water", this.messages.snapshotWater, this.sourcePicker("water", [SightingEditorElement.LIVE_WATER], () => undefined, this.groupChoice(["water"]))],
+      ["railways", this.messages.snapshotRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
     ])
     this.shadow.getElementById("label-aircraft-source")!.textContent = this.messages.sourceAircraft
     this.shadow.getElementById("aircraft-source-row")!.replaceChildren(this.aircraftPicker())
@@ -3755,14 +3755,14 @@ export class SightingEditorElement extends HTMLElement {
     else MessageStyle.show(this.aircraftStatus, said.length > 0 ? said.join(" ") : undefined, "info")
   }
 
-  /** A source picker's choice of the recording's files, for frozen groups of the ground (see FrozenData). */
-  private groupChoice(groups: readonly FrozenGroupName[]): FileChoice {
+  /** A source picker's choice of the recording's files, for frozen groups of the ground (see Snapshots). */
+  private groupChoice(groups: readonly SnapshotGroupName[]): FileChoice {
     return {
       item: groups[0],
-      fromFile: () => !this.frozenPanel.isLive(groups[0]),
-      setFromFile: fromFile => { for (const group of groups) this.frozenPanel.setLive(group, !fromFile) },
-      label: () => this.frozenPanel.itemLabel(groups[0]),
-      where: () => this.frozenPanel.where(groups[0])
+      fromFile: () => !this.snapshotsPanel.isLive(groups[0]),
+      setFromFile: fromFile => { for (const group of groups) this.snapshotsPanel.setLive(group, !fromFile) },
+      label: () => this.snapshotsPanel.itemLabel(groups[0]),
+      where: () => this.snapshotsPanel.where(groups[0])
     }
   }
 
@@ -3775,10 +3775,10 @@ export class SightingEditorElement extends HTMLElement {
       item: name,
       fromFile: () => this.sectionFromFile(name),
       setFromFile: fromFile => {
-        const frozen: FrozenData = { ...(this.ufoElement.sighting.frozen ?? {}) }
-        if (fromFile) frozen[name] = frozen[name] ?? {}
-        else delete frozen[name]
-        this.ufoElement.sighting.frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+        const snapshots: Snapshots = { ...(this.ufoElement.sighting.snapshots ?? {}) }
+        if (fromFile) snapshots[name] = snapshots[name] ?? {}
+        else delete snapshots[name]
+        this.ufoElement.sighting.snapshots = SnapshotGroups.isEmpty(snapshots) ? undefined : snapshots
         this.touch()
         this.scheduleFileSync()
         this.refreshFileItems()
@@ -3789,7 +3789,7 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  /** What a source picker offers to read the data from the recording's own files (see FrozenData). */
+  /** What a source picker offers to read the data from the recording's own files (see Snapshots). */
   private static readonly FILE_SOURCE = "file"
 
   /** The pickers that may read from the recording's files, each said again as the recording changes (see syncFilePickers). */
@@ -5714,12 +5714,12 @@ export class SightingEditorElement extends HTMLElement {
   /** Says in the recording whether its weather is read from its file (`frozen.weather`) or asked of a record again as the date or the place change. */
   private setWeatherFromFile(fromFile: boolean): void {
     const sighting = this.ufoElement.sighting
-    if (RecordingSections.fromFile(sighting.frozen, "weather") === fromFile) return
-    const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
-    if (fromFile) frozen.weather = { ...(frozen.weather ?? {}), live: undefined }
-    else delete frozen.weather
-    if (frozen.weather && frozen.weather.live === undefined) delete frozen.weather.live
-    sighting.frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+    if (RecordingSections.fromFile(sighting.snapshots, "weather") === fromFile) return
+    const snapshots: Snapshots = { ...(sighting.snapshots ?? {}) }
+    if (fromFile) snapshots.weather = { ...(snapshots.weather ?? {}), live: undefined }
+    else delete snapshots.weather
+    if (snapshots.weather && snapshots.weather.live === undefined) delete snapshots.weather.live
+    sighting.snapshots = SnapshotGroups.isEmpty(snapshots) ? undefined : snapshots
     this.touch()
     this.scheduleFileSync()
     this.refreshFileItems()
@@ -5998,7 +5998,7 @@ export class SightingEditorElement extends HTMLElement {
     this.closeFileAsk()
     this.weatherLookupResult = undefined
     this.followWeatherRecord()
-    this.weatherFromRecords = !RecordingSections.fromFile(sighting.frozen, "weather") &&
+    this.weatherFromRecords = !RecordingSections.fromFile(sighting.snapshots, "weather") &&
       (sighting.weatherSource !== undefined || sighting.weatherTrack.allKeyframes.length === 0)
     this.syncWeatherSourceState()
     if (this.weatherFromRecords && sighting.weatherSource === undefined) {
@@ -6777,19 +6777,19 @@ export class SightingEditorElement extends HTMLElement {
   private ownJson(json: SightingRecordingJson): SightingRecordingJson {
     const own = { ...json } as unknown as Record<string, unknown>
     for (const name of RecordingSections.NAMES) {
-      if (this.ufoElement.sighting.frozen?.[name]?.src !== undefined) RecordingSections.strip(name, own)
+      if (this.ufoElement.sighting.snapshots?.[name]?.src !== undefined) RecordingSections.strip(name, own)
     }
     return own as unknown as SightingRecordingJson
   }
 
   /** The recording's own file `json`, with what its annexes hold put back from the recording in memory: what the scene plays. */
   private withAnnexed(json: Record<string, unknown>): Record<string, unknown> {
-    const frozen = json.frozen as Record<string, { src?: string } | undefined> | undefined
+    const snapshots = json.snapshots as Record<string, { src?: string } | undefined> | undefined
     const current = this.sightingData as unknown as Record<string, unknown>
     for (const name of RecordingSections.NAMES) {
       // A text that holds them itself (one given whole, an older text of the history) says them.
       const given = RecordingSections.taken(name, json)
-      if (frozen?.[name]?.src === undefined || Object.values(given).some(value => !Array.isArray(value) || value.length > 0)) continue
+      if (snapshots?.[name]?.src === undefined || Object.values(given).some(value => !Array.isArray(value) || value.length > 0)) continue
       RecordingSections.put(name, json, RecordingSections.taken(name, current))
     }
     return json
@@ -9647,10 +9647,10 @@ export class SightingEditorElement extends HTMLElement {
   private setDecorFromFile(fromFile: boolean): void {
     const sighting = this.ufoElement.sighting
     if (this.sectionFromFile("decor") === fromFile) return
-    const frozen: FrozenData = { ...(sighting.frozen ?? {}) }
-    if (fromFile) frozen.decor = frozen.decor ?? {}
-    else delete frozen.decor
-    sighting.frozen = FrozenGroups.isEmpty(frozen) ? undefined : frozen
+    const snapshots: Snapshots = { ...(sighting.snapshots ?? {}) }
+    if (fromFile) snapshots.decor = snapshots.decor ?? {}
+    else delete snapshots.decor
+    sighting.snapshots = SnapshotGroups.isEmpty(snapshots) ? undefined : snapshots
     this.touch()
     this.scheduleFileSync()
     this.refreshFileItems()
@@ -11710,7 +11710,7 @@ export class SightingEditorElement extends HTMLElement {
     this.contextSendToBackButton.textContent = messages.sendToBack
     this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
-    this.frozenPanel.localize(messages)
+    this.snapshotsPanel.localize(messages)
     this.sectionFilePanel.localize(messages)
     this.eventsPanel.localize(messages.events)
     this.phenomenonEventsPanel.localize(messages.events)

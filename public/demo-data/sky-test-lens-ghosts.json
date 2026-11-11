@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "sky-test-lens-ghosts",
  "image": "https://ufoathome.org/demo-data/share/sky-test-lens-ghosts.jpg",
  "summaryTime": 20,
@@ -549,7 +549,7 @@
    ]
   }
  ],
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "sky-test-lens-ghosts.relief.zip",
    "takenOn": "2026-11-01",

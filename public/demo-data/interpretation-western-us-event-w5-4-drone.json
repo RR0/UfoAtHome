@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "2023-10-16-WesternUSEvent-W5-4-drone",
  "description": {
   "en": "We made it to our vehicle around 0130. We made our way down the mountain and got turned around in the wildlife area on our way out. We made it back to Highway [redacted] about 0330 and to the gate about 0415. We were driving around [redacted] lake, headed towards [redacted] base. Around 0430, I notice two lights in the distance about 2-3ft above the ground. The lights stayed on the far side of the road, but directly over the pavement. One was white and square, the second was round and red. The red light was diagonally to the left above the white lite. I watched it and wondered if someone decided to take a bike ride. Another vehicle started approaching from the opposite traffic side as we were approaching the red and white light pair. I started to notice the pair drifting into the sand, off the side of the road. [...] We were quickly approaching the lights and started to slow down, maybe 100 ft or so in front of us. The lights made it hard to see what would have been displaying the lights themselves. It appeared that the lights may have been directly facing us. As we were slowing our vehicle, and the opposite traffic vehicle quickly approached, the red and white light pair hovered, with zero resistance, or change in height, over the bushes to the right at about 15-20 mph. The light pair stopped just as we stopped our vehicle and I pulled out the Night Vision Goggles (NVGs) to take a look. I saw the light pair for a split second in the NVGs before the lights turned off and I saw a very thin line remain, maybe 4 ft wide, horizontal to the earth. It began moving at the same speed, 15-20 mph, and I could not see it for more than a second or two before I lost track of it. It also seemed to move up in height with this movement, but remained a flat line.",
@@ -2917,7 +2917,7 @@
   ]
  },
  "image": "https://ufoathome.org/demo-data/share/western-us-event-w5-4.jpg",
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "observer-western-us-event-w5-4.relief.zip",
    "takenOn": "2026-10-25",

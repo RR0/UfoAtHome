@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { Sighting } from "../../../../src/engine/model/Sighting.js"
-import { FrozenGroups } from "../../../../src/engine/model/FrozenData.js"
+import { SnapshotGroups } from "../../../../src/engine/model/Snapshots.js"
 import { fromSightingJson, toSightingJson } from "../../../../src/engine/persistence/sightingJson.js"
-import { FrozenAnnexes } from "../../../../src/render3d/terrain/frozen/FrozenAnnexes.js"
-import { FrozenPatches } from "../../../../src/render3d/terrain/frozen/FrozenPatches.js"
-import { FrozenElevationProvider, ReliefAnnex } from "../../../../src/render3d/terrain/frozen/ReliefAnnex.js"
-import { FrozenImageryProvider, FrozenMapImagery, ImageryAnnex, TileRecorder } from "../../../../src/render3d/terrain/frozen/ImageryAnnex.js"
-import { FrozenRoadProvider, type VectorAnnexData } from "../../../../src/render3d/terrain/frozen/VectorAnnex.js"
-import { FrozenTerrain } from "../../../../src/render3d/terrain/frozen/FrozenTerrain.js"
-import { TerrainFreezer } from "../../../../src/render3d/terrain/frozen/TerrainFreezer.js"
-import { FrozenUpperAirProvider } from "../../../../src/engine/traffic/FrozenUpperAirProvider.js"
+import { SnapshotAnnexes } from "../../../../src/render3d/terrain/snapshot/SnapshotAnnexes.js"
+import { SnapshotPatches } from "../../../../src/render3d/terrain/snapshot/SnapshotPatches.js"
+import { SnapshotElevationProvider, ReliefAnnex } from "../../../../src/render3d/terrain/snapshot/ReliefAnnex.js"
+import { SnapshotImageryProvider, SnapshotMapImagery, ImageryAnnex, TileRecorder } from "../../../../src/render3d/terrain/snapshot/ImageryAnnex.js"
+import { SnapshotRoadProvider, type VectorAnnexData } from "../../../../src/render3d/terrain/snapshot/VectorAnnex.js"
+import { SnapshotTerrain } from "../../../../src/render3d/terrain/snapshot/SnapshotTerrain.js"
+import { TerrainSnapshotTaker } from "../../../../src/render3d/terrain/snapshot/TerrainSnapshotTaker.js"
+import { SnapshotUpperAirProvider } from "../../../../src/engine/traffic/SnapshotUpperAirProvider.js"
 import type { TerrainProviders } from "../../../../src/render3d/terrain/defaultTerrainProviders.js"
 import type { RoadWay } from "../../../../src/render3d/terrain/RoadProvider.js"
 import { localMetersToGeo } from "../../../../src/render3d/terrain/GeoProjection.js"
@@ -36,33 +36,33 @@ function driving(km: number, seconds: number, back = false): Sighting {
   return sighting
 }
 
-function grid(width: number, height: number, bounds = FrozenPatches.boundsOf(PATCH)) {
+function grid(width: number, height: number, bounds = SnapshotPatches.boundsOf(PATCH)) {
   const heights = new Float32Array(width * height)
   for (let i = 0; i < heights.length; i++) heights[i] = 80 + i * 0.25
   return { heights, width, height, bounds }
 }
 
-afterEach(() => FrozenAnnexes.release())
+afterEach(() => SnapshotAnnexes.release())
 
-describe("FrozenGroups", () => {
+describe("SnapshotGroups", () => {
   it("reads a group from its annex unless everything is live or that group is to be refreshed", () => {
     const relief = { src: "x.relief.zip" }
-    expect(FrozenGroups.held({ relief }, "relief")).toBe(relief)
-    expect(FrozenGroups.held({ relief, live: true }, "relief")).toBeUndefined()
-    expect(FrozenGroups.held({ relief: { ...relief, refresh: true } }, "relief")).toBeUndefined()
-    expect(FrozenGroups.held(undefined, "relief")).toBeUndefined()
+    expect(SnapshotGroups.held({ relief }, "relief")).toBe(relief)
+    expect(SnapshotGroups.held({ relief, live: true }, "relief")).toBeUndefined()
+    expect(SnapshotGroups.held({ relief: { ...relief, refresh: true } }, "relief")).toBeUndefined()
+    expect(SnapshotGroups.held(undefined, "relief")).toBeUndefined()
   })
 
   it("names each annex after the recording", () => {
-    expect(FrozenGroups.annexName("cussac-sighting", "relief")).toBe("cussac-sighting.relief.zip")
-    expect(FrozenGroups.annexName("cussac-sighting", "upperAir")).toBe("cussac-sighting.upper-air.json")
-    expect(FrozenGroups.annexName("cussac-sighting", "map")).toBe("cussac-sighting.map.zip")
+    expect(SnapshotGroups.annexName("cussac-sighting", "relief")).toBe("cussac-sighting.relief.zip")
+    expect(SnapshotGroups.annexName("cussac-sighting", "upperAir")).toBe("cussac-sighting.upper-air.json")
+    expect(SnapshotGroups.annexName("cussac-sighting", "map")).toBe("cussac-sighting.map.zip")
   })
 
   it("travels in the recording's file", () => {
     const sighting = standing()
-    sighting.frozen = { relief: { src: "a.relief.zip", takenOn: "2026-10-20" } }
-    expect(fromSightingJson(toSightingJson(sighting)).frozen).toEqual(sighting.frozen)
+    sighting.snapshots = { relief: { src: "a.relief.zip", takenOn: "2026-10-20" } }
+    expect(fromSightingJson(toSightingJson(sighting)).snapshots).toEqual(sighting.snapshots)
   })
 })
 
@@ -82,8 +82,8 @@ describe("ReliefAnnex", () => {
 
   it("answers the patch it was taken for, a square inside it, and nothing else", async () => {
     const taken = grid(3, 3)
-    const provider = new FrozenElevationProvider(Promise.resolve({ takenOn: "", attribution: "", patches: [{ ...PATCH, grid: taken }] }))
-    const same = await provider.getElevationGrid(FrozenPatches.boundsOf(PATCH), { width: 65, height: 65 })
+    const provider = new SnapshotElevationProvider(Promise.resolve({ takenOn: "", attribution: "", patches: [{ ...PATCH, grid: taken }] }))
+    const same = await provider.getElevationGrid(SnapshotPatches.boundsOf(PATCH), { width: 65, height: 65 })
     expect(same.width).toBe(3)
     expect(Array.from(same.heights)).toEqual(Array.from(taken.heights))
     // A copy: the mesh presses river beds into what it is given.
@@ -107,45 +107,45 @@ describe("ImageryAnnex", () => {
     const { unzipSync } = await import("fflate")
     const read = ImageryAnnex.decode(unzipSync(bytes))
     expect(read.source).toBe("esri-world")
-    const replay = FrozenImageryProvider.fetchFrom(read.tiles)
+    const replay = SnapshotImageryProvider.fetchFrom(read.tiles)
     const served = await replay("https://tiles.example/1/2/3")
     expect(new Uint8Array(await served.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
     expect((await replay("https://tiles.example/9/9/9")).status).toBe(404)
   })
 })
 
-describe("FrozenMapImagery", () => {
+describe("SnapshotMapImagery", () => {
   it("keeps the ground the map asked its photograph for, and refuses an annex that holds no map", async () => {
     const bounds = ObserverMapView.fitted(ObserverPath.of(standing())!, [])
     const tiles = new Map([["https://tiles.example/1/2/3", { bytes: new Uint8Array([1]), type: "image/jpeg" }]])
     const bytes = await ImageryAnnex.encode({ takenOn: "2026-10-20", source: "esri-world", attribution: "Esri", patches: [], map: { bounds, pixels: 768 }, tiles })
     const { unzipSync } = await import("fflate")
     expect(ImageryAnnex.decode(unzipSync(bytes)).map).toEqual({ bounds, pixels: 768 })
-    const noMap = new FrozenMapImagery(Promise.resolve({ takenOn: "", source: "esri-world", attribution: "Esri", patches: [], tiles }), "stated")
+    const noMap = new SnapshotMapImagery(Promise.resolve({ takenOn: "", source: "esri-world", attribution: "Esri", patches: [], tiles }), "stated")
     expect(noMap.attribution).toBe("stated")
     await expect(noMap.getImagery()).rejects.toThrow()
   })
 
   it("is taken of the box the map is fitted to, and of none for a recording that states no place", () => {
     const sighting = driving(1.5, 60)
-    expect(TerrainFreezer.mapGround(sighting)).toEqual(ObserverMapView.fitted(ObserverPath.of(sighting)!, []))
-    expect(TerrainFreezer.mapGround(Sighting.create(undefined, []))).toBeUndefined()
+    expect(TerrainSnapshotTaker.mapGround(sighting)).toEqual(ObserverMapView.fitted(ObserverPath.of(sighting)!, []))
+    expect(TerrainSnapshotTaker.mapGround(Sighting.create(undefined, []))).toBeUndefined()
   })
 })
 
-describe("FrozenRoadProvider", () => {
+describe("SnapshotRoadProvider", () => {
   it("lays the ways of the patch asked for, and none where no patch was taken", async () => {
     const way: RoadWay = { id: "a", surface: "paved", widthM: 6, points: [SILLY, { lat: SILLY.lat + 0.001, lng: SILLY.lng }] }
     const annex: VectorAnnexData<RoadWay> = { version: 1, takenOn: "2026-10-20", attribution: "IGN BD TOPO", contemporary: true, patches: [{ ...PATCH, items: [way] }] }
-    const provider = new FrozenRoadProvider(Promise.resolve(annex), "stated")
+    const provider = new SnapshotRoadProvider(Promise.resolve(annex), "stated")
     expect(provider.attribution).toBe("stated")
-    expect(await provider.getRoads(FrozenPatches.boundsOf(PATCH))).toEqual([way])
+    expect(await provider.getRoads(SnapshotPatches.boundsOf(PATCH))).toEqual([way])
     expect(provider.attribution).toBe("IGN BD TOPO")
-    expect(await provider.getRoads(FrozenPatches.boundsOf({ ...PATCH, lat: 40 }))).toEqual([])
+    expect(await provider.getRoads(SnapshotPatches.boundsOf({ ...PATCH, lat: 40 }))).toEqual([])
   })
 })
 
-describe("FrozenTerrain", () => {
+describe("SnapshotTerrain", () => {
   const live = (): TerrainProviders => ({
     elevation: { getElevationGrid: vi.fn(async () => { throw new Error("asked live") }) },
     imagery: { attribution: "live", getImageryTexture: vi.fn(async () => { throw new Error("asked live") }) }
@@ -153,18 +153,18 @@ describe("FrozenTerrain", () => {
 
   it("is the live sources themselves when nothing of the ground is frozen", () => {
     const sources = live()
-    expect(FrozenTerrain.providers(undefined, undefined, sources)).toBe(sources)
-    expect(FrozenTerrain.providers({ live: true, relief: { src: "a.relief.zip" } }, undefined, sources)).toBe(sources)
+    expect(SnapshotTerrain.providers(undefined, undefined, sources)).toBe(sources)
+    expect(SnapshotTerrain.providers({ live: true, relief: { src: "a.relief.zip" } }, undefined, sources)).toBe(sources)
   })
 
   it("reads a frozen group from its annex, asks nobody for it, and builds where the annex was taken", async () => {
     const sources = live()
     const documentUrl = "https://example.org/case/sighting.json"
-    FrozenAnnexes.hold(FrozenAnnexes.address("s.relief.zip", documentUrl),
+    SnapshotAnnexes.hold(SnapshotAnnexes.address("s.relief.zip", documentUrl),
       await ReliefAnnex.encode({ takenOn: "2026-10-20", attribution: "IGN", patches: [{ ...PATCH, grid: grid(3, 3) }] }))
     const network = vi.spyOn(globalThis, "fetch")
-    const providers = FrozenTerrain.providers({ relief: { src: "s.relief.zip" } }, documentUrl, sources)
-    const answered = await providers.elevation.getElevationGrid(FrozenPatches.boundsOf(PATCH), { width: 65, height: 65 })
+    const providers = SnapshotTerrain.providers({ relief: { src: "s.relief.zip" } }, documentUrl, sources)
+    const answered = await providers.elevation.getElevationGrid(SnapshotPatches.boundsOf(PATCH), { width: 65, height: 65 })
     expect(answered.width).toBe(3)
     expect(sources.elevation.getElevationGrid).not.toHaveBeenCalled()
     expect(network).not.toHaveBeenCalled()
@@ -176,26 +176,26 @@ describe("FrozenTerrain", () => {
   })
 })
 
-describe("TerrainFreezer.plan", () => {
+describe("TerrainSnapshotTaker.plan", () => {
   it("is one patch for an observer who stays put", () => {
-    expect(TerrainFreezer.plan(standing())).toEqual([PATCH])
+    expect(TerrainSnapshotTaker.plan(standing())).toEqual([PATCH])
   })
 
   it("follows a drive at the distance the scene builds a new patch at, and does not take the same ground twice on the way back", () => {
-    const there = TerrainFreezer.plan(driving(1.5, 60))
+    const there = TerrainSnapshotTaker.plan(driving(1.5, 60))
     // 150 m between patches over 1.5 km, the first at the start.
     expect(there.length).toBeGreaterThanOrEqual(10)
     expect(there.length).toBeLessThanOrEqual(11)
-    expect(TerrainFreezer.plan(driving(1.5, 60, true))).toHaveLength(there.length)
+    expect(TerrainSnapshotTaker.plan(driving(1.5, 60, true))).toHaveLength(there.length)
   })
 
   it("adds the far ring round the patch where a beam the recording claims goes past it, which the scene finds as such and not as the patch", () => {
     const sighting = standing()
     const far = localMetersToGeo(8000, 0, SILLY.lat, SILLY.lng)
     sighting.skyEvents = { beams: [{ id: "b", path: [{ ...SILLY, altitudeM: 100 }, { lat: far.lat, lng: far.lng, altitudeM: 100 }], wavelengthNm: 532, powerW: 10 }] }
-    const plan = TerrainFreezer.plan(sighting)
+    const plan = TerrainSnapshotTaker.plan(sighting)
     expect(plan).toEqual([PATCH, { ...SILLY, radiusM: 30000, far: true }])
-    const index = new FrozenPatches(Promise.resolve(plan))
+    const index = new SnapshotPatches(Promise.resolve(plan))
     return index.ready.then(() => {
       expect(index.nearest(SILLY.lat, SILLY.lng)).toEqual(PATCH)
       expect(index.farRingOf(SILLY.lat, SILLY.lng)).toEqual({ ...SILLY, radiusM: 30000, far: true })
@@ -203,10 +203,10 @@ describe("TerrainFreezer.plan", () => {
   })
 })
 
-describe("FrozenUpperAirProvider", () => {
+describe("SnapshotUpperAirProvider", () => {
   it("gives the answer heard for the same request, or for a window holding it, and fails otherwise", async () => {
     const answer = { status: "found" as const, samples: [], source: { id: "om", name: "Open-Meteo", url: "https://x" } }
-    const provider = new FrozenUpperAirProvider(Promise.resolve({ version: 1, takenOn: "", attribution: "", answers: [{ ...SILLY, startMs: 1000, endMs: 9000, answer }] }))
+    const provider = new SnapshotUpperAirProvider(Promise.resolve({ version: 1, takenOn: "", attribution: "", answers: [{ ...SILLY, startMs: 1000, endMs: 9000, answer }] }))
     expect(await provider.between(SILLY, 1000, 9000)).toBe(answer)
     expect(await provider.between({ lat: 0, lng: 0 }, 2000, 8000)).toBe(answer)
     expect((await provider.between(SILLY, 0, 20_000)).status).toBe("failed")

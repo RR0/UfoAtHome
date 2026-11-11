@@ -31,6 +31,9 @@ interface Version1Location {
  * - an event of the account's phenomenon says the id of the shape or group it is about, where version 2 wrote "phenomenon": the group of all
  *   the account's shapes, made when there is more than one; and a blink is about the shapes that blink, where version 2 listed them in
  *   its `parts`: one of them, or a group of them, made where they were.
+ *
+ * Version 4 (2026-11) calls `snapshots` what version 3 called `frozen`: the copies of what third parties answered, kept beside the recording
+ * (see Snapshots). The data is copied, not the original frozen somewhere; the shape is the same.
  */
 export class SightingMigration {
 
@@ -40,9 +43,22 @@ export class SightingMigration {
   static toCurrent<T extends object>(json: T): T {
     const version = (json as { version?: unknown }).version
     const stated = typeof version === "object" && version !== null && "value" in version ? (version as { value: unknown }).value : version
-    if (stated !== undefined && stated !== 1 && stated !== 2) return json
-    const current = stated === 2 ? json as unknown as Record<string, unknown> : SightingMigration.fromVersion1(json as unknown as Record<string, unknown>)
-    return SightingMigration.fromVersion2(current) as unknown as T
+    if (stated !== undefined && stated !== 1 && stated !== 2 && stated !== 3) return json
+    let current = json as unknown as Record<string, unknown>
+    if (stated === undefined || stated === 1) current = SightingMigration.fromVersion1(current)
+    if (stated !== 3) current = SightingMigration.fromVersion2(current)
+    return SightingMigration.fromVersion3(current) as unknown as T
+  }
+
+  /** Version 3's `frozen` as version 4's `snapshots`, where it stood among the keys. */
+  private static fromVersion3(json: Record<string, unknown>): Record<string, unknown> {
+    const migrated: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(json)) {
+      if (key === "frozen") migrated.snapshots = value
+      else migrated[key] = value
+    }
+    migrated.version = 4
+    return migrated
   }
 
   /** The observer's id, as version 3 says whom an event is about: theirs, or "observer" for an observer without one. */

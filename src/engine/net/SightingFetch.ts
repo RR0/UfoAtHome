@@ -1,4 +1,4 @@
-import { RecordingSections } from "../model/FrozenData.js"
+import { RecordingSections } from "../model/Snapshots.js"
 import { SightingMigration } from "../persistence/SightingMigration.js"
 
 /** What went wrong fetching a recording, as far as a browser will ever let a page find out. */
@@ -38,9 +38,9 @@ export class SightingFetch {
    * them in annexes (see RecordingSections). An annex that cannot be read leaves the recording as it is.
    */
   static async recording(url: string): Promise<unknown> {
-    const json = await SightingFetch.json(url) as Record<string, unknown> & { frozen?: Record<string, { src?: string, live?: boolean } | undefined> }
+    const json = await SightingFetch.json(url) as Record<string, unknown> & { snapshots?: Record<string, { src?: string, live?: boolean } | undefined> }
     for (const name of RecordingSections.NAMES) {
-      const section = json?.frozen?.[name]
+      const section = json?.snapshots?.[name]
       if (!section?.src || section.live) continue
       try {
         // Its keys as the current version of the format writes them, whichever the annex was written in.

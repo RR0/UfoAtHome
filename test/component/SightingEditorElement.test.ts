@@ -1135,7 +1135,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
     }))
     expect(element.sightingData).toEqual({
       ...json,
-      version: 3,
+      version: 4,
       timeline: { keyframes: keyframesOut, order: ["ufo-1"], groups: [] },
       soundTrack: { keyframes: [] },
       decor: []
@@ -5238,7 +5238,7 @@ describe("SightingEditorElement inferred weather", () => {
     picker.value = "file"
     picker.dispatchEvent(new Event("change"))
     expect(element.sightingData.weatherSource).toEqual(SOURCE)
-    expect(element.sightingData.frozen?.weather).toEqual({})
+    expect(element.sightingData.snapshots?.weather).toEqual({})
     expect(weatherField(element, "cloudCover").disabled).toBe(false)
     setInput(element.shadowRoot!, "cloudCover", "0.7")
     expect(element.sightingData.weatherSource).toBeUndefined()
@@ -6097,11 +6097,11 @@ describe("SightingEditorElement data sources", () => {
     const weather = element.shadowRoot!.getElementById("weatherSource") as HTMLSelectElement
     weather.value = "file"
     weather.dispatchEvent(new Event("change"))
-    expect(element.sightingData.frozen?.weather).toEqual({})
+    expect(element.sightingData.snapshots?.weather).toEqual({})
     expect((element.shadowRoot!.getElementById("weatherInferred") as HTMLInputElement).checked).toBe(false)
     weather.value = "era5"
     weather.dispatchEvent(new Event("change"))
-    expect(element.sightingData.frozen?.weather).toBeUndefined()
+    expect(element.sightingData.snapshots?.weather).toBeUndefined()
   })
 
   it("asks no geocoder for a place read from the file", async () => {
@@ -6111,7 +6111,7 @@ describe("SightingEditorElement data sources", () => {
     const place = select(element, "place")
     place.value = "file"
     place.dispatchEvent(new Event("change"))
-    expect(element.sightingData.frozen?.place).toEqual({})
+    expect(element.sightingData.snapshots?.place).toEqual({})
     const input = element.shadowRoot!.getElementById("placeName") as HTMLInputElement
     input.value = "Valensole"
     input.dispatchEvent(new Event("input"))
@@ -6120,7 +6120,7 @@ describe("SightingEditorElement data sources", () => {
     expect(search).not.toHaveBeenCalled()
     place.value = "nominatim"
     place.dispatchEvent(new Event("change"))
-    expect(element.sightingData.frozen?.place).toBeUndefined()
+    expect(element.sightingData.snapshots?.place).toBeUndefined()
   })
 
   it("carries each source's own attribution beside its picker", async () => {

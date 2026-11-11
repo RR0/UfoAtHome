@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "id": "sky-test-laser-meudon",
  "image": "https://ufoathome.org/demo-data/share/sky-test-laser-meudon.jpg",
  "summaryTime": 90,
@@ -254,7 +254,7 @@
    }
   ]
  },
- "frozen": {
+ "snapshots": {
   "relief": {
    "src": "sky-test-laser-meudon.relief.zip",
    "takenOn": "2026-10-21",

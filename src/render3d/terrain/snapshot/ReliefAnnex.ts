@@ -1,9 +1,9 @@
 import type { GeoBounds } from "../GeoBounds.js"
 import type { ElevationGrid, ElevationHints, ElevationProvider } from "../ElevationProvider.js"
-import { FrozenPatches, type FrozenPatch } from "./FrozenPatches.js"
+import { SnapshotPatches, type SnapshotPatch } from "./SnapshotPatches.js"
 
 /** One patch of the relief, as its source answered for it. */
-export interface FrozenReliefPatch extends FrozenPatch {
+export interface SnapshotReliefPatch extends SnapshotPatch {
   grid: ElevationGrid
 }
 
@@ -11,14 +11,14 @@ export interface FrozenReliefPatch extends FrozenPatch {
 export interface ReliefAnnexData {
   takenOn: string
   attribution: string
-  patches: FrozenReliefPatch[]
+  patches: SnapshotReliefPatch[]
 }
 
 interface ReliefIndexFile {
   version: 1
   takenOn: string
   attribution: string
-  patches: (FrozenPatch & { bounds: GeoBounds, width: number, height: number, file: string })[]
+  patches: (SnapshotPatch & { bounds: GeoBounds, width: number, height: number, file: string })[]
 }
 
 /**
@@ -86,19 +86,19 @@ export class ReliefAnnex {
  * the ground under a point) the grid read there. Nothing else is asked of anybody: a square no patch holds is not a ground this can answer for,
  * and it says so, as a source that does not cover a place does.
  */
-export class FrozenElevationProvider implements ElevationProvider {
+export class SnapshotElevationProvider implements ElevationProvider {
   constructor(private readonly annex: Promise<ReliefAnnexData>) {
   }
 
   async getElevationGrid(bounds: GeoBounds, resolution: { width: number, height: number }, _hints?: ElevationHints): Promise<ElevationGrid> {
     const { patches } = await this.annex
     // By the square the patch was ASKED for: a source may answer with a grid of its own extent.
-    const same = patches.find(patch => FrozenPatches.sameBounds(FrozenPatches.boundsOf(patch), bounds))
+    const same = patches.find(patch => SnapshotPatches.sameBounds(SnapshotPatches.boundsOf(patch), bounds))
     // A copy: the mesh presses the beds of the rivers into the heights it is given (see WaterBeds), and the next build is of the same patch.
     if (same) return { ...same.grid, heights: new Float32Array(same.grid.heights) }
-    const within = patches.find(patch => FrozenPatches.contains(patch.grid.bounds, bounds))
-    if (within) return FrozenElevationProvider.resample(within.grid, bounds, resolution)
-    throw new Error("The frozen relief does not hold this ground")
+    const within = patches.find(patch => SnapshotPatches.contains(patch.grid.bounds, bounds))
+    if (within) return SnapshotElevationProvider.resample(within.grid, bounds, resolution)
+    throw new Error("The snapshots relief does not hold this ground")
   }
 
   /** `grid` read bilinearly at a `resolution` grid over `bounds`, which it contains. */

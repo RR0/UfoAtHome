@@ -81,7 +81,7 @@ A kind of event of the sky (`sky-events/SkyEventKind.ts`) is what a recording st
 (`simulation`, a `SkyEventSimulation` the scene gives the events and the instant at every tick, never drawing itself), to edit
 (`editor`, a part of the editor's Sky group named by the title of its `messages`), how far it reaches (`reachM`, for the ground and the
 depth of the scene) and what the tooltip says (`describe`). The scene (`SceneRenderer.setSkyEvents`), the editor
-(`SightingEditorElement.syncSkyEventParts`) and the terrain freezer read the list in `sky-events/skyEventSources.ts`, and follow a
+(`SightingEditorElement.syncSkyEventParts`) and the terrain snapshot taker read the list in `sky-events/skyEventSources.ts`, and follow a
 module that adds a kind.
 
 Built in: the launches (`sky-events/launches/`), the beams (`sky-events/beams/`) and the fireballs and re-entries

@@ -21,7 +21,7 @@ export interface UpperAirAnnexData {
  * The air aloft as it was frozen: the answer given for the same place and window, or for a window that holds the one asked, and none
  * otherwise — no record is asked, and a trail the annex cannot state is not drawn, as one the record could not state is not.
  */
-export class FrozenUpperAirProvider implements UpperAirProvider {
+export class SnapshotUpperAirProvider implements UpperAirProvider {
   /** Degrees and ms within which a request is the one that was answered: the scene asks with the same numbers, this forgives a round trip. */
   private static readonly SAME_PLACE_DEG = 1e-6
   private static readonly SAME_TIME_MS = 1000
@@ -37,9 +37,9 @@ export class FrozenUpperAirProvider implements UpperAirProvider {
       return { status: "failed" }
     }
     const samePlace = (heard: UpperAirHeard) =>
-      Math.abs(heard.lat - place.lat) <= FrozenUpperAirProvider.SAME_PLACE_DEG && Math.abs(heard.lng - place.lng) <= FrozenUpperAirProvider.SAME_PLACE_DEG
+      Math.abs(heard.lat - place.lat) <= SnapshotUpperAirProvider.SAME_PLACE_DEG && Math.abs(heard.lng - place.lng) <= SnapshotUpperAirProvider.SAME_PLACE_DEG
     const same = annex.answers.find(heard => samePlace(heard)
-      && Math.abs(heard.startMs - startMs) <= FrozenUpperAirProvider.SAME_TIME_MS && Math.abs(heard.endMs - endMs) <= FrozenUpperAirProvider.SAME_TIME_MS)
+      && Math.abs(heard.startMs - startMs) <= SnapshotUpperAirProvider.SAME_TIME_MS && Math.abs(heard.endMs - endMs) <= SnapshotUpperAirProvider.SAME_TIME_MS)
     const holding = same ?? annex.answers.find(heard => heard.startMs <= startMs && heard.endMs >= endMs)
     return holding ? holding.answer : { status: "failed" }
   }

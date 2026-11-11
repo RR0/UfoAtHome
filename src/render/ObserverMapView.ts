@@ -38,7 +38,7 @@ export class ObserverMapView {
    * The ground the map is fitted to: the observer's path with room around it, widened to the traced
    * points near enough to frame (see including).
    *
-   * Here rather than in the player because the map's frozen photograph (see FrozenMapImagery) is
+   * Here rather than in the player because the map's frozen photograph (see SnapshotMapImagery) is
    * taken of this very box, and two computations of it would be two boxes.
    */
   static fitted(path: ObserverPath, traced: ReadonlyArray<{ lat: number; lng: number }>): GeoBounds {

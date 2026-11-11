@@ -27,7 +27,7 @@ describe("RecordingActors", () => {
 
   it("says an event about nothing, and two things of one id", () => {
     const sighting = fromSightingJson({
-      version: 3, observer: { id: "craft" }, timeline: { keyframes: [] }, interpretation: { bodies: [{ id: "craft", track: [] }] },
+      version: 4, observer: { id: "craft" }, timeline: { keyframes: [] }, interpretation: { bodies: [{ id: "craft", track: [] }] },
       events: [{ eventType: "vanish", who: "nobody", t: 0 }]
     } as unknown as SightingRecordingJson)
     expect(RecordingActors.issues(sighting)).toEqual([

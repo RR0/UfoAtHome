@@ -3,7 +3,7 @@ import { geoToLocalMeters } from "../GeoProjection.js"
 import { boundsAroundObserver } from "../TerrainMeshBuilder.js"
 
 /** One patch of ground a scene builds: centred on a place, `radiusM` to each side (see SceneRenderer.setTerrainOrigin). */
-export interface FrozenPatch {
+export interface SnapshotPatch {
   lat: number
   lng: number
   radiusM: number
@@ -25,21 +25,21 @@ export interface TerrainPatchIndex {
   /** Settles once the list is in hand, or could not be read. */
   readonly ready: Promise<void>
   /** The frozen patch nearest (lat, lng), undefined when there is none (or the list is not in hand yet). */
-  nearest(lat: number, lng: number): FrozenPatch | undefined
+  nearest(lat: number, lng: number): SnapshotPatch | undefined
   /** The far ring frozen round the patch centred at (lat, lng), undefined when none was. */
-  farRingOf?(lat: number, lng: number): FrozenPatch | undefined
+  farRingOf?(lat: number, lng: number): SnapshotPatch | undefined
 }
 
 /** A list of patches, and the questions asked of one. */
-export class FrozenPatches implements TerrainPatchIndex {
+export class SnapshotPatches implements TerrainPatchIndex {
   /** Degrees: two bounds computed from the same patch are equal to the last bit, this only forgives a round trip through text. */
   private static readonly SAME_BOUNDS_DEG = 1e-9
 
   loaded = false
   readonly ready: Promise<void>
-  private list: readonly FrozenPatch[] = []
+  private list: readonly SnapshotPatch[] = []
 
-  constructor(patches: Promise<readonly FrozenPatch[]>) {
+  constructor(patches: Promise<readonly SnapshotPatch[]>) {
     this.ready = patches.then(list => {
       this.list = list
     }, () => undefined).finally(() => {
@@ -47,8 +47,8 @@ export class FrozenPatches implements TerrainPatchIndex {
     })
   }
 
-  nearest(lat: number, lng: number): FrozenPatch | undefined {
-    let best: FrozenPatch | undefined
+  nearest(lat: number, lng: number): SnapshotPatch | undefined {
+    let best: SnapshotPatch | undefined
     let bestM = Infinity
     for (const patch of this.list) {
       if (patch.far) continue
@@ -62,17 +62,17 @@ export class FrozenPatches implements TerrainPatchIndex {
     return best
   }
 
-  farRingOf(lat: number, lng: number): FrozenPatch | undefined {
-    return this.list.find(patch => patch.far && Math.abs(patch.lat - lat) <= FrozenPatches.SAME_BOUNDS_DEG && Math.abs(patch.lng - lng) <= FrozenPatches.SAME_BOUNDS_DEG)
+  farRingOf(lat: number, lng: number): SnapshotPatch | undefined {
+    return this.list.find(patch => patch.far && Math.abs(patch.lat - lat) <= SnapshotPatches.SAME_BOUNDS_DEG && Math.abs(patch.lng - lng) <= SnapshotPatches.SAME_BOUNDS_DEG)
   }
 
   /** The square of ground a patch is asked for — the same function the scene asks with, so the same numbers. */
-  static boundsOf(patch: FrozenPatch): GeoBounds {
+  static boundsOf(patch: SnapshotPatch): GeoBounds {
     return boundsAroundObserver(patch.lat, patch.lng, patch.radiusM)
   }
 
   static sameBounds(a: GeoBounds, b: GeoBounds): boolean {
-    const near = (x: number, y: number) => Math.abs(x - y) <= FrozenPatches.SAME_BOUNDS_DEG
+    const near = (x: number, y: number) => Math.abs(x - y) <= SnapshotPatches.SAME_BOUNDS_DEG
     return near(a.north, b.north) && near(a.south, b.south) && near(a.east, b.east) && near(a.west, b.west)
   }
 
@@ -80,7 +80,7 @@ export class FrozenPatches implements TerrainPatchIndex {
     return outer.north >= inner.north && outer.south <= inner.south && outer.east >= inner.east && outer.west <= inner.west
   }
 
-  static samePatches(a: readonly FrozenPatch[], b: readonly FrozenPatch[]): boolean {
+  static samePatches(a: readonly SnapshotPatch[], b: readonly SnapshotPatch[]): boolean {
     return a.length === b.length && a.every((patch, i) => patch.lat === b[i].lat && patch.lng === b[i].lng && patch.radiusM === b[i].radiusM && patch.far === b[i].far)
   }
 }

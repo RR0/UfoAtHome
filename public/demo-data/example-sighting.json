@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "time": "1987-06-12",
   "place": {"locations": [{"lat": 45.188529, "lng": 5.724524}]},
   "observer": { "id": "demo-observer-1" },
