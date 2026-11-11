@@ -4013,9 +4013,11 @@ export class SightingEditorElement extends HTMLElement {
    */
   private schedulePlaceReverse(): void {
     if (!this.namedCoordinates || this.sectionFromFile("place")) return
-    const lat = this.numberOrUndefined(this.latInput.value)
-    const lng = this.numberOrUndefined(this.lngInput.value)
-    if (lat === undefined || lng === undefined) return
+    // Where the recording sets off from, not the fields: they show the observer at the playhead, and a
+    // name is the whole sighting's, not the stretch of road (or of sky) under it at that instant.
+    const start = this.plantingCentre()
+    if (!start) return
+    const { lat, lng } = start
     if (Math.abs(lat - this.namedCoordinates.lat) < SAME_PLACE_DEG && Math.abs(lng - this.namedCoordinates.lng) < SAME_PLACE_DEG) {
       return
     }
@@ -4147,8 +4149,6 @@ export class SightingEditorElement extends HTMLElement {
     const observerTrack = this.ufoElement.sighting.observerTrack
     const t = this.ufoElement.currentTime
 
-    const name = this.stringOrUndefined(this.placeNameInput.value.trim())
-    event.place = lat !== undefined && lng !== undefined ? [{ lat, lng, name }] : undefined
 
     const instrument = this.ufoElement.sighting.instrument
     // A focal length is only ever another way of writing the field, which is what the pose keeps
@@ -4207,6 +4207,14 @@ export class SightingEditorElement extends HTMLElement {
         filter
       })
     }
+    // The recording's place is where it sets off from, not where the playhead has the observer: an edit made
+    // mid-flight wrote the aircraft's position of that instant as the place of the whole sighting, and the
+    // lookup that names it then renamed it after a street it was flying over.
+    const name = this.stringOrUndefined(this.placeNameInput.value.trim())
+    const start = observerTrack.getInterpolatedPoseAt(0)
+    event.place = lat !== undefined && lng !== undefined
+      ? [{ lat: start?.lat ?? lat, lng: start?.lng ?? lng, name }]
+      : undefined
     // Where the author puts the observer is a question to the survey of the place: what stands round it (see SurroundingsPlanter).
     // The place the recording sets off from, as placeLoaded was told, and not the fields': they show the observer at the playhead,
     // kilometres down the road for one who drives, and a ground height answering after an undo there took that for another place.

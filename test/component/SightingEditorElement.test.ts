@@ -6309,6 +6309,35 @@ describe("SightingEditorElement location coherence", () => {
     expect(placeName(element).value).toBe("the lavender field east of the farm")
   })
 
+  it("keeps the name of a recording whose observer travels when an edit is made down the road", async () => {
+    // The Concorde of 1976: a camera flying, a file naming the region, and an edit made mid-flight renamed
+    // the whole sighting after a town (Timaru) the lookup answered for the playhead's own position.
+    const reverse = vi.fn().mockResolvedValue(RIEZ)
+    const element = await mount()
+    element.placeSearchProvider = { attribution: { text: "© OSM", url: "https://osm.org/copyright" }, search: () => Promise.resolve([]), reverse }
+    element.sightingData = {
+      version: 1,
+      durationSeconds: 10,
+      place: [{ lat: VALENSOLE.lat, lng: VALENSOLE.lng, name: "the plateau" }],
+      timeline: { keyframes: [] },
+      weatherTrack: { keyframes: [] },
+      observerTrack: {
+        keyframes: [
+          { t: 0, pose: { lat: VALENSOLE.lat, lng: VALENSOLE.lng, pitchDeg: 0 } },
+          { t: 10_000, pose: { lat: RIEZ.lat, lng: RIEZ.lng, pitchDeg: 0 } }
+        ]
+      }
+    } as never
+    const ufo = element.shadowRoot!.querySelector("rr0-scene")!.shadowRoot!.querySelector("rr0-ufo") as unknown as { currentTime: number }
+    ufo.currentTime = 10_000
+    setInput(element, "pitch", "5")
+    await new Promise(resolve => setTimeout(resolve, 1200))
+
+    expect(reverse).not.toHaveBeenCalled()
+    expect(placeName(element).value).toBe("the plateau")
+    expect(element.sightingData.place).toEqual({ name: "the plateau", locations: [{ lat: VALENSOLE.lat, lng: VALENSOLE.lng }] })
+  })
+
   it("doesn't re-ask about a move too small to be a different place", async () => {
     const reverse = vi.fn().mockResolvedValue(RIEZ)
     const element = await mount()
