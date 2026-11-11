@@ -1023,12 +1023,27 @@ export class UfoElement extends HTMLElement {
 
   private titleOverride?: SaidText
 
+  /**
+   * Whether the title is laid over the picture at all: not in an editor, where it stood over the top of the scene with the controls, over
+   * what is to be pointed at and selected there, and where the editor's own heading already says what is edited.
+   */
+  set titleShown(shown: boolean) {
+    this.titleHidden = !shown
+    this.syncPlayerTitle()
+  }
+
+  get titleShown(): boolean {
+    return !this.titleHidden
+  }
+
+  private titleHidden = false
+
   /** What is played, over the picture's top left with the controls: the title the composing element gave it, or else
    * the account's — whose it is, and of what (the observer's own title: "Renato Nicolaï (déposition du 9 janvier 1981)"). */
   private syncPlayerTitle(): void {
     const text = this.said.read(this.titleOverride) ?? this.said.read(this.currentSighting.observer?.title) ?? ""
     this.playerTitleBox.textContent = text
-    this.playerTitleBox.hidden = text === ""
+    this.playerTitleBox.hidden = text === "" || this.titleHidden
   }
 
   /** What the recording on show has wrong with it: keys nothing reads, values of the wrong kind,

@@ -2897,6 +2897,17 @@ describe("SightingEditorElement sound keyframes over time", () => {
     expect(shadow.getElementById("sound-pitch-value")!.textContent).toBe("900 Hz")
   })
 
+  it("lays no title over its scene, where it covered what is pointed at and selected", async () => {
+    const element = await mount()
+    element.sightingData = { version: 1, durationSeconds: 10, observer: { id: "w", title: "A witness" }, timeline: { keyframes: [] } }
+    const title = nestedUfo(element)!.shadowRoot!.getElementById("player-title")!
+    expect(title.textContent).toBe("A witness")
+    expect(title.hidden).toBe(true)
+    // Nor the © of the credits: each source is credited where its data is set.
+    const scene = element.shadowRoot!.querySelector("rr0-scene")!
+    expect((scene.shadowRoot!.getElementById("credits-button") as HTMLButtonElement).hidden).toBe(true)
+  })
+
   it("mutes and sets the volume from its own playback row, the player's button being hidden with its controls", async () => {
     const element = await mount()
     const shadow = element.shadowRoot!

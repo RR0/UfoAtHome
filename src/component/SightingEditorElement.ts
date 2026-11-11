@@ -1278,6 +1278,11 @@ export class SightingEditorElement extends HTMLElement {
     this.ufoElement = this.sceneElement.ufoElement
     // A shape is lined up on the scene under the pointer: the scene holds still — see Stance.
     this.ufoElement.steadyObserver = true
+    // No title over the scene: it covered its top, over what is pointed at and selected there, and the editor's heading says it already.
+    this.ufoElement.titleShown = false
+    // Nor the © of its credits, over its corner: in the editor each source is credited where its data is set (each group's source, each
+    // picture's credit), and in the file.
+    this.sceneElement.ownCredits = false
     // A click on bare ground of the map puts the observer there, at the playhead — the same edit as
     // typing the two coordinates, and through the same path (see updateObserver).
     this.ufoElement.observerPlacing = true
