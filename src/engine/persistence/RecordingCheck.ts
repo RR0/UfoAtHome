@@ -6,6 +6,8 @@ export interface FormatField {
   doc?: string
   type: string
   values?: string[]
+  minimum?: number
+  maximum?: number
   fields?: Record<string, FormatField>
   loose?: true
 }
@@ -83,6 +85,8 @@ export class RecordingCheck {
       default:
         if (typeof value !== field.type) {
           issues.push({ kind: "wrong-type", path, expected: field.type, found: RecordingCheck.typeOf(value) })
+        } else if (typeof value === "number" && ((field.minimum !== undefined && value < field.minimum) || (field.maximum !== undefined && value > field.maximum))) {
+          issues.push({ kind: "out-of-range", path, expected: `${field.minimum ?? "−∞"}–${field.maximum ?? "∞"}`, found: String(value) })
         }
     }
   }

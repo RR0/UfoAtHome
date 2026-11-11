@@ -813,7 +813,8 @@
     "weather": {
      "cloudCover": 0,
      "cloudLayers": [],
-     "relativeHumidity": 85
+     "relativeHumidity": {"value": 0.85, "basis": "assumed", "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"},
+     "visibilityKm": {"value": 8, "basis": "derived", "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"}
     }
    }
   ]

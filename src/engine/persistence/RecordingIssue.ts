@@ -19,6 +19,8 @@ export interface RecordingIssue {
     | "wrong-type"
     /** A word a closed list does not have. */
     | "not-in-list"
+    /** A number outside what the field takes: a humidity of 85 where it is a fraction, read as its ceiling. */
+    | "out-of-range"
     /** A shape's first appearance left a field out, and the loader filled in a value nobody stated. */
     | "defaulted"
     /** A shape has neither a direction nor a box, so it is drawn at the middle of the view. */
@@ -48,6 +50,7 @@ export class RecordingIssues {
     "unknown-key": "{path}: unknown key, ignored",
     "wrong-type": "{path}: expected {expected}, found {found}",
     "not-in-list": "{path}: {found} is not one of {expected}",
+    "out-of-range": "{path}: {found} is outside {expected}",
     "defaulted": "{path}: missing, {expected} used",
     "unplaced": "{path}: no aim (and no bounds), drawn at the middle of the view",
     "unsized": "{path}: no angular size (and no bounds), drawn one pixel wide",

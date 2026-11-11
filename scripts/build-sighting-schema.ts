@@ -30,6 +30,9 @@ interface SchemaField {
   /** Words worth offering where any other would do as well (a `@suggest` tag on the property): an event's type, of which a case's own may be new.
    * Offered by the editor, and given as examples in the JSON Schema, which they do not restrict. */
   suggest?: string[]
+  /** The bounds a number may take (`@minimum` / `@maximum` tags on the property): a humidity is a fraction, not a percentage. */
+  minimum?: number
+  maximum?: number
   /** The keys of the object this holds, or of an array's element when it holds objects. */
   fields?: Record<string, SchemaField>
   /** Set when the type could not be told apart (a union of a string and an object, like a SaidText,
@@ -107,7 +110,12 @@ class SchemaBuilder {
   private describe(type: ts.Type, property?: ts.Symbol): SchemaField {
     const doc = property && this.docOf(property)
     const suggest = property && this.suggestionsOf(property)
-    const field: SchemaField = { type: "string", ...(doc === undefined ? {} : { doc }), ...(suggest === undefined ? {} : { suggest }) }
+    const minimum = property && this.boundOf(property, "minimum")
+    const maximum = property && this.boundOf(property, "maximum")
+    const field: SchemaField = {
+      type: "string", ...(doc === undefined ? {} : { doc }), ...(suggest === undefined ? {} : { suggest }),
+      ...(minimum === undefined ? {} : { minimum }), ...(maximum === undefined ? {} : { maximum })
+    }
     // undefined is what optionality looks like in a union; it says nothing about what may be
     // written there, so it goes before anything else is decided.
     const parts = (type.isUnion() ? type.types : [type]).filter(part => !(part.flags & ts.TypeFlags.Undefined))
@@ -196,6 +204,13 @@ class SchemaBuilder {
     const fields = this.fieldsOf(type)
     this.open.delete(type)
     return fields
+  }
+
+  /** The number a `@minimum 0` or `@maximum 1` tag gives a property. */
+  private boundOf(property: ts.Symbol, name: "minimum" | "maximum"): number | undefined {
+    const tag = property.getJsDocTags(this.checker).find(candidate => candidate.name === name)
+    const value = tag?.text ? Number(ts.displayPartsToString(tag.text).trim()) : NaN
+    return Number.isFinite(value) ? value : undefined
   }
 
   /** The words a `@suggest sighting, interview` tag lists on a property. */
@@ -305,7 +320,10 @@ class JsonSchemaExport {
       case "array":
         return { ...description, type: "array", ...(field.fields ? { items: JsonSchemaExport.orStated(JsonSchemaExport.object(field.fields, options), options) } : {}) }
       default:
-        return { ...description, type: field.type }
+        return {
+          ...description, type: field.type,
+          ...(field.minimum === undefined ? {} : { minimum: field.minimum }), ...(field.maximum === undefined ? {} : { maximum: field.maximum })
+        }
     }
   }
 }

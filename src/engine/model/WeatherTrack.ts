@@ -117,6 +117,7 @@ export function lerpWeather(a: Weather, b: Weather, t: number): Weather {
     cloudBaseM: a.cloudBaseM === undefined || b.cloudBaseM === undefined ? undefined : lerpNumber(a.cloudBaseM, b.cloudBaseM, t),
     relativeHumidity:
       a.relativeHumidity === undefined || b.relativeHumidity === undefined ? undefined : lerpNumber(a.relativeHumidity, b.relativeHumidity, t),
+    visibilityKm: a.visibilityKm === undefined || b.visibilityKm === undefined ? undefined : lerpNumber(a.visibilityKm, b.visibilityKm, t),
     precipitationType: t < 1 ? a.precipitationType : b.precipitationType,
     precipitationIntensity: lerpNumber(a.precipitationIntensity, b.precipitationIntensity, t),
     windDirectionDeg: lerpAngleDeg(a.windDirectionDeg, b.windDirectionDeg, t),

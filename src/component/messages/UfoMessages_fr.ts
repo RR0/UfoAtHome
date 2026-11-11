@@ -40,6 +40,7 @@ export const ufoMessages_fr: UfoMessages = {
     "unknown-key": "{path} : clé inconnue, ignorée",
     "wrong-type": "{path} : {expected} attendu, {found} trouvé",
     "not-in-list": "{path} : {found} ne fait pas partie de {expected}",
+    "out-of-range": "{path} : {found} sort de {expected}",
     "defaulted": "{path} : absent, {expected} utilisé",
     "unplaced": "{path} : ni aim ni bounds, dessiné au milieu de la vue",
     "unsized": "{path} : ni taille angulaire ni bounds, dessiné large d'un pixel",

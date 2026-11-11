@@ -198,6 +198,7 @@ function weatherEquals(a: Weather, b: Weather): boolean {
     a.rareIceCrystals === b.rareIceCrystals &&
     a.lowerCloudCover === b.lowerCloudCover &&
     a.relativeHumidity === b.relativeHumidity &&
+    a.visibilityKm === b.visibilityKm &&
     a.precipitationType === b.precipitationType &&
     a.precipitationIntensity === b.precipitationIntensity &&
     a.precipitationAmount === b.precipitationAmount &&
@@ -2570,16 +2571,10 @@ export class SceneRenderer {
     const precipitationKind = previous.precipitationType !== weather.precipitationType
     const precipitationAmount = previous.precipitationIntensity !== weather.precipitationIntensity
       || previous.precipitationAmount !== weather.precipitationAmount
-    if (previous.relativeHumidity !== weather.relativeHumidity || precipitationKind || precipitationAmount) {
-      // The same humidity that makes the sky milky makes the distance pale, and what is falling
+    if (previous.relativeHumidity !== weather.relativeHumidity || previous.visibilityKm !== weather.visibilityKm || precipitationKind || precipitationAmount) {
+      // The same haze that makes the sky milky makes the distance pale, and what is falling
       // thins it further: one air for both.
-      this.air = AerialPerspective.of(weather)
-      this.applyAir()
-      this.scatteredSky?.setConditions({
-        aerosolOpticalDepth:
-          weather.relativeHumidity === undefined ? undefined : HumidHaze.steppedOpticalDepth(weather.relativeHumidity)
-      })
-      this.pumpScatteredSky()
+      this.restateHaze()
     }
     if (clouds) {
       this.buildClouds()
@@ -4216,8 +4211,7 @@ export class SceneRenderer {
       this.lunarDiffractionKey = ""
       return
     }
-    const humidity = this.weather.relativeHumidity
-    const haze = (humidity === undefined ? AtmosphereProfile.DEFAULT_AEROSOL_OPTICAL_DEPTH : HumidHaze.opticalDepth(humidity))
+    const haze = (this.hazeOpticalDepth() ?? AtmosphereProfile.DEFAULT_AEROSOL_OPTICAL_DEPTH)
       * AtmosphereProfile.aerosolDensity(this.siteElevationM + this.observerElevationM)
     const throughAll = this.cloudTransmission(moon)
     const cloud = -Math.log(Math.max(this.cloudTransmission(moon, true), 1e-4))
@@ -4289,9 +4283,29 @@ export class SceneRenderer {
     return Math.max(altitudeM, groundY)
   }
 
+  /**
+   * The haze's vertical optical depth this recording's weather states or implies — a visibility read at the ground it was stated for,
+   * else the humidity's guess (see AerialPerspective.aerosolOpticalDepthOf) — undefined when it says neither.
+   */
+  private hazeOpticalDepth(): number | undefined {
+    return AerialPerspective.aerosolOpticalDepthOf(this.weather, this.siteElevationM)
+  }
+
+  /** The air and the sky made again from the haze of the weather and of the ground it stands on. */
+  private restateHaze(): void {
+    this.air = AerialPerspective.of(this.weather, this.siteElevationM)
+    this.applyAir()
+    const depth = this.hazeOpticalDepth()
+    const step = HumidHaze.OPTICAL_DEPTH_STEP
+    this.scatteredSky?.setConditions({ aerosolOpticalDepth: depth === undefined ? undefined : Math.round(depth / step) * step })
+    this.pumpScatteredSky()
+  }
+
   private setSiteElevation(elevationM: number): void {
     if (Math.abs(elevationM - this.siteElevationM) < 1) return
     this.siteElevationM = elevationM
+    // A stated visibility is read at this ground (see hazeOpticalDepth); a humidity's guess is not, and only the air needs restating.
+    if (this.weather.visibilityKm !== undefined) this.restateHaze()
     this.applyAir()
     if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
   }

@@ -73,8 +73,19 @@ export interface Weather {
    * Relative humidity near the ground, 0 to 1. What decides how milky the clear sky is: haze
    * particles swell with water as the air nears saturation (see HumidHaze). Undefined means nobody
    * stated it, and a typical haze stands in.
+   * @minimum 0
+   * @maximum 1
    */
   relativeHumidity?: number
+  /**
+   * The meteorological visibility near the ground, in kilometres: how far a dark object stands out
+   * against the horizon sky (Koschmieder's 2 % threshold). What a weather report states about the
+   * haze itself, which the humidity can only guess at from a typical burden of particles: stated,
+   * it decides how much haze there is, and the humidity is no longer read for it (see
+   * AerialPerspective.aerosolOpticalDepthOf). Undefined means nobody stated it.
+   * @minimum 0
+   */
+  visibilityKm?: number
   precipitationType: PrecipitationType
   /** 0-1; meaningless while precipitationType is "none". What KIND of rain: its drops, their speed,
    * their streaks. How much of it is falling at this moment is precipitationAmount. */

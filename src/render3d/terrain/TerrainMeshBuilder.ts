@@ -1,5 +1,6 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
 import { GrassDetail } from "./GrassDetail.js"
+import { AerialFog } from "../AerialFog.js"
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, Mesh, MeshLambertMaterial, SRGBColorSpace } from "three"
 import type { ElevationHints, ElevationProvider } from "./ElevationProvider.js"
 import type { ImageryProvider } from "./ImageryProvider.js"
@@ -277,6 +278,9 @@ export async function buildTerrainMesh(
 
   // The grass is a grain seen within metres; the ring is kilometres off.
   if (!ring) GrassDetail.install(material)
+  // Seen from above, the air lays over this ground mostly the light of the ground round it (see AerialFog.ground).
+  const imageryWestEast = geoToLocalMeters(observerLat, imageryTexture.bounds.east, observerLat, imageryTexture.bounds.west).x
+  AerialFog.ground(material, Math.abs(imageryWestEast) / IMAGERY_RESOLUTION)
 
   const mesh = new Mesh(geometry, material)
   // A ring is too far for a shadow of the scene to fall on it, and too coarse to cast one worth its map.

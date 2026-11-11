@@ -89,7 +89,7 @@ const recording = {
   exposureSeconds: 1 / 48,
   observerTrack: { keyframes: keys.map(k => ({ t: k.t, pose: { lat: round(latAt(k.t), 8), lng: round(lngAt(k.t), 8), elevationM: ALT_M, headingDeg: round(heading), pitchDeg: k.pitchDeg, rollDeg: ROLL_DEG, fovDeg: FOV_V, fNumber: Number(process.env.F ?? 18) } })) },
   // What the film shows: fields under a clear air, no cloud in any frame. Stated, so that no record of a supposed date is asked for.
-  weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudLayers: [], relativeHumidity: Number(process.env.RH ?? 85) } }] },
+  weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudLayers: [], relativeHumidity: {"value": 0.85, "basis": "assumed", "rationale": "A humid summer afternoon over southern England; no record of the day, whose date is itself supposed"}, visibilityKm: {"value": 8, "basis": "derived", "rationale": "From the film: the haze that leaves the ground under the aircraft (5 km off) as detailed as the film shows it. The film loses the farther ground faster than any haze can, which is put down to its copy (a 480-line television transfer), not to the air"} } }] },
   timeline: { keyframes: [{ t: 0, shapes: [] }], order: [], groups: [] },
   decor: [{ id: 'concorde', kind: 'aircraft', title: { fr: 'Concorde', en: 'Concorde' }, eastM: track[0].eastM, northM: track[0].northM, headingDeg: track[0].headingDeg, sizeM: { widthM: 25.64, lengthM: 61.66, heightM: 9.74 }, model: { id: 'mgg8-concorde-g-boac-gear-up' }, track }],
   references: [film('film', 0, FROM_S, TO_S, { fr: 'Le film', en: 'The film' }, keys)]

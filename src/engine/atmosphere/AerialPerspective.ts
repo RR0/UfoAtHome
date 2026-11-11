@@ -76,9 +76,35 @@ export class AerialPerspective {
   readonly precipitationPerM: number
 
   /** The air of a recording's weather at an instant: its humidity and what is falling. */
-  static of(weather: Pick<Weather, "relativeHumidity" | "precipitationType" | "precipitationIntensity" | "precipitationAmount">): AerialPerspective {
-    const depth = weather.relativeHumidity === undefined ? undefined : HumidHaze.opticalDepth(weather.relativeHumidity)
-    return new AerialPerspective(depth, AerialPerspective.precipitationExtinction(weather))
+  static of(
+    weather: Pick<Weather, "relativeHumidity" | "visibilityKm" | "precipitationType" | "precipitationIntensity" | "precipitationAmount">,
+    groundAltitudeM = 0
+  ): AerialPerspective {
+    return new AerialPerspective(AerialPerspective.aerosolOpticalDepthOf(weather, groundAltitudeM), AerialPerspective.precipitationExtinction(weather))
+  }
+
+  /**
+   * The haze's vertical optical depth at 550 nm for a recording's weather, undefined when it says
+   * nothing that bears on it (the profile's typical day then stands).
+   *
+   * A stated visibility is the haze itself, measured: Koschmieder's σ = 3.912 / V at the ground,
+   * less what the air's own molecules take there, is the haze's extinction at that ground, and the
+   * haze's exponential profile (AtmosphereProfile.AEROSOL_SCALE_HEIGHT_M) carries it back to the sea
+   * and up through its column. Read at the ground it was stated for, `groundAltitudeM`: the same
+   * five kilometres at Socorro, 1 500 m up, mean a thicker haze than on the coast. Without one, the
+   * humidity is the only clue, and HumidHaze swells a typical burden with it.
+   *
+   * A visibility the molecules alone would already shorten (over two hundred kilometres) leaves no
+   * haze at all rather than a negative one.
+   */
+  static aerosolOpticalDepthOf(weather: Pick<Weather, "relativeHumidity" | "visibilityKm">, groundAltitudeM = 0): number | undefined {
+    if (weather.visibilityKm !== undefined && weather.visibilityKm > 0) {
+      const total = AerialPerspective.KOSCHMIEDER / (weather.visibilityKm * 1000)
+      const molecules = AtmosphereProfile.rayleighAt(AerialPerspective.CHANNEL_WAVELENGTHS_NM[1]) * AtmosphereProfile.rayleighDensity(groundAltitudeM)
+      const hazeAtGround = Math.max(0, total - molecules)
+      return (hazeAtGround / AtmosphereProfile.aerosolDensity(groundAltitudeM)) * AtmosphereProfile.AEROSOL_SCALE_HEIGHT_M
+    }
+    return weather.relativeHumidity === undefined ? undefined : HumidHaze.opticalDepth(weather.relativeHumidity)
   }
 
   /** What is falling, as an extinction per metre at the ground. */

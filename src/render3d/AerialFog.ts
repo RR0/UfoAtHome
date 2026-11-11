@@ -1,8 +1,9 @@
 import { Color, Fog, ShaderChunk } from "three"
-import type { Material } from "three"
+import type { Material, MeshLambertMaterial } from "three"
 import { AerialPerspective } from "../engine/atmosphere/AerialPerspective.js"
 import type { Rgb } from "../engine/atmosphere/AerialPerspective.js"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
+import { AerialAdjacency } from "../engine/atmosphere/AerialAdjacency.js"
 
 /**
  * The air between the eye and everything real in the scene — see AerialPerspective — drawn by
@@ -73,6 +74,50 @@ export class AerialFog extends Fog {
     material.needsUpdate = true
   }
 
+  /**
+   * Makes a surface of ground take the air as ground seen from above does: its own light thinned along the line of sight as anything's is,
+   * but what replaces it mostly the light of the ground round it rather than the sky's (see AerialAdjacency). That ground is read from the
+   * surface's own picture, at the coarseness of where the light comes from (a median of two or three kilometres at a slant), never finer
+   * than the picture is already drawn at; `texelM` is how much ground one of its texels covers. Only the ground: an aircraft or a house is
+   * small against what surrounds it, and the sky's law stays theirs.
+   *
+   * Laid on the albedo, before the light: the surface's colour becomes (own · T + round · w · (1 − T)) / k, with k = T + w · (1 − T), and
+   * the fog then keeps k of what is lit and lays the sky over the rest — which is the single-scattering sum, since the light is linear in
+   * the albedo. The neighbourhood is lit as the point itself is, its own shade and slope not being known there.
+   */
+  static ground(material: MeshLambertMaterial, texelM: number): void {
+    const previous = material.onBeforeCompile
+    const previousKey = material.customProgramCacheKey()
+    material.defines = { ...material.defines, AERIAL_ADJACENCY: "" }
+    material.onBeforeCompile = (shader, renderer) => {
+      previous.call(material, shader, renderer)
+      const table = AerialAdjacency.table()
+      shader.uniforms.aerialGroundHaze = { value: [...table.haze] }
+      shader.uniforms.aerialGroundAir = { value: [...table.air] }
+      shader.uniforms.aerialNeighbourRadius = { value: [...table.radiusM] }
+      shader.uniforms.aerialTexelM = { value: texelM }
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", "#include <common>\nuniform float aerialTexelM;")
+        .replace("#include <emissivemap_fragment>", `#if defined(USE_FOG) && defined(USE_MAP) && defined(AERIAL_ADJACENCY)
+{
+  vec3 aerialT;
+  vec3 aerialW;
+  float aerialE;
+  aerialAdjacency(aerialT, aerialW, aerialE);
+  vec3 aerialK = aerialT + aerialW * (1.0 - aerialT);
+  vec2 aerialTexels = vMapUv * vec2(textureSize(map, 0));
+  float aerialDrawn = 0.5 * log2(max(max(dot(dFdx(aerialTexels), dFdx(aerialTexels)), dot(dFdy(aerialTexels), dFdy(aerialTexels))), 1.0));
+  float aerialLevel = max(log2(max(aerialTable(aerialNeighbourRadius, aerialE) / aerialTexelM, 1.0)), aerialDrawn);
+  vec3 aerialRound = diffuse * textureLod(map, vMapUv, aerialLevel).rgb;
+  diffuseColor.rgb = (diffuseColor.rgb * aerialT + aerialRound * aerialW * (1.0 - aerialT)) / max(aerialK, vec3(1e-4));
+}
+#endif
+#include <emissivemap_fragment>`)
+    }
+    material.customProgramCacheKey = () => `${previousKey}-aerial-ground`
+    material.needsUpdate = true
+  }
+
   private static installed = false
 
   /** Replaces three's fog chunks, once for the page — they are global, which is the point. */
@@ -111,6 +156,34 @@ export class AerialFog extends Fog {
           if (abs(rise) < 0.01) return exp(-from / scaleHeight);
           return scaleHeight * (exp(-from / scaleHeight) - exp(-to / scaleHeight)) / rise;
         }
+        // The air's and the haze's extinction per metre, per channel, averaged along the line from the eye to this fragment.
+        void aerialExtinctions(out vec3 air, out vec3 haze) {
+          air = fogNear * ${vec3(rayleigh)} * aerialMeanDensity(cameraPosition.y, vAerialWorld.y, ${air});
+          haze = fogFar * ${vec3(haze)} * aerialMeanDensity(cameraPosition.y, vAerialWorld.y, ${hazeHeight});
+        }
+        #ifdef AERIAL_ADJACENCY
+          // See AerialAdjacency: the ground's share in what the air lays over ground, sampled every ${AerialAdjacency.ELEVATION_STEP_DEG}°.
+          uniform float aerialGroundHaze[${AerialAdjacency.ELEVATIONS_DEG.length}];
+          uniform float aerialGroundAir[${AerialAdjacency.ELEVATIONS_DEG.length}];
+          uniform float aerialNeighbourRadius[${AerialAdjacency.ELEVATIONS_DEG.length}];
+          float aerialTable(float values[${AerialAdjacency.ELEVATIONS_DEG.length}], float elevationDeg) {
+            float position = clamp(elevationDeg, 0.0, 90.0) / ${AerialAdjacency.ELEVATION_STEP_DEG.toFixed(1)};
+            int below = min(int(floor(position)), ${AerialAdjacency.ELEVATIONS_DEG.length - 2});
+            return mix(values[below], values[below + 1], position - float(below));
+          }
+          // T, the share w of the ground in what replaces it, and the elevation the eye is at from here.
+          void aerialAdjacency(out vec3 transmittance, out vec3 groundWeight, out float elevationDeg) {
+            vec3 air;
+            vec3 haze;
+            aerialExtinctions(air, haze);
+            float distance = length(vAerialWorld - cameraPosition);
+            transmittance = exp(-(air + haze) * distance);
+            elevationDeg = degrees(asin(clamp((cameraPosition.y - vAerialWorld.y) / max(distance, 0.001), -1.0, 1.0)));
+            groundWeight = (air * aerialTable(aerialGroundAir, elevationDeg)
+              + haze * ${AtmosphereProfile.AEROSOL_SINGLE_SCATTERING_ALBEDO.toFixed(4)} * aerialTable(aerialGroundHaze, elevationDeg))
+              / max(air + haze, vec3(1e-12));
+          }
+        #endif
       #endif`
     ShaderChunk.fog_fragment = `
       #ifdef USE_FOG
@@ -118,12 +191,21 @@ export class AerialFog extends Fog {
           float fogFactor = 1.0 - exp(-fogDensity * fogDensity * dot(vAerialWorld - cameraPosition, vAerialWorld - cameraPosition));
           gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);
         #else
-          float aerialDistance = length(vAerialWorld - cameraPosition);
-          vec3 aerialExtinction =
-            fogNear * ${vec3(rayleigh)} * aerialMeanDensity(cameraPosition.y, vAerialWorld.y, ${air}) +
-            fogFar * ${vec3(haze)} * aerialMeanDensity(cameraPosition.y, vAerialWorld.y, ${hazeHeight});
-          vec3 aerialTransmittance = exp(-aerialExtinction * aerialDistance);
-          gl_FragColor.rgb = gl_FragColor.rgb * aerialTransmittance + fogColor * (1.0 - aerialTransmittance);
+          #ifdef AERIAL_ADJACENCY
+            // The ground's own share was laid in already, from the ground round it (see AerialFog.ground): only the sky's is laid here.
+            vec3 aerialTransmittance;
+            vec3 aerialGround;
+            float aerialElevation;
+            aerialAdjacency(aerialTransmittance, aerialGround, aerialElevation);
+            vec3 aerialKept = aerialTransmittance + aerialGround * (1.0 - aerialTransmittance);
+            gl_FragColor.rgb = gl_FragColor.rgb * aerialKept + fogColor * (1.0 - aerialKept);
+          #else
+            vec3 aerialAir;
+            vec3 aerialHaze;
+            aerialExtinctions(aerialAir, aerialHaze);
+            vec3 aerialTransmittance = exp(-(aerialAir + aerialHaze) * length(vAerialWorld - cameraPosition));
+            gl_FragColor.rgb = gl_FragColor.rgb * aerialTransmittance + fogColor * (1.0 - aerialTransmittance);
+          #endif
         #endif
       #endif`
   }
