@@ -272,6 +272,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "concorde-1976",
+          src: "/demo-data/observer-concorde-1976.json",
+          title: { en: "Concorde and its orb, 1976", fr: "Le Concorde et son orbe, 1976", es: "El Concorde y su orbe, 1976", it: "Il Concorde e la sua sfera, 1976" },
+          blurb: {
+            en: "The British Airways film of Concorde shot from a Learjet through the Astrovision periscope, laid over the reconstruction: a pale orb comes down beside the aircraft, turns back as the camera does, slides along the fuselage and rises above it. Slide the film in and out against the scene. Measured on the film: the camera's moves, the ground sliding by, the copy's look; supposed: the date, the height, the lens, and so the Sun.",
+            fr: "Le film British Airways du Concorde tourné depuis un Learjet par le périscope Astrovision, posé sur la reconstitution : une orbe pâle descend près de l'avion, repart quand la caméra repart, glisse le long du fuselage et remonte au-dessus. Faites varier l'opacité du film contre la scène. Mesurés sur le film : les mouvements de la caméra, le défilement du sol, l'aspect de la copie ; supposés : la date, l'altitude, la focale, et donc le Soleil.",
+            es: "La película de British Airways del Concorde rodada desde un Learjet con el periscopio Astrovision, superpuesta a la reconstrucción: un orbe pálido baja junto al avión, vuelve a subir cuando lo hace la cámara, se desliza a lo largo del fuselaje y asciende por encima. Varíe la opacidad de la película frente a la escena. Medidos en la película: los movimientos de la cámara, el desfile del suelo, el aspecto de la copia; supuestos: la fecha, la altitud, la focal, y por tanto el Sol.",
+            it: "Il film British Airways del Concorde girato da un Learjet con il periscopio Astrovision, sovrapposto alla ricostruzione: una sfera pallida scende accanto all'aereo, risale quando lo fa la camera, scivola lungo la fusoliera e sale sopra di essa. Variate l'opacità del film rispetto alla scena. Misurati sul film: i movimenti della camera, lo scorrere del suolo, l'aspetto della copia; supposti: la data, l'altitudine, la focale, e quindi il Sole."
+          }
+        },
+        {
           id: "western-us-event",
           src: "/demo-data/observer-western-us-event-w3-1.json",
           // The case, for the player: five federal agents over two evenings and a dawn, and every reading tested against them.
