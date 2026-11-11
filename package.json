@@ -17,8 +17,6 @@
     "./scene": "./dist-embed-scene/rr0-scene.mjs",
     "./sighting": "./dist-embed-sighting/rr0-sighting.mjs",
     "./editor": "./dist-embed-sighting-editor/rr0-sighting-editor.mjs",
-    "./eyewitness": "./dist-embed-sighting/rr0-sighting.mjs",
-    "./recorder": "./dist-embed-sighting-editor/rr0-sighting-editor.mjs",
     "./interview": "./dist-embed-interview/rr0-interview.mjs"
   },
   "files": [
