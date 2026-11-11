@@ -58,6 +58,32 @@ describe("ReferenceSystem", () => {
     expect(meshOf(scene, "vue-1968")!.visible).toBe(false)
   })
 
+  it("keeps a picture where it stands on the screen while held, whichever way the camera turns, and by its registration once released", async () => {
+    const scene = new Scene()
+    const system = new ReferenceSystem(scene, () => {}, loaded())
+    system.set([photo({}, { opacity: 1 })])
+    await settled()
+    system.set([photo({}, { opacity: 1 })])
+    const mesh = meshOf(scene, "vue-1968")!
+    const camera = new PerspectiveCamera(30, 4 / 3, 0.1, 1e6)
+    camera.rotation.set(0, -288 * Math.PI / 180, 0, "YXZ")
+    camera.updateMatrixWorld()
+    system.place(camera)
+    const onScreen = () => mesh.getWorldDirection(new Vector3()).applyQuaternion(camera.quaternion.clone().invert())
+    const before = onScreen()
+    // Held for a pose, the camera turning 20 degrees within it (a heading changed by hand between two keys).
+    system.hold(camera)
+    camera.rotation.set(0, -308 * Math.PI / 180, 0, "YXZ")
+    camera.updateMatrixWorld()
+    system.place(camera)
+    expect(onScreen().distanceTo(before)).toBeLessThan(1e-9)
+    // Released, it stands by its registration again: turned away on the screen by the camera's turn.
+    system.release()
+    system.set([photo({}, { opacity: 1 })])
+    system.place(camera)
+    expect(onScreen().angleTo(before) * 180 / Math.PI).toBeCloseTo(20, 3)
+  })
+
   it("never fades a picture that does not say where it was taken", () => {
     expect(ReferenceSystem.presenceAt(photo(), { lat: 10, lng: 10 })).toBe(1)
     expect(ReferenceSystem.presenceAt(photo({}, { from: { lat: 0, lng: 0 } }), undefined)).toBe(1)

@@ -4960,6 +4960,8 @@ export class SceneRenderer {
       if (this.skyColoursStale && this.lastAstronomy) this.applySkyColours(this.lastAstronomy)
     }
     this.frameDirty = false
+    // The instant itself: its pictures where their registration puts them (a pose holds them on the screen while it is added up).
+    this.references?.release()
     this.refreshReflections()
     this.resolution.beginDrawing()
     try {
@@ -5940,6 +5942,8 @@ export class SceneRenderer {
    */
   private startExposure(): void {
     this.cancelExposure()
+    // The pictures laid over the scene stay where the instant just drawn put them on the screen (see ReferenceSystem.hold).
+    this.references?.hold(this.camera)
     this.exposureSubjectBounds = []
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     const width = Math.max(1, Math.round(size.x))

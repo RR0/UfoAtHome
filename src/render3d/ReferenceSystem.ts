@@ -1,5 +1,5 @@
-import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, SphereGeometry, SRGBColorSpace, Texture, VideoTexture } from "three"
-import type { Camera, Quaternion, Scene, Vector3 } from "three"
+import { BackSide, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Quaternion, SphereGeometry, SRGBColorSpace, Texture, VideoTexture } from "three"
+import type { Camera, Scene, Vector3 } from "three"
 import type { ReferenceRegistration, SceneReference } from "../engine/model/Reference.js"
 import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
@@ -199,12 +199,45 @@ export class ReferenceSystem {
    * camera (see SceneRenderer.renderOnce), since the eye moves with the observer.
    */
   place(camera: Camera): void {
+    const held = this.held
+    if (held) camera.getWorldQuaternion(this.cameraTurn)
     for (const mesh of this.meshes.values()) {
       if (!mesh.visible) continue
       mesh.position.copy(camera.position)
+      const onScreen = held?.get(mesh)
+      if (onScreen) mesh.quaternion.copy(this.cameraTurn).multiply(onScreen)
       mesh.updateMatrixWorld()
     }
   }
+
+  /**
+   * Keeps each picture where it stands on the screen now, whichever way the camera turns, until release: for the instants of a pose. A
+   * picture laid over the scene is there to compare with, an image already taken; added up over a pose while the camera turned (an
+   * observer's heading being changed by hand, between two keys), it was drawn once per instant, each a little further across, and came
+   * out as a string of copies of the film. The scene behind is smeared as the pose says; the picture is not part of it.
+   */
+  hold(camera: Camera): void {
+    camera.getWorldQuaternion(this.cameraTurn)
+    const toCamera = this.cameraTurn.clone().invert()
+    this.held = new Map([...this.meshes.values()].map(mesh => [mesh, toCamera.clone().multiply(mesh.quaternion)] as const))
+    this.registered = new Map([...this.meshes.values()].map(mesh => [mesh, mesh.quaternion.clone()] as const))
+  }
+
+  /** Lets the pictures stand by their registration again (see hold): as they stood when held, which a picture whose registration did not
+   * change since would not be turned back to, being left alone (see set). */
+  release(): void {
+    if (!this.held) return
+    for (const [mesh, turn] of this.registered ?? []) mesh.quaternion.copy(turn)
+    this.held = undefined
+    this.registered = undefined
+  }
+
+  /** Each picture's orientation by its registration when held, given back on release. */
+  private registered?: Map<Mesh, Quaternion>
+
+  /** Each picture's orientation in the camera's own frame, while held (see hold). */
+  private held?: Map<Mesh, Quaternion>
+  private readonly cameraTurn = new Quaternion()
 
   /** How far the furthest picture stands, metres — for the camera's far plane. */
   get furthestM(): number {
