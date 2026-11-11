@@ -13,6 +13,7 @@ import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
+import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
@@ -942,8 +943,18 @@ export class CaseEditorElement extends HTMLElement {
     const account = track && this.session ? this.session.accountOf(track) : undefined
     if (!track || track.kind !== "reading" || !account?.recording) {
       this.editor.markBeyondKnown([])
+      this.editor.setReadingBounds({})
       return
     }
+    // What the bounds of the account's values say, the fields themselves keep to; the rest (the Sun) is marked below.
+    const known = Provenance.strip(account.recording).provenance
+    const rangeOf = (path: string) => known.at(path)?.range
+    const time = rangeOf("time"), lat = rangeOf("place.locations.0.lat"), lng = rangeOf("place.locations.0.lng")
+    this.editor.setReadingBounds({
+      ...(typeof time === "string" ? { time } : {}),
+      ...(Array.isArray(lat) ? { lat } : {}),
+      ...(Array.isArray(lng) ? { lng } : {})
+    })
     const failed = (this.readingCheck?.findingsOf(account.recording, this.editor.sightingData) ?? []).filter(finding => finding.outcome === "fails" && finding.path)
     this.editor.markBeyondKnown(failed.map(finding => ({
       path: finding.path === "lighting" ? "time" : finding.path!,

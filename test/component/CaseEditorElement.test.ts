@@ -871,6 +871,9 @@ describe("CaseEditorElement's events", () => {
     // September, where the sources give June or July: what is known contradicted, on the field, with why.
     expect(field.getAttribute("aria-invalid")).toBe("true")
     expect(field.getAttribute("title")).toContain("1976-06/1976-07")
+    // And its picker offers only what is known: June and July.
+    const picker = editor.shadowRoot!.getElementById("obs-time-native") as HTMLInputElement
+    expect([picker.min, picker.max]).toEqual(["1976-06-01T00:00", "1976-07-31T23:59"])
     editor.sightingData = { ...editor.sightingData, time: "1976-07-02T16:00" }
     editor.dispatchEvent(new CustomEvent("sightingchange"))
     expect(field.hasAttribute("aria-invalid")).toBe(false)

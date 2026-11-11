@@ -1,4 +1,5 @@
 import { formatEdtfTime, parseEdtfTime } from "../engine/model/Sighting.js"
+import { TimeSpan } from "../engine/model/TimeSpan.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 
 /** What a date field says in words. */
@@ -84,6 +85,28 @@ export class EdtfDateField {
     // character of "1965-07-01T05:00" is illegible and distracting.
     parts.text.addEventListener("blur", () => this.validate())
     parts.text.addEventListener("focus", () => this.showDeduction())
+  }
+
+  /**
+   * How far the date may go, when something else decides it (a reading may move an account's date only within what is known of it, see
+   * ReadingCheck): the first and the last instant, as wall-clock times. The picker offers no day beyond them, and a date entered beyond
+   * is brought back to the nearer of the two. None: any date.
+   */
+  setBounds(bounds: { min: SightingTime, max: SightingTime } | undefined): void {
+    this.bounds = bounds
+    const { picker } = this.parts
+    picker.min = bounds ? EdtfDateField.pickerValueOf(bounds.min) : ""
+    picker.max = bounds ? EdtfDateField.pickerValueOf(bounds.max) : ""
+  }
+
+  private bounds?: { min: SightingTime, max: SightingTime }
+
+  /** `time` brought within the bounds: a time wholly before them is their first instant, one wholly after their last. */
+  private bounded(time: SightingTime): SightingTime {
+    if (!this.bounds) return time
+    if (TimeSpan.latestOf(time) < TimeSpan.earliestOf(this.bounds.min)) return this.bounds.min
+    if (TimeSpan.earliestOf(time) > TimeSpan.earliestOf(this.bounds.max)) return this.bounds.max
+    return time
   }
 
   /** Whether the date is said as a precise instant, in the picker, rather than in EDTF. */
@@ -251,7 +274,9 @@ export class EdtfDateField {
     const parsed = parseEdtfTime(value)
     if (!parsed) return
     this.clean()
-    this.onChange(parsed)
+    const bounded = this.bounded(parsed)
+    if (bounded !== parsed) this.set(bounded)
+    this.onChange(bounded)
   }
 
   private clean(): void {

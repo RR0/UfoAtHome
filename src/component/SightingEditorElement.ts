@@ -1,3 +1,4 @@
+import { TimeSpan } from "../engine/model/TimeSpan.js"
 import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.js"
 import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
 import { SightingMigration } from "../engine/persistence/SightingMigration.js"
@@ -818,6 +819,39 @@ export class SightingEditorElement extends HTMLElement {
       }
     }
   }
+
+  /**
+   * Limits the fields of a reading to what is known of its account's values (see StatedValue.range): the date to its EDTF interval, the
+   * latitude and the longitude to their least and greatest. The date's picker offers nothing beyond, and a value entered beyond is brought
+   * back to the nearer bound before it is applied. What the bounds alone cannot say (the Sun the date, the place and the heading put
+   * together) is for markBeyondKnown. None given, a field is free again.
+   */
+  setReadingBounds(bounds: { time?: string, lat?: [number, number], lng?: [number, number] }): void {
+    const date = this.shadow.querySelector<DateInputElement>('rr0-date-input[name="obs-time"]')
+    date?.setBounds(bounds.time ? TimeSpan.boundsOf(bounds.time) : undefined)
+    for (const [id, range] of [["lat", bounds.lat], ["lng", bounds.lng]] as const) {
+      const field = this.shadow.getElementById(id) as HTMLInputElement | null
+      if (!field) continue
+      this.numberBounds.set(field, range)
+      field.min = range ? String(range[0]) : ""
+      field.max = range ? String(range[1]) : ""
+      if (!this.boundedFields.has(field)) {
+        this.boundedFields.add(field)
+        // Before whatever applies it: a listener of the target's capture runs first.
+        const clamp = () => {
+          const limits = this.numberBounds.get(field)
+          const value = Number(field.value)
+          if (!limits || field.value === "" || !Number.isFinite(value)) return
+          const clamped = Math.min(Math.max(value, limits[0]), limits[1])
+          if (clamped !== value) field.value = String(clamped)
+        }
+        field.addEventListener("change", clamp, { capture: true })
+      }
+    }
+  }
+
+  private readonly numberBounds = new WeakMap<HTMLInputElement, [number, number] | undefined>()
+  private readonly boundedFields = new WeakSet<HTMLInputElement>()
 
   /** The fields markBeyondKnown marked, each with the title it had before. */
   private markedBeyondKnown: { field: HTMLElement, title: string | null }[] = []

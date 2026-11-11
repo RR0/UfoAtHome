@@ -3,6 +3,7 @@ import { EdtfDateField } from "../../src/component/EdtfDateField.js"
 import { register } from "../../src/component/DateInputElement.js"
 import type { DateInputElement } from "../../src/component/DateInputElement.js"
 import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
+import { TimeSpan } from "../../src/engine/model/TimeSpan.js"
 import type { SightingTime } from "../../src/engine/model/Sighting.js"
 import { sightingEditorMessages_en } from "../../src/component/messages/SightingEditorMessages_en.js"
 
@@ -35,6 +36,27 @@ describe("EdtfDateField", () => {
     expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00~"))).toBe(false)
     expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-07-01T05:00?"))).toBe(false)
     expect(EdtfDateField.opensPrecise(parseEdtfTime("1965-?07-01T05:00"))).toBe(false)
+  })
+
+  it("keeps to its bounds: the picker offers nothing beyond, and a date entered beyond is brought back to the nearer bound", () => {
+    const { element, picker, text, told } = make()
+    element.setBounds(TimeSpan.boundsOf("1976-06/1976-07"))
+    expect([picker.min, picker.max]).toEqual(["1976-06-01T00:00", "1976-07-31T23:59"])
+    picker.value = "1976-09-15T16:00"
+    picker.dispatchEvent(new Event("change"))
+    expect(told.at(-1)).toMatchObject({ year: 1976, month: 7, day: 31, hour: 23, minute: 59 })
+    expect(picker.value).toBe("1976-07-31T23:59")
+    // Within, as said: a month, imprecise, is kept as it was typed.
+    element.setPrecise(false)
+    text.value = "1976-06"
+    text.dispatchEvent(new Event("input"))
+    expect(told.at(-1)).toMatchObject({ year: 1976, month: 6, raw: "1976-06" })
+    // Before, wholly: the first instant.
+    text.value = "1975"
+    text.dispatchEvent(new Event("input"))
+    expect(told.at(-1)).toMatchObject({ year: 1976, month: 6, day: 1, hour: 0, minute: 0 })
+    element.setBounds(undefined)
+    expect(picker.min).toBe("")
   })
 
   it("says a season in words, with its year and its doubt", () => {

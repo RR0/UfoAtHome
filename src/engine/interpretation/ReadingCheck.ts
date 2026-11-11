@@ -1,5 +1,6 @@
 import { computeBodyPosition, sightingTimeToDate } from "../astronomy/CelestialPositions.js"
-import { parseEdtfTime, type SightingTime } from "../model/Sighting.js"
+import { parseEdtfTime } from "../model/Sighting.js"
+import { TimeSpan } from "../model/TimeSpan.js"
 import { Provenance, type ProvenanceEntry } from "../persistence/Provenance.js"
 import type { SightingLighting, SightingRecordingJson } from "../persistence/sightingJson.js"
 import type { FindingGround, ReadingFinding } from "./Interpretation.js"
@@ -50,8 +51,8 @@ export class ReadingCheck {
     const from = start ? parseEdtfTime(start) : undefined
     const to = end ? parseEdtfTime(end) : undefined
     if (!from && !to) return undefined
-    if (from && instant.getTime() < ReadingCheck.earliest(from)) return false
-    if (to && instant.getTime() > ReadingCheck.latest(to)) return false
+    if (from && instant.getTime() < TimeSpan.earliestOf(from)) return false
+    if (to && instant.getTime() > TimeSpan.latestOf(to)) return false
     return true
   }
 
@@ -124,20 +125,6 @@ export class ReadingCheck {
     const span = ((to - from) % 360 + 360) % 360
     const along = ((angle - from) % 360 + 360) % 360
     return along <= span
-  }
-
-  private static earliest(time: SightingTime): number {
-    return Date.UTC(time.year ?? 0, (time.month ?? 1) - 1, time.day ?? 1, time.hour ?? 0, time.minute ?? 0, time.second ?? 0)
-  }
-
-  /** The last instant a time said as far as it is said covers: "1976-07" ends with the 31st of July. */
-  private static latest(time: SightingTime): number {
-    const year = time.year ?? 9999
-    if (time.month === undefined) return Date.UTC(year + 1, 0, 1) - 1
-    if (time.day === undefined) return Date.UTC(year, time.month, 1) - 1
-    if (time.hour === undefined) return Date.UTC(year, time.month - 1, time.day + 1) - 1
-    if (time.minute === undefined) return Date.UTC(year, time.month - 1, time.day, time.hour + 1) - 1
-    return Date.UTC(year, time.month - 1, time.day, time.hour, time.minute + 1) - 1
   }
 
   private static at(json: unknown, path: string): unknown {

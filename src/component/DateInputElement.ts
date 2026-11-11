@@ -150,6 +150,11 @@ export class DateInputElement extends HTMLElement {
     this.field.set(time)
   }
 
+  /** How far the date may go (see EdtfDateField.setBounds): none, any date. */
+  setBounds(bounds: { min: SightingTime, max: SightingTime } | undefined): void {
+    this.field.setBounds(bounds)
+  }
+
   /** Whether the date is said as a precise instant, in the picker, rather than in EDTF. */
   get precise(): boolean {
     return this.field.isPrecise
