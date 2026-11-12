@@ -220,8 +220,6 @@ const TEMPLATE = `
   .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
   .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
   .finding-mark { font-weight: 700; text-align: center; }
-  /* Above the title's cover of the card, which would open the reading as it is instead. */
-  .findings li > .finding-lay { grid-column: 2; justify-self: start; position: relative; z-index: 1; min-height: 0; margin-top: 2px; padding: 2px 8px; font-size: 12px; }
   .findings li[data-outcome="holds"] .finding-mark { color: var(--ok); }
   .findings li[data-outcome="fails"] .finding-mark { color: var(--error); }
   .findings li[data-outcome="untested"] .finding-mark { color: var(--ink-faint); }
@@ -924,13 +922,17 @@ export class CaseEditorElement extends HTMLElement {
       // A reading's `explains` are the shapes of the account it reads: that one is loaded too.
       const account = session.accountOf(track)
       if (account) await this.loadTrack(account)
+      this.layMostFavourable(track)
       this.current = track
       this.editor.documentUrl = track.base ? track.base.url : track.url
       this.editor.reading = track.kind === "reading"
       this.editor.accountShapeIds = track.kind === "reading" && account?.recording ? CaseEditorElement.shapesOf(account.recording) : undefined
       // The readings of an account are candidates of its own (see CandidatesView): they are read for it.
       const readings = track.kind === "observer" ? session.readingsOf(track) : []
-      for (const reading of readings) await this.loadTrack(reading).catch(() => undefined)
+      for (const reading of readings) {
+        await this.loadTrack(reading).catch(() => undefined)
+        this.layMostFavourable(reading)
+      }
       this.editor.readings = readings.filter(reading => reading.recording?.interpretation?.bodies.length || InterpretationKinds.computes(reading.recording?.interpretation, InterpretationRegistry.kinds()))
         .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: reading.recording!.interpretation! }))
       this.editor.sightingData = structuredClone(track.recording!)
@@ -1287,7 +1289,7 @@ export class CaseEditorElement extends HTMLElement {
       const body = document.createElement("div")
       body.className = "event-body"
       body.append(pill, main, links)
-      if (findings && findings.length > 0) body.append(this.findingsList(findings, this.bestCaseLaying(item.track!)))
+      if (findings && findings.length > 0) body.append(this.findingsList(findings))
       card.append(body, remove)
       return { card, child }
     })
@@ -1340,37 +1342,30 @@ export class CaseEditorElement extends HTMLElement {
   /** What sets a reading against its account, in the reader's language: none before the words have come. */
   private readingCheck?: ReadingCheck
 
-  /** What lays a reading's best case in its scene (see layBestCase), in the reader's language. */
+  /** What sets a reading in its most favourable configuration (see layMostFavourable), in the reader's language. */
   private bestCases?: BestCaseSearch
 
-  /** What lays the best case of a reading in its scene, for a reading whose mechanism has one to lay; none for any other. */
-  private bestCaseLaying(track: CaseTrack): (() => void) | undefined {
-    const mechanism = track.recording?.interpretation?.mechanism
-    return track.kind === "reading" && BestCaseSearch.lays(mechanism) ? () => void this.layBestCase(track) : undefined
-  }
+  /** The readings already set in their most favourable configuration, which is done once, when one and its account are first read. */
+  private readonly laid = new WeakSet<CaseTrack>()
 
   /**
-   * Opens a reading with its best case laid in its scene, as its findings measured it (see BestCaseSearch.bestSceneOf): an edit of the
-   * reading, which Undo takes back and which is kept with the case's other changes.
+   * Sets a reading that says how its instrument or the sky made the phenomenon in its most favourable configuration, as its findings
+   * measure it (see BestCaseSearch.bestSceneOf): how it is always shown, whatever its file placed there. What it is then is what it was
+   * read as, not a change of the author's: its file is written only when they change something else of it.
    */
-  private async layBestCase(track: CaseTrack): Promise<void> {
-    const session = this.session
-    if (!session) return
-    const index = (this.items(session) as { track?: CaseTrack }[]).findIndex(item => item.track === track)
-    if (index < 0) return
-    ;(this.byId("track") as HTMLSelectElement).value = String(index)
-    this.byId("cited").hidden = true
-    this.listShown = false
-    this.refreshOverview()
-    if (this.current !== track) await this.showTrack(track)
-    const account = session.accountOf(track)
-    const scene = account?.recording && this.bestCases ? this.bestCases.bestSceneOf(account.recording, this.editor.sightingData) : undefined
-    if (scene) this.editor.applyEdit(scene)
-    requestAnimationFrame(() => this.bringEditorIntoView())
+  private layMostFavourable(track: CaseTrack): void {
+    if (track.kind !== "reading" || !track.recording || this.laid.has(track) || !this.bestCases) return
+    const account = this.session?.accountOf(track)?.recording
+    if (!account) return
+    this.laid.add(track)
+    const scene = this.bestCases.bestSceneOf(account, track.recording)
+    if (!scene) return
+    track.recording = scene
+    track.loaded = JSON.stringify(scene)
   }
 
   /** A reading's tests, each with its mark (holds ✓, fails ✗, could not be made ?) and, for a failure, what it failed against. */
-  private findingsList(findings: readonly ReadingFinding[], layBestCase?: () => void): HTMLUListElement {
+  private findingsList(findings: readonly ReadingFinding[]): HTMLUListElement {
     const m = this.messages
     const list = document.createElement("ul")
     list.className = "findings"
@@ -1390,16 +1385,6 @@ export class CaseEditorElement extends HTMLElement {
         against.className = "finding-against"
         against.textContent = ` (${m.findingAgainst[finding.against ?? "established"]})`
         line.append(against)
-      }
-      // The best case computed, where it can be laid in the scene: to be seen there as it was measured.
-      if (layBestCase && finding.path === "interpretation.mechanism") {
-        const lay = document.createElement("button")
-        lay.type = "button"
-        lay.className = "finding-lay"
-        lay.textContent = m.applyBestCase.label
-        lay.title = m.applyBestCase.title
-        lay.addEventListener("click", layBestCase)
-        line.append(lay)
       }
       list.append(line)
     }

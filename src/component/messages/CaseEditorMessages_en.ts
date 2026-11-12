@@ -19,7 +19,6 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   readingVerdict: { incompatible: "Contradicts what is established", unsettled: "Not settled", compatible: "Compatible" },
   findingOutcome: { holds: "Holds", fails: "Fails", untested: "Could not be tested" },
   findingAgainst: { established: "against what is established", supposed: "against a supposition" },
-  applyBestCase: { label: "Lay in the scene", title: "Opens the reading with this best case laid in its scene, as it was measured: undo takes it back" },
   untitledObservation: "Observation {n}",
   deleteRecording: "Delete this recording from the case",
   deleteReadingQuestion: "Delete this reading? Nothing is written until the case is saved.",

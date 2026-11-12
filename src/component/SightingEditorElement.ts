@@ -821,26 +821,6 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Makes `json` the recording, as an edit of the author's: one step of the history, which Undo takes back, and a change to keep. For
-   * whoever holds the editor to change the recording as a whole (a reading's best case laid in its scene, see CaseEditorElement); the
-   * playhead stays where it is.
-   */
-  applyEdit(json: SightingRecordingJson): void {
-    this.armHistory()
-    const playhead = this.ufoElement.currentTime
-    this.applyingFileText = true
-    try {
-      this.sightingData = json
-      this.touched = true
-      this.ufoElement.currentTime = playhead
-    } finally {
-      this.applyingFileText = false
-    }
-    this.recordHistory()
-    this.dispatchEvent(new CustomEvent("sightingchange"))
-  }
-
-  /**
    * Limits the fields of a reading to what is known of its account's values (see StatedValue.range): the date to its EDTF interval, the
    * latitude and the longitude to their least and greatest. The date's picker offers nothing beyond, and a value entered beyond is brought
    * back to the nearer bound before it is applied. What the bounds alone cannot say (the Sun the date, the place and the heading put

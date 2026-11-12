@@ -36,7 +36,7 @@ export const READINGS = [
   {
     id: 'lens-ghost',
     mechanism: { kind: 'lens-ghost', explains: 'orb' },
-    // Its best case in daylight: the Sun where the film's light allows it nearest the front of the camera. No ghost of it comes into the
+    // At its most favourable in daylight: the Sun where the film's light allows it nearest the front of the camera. No ghost of it comes into the
     // frame: the camera looks 29° down, and only a Sun on the horizon ahead would throw one in (see the last finding).
     sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
     lens: { reachDeg: 90 },
@@ -67,7 +67,7 @@ export const READINGS = [
   {
     id: 'periscope',
     mechanism: { kind: 'stated-ghost', explains: 'orb' },
-    // Its best case: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
+    // At its most favourable: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
     // height the light allows), a periscope head taking light that far out, and the ghost that lays it on the orb at the first instant.
     sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
     periscope: { reachDeg: 90, share: 2e-3, blur: 0.009 },
@@ -97,7 +97,7 @@ export const READINGS = [
   {
     id: 'window',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: 'Le reflet sur la vitre (meilleur cas)', en: 'The reflection on the pane (best case)', es: 'El reflejo en el cristal (mejor caso)', it: 'Il riflesso sul vetro (caso migliore)' }, distanceM: 1000, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: 'Le reflet sur la vitre (configuration la plus favorable)', en: 'The reflection on the pane (most favourable configuration)', es: 'El reflejo en el cristal (configuración más favorable)', it: 'Il riflesso sul vetro (configurazione più favorevole)' }, distanceM: 1000, luminanceCdM2: 3e4 },
     by: [{ people: 'BeauJerome' }],
     time: '2026-11-08',
     lens: { glass: 'window' },
@@ -125,7 +125,8 @@ export const READINGS = [
   },
   {
     id: 'glint',
-    // Its best case: the glint there all along, as bright as the Sun's disc (1.6e9 cd/m²) in glass reflecting 5 % of it, the image of the
+    mechanism: { kind: 'ghost-of', explains: 'orb', of: 'glint' },
+    // At its most favourable: the glint there all along, as bright as the Sun's disc (1.6e9 cd/m²) in glass reflecting 5 % of it, the image of the
     // Sun in a curved pane some 0.3 m across at 155 m (a few pixels).
     glint: { luminanceCdM2: 8e7, sizeM: 0.3 },
     by: [{ title: 'Peter_Morris (Straight Dope)' }],
@@ -154,12 +155,6 @@ export const READINGS = [
         en: "No glint on the windscreen in the frames examined: the flight deck stays dark, and the rest of the aircraft is saturated white.",
         es: "Ningún destello en el parabrisas en las imágenes examinadas: la cabina sigue oscura, y el resto del avión está saturado de blanco.",
         it: "Nessun bagliore sul parabrezza nei fotogrammi esaminati: la cabina resta scura, e il resto dell'aereo è saturo di bianco."
-      }),
-      fails({
-        fr: "Simulé dans son meilleur cas, un éclat au pare-brise tout le plan : ses reflets par l'objectif (facteurs de −1,4 à +0,65) restent à 90 px de l'orbe en médiane (de 21 à 160 px), et ne parcourent pas plus de 75 px, quand l'orbe en parcourt 377.",
-        en: "Simulated at its best, a glint on the windscreen all through the shot: its ghosts through the lens (factors −1.4 to +0.65) stay 90 px from the orb at the median (21 to 160 px), and travel no more than 75 px, where the orb travels 377.",
-        es: "Simulado en su mejor caso, un destello en el parabrisas durante todo el plano: sus reflejos por el objetivo (factores de −1,4 a +0,65) quedan a 90 px del orbe en la mediana (de 21 a 160 px), y no recorren más de 75 px, cuando el orbe recorre 377.",
-        it: "Simulato nel caso migliore, un bagliore sul parabrezza per tutta la ripresa: i suoi riflessi attraverso l'obiettivo (fattori da −1,4 a +0,65) restano a 90 px dalla sfera in mediana (da 21 a 160 px), e non percorrono più di 75 px, mentre la sfera ne percorre 377."
       })
     ]
   },
@@ -168,7 +163,7 @@ export const READINGS = [
     mechanism: { kind: 'driven-one-way', explains: 'orb' },
     by: [{ title: 'GuanoLad (Straight Dope)' }],
     time: '2008-08',
-    // Its best case: one drop, where the film shows the orb, down as far as the orb goes; then still, the airflow driving it one way.
+    // At its most favourable: one drop, where the film shows the orb, down as far as the orb goes; then still, the airflow driving it one way.
     lens: { glass: 'window', drops: 0.05 },
     placedDrop: true,
     title: {
@@ -192,17 +187,17 @@ export const READINGS = [
         it: "Una goccia che le vibrazioni farebbero risalire resta da descrivere: nessuno ha detto come."
       }),
       fails({
-        fr: "Simulée dans son meilleur cas (une seule goutte, poussée vers le bas au plus près de l'orbe et jamais vers le haut ; deux fois sa taille pour qu'on la voie) : elle montre le sol, renversé et flou, plus sombre que ce qui l'entoure, quand l'orbe est blanche et plus claire que tout autour d'elle. Le Soleil, derrière la caméra, ne peut pas s'y refléter.",
-        en: "Simulated at its best (a single drop, driven down as near the orb as it can be and never up; twice its size so that it is seen): it shows the ground, upside down and blurred, darker than what is round it, where the orb is white and brighter than anything round it. The Sun, behind the camera, cannot shine in it.",
-        es: "Simulada en su mejor caso (una sola gota, empujada hacia abajo lo más cerca posible del orbe y nunca hacia arriba; el doble de su tamaño para que se vea): muestra el suelo, invertido y borroso, más oscuro que lo que la rodea, cuando el orbe es blanco y más claro que todo a su alrededor. El Sol, detrás de la cámara, no puede reflejarse en ella.",
-        it: "Simulata nel caso migliore (una sola goccia, spinta verso il basso il più vicino possibile alla sfera e mai verso l'alto; il doppio della sua grandezza perché si veda): mostra il suolo, capovolto e sfocato, più scuro di ciò che la circonda, mentre la sfera è bianca e più chiara di tutto intorno. Il Sole, dietro la camera, non può riflettersi in essa."
+        fr: "Simulée dans sa configuration la plus favorable (une seule goutte, poussée vers le bas au plus près de l'orbe et jamais vers le haut ; deux fois sa taille pour qu'on la voie) : elle montre le sol, renversé et flou, plus sombre que ce qui l'entoure, quand l'orbe est blanche et plus claire que tout autour d'elle. Le Soleil, derrière la caméra, ne peut pas s'y refléter.",
+        en: "Simulated in its most favourable configuration (a single drop, driven down as near the orb as it can be and never up; twice its size so that it is seen): it shows the ground, upside down and blurred, darker than what is round it, where the orb is white and brighter than anything round it. The Sun, behind the camera, cannot shine in it.",
+        es: "Simulada en su configuración más favorable (una sola gota, empujada hacia abajo lo más cerca posible del orbe y nunca hacia arriba; el doble de su tamaño para que se vea): muestra el suelo, invertido y borroso, más oscuro que lo que la rodea, cuando el orbe es blanco y más claro que todo a su alrededor. El Sol, detrás de la cámara, no puede reflejarse en ella.",
+        it: "Simulata nella configurazione più favorevole (una sola goccia, spinta verso il basso il più vicino possibile alla sfera e mai verso l'alto; il doppio della sua grandezza perché si veda): mostra il suolo, capovolto e sfocato, più scuro di ciò che la circonda, mentre la sfera è bianca e più chiara di tutto intorno. Il Sole, dietro la camera, non può riflettersi in essa."
       })
     ]
   },
   {
     id: 'dust',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: "La poussière sur l'objectif (meilleur cas)", en: 'The speck on the lens (best case)', es: 'La mota en el objetivo (mejor caso)', it: "Il granello sull'obiettivo (caso migliore)" }, distanceM: 2, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: "La poussière sur l'objectif (configuration la plus favorable)", en: 'The speck on the lens (most favourable configuration)', es: 'La mota en el objetivo (configuración más favorable)', it: "Il granello sull'obiettivo (configurazione più favorevole)" }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'Manduck (Straight Dope)' }, { title: 'Telemark (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -224,7 +219,7 @@ export const READINGS = [
   {
     id: 'film-defect',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: 'Le cheveu dans le couloir (meilleur cas)', en: 'The hair in the gate (best case)', es: 'El pelo en la ventanilla (mejor caso)', it: 'Il pelo nel quadruccio (caso migliore)' }, distanceM: 2, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: 'Le cheveu dans le couloir (configuration la plus favorable)', en: 'The hair in the gate (most favourable configuration)', es: 'El pelo en la ventanilla (configuración más favorable)', it: 'Il pelo nel quadruccio (configurazione più favorevole)' }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'beowulff (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -250,6 +245,7 @@ export const READINGS = [
   },
   {
     id: 'object',
+    mechanism: { kind: 'real-object', explains: 'orb' },
     by: [{ title: 'UFO video channels' }],
     title: {
       fr: "Un objet réel près du Concorde, une « sonde »",

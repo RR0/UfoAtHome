@@ -1588,10 +1588,10 @@
    {
     "id": "orb",
     "title": {
-     "fr": "Le cheveu dans le couloir (meilleur cas)",
-     "en": "The hair in the gate (best case)",
-     "es": "El pelo en la ventanilla (mejor caso)",
-     "it": "Il pelo nel quadruccio (caso migliore)"
+     "fr": "Le cheveu dans le couloir (configuration la plus favorable)",
+     "en": "The hair in the gate (most favourable configuration)",
+     "es": "El pelo en la ventanilla (configuración más favorable)",
+     "it": "Il pelo nel quadruccio (configurazione più favorevole)"
     },
     "explains": [
      "orb"

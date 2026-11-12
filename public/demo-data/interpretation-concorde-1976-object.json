@@ -1904,6 +1904,10 @@
     },
     "outcome": "untested"
    }
-  ]
+  ],
+  "mechanism": {
+   "kind": "real-object",
+   "explains": "orb"
+  }
  }
 }

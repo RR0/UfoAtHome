@@ -1591,10 +1591,10 @@
    {
     "id": "orb",
     "title": {
-     "fr": "Le reflet sur la vitre (meilleur cas)",
-     "en": "The reflection on the pane (best case)",
-     "es": "El reflejo en el cristal (mejor caso)",
-     "it": "Il riflesso sul vetro (caso migliore)"
+     "fr": "Le reflet sur la vitre (configuration la plus favorable)",
+     "en": "The reflection on the pane (most favourable configuration)",
+     "es": "El reflejo en el cristal (configuración más favorable)",
+     "it": "Il riflesso sul vetro (configurazione più favorevole)"
     },
     "explains": [
      "orb"

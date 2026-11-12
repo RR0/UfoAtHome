@@ -3184,16 +3184,25 @@ describe("SightingEditorElement toolbar groups", () => {
       const element = await mount()
       fileTab(element).click()
       await waitFor(() => cmEditor(element) !== null)
-      element.applyEdit({ ...element.sightingData, tags: ["first"] })
+      const type = (tags: string[]) => {
+        const view = EditorView.findFromDOM(cmEditor(element)!)!
+        view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: JSON.stringify({ ...element.sightingData, tags }, null, 2) } })
+      }
       const undo = element.historyControls.querySelector("button")!
-      await waitFor(() => !undo.disabled)
+      type(["first"])
+      await waitFor(() => element.sightingData.tags?.[0] === "first" && !undo.disabled)
       element.sightingData = { ...element.sightingData, tags: ["another"] }
       await waitFor(() => text(element).includes("another"))
       expect(undo.disabled).toBe(true)
-      element.applyEdit({ ...element.sightingData, tags: ["laid"] })
-      await waitFor(() => !undo.disabled)
-      undo.click()
-      await waitFor(() => element.sightingData.tags?.[0] === "another")
+      type(["typed"])
+      await waitFor(() => element.sightingData.tags?.[0] === "typed" && !undo.disabled)
+      // As far back as Undo goes, it stops at the recording given: never the one before it.
+      for (let step = 0; step < 5 && !undo.disabled; step++) {
+        undo.click()
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      await waitFor(() => undo.disabled)
+      expect(element.sightingData.tags).toEqual(["another"])
     })
 
     it("drives the form: a text that parses becomes the recording, and one that does not changes nothing", async () => {

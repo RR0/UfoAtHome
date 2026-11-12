@@ -4,6 +4,8 @@ import { ReadingCheck } from "../../../src/engine/interpretation/ReadingCheck.js
 import { readingCheckTexts_en } from "../../../src/engine/interpretation/messages/ReadingCheckTexts_en.js"
 import type { SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 import concorde from "../../../public/demo-data/observer-concorde-1976.json"
+import concordeGlint from "../../../public/demo-data/interpretation-concorde-1976-glint.json"
+import concordeObject from "../../../public/demo-data/interpretation-concorde-1976-object.json"
 
 /** An account whose phenomenon is where `at` says at each of ten instants, filmed by a camera looking north, level. */
 const accountOf = (at: (i: number) => { azimuthDeg: number, altitudeDeg: number }) => ({
@@ -77,6 +79,14 @@ describe("BestCaseSearch", () => {
     const ghost = of("lens-ghost")
     expect(ghost.map(finding => finding.outcome)).toEqual(["fails", "fails"])
     expect(ghost[1].path).toBe("lighting")
+    // A ghost of a glint on the windscreen, where the film shows it: it does not travel as the orb does.
+    const glint = search.findingsOf(account, concordeGlint as unknown as SightingRecordingJson)
+    expect(glint).toHaveLength(1)
+    expect(glint[0].outcome).toBe("fails")
+    // A real object: it follows the orb at any distance, and the finding says what that asks of it at the distance placed.
+    const object = search.findingsOf(account, concordeObject as unknown as SightingRecordingJson)
+    expect(object[0]).toMatchObject({ outcome: "holds" })
+    expect(object[0].text).toMatch(/^Most favourable configuration, computed: .* At 100 m/)
   })
 
   it("lays a still speck at the one point of the frame nearest the phenomenon, carried with the camera", () => {

@@ -19,7 +19,6 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   readingVerdict: { incompatible: "Contradice lo establecido", unsettled: "Sin resolver", compatible: "Compatible" },
   findingOutcome: { holds: "Se sostiene", fails: "Falla", untested: "No se pudo probar" },
   findingAgainst: { established: "contra un elemento establecido", supposed: "contra una suposición" },
-  applyBestCase: { label: "Aplicar a la escena", title: "Abre la lectura con este mejor caso colocado en su escena, tal como se midió: Deshacer lo retira" },
   untitledObservation: "Observación {n}",
   deleteRecording: "Quitar esta grabación del caso",
   deleteReadingQuestion: "¿Eliminar esta lectura? Nada se escribe hasta guardar el caso.",

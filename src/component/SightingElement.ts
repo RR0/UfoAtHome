@@ -6,6 +6,7 @@ import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
+import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import type { CaseJson } from "../engine/persistence/caseJson.js"
@@ -130,6 +131,8 @@ export class SightingElement extends HTMLElement {
   private readonly readingFindingsElement: HTMLElement
   /** What sets a reading against its account, in the reader's language: none before the words have come. */
   private readingCheck?: ReadingCheck
+  /** What sets a reading in its most favourable configuration, which is how it is shown (see BestCaseSearch.bestSceneOf). */
+  private bestCases?: BestCaseSearch
   /** Whether the scene plays the recording of a reading rather than the account's (see chooseInterpretation). */
   private readingScene = false
   /** The reading on show as a chip of the Summary's (see showReadingFindings): none for the account, a variant, an untested reading. */
@@ -370,6 +373,7 @@ export class SightingElement extends HTMLElement {
     this.language = language
     this.messages = messages
     this.readingCheck = new ReadingCheck(checkWords)
+    this.bestCases = new BestCaseSearch(checkWords)
     this.tags = new SightingTags(tagNames)
     this.said = new SaidTexts(preferences)
     this.summaryBuilder = new SightingSummary(this.messages, new SceneNaming(sceneNames), this.said, this.tags, { messages: this.messages, locale: language })
@@ -952,14 +956,26 @@ export class SightingElement extends HTMLElement {
   private async chooseInterpretation(value: string): Promise<void> {
     const token = ++this.interpretationToken
     const load = this.interpretationLoaders.get(value)
-    const interpretation = load ? await load().catch(error => {
+    const stated = load ? await load().catch(error => {
       console.warn(`<rr0-sighting>: could not read interpretation "${value}":`, error)
       return undefined
     }) : undefined
     const readingUrl = this.readingUrlOf(value)
-    const reading = readingUrl ? await SightingFetch.recording(readingUrl).catch(() => undefined) as SightingRecordingJson | undefined : undefined
+    const fetched = readingUrl ? await SightingFetch.recording(readingUrl).catch(() => undefined) as SightingRecordingJson | undefined : undefined
     if (token !== this.interpretationToken) return
     const entry = this.entries.find(e => e.src === this.currentSrc)
+    // A reading that says how its instrument or the sky made the phenomenon is shown in its most favourable configuration, as its
+    // findings measure it, whatever its file placed there.
+    const laid = entry && fetched && "timeline" in fetched ? this.bestCases?.bestSceneOf(entry.sighting, fetched) : undefined
+    const reading = laid ?? fetched
+    // Only the tracks it sets: the models the interpretation read keep the addresses it made absolute (see CaseFile.withModelsFrom).
+    const interpretation = laid?.interpretation && stated ? {
+      ...stated,
+      bodies: [
+        ...stated.bodies.map(body => { const set = laid.interpretation!.bodies.find(other => other.id === body.id); return set ? { ...body, track: set.track } : body }),
+        ...laid.interpretation.bodies.filter(body => !stated.bodies.some(other => other.id === body.id))
+      ]
+    } : stated
     // A reading is the observation as whoever reads it holds it, in its own recording: another Sun, another lens, a heading moved. It is
     // shown whole, the account's phenomenon drawn in it to be compared with; only its bodies, laid over the account's scene, showed
     // nothing of most of the Concorde's. A reading that changes nothing of the scene but its bodies keeps the account's, not built again.

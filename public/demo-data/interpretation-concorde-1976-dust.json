@@ -1588,10 +1588,10 @@
    {
     "id": "orb",
     "title": {
-     "fr": "La poussière sur l'objectif (meilleur cas)",
-     "en": "The speck on the lens (best case)",
-     "es": "La mota en el objetivo (mejor caso)",
-     "it": "Il granello sull'obiettivo (caso migliore)"
+     "fr": "La poussière sur l'objectif (configuration la plus favorable)",
+     "en": "The speck on the lens (most favourable configuration)",
+     "es": "La mota en el objetivo (configuración más favorable)",
+     "it": "Il granello sull'obiettivo (configurazione più favorevole)"
     },
     "explains": [
      "orb"

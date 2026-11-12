@@ -65,11 +65,17 @@ export interface InterpretationJson {
  *   the camera is fixed to;
  * - "lens-ghost": a ghost of the Sun in the instrument's own lens, at one of the factors its glass throws them (see LensGhosts);
  * - "stated-ghost": a ghost of the Sun in an optic before the lens, a periscope's, at whatever factor and offset its geometry gives;
- * - "driven-one-way": something on the glass driven across the frame one way, as the airflow drives a drop.
+ * - "driven-one-way": something on the glass driven across the frame one way, as the airflow drives a drop;
+ * - "ghost-of": a ghost in the instrument's own lens of a light the reading places itself (`of`, the id of one of its bodies): a glint of
+ *   the Sun on an aircraft's windscreen, say;
+ * - "real-object": something really there in the sky, wherever along the line of sight.
+ * Each is set, at its most favourable, as near the phenomenon as it can be, and how near that is is a finding (see BestCaseSearch).
  */
 export interface ReadingMechanism {
-  kind: "fixed-in-frame" | "lens-ghost" | "stated-ghost" | "driven-one-way"
+  kind: "fixed-in-frame" | "lens-ghost" | "stated-ghost" | "driven-one-way" | "ghost-of" | "real-object"
   explains: string
+  /** For "ghost-of": the body of the reading whose light the ghost is of. */
+  of?: string
 }
 
 /** How a test of a claim came out: it holds, it fails, or it could not be made with what is known. */

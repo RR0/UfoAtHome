@@ -85,18 +85,92 @@ export class BestCaseSearch {
         return this.lensGhostFindings(setting, reading, path)
       case "stated-ghost":
         return this.statedGhostFindings(setting, reading, path)
+      case "ghost-of":
+        return this.ghostOfFindings(setting, reading, mechanism.of, path)
+      case "real-object":
+        return [this.realObjectFinding(setting, reading, mechanism.explains, path)]
     }
   }
 
-  /** Whether the best case of a mechanism is one this search can lay in the reading's scene (see bestSceneOf). */
-  static lays(mechanism: ReadingMechanism | undefined): boolean {
-    return mechanism?.kind === "fixed-in-frame" || mechanism?.kind === "driven-one-way"
+  /**
+   * A ghost of a light the reading places (a glint on an aircraft, say): where that light is, it is, so nothing is free but which of the
+   * lens's factors throws it; the one that keeps it nearest the phenomenon. Nothing found for a reading that places no such light.
+   */
+  private ghostOfFindings(setting: Setting, reading: SightingRecordingJson, of: string | undefined, path: string): ReadingFinding[] {
+    const source = reading.interpretation?.bodies?.find(body => body.id === of)
+    if (!source) return []
+    const lights = setting.samples.map(sample => {
+      const world = BestCaseSearch.bodyDirectionAt(source, sample.t)
+      if (!world) return undefined
+      const local = world.applyQuaternion(sample.frame.inverse)
+      return local.z < 0 ? { x: local.x / -local.z, y: local.y / -local.z } : undefined
+    })
+    const factors = LensGhosts.of(Instruments.byId(reading.instrument)).filter(ghost => !LensGhosts.scatters(ghost)).map(ghost => ghost.scale)
+    let best: { miss: Miss, k: number, track: (Tangent | undefined)[] } | undefined
+    for (const k of factors) {
+      const track = lights.map(light => light ? { x: k * light.x, y: k * light.y } : undefined)
+      const miss = BestCaseSearch.missOfTrack(setting.samples, track)
+      if (!best || miss.medianDeg < best.miss.medianDeg) best = { miss, k, track }
+    }
+    if (!best) return []
+    const shown = best.track.filter((point): point is Tangent => point !== undefined)
+    let ghostTravel = 0
+    for (const a of shown) for (const b of shown) ghostTravel = Math.max(ghostTravel, BestCaseSearch.angleDeg(a, b))
+    return [this.finding(this.words.bestGhostOf, best.miss, setting, { k: this.number(best.k), ghostTravel: this.number(ghostTravel) }, "established", path)]
   }
 
   /**
-   * The reading with its best case laid in its scene, as its findings measure it: what stands still in the frame, a body carried with the
-   * camera at the one point of the picture nearest the phenomenon all along; what is driven across the glass, one drop placed on it along
-   * the track that never goes back nearest the phenomenon. The rest of the reading is left as it is, and what it said of that body or drop
+   * Something really in the sky: along the line of sight it is where the phenomenon is at every instant, at any distance, so it holds;
+   * what the finding says is what that asks of it at the distance the reading places it (the phenomenon's size there, and the speed across
+   * the line of sight its turns take at the least), each in proportion to the distance.
+   */
+  private realObjectFinding(setting: Setting, reading: SightingRecordingJson, explains: string, path: string): ReadingFinding {
+    const said = reading.interpretation?.bodies?.find(body => body.explains?.includes(explains))?.track[0]
+    const distanceM = said?.distanceM ?? BestCaseSearch.DEFAULT_DISTANCE_M
+    const worlds = setting.samples.map(sample => new Vector3(sample.at.x, sample.at.y, -1).normalize().applyQuaternion(sample.frame.rotation))
+    // The fastest it turns across the sky, over half a second at the least: the measure's own jitter is not a speed.
+    let rate = 0
+    for (let i = 0; i < worlds.length; i++) {
+      const j = setting.samples.findIndex(sample => sample.t >= setting.samples[i].t + BestCaseSearch.RATE_WINDOW_MS)
+      if (j < 0) break
+      rate = Math.max(rate, worlds[i].angleTo(worlds[j]) / ((setting.samples[j].t - setting.samples[i].t) / 1000))
+    }
+    return {
+      text: this.fill(this.words.bestRealObject, { medianDeg: 0, maxDeg: 0 }, setting, {
+        distance: Math.round(distanceM), width: this.number(distanceM * setting.sizeDeg * DEG), speed: Math.round(distanceM * rate)
+      }),
+      outcome: "holds", against: "established", path
+    }
+  }
+
+  /** Where a body of a reading is from the observer at `t`, between the two keyframes of its track that say it about it. */
+  private static bodyDirectionAt(body: BodyJson, t: number): Vector3 | undefined {
+    const aimed = body.track.filter(keyframe => keyframe.azimuthDeg !== undefined && keyframe.altitudeDeg !== undefined)
+    if (aimed.length === 0) return undefined
+    const after = aimed.findIndex(keyframe => keyframe.t > t)
+    const a = aimed[after <= 0 ? (after === 0 ? 0 : aimed.length - 1) : after - 1]
+    const b = after <= 0 ? a : aimed[after]
+    const s = b.t > a.t ? (t - a.t) / (b.t - a.t) : 0
+    const turn = ((((b.azimuthDeg! - a.azimuthDeg!) % 360) + 540) % 360) - 180
+    return BestCaseSearch.direction(a.azimuthDeg! + turn * s, a.altitudeDeg! + (b.altitudeDeg! - a.altitudeDeg!) * s)
+  }
+
+  /** Where a reading says nothing of how far what it places is: a kilometre. */
+  private static readonly DEFAULT_DISTANCE_M = 1000
+
+  /** The least span a speed is measured over, ms. */
+  private static readonly RATE_WINDOW_MS = 500
+
+  /** Whether the best case of a mechanism is one this search can lay in the reading's scene (see bestSceneOf). */
+  static lays(mechanism: ReadingMechanism | undefined): boolean {
+    return mechanism?.kind === "fixed-in-frame" || mechanism?.kind === "driven-one-way" || mechanism?.kind === "real-object"
+  }
+
+  /**
+   * The reading in its most favourable configuration, as its findings measure it, which is how it is shown (see CaseEditorElement and
+   * SightingElement): what stands still in the frame, a body carried with the camera at the one point of the picture nearest the phenomenon
+   * all along; what is driven across the glass, one drop placed on it along the track that never goes back nearest the phenomenon; what is
+   * really in the sky, a body on the phenomenon's line of sight at every instant. What the reading's file places there is replaced. The rest of the reading is left as it is, and what it said of that body or drop
    * (how far, how big, how bright) kept; what it did not, the phenomenon's own size, at a kilometre. Undefined for a mechanism whose best
    * case is not the reading's to lay (a ghost: its Sun is the account's, with all that hangs on its heading), or an account with no
    * phenomenon to measure it on.
@@ -108,11 +182,12 @@ export class BestCaseSearch {
     const setting = BestCaseSearch.settingOf(accountJson, mechanism!.explains)
     if (!setting) return undefined
     const scene = structuredClone(readingJson)
-    if (mechanism!.kind === "fixed-in-frame") {
+    if (mechanism!.kind === "fixed-in-frame" || mechanism!.kind === "real-object") {
       const interpretation = scene.interpretation ?? { bodies: [] }
       const bodies = interpretation.bodies ?? []
       const index = bodies.findIndex(body => body.explains?.includes(mechanism!.explains))
-      const body = BestCaseSearch.stillBody(setting, mechanism!.explains, index >= 0 ? bodies[index] : undefined)
+      const said = index >= 0 ? bodies[index] : undefined
+      const body = mechanism!.kind === "fixed-in-frame" ? BestCaseSearch.stillBody(setting, mechanism!.explains, said) : BestCaseSearch.sightLineBody(setting, mechanism!.explains, said)
       scene.interpretation = { ...interpretation, bodies: index >= 0 ? bodies.map((other, i) => i === index ? body : other) : [...bodies, body] }
     } else {
       const { track } = BestCaseSearch.oneWay(setting.samples)
@@ -137,14 +212,29 @@ export class BestCaseSearch {
     const point = BestCaseSearch.fixedPoint(setting.samples)
     const from = setting.samples[0].t, to = setting.samples[setting.samples.length - 1].t
     const times = [...new Set([...setting.samples.map(sample => sample.t), ...setting.keyframes.map(keyframe => keyframe.t).filter(t => t > from && t < to)])].sort((a, b) => a - b)
+    return BestCaseSearch.bodyAlong(setting, explains, said, times, () => point)
+  }
+
+  /** A body really in the sky, where the phenomenon is at every instant the account shows it, along its line of sight. */
+  private static sightLineBody(setting: Setting, explains: string, said: BodyJson | undefined): BodyJson {
+    return BestCaseSearch.bodyAlong(setting, explains, said, setting.samples.map(sample => sample.t), (_t, i) => setting.samples[i].at)
+  }
+
+  /**
+   * A body at a point of the picture at each of `times`, as the camera looks then: at the distance, size and look the reading said of it,
+   * or the phenomenon's own size at a kilometre; gone after the last.
+   */
+  private static bodyAlong(setting: Setting, explains: string, said: BodyJson | undefined, times: readonly number[], pointAt: (t: number, i: number) => Tangent): BodyJson {
+    const to = times[times.length - 1]
     const saidFirst = said?.track[0]
-    const distanceM = saidFirst?.distanceM ?? 1000
+    const distanceM = saidFirst?.distanceM ?? BestCaseSearch.DEFAULT_DISTANCE_M
     const sizeM = saidFirst?.sizeM ?? (() => {
       const m = BestCaseSearch.round(distanceM * setting.sizeDeg * DEG, 4)
       return { widthM: m, lengthM: m, heightM: m }
     })()
     const appearance = saidFirst?.appearance ?? { color: "#f4f6f5" }
     const along: BodyKeyframe[] = times.map((t, i) => {
+      const point = pointAt(t, i)
       const world = new Vector3(point.x, point.y, -1).normalize().applyQuaternion(BestCaseSearch.frameAt(setting.keyframes, t).rotation)
       return {
         t, ...(i === 0 ? { present: true, sizeM, appearance } : {}),
