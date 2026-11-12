@@ -35,9 +35,9 @@ const BLURRED = {
 export const READINGS = [
   {
     id: 'lens-ghost',
-    // Its best case: the Sun where its nearest ghost (factor +0.3) comes nearest the orb at the first instant while the Sun is still up: on
-    // the horizon, 18° right of where the camera looks. Against the film's light, which wants it behind the camera.
-    sun: { fromViewDeg: 18, altitudeDeg: 0.2 },
+    // Its best case in daylight: the Sun where the film's light allows it nearest the front of the camera. No ghost of it comes into the
+    // frame: the camera looks 29° down, and only a Sun on the horizon ahead would throw one in (see the last finding).
+    sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
     lens: { reachDeg: 90 },
     by: [{ title: 'UFO@home' }],
     time: '2026-11-08',
@@ -62,16 +62,16 @@ export const READINGS = [
         it: "La sua discesa richiederebbe un fattore di circa +4,4; quelli di un obiettivo da camera vanno da −1,4 a +0,65."
       }),
       fails({
-        fr: "Au mieux dans l'éclairage du film (le Soleil au plus près de l'avant qu'il permet, à 285° de la visée et 15,5° de haut, 85° de l'axe ; un objectif qui en reçoit la lumière jusque-là) : le plus proche de ses reflets (facteur +0,3) tombe à 3 600 px à gauche du cadre, plus de cinq largeurs d'image. Aucun n'entre dans le cadre.",
-        en: "At its best within the film's light (the Sun as near the front as it allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a lens taking its light that far out): the nearest of its ghosts (factor +0.3) falls 3,600 px left of the frame, more than five widths of the picture. None comes into the frame.",
-        es: "En su mejor caso dentro de la iluminación de la película (el Sol tan cerca del frente como permite, a 285° de la mira y 15,5° de altura, a 85° del eje; un objetivo que recibe su luz hasta ahí): el más cercano de sus reflejos (factor +0,3) cae a 3.600 px a la izquierda del encuadre, más de cinco anchos de la imagen. Ninguno entra en el encuadre.",
-        it: "Nel caso migliore entro l'illuminazione del film (il Sole il più vicino al fronte che consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un obiettivo che ne riceve la luce fin lì): il più vicino dei suoi riflessi (fattore +0,3) cade a 3.600 px a sinistra dell'inquadratura, più di cinque larghezze dell'immagine. Nessuno entra nell'inquadratura."
+        fr: "Simulé dans son meilleur cas de jour (le Soleil au plus près de l'avant que l'éclairage du film permet, à 285° de la visée et 15,5° de haut, 85° de l'axe ; un objectif qui en reçoit la lumière jusque-là) : le plus proche de ses reflets (facteur +0,3) tombe à 3 600 px à gauche du cadre, plus de cinq largeurs d'image. Aucun n'entre dans le cadre.",
+        en: "Simulated at its best in daylight (the Sun as near the front as the film's light allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a lens taking its light that far out): the nearest of its ghosts (factor +0.3) falls 3,600 px left of the frame, more than five widths of the picture. None comes into the frame.",
+        es: "Simulado en su mejor caso de día (el Sol tan cerca del frente como permite la iluminación de la película, a 285° de la mira y 15,5° de altura, a 85° del eje; un objetivo que recibe su luz hasta ahí): el más cercano de sus reflejos (factor +0,3) cae a 3.600 px a la izquierda del encuadre, más de cinco anchos de la imagen. Ninguno entra en el encuadre.",
+        it: "Simulato nel caso migliore di giorno (il Sole il più vicino al fronte che l'illuminazione del film consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un obiettivo che ne riceve la luce fin lì): il più vicino dei suoi riflessi (fattore +0,3) cade a 3.600 px a sinistra dell'inquadratura, più di cinque larghezze dell'immagine. Nessuno entra nell'inquadratura."
       }),
       fails({
-        fr: "Simulé là où il lui faudrait le Soleil : à l'horizon, 18° à droite de la visée. Même alors son reflet le plus proche (facteur +0,3) passe 47 px au-dessus de l'orbe au premier instant, au bord haut du cadre, et ne la suit pas ensuite. Ce Soleil devant la caméra laisse l'avion à contre-jour dans un ciel de crépuscule, quand le film le montre éclairé du côté de la caméra en plein jour.",
-        en: "Simulated where it would need the Sun: on the horizon, 18° right of where the camera looks. Even then its nearest ghost (factor +0.3) passes 47 px above the orb at the first instant, at the top edge of the frame, and does not follow it afterwards. That Sun ahead of the camera leaves the aircraft backlit in a dusk sky, where the film shows it lit on the camera's side in broad daylight.",
-        es: "Simulado donde necesitaría el Sol: en el horizonte, 18° a la derecha de la mira. Aun así su reflejo más cercano (factor +0,3) pasa 47 px por encima del orbe en el primer instante, en el borde superior del encuadre, y no lo sigue después. Ese Sol delante de la cámara deja el avión a contraluz en un cielo de crepúsculo, cuando la película lo muestra iluminado del lado de la cámara a plena luz del día.",
-        it: "Simulato dove gli servirebbe il Sole: sull'orizzonte, 18° a destra della mira. Anche allora il suo riflesso più vicino (fattore +0,3) passa 47 px sopra la sfera al primo istante, al bordo superiore dell'inquadratura, e non la segue poi. Quel Sole davanti alla camera lascia l'aereo in controluce in un cielo di crepuscolo, mentre il film lo mostra illuminato dal lato della camera in pieno giorno."
+        fr: "Pour qu'un de ses reflets entre dans le cadre, la caméra regardant 29° vers le bas, il faudrait le Soleil à l'horizon devant elle (18° à droite de la visée, essayé). Même alors son reflet le plus proche (facteur +0,3) passe 47 px au-dessus de l'orbe au premier instant, au bord haut du cadre, et ne la suit pas ensuite. Ce Soleil devant la caméra laisse l'avion à contre-jour dans un ciel de crépuscule, quand le film le montre éclairé du côté de la caméra en plein jour.",
+        en: "For one of its ghosts to come into the frame, the camera looking 29° down, the Sun would have to be on the horizon ahead of it (18° right of where it looks, tried). Even then its nearest ghost (factor +0.3) passes 47 px above the orb at the first instant, at the top edge of the frame, and does not follow it afterwards. That Sun ahead of the camera leaves the aircraft backlit in a dusk sky, where the film shows it lit on the camera's side in broad daylight.",
+        es: "Para que uno de sus reflejos entre en el encuadre, mirando la cámara 29° hacia abajo, haría falta el Sol en el horizonte delante de ella (18° a la derecha de la mira, probado). Aun así su reflejo más cercano (factor +0,3) pasa 47 px por encima del orbe en el primer instante, en el borde superior del encuadre, y no lo sigue después. Ese Sol delante de la cámara deja el avión a contraluz en un cielo de crepúsculo, cuando la película lo muestra iluminado del lado de la cámara a plena luz del día.",
+        it: "Perché uno dei suoi riflessi entri nell'inquadratura, guardando la camera 29° verso il basso, servirebbe il Sole sull'orizzonte davanti a lei (18° a destra della mira, provato). Anche allora il suo riflesso più vicino (fattore +0,3) passa 47 px sopra la sfera al primo istante, al bordo superiore dell'inquadratura, e non la segue poi. Quel Sole davanti alla camera lascia l'aereo in controluce in un cielo di crepuscolo, mentre il film lo mostra illuminato dal lato della camera in pieno giorno."
       })
     ]
   },
