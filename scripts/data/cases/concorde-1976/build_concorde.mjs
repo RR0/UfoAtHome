@@ -97,7 +97,10 @@ const orbKeys = orbRows.filter((r, i) => r.t > 8 || i % 2 === 0 || i === orbRows
   return { t: ms, shapes: [{ sourceId: 'orb', shape: { aim: { value: aimOfPixel(r.x, r.y, ms), basis: 'derived', rationale: `Measured on the film: where it shows it at ${r.t.toFixed(2)} s of the file: (${r.x.toFixed(1)}, ${r.y.toFixed(1)}) of its 640 × 480, under the film's registration then.` }, kind: 'oval', angular: { widthDeg: orbDeg, heightDeg: orbDeg }, color: '#eef3f2', title: ORB_TITLE } }] }
 })
 const lastOrbMs = orbKeys[orbKeys.length - 1].t
-const timeline = { keyframes: [...orbKeys, { t: lastOrbMs + 40, shapes: [] }], order: ['orb'], groups: [] }
+// The whole shot, which outlasts the orb: every track here is in milliseconds of the film, and without its span the timeline would be taken
+// to end with the orb's last frame and be stretched to the shot's length, the film's own clock alone running at its real pace ahead of the
+// camera, the aircraft and the orb (0.44 s ahead by 2.5 s).
+const timeline = { keyframes: [...orbKeys, { t: lastOrbMs + 40, shapes: [] }], order: ['orb'], groups: [], span: Math.round(durationS * 1000) }
 const recording = {
   version: 4,
   id: 'concorde-1976',
