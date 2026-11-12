@@ -1587,7 +1587,315 @@
    "es": "Un reflejo en un cristal: el del Learjet, o la ventana exterior del periscopio",
    "it": "Un riflesso su un vetro: quello del Learjet, o la finestra esterna del periscopio"
   },
-  "bodies": [],
+  "bodies": [
+   {
+    "id": "orb",
+    "title": {
+     "fr": "Le reflet sur la vitre (meilleur cas)",
+     "en": "The reflection on the pane (best case)",
+     "es": "El reflejo en el cristal (mejor caso)",
+     "it": "Il riflesso sul vetro (caso migliore)"
+    },
+    "explains": [
+     "orb"
+    ],
+    "model": {
+     "id": "sphere"
+    },
+    "track": [
+     {
+      "t": 0,
+      "present": true,
+      "sizeM": {
+       "widthM": 6.1959,
+       "lengthM": 6.1959,
+       "heightM": 6.1959
+      },
+      "appearance": {
+       "color": "#f4f6f5",
+       "luminanceCdM2": 30000
+      },
+      "azimuthDeg": 37.427,
+      "altitudeDeg": -21.235,
+      "distanceM": 1000
+     },
+     {
+      "t": 100,
+      "azimuthDeg": 37.423,
+      "altitudeDeg": -21.14,
+      "distanceM": 1000
+     },
+     {
+      "t": 200,
+      "azimuthDeg": 37.416,
+      "altitudeDeg": -20.985,
+      "distanceM": 1000
+     },
+     {
+      "t": 300,
+      "azimuthDeg": 37.409,
+      "altitudeDeg": -20.818,
+      "distanceM": 1000
+     },
+     {
+      "t": 400,
+      "azimuthDeg": 37.4,
+      "altitudeDeg": -20.612,
+      "distanceM": 1000
+     },
+     {
+      "t": 500,
+      "azimuthDeg": 37.391,
+      "altitudeDeg": -20.412,
+      "distanceM": 1000
+     },
+     {
+      "t": 600,
+      "azimuthDeg": 37.391,
+      "altitudeDeg": -20.404,
+      "distanceM": 1000
+     },
+     {
+      "t": 700,
+      "azimuthDeg": 37.393,
+      "altitudeDeg": -20.458,
+      "distanceM": 1000
+     },
+     {
+      "t": 800,
+      "azimuthDeg": 37.394,
+      "altitudeDeg": -20.474,
+      "distanceM": 1000
+     },
+     {
+      "t": 900,
+      "azimuthDeg": 37.392,
+      "altitudeDeg": -20.434,
+      "distanceM": 1000
+     },
+     {
+      "t": 1000,
+      "azimuthDeg": 37.389,
+      "altitudeDeg": -20.358,
+      "distanceM": 1000
+     },
+     {
+      "t": 1100,
+      "azimuthDeg": 37.385,
+      "altitudeDeg": -20.267,
+      "distanceM": 1000
+     },
+     {
+      "t": 1200,
+      "azimuthDeg": 37.382,
+      "altitudeDeg": -20.188,
+      "distanceM": 1000
+     },
+     {
+      "t": 1300,
+      "azimuthDeg": 37.377,
+      "altitudeDeg": -20.067,
+      "distanceM": 1000
+     },
+     {
+      "t": 1400,
+      "azimuthDeg": 37.371,
+      "altitudeDeg": -19.927,
+      "distanceM": 1000
+     },
+     {
+      "t": 1500,
+      "azimuthDeg": 37.363,
+      "altitudeDeg": -19.727,
+      "distanceM": 1000
+     },
+     {
+      "t": 1600,
+      "azimuthDeg": 37.353,
+      "altitudeDeg": -19.479,
+      "distanceM": 1000
+     },
+     {
+      "t": 1700,
+      "azimuthDeg": 37.339,
+      "altitudeDeg": -19.11,
+      "distanceM": 1000
+     },
+     {
+      "t": 1800,
+      "azimuthDeg": 37.325,
+      "altitudeDeg": -18.756,
+      "distanceM": 1000
+     },
+     {
+      "t": 1900,
+      "azimuthDeg": 37.313,
+      "altitudeDeg": -18.446,
+      "distanceM": 1000
+     },
+     {
+      "t": 2000,
+      "azimuthDeg": 37.306,
+      "altitudeDeg": -18.239,
+      "distanceM": 1000
+     },
+     {
+      "t": 2100,
+      "azimuthDeg": 37.304,
+      "altitudeDeg": -18.198,
+      "distanceM": 1000
+     },
+     {
+      "t": 2200,
+      "azimuthDeg": 37.309,
+      "altitudeDeg": -18.318,
+      "distanceM": 1000
+     },
+     {
+      "t": 2300,
+      "azimuthDeg": 37.315,
+      "altitudeDeg": -18.479,
+      "distanceM": 1000
+     },
+     {
+      "t": 2400,
+      "azimuthDeg": 37.319,
+      "altitudeDeg": -18.586,
+      "distanceM": 1000
+     },
+     {
+      "t": 2500,
+      "azimuthDeg": 37.322,
+      "altitudeDeg": -18.669,
+      "distanceM": 1000
+     },
+     {
+      "t": 2600,
+      "azimuthDeg": 37.325,
+      "altitudeDeg": -18.763,
+      "distanceM": 1000
+     },
+     {
+      "t": 2700,
+      "azimuthDeg": 37.331,
+      "altitudeDeg": -18.905,
+      "distanceM": 1000
+     },
+     {
+      "t": 2800,
+      "azimuthDeg": 37.336,
+      "altitudeDeg": -19.046,
+      "distanceM": 1000
+     },
+     {
+      "t": 2900,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.144,
+      "distanceM": 1000
+     },
+     {
+      "t": 3000,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.147,
+      "distanceM": 1000
+     },
+     {
+      "t": 3100,
+      "azimuthDeg": 37.339,
+      "altitudeDeg": -19.132,
+      "distanceM": 1000
+     },
+     {
+      "t": 3200,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.138,
+      "distanceM": 1000
+     },
+     {
+      "t": 3300,
+      "azimuthDeg": 37.341,
+      "altitudeDeg": -19.161,
+      "distanceM": 1000
+     },
+     {
+      "t": 3400,
+      "azimuthDeg": 37.342,
+      "altitudeDeg": -19.196,
+      "distanceM": 1000
+     },
+     {
+      "t": 3500,
+      "azimuthDeg": 37.346,
+      "altitudeDeg": -19.296,
+      "distanceM": 1000
+     },
+     {
+      "t": 3600,
+      "azimuthDeg": 37.354,
+      "altitudeDeg": -19.502,
+      "distanceM": 1000
+     },
+     {
+      "t": 3700,
+      "azimuthDeg": 37.365,
+      "altitudeDeg": -19.766,
+      "distanceM": 1000
+     },
+     {
+      "t": 3800,
+      "azimuthDeg": 37.373,
+      "altitudeDeg": -19.968,
+      "distanceM": 1000
+     },
+     {
+      "t": 3900,
+      "azimuthDeg": 37.375,
+      "altitudeDeg": -20.013,
+      "distanceM": 1000
+     },
+     {
+      "t": 4000,
+      "azimuthDeg": 37.365,
+      "altitudeDeg": -19.783,
+      "distanceM": 1000
+     },
+     {
+      "t": 4100,
+      "azimuthDeg": 37.343,
+      "altitudeDeg": -19.219,
+      "distanceM": 1000
+     },
+     {
+      "t": 4200,
+      "azimuthDeg": 37.318,
+      "altitudeDeg": -18.572,
+      "distanceM": 1000
+     },
+     {
+      "t": 4300,
+      "azimuthDeg": 37.295,
+      "altitudeDeg": -17.948,
+      "distanceM": 1000
+     },
+     {
+      "t": 4400,
+      "azimuthDeg": 37.287,
+      "altitudeDeg": -17.722,
+      "distanceM": 1000
+     },
+     {
+      "t": 4500,
+      "azimuthDeg": 37.289,
+      "altitudeDeg": -17.77,
+      "distanceM": 1000
+     },
+     {
+      "t": 4545,
+      "present": false
+     }
+    ]
+   }
+  ],
   "findings": [
    {
     "text": {
@@ -1617,6 +1925,16 @@
      "it": "Verificarlo richiederebbe l'assetto del Learjet, che il film non dà; queste misure non lo distinguono da un riflesso nel periscopio."
     },
     "outcome": "untested"
+   },
+   {
+    "text": {
+     "fr": "Simulé dans son meilleur cas (le reflet fixe dans le cadre, la vitre solidaire de la caméra, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
+     "en": "Simulated at its best (the reflection standing still in the frame, the pane fixed to the camera, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
+     "es": "Simulado en su mejor caso (el reflejo fijo en el encuadre, el cristal solidario de la cámara, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
+     "it": "Simulato nel caso migliore (il riflesso fermo nell'inquadratura, il vetro solidale con la camera, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
+    },
+    "outcome": "fails",
+    "against": "supposed"
    }
   ]
  }

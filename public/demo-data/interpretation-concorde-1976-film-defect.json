@@ -1584,7 +1584,315 @@
    "es": "Un defecto de la película: polvo en la ventanilla, una raya",
    "it": "Un difetto della pellicola: polvere nel quadruccio, un graffio"
   },
-  "bodies": [],
+  "bodies": [
+   {
+    "id": "orb",
+    "title": {
+     "fr": "Le cheveu dans le couloir (meilleur cas)",
+     "en": "The hair in the gate (best case)",
+     "es": "El pelo en la ventanilla (mejor caso)",
+     "it": "Il pelo nel quadruccio (caso migliore)"
+    },
+    "explains": [
+     "orb"
+    ],
+    "model": {
+     "id": "sphere"
+    },
+    "track": [
+     {
+      "t": 0,
+      "present": true,
+      "sizeM": {
+       "widthM": 0.0124,
+       "lengthM": 0.0124,
+       "heightM": 0.0124
+      },
+      "appearance": {
+       "color": "#f4f6f5",
+       "luminanceCdM2": 30000
+      },
+      "azimuthDeg": 37.427,
+      "altitudeDeg": -21.235,
+      "distanceM": 2
+     },
+     {
+      "t": 100,
+      "azimuthDeg": 37.423,
+      "altitudeDeg": -21.14,
+      "distanceM": 2
+     },
+     {
+      "t": 200,
+      "azimuthDeg": 37.416,
+      "altitudeDeg": -20.985,
+      "distanceM": 2
+     },
+     {
+      "t": 300,
+      "azimuthDeg": 37.409,
+      "altitudeDeg": -20.818,
+      "distanceM": 2
+     },
+     {
+      "t": 400,
+      "azimuthDeg": 37.4,
+      "altitudeDeg": -20.612,
+      "distanceM": 2
+     },
+     {
+      "t": 500,
+      "azimuthDeg": 37.391,
+      "altitudeDeg": -20.412,
+      "distanceM": 2
+     },
+     {
+      "t": 600,
+      "azimuthDeg": 37.391,
+      "altitudeDeg": -20.404,
+      "distanceM": 2
+     },
+     {
+      "t": 700,
+      "azimuthDeg": 37.393,
+      "altitudeDeg": -20.458,
+      "distanceM": 2
+     },
+     {
+      "t": 800,
+      "azimuthDeg": 37.394,
+      "altitudeDeg": -20.474,
+      "distanceM": 2
+     },
+     {
+      "t": 900,
+      "azimuthDeg": 37.392,
+      "altitudeDeg": -20.434,
+      "distanceM": 2
+     },
+     {
+      "t": 1000,
+      "azimuthDeg": 37.389,
+      "altitudeDeg": -20.358,
+      "distanceM": 2
+     },
+     {
+      "t": 1100,
+      "azimuthDeg": 37.385,
+      "altitudeDeg": -20.267,
+      "distanceM": 2
+     },
+     {
+      "t": 1200,
+      "azimuthDeg": 37.382,
+      "altitudeDeg": -20.188,
+      "distanceM": 2
+     },
+     {
+      "t": 1300,
+      "azimuthDeg": 37.377,
+      "altitudeDeg": -20.067,
+      "distanceM": 2
+     },
+     {
+      "t": 1400,
+      "azimuthDeg": 37.371,
+      "altitudeDeg": -19.927,
+      "distanceM": 2
+     },
+     {
+      "t": 1500,
+      "azimuthDeg": 37.363,
+      "altitudeDeg": -19.727,
+      "distanceM": 2
+     },
+     {
+      "t": 1600,
+      "azimuthDeg": 37.353,
+      "altitudeDeg": -19.479,
+      "distanceM": 2
+     },
+     {
+      "t": 1700,
+      "azimuthDeg": 37.339,
+      "altitudeDeg": -19.11,
+      "distanceM": 2
+     },
+     {
+      "t": 1800,
+      "azimuthDeg": 37.325,
+      "altitudeDeg": -18.756,
+      "distanceM": 2
+     },
+     {
+      "t": 1900,
+      "azimuthDeg": 37.313,
+      "altitudeDeg": -18.446,
+      "distanceM": 2
+     },
+     {
+      "t": 2000,
+      "azimuthDeg": 37.306,
+      "altitudeDeg": -18.239,
+      "distanceM": 2
+     },
+     {
+      "t": 2100,
+      "azimuthDeg": 37.304,
+      "altitudeDeg": -18.198,
+      "distanceM": 2
+     },
+     {
+      "t": 2200,
+      "azimuthDeg": 37.309,
+      "altitudeDeg": -18.318,
+      "distanceM": 2
+     },
+     {
+      "t": 2300,
+      "azimuthDeg": 37.315,
+      "altitudeDeg": -18.479,
+      "distanceM": 2
+     },
+     {
+      "t": 2400,
+      "azimuthDeg": 37.319,
+      "altitudeDeg": -18.586,
+      "distanceM": 2
+     },
+     {
+      "t": 2500,
+      "azimuthDeg": 37.322,
+      "altitudeDeg": -18.669,
+      "distanceM": 2
+     },
+     {
+      "t": 2600,
+      "azimuthDeg": 37.325,
+      "altitudeDeg": -18.763,
+      "distanceM": 2
+     },
+     {
+      "t": 2700,
+      "azimuthDeg": 37.331,
+      "altitudeDeg": -18.905,
+      "distanceM": 2
+     },
+     {
+      "t": 2800,
+      "azimuthDeg": 37.336,
+      "altitudeDeg": -19.046,
+      "distanceM": 2
+     },
+     {
+      "t": 2900,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.144,
+      "distanceM": 2
+     },
+     {
+      "t": 3000,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.147,
+      "distanceM": 2
+     },
+     {
+      "t": 3100,
+      "azimuthDeg": 37.339,
+      "altitudeDeg": -19.132,
+      "distanceM": 2
+     },
+     {
+      "t": 3200,
+      "azimuthDeg": 37.34,
+      "altitudeDeg": -19.138,
+      "distanceM": 2
+     },
+     {
+      "t": 3300,
+      "azimuthDeg": 37.341,
+      "altitudeDeg": -19.161,
+      "distanceM": 2
+     },
+     {
+      "t": 3400,
+      "azimuthDeg": 37.342,
+      "altitudeDeg": -19.196,
+      "distanceM": 2
+     },
+     {
+      "t": 3500,
+      "azimuthDeg": 37.346,
+      "altitudeDeg": -19.296,
+      "distanceM": 2
+     },
+     {
+      "t": 3600,
+      "azimuthDeg": 37.354,
+      "altitudeDeg": -19.502,
+      "distanceM": 2
+     },
+     {
+      "t": 3700,
+      "azimuthDeg": 37.365,
+      "altitudeDeg": -19.766,
+      "distanceM": 2
+     },
+     {
+      "t": 3800,
+      "azimuthDeg": 37.373,
+      "altitudeDeg": -19.968,
+      "distanceM": 2
+     },
+     {
+      "t": 3900,
+      "azimuthDeg": 37.375,
+      "altitudeDeg": -20.013,
+      "distanceM": 2
+     },
+     {
+      "t": 4000,
+      "azimuthDeg": 37.365,
+      "altitudeDeg": -19.783,
+      "distanceM": 2
+     },
+     {
+      "t": 4100,
+      "azimuthDeg": 37.343,
+      "altitudeDeg": -19.219,
+      "distanceM": 2
+     },
+     {
+      "t": 4200,
+      "azimuthDeg": 37.318,
+      "altitudeDeg": -18.572,
+      "distanceM": 2
+     },
+     {
+      "t": 4300,
+      "azimuthDeg": 37.295,
+      "altitudeDeg": -17.948,
+      "distanceM": 2
+     },
+     {
+      "t": 4400,
+      "azimuthDeg": 37.287,
+      "altitudeDeg": -17.722,
+      "distanceM": 2
+     },
+     {
+      "t": 4500,
+      "azimuthDeg": 37.289,
+      "altitudeDeg": -17.77,
+      "distanceM": 2
+     },
+     {
+      "t": 4545,
+      "present": false
+     }
+    ]
+   }
+  ],
   "findings": [
    {
     "text": {
@@ -1602,6 +1910,16 @@
      "en": "A hair or a speck in the gate stays put in the frame; the orb travels 377 px across it.",
      "es": "Un pelo o una mota en la ventanilla queda fijo en el encuadre; el orbe lo recorre en 377 px.",
      "it": "Un pelo o un granello nel quadruccio resta fisso nell'inquadratura; la sfera lo percorre per 377 px."
+    },
+    "outcome": "fails",
+    "against": "established"
+   },
+   {
+    "text": {
+     "fr": "Simulé dans son meilleur cas (un cheveu coincé dans le couloir tout le plan, fixe dans le cadre, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
+     "en": "Simulated at its best (a hair caught in the gate all through the shot, standing still in the frame, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
+     "es": "Simulado en su mejor caso (un pelo atrapado en la ventanilla todo el plano, fijo en el encuadre, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
+     "it": "Simulato nel caso migliore (un pelo incastrato nel quadruccio per tutta la ripresa, fermo nell'inquadratura, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
     },
     "outcome": "fails",
     "against": "established"

@@ -206,6 +206,21 @@ const glintBody = ({ luminanceCdM2, sizeM }) => ({
     })
   ]
 })
+// What a reading claims stands still in the frame (a speck on the lens or in the gate, a reflection on a pane the camera is fixed to): at its
+// best laid on the orb at the first instant, where the film shows it, and carried with the camera from there on, frame by frame as the film's
+// registration turns it. As bright as the orb, which its claim does not say: the best case.
+const inFrameBody = ({ title, distanceM, luminanceCdM2 }) => ({
+  id: 'orb', title, explains: ['orb'], model: { id: 'sphere' },
+  track: [
+    ...keys.filter(key => key.t <= lastOrbMs).map((key, index) => ({
+      t: key.t, ...(index === 0 ? { present: true, sizeM: { widthM: round(distanceM * orbDeg * D2R, 4), lengthM: round(distanceM * orbDeg * D2R, 4), heightM: round(distanceM * orbDeg * D2R, 4) },
+        appearance: { color: '#f4f6f5', luminanceCdM2 } } : {}),
+      ...aimOfPixel(orbRows[0].x, orbRows[0].y, key.t), distanceM
+    })),
+    { t: lastOrbMs + 40, present: false }
+  ]
+})
+
 /**
  * The ghost a periscope would have to throw for the orb to be it, at its best: the one factor that lays the Sun's ghost on the orb at the
  * first instant (with the offset that the factor cannot give in height), and the reach that lets a Sun that far off the frame in at all.
@@ -222,7 +237,7 @@ for (const reading of READINGS) {
   const moved = reading.sun ? accountUnderSun(reading.sun) : undefined
   const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = moved ? moved.account : recording
   const lens = moved && reading.periscope ? periscopeLens(reading.periscope, moved) : reading.lens
-  const bodies = reading.glint ? [glintBody(reading.glint)] : reading.distanceM === undefined ? [] : [{
+  const bodies = reading.glint ? [glintBody(reading.glint)] : reading.inFrame ? [inFrameBody(reading.inFrame)] : reading.distanceM === undefined ? [] : [{
     id: 'orb', title: ORB_TITLE, explains: ['orb'], model: { id: 'sphere' },
     track: [
       ...orbKeys.map((key, index) => ({

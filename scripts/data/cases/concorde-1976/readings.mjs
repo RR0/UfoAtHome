@@ -106,6 +106,7 @@ export const READINGS = [
   },
   {
     id: 'window',
+    inFrame: { title: { fr: 'Le reflet sur la vitre (meilleur cas)', en: 'The reflection on the pane (best case)', es: 'El reflejo en el cristal (mejor caso)', it: 'Il riflesso sul vetro (caso migliore)' }, distanceM: 1000, luminanceCdM2: 3e4 },
     by: [{ people: 'BeauJerome' }],
     time: '2026-11-08',
     lens: { glass: 'window' },
@@ -128,7 +129,13 @@ export const READINGS = [
         en: "Testing it would take the Learjet's attitude, which the film does not give; these measures cannot tell it from a reflection in the periscope.",
         es: "Probarlo requeriría la actitud del Learjet, que la película no da; estas medidas no lo distinguen de un reflejo en el periscopio.",
         it: "Verificarlo richiederebbe l'assetto del Learjet, che il film non dà; queste misure non lo distinguono da un riflesso nel periscopio."
-      })
+      }),
+      fails({
+        fr: "Simulé dans son meilleur cas (le reflet fixe dans le cadre, la vitre solidaire de la caméra, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
+        en: "Simulated at its best (the reflection standing still in the frame, the pane fixed to the camera, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
+        es: "Simulado en su mejor caso (el reflejo fijo en el encuadre, el cristal solidario de la cámara, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
+        it: "Simulato nel caso migliore (il riflesso fermo nell'inquadratura, il vetro solidale con la camera, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
+      }, 'supposed')
     ]
   },
   {
@@ -200,6 +207,7 @@ export const READINGS = [
   },
   {
     id: 'dust',
+    inFrame: { title: { fr: "La poussière sur l'objectif (meilleur cas)", en: 'The speck on the lens (best case)', es: 'La mota en el objetivo (mejor caso)', it: "Il granello sull'obiettivo (caso migliore)" }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'Manduck (Straight Dope)' }, { title: 'Telemark (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -215,11 +223,18 @@ export const READINGS = [
         en: "It adds light over a dark ground (+99): a particle can only do so lit by the Sun, in shadow it would darken; where the Sun was is not known.",
         es: "Añade luz sobre fondo oscuro (+99): una partícula solo puede hacerlo iluminada por el Sol, a la sombra oscurecería; no se sabe dónde estaba el Sol.",
         it: "Aggiunge luce su uno sfondo scuro (+99): una particella può farlo solo illuminata dal Sole, all'ombra scurirebbe; dove fosse il Sole non è noto."
-      })
+      }),
+      fails({
+        fr: "Simulé dans son meilleur cas (une poussière posée sur l'objectif, fixe dans le cadre, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
+        en: "Simulated at its best (a speck sitting on the lens, standing still in the frame, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
+        es: "Simulado en su mejor caso (una mota posada en el objetivo, fija en el encuadre, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
+        it: "Simulato nel caso migliore (un granello posato sull'obiettivo, fermo nell'inquadratura, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
+      }, 'supposed')
     ]
   },
   {
     id: 'film-defect',
+    inFrame: { title: { fr: 'Le cheveu dans le couloir (meilleur cas)', en: 'The hair in the gate (best case)', es: 'El pelo en la ventanilla (mejor caso)', it: 'Il pelo nel quadruccio (caso migliore)' }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'beowulff (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -240,6 +255,12 @@ export const READINGS = [
         en: "A hair or a speck in the gate stays put in the frame; the orb travels 377 px across it.",
         es: "Un pelo o una mota en la ventanilla queda fijo en el encuadre; el orbe lo recorre en 377 px.",
         it: "Un pelo o un granello nel quadruccio resta fisso nell'inquadratura; la sfera lo percorre per 377 px."
+      }),
+      fails({
+        fr: "Simulé dans son meilleur cas (un cheveu coincé dans le couloir tout le plan, fixe dans le cadre, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
+        en: "Simulated at its best (a hair caught in the gate all through the shot, standing still in the frame, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
+        es: "Simulado en su mejor caso (un pelo atrapado en la ventanilla todo el plano, fijo en el encuadre, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
+        it: "Simulato nel caso migliore (un pelo incastrato nel quadruccio per tutta la ripresa, fermo nell'inquadratura, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
       })
     ]
   },
