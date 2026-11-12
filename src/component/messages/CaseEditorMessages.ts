@@ -30,6 +30,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   findingOutcome: { holds: string, fails: string, untested: string }
   /** What a failed test was set against. */
   findingAgainst: { established: string, supposed: string }
+  /** The button on a best case computed for a reading that lays it in the reading's scene (see BestCaseSearch.bestSceneOf). */
+  applyBestCase: { label: string, title: string }
   untitledObservation: string
   deleteRecording: string
   deleteReadingQuestion: string

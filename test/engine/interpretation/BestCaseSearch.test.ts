@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import { BestCaseSearch } from "../../../src/engine/interpretation/BestCaseSearch.js"
 import { ReadingCheck } from "../../../src/engine/interpretation/ReadingCheck.js"
 import { readingCheckTexts_en } from "../../../src/engine/interpretation/messages/ReadingCheckTexts_en.js"
 import type { SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
+import concorde from "../../../public/demo-data/observer-concorde-1976.json"
 
 /** An account whose phenomenon is where `at` says at each of ten instants, filmed by a camera looking north, level. */
 const accountOf = (at: (i: number) => { azimuthDeg: number, altitudeDeg: number }) => ({
@@ -67,7 +67,7 @@ describe("BestCaseSearch", () => {
   })
 
   it("finds, for the Concorde's orb, how near each thing on the film the readings name can come to it", () => {
-    const account = JSON.parse(readFileSync("public/demo-data/observer-concorde-1976.json", "utf8")) as SightingRecordingJson
+    const account = concorde as unknown as SightingRecordingJson
     const of = (kind: string) => search.findingsOf(account, { ...readingOf(account, kind), lens: { reachDeg: 90 } } as SightingRecordingJson)
     // A speck: 2.2° from the orb at the median, for an orb of 0.35° that travels 13.9°.
     expect(of("fixed-in-frame")[0].text).toMatch(/stays 2\.2° from it at the median, .* for a phenomenon of 0\.35° that travels 13\.9°/)
@@ -77,5 +77,33 @@ describe("BestCaseSearch", () => {
     const ghost = of("lens-ghost")
     expect(ghost.map(finding => finding.outcome)).toEqual(["fails", "fails"])
     expect(ghost[1].path).toBe("lighting")
+  })
+
+  it("lays a still speck at the one point of the frame nearest the phenomenon, carried with the camera", () => {
+    const account = accountOf(i => ({ azimuthDeg: i % 2 === 0 ? 2 : 4, altitudeDeg: 1 }))
+    const scene = search.bestSceneOf(account, readingOf(account, "fixed-in-frame"))!
+    const body = scene.interpretation!.bodies[0]
+    expect(body.explains).toEqual(["orb"])
+    expect(body.track[0]).toMatchObject({ present: true, distanceM: 1000 })
+    for (const keyframe of body.track.slice(0, -1)) {
+      expect(keyframe.azimuthDeg!).toBeGreaterThanOrEqual(2)
+      expect(keyframe.azimuthDeg!).toBeLessThanOrEqual(4)
+      expect(keyframe.altitudeDeg).toBeCloseTo(1, 1)
+    }
+    expect(body.track.at(-1)).toMatchObject({ present: false })
+  })
+
+  it("lays one drop on the glass that follows the phenomenon one way, and holds where it turns back", () => {
+    const account = accountOf(i => ({ azimuthDeg: 0, altitudeDeg: [4, 3, 2, 1, 0, 1, 2, 3, 4, 5][i] }))
+    const scene = search.bestSceneOf(account, readingOf(account, "driven-one-way"))!
+    const drop = scene.lens!.placedDrops![0]
+    expect(drop.track).toHaveLength(10)
+    const ys = drop.track.map(point => point.y)
+    // One way only, whichever: never back.
+    const steps = ys.slice(1).map((y, i) => y - ys[i])
+    expect(steps.every(step => step >= -1e-4) || steps.every(step => step <= 1e-4)).toBe(true)
+    expect(new Set(ys).size).toBeGreaterThan(2)
+    expect(drop.track.every(point => Math.abs(point.x - 0.5) < 1e-3)).toBe(true)
+    expect(BestCaseSearch.lays({ kind: "lens-ghost", explains: "orb" })).toBe(false)
   })
 })

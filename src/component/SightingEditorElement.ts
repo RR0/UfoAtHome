@@ -821,6 +821,26 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
+   * Makes `json` the recording, as an edit of the author's: one step of the history, which Undo takes back, and a change to keep. For
+   * whoever holds the editor to change the recording as a whole (a reading's best case laid in its scene, see CaseEditorElement); the
+   * playhead stays where it is.
+   */
+  applyEdit(json: SightingRecordingJson): void {
+    this.armHistory()
+    const playhead = this.ufoElement.currentTime
+    this.applyingFileText = true
+    try {
+      this.sightingData = json
+      this.touched = true
+      this.ufoElement.currentTime = playhead
+    } finally {
+      this.applyingFileText = false
+    }
+    this.recordHistory()
+    this.dispatchEvent(new CustomEvent("sightingchange"))
+  }
+
+  /**
    * Limits the fields of a reading to what is known of its account's values (see StatedValue.range): the date to its EDTF interval, the
    * latitude and the longitude to their least and greatest. The date's picker offers nothing beyond, and a value entered beyond is brought
    * back to the nearer bound before it is applied. What the bounds alone cannot say (the Sun the date, the place and the heading put
@@ -2531,6 +2551,9 @@ export class SightingEditorElement extends HTMLElement {
     // and SceneElement's own updateAstronomy() (driven by the sightingData assignment above,
     // which surfaces as a timeupdate) already resolves+applies it, unlike before this was a
     // keyframed track.
+    // Another recording given is not an edit of this one: what came before it is not its past, and Undo must not give it back (which is
+    // what it did in a case, from one reading to the one opened before it). The text applied and a draft patched are edits.
+    if (!this.applyingFileText && !this.patchingDraft) this.resetHistory()
     this.markClean()
     // A recording just opened: its first assessment chooses the section to show, as long as the author has not chosen one
     // (see openMostLackingGroup).
@@ -3078,7 +3101,6 @@ export class SightingEditorElement extends HTMLElement {
       // A picked file has no address of its own: its relative addresses can only mean the page's.
       this.sceneElement.documentUrl = undefined
       this.sightingData = json
-      this.resetHistory()
       this.refreshEditorHead()
       this.dispatchEvent(new CustomEvent("recordingloaded", { bubbles: true, composed: true }))
       // The recording now open came from a file, not from the address still sitting in the field.
@@ -3176,7 +3198,6 @@ export class SightingEditorElement extends HTMLElement {
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
       this.sourceUrl = new URL(url, location.href).href
-      this.resetHistory()
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.
@@ -3317,7 +3338,12 @@ export class SightingEditorElement extends HTMLElement {
       // the file; patching is arithmetic on values.
       const before = this.ufoElement.sighting.provenance
       const base = plainSightingJson(this.ufoElement.sighting)
-      this.sightingData = DraftPatch.apply(base, DraftRecording.loadable(recording), paths)
+      this.patchingDraft = true
+      try {
+        this.sightingData = DraftPatch.apply(base, DraftRecording.loadable(recording), paths)
+      } finally {
+        this.patchingDraft = false
+      }
       // Loading a plain recording left the table empty. What was known before this draft is still
       // true of every value the draft did not touch — and stops being true, on its own, for the
       // ones it did: an entry expires when the value it was said about changes (ProvenanceEntry.of).
@@ -7111,6 +7137,9 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Set while the text the author edited is made the recording, which is not a recording loaded (see markClean). */
   private applyingFileText = false
+
+  /** Set while a draft is patched into the recording: an edit of it, which keeps its history (see the sightingData setter). */
+  private patchingDraft = false
 
   /** Leaving the text: what was typed is applied at once, and the text takes the form's own
    * spelling of it (key order, what the model drops), so that it never disagrees with Export. */

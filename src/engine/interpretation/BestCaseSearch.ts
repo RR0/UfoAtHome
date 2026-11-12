@@ -6,7 +6,7 @@ import { parseEdtfTime } from "../model/Sighting.js"
 import { TimeSpan } from "../model/TimeSpan.js"
 import { Provenance } from "../persistence/Provenance.js"
 import type { SightingLighting, SightingRecordingJson } from "../persistence/sightingJson.js"
-import type { FindingGround, ReadingFinding, ReadingMechanism } from "./Interpretation.js"
+import type { BodyJson, BodyKeyframe, FindingGround, ReadingFinding, ReadingMechanism } from "./Interpretation.js"
 import type { ReadingCheckTexts } from "./messages/ReadingCheckTexts.js"
 
 const DEG = Math.PI / 180
@@ -23,12 +23,17 @@ interface Sample { t: number, at: Tangent, frame: Frame }
 /** How far a mechanism at its best stays from the phenomenon, degrees, over all the instants the account shows it. */
 interface Miss { medianDeg: number, maxDeg: number }
 
+/** A pose of the camera's track. */
+interface PoseKeyframe { t: number, pose: { headingDeg?: number, pitchDeg?: number, rollDeg?: number, fovDeg?: number } }
+
 /** A Sun, by where it is from the way the instrument looked at the start and how high. */
 interface SunAt { bearing: number, altitudeDeg: number }
 
 /** What the search needs of the account: the phenomenon, the camera, the bounds of the Sun. */
 interface Setting {
   samples: Sample[]
+  /** The camera's track, as the account states it. */
+  keyframes: readonly PoseKeyframe[]
   sizeDeg: number
   travelDeg: number
   aspect: number
@@ -81,6 +86,82 @@ export class BestCaseSearch {
       case "stated-ghost":
         return this.statedGhostFindings(setting, reading, path)
     }
+  }
+
+  /** Whether the best case of a mechanism is one this search can lay in the reading's scene (see bestSceneOf). */
+  static lays(mechanism: ReadingMechanism | undefined): boolean {
+    return mechanism?.kind === "fixed-in-frame" || mechanism?.kind === "driven-one-way"
+  }
+
+  /**
+   * The reading with its best case laid in its scene, as its findings measure it: what stands still in the frame, a body carried with the
+   * camera at the one point of the picture nearest the phenomenon all along; what is driven across the glass, one drop placed on it along
+   * the track that never goes back nearest the phenomenon. The rest of the reading is left as it is, and what it said of that body or drop
+   * (how far, how big, how bright) kept; what it did not, the phenomenon's own size, at a kilometre. Undefined for a mechanism whose best
+   * case is not the reading's to lay (a ghost: its Sun is the account's, with all that hangs on its heading), or an account with no
+   * phenomenon to measure it on.
+   */
+  bestSceneOf(accountJson: SightingRecordingJson, readingJson: SightingRecordingJson): SightingRecordingJson | undefined {
+    const reading = Provenance.strip(readingJson).recording
+    const mechanism = (reading.interpretation as { mechanism?: ReadingMechanism } | undefined)?.mechanism
+    if (!BestCaseSearch.lays(mechanism)) return undefined
+    const setting = BestCaseSearch.settingOf(accountJson, mechanism!.explains)
+    if (!setting) return undefined
+    const scene = structuredClone(readingJson)
+    if (mechanism!.kind === "fixed-in-frame") {
+      const interpretation = scene.interpretation ?? { bodies: [] }
+      const bodies = interpretation.bodies ?? []
+      const index = bodies.findIndex(body => body.explains?.includes(mechanism!.explains))
+      const body = BestCaseSearch.stillBody(setting, mechanism!.explains, index >= 0 ? bodies[index] : undefined)
+      scene.interpretation = { ...interpretation, bodies: index >= 0 ? bodies.map((other, i) => i === index ? body : other) : [...bodies, body] }
+    } else {
+      const { track } = BestCaseSearch.oneWay(setting.samples)
+      const said = scene.lens?.placedDrops?.[0]
+      const first = setting.samples[0]
+      const radius = said?.radius ?? BestCaseSearch.round(setting.sizeDeg / first.frame.fovDeg, 4)
+      const placed = setting.samples.map((sample, i) => {
+        const halfHeight = Math.tan(sample.frame.fovDeg / 2 * DEG)
+        return {
+          t: sample.t,
+          x: BestCaseSearch.round(0.5 + track[i].x / (2 * halfHeight * setting.aspect), 4),
+          y: BestCaseSearch.round(0.5 - track[i].y / (2 * halfHeight), 4)
+        }
+      })
+      scene.lens = { ...scene.lens, placedDrops: [{ radius, track: placed }] }
+    }
+    return scene
+  }
+
+  /** A body standing still in the frame at its best, carried with the camera at every pose of its track while the phenomenon is shown. */
+  private static stillBody(setting: Setting, explains: string, said: BodyJson | undefined): BodyJson {
+    const point = BestCaseSearch.fixedPoint(setting.samples)
+    const from = setting.samples[0].t, to = setting.samples[setting.samples.length - 1].t
+    const times = [...new Set([...setting.samples.map(sample => sample.t), ...setting.keyframes.map(keyframe => keyframe.t).filter(t => t > from && t < to)])].sort((a, b) => a - b)
+    const saidFirst = said?.track[0]
+    const distanceM = saidFirst?.distanceM ?? 1000
+    const sizeM = saidFirst?.sizeM ?? (() => {
+      const m = BestCaseSearch.round(distanceM * setting.sizeDeg * DEG, 4)
+      return { widthM: m, lengthM: m, heightM: m }
+    })()
+    const appearance = saidFirst?.appearance ?? { color: "#f4f6f5" }
+    const along: BodyKeyframe[] = times.map((t, i) => {
+      const world = new Vector3(point.x, point.y, -1).normalize().applyQuaternion(BestCaseSearch.frameAt(setting.keyframes, t).rotation)
+      return {
+        t, ...(i === 0 ? { present: true, sizeM, appearance } : {}),
+        azimuthDeg: BestCaseSearch.round(((Math.atan2(world.x, -world.z) / DEG) + 360) % 360, 3),
+        altitudeDeg: BestCaseSearch.round(Math.asin(Math.min(1, Math.max(-1, world.y))) / DEG, 3),
+        distanceM
+      }
+    })
+    const step = times.length > 1 ? times[times.length - 1] - times[times.length - 2] : 40
+    return {
+      ...(said ?? { id: explains, explains: [explains], model: { id: "sphere" } }),
+      track: [...along, { t: to + step, present: false }]
+    }
+  }
+
+  private static round(value: number, digits: number): number {
+    return Math.round(value * 10 ** digits) / 10 ** digits
   }
 
   private lensGhostFindings(setting: Setting, reading: SightingRecordingJson, path: string): ReadingFinding[] {
@@ -175,7 +256,7 @@ export class BestCaseSearch {
     const start = keyframes[0].pose
     const lat = start.lat ?? 0
     return {
-      samples, sizeDeg: sizes.length > 0 ? sizes[Math.floor(sizes.length / 2)] : 0.5, travelDeg, aspect, headingDeg: start.headingDeg ?? 0,
+      samples, keyframes, sizeDeg: sizes.length > 0 ? sizes[Math.floor(sizes.length / 2)] : 0.5, travelDeg, aspect, headingDeg: start.headingDeg ?? 0,
       lighting: account.lighting, lightingGround: provenance.at("lighting")?.basis === "assumed" ? "supposed" : "established",
       altitudes: {
         minDeg: -Math.acos(6371000 / (6371000 + Math.max(start.elevationM ?? 0, 0))) / DEG,
@@ -204,7 +285,7 @@ export class BestCaseSearch {
   }
 
   /** The camera at `t`, between the two poses of the track about it (headings the short way round), at the nearer end outside them. */
-  private static frameAt(keyframes: readonly { t: number, pose: { headingDeg?: number, pitchDeg?: number, rollDeg?: number, fovDeg?: number } }[], t: number): Frame {
+  private static frameAt(keyframes: readonly PoseKeyframe[], t: number): Frame {
     const after = keyframes.findIndex(keyframe => keyframe.t > t)
     const a = keyframes[after <= 0 ? (after === 0 ? 0 : keyframes.length - 1) : after - 1]
     const b = after <= 0 ? a : keyframes[after]
@@ -258,8 +339,8 @@ export class BestCaseSearch {
    * The way that keeps it nearest, every five degrees; along it, the track that never goes back that is nearest (pool adjacent violators),
    * across it, the one line nearest.
    */
-  static oneWay(samples: readonly Sample[]): { miss: Miss, directionDeg: number } {
-    let best: { miss: Miss, directionDeg: number } | undefined
+  static oneWay(samples: readonly Sample[]): { miss: Miss, directionDeg: number, track: Tangent[] } {
+    let best: { miss: Miss, directionDeg: number, track: Tangent[] } | undefined
     for (let directionDeg = 0; directionDeg < 360; directionDeg += 5) {
       const along = { x: Math.sin(directionDeg * DEG), y: Math.cos(directionDeg * DEG) }
       const across = { x: along.y, y: -along.x }
@@ -269,7 +350,7 @@ export class BestCaseSearch {
       const fitted = BestCaseSearch.neverBack(forward)
       const track = fitted.map(a => ({ x: a * along.x + line * across.x, y: a * along.y + line * across.y }))
       const miss = BestCaseSearch.missOfTrack(samples, track)
-      if (!best || miss.medianDeg < best.miss.medianDeg || (miss.medianDeg === best.miss.medianDeg && miss.maxDeg < best.miss.maxDeg)) best = { miss, directionDeg }
+      if (!best || miss.medianDeg < best.miss.medianDeg || (miss.medianDeg === best.miss.medianDeg && miss.maxDeg < best.miss.maxDeg)) best = { miss, directionDeg, track }
     }
     return best!
   }

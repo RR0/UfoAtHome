@@ -13,6 +13,7 @@ import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
+import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
@@ -219,6 +220,8 @@ const TEMPLATE = `
   .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
   .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
   .finding-mark { font-weight: 700; text-align: center; }
+  /* Above the title's cover of the card, which would open the reading as it is instead. */
+  .findings li > .finding-lay { grid-column: 2; justify-self: start; position: relative; z-index: 1; min-height: 0; margin-top: 2px; padding: 2px 8px; font-size: 12px; }
   .findings li[data-outcome="holds"] .finding-mark { color: var(--ok); }
   .findings li[data-outcome="fails"] .finding-mark { color: var(--error); }
   .findings li[data-outcome="untested"] .finding-mark { color: var(--ink-faint); }
@@ -625,6 +628,7 @@ export class CaseEditorElement extends HTMLElement {
     this.language = language
     this.messages = messages
     this.readingCheck = new ReadingCheck(checkWords)
+    this.bestCases = new BestCaseSearch(checkWords)
     this.caseDate.messages = editorMessages
     this.editorMessages = editorMessages
     this.applyMessages()
@@ -1283,7 +1287,7 @@ export class CaseEditorElement extends HTMLElement {
       const body = document.createElement("div")
       body.className = "event-body"
       body.append(pill, main, links)
-      if (findings && findings.length > 0) body.append(this.findingsList(findings))
+      if (findings && findings.length > 0) body.append(this.findingsList(findings, this.bestCaseLaying(item.track!)))
       card.append(body, remove)
       return { card, child }
     })
@@ -1336,8 +1340,37 @@ export class CaseEditorElement extends HTMLElement {
   /** What sets a reading against its account, in the reader's language: none before the words have come. */
   private readingCheck?: ReadingCheck
 
+  /** What lays a reading's best case in its scene (see layBestCase), in the reader's language. */
+  private bestCases?: BestCaseSearch
+
+  /** What lays the best case of a reading in its scene, for a reading whose mechanism has one to lay; none for any other. */
+  private bestCaseLaying(track: CaseTrack): (() => void) | undefined {
+    const mechanism = track.recording?.interpretation?.mechanism
+    return track.kind === "reading" && BestCaseSearch.lays(mechanism) ? () => void this.layBestCase(track) : undefined
+  }
+
+  /**
+   * Opens a reading with its best case laid in its scene, as its findings measured it (see BestCaseSearch.bestSceneOf): an edit of the
+   * reading, which Undo takes back and which is kept with the case's other changes.
+   */
+  private async layBestCase(track: CaseTrack): Promise<void> {
+    const session = this.session
+    if (!session) return
+    const index = (this.items(session) as { track?: CaseTrack }[]).findIndex(item => item.track === track)
+    if (index < 0) return
+    ;(this.byId("track") as HTMLSelectElement).value = String(index)
+    this.byId("cited").hidden = true
+    this.listShown = false
+    this.refreshOverview()
+    if (this.current !== track) await this.showTrack(track)
+    const account = session.accountOf(track)
+    const scene = account?.recording && this.bestCases ? this.bestCases.bestSceneOf(account.recording, this.editor.sightingData) : undefined
+    if (scene) this.editor.applyEdit(scene)
+    requestAnimationFrame(() => this.bringEditorIntoView())
+  }
+
   /** A reading's tests, each with its mark (holds ✓, fails ✗, could not be made ?) and, for a failure, what it failed against. */
-  private findingsList(findings: readonly ReadingFinding[]): HTMLUListElement {
+  private findingsList(findings: readonly ReadingFinding[], layBestCase?: () => void): HTMLUListElement {
     const m = this.messages
     const list = document.createElement("ul")
     list.className = "findings"
@@ -1357,6 +1390,16 @@ export class CaseEditorElement extends HTMLElement {
         against.className = "finding-against"
         against.textContent = ` (${m.findingAgainst[finding.against ?? "established"]})`
         line.append(against)
+      }
+      // The best case computed, where it can be laid in the scene: to be seen there as it was measured.
+      if (layBestCase && finding.path === "interpretation.mechanism") {
+        const lay = document.createElement("button")
+        lay.type = "button"
+        lay.className = "finding-lay"
+        lay.textContent = m.applyBestCase.label
+        lay.title = m.applyBestCase.title
+        lay.addEventListener("click", layBestCase)
+        line.append(lay)
       }
       list.append(line)
     }

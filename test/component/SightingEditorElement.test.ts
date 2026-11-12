@@ -3153,7 +3153,8 @@ describe("SightingEditorElement toolbar groups", () => {
   describe("the File group", () => {
     const fileTab = (element: SightingEditorElement) => tabs(element).find(tab => tab.getAttribute("aria-controls") === "group-file")!
     const cmEditor = (element: SightingEditorElement) => element.shadowRoot!.querySelector<HTMLElement>("#file-editor .cm-editor")
-    const text = (element: SightingEditorElement) => EditorView.findFromDOM(cmEditor(element)!)!.state.doc.toString()
+    // Nothing while the text is made again for another recording given (see resetHistory).
+    const text = (element: SightingEditorElement) => { const dom = cmEditor(element); return dom ? EditorView.findFromDOM(dom)!.state.doc.toString() : "" }
 
     it("holds the controls that bring a recording in and take it out", async () => {
       const element = await mount()
@@ -3177,6 +3178,22 @@ describe("SightingEditorElement toolbar groups", () => {
       await waitFor(() => cmEditor(element) !== null)
       element.sightingData = { ...element.sightingData, tags: ["from-the-form"] }
       await waitFor(() => text(element).includes("from-the-form"))
+    })
+
+    it("forgets what was done to a recording when another is given: Undo does not give it back", async () => {
+      const element = await mount()
+      fileTab(element).click()
+      await waitFor(() => cmEditor(element) !== null)
+      element.applyEdit({ ...element.sightingData, tags: ["first"] })
+      const undo = element.historyControls.querySelector("button")!
+      await waitFor(() => !undo.disabled)
+      element.sightingData = { ...element.sightingData, tags: ["another"] }
+      await waitFor(() => text(element).includes("another"))
+      expect(undo.disabled).toBe(true)
+      element.applyEdit({ ...element.sightingData, tags: ["laid"] })
+      await waitFor(() => !undo.disabled)
+      undo.click()
+      await waitFor(() => element.sightingData.tags?.[0] === "another")
     })
 
     it("drives the form: a text that parses becomes the recording, and one that does not changes nothing", async () => {
