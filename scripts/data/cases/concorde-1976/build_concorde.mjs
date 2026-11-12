@@ -225,7 +225,10 @@ const inFrameBody = ({ title, distanceM, luminanceCdM2 }) => ({
 // and still from the lowest point on, since the airflow does not drive it back up (the orb goes back up, see its findings). Twice the
 // orb's width, so that it is seen at all: as wide as the orb, the ground it shows is lost in the ground round it.
 const placedDrop = () => {
-  const down = orbRows.filter((row, i) => row.t <= 8 && (i % 2 === 0))
+  // Down to the lowest point the film shows the orb at (some 1.9 s in), where it turns back up.
+  const descending = orbRows.filter((row, i) => row.t <= 8 && (i % 2 === 0))
+  const lowest = descending.reduce((at, row, i) => row.y > descending[at].y ? i : at, 0)
+  const down = descending.slice(0, lowest + 1)
   return {
     radius: round(orbSizes[Math.floor(orbSizes.length / 2)] / 480, 4),
     track: down.map(row => ({ t: Math.round((row.t - FROM_S) / RATE * 1000), x: round(row.x / 640, 4), y: round(row.y / 480, 4) }))
