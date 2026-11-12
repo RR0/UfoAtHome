@@ -2088,7 +2088,7 @@ export class SceneElement extends HTMLElement {
     // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
     // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
     this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens,
-      this.glassWettingOf(sighting).stateAt(t / 1000)))
+      this.glassWettingOf(sighting).stateAt(t / 1000), t))
     // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
     this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
     // What the observer's own legs are doing to their eye between two recorded positions — nothing

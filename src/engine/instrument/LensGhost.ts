@@ -46,6 +46,11 @@ export interface LensStateJson {
   glass?: "filter" | "window" | "windscreen"
   /** Drops of water on the outermost glass. When absent, from the rain or snow falling (see LensGhosts.dropsFrom), unless `sheltered`. */
   drops?: number
+  /**
+   * Drops stated one by one, where they are on the picture, instead of the glass `drops` scatters at random: what a reading that claims one
+   * drop says of it. With them, `drops` only says how much light they scatter round each light.
+   */
+  placedDrops?: PlacedDropJson[]
   /** Condensation on it: a lens taken from a warm room or car into the cold, or the cold glass of a windscreen. None when absent. */
   condensation?: number
   /** Dirt, grease or fingerprints on it: a phone's lens wiped on a pocket. None when absent. */
@@ -62,6 +67,21 @@ export interface LensStateJson {
    * lens, more for an optic whose front stands out in the open, as a periscope's head. Absent: a lens's.
    */
   reachDeg?: number
+}
+
+/** A drop on the glass, where the picture shows it: its radius, and the way it goes over the picture, held at its ends. */
+export interface PlacedDropJson {
+  /** Its radius, as a share of the picture's height. */
+  radius: number
+  /** Where it is at each instant: `t` ms from the recording's start, `x` and `y` shares of the picture's width and height from its top left. */
+  track: Array<{ t: number, x: number, y: number }>
+}
+
+/** A placed drop at an instant: its centre, shares of the picture's width and height from its top left, and its radius, of its height. */
+export interface PlacedDrop {
+  x: number
+  y: number
+  radius: number
 }
 
 /** What the scene needs of the lens to lay its ghosts over a picture. */
@@ -87,6 +107,8 @@ export interface LensOptics {
   running: number
   /** How far beyond the frame's corner a light still strikes the front glass, degrees (see LensStateJson.reachDeg). */
   reachDeg: number
+  /** The drops stated one by one, where they are at this instant (see LensStateJson.placedDrops): the only ones on the glass when any. */
+  placed: PlacedDrop[]
 }
 
 /**
@@ -133,7 +155,7 @@ export interface RainExposure {
 export class LensGhosts {
 
   /** What an eye lays over its picture: nothing. */
-  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impacts: 0, history: [], still: false, running: 0, reachDeg: 30 }
+  static readonly NONE: LensOptics = { ghosts: [], blades: 0, bladeAngleRad: 0, scattered: 0, drops: 0, impacts: 0, history: [], still: false, running: 0, reachDeg: 30, placed: [] }
 
   /**
    * A phone: few elements, but a sensor and its cover glass close behind them, which send back a ghost mirrored through the centre, small
@@ -221,7 +243,7 @@ export class LensGhosts {
    */
   static optics(
     instrument: Pick<Instrument, "category" | "medium" | "ghosts" | "fNumber" | "fNumberRange" | "apertureBlades">,
-    fNumber: number | undefined, lens: LensStateJson | undefined, wetting?: { impacts: number, history: number[] }
+    fNumber: number | undefined, lens: LensStateJson | undefined, wetting?: { impacts: number, history: number[] }, ms = 0
   ): LensOptics {
     const own = LensGhosts.of(instrument)
     if (own.length === 0) return LensGhosts.NONE
@@ -257,8 +279,19 @@ export class LensGhosts {
     const running = lens?.glass === "window" || lens?.glass === "windscreen" ? 1 : 0.25
     return {
       ghosts, blades, bladeAngleRad: 0.3, scattered: Math.min(0.9, scattered), drops, impacts, history, still: lens?.drops !== undefined, running,
-      reachDeg: lens?.reachDeg ?? LensGhosts.OFF_FRAME_REACH_DEG
+      reachDeg: lens?.reachDeg ?? LensGhosts.OFF_FRAME_REACH_DEG,
+      placed: (lens?.placedDrops ?? []).map(drop => LensGhosts.placedAt(drop, ms))
     }
+  }
+
+  /** Where a placed drop is at `ms`: between the two points of its track about it, at the nearer end of it outside them. */
+  static placedAt(drop: PlacedDropJson, ms: number): PlacedDrop {
+    const track = drop.track
+    const after = track.findIndex(point => point.t > ms)
+    if (after === 0) return { x: track[0].x, y: track[0].y, radius: drop.radius }
+    if (after === -1) { const last = track[track.length - 1]; return { x: last.x, y: last.y, radius: drop.radius } }
+    const a = track[after - 1], b = track[after], s = (ms - a.t) / (b.t - a.t)
+    return { x: a.x + (b.x - a.x) * s, y: a.y + (b.y - a.y) * s, radius: drop.radius }
   }
 
   /** Whether drops land on the glass from the rain, rather than being stated or kept off it. */

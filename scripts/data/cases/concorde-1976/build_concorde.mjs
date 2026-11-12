@@ -221,6 +221,17 @@ const inFrameBody = ({ title, distanceM, luminanceCdM2 }) => ({
   ]
 })
 
+// The one drop a reading claims on the pane, at its best: where the film shows the orb all the way down, which the airflow can drive it;
+// and still from the lowest point on, since the airflow does not drive it back up (the orb goes back up, see its findings). Twice the
+// orb's width, so that it is seen at all: as wide as the orb, the ground it shows is lost in the ground round it.
+const placedDrop = () => {
+  const down = orbRows.filter((row, i) => row.t <= 8 && (i % 2 === 0))
+  return {
+    radius: round(orbSizes[Math.floor(orbSizes.length / 2)] / 480, 4),
+    track: down.map(row => ({ t: Math.round((row.t - FROM_S) / RATE * 1000), x: round(row.x / 640, 4), y: round(row.y / 480, 4) }))
+  }
+}
+
 /**
  * The ghost a periscope would have to throw for the orb to be it, at its best: the one factor that lays the Sun's ghost on the orb at the
  * first instant (with the offset that the factor cannot give in height), and the reach that lets a Sun that far off the frame in at all.
@@ -236,7 +247,7 @@ for (const reading of READINGS) {
   // A reading that moves the Sun is the account laid out again under it; its ghost, placed on the orb at the first instant.
   const moved = reading.sun ? accountUnderSun(reading.sun) : undefined
   const { image: _image, snapshots: _snapshots, milestones: _milestones, ...account } = moved ? moved.account : recording
-  const lens = moved && reading.periscope ? periscopeLens(reading.periscope, moved) : reading.lens
+  const lens = moved && reading.periscope ? periscopeLens(reading.periscope, moved) : reading.placedDrop ? { ...reading.lens, placedDrops: [placedDrop()] } : reading.lens
   const bodies = reading.glint ? [glintBody(reading.glint)] : reading.inFrame ? [inFrameBody(reading.inFrame)] : reading.distanceM === undefined ? [] : [{
     id: 'orb', title: ORB_TITLE, explains: ['orb'], model: { id: 'sphere' },
     track: [

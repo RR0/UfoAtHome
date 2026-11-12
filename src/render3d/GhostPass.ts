@@ -49,6 +49,8 @@ export interface GhostHit {
 export class GhostPass {
   /** The most ghosts a lens is drawn with: its own, what it was taken through, and what is on the glass. */
   static readonly MAX_GHOSTS = 12
+  /** How many drops stated one by one the pass draws (see LensStateJson.placedDrops). */
+  static readonly MAX_PLACED_DROPS = 4
   /** Taps of a ghost of the glass: enough for the polygon of the blades to show. */
   private static readonly TAPS = 12
   /** What a ghost has to show on the screen to be pointed at, in the medium's response (0 black, 1 white): faint, but seen. */
@@ -171,6 +173,8 @@ export class GhostPass {
         uHistory: { value: new Array<number>(GlassWetting.HISTORY_S).fill(0) },
         uStill: { value: 0 },
         uRunning: { value: 0 },
+        uPlacedCount: { value: 0 },
+        uPlaced: { value: Array.from({ length: GhostPass.MAX_PLACED_DROPS }, () => new Vector3()) },
         uBright: { value: new Vector2() },
         uBrightRadius: { value: 0 },
         uBrightFlux: { value: new Vector3() }
@@ -196,6 +200,10 @@ export class GhostPass {
         uniform float uHistory[${GlassWetting.HISTORY_S}];
         uniform float uStill;
         uniform float uRunning;
+        uniform int uPlacedCount;
+        // The drops stated one by one (see LensStateJson.placedDrops): their centres in the picture's own coordinates, and their radii, of
+        // its height.
+        uniform vec3 uPlaced[${GhostPass.MAX_PLACED_DROPS}];
         uniform vec2 uBright;
         uniform float uBrightRadius;
         uniform vec3 uBrightFlux;
@@ -353,6 +361,22 @@ export class GhostPass {
         vec4 drops(vec2 uv) {
           float aspect = uSize.x / uSize.y;
           vec2 q = vec2(uv.x * aspect, uv.y);
+          // Stated one by one, they are the only drops on the glass: the same fields, merging the same way, without the grid of the rain's
+          // nor its fine droplets.
+          if (uPlacedCount > 0) {
+            vec2 pulled = vec2(0.0);
+            float sum = 0.0;
+            for (int i = 0; i < ${GhostPass.MAX_PLACED_DROPS}; i++) {
+              if (i >= uPlacedCount) break;
+              vec2 d = q - vec2(uPlaced[i].x * aspect, uPlaced[i].y);
+              // Sagging a little under its weight, wider below than above, as a drop that clings does.
+              if (d.y < 0.0) d.y *= 0.88;
+              float f = kernel(length(d), uPlaced[i].z);
+              sum += f;
+              pulled += f * d;
+            }
+            return vec4(smoothstep(0.64, 0.76, sum), pulled / max(sum, 1e-3) / vec2(aspect, 1.0), 0.3 + 0.7 * smoothstep(0.7, 1.05, sum));
+          }
           float size = 18.0;
           vec2 cellular = q * size;
           vec2 cell = floor(cellular);
@@ -392,7 +416,7 @@ export class GhostPass {
 
         void main() {
           vec3 sum = vec3(0.0);
-          vec4 drop = uDrops > 0.0 || uImpacts > 0.0 ? drops(vUv) : vec4(0.0);
+          vec4 drop = uDrops > 0.0 || uImpacts > 0.0 || uPlacedCount > 0 ? drops(vUv) : vec4(0.0);
           // What a drop shows of the scene: what is on the other side of it, upside down and out of focus, instead of what is behind it
           // (the finish takes the scene away where the alpha says a drop covers it).
           // Out of focus, as a disc of taps: read from one texel of a level eight times smaller, as it was, a streetlight many times the white
@@ -608,6 +632,9 @@ export class GhostPass {
     for (let j = 0; j < history.length; j++) history[j] = optics.history[j] ?? 0
     uniforms.uStill.value = optics.still ? 1 : 0
     uniforms.uRunning.value = optics.running
+    const placed = optics.placed.slice(0, GhostPass.MAX_PLACED_DROPS)
+    uniforms.uPlacedCount.value = placed.length
+    placed.forEach((drop, i) => (uniforms.uPlaced.value as Vector3[])[i].set(drop.x, 1 - drop.y, drop.radius))
     ;(uniforms.uBright.value as Vector2).set(((bright?.x ?? 0) + 1) / 2, ((bright?.y ?? 0) + 1) / 2)
     uniforms.uBrightRadius.value = bright?.radius ?? 0
     const flux = bright?.flux ?? [0, 0, 0]

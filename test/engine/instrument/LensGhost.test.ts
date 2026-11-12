@@ -160,3 +160,19 @@ describe("a light out of the picture", () => {
     expect(periscope.ghosts.at(-1)).toMatchObject({ scale: -0.008, offset: [0, 0.47] })
   })
 })
+
+describe("drops placed one by one", () => {
+  const camera = Instruments.byId("cine-35mm-broadcast")!
+  const drop = { radius: 0.02, track: [{ t: 0, x: 0.2, y: 0.1 }, { t: 1000, x: 0.2, y: 0.5 }] }
+
+  it("puts each where its track says at that instant, held at its ends", () => {
+    const at = (ms: number) => LensGhosts.optics(camera, undefined, { glass: "window", drops: 0.05, placedDrops: [drop] }, undefined, ms).placed
+    expect(at(500)).toEqual([{ x: 0.2, y: expect.closeTo(0.3), radius: 0.02 }])
+    expect(at(-10)[0].y).toBe(0.1)
+    expect(at(5000)[0].y).toBe(0.5)
+  })
+
+  it("leaves none on a glass that states none", () => {
+    expect(LensGhosts.optics(camera, undefined, { glass: "window", drops: 0.05 }).placed).toEqual([])
+  })
+})

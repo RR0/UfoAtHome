@@ -1579,7 +1579,209 @@
  ],
  "lens": {
   "glass": "window",
-  "drops": 0.05
+  "drops": 0.05,
+  "placedDrops": [
+   {
+    "radius": 0.0177,
+    "track": [
+     {
+      "t": 33,
+      "x": 0.6903,
+      "y": 0.0873
+     },
+     {
+      "t": 100,
+      "x": 0.6892,
+      "y": 0.1344
+     },
+     {
+      "t": 167,
+      "x": 0.6897,
+      "y": 0.1571
+     },
+     {
+      "t": 234,
+      "x": 0.6903,
+      "y": 0.2083
+     },
+     {
+      "t": 300,
+      "x": 0.6905,
+      "y": 0.2596
+     },
+     {
+      "t": 367,
+      "x": 0.6908,
+      "y": 0.2852
+     },
+     {
+      "t": 467,
+      "x": 0.6898,
+      "y": 0.3531
+     },
+     {
+      "t": 734,
+      "x": 0.6922,
+      "y": 0.4646
+     },
+     {
+      "t": 801,
+      "x": 0.6942,
+      "y": 0.4794
+     },
+     {
+      "t": 868,
+      "x": 0.6925,
+      "y": 0.5085
+     },
+     {
+      "t": 934,
+      "x": 0.6917,
+      "y": 0.5398
+     },
+     {
+      "t": 1001,
+      "x": 0.6919,
+      "y": 0.5612
+     },
+     {
+      "t": 1068,
+      "x": 0.6909,
+      "y": 0.5858
+     },
+     {
+      "t": 1134,
+      "x": 0.6906,
+      "y": 0.6094
+     },
+     {
+      "t": 1201,
+      "x": 0.6902,
+      "y": 0.6269
+     },
+     {
+      "t": 1268,
+      "x": 0.69,
+      "y": 0.651
+     },
+     {
+      "t": 1335,
+      "x": 0.6897,
+      "y": 0.6752
+     },
+     {
+      "t": 1401,
+      "x": 0.6905,
+      "y": 0.6885
+     },
+     {
+      "t": 1468,
+      "x": 0.6903,
+      "y": 0.709
+     },
+     {
+      "t": 1535,
+      "x": 0.6908,
+      "y": 0.7285
+     },
+     {
+      "t": 1602,
+      "x": 0.6911,
+      "y": 0.7413
+     },
+     {
+      "t": 1668,
+      "x": 0.69,
+      "y": 0.7548
+     },
+     {
+      "t": 1735,
+      "x": 0.6911,
+      "y": 0.7719
+     },
+     {
+      "t": 1802,
+      "x": 0.6912,
+      "y": 0.7783
+     },
+     {
+      "t": 1869,
+      "x": 0.6919,
+      "y": 0.7802
+     },
+     {
+      "t": 1935,
+      "x": 0.692,
+      "y": 0.7804
+     },
+     {
+      "t": 2002,
+      "x": 0.6923,
+      "y": 0.7792
+     },
+     {
+      "t": 2069,
+      "x": 0.692,
+      "y": 0.7598
+     },
+     {
+      "t": 2135,
+      "x": 0.6925,
+      "y": 0.7371
+     },
+     {
+      "t": 2202,
+      "x": 0.6919,
+      "y": 0.715
+     },
+     {
+      "t": 2269,
+      "x": 0.6922,
+      "y": 0.6817
+     },
+     {
+      "t": 2336,
+      "x": 0.692,
+      "y": 0.6585
+     },
+     {
+      "t": 2402,
+      "x": 0.6928,
+      "y": 0.6421
+     },
+     {
+      "t": 2469,
+      "x": 0.6923,
+      "y": 0.624
+     },
+     {
+      "t": 2536,
+      "x": 0.692,
+      "y": 0.6077
+     },
+     {
+      "t": 2603,
+      "x": 0.6916,
+      "y": 0.5938
+     },
+     {
+      "t": 2669,
+      "x": 0.6917,
+      "y": 0.5765
+     },
+     {
+      "t": 2736,
+      "x": 0.692,
+      "y": 0.5544
+     },
+     {
+      "t": 2803,
+      "x": 0.6912,
+      "y": 0.5438
+     }
+    ]
+   }
+  ]
  },
  "interpretation": {
   "title": {
@@ -1618,6 +1820,16 @@
      "it": "Una goccia che le vibrazioni farebbero risalire resta da descrivere: nessuno ha detto come."
     },
     "outcome": "untested"
+   },
+   {
+    "text": {
+     "fr": "Simulée dans son meilleur cas (une seule goutte, là où le film montre l'orbe tout au long de sa descente, puis immobile ; deux fois sa taille pour qu'on la voie) : elle montre le sol, renversé et flou, plus sombre que ce qui l'entoure, quand l'orbe est blanche et plus claire que tout autour d'elle. Le Soleil, derrière la caméra, ne peut pas s'y refléter.",
+     "en": "Simulated at its best (a single drop, where the film shows the orb all the way down, then still; twice its size so that it is seen): it shows the ground, upside down and blurred, darker than what is round it, where the orb is white and brighter than anything round it. The Sun, behind the camera, cannot shine in it.",
+     "es": "Simulada en su mejor caso (una sola gota, donde la película muestra el orbe durante todo su descenso, luego inmóvil; el doble de su tamaño para que se vea): muestra el suelo, invertido y borroso, más oscuro que lo que la rodea, cuando el orbe es blanco y más claro que todo a su alrededor. El Sol, detrás de la cámara, no puede reflejarse en ella.",
+     "it": "Simulata nel caso migliore (una sola goccia, dove il film mostra la sfera per tutta la discesa, poi ferma; il doppio della sua grandezza perché si veda): mostra il suolo, capovolto e sfocato, più scuro di ciò che la circonda, mentre la sfera è bianca e più chiara di tutto intorno. Il Sole, dietro la camera, non può riflettersi in essa."
+    },
+    "outcome": "fails",
+    "against": "established"
    }
   ]
  }
