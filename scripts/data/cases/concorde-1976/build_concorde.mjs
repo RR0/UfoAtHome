@@ -206,32 +206,50 @@ const glintBody = ({ luminanceCdM2, sizeM }) => ({
     })
   ]
 })
+// The point of the film nearest the orb all along, its geometric median (Weiszfeld): where something standing still in the frame is at its
+// best, as BestCaseSearch finds it for the reading.
+const nearestStill = (() => {
+  let p = { x: orbRows.reduce((s, r) => s + r.x, 0) / orbRows.length, y: orbRows.reduce((s, r) => s + r.y, 0) / orbRows.length }
+  for (let i = 0; i < 100; i++) {
+    let x = 0, y = 0, w = 0
+    for (const r of orbRows) { const k = 1 / Math.max(Math.hypot(r.x - p.x, r.y - p.y), 1e-9); x += r.x * k; y += r.y * k; w += k }
+    p = { x: x / w, y: y / w }
+  }
+  return p
+})()
 // What a reading claims stands still in the frame (a speck on the lens or in the gate, a reflection on a pane the camera is fixed to): at its
-// best laid on the orb at the first instant, where the film shows it, and carried with the camera from there on, frame by frame as the film's
-// registration turns it. As bright as the orb, which its claim does not say: the best case.
+// best where it stays nearest the orb all along, carried with the camera, frame by frame as the film's registration turns it. As bright as
+// the orb, which its claim does not say: the best case.
 const inFrameBody = ({ title, distanceM, luminanceCdM2 }) => ({
   id: 'orb', title, explains: ['orb'], model: { id: 'sphere' },
   track: [
     ...keys.filter(key => key.t <= lastOrbMs).map((key, index) => ({
       t: key.t, ...(index === 0 ? { present: true, sizeM: { widthM: round(distanceM * orbDeg * D2R, 4), lengthM: round(distanceM * orbDeg * D2R, 4), heightM: round(distanceM * orbDeg * D2R, 4) },
         appearance: { color: '#f4f6f5', luminanceCdM2 } } : {}),
-      ...aimOfPixel(orbRows[0].x, orbRows[0].y, key.t), distanceM
+      ...aimOfPixel(nearestStill.x, nearestStill.y, key.t), distanceM
     })),
     { t: lastOrbMs + 40, present: false }
   ]
 })
 
-// The one drop a reading claims on the pane, at its best: where the film shows the orb all the way down, which the airflow can drive it;
-// and still from the lowest point on, since the airflow does not drive it back up (the orb goes back up, see its findings). Twice the
-// orb's width, so that it is seen at all: as wide as the orb, the ground it shows is lost in the ground round it.
+// The one drop a reading claims on the pane, at its best: driven down the frame, which the airflow can drive it, never back up, as near the
+// orb as that lets it be all along (down the column the orb keeps to; down the film as the orb is, held where the orb turns back up), as
+// BestCaseSearch finds it. Twice the orb's width, so that it is seen at all: as wide as the orb, the ground it shows is lost in the ground
+// round it.
 const placedDrop = () => {
-  // Down to the lowest point the film shows the orb at (some 1.9 s in), where it turns back up.
-  const descending = orbRows.filter((row, i) => row.t <= 8 && (i % 2 === 0))
-  const lowest = descending.reduce((at, row, i) => row.y > descending[at].y ? i : at, 0)
-  const down = descending.slice(0, lowest + 1)
+  const xs = orbRows.map(row => row.x).sort((a, b) => a - b), column = xs[Math.floor(xs.length / 2)]
+  // Pool adjacent violators: the heights nearest the orb's that never go back up.
+  const blocks = []
+  for (const row of orbRows) {
+    blocks.push({ sum: row.y, count: 1, first: row })
+    while (blocks.length > 1 && blocks.at(-2).sum / blocks.at(-2).count > blocks.at(-1).sum / blocks.at(-1).count) {
+      const last = blocks.pop(); blocks.at(-1).sum += last.sum; blocks.at(-1).count += last.count
+    }
+  }
+  const ys = blocks.flatMap(block => new Array(block.count).fill(block.sum / block.count))
   return {
     radius: round(orbSizes[Math.floor(orbSizes.length / 2)] / 480, 4),
-    track: down.map(row => ({ t: Math.round((row.t - FROM_S) / RATE * 1000), x: round(row.x / 640, 4), y: round(row.y / 480, 4) }))
+    track: orbRows.filter((row, i) => i % 2 === 0 || i === orbRows.length - 1).map(row => ({ t: Math.round((row.t - FROM_S) / RATE * 1000), x: round(column / 640, 4), y: round(ys[orbRows.indexOf(row)] / 480, 4) }))
   }
 }
 
@@ -270,7 +288,7 @@ for (const reading of READINGS) {
     timeline: { keyframes: [], order: [], groups: [] },
     // The film is there to be compared with, not laid over what the reading claims: drawn at full opacity it hid it. Its slider brings it back.
     references: account.references.map(reference => ({ ...reference, opacity: 0 })),
-    interpretation: { title: reading.title, bodies, findings: reading.findings }
+    interpretation: { title: reading.title, bodies, findings: reading.findings, ...(reading.mechanism ? { mechanism: reading.mechanism } : {}) }
   }, null, 1))
   caseEvents.push({ type: 'event', eventType: 'sighting', id: reading.id, interpretationOf: 'film', ...(reading.time ? { time: reading.time } : {}), by: reading.by, title: reading.title, url: file })
 }

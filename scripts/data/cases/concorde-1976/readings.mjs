@@ -35,6 +35,7 @@ const BLURRED = {
 export const READINGS = [
   {
     id: 'lens-ghost',
+    mechanism: { kind: 'lens-ghost', explains: 'orb' },
     // Its best case in daylight: the Sun where the film's light allows it nearest the front of the camera. No ghost of it comes into the
     // frame: the camera looks 29° down, and only a Sun on the horizon ahead would throw one in (see the last finding).
     sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
@@ -60,23 +61,12 @@ export const READINGS = [
         en: "Its descent would need a factor of about +4.4; a camera lens's run from −1.4 to +0.65.",
         es: "Su descenso requeriría un factor de unos +4,4; los de un objetivo de cámara van de −1,4 a +0,65.",
         it: "La sua discesa richiederebbe un fattore di circa +4,4; quelli di un obiettivo da camera vanno da −1,4 a +0,65."
-      }),
-      fails({
-        fr: "Simulé dans son meilleur cas de jour (le Soleil au plus près de l'avant que l'éclairage du film permet, à 285° de la visée et 15,5° de haut, 85° de l'axe ; un objectif qui en reçoit la lumière jusque-là) : le plus proche de ses reflets (facteur +0,3) tombe à 3 600 px à gauche du cadre, plus de cinq largeurs d'image. Aucun n'entre dans le cadre.",
-        en: "Simulated at its best in daylight (the Sun as near the front as the film's light allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a lens taking its light that far out): the nearest of its ghosts (factor +0.3) falls 3,600 px left of the frame, more than five widths of the picture. None comes into the frame.",
-        es: "Simulado en su mejor caso de día (el Sol tan cerca del frente como permite la iluminación de la película, a 285° de la mira y 15,5° de altura, a 85° del eje; un objetivo que recibe su luz hasta ahí): el más cercano de sus reflejos (factor +0,3) cae a 3.600 px a la izquierda del encuadre, más de cinco anchos de la imagen. Ninguno entra en el encuadre.",
-        it: "Simulato nel caso migliore di giorno (il Sole il più vicino al fronte che l'illuminazione del film consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un obiettivo che ne riceve la luce fin lì): il più vicino dei suoi riflessi (fattore +0,3) cade a 3.600 px a sinistra dell'inquadratura, più di cinque larghezze dell'immagine. Nessuno entra nell'inquadratura."
-      }),
-      fails({
-        fr: "Pour qu'un de ses reflets entre dans le cadre, la caméra regardant 29° vers le bas, il faudrait le Soleil à l'horizon devant elle (18° à droite de la visée, essayé). Même alors son reflet le plus proche (facteur +0,3) passe 47 px au-dessus de l'orbe au premier instant, au bord haut du cadre, et ne la suit pas ensuite. Ce Soleil devant la caméra laisse l'avion à contre-jour dans un ciel de crépuscule, quand le film le montre éclairé du côté de la caméra en plein jour.",
-        en: "For one of its ghosts to come into the frame, the camera looking 29° down, the Sun would have to be on the horizon ahead of it (18° right of where it looks, tried). Even then its nearest ghost (factor +0.3) passes 47 px above the orb at the first instant, at the top edge of the frame, and does not follow it afterwards. That Sun ahead of the camera leaves the aircraft backlit in a dusk sky, where the film shows it lit on the camera's side in broad daylight.",
-        es: "Para que uno de sus reflejos entre en el encuadre, mirando la cámara 29° hacia abajo, haría falta el Sol en el horizonte delante de ella (18° a la derecha de la mira, probado). Aun así su reflejo más cercano (factor +0,3) pasa 47 px por encima del orbe en el primer instante, en el borde superior del encuadre, y no lo sigue después. Ese Sol delante de la cámara deja el avión a contraluz en un cielo de crepúsculo, cuando la película lo muestra iluminado del lado de la cámara a plena luz del día.",
-        it: "Perché uno dei suoi riflessi entri nell'inquadratura, guardando la camera 29° verso il basso, servirebbe il Sole sull'orizzonte davanti a lei (18° a destra della mira, provato). Anche allora il suo riflesso più vicino (fattore +0,3) passa 47 px sopra la sfera al primo istante, al bordo superiore dell'inquadratura, e non la segue poi. Quel Sole davanti alla camera lascia l'aereo in controluce in un cielo di crepuscolo, mentre il film lo mostra illuminato dal lato della camera in pieno giorno."
       })
     ]
   },
   {
     id: 'periscope',
+    mechanism: { kind: 'stated-ghost', explains: 'orb' },
     // Its best case: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
     // height the light allows), a periscope head taking light that far out, and the ghost that lays it on the orb at the first instant.
     sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
@@ -101,18 +91,12 @@ export const READINGS = [
         en: "To light the aircraft as the film does (on the camera's side), the Sun had to be 105° to 285° from the way the camera looked, at least 75° off its axis, whatever the date, the hour, the place or the heading: the periscope would have to take light that oblique on its front element. The reach the engine supposes stops at 43° off the axis (30° beyond the frame); an Astrovision's is not known.",
         es: "Para iluminar el avión como la película (del lado de la cámara), el Sol tenía que estar a 105°-285° de la dirección de mira, al menos a 75° del eje, cualesquiera que sean la fecha, la hora, el lugar o el rumbo: el periscopio tendría que recibir una luz tan oblicua en su elemento frontal. El alcance que supone el motor se detiene a 43° del eje (30° más allá del encuadre); el de un Astrovision no se conoce.",
         it: "Per illuminare l'aereo come il film (dal lato della camera), il Sole doveva essere a 105°-285° dalla direzione di mira, almeno a 75° dall'asse, qualunque siano la data, l'ora, il luogo o la rotta: il periscopio dovrebbe ricevere una luce così obliqua sul suo elemento frontale. La portata che il motore suppone si ferma a 43° dall'asse (30° oltre l'inquadratura); quella di un Astrovision non è nota."
-      }, 'supposed'),
-      fails({
-        fr: "Simulé dans son meilleur cas (le Soleil au plus près que l'éclairage permet, à 285° de la visée et 15,5° de haut, 85° de l'axe ; un périscope qui reçoit la lumière jusque-là ; le reflet posé sur l'orbe au premier instant, facteur −0,008) : le reflet ne bouge que de 7 px dans le cadre, quand l'orbe en parcourt 333. Il reste à 257 px d'elle en médiane, 339 au plus. Un reflet de facteur fixe ne le peut pas ; reste un périscope dont les prismes ne gardent pas de facteur fixe.",
-        en: "Simulated at its best (the Sun as near the front as the light allows, 285° from where the camera looks and 15.5° high, 85° off the axis; a periscope taking light that far out; the ghost laid on the orb at the first instant, factor −0.008): the ghost moves no more than 7 px in the frame, where the orb travels 333. It stays 257 px from it at the median, 339 at most. A ghost of a fixed factor cannot do it; what is left is a periscope whose prisms keep no fixed factor.",
-        es: "Simulado en su mejor caso (el Sol tan cerca del frente como permite la iluminación, a 285° de la mira y 15,5° de altura, a 85° del eje; un periscopio que recibe la luz hasta ahí; el reflejo puesto sobre el orbe en el primer instante, factor −0,008): el reflejo no se mueve más de 7 px en el encuadre, cuando el orbe recorre 333. Queda a 257 px de él en la mediana, 339 como mucho. Un reflejo de factor fijo no puede; queda un periscopio cuyos prismas no guardan un factor fijo.",
-        it: "Simulato nel caso migliore (il Sole il più vicino al fronte che l'illuminazione consenta, a 285° dalla mira e 15,5° di altezza, a 85° dall'asse; un periscopio che riceve la luce fin lì; il riflesso posto sulla sfera al primo istante, fattore −0,008): il riflesso non si sposta più di 7 px nell'inquadratura, mentre la sfera ne percorre 333. Resta a 257 px da essa in mediana, 339 al massimo. Un riflesso a fattore fisso non può; resta un periscopio i cui prismi non mantengono un fattore fisso."
-      // What fails is the fixed factor the simulation supposes, not what Tanner says: his prisms need not keep one (see the finding above).
       }, 'supposed')
     ]
   },
   {
     id: 'window',
+    mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
     inFrame: { title: { fr: 'Le reflet sur la vitre (meilleur cas)', en: 'The reflection on the pane (best case)', es: 'El reflejo en el cristal (mejor caso)', it: 'Il riflesso sul vetro (caso migliore)' }, distanceM: 1000, luminanceCdM2: 3e4 },
     by: [{ people: 'BeauJerome' }],
     time: '2026-11-08',
@@ -136,13 +120,7 @@ export const READINGS = [
         en: "Testing it would take the Learjet's attitude, which the film does not give; these measures cannot tell it from a reflection in the periscope.",
         es: "Probarlo requeriría la actitud del Learjet, que la película no da; estas medidas no lo distinguen de un reflejo en el periscopio.",
         it: "Verificarlo richiederebbe l'assetto del Learjet, che il film non dà; queste misure non lo distinguono da un riflesso nel periscopio."
-      }),
-      fails({
-        fr: "Simulé dans son meilleur cas (le reflet fixe dans le cadre, la vitre solidaire de la caméra, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
-        en: "Simulated at its best (the reflection standing still in the frame, the pane fixed to the camera, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
-        es: "Simulado en su mejor caso (el reflejo fijo en el encuadre, el cristal solidario de la cámara, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
-        it: "Simulato nel caso migliore (il riflesso fermo nell'inquadratura, il vetro solidale con la camera, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
-      }, 'supposed')
+      })
     ]
   },
   {
@@ -187,6 +165,7 @@ export const READINGS = [
   },
   {
     id: 'drop',
+    mechanism: { kind: 'driven-one-way', explains: 'orb' },
     by: [{ title: 'GuanoLad (Straight Dope)' }],
     time: '2008-08',
     // Its best case: one drop, where the film shows the orb, down as far as the orb goes; then still, the airflow driving it one way.
@@ -213,15 +192,16 @@ export const READINGS = [
         it: "Una goccia che le vibrazioni farebbero risalire resta da descrivere: nessuno ha detto come."
       }),
       fails({
-        fr: "Simulée dans son meilleur cas (une seule goutte, là où le film montre l'orbe tout au long de sa descente, puis immobile ; deux fois sa taille pour qu'on la voie) : elle montre le sol, renversé et flou, plus sombre que ce qui l'entoure, quand l'orbe est blanche et plus claire que tout autour d'elle. Le Soleil, derrière la caméra, ne peut pas s'y refléter.",
-        en: "Simulated at its best (a single drop, where the film shows the orb all the way down, then still; twice its size so that it is seen): it shows the ground, upside down and blurred, darker than what is round it, where the orb is white and brighter than anything round it. The Sun, behind the camera, cannot shine in it.",
-        es: "Simulada en su mejor caso (una sola gota, donde la película muestra el orbe durante todo su descenso, luego inmóvil; el doble de su tamaño para que se vea): muestra el suelo, invertido y borroso, más oscuro que lo que la rodea, cuando el orbe es blanco y más claro que todo a su alrededor. El Sol, detrás de la cámara, no puede reflejarse en ella.",
-        it: "Simulata nel caso migliore (una sola goccia, dove il film mostra la sfera per tutta la discesa, poi ferma; il doppio della sua grandezza perché si veda): mostra il suolo, capovolto e sfocato, più scuro di ciò che la circonda, mentre la sfera è bianca e più chiara di tutto intorno. Il Sole, dietro la camera, non può riflettersi in essa."
+        fr: "Simulée dans son meilleur cas (une seule goutte, poussée vers le bas au plus près de l'orbe et jamais vers le haut ; deux fois sa taille pour qu'on la voie) : elle montre le sol, renversé et flou, plus sombre que ce qui l'entoure, quand l'orbe est blanche et plus claire que tout autour d'elle. Le Soleil, derrière la caméra, ne peut pas s'y refléter.",
+        en: "Simulated at its best (a single drop, driven down as near the orb as it can be and never up; twice its size so that it is seen): it shows the ground, upside down and blurred, darker than what is round it, where the orb is white and brighter than anything round it. The Sun, behind the camera, cannot shine in it.",
+        es: "Simulada en su mejor caso (una sola gota, empujada hacia abajo lo más cerca posible del orbe y nunca hacia arriba; el doble de su tamaño para que se vea): muestra el suelo, invertido y borroso, más oscuro que lo que la rodea, cuando el orbe es blanco y más claro que todo a su alrededor. El Sol, detrás de la cámara, no puede reflejarse en ella.",
+        it: "Simulata nel caso migliore (una sola goccia, spinta verso il basso il più vicino possibile alla sfera e mai verso l'alto; il doppio della sua grandezza perché si veda): mostra il suolo, capovolto e sfocato, più scuro di ciò che la circonda, mentre la sfera è bianca e più chiara di tutto intorno. Il Sole, dietro la camera, non può riflettersi in essa."
       })
     ]
   },
   {
     id: 'dust',
+    mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
     inFrame: { title: { fr: "La poussière sur l'objectif (meilleur cas)", en: 'The speck on the lens (best case)', es: 'La mota en el objetivo (mejor caso)', it: "Il granello sull'obiettivo (caso migliore)" }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'Manduck (Straight Dope)' }, { title: 'Telemark (Straight Dope)' }],
     time: '2008-08',
@@ -238,17 +218,12 @@ export const READINGS = [
         en: "It adds light over a dark ground (+99): a particle can only do so lit by the Sun, in shadow it would darken; where the Sun was is not known.",
         es: "Añade luz sobre fondo oscuro (+99): una partícula solo puede hacerlo iluminada por el Sol, a la sombra oscurecería; no se sabe dónde estaba el Sol.",
         it: "Aggiunge luce su uno sfondo scuro (+99): una particella può farlo solo illuminata dal Sole, all'ombra scurirebbe; dove fosse il Sole non è noto."
-      }),
-      fails({
-        fr: "Simulé dans son meilleur cas (une poussière posée sur l'objectif, fixe dans le cadre, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
-        en: "Simulated at its best (a speck sitting on the lens, standing still in the frame, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
-        es: "Simulado en su mejor caso (una mota posada en el objetivo, fija en el encuadre, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
-        it: "Simulato nel caso migliore (un granello posato sull'obiettivo, fermo nell'inquadratura, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
-      }, 'supposed')
+      })
     ]
   },
   {
     id: 'film-defect',
+    mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
     inFrame: { title: { fr: 'Le cheveu dans le couloir (meilleur cas)', en: 'The hair in the gate (best case)', es: 'El pelo en la ventanilla (mejor caso)', it: 'Il pelo nel quadruccio (caso migliore)' }, distanceM: 2, luminanceCdM2: 3e4 },
     by: [{ title: 'beowulff (Straight Dope)' }],
     time: '2008-08',
@@ -270,12 +245,6 @@ export const READINGS = [
         en: "A hair or a speck in the gate stays put in the frame; the orb travels 377 px across it.",
         es: "Un pelo o una mota en la ventanilla queda fijo en el encuadre; el orbe lo recorre en 377 px.",
         it: "Un pelo o un granello nel quadruccio resta fisso nell'inquadratura; la sfera lo percorre per 377 px."
-      }),
-      fails({
-        fr: "Simulé dans son meilleur cas (un cheveu coincé dans le couloir tout le plan, fixe dans le cadre, posé sur l'orbe au premier instant, aussi lumineux qu'elle) : il reste à 251 px de l'orbe en médiane, 333 au plus, quand elle parcourt 333 px dans le cadre.",
-        en: "Simulated at its best (a hair caught in the gate all through the shot, standing still in the frame, laid on the orb at the first instant, as bright as it): it stays 251 px from the orb at the median, 333 at most, where the orb travels 333 px in the frame.",
-        es: "Simulado en su mejor caso (un pelo atrapado en la ventanilla todo el plano, fijo en el encuadre, puesto sobre el orbe en el primer instante, tan luminoso como él): queda a 251 px del orbe en la mediana, 333 como mucho, cuando el orbe recorre 333 px en el encuadre.",
-        it: "Simulato nel caso migliore (un pelo incastrato nel quadruccio per tutta la ripresa, fermo nell'inquadratura, posto sulla sfera al primo istante, luminoso quanto lei): resta a 251 px dalla sfera in mediana, 333 al massimo, mentre la sfera percorre 333 px nell'inquadratura."
       })
     ]
   },

@@ -16,6 +16,15 @@ export interface ReadingCheckTexts {
   altitudes: string
   latitude: string
   longitude: string
+  /** The best cases a search finds for a reading that says its mechanism (see BestCaseSearch). */
+  bestFixed: string
+  bestOneWay: string
+  bestGhost: string
+  bestGhostNeeds: string
+  bestStatedGhost: string
+  bestNoGhost: string
+  /** The decimal mark of the language. */
+  decimal: string
 }
 
 export const READING_CHECK_TEXTS = Messages.catalog<ReadingCheckTexts>({

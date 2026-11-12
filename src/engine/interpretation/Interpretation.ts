@@ -49,8 +49,27 @@ export interface InterpretationJson {
    * ReadingVerdict for what the findings come to.
    */
   findings?: ReadingFinding[]
+  /**
+   * How the claim says the phenomenon came to be in the picture, when it is something of the instrument rather than of the sky: what lets
+   * its best case be searched for, within what is known of the observation, and measured against the picture (see BestCaseSearch).
+   */
+  mechanism?: ReadingMechanism
   /** What a kind of interpretation a module brings states, under that kind's key (see InterpretationKind): computed into bodies when shown. */
   [kind: string]: unknown
+}
+
+/**
+ * What a claim says made a phenomenon of the picture, among what an instrument adds to it, and which phenomenon (`explains`, the id of
+ * its shapes in the account's timeline):
+ * - "fixed-in-frame": standing still in the frame, wherever the camera turns: a speck on the lens or in the gate, a reflection on a pane
+ *   the camera is fixed to;
+ * - "lens-ghost": a ghost of the Sun in the instrument's own lens, at one of the factors its glass throws them (see LensGhosts);
+ * - "stated-ghost": a ghost of the Sun in an optic before the lens, a periscope's, at whatever factor and offset its geometry gives;
+ * - "driven-one-way": something on the glass driven across the frame one way, as the airflow drives a drop.
+ */
+export interface ReadingMechanism {
+  kind: "fixed-in-frame" | "lens-ghost" | "stated-ghost" | "driven-one-way"
+  explains: string
 }
 
 /** How a test of a claim came out: it holds, it fails, or it could not be made with what is known. */

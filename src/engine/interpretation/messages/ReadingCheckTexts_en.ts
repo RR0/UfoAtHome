@@ -11,5 +11,12 @@ export const readingCheckTexts_en = {
   lightingFails: "The Sun it puts together ({bearing}° from where the camera looks, {altitude}° high) does not light the scene as the picture shows it ({from}° to {to}° from where it looks{altitudes}).",
   altitudes: ", {min}° to {max}° high",
   latitude: "latitude",
-  longitude: "longitude"
+  longitude: "longitude",
+  bestFixed: "Computed best case, standing still in the frame and placed nearest the phenomenon all along: it stays {median}° from it at the median, {max}° at most, for a phenomenon of {size}° that travels {travel}°.",
+  bestOneWay: "Computed best case, driven one way (towards {direction}° from the top of the frame, clockwise) and nearest the phenomenon: it stays {median}° from it at the median, {max}° at most, for a phenomenon of {size}° that travels {travel}°.",
+  bestGhost: "Computed best case, a ghost of the lens (factor {k}) with the Sun where the account allows it ({bearing}° from where the camera looks, {altitude}° high): it stays {median}° from the phenomenon at the median, {max}° at most, for a phenomenon of {size}° that travels {travel}°.",
+  bestGhostNeeds: "Leaving the picture's light aside, the best Sun would be {bearing}° from where the camera looks and {altitude}° high (factor {k}): the ghost would stay {median}° from the phenomenon at the median, {max}° at most.",
+  bestStatedGhost: "Computed best case, a ghost of an optic set before the lens, at the factor ({k}) and offset ({offset}°) that lay it best, the Sun {bearing}° from where the camera looks and {altitude}° high: it stays {median}° from the phenomenon at the median, {max}° at most, for a phenomenon of {size}° that travels {travel}°.",
+  bestNoGhost: "Computed best case: no Sun the account allows is within the lens's reach all along, so it throws no ghost of it.",
+  decimal: "."
 } satisfies ReadingCheckTexts

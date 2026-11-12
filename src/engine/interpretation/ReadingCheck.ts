@@ -3,6 +3,7 @@ import { parseEdtfTime, type SightingTime } from "../model/Sighting.js"
 import { TimeSpan } from "../model/TimeSpan.js"
 import { Provenance, type ProvenanceEntry } from "../persistence/Provenance.js"
 import type { SightingLighting, SightingRecordingJson } from "../persistence/sightingJson.js"
+import { BestCaseSearch } from "./BestCaseSearch.js"
 import type { FindingGround, ReadingFinding } from "./Interpretation.js"
 import type { ReadingCheckTexts } from "./messages/ReadingCheckTexts.js"
 
@@ -28,7 +29,13 @@ const PLACES: readonly { path: string, what: "latitude" | "longitude" }[] = [
 export class ReadingCheck {
 
   /** @param words What the findings say, in the language of whoever reads them: they are computed for them, never written down. */
-  constructor(private readonly words: ReadingCheckTexts) {}
+  private readonly bestCases: BestCaseSearch
+  /** The best cases found, by reading and account: a search of the whole sky, too long to run again on every drawing of a list. */
+  private readonly found = new WeakMap<SightingRecordingJson, { account: SightingRecordingJson, key: string, findings: ReadingFinding[] }>()
+
+  constructor(private readonly words: ReadingCheckTexts) {
+    this.bestCases = new BestCaseSearch(words)
+  }
 
   findingsOf(accountJson: SightingRecordingJson, readingJson: SightingRecordingJson): ReadingFinding[] {
     const account = Provenance.strip(accountJson)
@@ -45,6 +52,17 @@ export class ReadingCheck {
       const found = this.lightingFinding(lighting, account.provenance.at("lighting"), reading)
       if (found) findings.push(found)
     }
+    findings.push(...this.bestCasesOf(accountJson, readingJson))
+    return findings
+  }
+
+  /** The findings of the reading's best case (see BestCaseSearch), found once for a reading and its account as they are. */
+  private bestCasesOf(account: SightingRecordingJson, reading: SightingRecordingJson): ReadingFinding[] {
+    const key = JSON.stringify([reading.interpretation?.mechanism, reading.lens, reading.instrument])
+    const known = this.found.get(reading)
+    if (known && known.account === account && known.key === key) return known.findings
+    const findings = this.bestCases.findingsOf(account, reading)
+    this.found.set(reading, { account, key, findings })
     return findings
   }
 
