@@ -6837,6 +6837,9 @@ export class SceneRenderer {
   }
   private readonly bodyBoxScratch = new Box3()
   private readonly bodyCornerScratch = new Vector3()
+  private readonly decorFrameScratch = new Matrix4()
+  private readonly decorPartMatrix = new Matrix4()
+  private readonly decorPartScratch = new Box3()
 
   /** Which of the interpretation's bodies stands under a point of the picture, by id — see
    * BodySystem.pick. */
@@ -6845,18 +6848,30 @@ export class SceneRenderer {
     return this.bodySystem.pick(this.raycaster)
   }
 
-  /** The rectangle a decor object covers on the picture, in the same normalised device
-   * coordinates as bodyScreenBox — what the editor frames it with. Undefined when any corner of
-   * its box is behind the eye. */
+  /**
+   * The rectangle a decor object covers on the picture, in the same normalised device coordinates as bodyScreenBox — what the editor
+   * frames it with. Its box is its own, turned with it: the box of the world's axes round an aircraft heading south-east, seen from
+   * 150 m, stood out of it by half its height above and below, and the frame grew and shrank by more than the aircraft as it was carried.
+   * Undefined when any corner of its box is behind the eye.
+   */
   decorScreenBox(id: string): { minX: number, minY: number, maxX: number, maxY: number } | undefined {
     const group = this.decorGroups.get(id)
     if (!group || !group.visible) return undefined
-    const box = this.bodyBoxScratch.setFromObject(group)
+    group.updateWorldMatrix(true, true)
+    const toGroup = this.decorFrameScratch.copy(group.matrixWorld).invert()
+    const box = this.bodyBoxScratch.makeEmpty()
+    group.traverse(object => {
+      const geometry = (object as { geometry?: { boundingBox: Box3 | null, computeBoundingBox(): void } }).geometry
+      if (!geometry || !object.visible) return
+      if (!geometry.boundingBox) geometry.computeBoundingBox()
+      if (!geometry.boundingBox) return
+      box.union(this.decorPartScratch.copy(geometry.boundingBox).applyMatrix4(this.decorPartMatrix.multiplyMatrices(toGroup, object.matrixWorld)))
+    })
     if (box.isEmpty()) return undefined
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (let corner = 0; corner < 8; corner++) {
       const point = this.bodyCornerScratch.set(
-        corner & 1 ? box.max.x : box.min.x, corner & 2 ? box.max.y : box.min.y, corner & 4 ? box.max.z : box.min.z)
+        corner & 1 ? box.max.x : box.min.x, corner & 2 ? box.max.y : box.min.y, corner & 4 ? box.max.z : box.min.z).applyMatrix4(group.matrixWorld)
       const ndc = this.screenPointOf(point.sub(this.camera.position).normalize())
       if (!ndc) return undefined
       minX = Math.min(minX, ndc.ndcX)
