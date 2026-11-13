@@ -1,4 +1,4 @@
-import type { Basis } from "../engine/persistence/Provenance.js"
+import { Provenance, type Basis, type ValueSource } from "../engine/persistence/Provenance.js"
 import { WindowClose } from "./WindowClose.js"
 
 /** What the element says: the window's title, what each basis is called, and its fields. */
@@ -10,11 +10,57 @@ export interface BasisInputMessages {
   rationaleField: string
 }
 
+/**
+ * What the window says of what a value rests on (see ValueSource): the kinds of source, and the fields of each.
+ *
+ * Its own catalog, and not a part of BasisInputMessages, because the pill's own words are said twice over in the editor (once of an
+ * observer's values, once of an event's parameters) while these are said once: the same words wherever a source is written.
+ */
+export interface BasisSourceMessages {
+  /** The heading of the part: what this value rests on. */
+  field: string
+  /** The kinds of source, in the order the window offers them. */
+  kinds: Record<SourceKind, string>
+  interviewField: string
+  segmentField: string
+  documentField: string
+  atField: string
+  urlField: string
+  pictureField: string
+  toolField: string
+  /** Said in place of the fields when the basis is a free one: a working hypothesis rests on nothing (see Provenance.free). */
+  free: string
+  /** A turn of speech whose text is not known yet, in the list of passages ({n} its number). */
+  segmentUnnamed: string
+  /** The one interview of a case that says nothing of which it is. */
+  interviewOnly: string
+}
+
+/** Which kind of thing a value rests on: one of ValueSource's, or none. */
+export type SourceKind = "none" | "said" | "document" | "picture" | "tool"
+
+/**
+ * What the window can offer to point at, which only its host knows: the interviews belong to the CASE (so they come through the case
+ * editor) and the pictures to the recording. Neither is offered when there is none, rather than offered empty.
+ */
+export interface SourceChoices {
+  interviews?: {
+    /** The id of the case's interview event; absent for the only interview a case holds (see SaidIn.interview). */
+    id?: string
+    label: string
+    /** The turns of speech of its transcript, as the list of passages shows them. */
+    segments: { index: number, label: string }[]
+  }[]
+  pictures?: { id: string, label: string }[]
+}
+
 /** What a value stands on, as the element shows and edits it (see ProvenanceEntry, without the value it is about). */
 export interface BasisEntry {
   basis: Basis
   how?: string
   rationale?: string
+  /** What it rests on, named (see ValueSource). */
+  source?: ValueSource
 }
 
 /**
@@ -52,14 +98,26 @@ rr0-input-basis[hidden] { display: none; }
   position-area: bottom span-right; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; }
 @supports not (position-area: bottom) { .basis-window.basis-window:popover-open { inset: 0; margin: auto; height: fit-content; } }
 .basis-window textarea { min-height: 8em; font: 400 14px/1.45 var(--sans, sans-serif); resize: vertical; }
+/* A value that names what it rests on (see ValueSource): said on the pill itself, so that a reader sees which values can be gone and
+   looked at without opening anything. */
+.basis-mark[data-sourced] { text-decoration: underline dotted; text-underline-offset: 2px; }
+.basis-source { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.basis-source h4 { margin: 0 0 10px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+.basis-source-free { margin: 0; font: 400 13px/1.45 var(--sans); color: var(--ink-dim); }
+.basis-window input { box-sizing: border-box; width: 100%; font-weight: 400; }
 `
 
   /** The ways a value of its kind can have been obtained, for the window's list (none: the list is not shown). */
   hows: { value: string, label: string }[] = []
   /** Whether the host keeps a rationale (a position's host keeps its basis alone): its field is shown only then. */
   rationaleKept = true
+  /** Whether the host keeps what the value rests on: the source part is shown only then, and only once its words have come. */
+  sourceKept = true
+  /** What the window can offer to point at (see SourceChoices): none makes the kinds that need a list not be offered. */
+  choices: SourceChoices = {}
 
   private wording?: BasisInputMessages
+  private sourceWording?: BasisSourceMessages
   private shown?: BasisEntry
   private mark?: HTMLElement
   private window?: HTMLElement
@@ -106,13 +164,19 @@ rr0-input-basis[hidden] { display: none; }
     this.say()
   }
 
+  /** The words of the source part (see BasisSourceMessages): without them the part is not shown, and nothing is lost. */
+  set sourceMessages(messages: BasisSourceMessages | undefined) {
+    this.sourceWording = messages
+  }
+
   /** What the value stands on; undefined is "stated", with nothing more said. */
   get entry(): BasisEntry | undefined {
     return this.shown
   }
 
   set entry(entry: BasisEntry | undefined) {
-    this.shown = entry && (entry.basis !== "stated" || entry.how !== undefined || entry.rationale !== undefined) ? { ...entry } : undefined
+    this.shown = entry && (entry.basis !== "stated" || entry.how !== undefined || entry.rationale !== undefined || entry.source !== undefined)
+      ? { ...entry } : undefined
     this.say()
   }
 
@@ -131,6 +195,8 @@ rr0-input-basis[hidden] { display: none; }
     this.dataset.basis = basis
     // Written only when it changes: a text set anew is a node inserted anew.
     if (mark.textContent !== m.basis[basis]) mark.textContent = m.basis[basis]
+    if (this.shown?.source) mark.dataset.sourced = "yes"
+    else delete mark.dataset.sourced
     mark.title = this.shown?.rationale ? `${m.title} : ${this.shown.rationale}` : m.title
     mark.setAttribute("aria-label", `${m.title} : ${m.basis[basis]}`)
   }
@@ -149,22 +215,150 @@ rr0-input-basis[hidden] { display: none; }
     how.value = this.shown?.how ?? ""
     const rationale = document.createElement("textarea")
     rationale.value = this.shown?.rationale ?? ""
-    const write = () => {
-      this.entry = { basis: basis.value as Basis, ...(how.value ? { how: how.value } : {}), ...(rationale.value.trim() ? { rationale: rationale.value.trim() } : {}) }
-      this.dispatchEvent(new CustomEvent("basischange", { detail: { entry: this.shown }, bubbles: true, composed: true }))
-    }
-    for (const control of [basis, how]) control.addEventListener("change", write)
-    rationale.addEventListener("change", write)
     const labelled = (text: string, control: HTMLElement) => {
       const label = document.createElement("label")
       label.append(Object.assign(document.createElement("span"), { textContent: text }), control)
       return label
     }
+    // What the value rests on, read by whatever the source part drew, and nothing when it drew none.
+    let readSource: () => ValueSource | undefined = () => this.shown?.source
+    const write = () => {
+      const picked = basis.value as Basis
+      const source = readSource()
+      this.entry = {
+        basis: picked,
+        ...(how.value ? { how: how.value } : {}),
+        ...(rationale.value.trim() ? { rationale: rationale.value.trim() } : {}),
+        ...(source ? { source } : {})
+      }
+      this.dispatchEvent(new CustomEvent("basischange", { detail: { entry: this.shown }, bubbles: true, composed: true }))
+    }
+    how.addEventListener("change", write)
+    rationale.addEventListener("change", write)
+    const source = document.createElement("div")
+    source.className = "basis-source"
+    const drawSource = () => {
+      readSource = this.drawSource(source, basis.value as Basis, labelled, () => write())
+    }
+    // A basis turned to a free one takes its source away with it: a hypothesis rests on nothing (see ValueSource).
+    basis.addEventListener("change", () => { drawSource(); write() })
     const window = this.windowElement()
-    window.replaceChildren(heading, labelled(m.basisField, basis), ...(this.hows.length > 0 ? [labelled(m.howField, how)] : []), ...(this.rationaleKept ? [labelled(m.rationaleField, rationale)] : []))
+    const sourceShown = this.sourceKept && this.sourceWording !== undefined
+    if (sourceShown) drawSource()
+    window.replaceChildren(heading, labelled(m.basisField, basis), ...(this.hows.length > 0 ? [labelled(m.howField, how)] : []), ...(this.rationaleKept ? [labelled(m.rationaleField, rationale)] : []), ...(sourceShown ? [source] : []))
     WindowClose.popover(window, m.title)
     if (typeof window.showPopover === "function" && window.isConnected) window.showPopover()
     else window.hidden = false
+  }
+
+  /** Which kind of thing a source names (see ValueSource): one at a time, which is how it is written. */
+  static kindOf(source: ValueSource | undefined): SourceKind {
+    if (source?.said) return "said"
+    if (source?.picture) return "picture"
+    if (source?.document !== undefined || source?.at || source?.url) return "document"
+    if (source?.tool) return "tool"
+    return "none"
+  }
+
+  /**
+   * The part of the window where what the value rests on is said: the kind of source, then the fields of that kind. Answers a reader of
+   * what it now says, for the window to write it.
+   *
+   * A free basis gets no fields at all, only the line that says why (see Provenance.free): a working hypothesis rests on nothing, and
+   * letting one be given a source would be the one lie this field exists to prevent.
+   */
+  private drawSource(container: HTMLElement, basis: Basis, labelled: (text: string, control: HTMLElement) => HTMLElement, write: () => void): () => ValueSource | undefined {
+    const m = this.sourceWording
+    if (!m) {
+      container.replaceChildren()
+      return () => undefined
+    }
+    if (Provenance.free({ basis })) {
+      container.replaceChildren(Object.assign(document.createElement("p"), { className: "basis-source-free", textContent: m.free }))
+      return () => undefined
+    }
+    const interviews = this.choices.interviews ?? []
+    const pictures = this.choices.pictures ?? []
+    // Only the kinds there is something to point at: a recording outside a case has no interviews, and one without pictures no pictures.
+    const kinds: SourceKind[] = ["none", ...(interviews.length > 0 ? ["said" as const] : []), "document", ...(pictures.length > 0 ? ["picture" as const] : []), "tool"]
+    const kind = document.createElement("select")
+    for (const value of kinds) kind.append(new Option(m.kinds[value], value))
+    const held = this.shown?.source
+    const wanted = BasisInputElement.kindOf(held)
+    kind.value = kinds.includes(wanted) ? wanted : "none"
+    const fields = document.createElement("div")
+    let read: () => ValueSource | undefined = () => undefined
+    const draw = () => { read = this.drawSourceFields(fields, kind.value as SourceKind, held, labelled, write) }
+    kind.addEventListener("change", () => { draw(); write() })
+    draw()
+    container.replaceChildren(labelled(m.field, kind), fields)
+    return () => read()
+  }
+
+  /** The fields of one kind of source, filled with what the value already said when it is of that kind. */
+  private drawSourceFields(fields: HTMLElement, kind: SourceKind, held: ValueSource | undefined, labelled: (text: string, control: HTMLElement) => HTMLElement, write: () => void): () => ValueSource | undefined {
+    const m = this.sourceWording!
+    const of = (kind === BasisInputElement.kindOf(held) ? held : undefined) ?? {}
+    const text = (value?: string) => {
+      const input = document.createElement("input")
+      input.type = "text"
+      input.value = value ?? ""
+      input.addEventListener("change", write)
+      return input
+    }
+    const trimmed = (input: HTMLInputElement) => input.value.trim() || undefined
+    if (kind === "said") {
+      const interviews = this.choices.interviews ?? []
+      const which = document.createElement("select")
+      for (const interview of interviews) which.append(new Option(interview.id === undefined ? m.interviewOnly : interview.label, interview.id ?? ""))
+      which.value = of.said?.interview ?? interviews[0]?.id ?? ""
+      const segment = document.createElement("select")
+      const fill = () => {
+        const chosen = interviews.find(candidate => (candidate.id ?? "") === which.value) ?? interviews[0]
+        segment.replaceChildren(...(chosen?.segments ?? []).map(turn => new Option(turn.label || m.segmentUnnamed.replace("{n}", String(turn.index + 1)), String(turn.index))))
+        if (of.said && segment.querySelector(`option[value="${of.said.segment}"]`)) segment.value = String(of.said.segment)
+      }
+      fill()
+      which.addEventListener("change", () => { fill(); write() })
+      segment.addEventListener("change", write)
+      fields.replaceChildren(labelled(m.interviewField, which), labelled(m.segmentField, segment))
+      return () => {
+        if (segment.value === "") return undefined
+        const chosen = interviews.find(candidate => (candidate.id ?? "") === which.value)
+        // The range of the passage is not picked here: what is said is the turn of speech, which is what a reader is taken to.
+        return { said: { ...(chosen?.id !== undefined ? { interview: chosen.id } : {}), segment: Number(segment.value), ...(of.said?.range ? { range: of.said.range } : {}) } }
+      }
+    }
+    if (kind === "picture") {
+      const pictures = this.choices.pictures ?? []
+      const which = document.createElement("select")
+      which.append(new Option("—", ""))
+      for (const picture of pictures) which.append(new Option(picture.label, picture.id))
+      which.value = of.picture ?? ""
+      which.addEventListener("change", write)
+      fields.replaceChildren(labelled(m.pictureField, which))
+      return () => which.value ? { picture: which.value } : undefined
+    }
+    if (kind === "tool") {
+      const tool = text(of.tool)
+      fields.replaceChildren(labelled(m.toolField, tool))
+      return () => trimmed(tool) ? { tool: trimmed(tool)! } : undefined
+    }
+    if (kind === "document") {
+      // A title as the author writes it: a SaidText in one language is that language's string (see SaidText).
+      const title = text(typeof of.document === "string" ? of.document : undefined)
+      const at = text(of.at)
+      const url = text(of.url)
+      fields.replaceChildren(labelled(m.documentField, title), labelled(m.atField, at), labelled(m.urlField, url))
+      return () => {
+        const said = { ...(trimmed(title) ? { document: trimmed(title)! } : {}), ...(trimmed(at) ? { at: trimmed(at)! } : {}), ...(trimmed(url) ? { url: trimmed(url)! } : {}) }
+        // A document kept as it was said in several languages, with its title untouched here, stays whole.
+        if (typeof of.document === "object" && of.document !== null && trimmed(title) === undefined) return Object.keys(said).length > 0 || of.document ? { ...said, document: of.document } : undefined
+        return Object.keys(said).length > 0 ? said : undefined
+      }
+    }
+    fields.replaceChildren()
+    return () => undefined
   }
 
   /**

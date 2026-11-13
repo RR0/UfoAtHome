@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest"
 import { BasisInputElement, register } from "../../src/component/BasisInputElement.js"
 import { HintElement } from "../../src/component/HintElement.js"
 
+const sourceMessages = {
+  field: "What it rests on",
+  kinds: { none: "Nothing named", said: "What the witness said", document: "A document", picture: "A picture", tool: "A tool" },
+  interviewField: "Interview", segmentField: "Passage", documentField: "Title", atField: "Where in it", urlField: "Address",
+  pictureField: "Picture", toolField: "Tool",
+  free: "A working hypothesis rests on nothing.",
+  segmentUnnamed: "Turn {n}", interviewOnly: "The case's interview"
+}
+
 const messages = {
   title: "How this value was obtained", basisField: "Basis", howField: "How", rationaleField: "Rationale",
   basis: { established: "established", stated: "stated", measured: "measured", derived: "derived", assumed: "assumed", fitted: "fitted" }
@@ -45,6 +54,91 @@ describe("BasisInputElement", () => {
     rationale.value = ""
     rationale.dispatchEvent(new Event("change"))
     expect(reported.at(-1)).toBeUndefined()
+  })
+
+  it("says what the value rests on: the turn of speech of an interview the witness said it in", () => {
+    const element = mounted()
+    element.sourceMessages = sourceMessages
+    element.choices = { interviews: [
+      { id: "interview-1", label: "Interview of Q. B.", segments: [{ index: 0, label: "Q. B.: a light over the wood" }, { index: 1, label: "" }] },
+      { id: "interview-2", label: "Second interview of Q. B.", segments: [{ index: 0, label: "Q. B.: higher than I said" }] }
+    ] }
+    const reported: unknown[] = []
+    element.addEventListener("basischange", event => reported.push((event as CustomEvent).detail.entry))
+    element.pill.click()
+    const window = element.openWindow!
+    const kind = [...window.querySelectorAll("select")].find(select => [...select.options].some(option => option.value === "said"))!
+    kind.value = "said"
+    kind.dispatchEvent(new Event("change"))
+    // The interview corrected is the one cited: which interview each value cites IS the history of what the witness said.
+    const selects = [...window.querySelectorAll("select")]
+    const which = selects[selects.indexOf(kind) + 1]!
+    which.value = "interview-2"
+    which.dispatchEvent(new Event("change"))
+    expect(reported.at(-1)).toEqual({ basis: "stated", source: { said: { interview: "interview-2", segment: 0 } } })
+    // A turn whose text is not known is still one to point at.
+    which.value = "interview-1"
+    which.dispatchEvent(new Event("change"))
+    const segment = [...window.querySelectorAll("select")].at(-1)!
+    expect([...segment.options].map(option => option.text)).toEqual(["Q. B.: a light over the wood", "Turn 2"])
+    segment.value = "1"
+    segment.dispatchEvent(new Event("change"))
+    expect(reported.at(-1)).toEqual({ basis: "stated", source: { said: { interview: "interview-1", segment: 1 } } })
+    // A value that names what it rests on says so on its pill, without being opened.
+    expect(element.pill.dataset.sourced).toBe("yes")
+  })
+
+  it("names a document with where in it and its address, and a picture only among the recording's", () => {
+    const element = mounted()
+    element.sourceMessages = sourceMessages
+    element.choices = { pictures: [{ id: "photo-1", label: "From the wall, 1968" }] }
+    const reported: unknown[] = []
+    element.addEventListener("basischange", event => reported.push((event as CustomEvent).detail.entry))
+    element.pill.click()
+    const window = element.openWindow!
+    const kind = [...window.querySelectorAll("select")].find(select => [...select.options].some(option => option.value === "document"))!
+    // No interview to point at: that kind is not offered at all, rather than offered empty.
+    expect([...kind.options].map(option => option.value)).toEqual(["none", "document", "picture", "tool"])
+    kind.value = "document"
+    kind.dispatchEvent(new Event("change"))
+    const [title, at, url] = [...window.querySelectorAll("input")]
+    title!.value = "GEIPAN questionnaire"
+    at!.value = "question 14"
+    url!.value = "https://example.org/q.pdf"
+    url!.dispatchEvent(new Event("change"))
+    expect(reported.at(-1)).toEqual({ basis: "stated", source: { document: "GEIPAN questionnaire", at: "question 14", url: "https://example.org/q.pdf" } })
+    kind.value = "picture"
+    kind.dispatchEvent(new Event("change"))
+    const picture = [...window.querySelectorAll("select")].at(-1)!
+    picture.value = "photo-1"
+    picture.dispatchEvent(new Event("change"))
+    // One source at a time: the document it named is gone, not kept beside the picture.
+    expect(reported.at(-1)).toEqual({ basis: "stated", source: { picture: "photo-1" } })
+  })
+
+  it("leaves a free basis resting on nothing: no fields, and whatever was named goes", () => {
+    const element = mounted()
+    element.sourceMessages = sourceMessages
+    element.entry = { basis: "derived", source: { tool: "QGIS" } }
+    const reported: unknown[] = []
+    element.addEventListener("basischange", event => reported.push((event as CustomEvent).detail.entry))
+    element.pill.click()
+    const window = element.openWindow!
+    const basis = window.querySelector("select")!
+    basis.value = "fitted"
+    basis.dispatchEvent(new Event("change"))
+    expect(window.querySelector(".basis-source-free")?.textContent).toBe(sourceMessages.free)
+    // Nothing to fill in, and the tool it rested on is not carried over: a hypothesis rests on nothing.
+    expect(reported.at(-1)).toEqual({ basis: "fitted" })
+    expect(element.pill.dataset.sourced).toBeUndefined()
+  })
+
+  it("is not asked for where its host does not keep it", () => {
+    const element = mounted()
+    element.sourceMessages = sourceMessages
+    element.sourceKept = false
+    element.pill.click()
+    expect(element.openWindow!.querySelector(".basis-source")).toBeNull()
   })
 })
 

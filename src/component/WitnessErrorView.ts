@@ -1,5 +1,5 @@
 import { HintElement } from "./HintElement.js"
-import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
+import { BasisInputElement, register as registerBasisInput, type BasisEntry, type BasisSourceMessages, type SourceChoices } from "./BasisInputElement.js"
 import type { WitnessErrorMessages } from "./messages/WitnessErrorMessages.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { WitnessConditions, WitnessExposure, WitnessWord } from "../engine/model/Account.js"
@@ -21,6 +21,9 @@ export interface WitnessErrorHost {
   recordingJson(): unknown
   /** The model or the observer's conditions changed: whatever reads the laws reads them again (the confrontation, the candidates). */
   lawsChanged(): void
+  /** The words and the lists the basis window needs to say what a value RESTS on (see BasisInputElement): none before the editor's words
+   * have come, and no interviews outside a case. */
+  valueSources?(): { messages: BasisSourceMessages, choices: SourceChoices } | undefined
 }
 
 /** A field whose value an observer gave, and whose error the view says. */
@@ -146,6 +149,9 @@ export class WitnessErrorView {
     // Said again in the words of the moment, as the rest of the mark is.
     mark.hows = WitnessError.HOW[field.kind].map(value => ({ value, label: m.how[value] ?? value }))
     mark.messages = { title: m.basisTitle, basis: m.basis, basisField: m.basisField, howField: m.howField, rationaleField: m.rationaleField }
+    const sources = this.host.valueSources?.()
+    mark.sourceMessages = sources?.messages
+    mark.choices = sources?.choices ?? {}
     mark.entry = entry
     mark.hidden = field.path() === undefined
     field.label.dataset.basis = basis

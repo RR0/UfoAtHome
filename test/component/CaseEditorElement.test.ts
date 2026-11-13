@@ -756,6 +756,22 @@ describe("CaseEditorElement's events", () => {
     expect(calls).toEqual(["seek 2", "render"])
   })
 
+  it("offers the case's interviews, with their turns of speech, as what a value of the observation rests on", async () => {
+    const element = await open(undefined, withPassages())
+    await wait(100)
+    const editor = element.shadowRoot!.querySelector("rr0-sighting-editor")! as unknown as {
+      valueSources(): { choices: { interviews?: { id?: string, label: string, segments: { index: number, label: string }[] }[] } } | undefined
+    }
+    const interviews = editor.valueSources()!.choices.interviews!
+    // The one interview of the case, which needs no id in what is written (see SaidIn.interview), and both of its turns of speech: the
+    // editor of a recording knows none of this on its own.
+    expect(interviews.map(interview => [interview.id, interview.label])).toEqual([[undefined, "Interview of An account"]])
+    expect(interviews[0].segments).toEqual([
+      { index: 0, label: "A. W.: It reached the zenith at once." },
+      { index: 1, label: "A. W.: No ref here." }
+    ])
+  })
+
   it("shows no passages under an observation that no interview tells of", async () => {
     const element = await open(undefined, interviewed())
     await wait(100)

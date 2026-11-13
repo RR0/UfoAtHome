@@ -6,7 +6,7 @@ import type { EventsMessages } from "./messages/EventsMessages.js"
 import { AddMenu } from "./AddMenu.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { Icons } from "./Icons.js"
-import { BasisInputElement, register as registerBasisInput, type BasisEntry } from "./BasisInputElement.js"
+import { BasisInputElement, register as registerBasisInput, type BasisEntry, type BasisSourceMessages, type SourceChoices } from "./BasisInputElement.js"
 import { HintElement } from "./HintElement.js"
 import type { ProvenanceEntry } from "../engine/persistence/Provenance.js"
 import type { GeoPoint, PositionFrame, SaidPosition } from "../engine/model/SaidPosition.js"
@@ -44,6 +44,8 @@ export interface EventsPanelHost {
   compassPoint?(azimuthDeg: number): string
   /** Where the observer looks at the playhead: a direction in the sky an event can be said to start from or go towards. */
   lookedAt?(): { azimuthDeg: number, altitudeDeg: number } | undefined
+  /** The words and the lists the basis window needs to say what a parameter RESTS on (see BasisInputElement). */
+  valueSources?(): { messages: BasisSourceMessages, choices: SourceChoices } | undefined
 }
 
 /** A direction in the sky: its azimuth from north, and its altitude above the horizon, degrees. */
@@ -750,6 +752,9 @@ export class EventsPanel {
     element.anchorKey = path
     element.messages = { title: this.messages.basisTitle, basis: this.messages.basis, basisField: this.messages.basisField, howField: this.messages.howField,
       rationaleField: this.messages.rationaleField }
+    const sources = this.host.valueSources?.()
+    element.sourceMessages = sources?.messages
+    element.choices = sources?.choices ?? {}
     element.entry = this.host.sighting().provenance.at(path)
     // What it stands on is said of the value as it is: no typing, nothing worked out again.
     element.addEventListener("basischange", event => {

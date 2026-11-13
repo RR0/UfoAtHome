@@ -1,5 +1,6 @@
 import type { AircraftProblem } from "../../engine/traffic/AircraftProvider.js"
 import type { AccountEvaluationMessages } from "../AccountEvaluationFields.js"
+import type { BasisSourceMessages } from "../BasisInputElement.js"
 import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
 import type { EventsMessages } from "./EventsMessages.js"
 import type { TimelineTracksMessages } from "../TimelineTracks.js"
@@ -368,6 +369,9 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The ✕ of every window: what it does, said to whoever cannot see it. */
   close: string
   editorKicker: string
+  /** What the window of a value's basis says of what that value rests on (see BasisInputElement): the same words of an observer's values
+   * and of an event's parameters. */
+  basisSource: BasisSourceMessages
   /** What the editor says of the errors an observer's values may hold (see WitnessErrorView). */
   witnessError: WitnessErrorMessages
   /** The events panel (see EventsPanel). */

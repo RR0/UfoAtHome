@@ -1,3 +1,4 @@
+import { basisSourceMessages_en } from "./BasisSourceMessages_en.js"
 import { eventsMessages_en } from "./EventsMessages_en.js"
 import { witnessErrorMessages_en } from "./WitnessErrorMessages_en.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
@@ -233,6 +234,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   soundGroup: "Sound",
   close: "Close",
   editorKicker: "Sighting editor",
+  basisSource: basisSourceMessages_en,
   witnessError: witnessErrorMessages_en,
   events: eventsMessages_en,
   expandTracks: "Expand the tracks",

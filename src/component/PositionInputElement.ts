@@ -189,8 +189,9 @@ export class PositionInputElement extends HTMLElement {
     const basis = doc.createElement(BasisInputElement.TAG) as BasisInputElement
     basis.id = `${name}-basis`
     basis.className = "position-basis"
-    // Its host keeps what a position stands on, not why.
+    // Its host keeps what a position stands on, not why, and not what it rests on.
     basis.rationaleKept = false
+    basis.sourceKept = false
     basis.anchorKey = `${name}-basis`
     basis.addEventListener("basischange", event => {
       event.stopPropagation()

@@ -28,6 +28,7 @@ import type { SightingTime } from "../engine/model/Sighting.js"
 import type { CaseTrack } from "./CaseSession.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
+import type { SourceChoices } from "./BasisInputElement.js"
 import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import type { InterviewEditorElement, InterviewEvent } from "./InterviewEditorElement.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
@@ -631,6 +632,8 @@ export class CaseEditorElement extends HTMLElement {
     this.editorMessages = editorMessages
     this.applyMessages()
     this.refreshRow()
+    // The interviews a value may be said to rest on are named in the words that have just come, not in none.
+    void this.showInterviewSources()
     const share = await this.shareDialog.useLanguage(language)
     if (!share || token !== this.localeToken) return
     this.shareMessages = share
@@ -946,9 +949,46 @@ export class CaseEditorElement extends HTMLElement {
     }
     this.refreshRow()
     void this.showPassages(track)
+    void this.showInterviewSources()
   }
 
   private passagesToken = 0
+  private sourcesToken = 0
+
+  /**
+   * Gives the recording on show the case's interviews and their turns of speech, so that a value of it can be said to rest on the passage
+   * where the witness said it (see ValueSource.said and Provenance's note on citations as the history of what was said).
+   *
+   * The interviews belong to the case and the editor of a recording knows none: without this it offers no passage, which is right for a
+   * recording opened on its own and wrong inside a case.
+   */
+  private async showInterviewSources(): Promise<void> {
+    const session = this.session
+    const token = ++this.sourcesToken
+    this.editor.interviewSources = undefined
+    if (!session || session.interviews.length === 0) return
+    const { InterviewFile } = await import("../engine/persistence/interviewJson.js")
+    const items = this.items(session) as { interview?: InterviewEvent }[]
+    const only = session.interviews.length === 1
+    const choices: NonNullable<SourceChoices["interviews"]> = []
+    for (const interview of session.interviews) {
+      const json = await this.transcriptOf(interview)
+      if (!json || !Array.isArray(json.segments)) continue
+      const id = interview.id
+      choices.push({
+        // The only interview a case holds needs no id in what is written (see SaidIn.interview); one of several without an id cannot be pointed at.
+        ...(only || id === undefined ? {} : { id }),
+        label: this.optionLabel({ interview }, items.findIndex(candidate => candidate.interview === interview)),
+        segments: json.segments.map((segment, index) => {
+          const said = InterviewFile.said(segment) ?? ""
+          const quoted = said.length > 80 ? `${said.slice(0, 77)}…` : said
+          return { index, label: said === "" ? "" : `${InterviewFile.speakerName(json, segment.speaker)}${this.messages.colon}${quoted}` }
+        })
+      })
+    }
+    if (token !== this.sourcesToken || choices.length === 0) return
+    this.editor.interviewSources = choices
+  }
 
   /**
    * Marks on the reading on show the fields of the values it took beyond what is known of its account's (see ReadingCheck): its time and

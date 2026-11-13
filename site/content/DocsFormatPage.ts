@@ -550,6 +550,10 @@ export class DocsFormatPage extends DocsSection {
       <em>is</em> the record of what changed and what did not, and no version of the reconstruction
       has to be kept to show it. Which interview is the later one is the case's to say, from the
       dates of its interview events.</p>
+    <p>In the editor it is written in the window of the value's own basis pill: what it rests on,
+      then the fields of that kind. The passages offered are the interviews of the case, so a
+      recording opened on its own offers none; the pictures offered are the recording's own. A free
+      basis offers no fields at all.</p>
     <p>The two ends of that list are what keeps a likeness from passing for a proof. Only what is
       <code>established</code> owes nothing to the account and nothing to the reconstruction, which
       is what makes it worth judging a reconstruction against. A <code>fitted</code> value is the
@@ -1108,6 +1112,10 @@ export class DocsFormatPage extends DocsSection {
       qui a changé et de ce qui n'a pas changé, et il n'y a aucune version de la reconstitution à
       conserver pour le montrer. Laquelle est la plus récente, c'est au dossier de le dire, par les
       dates de ses événements d'interview.</p>
+    <p>Dans l'éditeur, elle s'écrit dans la fenêtre de la pastille de base de la valeur : ce sur quoi
+      elle repose, puis les champs de cette nature. Les passages proposés sont les interviews du
+      dossier, donc un enregistrement ouvert seul n'en propose aucun ; les photos proposées sont
+      celles de l'enregistrement. Une base libre ne propose aucun champ.</p>
     <p>Les deux bouts de cette liste sont ce qui empêche une ressemblance de passer pour une preuve.
       Seul ce qui est <code>established</code> ne doit rien au témoignage ni à la reconstitution :
       c'est ce qui en fait la seule chose contre laquelle juger une reconstitution. Une valeur
@@ -1654,6 +1662,10 @@ export class DocsFormatPage extends DocsSection {
       cada valor <em>es</em> el registro de lo que cambió y lo que no, y no hay que conservar ninguna
       versión de la reconstrucción para mostrarlo. Cuál es la más reciente le toca decirlo al
       expediente, por las fechas de sus eventos de entrevista.</p>
+    <p>En el editor se escribe en la ventana de la pastilla de base del valor: en qué se basa, y
+      luego los campos de esa clase. Los pasajes ofrecidos son las entrevistas del expediente, así
+      que una grabación abierta sola no ofrece ninguno; las fotos ofrecidas son las de la grabación.
+      Una base libre no ofrece ningún campo.</p>
     <p>Los dos extremos de esa lista son lo que impide que un parecido pase por una prueba. Solo lo
       <code>established</code> no debe nada al testimonio ni a la reconstrucción: eso es lo que lo
       convierte en lo único contra lo que juzgar una reconstrucción. Un valor <code>fitted</code> es
@@ -2200,6 +2212,10 @@ export class DocsFormatPage extends DocsSection {
       Quale intervista cita ciascun valore <em>è</em> il registro di ciò che è cambiato e di ciò che
       non è cambiato, e non c'è nessuna versione della ricostruzione da conservare per mostrarlo.
       Quale sia la più recente spetta al fascicolo dirlo, dalle date dei suoi eventi di intervista.</p>
+    <p>Nell'editor si scrive nella finestra della pastiglia di base del valore: su che cosa si basa,
+      poi i campi di quel genere. I passaggi proposti sono le interviste del fascicolo, quindi una
+      registrazione aperta da sola non ne propone alcuno; le foto proposte sono quelle della
+      registrazione. Una base libera non propone alcun campo.</p>
     <p>I due estremi di questo elenco sono ciò che impedisce a una somiglianza di passare per una
       prova. Solo ciò che è <code>established</code> non deve nulla alla testimonianza né alla
       ricostruzione: è questo a renderlo l'unica cosa contro cui giudicare una ricostruzione. Un

@@ -2,6 +2,7 @@ import { TimeSpan } from "../engine/model/TimeSpan.js"
 import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.js"
 import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
 import { SightingMigration } from "../engine/persistence/SightingMigration.js"
+import type { BasisSourceMessages, SourceChoices } from "./BasisInputElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
 import { setupCloudEditor } from "./CloudEditor.js"
@@ -519,6 +520,8 @@ export class SightingEditorElement extends HTMLElement {
   private overlayTimer?: ReturnType<typeof setTimeout>
   /** The error model of the witness: each value's basis and law, the observer's conditions and Moon gauge (see WitnessErrorView). */
   private readonly witnessErrorView: WitnessErrorView
+  /** The case's interviews, as a value's source may point at them (see interviewSources): none outside a case. */
+  private saidInterviews?: SourceChoices["interviews"]
   /** The candidate explanations of the Summary section, and the variant on show (see CandidatesView). */
   private candidatesView?: CandidatesView
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
@@ -1387,6 +1390,7 @@ export class SightingEditorElement extends HTMLElement {
         sighting.account = Object.values(account).some(value => value !== undefined) ? account : undefined
       },
       recordingJson: () => this.sightingData,
+      valueSources: () => this.valueSources(),
       lawsChanged: () => {
         // An interpretation is contradicted where it is outside the laws, not merely different (see BodyConfrontation.lawsOf).
         this.sceneElement.confrontationTolerance = BodyConfrontation.lawsOf(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions)
@@ -1662,7 +1666,8 @@ export class SightingEditorElement extends HTMLElement {
       bodyLabel: (id: string) => {
         const body = this.ufoElement.sighting.interpretation?.bodies.find(candidate => candidate.id === id)
         return this.said.read(body?.title) ?? id
-      }
+      },
+      valueSources: () => this.valueSources()
     }
     this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, undefined)
     this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, undefined, "phenomenon")
@@ -7718,6 +7723,31 @@ export class SightingEditorElement extends HTMLElement {
       return item
     }))
     list.hidden = list.childElementCount === 0
+  }
+
+  /**
+   * The interviews of the case that holds this observation, with their turns of speech, for a value to be said to rest on one of their
+   * passages (see ValueSource.said). Given by the case editor, which is the only thing that knows them: a recording opened on its own has
+   * none, and then the window offers no passage rather than an empty list.
+   */
+  set interviewSources(interviews: SourceChoices["interviews"]) {
+    this.saidInterviews = interviews
+    this.witnessErrorView?.refreshFields()
+  }
+
+  /**
+   * What the window of a value's basis needs to say what the value RESTS on: its words, the case's interviews, and the pictures of the
+   * recording (a photograph lined up on the scene is a measurement, so a value may be said to be measured on one).
+   */
+  private valueSources(): { messages: BasisSourceMessages, choices: SourceChoices } | undefined {
+    if (!this.worded) return undefined
+    const pictures = this.ufoElement.sighting.references
+      .filter(reference => reference.kind !== "video")
+      .map(reference => ({ id: reference.id, label: this.said.read(reference.title) ?? reference.id }))
+    return {
+      messages: this.messages.basisSource,
+      choices: { ...(this.saidInterviews?.length ? { interviews: this.saidInterviews } : {}), ...(pictures.length > 0 ? { pictures } : {}) }
+    }
   }
 
   /** Opens the section whose panel is `id` ("group-temporal"…), for a caller that sends the author there (a moment quoted in an interview). */
