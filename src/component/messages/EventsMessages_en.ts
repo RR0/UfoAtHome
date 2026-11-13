@@ -42,5 +42,5 @@ export const eventsMessages_en: EventsMessages = {
   atOnceHint: "Ticked: the value stays the previous row's until this instant, then becomes this row's at once (braking, a sudden start). Unticked: it gets there gradually from the previous row.",
   addRow: "Add a row",
   removeRow: "Remove this row",
-  basis: { stated: "stated", derived: "derived", assumed: "assumed", measured: "measured" }
+  basis: { established: "established", stated: "stated", derived: "derived", assumed: "assumed", measured: "measured", fitted: "fitted" }
 }

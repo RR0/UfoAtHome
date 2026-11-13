@@ -4,7 +4,7 @@ import { HintElement } from "../../src/component/HintElement.js"
 
 const messages = {
   title: "How this value was obtained", basisField: "Basis", howField: "How", rationaleField: "Rationale",
-  basis: { stated: "stated", measured: "measured", derived: "derived", assumed: "assumed" }
+  basis: { established: "established", stated: "stated", measured: "measured", derived: "derived", assumed: "assumed", fitted: "fitted" }
 }
 
 function mounted(): BasisInputElement {
@@ -37,6 +37,8 @@ describe("BasisInputElement", () => {
     rationale.value = "From the road's width"
     rationale.dispatchEvent(new Event("change"))
     expect(reported).toEqual([{ basis: "derived" }, { basis: "derived", rationale: "From the road's width" }])
+    // Every basis the format knows, strongest first: a reader of the window sees the whole scale, not the three in the middle.
+    expect([...basis.options].map(option => option.value)).toEqual(["established", "measured", "stated", "derived", "assumed", "fitted"])
     // No list of ways given: none shown.
     expect(window.querySelectorAll("select").length).toBe(1)
     basis.value = "stated"

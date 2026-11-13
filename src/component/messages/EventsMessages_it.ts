@@ -42,5 +42,5 @@ export const eventsMessages_it: EventsMessages = {
   atOnceHint: "Spuntato: il valore resta quello della riga precedente fino a questo istante, poi passa di colpo a quello di questa riga (una frenata, una partenza brusca). Non spuntato: ci arriva gradualmente dalla riga precedente.",
   addRow: "Aggiungi una riga",
   removeRow: "Rimuovi questa riga",
-  basis: { stated: "dichiarato", derived: "dedotto", assumed: "supposto", measured: "misurato" }
+  basis: { established: "accertato", stated: "dichiarato", derived: "dedotto", assumed: "supposto", measured: "misurato", fitted: "adattato" }
 }

@@ -69,7 +69,7 @@ export class BallesterGuaspAssessor implements Assessor {
   static readonly PENDING = "pending"
 
   /** Weakest first, as CoverageAssessor: a figure is worth no more than the least of what holds it up. */
-  private static readonly WEAKEST_FIRST: Basis[] = ["assumed", "derived", "stated", "measured"]
+  private static readonly WEAKEST_FIRST: Basis[] = ["fitted", "assumed", "derived", "stated", "measured", "established"]
 
   async assess(sighting: Sighting): Promise<Assessment> {
     const account = sighting.account ?? {}

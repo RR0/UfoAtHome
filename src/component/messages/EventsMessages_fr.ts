@@ -42,5 +42,5 @@ export const eventsMessages_fr: EventsMessages = {
   atOnceHint: "Coché : la valeur reste celle de la ligne précédente jusqu'à cet instant, puis passe d'un coup à celle de cette ligne (un freinage, un départ brusque). Décoché : elle y arrive progressivement depuis la ligne précédente.",
   addRow: "Ajouter une ligne",
   removeRow: "Retirer cette ligne",
-  basis: { stated: "énoncé", derived: "dérivé", assumed: "supposé", measured: "mesuré" }
+  basis: { established: "établi", stated: "énoncé", derived: "dérivé", assumed: "supposé", measured: "mesuré", fitted: "ajusté" }
 }

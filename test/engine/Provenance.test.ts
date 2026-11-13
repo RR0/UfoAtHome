@@ -160,3 +160,17 @@ describe("Provenance.restore and what it is given", () => {
     expect(restored.observerTrack).not.toBe((recording as typeof json).observerTrack)
   })
 })
+
+describe("Provenance.free", () => {
+  it("is true of what a reading may move: what nobody settled, and what was turned for a hypothesis", () => {
+    expect(Provenance.free({ basis: "assumed" })).toBe(true)
+    expect(Provenance.free({ basis: "fitted", rationale: "Venus, to see whether the heading can be made to fit" })).toBe(true)
+  })
+
+  it("is false of everything a reconstruction may be judged against, and of nothing said at all", () => {
+    for (const basis of ["established", "measured", "stated", "derived"] as const) {
+      expect(Provenance.free({ basis })).toBe(false)
+    }
+    expect(Provenance.free(undefined)).toBe(false)
+  })
+})

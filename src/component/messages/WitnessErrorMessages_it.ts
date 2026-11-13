@@ -36,10 +36,12 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
   "parametersIntro": "Gli errori di uno stesso testimone sono legati: lo stesso fattore su tutte le dimensioni, lo stesso scarto su tutte le ore. Calcolati, mai scritti: nessun margine «±» si inserisce a mano.",
   "showMore": "Mostra",
   "basis": {
+    "established": "◇ accertata",
     "measured": "◆ misurata",
     "stated": "dichiarata",
     "derived": "dedotta",
-    "assumed": "supposta"
+    "assumed": "supposta",
+    "fitted": "⇄ adattata"
   },
   "how": {
     "clock": "letta su un orologio",

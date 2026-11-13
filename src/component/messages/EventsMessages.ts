@@ -1,3 +1,5 @@
+import type { Basis } from "../../engine/persistence/Provenance.js"
+
 /** What the editor's events panel says (see EventsPanel), in one language. */
 export interface EventsMessages {
   /** The section's title: the observer's events, the phenomenon's, a body's ({body} its name). */
@@ -61,5 +63,5 @@ export interface EventsMessages {
   addRow: string
   removeRow: string
   /** What a value's basis is called (see Basis). */
-  basis: Record<"stated" | "derived" | "assumed" | "measured", string>
+  basis: Record<Basis, string>
 }

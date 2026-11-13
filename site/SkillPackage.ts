@@ -75,6 +75,19 @@ A wrong value marked "assumed" is a question for the author. A guess passed off 
 fabricated account, the one thing this format exists to prevent. When in doubt, mark it weaker. Do
 not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
 
+Three more exist, and you write only the first of them:
+
+- **measured**: read off an instrument or a gauge — a clock, a compass, a theodolite — by the
+  observer or the investigator. Say \`how\` (\`clock\`, \`instrument\`, \`landmark\`,
+  \`arm-length-gauge\`...): it is what picks the law of its error;
+- **established**: settled away from the account AND away from the reconstruction — a document, a
+  register, a survey, a third party's measurement. An investigator writes it, naming the source in
+  the \`rationale\`. You do not: what you read in the file, you read in the account, so it is
+  "stated" or "derived";
+- **fitted**: moved, within what is known, to see whether a hypothesis can be made to fit. It
+  belongs to whoever tests a hypothesis, never to a draft — you have no hypothesis to turn a knob
+  for, and what you chose to make the file playable is "assumed".
+
 ## Method
 
 1. **Read every document, and cite as you go** (document and page). Note each contradiction between

@@ -36,10 +36,12 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
   "parametersIntro": "Les erreurs d'un même témoin sont liées : il applique le même facteur à toutes ses tailles, le même décalage à toutes ses heures. Calculées, jamais saisies : aucune marge « ± » ne se tape à la main.",
   "showMore": "Afficher",
   "basis": {
+    "established": "◇ établie",
     "measured": "◆ mesurée",
     "stated": "déclarée",
     "derived": "déduite",
-    "assumed": "supposée"
+    "assumed": "supposée",
+    "fitted": "⇄ ajustée"
   },
   "how": {
     "clock": "lue sur une horloge",

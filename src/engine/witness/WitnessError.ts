@@ -77,7 +77,9 @@ export class ConsolidatedErrorModel implements ErrorModel {
 
   law(value: WitnessValue, conditions?: WitnessConditions): ErrorLaw {
     const v = value.value
-    const measured = value.basis === "measured"
+    // "established" with it: a value settled from a document or a register owes nothing to this observer's memory, so it is held
+    // to the instrument's error rather than to a law of estimation (see Basis).
+    const measured = value.basis === "measured" || value.basis === "established"
     switch (value.kind) {
       case "time": {
         if (value.how === "clock" || measured) return { shape: "range", low: -1, high: 1, note: "timeClock", params: { minutes: 1 }, status: "argued", sources: ["Bullard 2014"] }

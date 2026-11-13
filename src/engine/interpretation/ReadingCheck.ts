@@ -87,7 +87,7 @@ export class ReadingCheck {
       const words = within ? this.words.timeWithin : this.words.timeOutside
       return { text: ReadingCheck.fill(words, { time: readingTime, range: entry.range }), outcome: within ? "holds" : "fails", against: "established", path: "time" }
     }
-    if (entry?.basis === "assumed") return undefined
+    if (Provenance.free(entry)) return undefined
     return { text: ReadingCheck.fill(this.words.timeChanged, { from: accountTime, time: readingTime }), outcome: "fails", against: "established", path: "time" }
   }
 
@@ -101,7 +101,7 @@ export class ReadingCheck {
         outcome: within ? "holds" : "fails", against: "established"
       }
     }
-    if (entry?.basis === "assumed") return undefined
+    if (Provenance.free(entry)) return undefined
     return { text: ReadingCheck.fill(this.words.valueChanged, { what, from: accountValue, value: readingValue }), outcome: "fails", against: "established" }
   }
 
@@ -122,7 +122,7 @@ export class ReadingCheck {
     const { fromDeg: from, toDeg: to } = lighting.sunFromViewDeg ?? { fromDeg: 0, toDeg: 360 }
     const { minDeg: low, maxDeg: high } = lighting.sunAltitudeDeg ?? { minDeg: -90, maxDeg: 90 }
     const holds = ReadingCheck.lights(lighting, sun)
-    const ground: FindingGround = entry?.basis === "assumed" ? "supposed" : "established"
+    const ground: FindingGround = Provenance.free(entry) ? "supposed" : "established"
     const round = (value: number) => Math.round(value)
     return {
       text: ReadingCheck.fill(holds ? this.words.lightingHolds : this.words.lightingFails, {

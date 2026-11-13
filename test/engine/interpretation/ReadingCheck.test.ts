@@ -77,6 +77,12 @@ describe("A reading set against the observation it reads", () => {
     expect(ReadingCheck.findingsOf(assumed, reading)).toEqual([])
   })
 
+  it("leaves free a value turned to make a hypothesis fit: moving it is no contradiction", () => {
+    const fitted = { ...account(), time: { value: "1976-06-15T16:00:00", basis: "fitted", rationale: "turned for the reflection" } as never, lighting: undefined }
+    const reading = { ...fitted, time: { value: "1976-12-01T09:00:00", basis: "fitted" } as never }
+    expect(ReadingCheck.findingsOf(fitted, reading)).toEqual([])
+  })
+
   it("brings an hour the light rules out to the nearest of that day it allows, which the heading moves", () => {
     const lighting = { sunFromViewDeg: { fromDeg: 105, toDeg: 285 }, sunAltitudeDeg: { minDeg: 5, maxDeg: 90 } }
     const midnight = { year: 1976, month: 6, day: 15, hour: 0, minute: 0 }

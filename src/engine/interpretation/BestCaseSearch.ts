@@ -347,7 +347,7 @@ export class BestCaseSearch {
     const lat = start.lat ?? 0
     return {
       samples, keyframes, sizeDeg: sizes.length > 0 ? sizes[Math.floor(sizes.length / 2)] : 0.5, travelDeg, aspect, headingDeg: start.headingDeg ?? 0,
-      lighting: account.lighting, lightingGround: provenance.at("lighting")?.basis === "assumed" ? "supposed" : "established",
+      lighting: account.lighting, lightingGround: Provenance.free(provenance.at("lighting")) ? "supposed" : "established",
       altitudes: {
         minDeg: -Math.acos(6371000 / (6371000 + Math.max(start.elevationM ?? 0, 0))) / DEG,
         maxDeg: BestCaseSearch.highestSun(account.time, provenance.at("time")?.range, lat, start.lng ?? 0)

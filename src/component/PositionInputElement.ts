@@ -28,9 +28,11 @@ export interface PositionInputMessages {
   /** The tooltip of the basis: what it says. */
   positionBasisHint: string
   positionBasisStated: string
+  positionBasisEstablished: string
   positionBasisMeasured: string
   positionBasisDerived: string
   positionBasisAssumed: string
+  positionBasisFitted: string
   /** The basis's field in its window. */
   positionBasisField: string
 }
@@ -49,9 +51,11 @@ export const positionInputMessages_en: PositionInputMessages = {
   positionLabel: "Position",
   positionBasisHint: "Where this position comes from",
   positionBasisStated: "stated",
+  positionBasisEstablished: "established",
   positionBasisMeasured: "measured",
   positionBasisDerived: "derived",
   positionBasisAssumed: "assumed",
+  positionBasisFitted: "fitted",
   positionBasisField: "Basis"
 }
 
@@ -358,7 +362,10 @@ export class PositionInputElement extends HTMLElement {
     this.fromRow!.querySelector(".position-from-text")!.textContent = wording.positionFrom
     this.basisSelect!.messages = {
       title: wording.positionBasisHint, basisField: wording.positionBasisField, howField: "", rationaleField: "",
-      basis: { stated: wording.positionBasisStated, measured: wording.positionBasisMeasured, derived: wording.positionBasisDerived, assumed: wording.positionBasisAssumed }
+      basis: {
+        established: wording.positionBasisEstablished, stated: wording.positionBasisStated, measured: wording.positionBasisMeasured,
+        derived: wording.positionBasisDerived, assumed: wording.positionBasisAssumed, fitted: wording.positionBasisFitted
+      }
     }
     this.markBasis()
   }

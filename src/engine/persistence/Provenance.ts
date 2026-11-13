@@ -5,14 +5,23 @@
  * every value was the observer's own, so a file that says nothing says "stated", and every recording
  * ever written stays true without being touched.
  *
- * The other two are what let a reconstruction be run at all. A observer who says "a few minutes"
+ * The weaker ones are what let a reconstruction be run at all. A observer who says "a few minutes"
  * has not given a duration, and a timeline needs one; one who says the thing barred the road has
  * not given an angle, though a road's width and a plausible distance bound one. Refusing to write
  * those left a recording that could not play, which is a worse answer than a marked guess.
+ *
+ * The two at the ends were asked for by the GEIPAN (A. Cousyn, November 2026), and they are about one danger: a reconstruction
+ * that is made to fit and then read as a validation. "established" names what was settled away from both the account and the
+ * simulation, the only thing worth judging a reconstruction against; "fitted" names what was turned to make a hypothesis fit, and
+ * nothing may be judged against it.
  */
 export type Basis =
+  /** Settled away from the observation and away from the reconstruction: a document, a register, a survey, a third party's
+   * measurement — a crane's permit, a cadastre, a published orbit. It owes nothing to the account and nothing to the simulation,
+   * which is what makes it the one kind of value a reconstruction may be judged against. `rationale` names the source. */
+  | "established"
   /** Read off an instrument or a gauge — a clock, a compass, an arm's-length gauge — by the observer or an investigator: the
-   * strongest there is, since its error is the instrument's and not a memory's (see docs/witness-error-model.md). */
+   * strongest the observation itself gives, since its error is the instrument's and not a memory's (see docs/witness-error-model.md). */
   | "measured"
   /** The observer said it. The default when a file states no basis at all. */
   | "stated"
@@ -22,6 +31,12 @@ export type Basis =
   /** Chosen so the reconstruction has a value at all, on nothing the observer said. The list of
    * these IS the list of what to go back to the source for. */
   | "assumed"
+  /** Moved, within what is known, to see whether a hypothesis can be made to fit — the knob a reading turns.
+   *
+   * It is the weakest of all, and deliberately so: the more of these a reconstruction holds, the easier it is to produce a
+   * likeness, so a likeness obtained on them proves nothing. Nothing judges a reading against a fitted value (see ReadingCheck):
+   * agreement there is the fitting, not a finding. `rationale` says which hypothesis it was turned for. */
+  | "fitted"
 
 /** A value with its provenance beside it — what any field of a recording may be written as, in
  * place of the bare value. */
@@ -95,6 +110,18 @@ type JsonObject = Record<string, unknown>
 export class Provenance {
 
   private constructor(private readonly entries: Map<string, ProvenanceEntry>) {
+  }
+
+  /**
+   * Whether a value is one a reading may move freely: one the account never settled ("assumed"), or one turned to make a
+   * hypothesis fit ("fitted").
+   *
+   * Moving it is not a contradiction, and agreeing with it is not a finding: it was put there to be moved. Nothing is tested
+   * against such a value (see ReadingCheck), which is the whole point of marking it — a likeness obtained by turning knobs is a
+   * likeness and no more.
+   */
+  static free(entry: ProvenanceEntry | undefined): boolean {
+    return entry?.basis === "assumed" || entry?.basis === "fitted"
   }
 
   static empty(): Provenance {

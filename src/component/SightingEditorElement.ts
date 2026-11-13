@@ -13467,11 +13467,14 @@ export class SightingEditorElement extends HTMLElement {
 
 /** Which message heads each group of the draft report — see showNarrativeReport. */
 const BASIS_HEADINGS = {
-  // A draft measures nothing: what it may say was measured, it read in the account, as anything stated.
+  // A draft measures nothing and establishes nothing: what it may say was measured or established, it read in the account, as
+  // anything stated. Nor does it fit anything: a drafter has no hypothesis to turn a knob for, and says "assumed" instead.
+  established: "narrativeStated",
   measured: "narrativeStated",
   stated: "narrativeStated",
   derived: "narrativeDerived",
-  assumed: "narrativeAssumed"
+  assumed: "narrativeAssumed",
+  fitted: "narrativeAssumed"
 } as const satisfies Record<Basis, keyof SightingEditorMessages>
 
 /** What a part of the Sky group made from a kind edits with (see SightingEditorElement.buildSkyParts). */

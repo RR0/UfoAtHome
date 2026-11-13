@@ -36,10 +36,12 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
   "parametersIntro": "One witness's errors are tied: the same factor on every size, the same offset on every time. Computed, never typed: no “±” margin is entered by hand.",
   "showMore": "Show",
   "basis": {
+    "established": "◇ established",
     "measured": "◆ measured",
     "stated": "stated",
     "derived": "derived",
-    "assumed": "assumed"
+    "assumed": "assumed",
+    "fitted": "⇄ fitted"
   },
   "how": {
     "clock": "read on a clock",

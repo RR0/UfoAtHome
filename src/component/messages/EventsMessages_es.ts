@@ -42,5 +42,5 @@ export const eventsMessages_es: EventsMessages = {
   atOnceHint: "Marcado: el valor sigue siendo el de la fila anterior hasta este instante, y pasa de golpe al de esta fila (un frenazo, un arranque brusco). Sin marcar: llega poco a poco desde la fila anterior.",
   addRow: "Añadir una fila",
   removeRow: "Quitar esta fila",
-  basis: { stated: "declarado", derived: "deducido", assumed: "supuesto", measured: "medido" }
+  basis: { established: "establecido", stated: "declarado", derived: "deducido", assumed: "supuesto", measured: "medido", fitted: "ajustado" }
 }

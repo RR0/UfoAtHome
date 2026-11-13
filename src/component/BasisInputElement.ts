@@ -40,6 +40,8 @@ rr0-input-basis[hidden] { display: none; }
 .basis-mark[data-basis="stated"] { border-style: dashed; opacity: .55; }
 :is(label, .field, .event-param-label):is(:hover, :focus-within) .basis-mark, .basis-mark:is(:hover, :focus-visible) { opacity: 1; }
 .basis-mark[data-basis="assumed"], .basis-mark[data-basis="derived"] { font-style: italic; }
+/* Turned to make a hypothesis fit: nothing is judged against it (see Basis), and it does not read as one of the account's own. */
+.basis-mark[data-basis="fitted"] { font-style: italic; border-style: dotted; }
 .basis-window { width: min(26em, 92vw); padding: 18px 20px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--ground-raised); color: var(--ink); box-shadow: 0 12px 32px rgba(0, 0, 0, .3); }
 .basis-window h3 { margin: 0 0 12px; font: 600 19px/1.3 var(--serif); }
 .basis-window label { display: flex; flex-direction: column; gap: 5px; margin: 0 0 12px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
@@ -139,7 +141,7 @@ rr0-input-basis[hidden] { display: none; }
     if (!m) return
     const heading = Object.assign(document.createElement("h3"), { textContent: m.title })
     const basis = document.createElement("select")
-    for (const value of ["measured", "stated", "derived", "assumed"] as const) basis.append(new Option(m.basis[value], value))
+    for (const value of ["established", "measured", "stated", "derived", "assumed", "fitted"] as const) basis.append(new Option(m.basis[value], value))
     basis.value = this.shown?.basis ?? "stated"
     const how = document.createElement("select")
     how.append(new Option("—", ""))

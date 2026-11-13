@@ -1,3 +1,4 @@
+import type { Basis } from "../../engine/persistence/Provenance.js"
 import type { SightingLabels } from "./SightingLabels.js"
 
 /** Contract for `<rr0-sighting>`'s user-visible label strings — implemented per language
@@ -21,7 +22,7 @@ export interface SightingMessages extends SightingLabels {
   /** The info panel's label for where the account can be read as given — see RecordingSource. */
   source: string
   /** The tag after a line of the info panel saying how it is known — see Basis. */
-  basis: Record<"measured" | "stated" | "derived" | "assumed", string>
+  basis: Record<Basis, string>
   credits: string
   /** Title of the info panel's app link, which opens the observation being shown in the editor. */
   editThisObservation: string
