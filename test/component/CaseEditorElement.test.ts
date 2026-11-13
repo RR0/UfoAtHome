@@ -919,9 +919,9 @@ describe("CaseEditorElement's events", () => {
     const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")]
     // A reading nobody dated takes the time of the account it reads: not before it.
     expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Observation of An account", "Undated", "A model"])
-    // Under the account it reads, as a part of it, saying no more whose it is.
-    expect(cards.map(card => card.classList.contains("event-child"))).toEqual([false, true, true])
-    expect(cards[1].querySelector(".event-links")!.textContent).not.toContain("Interpretation of")
+    // Every event on the same footing, in the order of time: a reading is no longer drawn inside the account it reads, it names it.
+    expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "reading"])
+    expect(cards[1].querySelector(".event-links")!.textContent).toContain("Interpretation of")
     const undated = cards[1]
     // It fails only against a supposition, and could not be tested on one point: not settled, orange.
     expect(undated.dataset.verdict).toBe("unsettled")
@@ -932,6 +932,29 @@ describe("CaseEditorElement's events", () => {
     // A reading with no findings has no verdict: untested is not sound.
     expect(cards[2].dataset.verdict).toBeUndefined()
     expect(cards[2].querySelector(".findings")).toBeNull()
+  })
+
+  it("filters the list by kind of event, saying how many of each the case holds, and never empties it", async () => {
+    const element = await open(undefined, interviewed())
+    // The words come from a catalog fetched after the case: the chips are named once they are there.
+    await wait(80)
+    const root = element.shadowRoot!
+    const chips = () => [...root.querySelectorAll<HTMLButtonElement>(".filter-chip")]
+    const shown = () => [...root.querySelectorAll<HTMLElement>(".event-card")].map(card => card.dataset.kind)
+    expect(chips().map(chip => chip.textContent)).toEqual(["Observations1", "Interviews1"])
+    expect(chips().map(chip => chip.getAttribute("aria-pressed"))).toEqual(["true", "true"])
+    expect(shown()).toEqual(["observation", "interview"])
+    chips()[1].click()
+    await wait()
+    expect(shown()).toEqual(["observation"])
+    expect(root.getElementById("events-count")!.textContent).toBe("1")
+    // The last kind shown stays: a list of nothing says nothing about the case.
+    chips()[0].click()
+    await wait()
+    expect(shown()).toEqual(["observation"])
+    chips()[1].click()
+    await wait()
+    expect(shown()).toEqual(["observation", "interview"])
   })
 
   it("makes every reference to another event of the case a link that opens it", async () => {
@@ -945,11 +968,19 @@ describe("CaseEditorElement's events", () => {
     files["https://example.org/d/closeup.json"] = { ...account, id: "close" }
     await wait()
     const root = element.shadowRoot!
-    const reading = [...root.querySelectorAll<HTMLElement>(".event-card")].find(card => card.classList.contains("event-child"))!
-    // It reads two accounts: under the one it is nested in, the other is named, and naming it is a way to it.
+    const reading = [...root.querySelectorAll<HTMLElement>(".event-card")].find(card => card.dataset.kind === "reading")!
+    // It reads two accounts: it names both, wherever they sit in the chronology, and naming one is a way to it.
     const refs = [...reading.querySelectorAll<HTMLButtonElement>(".event-ref")]
-    expect(refs.map(ref => ref.textContent)).toEqual(["Observation of A close-up"])
-    refs[0].click()
+    expect(refs.map(ref => ref.textContent)).toEqual(["Observation of An account", "Observation of A close-up"])
+    expect(reading.querySelector(".event-links")!.textContent).toContain(" and ")
+    // Pointed at, the card it leads to is lit, and no other.
+    const aimed = () => [...root.querySelectorAll<HTMLElement>(".event-card.event-aimed")]
+      .map(card => card.querySelector(".event-open")!.textContent)
+    refs[1].dispatchEvent(new Event("mouseenter"))
+    expect(aimed()).toEqual(["Observation of A close-up"])
+    refs[1].dispatchEvent(new Event("mouseleave"))
+    expect(aimed()).toEqual([])
+    refs[1].click()
     await wait()
     expect(root.getElementById("event-item")!.hidden).toBe(false)
     expect(root.getElementById("crumb-title")!.textContent).toBe("Observation of A close-up")
@@ -973,7 +1004,7 @@ describe("CaseEditorElement's events", () => {
     // What the author carries on with: the copy is the one opened.
     expect(root.getElementById("event-item")!.hidden).toBe(false)
     // A reading's clone still reads the account the original read: a reading of nothing would be no reading.
-    cards().find(card => card.classList.contains("event-child"))!.querySelector<HTMLButtonElement>(".event-copy")!.click()
+    cards().find(card => card.dataset.kind === "reading")!.querySelector<HTMLButtonElement>(".event-copy")!.click()
     await wait()
     expect(session.tracks).toHaveLength(4)
     const readingCopy = session.tracks[3]

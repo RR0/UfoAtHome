@@ -24,6 +24,12 @@ export interface CaseEditorMessages extends InputFileMessages {
   /** A reading's kind, on its pill; and how many readings an account has. */
   kindReading: string
   readingsCount: string
+  /** The filter over the list: one button per kind of event the case holds, named in the plural. */
+  kindObservations: string
+  kindReadings: string
+  kindInterviews: string
+  /** Between the last two events a card names, where it names several: "Interpretation of A and B". */
+  linkAnd: string
   /** What a reading's findings come to (see ReadingVerdict), as said on its card. */
   readingVerdict: { incompatible: string, unsettled: string, compatible: string }
   /** How each test of a reading came out, said to whoever cannot see its mark. */
@@ -94,8 +100,6 @@ export interface CaseEditorMessages extends InputFileMessages {
   add: string
   addHint: string
   interpretationOf: string
-  /** A reading listed under the observation it reads, of the others it reads too. */
-  interpretationAlsoOf: string
   /** A colon as the language writes one between a heading and what follows it (French puts a no-break space before it). */
   colon: string
   /** A quotation as the language marks one, `{text}` standing for it. */

@@ -172,26 +172,17 @@ const TEMPLATE = `
   .event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
   .event-entry { display: grid; gap: var(--gap); }
   .event-card { --dot-y: 50%; position: relative; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground); }
-  .event-entry > .event-card::before, .event-entry > .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); }
-  .event-entry > .event-card::before {
-    z-index: 1; top: calc(var(--dot-y) - 1px); box-sizing: border-box; width: 13px; height: 13px; transform: translate(-50%, -50%);
-    border: 2px solid var(--kind); border-radius: 50%; background: var(--ground-raised);
+  .event-entry > .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); }
+  /* On the rail, in the colour of its kind: what kind of event it is, rather than a dot that says only that there is one. */
+  .event-mark {
+    position: absolute; z-index: 1; left: calc(var(--rail) - 24px - 1px); top: calc(var(--dot-y) - 1px); display: grid; place-items: center;
+    width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ground-raised); color: var(--kind);
   }
+  .event-mark .icon { width: 14px; height: 14px; }
   .event-entry > .event-card::after { top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--line-strong); }
   .event-entry:first-child > .event-card::after { top: calc(var(--dot-y) - 1px); }
   .event-entry:last-child > .event-card::after { bottom: calc(100% - var(--dot-y) - 1px); }
   .event-entry:only-child > .event-card::after { display: none; }
-  /* The readings of an observation, under it, set in: each joined to it by an elbow off one stem that runs down from it to the last, and
-     the rail of time running on past them to the next event when one follows. */
-  .event-children { --stem: -14px; --elbow-y: 23px; position: relative; display: grid; gap: var(--gap); margin: 0 0 0 28px; padding: 0; list-style: none; }
-  .event-entry:not(:last-child) > .event-children::after {
-    content: ""; position: absolute; left: calc(var(--rail) - 24px - 28px); top: calc(-1px - var(--gap) / 2); bottom: calc(-1px - var(--gap) / 2);
-    width: 1px; transform: translateX(-50%); background: var(--line-strong);
-  }
-  .event-child::before, .event-child:not(:last-child)::after { content: ""; position: absolute; left: var(--stem); border-left: 1.5px solid var(--line-strong); }
-  .event-child::before { top: calc(-1px - var(--gap)); width: 12px; height: calc(var(--elbow-y) + var(--gap)); border-bottom: 1.5px solid var(--line-strong); border-radius: 0 0 0 8px; }
-  .event-child:not(:last-child)::after { top: calc(var(--elbow-y) - 1px); bottom: calc(-1px - var(--gap)); }
-  .event-child .event-body { align-items: start; }
   /* What the card is linked to goes UNDER what it says, across the card: beside the title it had a third of the width and wrapped on
      every reference, below it has the whole of it. Only the top line keeps clear of the corner's buttons. */
   .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1fr); grid-template-areas: "pill main" "links links" "findings findings";
@@ -213,11 +204,23 @@ const TEMPLATE = `
   .event-card:has(.event-tool) .event-main { margin-right: 100px; }
   .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
   .event-links:empty { display: none; }
+  /* The filter over the list: a button per kind, lit while its events are shown, with how many of them the case holds. */
+  .event-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .event-filter[hidden] { display: none; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
+    background: none; color: var(--ink-dim); font: 600 12px/1.6 var(--sans); cursor: pointer; }
+  .filter-chip[aria-pressed="true"] { border-color: var(--kind, var(--glow-solid)); color: var(--ink); }
+  .filter-chip[data-kind="interview"] { --kind: var(--sky); }
+  .filter-chip[data-kind="reading"] { --kind: var(--ink-faint); }
+  .filter-chip[aria-pressed="false"] { opacity: .55; }
+  .filter-count { color: var(--ink-faint); font-weight: 400; }
   /* A renvoi to another event of the case: it opens it, so it looks like what it is. */
   /* Above the hit area the title stretches over the whole card (.event-open::after), as the corner's buttons are: otherwise the card
      swallows the click and opens itself, which is exactly not where the renvoi leads. */
   .event-ref { position: relative; z-index: 1; padding: 0; border: 0; background: none; font: inherit; color: var(--sky); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
   .event-ref:hover { color: var(--ink); }
+  /* The card a reference is pointing at, while it is pointed at. */
+  .event-card.event-aimed { outline: 2px solid var(--sky); outline-offset: 2px; background: var(--ground-sunken); }
   .event-ref:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; border-radius: 3px; }
   /* What a reading's findings come to, as the editor's groups say what their fields do: red when it contradicts what is established, orange
      when it is not settled, green when it holds (see ReadingVerdict). */
@@ -310,6 +313,8 @@ const TEMPLATE = `
         <h3 id="label-events-in-time" class="section-title"></h3>
         <button id="add" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><span id="label-add"></span></button>
       </div>
+      <!-- What the list shows, by kind: a way of reading the chronology, never written in the case (see renderFilter). -->
+      <div id="event-filter" class="event-filter" role="group" hidden></div>
       <ol id="event-list" class="event-list"></ol>
     </div>
     <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
@@ -1295,30 +1300,69 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.byId("next-event") as HTMLButtonElement).disabled = open < 0 || open >= events.length - 1
   }
 
+  /**
+   * Which kinds of event the list shows. All of them until the author says otherwise, and the choice holds while the case is open: it is a
+   * way of reading a long chronology, not something to write in the case.
+   */
+  private readonly kindsShown = new Set<"observation" | "interview" | "reading">(["observation", "interview", "reading"])
+
+  /** The filter over the list: one button per kind the case holds, saying how many, and whether its events are shown. */
+  private renderFilter(events: { item: { track?: CaseTrack, interview?: InterviewEvent } }[]): void {
+    const m = this.messages
+    const row = this.byId("event-filter")
+    const counted = (["observation", "reading", "interview"] as const)
+      .map(kind => ({ kind, count: events.filter(({ item }) => this.kindOf(item) === kind).length }))
+      .filter(({ count }) => count > 0)
+    // Nothing to filter when the case holds one kind only.
+    row.hidden = counted.length < 2
+    if (row.hidden) return
+    row.replaceChildren(...counted.map(({ kind, count }) => {
+      const shown = this.kindsShown.has(kind)
+      const chip = document.createElement("button")
+      chip.type = "button"
+      chip.className = "filter-chip"
+      chip.dataset.kind = kind
+      chip.setAttribute("aria-pressed", String(shown))
+      const label = document.createElement("span")
+      label.textContent = { observation: m.kindObservations, reading: m.kindReadings, interview: m.kindInterviews }[kind]
+      const many = document.createElement("span")
+      many.className = "filter-count"
+      many.textContent = String(count)
+      chip.append(label, many)
+      chip.addEventListener("click", () => {
+        // Read from the set and not from what this chip was drawn with: the list is drawn again whenever the case or its words change,
+        // and a chip left over from an earlier drawing would toggle the wrong way.
+        const on = this.kindsShown.has(kind)
+        // The last kind the case HOLDS cannot be turned off: an empty list says nothing about the case. Counting the set itself would be
+        // wrong, since it carries kinds this case has none of.
+        if (on && !counted.some(other => other.kind !== kind && this.kindsShown.has(other.kind))) return
+        if (on) this.kindsShown.delete(kind)
+        else this.kindsShown.add(kind)
+        this.refreshOverview()
+      })
+      return chip
+    }))
+  }
+
   /** One card per event, in the order of time, on a line: its kind, what it is called, when and its id, what it is linked to, and its
    * removal. A click anywhere on it but the removal opens it. */
   private renderEvents(session: CaseSession, events: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[]): void {
     const m = this.messages
     const list = this.byId("event-list")
-    // A reading is shown under the observation it reads, as a part of it: it need not say whose it is. Under the first it reads when it
-    // reads several, the others said on it; on its own, in its time, when it reads none the case lists.
-    const accountOf = (item: { track?: CaseTrack }) => item.track?.kind === "reading" ? session.accountOf(item.track) : undefined
-    const listed = new Set(events.map(({ item }) => item.track).filter((track): track is CaseTrack => track !== undefined))
-    const nested = (item: { track?: CaseTrack }) => { const account = accountOf(item); return account !== undefined && listed.has(account) }
-    const ordered: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number, child: boolean }[] = []
-    for (const entry of events) {
-      if (nested(entry.item)) continue
-      ordered.push({ ...entry, child: false })
-      if (entry.item.track?.kind === "observer") {
-        for (const reading of events) if (nested(reading.item) && accountOf(reading.item) === entry.item.track) ordered.push({ ...reading, child: true })
-      }
-    }
-    const cards = ordered.map(({ item, index, child }) => {
+    // Every event on the same footing, in the order of time: a reading used to be drawn inside the observation it reads, but a case is a
+    // chronology, and a reading of the first observation may well have been made after the second. What reads what is said by the links a
+    // card carries, not by where it sits. The filter above the list is what tames a long one.
+    const shown = events.filter(({ item }) => this.kindsShown.has(this.kindOf(item)))
+    this.renderFilter(events)
+    this.byId("events-count").textContent = String(shown.length)
+    const cards = shown.map(({ item, index }) => {
       const kind = this.kindOf(item)
       const event = (item.track?.event ?? item.interview)!
-      const card = document.createElement(child ? "li" : "div")
-      card.className = child ? "event-card event-child" : "event-card"
+      const card = document.createElement("div")
+      card.className = "event-card"
       card.dataset.kind = kind
+      // What a link from another card aims at (see toEvent): the event's own place among the case's.
+      card.dataset.at = String(index)
       const pill = document.createElement("span")
       pill.className = "kind-pill"
       pill.dataset.kind = kind
@@ -1347,21 +1391,27 @@ export class CaseEditorElement extends HTMLElement {
         link.textContent = label
         link.title = m.openEvent
         link.addEventListener("click", () => this.openEvent(to))
+        // Pointed at or focused, the card it leads to is lit, so that a reference is found without leaving the list — and nothing is lit
+        // when that card is filtered out, which is answer enough.
+        const aim = (lit: boolean) => list.querySelector<HTMLElement>(`.event-card[data-at="${to}"]`)?.classList.toggle("event-aimed", lit)
+        for (const [event, lit] of [["mouseenter", true], ["mouseleave", false], ["focus", true], ["blur", false]] as const) {
+          link.addEventListener(event, () => aim(lit))
+        }
         return link
       }
-      const listed = (nodes: Node[]) => nodes.flatMap((node, index) => index === 0 ? [node] : [document.createTextNode(", "), node])
+      const listed = (nodes: Node[]) => nodes.flatMap((node, at) =>
+        at === 0 ? [node] : [document.createTextNode(at === nodes.length - 1 ? ` ${m.linkAnd} ` : ", "), node])
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
           .map(interview => toEvent(this.optionLabel({ interview }, 0), session.tracks.length + session.interviews.indexOf(interview)))
         if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}`, ...listed(told))
       } else if (item.track) {
-        // Under the observation it reads, it says only the others it reads too; on its own, all of them.
-        const under = child ? session.accountOf(item.track) : undefined
+        // A reading says every observation it reads, wherever they sit in the chronology: this is the only place that says it.
         const others = [item.track.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
           .map(id => session.tracks.find(other => other.kind === "observer" && (other.event.id === id || other.recording?.id === id)))
-          .filter((other): other is CaseTrack => other !== undefined && other !== under)
+          .filter((other): other is CaseTrack => other !== undefined)
         if (others.length > 0) {
-          said.push(`${under ? m.interpretationAlsoOf : m.interpretationOf}${m.colon}`,
+          said.push(`${m.interpretationOf}${m.colon}`,
             ...listed(others.map(other => toEvent(this.optionLabel({ track: other }, session.tracks.indexOf(other)), session.tracks.indexOf(other)))))
         }
       }
@@ -1417,28 +1467,21 @@ export class CaseEditorElement extends HTMLElement {
       body.className = "event-body"
       body.append(pill, main, links)
       if (findings && findings.length > 0) body.append(this.findingsList(findings))
-      card.append(body, tools)
-      return { card, child }
+      // On the rail, in the card's own colour: what kind of event it is. Said twice, here and on the pill, as a word and as a picture.
+      const mark = document.createElement("span")
+      mark.className = "event-mark"
+      mark.innerHTML = { observation: Icons.WITNESS, reading: Icons.SUMMARY, interview: Icons.INTERVIEW }[kind]
+      mark.setAttribute("aria-hidden", "true")
+      card.append(body, tools, mark)
+      return card
     })
-    // Each observation, interview or reading on its own is an entry of the list, its readings listed within it.
-    const entries: HTMLLIElement[] = []
-    for (const { card, child } of cards) {
-      if (!child) {
-        const entry = document.createElement("li")
-        entry.className = "event-entry"
-        entry.append(card)
-        entries.push(entry)
-        continue
-      }
-      const entry = entries[entries.length - 1]!
-      let children = entry.querySelector<HTMLOListElement>(":scope > .event-children")
-      if (!children) {
-        children = document.createElement("ol")
-        children.className = "event-children"
-        entry.append(children)
-      }
-      children.append(card)
-    }
+    // One entry of the list per event, whatever it is: the rail runs through them all in the order of time.
+    const entries = cards.map(card => {
+      const entry = document.createElement("li")
+      entry.className = "event-entry"
+      entry.append(card)
+      return entry
+    })
     list.replaceChildren(...entries)
   }
 
