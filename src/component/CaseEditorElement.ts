@@ -192,7 +192,9 @@ const TEMPLATE = `
   .event-child::before { top: calc(-1px - var(--gap)); width: 12px; height: calc(var(--elbow-y) + var(--gap)); border-bottom: 1.5px solid var(--line-strong); border-radius: 0 0 0 8px; }
   .event-child:not(:last-child)::after { top: calc(var(--elbow-y) - 1px); bottom: calc(-1px - var(--gap)); }
   .event-child .event-body { align-items: start; }
-  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: "pill main links" "findings findings findings";
+  /* What the card is linked to goes UNDER what it says, across the card: beside the title it had a third of the width and wrapped on
+     every reference, below it has the whole of it. Only the top line keeps clear of the corner's buttons. */
+  .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1fr); grid-template-areas: "pill main" "links links" "findings findings";
     align-items: center; gap: 4px 12px; min-width: 0; padding: 12px 14px 12px 14px; }
   .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--ink); font: 700 12px/1.5 var(--sans); white-space: nowrap; }
   .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -205,8 +207,18 @@ const TEMPLATE = `
   .event-card:has(.event-open:focus-visible) { outline: 2px solid var(--sky); outline-offset: 2px; }
   .event-meta { font-size: 13px; color: var(--ink-faint); overflow-wrap: anywhere; }
   /* Clear of the removal, in the corner above it. */
-  .event-links { grid-area: links; margin-right: 24px; font-size: 13px; color: var(--ink-dim); }
+  /* The room the corner's buttons take, kept clear of the top line alone: 28px each and 2px between them, from 6px off the edge. The card
+     with no clone and no padlock (an interview) keeps room for its removal alone. */
+  .event-main { margin-right: 40px; }
+  .event-card:has(.event-tool) .event-main { margin-right: 100px; }
+  .event-links { grid-area: links; font-size: 13px; color: var(--ink-dim); }
   .event-links:empty { display: none; }
+  /* A renvoi to another event of the case: it opens it, so it looks like what it is. */
+  /* Above the hit area the title stretches over the whole card (.event-open::after), as the corner's buttons are: otherwise the card
+     swallows the click and opens itself, which is exactly not where the renvoi leads. */
+  .event-ref { position: relative; z-index: 1; padding: 0; border: 0; background: none; font: inherit; color: var(--sky); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .event-ref:hover { color: var(--ink); }
+  .event-ref:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; border-radius: 3px; }
   /* What a reading's findings come to, as the editor's groups say what their fields do: red when it contradicts what is established, orange
      when it is not settled, green when it holds (see ReadingVerdict). */
   .event-card[data-verdict="incompatible"] { border-color: var(--error); }
@@ -255,6 +267,10 @@ const TEMPLATE = `
        when it says something; the removal keeps its column. */
     .event-card { --dot-y: 24px; }
     .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "main" "links" "findings"; gap: 6px 10px; }
+    /* Narrow, the pill is alone on the top line, so it is the one that keeps clear of the buttons. */
+    .event-main { margin-right: 0; }
+    .kind-pill { margin-right: 40px; }
+    .event-card:has(.event-tool) .kind-pill { margin-right: 100px; }
     .editor-head { flex-wrap: wrap; }
     .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
   }
@@ -1322,20 +1338,34 @@ export class CaseEditorElement extends HTMLElement {
       main.append(title, meta)
       const links = document.createElement("span")
       links.className = "event-links"
-      const said: string[] = []
+      // A card that names another event of the case opens it: a reference the reader can only read is one they have to go and find.
+      const said: (string | Node)[] = []
+      const toEvent = (label: string, to: number) => {
+        const link = document.createElement("button")
+        link.type = "button"
+        link.className = "event-ref"
+        link.textContent = label
+        link.title = m.openEvent
+        link.addEventListener("click", () => this.openEvent(to))
+        return link
+      }
+      const listed = (nodes: Node[]) => nodes.flatMap((node, index) => index === 0 ? [node] : [document.createTextNode(", "), node])
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
-          .map(interview => this.optionLabel({ interview }, 0))
-        if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}${told.join(", ")}`)
+          .map(interview => toEvent(this.optionLabel({ interview }, 0), session.tracks.length + session.interviews.indexOf(interview)))
+        if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}`, ...listed(told))
       } else if (item.track) {
         // Under the observation it reads, it says only the others it reads too; on its own, all of them.
         const under = child ? session.accountOf(item.track) : undefined
         const others = [item.track.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
           .map(id => session.tracks.find(other => other.kind === "observer" && (other.event.id === id || other.recording?.id === id)))
           .filter((other): other is CaseTrack => other !== undefined && other !== under)
-        if (others.length > 0) said.push(`${under ? m.interpretationAlsoOf : m.interpretationOf}${m.colon}${others.map(other => this.optionLabel({ track: other }, session.tracks.indexOf(other))).join(", ")}`)
+        if (others.length > 0) {
+          said.push(`${under ? m.interpretationAlsoOf : m.interpretationOf}${m.colon}`,
+            ...listed(others.map(other => toEvent(this.optionLabel({ track: other }, session.tracks.indexOf(other)), session.tracks.indexOf(other)))))
+        }
       }
-      links.textContent = said.join(" · ")
+      links.append(...said)
       const findings = item.track?.kind === "reading" ? this.findingsOf(item.track) : undefined
       const verdict = ReadingVerdicts.of(findings)
       if (verdict) {

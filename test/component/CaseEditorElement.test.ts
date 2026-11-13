@@ -934,6 +934,27 @@ describe("CaseEditorElement's events", () => {
     expect(cards[2].querySelector(".findings")).toBeNull()
   })
 
+  it("makes every reference to another event of the case a link that opens it", async () => {
+    const element = await open(undefined, {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1950", title: "An account", url: "account.json" },
+        { type: "event", eventType: "sighting", id: "close", time: "1950", title: { en: "A close-up" }, url: "closeup.json" },
+        { type: "event", eventType: "sighting", interpretationOf: ["x-1", "close"], time: "2013-04", title: { en: "A model" }, url: "reading.json" }
+      ]
+    })
+    files["https://example.org/d/closeup.json"] = { ...account, id: "close" }
+    await wait()
+    const root = element.shadowRoot!
+    const reading = [...root.querySelectorAll<HTMLElement>(".event-card")].find(card => card.classList.contains("event-child"))!
+    // It reads two accounts: under the one it is nested in, the other is named, and naming it is a way to it.
+    const refs = [...reading.querySelectorAll<HTMLButtonElement>(".event-ref")]
+    expect(refs.map(ref => ref.textContent)).toEqual(["Observation of A close-up"])
+    refs[0].click()
+    await wait()
+    expect(root.getElementById("event-item")!.hidden).toBe(false)
+    expect(root.getElementById("crumb-title")!.textContent).toBe("Observation of A close-up")
+  })
+
   it("clones an event of the case, beside its removal: the copy has a file and an id of its own, reads what the original read, and opens", async () => {
     const element = await open()
     await wait()
