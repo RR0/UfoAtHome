@@ -34,3 +34,4 @@ perf-out/
 
 # Working notes from calls with observers: they hold personal details and are never published.
 call-*.md
+__pycache__/
