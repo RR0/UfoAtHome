@@ -141,7 +141,7 @@ import { sortedMilestones } from "../engine/model/Milestone.js"
 import { DEFAULT_REFERENCE_FOV_DEG, DEFAULT_REFERENCE_OPACITY, REFERENCE_INLINE_WARNING_BYTES } from "../engine/model/Reference.js"
 import type { PictureLandmark, ReferenceKind, ReferenceRegistration, ReferenceVideoClip, SceneReference } from "../engine/model/Reference.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
-import type { KmlImportResult } from "../engine/interop/KmlImport.js"
+import type { TraceImportResult } from "../engine/interop/TraceImport.js"
 import type { PictureRegistration } from "../engine/reference/PictureRegistration.js"
 import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
 import { FilmStocks } from "../engine/instrument/FilmStock.js"
@@ -503,6 +503,7 @@ export class SightingEditorElement extends HTMLElement {
   /** The duration, exact or as stated: its number always holds the length the simulation is played at. */
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
+  private readonly exportKmlButton: HTMLButtonElement
   /** The header's own Save: the same export as the File section's, the one way to keep what was done. */
   private readonly saveButton: HTMLButtonElement
   /** The recording's tracks under the scene, when laid out (see TimelineTracks). */
@@ -1361,6 +1362,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationElement = this.shadow.querySelector<DurationInputElement>(DURATION_INPUT_ELEMENT_NAME)!
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
+    this.exportKmlButton = this.shadow.getElementById("export-kml") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
     this.shareButton = this.shadow.getElementById("share") as HTMLButtonElement
     this.shareDialog = this.shadow.getElementById("share-dialog") as ShareDialogElement
@@ -1963,6 +1965,7 @@ export class SightingEditorElement extends HTMLElement {
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
+    this.exportKmlButton.addEventListener("click", () => void this.exportKml())
     this.saveButton.addEventListener("click", () => this.exportJson())
     this.shareButton.addEventListener("click", () => this.openShare())
     this.importInput.addEventListener("filepick", event => {
@@ -5622,10 +5625,10 @@ export class SightingEditorElement extends HTMLElement {
    */
   private async addTraces(pick: InputFilePick): Promise<void> {
     const name = pick.file?.name ?? decodeURIComponent(pick.url!.split("/").pop() ?? pick.url!)
-    let result: KmlImportResult
+    let result: TraceImportResult
     try {
-      const { KmlImport } = await import("../engine/interop/KmlImport.js")
-      result = await KmlImport.fromBytes(await InputFileElement.bytesOf(pick))
+      const { TraceImport } = await import("../engine/interop/TraceImport.js")
+      result = await TraceImport.fromBytes(await InputFileElement.bytesOf(pick))
     } catch {
       this.traceStatus.textContent = this.messages.traceFailed
       return
@@ -5655,6 +5658,25 @@ export class SightingEditorElement extends HTMLElement {
     const left = result.skipped.length > 0 ? ` ${this.messages.traceSkipped.replace("{what}", result.skipped.join(", "))}` : ""
     this.traceStatus.textContent = this.messages.traceImported.replace("{n}", String(added.length)).replace("{name}", name) + left
     this.ufoElement.refresh()
+  }
+
+  /**
+   * Writes out what the recording holds geographically, as a Google Earth file — see KmlExport.
+   *
+   * Beside Save rather than in the traces list: what goes out is the whole of what can be laid over
+   * a map (where the observer stood, the directions stated, what a reading places, the traces
+   * brought in), not any one of those. Its words are the author's writing language: the file is
+   * read by whoever they send it to.
+   */
+  private async exportKml(): Promise<void> {
+    const [{ KmlExport }, { KML_EXPORT_TEXTS }] = await Promise.all([
+      import("../engine/interop/KmlExport.js"),
+      import("../engine/interop/messages/KmlExportTexts.js")
+    ])
+    const base = this.fileBase()
+    const texts = await KML_EXPORT_TEXTS.load(this.writingLanguage)
+    const kml = KmlExport.of(this.ufoElement.sighting, base, texts, this.said)
+    this.download(new Blob([kml], { type: "application/vnd.google-earth.kml+xml" }), `${base}.kml`)
   }
 
   private deleteTrace(): void {
@@ -11837,6 +11859,8 @@ export class SightingEditorElement extends HTMLElement {
     this.contextSendToBackButton.textContent = messages.sendToBack
     this.contextDeleteButton.textContent = messages.contextMenuDelete
     this.exportButton.textContent = messages.export
+    this.exportKmlButton.textContent = messages.exportKml
+    this.exportKmlButton.title = messages.exportKmlHint
     this.snapshotsPanel.localize(messages)
     this.sectionFilePanel.localize(messages)
     this.eventsPanel.localize(messages.events)

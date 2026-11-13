@@ -410,6 +410,8 @@ export const html = `
     <div class="toolbar">
       <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
       <button id="export" type="button"></button>
+      <!-- What the reconstruction holds geographically, for Google Earth, SVH or QGIS: see KmlExport. -->
+      <button id="export-kml" type="button"></button>
       <!-- How the keyframes are written, in the text below and in the file saved: see RecordingText.of. -->
       <label class="check"><input id="whole-keyframes" type="checkbox"/> <span id="label-whole-keyframes"></span></label>
     </div>
@@ -678,7 +680,7 @@ export const html = `
     <div class="form-section" data-fold="all">
     <!-- What an investigator drew over the place, from their own file (see InvestigatorTrace): lines
          of sight, axes, markers. Drawn over the scene as theirs, not as part of the reconstruction. A list of its own, laid out
-         as every list is; its "+" reads a KML or KMZ file. -->
+         as every list is; its "+" reads a KML, KMZ or GeoJSON file. -->
     <h3 class="section-title"><span id="label-trace-import"></span></h3>
     <div class="element-list-row" id="trace-row">
       <label class="element-list-picker"><select id="trace" aria-labelledby="label-trace-import"></select></label>
@@ -687,7 +689,7 @@ export const html = `
       <button id="add-trace" type="button" class="icon-btn element-list-add">${Icons.PLUS}</button>
     </div>
     <!-- Where the lines added by "+" are read from: a file of the author's, or an address. -->
-    <span id="trace-import-row" class="input-file-row" hidden><rr0-input-file id="trace-import" name="trace-import" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" placeholder="https://…/lines.kmz"></rr0-input-file></span>
+    <span id="trace-import-row" class="input-file-row" hidden><rr0-input-file id="trace-import" name="trace-import" accept=".kml,.kmz,.geojson,.json,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz,application/geo+json,application/json" placeholder="https://…/lines.kmz"></rr0-input-file></span>
     <span id="trace-status" class="apparent-size"></span>
     <div class="element-list-body" id="trace-item">
       <label><span id="label-trace-title"></span> <input id="traceTitle" class="trace-field" type="text"/></label>

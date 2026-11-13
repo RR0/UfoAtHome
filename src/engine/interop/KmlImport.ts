@@ -1,15 +1,8 @@
 import type { InvestigatorTrace, TraceAltitude, TracePoint } from "../model/Trace.js"
+import type { TraceImportResult } from "./TraceImport.js"
 
-/** What reading a file gives: the traces it holds, without ids (the recording hands those out), and
- * what it could not read, so that an import that drops something says so. */
-export interface KmlImportResult {
-  traces: Omit<InvestigatorTrace, "id">[]
-  /** Kinds of element found and left out, by tag name — a Google Earth file also holds photo
-   * overlays, tours and 3D models, none of which is a line or a place. */
-  skipped: string[]
-  /** What the document calls itself, for the credit. */
-  documentName?: string
-}
+/** What reading a Google Earth file gives — the same as any other file of traces (see TraceImportResult). */
+export type KmlImportResult = TraceImportResult
 
 /**
  * Reads the lines, places and outlines out of a Google Earth file (KML, or KMZ — the same thing
