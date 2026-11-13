@@ -132,6 +132,9 @@
   "it": "Il Concorde di British Airways filmato da un Learjet con la cinepresa a periscopio Astrovision, e la sfera che lo accompagna. Misurati sul film: l'inclinazione della camera, lo scorrere del suolo, il contrasto, la nitidezza e la polvere della copia. Adattato sul film: l'assetto del Concorde. Supposti: data, ora, luogo, altitudine, focale, pellicola, e quindi la posizione del Sole. Alan Tanner, della troupe del film, vi vede un riflesso del Sole nel periscopio."
  },
  "instrument": "cine-35mm-broadcast",
+ "vehicle": {
+  "kind": "business-jet"
+ },
  "film": "eastman-5247-1974",
  "exposureSeconds": 0.020833333333333332,
  "observerTrack": {

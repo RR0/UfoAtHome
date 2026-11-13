@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest"
 import { DecorAircraftHearing } from "../../../src/engine/place/DecorAircraftHearing.js"
 import type { DecorObject } from "../../../src/engine/model/Decor.js"
 import type { Sighting } from "../../../src/engine/model/Sighting.js"
+import { ObserverRide } from "../../../src/engine/place/ObserverRide.js"
+import { CabinHearing } from "../../../src/engine/traffic/CabinHearing.js"
 
 const ORIGIN = { lat: 48.85, lng: 2.35 }
 const OBSERVER = { ...ORIGIN, heightM: 0 }
@@ -33,6 +35,38 @@ describe("DecorAircraftHearing", () => {
     // It is coming from the west, and the sound that arrives left it earlier still.
     expect(voices[0].azimuthDeg).toBeGreaterThan(250)
     expect(voices[0].azimuthDeg).toBeLessThan(290)
+  })
+
+  test("heard from inside a cabin it is duller, and under the cabin's own roar it is not heard at all", () => {
+    const hearing = new DecorAircraftHearing()
+    const open = hearing.voices(recording(overhead), 29000, OBSERVER, CALM)[0]
+    const jet = { kind: "business-jet" } as const
+    // The same aircraft, from inside an aircraft: through the fuselage, and against the roar of the cabin rather than a calm night.
+    const inside = { ambientDbA: CabinHearing.levelDbA(jet.kind), throughDb: ObserverRide.insulationDb(jet) }
+    const heard = hearing.voices(recording(overhead), 29000, OBSERVER, inside)
+    // 2000 m up, it is well under the cabin: nothing of it is noticed.
+    expect(heard).toHaveLength(0)
+    // Through a window left open it is only a little quieter than in the open air.
+    const ajar = hearing.voices(recording(overhead), 29000, OBSERVER, { ...CALM, throughDb: ObserverRide.insulationDb({ kind: "van", windowsOpen: true }) })[0]
+    expect(ajar.levelDbA).toBeLessThan(open.levelDbA)
+    expect(ajar.levelDbA).toBeGreaterThan(open.levelDbA - 12)
+  })
+
+  test("a Concorde a hundred and fifty metres off is a roar in the open air, and nothing from inside a Learjet", () => {
+    // The Concorde's film of 1976: the camera was aboard a chase aircraft, 154 m from it, both holding station (see observer-concorde-1976.json).
+    const abeam: Partial<DecorObject> = {
+      track: [{ t: 0, eastM: 110, northM: 108, altitudeM: 2932, headingDeg: 90 }, { t: 60000, eastM: 110, northM: 108, altitudeM: 2932, headingDeg: 90 }]
+    }
+    // The ear is up there with it: 154 m away and level, as the film shows them.
+    const alongside = { ...OBSERVER, heightM: 2932 }
+    const hearing = new DecorAircraftHearing()
+    const open = hearing.voices(recording(abeam), 30000, alongside, CALM)[0]
+    expect(open.levelDbA).toBeGreaterThan(85)
+    const jet = { kind: "business-jet" } as const
+    const aboard = hearing.voices(recording(abeam), 30000, alongside,
+      { ambientDbA: CabinHearing.levelDbA(jet.kind), throughDb: ObserverRide.insulationDb(jet) })
+    // Through the fuselage it is some 25 dB down, and the cabin's own roar is louder than what is left of it.
+    expect(aboard).toHaveLength(0)
   })
 
   test("it drops in pitch once it has gone by", () => {

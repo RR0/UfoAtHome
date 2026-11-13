@@ -77,23 +77,38 @@ export class WeatherAudio {
   }
 
   private level = 1
+  /** How much of the weather reaches the observer, 0 to 1: all of it in the open, a fraction inside a closed cabin (see ObserverRide). */
+  private share = 1
   private master?: GainNode
 
   /** Where every bed and every thunderclap is sent, so that one gain silences them all at once. */
   private output(context: AudioContext): GainNode {
     if (!this.master) {
       this.master = context.createGain()
-      this.master.gain.value = this.level
+      this.master.gain.value = this.gain
       this.master.connect(context.destination)
     }
     return this.master
+  }
+
+  private get gain(): number {
+    return this.level * this.share
   }
 
   /** How loud everything is, 0 (silent) to 1, without touching what it is doing — a track heard
    * again is where it would have got to, not where it was left. */
   setLevel(level: number): void {
     this.level = level
-    if (this.master) this.master.gain.value = level
+    if (this.master) this.master.gain.value = this.gain
+  }
+
+  /**
+   * How much of the weather gets through what the observer is inside, 0 to 1: rain on the road is a roar in the open and a patter from
+   * inside a closed van (see ObserverRide.insulationDb). The reader's own volume is kept apart from it.
+   */
+  setOutsideHeard(share: number): void {
+    this.share = Math.min(1, Math.max(0, share))
+    if (this.master) this.master.gain.value = this.gain
   }
 
   /** Unlocks the AudioContext — must be called from a real user gesture (browsers start it

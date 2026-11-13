@@ -334,8 +334,10 @@ export class AircraftAudio {
     set(built.wanderDepth.gain, master * FAR_WANDER * far / WANDER_RATES_HZ.length)
     if (built.send) set(built.send.gain, REVERB_SEND * far)
     if (built.panner) {
+      // The cabin the listener sits in is all round them: it comes from no bearing, so it is not placed to either side.
       const toward = ((voice.azimuthDeg - this.headingDeg) * Math.PI) / 180
-      set(built.panner.pan, Math.max(-MAX_PAN, Math.min(MAX_PAN, Math.sin(toward))) * (1 - FAR_PAN_LOSS * far))
+      const placed = voice.inside ? 0 : Math.max(-MAX_PAN, Math.min(MAX_PAN, Math.sin(toward))) * (1 - FAR_PAN_LOSS * far)
+      set(built.panner.pan, placed)
     }
   }
 

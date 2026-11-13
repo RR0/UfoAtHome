@@ -190,7 +190,7 @@ def airliner(total_s, seat="left", seen=("disc",)):
     objects = [airframe(total_s, "af3532-cockpit", cockpit_title,
                         "davidmarton-a320-cockpit", {"widthM": 3.257, "lengthM": 2.591, "heightM": 2.127}, *around(eye, COCKPIT_AT),
                         # The disc was seen through the windows: the frame, the pillars and the captain are in front of it
-                        {"aircraftSound": "airliner-narrow", "occludesSourceIds": list(seen)})]
+                        {"occludesSourceIds": list(seen)})]
     # An observer (a companion who was there), not an entity: an entity is a being seen, and the engine would class the case "with occupants"
     if seat != "left":
         objects.append({**airframe(total_s, "af3532-captain", tr("Le commandant Duboc, au siège gauche", "Captain Duboc, at the left seat"),
@@ -338,6 +338,8 @@ def commander_recording():
                 "25. The recording keeps the pilot's angles and borrows that distance only to place them."),
         },
         "instrument": "eye",
+        # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
+        "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
         "timeline": {"order": ["disc"], "groups": [["disc"]], "keyframes": frames},
         "weatherTrack": weather(total, 101),
@@ -427,6 +429,8 @@ def copilot_recording():
                 "the captain's 1999 interview gives, 1000 m at her 25 nautical miles (borrowed), and when the object moves from 10 o'clock to 9 is chosen."),
         },
         "instrument": "eye",
+        # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
+        "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
         "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
         "weatherTrack": weather(total, 120),

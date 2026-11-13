@@ -115,6 +115,7 @@ import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
 import { DecorAircraft, resolveDecorSeatAt } from "../engine/model/Decor.js"
+import { ObserverRide } from "../engine/place/ObserverRide.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
@@ -1489,6 +1490,8 @@ export class SceneElement extends HTMLElement {
 
   setWeather(weather: Weather): void {
     this.sceneRenderer.setWeather(weather)
+    // Muffled by whatever the observer rides in, which is why rain on a closed van is a patter and not the roar it is outside it.
+    this.weatherAudio.setOutsideHeard(ObserverRide.transmission(this.ufoElement.sighting.vehicle))
     this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity * (weather.precipitationAmount ?? 1), weather.windSpeed)
   }
 
@@ -2561,6 +2564,7 @@ export class SceneElement extends HTMLElement {
   private pushAircraftSound(sighting: Sighting, t: number): void {
     this.startDecorAircraftSound(sighting)
     this.startBodySound()
+    this.startRideSound(sighting)
     const audio = this.aircraftAudio
     if (!audio) return
     const runtime = SceneElement.trafficRuntime
@@ -2570,7 +2574,16 @@ export class SceneElement extends HTMLElement {
     }
     const pose = resolveObserverPoseAt(sighting, t)
     const weather = resolveActualWeatherAt(sighting, t)
-    const options = { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) }
+    const outside = { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) }
+    // Aboard an aircraft, the cabin is the loudest thing there is: it is what everything else outside has to stand against, and its shell
+    // takes the highs off whatever gets through (see ObserverRide). A road vehicle's own noise is VehicleAudio's, but its cabin muffles too.
+    const ride = sighting.vehicle
+    const cabin = ride ? runtime.CabinHearing.voice(ride, outside) : undefined
+    const options = {
+      ...outside,
+      ambientDbA: Math.max(outside.ambientDbA, cabin?.levelDbA ?? 0),
+      ...(ride ? { throughDb: ObserverRide.insulationDb(ride) } : {})
+    }
     const voices = this.trafficVoices(t, pose, options, runtime)
     // The aircraft the recording places itself are heard like those of a record, and by the same ear: together the loudest few.
     const origin = sighting.event.place?.[0]
@@ -2581,10 +2594,18 @@ export class SceneElement extends HTMLElement {
       voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
         decor => this.decorModelSounds.get(decor.model?.id ?? "")))
       voices.push(...this.bodyVoices(sighting, t, options, runtime))
+      if (cabin) voices.push(cabin)
       voices.sort((a, b) => b.levelDbA - a.levelDbA)
       voices.length = Math.min(voices.length, 4)
     }
     audio.setVoices(voices, pose?.headingDeg ?? 0)
+  }
+
+  /** Readies the sound player when the observer rides an aircraft, whose cabin they hear all through the observation (see CabinHearing). */
+  private startRideSound(sighting: Sighting): void {
+    if (this.aircraftAudio || ObserverRide.aircraftOf(sighting.vehicle) === undefined) return
+    if (SceneElement.trafficRuntime) this.aircraftAudio = this.newAircraftAudio(SceneElement.trafficRuntime)
+    else void SceneElement.loadTrafficRuntime().catch(() => undefined)
   }
 
   /** Readies the sound player when the interpretation on show has a body that makes a sound (see BodyHearing). */

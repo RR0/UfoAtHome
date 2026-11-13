@@ -23,6 +23,8 @@ export interface AircraftVoice {
   azimuthDeg: number
   /** Where it comes from in height, degrees above the horizon. */
   elevationDeg: number
+  /** Around the ear rather than somewhere in the scene: the cabin the observer rides in (see CabinHearing), neither placed nor shifted. */
+  inside?: boolean
   character?: AircraftSoundCharacter
 }
 
@@ -38,6 +40,12 @@ export interface TrafficSoundOptions extends AircraftHearingOptions {
   noiseOf?: (id: string) => AircraftNoise | undefined
   /** What sort of machine an id is, when something other than a record's description knows (a decor aircraft's own sound). */
   kindOf?: (id: string) => AircraftKind | undefined
+  /**
+   * What stands between the source and the ear, octave by octave, dB: the shell of whatever the observer rides (see
+   * ObserverRide.insulationDb). Nothing by default, which is the open air. A sound the shell takes under what can be noticed is dropped:
+   * through a fuselage, a machine that would be a roar outside is not heard at all.
+   */
+  throughDb?: readonly number[]
   /** The amplitude a sound at the ambient noise's own level is played at: see AmbientNoise.referenceAmplitude. */
   referenceAmplitude?: number
 }
@@ -102,11 +110,15 @@ export class TrafficSound {
       const noise = options.noiseOf?.(id) ?? AircraftHearing.noiseOfKind(kind)
       const heard = AircraftHearing.heardAt(flight, observer, t, { ...options, noise })
       if (!heard?.audible) continue
+      // What the observer's own shell takes off it before it reaches them, when they are inside one.
+      const through = options.throughDb
+      const bandsDbA = through ? heard.bandsDbA.map((level, band) => level - (through[band] ?? 0)) : heard.bandsDbA
+      if (through && !TrafficSound.noticed(bandsDbA, heard.ambientDbA)) continue
       voices.push({
         id,
         kind,
-        bandAmplitudes: TrafficSound.bandAmplitudes(heard.bandsDbA, heard.ambientDbA, options.referenceAmplitude),
-        levelDbA: heard.levelDbA,
+        bandAmplitudes: TrafficSound.bandAmplitudes(bandsDbA, heard.ambientDbA, options.referenceAmplitude),
+        levelDbA: through ? SoundInAir.sumDb(bandsDbA) : heard.levelDbA,
         distanceKm: heard.sound.distanceKm,
         dopplerRatio: heard.dopplerRatio,
         azimuthDeg: heard.sound.azimuthDeg,
@@ -125,6 +137,12 @@ export class TrafficSound {
    * flattens it into a hiss, a wind tunnel. The ambient noise only decides what is MASKED: a band is silent until it is MASKING_RANGE_DB under the
    * level at which it is noticed (see AircraftHearing.DETECTION_MARGIN_DB), comes in smoothly, and is whole from that far over it.
    */
+  /** Whether any band of a sound still stands far enough over what is around it to be noticed at all (see AircraftHearing.couldBeHeard). */
+  private static noticed(bandsDbA: readonly number[], ambientDbA: number): boolean {
+    const ambient = AircraftHearing.ambientBands(ambientDbA)
+    return bandsDbA.some((level, band) => level >= ambient[band] + AircraftHearing.DETECTION_MARGIN_DB)
+  }
+
   static bandAmplitudes(bandsDbA: readonly number[], ambientDbA: number, reference = TrafficSound.REFERENCE_AMPLITUDE): number[] {
     const ambient = AircraftHearing.ambientBands(ambientDbA)
     const noticed = AircraftHearing.DETECTION_MARGIN_DB

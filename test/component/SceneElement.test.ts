@@ -186,6 +186,7 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
   WeatherAudio: class {
     resume(): void {}
     setAmbient(): void {}
+    setOutsideHeard(): void {}
     setLevel(): void {}
     dispose(): void {}
     playThunder(): void {

@@ -139,6 +139,9 @@ const recording = {
     it: "Il Concorde di British Airways filmato da un Learjet con la cinepresa a periscopio Astrovision, e la sfera che lo accompagna. Misurati sul film: l'inclinazione della camera, lo scorrere del suolo, il contrasto, la nitidezza e la polvere della copia. Adattato sul film: l'assetto del Concorde. Supposti: data, ora, luogo, altitudine, focale, pellicola, e quindi la posizione del Sole. Alan Tanner, della troupe del film, vi vede un riflesso del Sole nel periscopio." 
   },
   instrument: process.env.INSTRUMENT ?? 'cine-35mm-broadcast',
+  // The camera was aboard a Learjet (see the description): its cabin is what anyone there heard, and its fuselage muffles the rest,
+  // the Concorde a hundred and fifty metres off included (see ObserverRide). SUPPOSED, like everything else about the chase aircraft.
+  vehicle: { kind: 'business-jet' },
   // A rule of thumb that owes nothing to this film: the sunny day's, ISO 100 at f/11 and 1/250 s, that is f/18 for this stock of ISO 64 at the 1/48 s of a cinema camera's shutter. The stock and the settings are SUPPOSED.
   film: 'eastman-5247-1974', // SUPPOSED: one of the two negatives Kodak dates to the period, the one rated for daylight
   exposureSeconds: 1 / 48,

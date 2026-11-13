@@ -2,6 +2,7 @@ import type { Sighting } from "../model/Sighting.js"
 import { resolveDecorPlacementAt } from "../model/Decor.js"
 import type { DecorObject } from "../model/Decor.js"
 import { VehicleProfiles } from "../model/Vehicle.js"
+import { ObserverRide } from "./ObserverRide.js"
 import type { VehicleProfile } from "../model/Vehicle.js"
 import { geoToLocalMeters } from "../../render3d/terrain/GeoProjection.js"
 import { VehicleDrive } from "./VehicleDrive.js"
@@ -19,7 +20,7 @@ export interface HeardVehicle {
 }
 
 /**
- * Which vehicles the observer hears, and how: the one they are in (Sighting.vehicle), from inside,
+ * Which road vehicles the observer hears, and how: the one they are in (Sighting.vehicle), from inside,
  * turning with their own journey; and every decor vehicle whose engine runs (DecorObject.engine),
  * from where the observer stands, turning with its own track.
  *
@@ -41,10 +42,12 @@ export class VehicleHearing {
       return { eastM: local.x, northM: -local.z }
     }
     const span = Math.max(sighting.observerTrack.duration, (sighting.event.durationSeconds ?? 0) * 1000)
+    // The one they rode, when it was driven on a road: an aircraft's cabin has no cylinders and no gears, and is heard by CabinHearing.
     const vehicle = sighting.vehicle
-    if (vehicle) {
-      const profile = VehicleProfiles.of(vehicle.kind)
-      const drive = this.drive(`observer:${vehicle.kind}`, VehicleHearing.trackKey(sighting), () =>
+    const road = ObserverRide.roadOf(vehicle)
+    if (vehicle && road) {
+      const profile = VehicleProfiles.of(road)
+      const drive = this.drive(`observer:${road}`, VehicleHearing.trackKey(sighting), () =>
         VehicleDrive.of(profile, observerAt, 0, span))
       if (drive) heard.push({ id: "observer", profile, state: drive.at(tMs), noise: vehicle.noise ?? 1, inside: true, windowsOpen: vehicle.windowsOpen === true, distanceM: 0 })
     }

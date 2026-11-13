@@ -4,8 +4,12 @@
  * which: an ordinary petrol car.
  */
 import type { HeadlightMode } from "./Headlights.js"
+import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 export type VehicleKind = "car" | "van" | "truck" | "motorcycle" | "generic"
+
+/** What an observer can ride in and hear around them: a road vehicle, or an aircraft (see ObserverRide). */
+export type RideKind = VehicleKind | AircraftKind
 
 /**
  * The vehicle the observer was in, when it is not drawn — see Sighting.vehicle.
@@ -16,7 +20,11 @@ export type VehicleKind = "car" | "van" | "truck" | "motorcycle" | "generic"
  * of it, which is what made them hear nothing else.
  */
 export interface ObserverVehicle {
-  kind: VehicleKind
+  /**
+   * What the observer rode: a road vehicle (VehicleKind), heard as its cylinders and its tyres, or an aircraft (AircraftKind), heard as
+   * the steady roar of its cabin. One field for both, the two vocabularies having no word in common: "van", or "business-jet".
+   */
+  kind: RideKind
   /** Whether the windows were open: the road and the wind come in, the cabin no longer muffles the
    * engine. Absent means closed. */
   windowsOpen?: boolean
