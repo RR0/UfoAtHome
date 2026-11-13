@@ -1,3 +1,5 @@
+import type { SaidText } from "../model/SaidText.js"
+
 /**
  * Where a value in a recording came from.
  *
@@ -38,6 +40,60 @@ export type Basis =
    * agreement there is the fitting, not a finding. `rationale` says which hypothesis it was turned for. */
   | "fitted"
 
+/**
+ * Where the observer said it: the passage of an interview a value comes from (see InterviewJson).
+ *
+ * The mirror of InterviewSightingRef, which points the other way, from a passage to the moment of
+ * the observation it tells of. Both halves exist because an investigator reads in both directions:
+ * from the account to what was said, and from what was said to the account.
+ *
+ * It is also, and this is the point, the whole history of what the observer said. A witness gone
+ * back to corrects some things and leaves the rest standing, so a value corrected cites the LATER
+ * interview and one nobody revisited goes on citing the FIRST: which interview each value cites IS
+ * the record of what changed and what did not, and nothing has to keep successive versions of the
+ * reconstruction to show it. Asked for by the GEIPAN (A. Cousyn, November 2026), whose worry is a
+ * witness's memory contaminated by what was shown to them: what a value rests on is then a dated
+ * statement, not "the account" in general.
+ */
+export interface SaidIn {
+  /** The `id` of the case's interview event. Absent: the only interview the case holds. */
+  interview?: string
+  /** Which turn of speech, as an index into the transcript's `segments`. */
+  segment: number
+  /** The part of that segment's text it is about, as `[from, to)` character offsets. */
+  range?: [number, number]
+}
+
+/**
+ * What a value rests on, named: the thing an investigator would go and look at.
+ *
+ * A basis says what KIND of thing a value is (see Basis); this says WHICH thing, and the two answer
+ * different questions. "derived" with the working in its `rationale` is honest and still leaves a
+ * reader with nowhere to go; "established" is worth nothing at all until it names the register it
+ * was established in. The GEIPAN put it plainly (A. Cousyn, November 2026): every determining
+ * parameter should be tied to its origin — testimony, questionnaire, photograph, measurement,
+ * outside calculation or working hypothesis — and the traceability has to be beyond reproach.
+ *
+ * One of these at a time, in the order they are declared. The last of their list has none on
+ * purpose: a working hypothesis rests on nothing, which is what "assumed" and "fitted" already say,
+ * and inventing a source for it would be the one lie this field exists to prevent.
+ */
+export interface ValueSource {
+  /** What the observer said, and where — see SaidIn. */
+  said?: SaidIn
+  /** A document: the questionnaire, a report, a paper, a register. Translatable, as a title is. */
+  document?: SaidText
+  /** Where in it: a page, a question's number, a line. */
+  at?: string
+  /** Its address, where it has one. */
+  url?: string
+  /** The `id` of a picture of the recording it was measured on (see Reference): a photograph lined
+   * up on the scene, which is a measurement and not an illustration. */
+  picture?: string
+  /** The tool the measurement or the calculation was made in: "SVH", "IPACO", "QGIS", "a theodolite". */
+  tool?: string
+}
+
 /** A value with its provenance beside it — what any field of a recording may be written as, in
  * place of the bare value. */
 export interface StatedValue<T = unknown> {
@@ -62,6 +118,8 @@ export interface StatedValue<T = unknown> {
    * ReadingCheck). Absent: a stated, derived or measured value is what is known; an assumed one is free.
    */
   range?: ValueRange
+  /** What it rests on — see ValueSource. */
+  source?: ValueSource
 }
 
 /** See StatedValue.range. */
@@ -75,6 +133,8 @@ export interface ProvenanceEntry {
   how?: string
   /** See StatedValue.range. */
   range?: ValueRange
+  /** See StatedValue.source. */
+  source?: ValueSource
   /**
    * The value this was said ABOUT, kept so the saying can expire.
    *
@@ -143,10 +203,43 @@ export class Provenance {
     return [...this.entries.keys()]
   }
 
+  /** Every value that names what it rests on, with its path and its basis — what a report's
+   * traceability table is made of (see ValueSource). */
+  sourced(): { path: string, basis: Basis, source: ValueSource }[] {
+    return [...this.entries]
+      .filter(([, entry]) => entry.source !== undefined)
+      .map(([path, entry]) => ({ path, basis: entry.basis, source: entry.source! }))
+  }
+
+  /**
+   * The interviews this recording cites, in the order they are first cited.
+   *
+   * What each one accounts for is the history of what the observer said: a value corrected by a
+   * later interview cites that one, and one nobody went back over goes on citing the first (see
+   * SaidIn). Which is the later is the CASE's to say, from the dates of its interview events;
+   * nothing here knows them, and nothing here guesses. A citation that names no interview (the only
+   * one a case holds) is not listed, since there is nothing to tell apart.
+   */
+  interviewsCited(): string[] {
+    const cited: string[] = []
+    for (const { source } of this.sourced()) {
+      const id = source.said?.interview
+      if (id !== undefined && !cited.includes(id)) cited.push(id)
+    }
+    return cited
+  }
+
+  /** The paths whose value was said in that interview — what it accounts for. With no `id`, the
+   * paths said in the interview a citation names none of. */
+  pathsFromInterview(id?: string): string[] {
+    return this.sourced().filter(({ source }) => source.said !== undefined && source.said.interview === id).map(({ path }) => path)
+  }
+
   /** Records what is known about `path`. A "stated" entry with no rationale is dropped rather than
    * stored: it is the default, and writing it would put noise in every file. */
   set(path: string, entry: ProvenanceEntry): void {
-    if (entry.basis === "stated" && entry.rationale === undefined && entry.how === undefined && entry.range === undefined) {
+    if (entry.basis === "stated" && entry.rationale === undefined && entry.how === undefined && entry.range === undefined
+      && entry.source === undefined) {
       this.entries.delete(path)
     } else {
       this.entries.set(path, entry)
@@ -210,7 +303,8 @@ export class Provenance {
         ...(entry.basis === "stated" ? {} : { basis: entry.basis }),
         ...(entry.rationale === undefined ? {} : { rationale: entry.rationale }),
         ...(entry.how === undefined ? {} : { how: entry.how }),
-        ...(entry.range === undefined ? {} : { range: entry.range })
+        ...(entry.range === undefined ? {} : { range: entry.range }),
+        ...(entry.source === undefined ? {} : { source: entry.source })
       } satisfies StatedValue
     }
     return restored as unknown as T
@@ -232,6 +326,7 @@ export class Provenance {
         ...(value.rationale === undefined ? {} : { rationale: value.rationale }),
         ...(value.how === undefined ? {} : { how: value.how }),
         ...(value.range === undefined ? {} : { range: value.range }),
+        ...(value.source === undefined ? {} : { source: value.source }),
         of: value.value
       })
       // Recur: a wrapped object may hold wrapped fields of its own.

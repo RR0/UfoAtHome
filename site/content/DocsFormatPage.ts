@@ -534,6 +534,22 @@ export class DocsFormatPage extends DocsSection {
       made to fit; <code>rationale</code> says which one). The list of <code>assumed</code> values is
       the list of what to go back to the witness or the file for, which is why it is worth writing
       even when nothing else is.</p>
+    <p><code>source</code> names what the value rests on, which a basis does not: a basis says what
+      KIND of thing it is, this says WHICH thing — the thing somebody would go and look at. One at a
+      time: <code>said</code> (<code>{ interview, segment, range }</code>, the passage of an
+      interview of the case it was said in, <code>interview</code> being that event's <code>id</code>
+      and <code>segment</code> which turn of speech), <code>document</code> with <code>at</code> (a
+      page, a question's number) and <code>url</code>, <code>picture</code> (the <code>id</code> of a
+      picture of the recording it was measured on) or <code>tool</code> (SVH, IPACO, QGIS, a
+      theodolite). A working hypothesis names none, which is what <code>assumed</code> and
+      <code>fitted</code> already say, and giving it one would be the one lie the field exists to
+      prevent.</p>
+    <p>A <code>said</code> source is also the whole history of what the witness said. A witness gone
+      back to corrects some things and leaves the rest standing, so a value corrected cites the LATER
+      interview while one nobody revisited goes on citing the FIRST: which interview each value cites
+      <em>is</em> the record of what changed and what did not, and no version of the reconstruction
+      has to be kept to show it. Which interview is the later one is the case's to say, from the
+      dates of its interview events.</p>
     <p>The two ends of that list are what keeps a likeness from passing for a proof. Only what is
       <code>established</code> owes nothing to the account and nothing to the reconstruction, which
       is what makes it worth judging a reconstruction against. A <code>fitted</code> value is the
@@ -1075,6 +1091,23 @@ export class DocsFormatPage extends DocsSection {
       hypothèse peut coller ; <code>rationale</code> dit laquelle). La liste des valeurs
       <code>assumed</code> est la liste de ce qu'il faut retourner demander au témoin ou au dossier :
       c'est pourquoi elle vaut d'être écrite même quand rien d'autre ne l'est.</p>
+    <p><code>source</code> nomme ce sur quoi la valeur repose, ce qu'une base ne fait pas : la base
+      dit de quelle NATURE elle est, ceci dit LAQUELLE — la chose qu'on irait regarder. Une à la
+      fois : <code>said</code> (<code>{ interview, segment, range }</code>, le passage d'une
+      interview du dossier où elle a été dite, <code>interview</code> étant l'<code>id</code> de cet
+      événement et <code>segment</code> le tour de parole), <code>document</code> avec
+      <code>at</code> (une page, un numéro de question) et <code>url</code>, <code>picture</code>
+      (l'<code>id</code> d'une photo de l'enregistrement sur laquelle elle a été mesurée) ou
+      <code>tool</code> (SVH, IPACO, QGIS, un théodolite). Une hypothèse de travail n'en nomme
+      aucune, ce que <code>assumed</code> et <code>fitted</code> disent déjà, et lui en donner une
+      serait le seul mensonge que ce champ existe pour empêcher.</p>
+    <p>Une source <code>said</code> est aussi tout l'historique de ce que le témoin a déclaré. Un
+      témoin auprès de qui on retourne corrige certaines choses et laisse le reste tel quel : une
+      valeur corrigée cite donc l'interview LA PLUS RÉCENTE, et celle que personne n'a reprise
+      continue de citer LA PREMIÈRE. Quelle interview chaque valeur cite <em>est</em> le relevé de ce
+      qui a changé et de ce qui n'a pas changé, et il n'y a aucune version de la reconstitution à
+      conserver pour le montrer. Laquelle est la plus récente, c'est au dossier de le dire, par les
+      dates de ses événements d'interview.</p>
     <p>Les deux bouts de cette liste sont ce qui empêche une ressemblance de passer pour une preuve.
       Seul ce qui est <code>established</code> ne doit rien au témoignage ni à la reconstitution :
       c'est ce qui en fait la seule chose contre laquelle juger une reconstitution. Une valeur
@@ -1605,6 +1638,22 @@ export class DocsFormatPage extends DocsSection {
       dijo el testigo) o <code>fitted</code> (desplazado, dentro de lo que se sabe, para ver si una
       hipótesis puede encajar; <code>rationale</code> dice cuál). La lista de valores <code>assumed</code> es la lista de lo que hay que volver a
       preguntar al testigo o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.</p>
+    <p><code>source</code> nombra aquello en lo que se apoya el valor, lo que una base no hace: la
+      base dice de qué CLASE es, esto dice CUÁL — la cosa que alguien iría a mirar. Una a la vez:
+      <code>said</code> (<code>{ interview, segment, range }</code>, el pasaje de una entrevista del
+      expediente en que se dijo, siendo <code>interview</code> el <code>id</code> de ese evento y
+      <code>segment</code> el turno de palabra), <code>document</code> con <code>at</code> (una
+      página, el número de una pregunta) y <code>url</code>, <code>picture</code> (el
+      <code>id</code> de una foto de la grabación sobre la que se midió) o <code>tool</code> (SVH,
+      IPACO, QGIS, un teodolito). Una hipótesis de trabajo no nombra ninguna, que es lo que ya dicen
+      <code>assumed</code> y <code>fitted</code>, y darle una sería la única mentira que este campo
+      existe para impedir.</p>
+    <p>Una fuente <code>said</code> es además todo el historial de lo que dijo el testigo. A un
+      testigo al que se vuelve corrige algunas cosas y deja el resto en pie: un valor corregido cita
+      la entrevista MÁS RECIENTE, y el que nadie revisó sigue citando LA PRIMERA. Qué entrevista cita
+      cada valor <em>es</em> el registro de lo que cambió y lo que no, y no hay que conservar ninguna
+      versión de la reconstrucción para mostrarlo. Cuál es la más reciente le toca decirlo al
+      expediente, por las fechas de sus eventos de entrevista.</p>
     <p>Los dos extremos de esa lista son lo que impide que un parecido pase por una prueba. Solo lo
       <code>established</code> no debe nada al testimonio ni a la reconstrucción: eso es lo que lo
       convierte en lo único contra lo que juzgar una reconstrucción. Un valor <code>fitted</code> es
@@ -2135,6 +2184,22 @@ export class DocsFormatPage extends DocsSection {
       il testimone ha detto) o <code>fitted</code> (spostato, entro ciò che si sa, per vedere se
       un'ipotesi può combaciare; <code>rationale</code> dice quale). L'elenco dei valori <code>assumed</code> è l'elenco di ciò per cui tornare dal testimone
       o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.</p>
+    <p><code>source</code> nomina ciò su cui il valore si appoggia, cosa che una base non fa: la base
+      dice di che GENERE è, questo dice QUALE — la cosa che qualcuno andrebbe a guardare. Una alla
+      volta: <code>said</code> (<code>{ interview, segment, range }</code>, il passaggio di
+      un'intervista del fascicolo in cui è stato detto, dove <code>interview</code> è l'<code>id</code>
+      di quell'evento e <code>segment</code> il turno di parola), <code>document</code> con
+      <code>at</code> (una pagina, il numero di una domanda) e <code>url</code>, <code>picture</code>
+      (l'<code>id</code> di una foto della registrazione su cui è stato misurato) o <code>tool</code>
+      (SVH, IPACO, QGIS, un teodolite). Un'ipotesi di lavoro non ne nomina alcuna, che è ciò che
+      <code>assumed</code> e <code>fitted</code> già dicono, e dargliene una sarebbe l'unica bugia
+      che questo campo esiste per impedire.</p>
+    <p>Una fonte <code>said</code> è anche tutta la storia di ciò che il testimone ha detto. Un
+      testimone da cui si torna corregge alcune cose e lascia il resto in piedi: un valore corretto
+      cita l'intervista PIÙ RECENTE, mentre quello che nessuno ha ripreso continua a citare LA PRIMA.
+      Quale intervista cita ciascun valore <em>è</em> il registro di ciò che è cambiato e di ciò che
+      non è cambiato, e non c'è nessuna versione della ricostruzione da conservare per mostrarlo.
+      Quale sia la più recente spetta al fascicolo dirlo, dalle date dei suoi eventi di intervista.</p>
     <p>I due estremi di questo elenco sono ciò che impedisce a una somiglianza di passare per una
       prova. Solo ciò che è <code>established</code> non deve nulla alla testimonianza né alla
       ricostruzione: è questo a renderlo l'unica cosa contro cui giudicare una ricostruzione. Un

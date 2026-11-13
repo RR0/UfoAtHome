@@ -174,3 +174,57 @@ describe("Provenance.free", () => {
     expect(Provenance.free(undefined)).toBe(false)
   })
 })
+
+describe("Provenance and what a value rests on", () => {
+  /** A duration the observer first said, corrected in a second interview; a distance measured in SVH on a
+   * registered photograph; a crane's height taken from the works permit. */
+  const recording = () => ({
+    version: 4,
+    durationSeconds: { value: 90, source: { said: { interview: "itw-2", segment: 14, range: [0, 32] } } },
+    observerTrack: {
+      keyframes: [{
+        t: 0,
+        pose: {
+          headingDeg: { value: 112, basis: "measured", how: "instrument", source: { tool: "SVH", picture: "ref-1" } },
+          elevationM: { value: 31, basis: "established", source: { document: "Permis de construire PC 075-2024", at: "p. 4", url: "https://example.org/pc.pdf" } },
+          // Never revisited: it goes on citing the first interview, which is what says it did not change.
+          pitchDeg: { value: 3, source: { said: { interview: "itw-1", segment: 7 } } }
+        }
+      }]
+    }
+  })
+
+  it("keeps what a value rests on through a round trip, as it keeps the rest", () => {
+    const { recording: stripped, provenance } = Provenance.strip(recording())
+    // A bare basis is "stated", and stays unwritten: what is written back is what a file holds.
+    expect(provenance.at("durationSeconds")?.basis).toBe("stated")
+    expect(provenance.at("durationSeconds")?.source).toEqual({ said: { interview: "itw-2", segment: 14, range: [0, 32] } })
+    expect(provenance.at("observerTrack.keyframes.0.pose.elevationM")?.source).toMatchObject({ at: "p. 4" })
+    expect(Provenance.restore(stripped, provenance)).toEqual(recording())
+  })
+
+  it("lists every value that names its source, with its basis: a report's traceability table", () => {
+    const { provenance } = Provenance.strip(recording())
+    expect(provenance.sourced().map(({ path, basis }) => [path, basis])).toEqual([
+      ["durationSeconds", "stated"],
+      ["observerTrack.keyframes.0.pose.headingDeg", "measured"],
+      ["observerTrack.keyframes.0.pose.elevationM", "established"],
+      ["observerTrack.keyframes.0.pose.pitchDeg", "stated"]
+    ])
+  })
+
+  it("says which interviews it cites and what each accounts for: the history of what was said", () => {
+    const { provenance } = Provenance.strip(recording())
+    expect(provenance.interviewsCited()).toEqual(["itw-2", "itw-1"])
+    expect(provenance.pathsFromInterview("itw-2")).toEqual(["durationSeconds"])
+    expect(provenance.pathsFromInterview("itw-1")).toEqual(["observerTrack.keyframes.0.pose.pitchDeg"])
+    // What a document or a tool holds up is not an interview's doing.
+    expect(provenance.pathsFromInterview()).toEqual([])
+  })
+
+  it("is said of a value that says nothing else: a source alone is worth storing", () => {
+    const { recording: stripped, provenance } = Provenance.strip({ lightPollution: { value: 2, source: { tool: "World Atlas 2016" } } })
+    expect(provenance.at("lightPollution")).toMatchObject({ basis: "stated", source: { tool: "World Atlas 2016" } })
+    expect(Provenance.restore(stripped, provenance)).toEqual({ lightPollution: { value: 2, source: { tool: "World Atlas 2016" } } })
+  })
+})

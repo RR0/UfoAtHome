@@ -294,6 +294,29 @@ class JsonSchemaExport {
               range: {
                 description: "How far what is known lets it be: a number's least and greatest, or a time's EDTF interval (\"1976-06/1976-07\"). What a reading of the observation may move it within.",
                 anyOf: [{ type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }, { type: "string" }]
+              },
+              source: {
+                description: "What the value rests on, named: the passage of an interview it was said in, a document and where in it, a picture of the recording it was measured on, or the tool it was measured in. One of these at a time; a working hypothesis has none, which is what \"assumed\" and \"fitted\" say.",
+                type: "object",
+                properties: {
+                  said: {
+                    description: "Where the observer said it: the interview event's id (absent: the only interview the case holds), which turn of speech, and the part of its text.",
+                    type: "object",
+                    required: ["segment"],
+                    properties: {
+                      interview: { type: "string" },
+                      segment: { type: "number" },
+                      range: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }
+                    },
+                    additionalProperties: false
+                  },
+                  document: { description: "A document: the questionnaire, a report, a paper, a register.", anyOf: [{ type: "string" }, { type: "object" }] },
+                  at: { type: "string", description: "Where in it: a page, a question's number, a line." },
+                  url: { type: "string" },
+                  picture: { type: "string", description: "The id of a picture of the recording it was measured on." },
+                  tool: { type: "string", description: "The tool the measurement or the calculation was made in." }
+                },
+                additionalProperties: false
               }
             },
             additionalProperties: false

@@ -75,6 +75,18 @@ A wrong value marked "assumed" is a question for the author. A guess passed off 
 fabricated account, the one thing this format exists to prevent. When in doubt, mark it weaker. Do
 not wrap plumbing (\`version\`, \`id\`, \`sourceId\`).
 
+Beside the basis, say WHICH thing the value rests on, in \`source\`: \`{"said": {"interview": "itw-2",
+"segment": 14}}\` for a passage of an interview of the case (the event's id, and which turn of
+speech), \`{"document": "GEIPAN questionnaire", "at": "q. 12"}\` for a document, \`{"picture":
+"ref-1"}\` for a picture of the recording it was measured on, \`{"tool": "IPACO"}\` for a measurement
+made elsewhere. A basis says what KIND of thing a value is; this says which thing, and a reader needs
+both. What you chose yourself has no source: that is what "assumed" means, and inventing one for it
+is the worst thing you can write here.
+
+Where the case holds several interviews, cite the one a value was last said in: a value corrected in
+the second cites the second, one nobody went back over goes on citing the first. That is how the
+record of what changed is kept, so do not re-cite everything to the latest interview.
+
 Three more exist, and you write only the first of them:
 
 - **measured**: read off an instrument or a gauge — a clock, a compass, a theodolite — by the
