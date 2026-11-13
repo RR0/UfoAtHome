@@ -32,6 +32,17 @@ export interface CaseEditorMessages extends InputFileMessages {
   findingAgainst: { established: string, supposed: string }
   untitledObservation: string
   deleteRecording: string
+  /** What cloning an event of the case does, on the button beside its removal. */
+  cloneEvent: string
+  /** Freezing an event, and thawing it: on the padlock beside the clone (see CaseEventJson.sealed). */
+  freezeEvent: string
+  unfreezeEvent: string
+  /** On a frozen event's card, and why its removal is refused while it is frozen. */
+  sealedChip: string
+  deleteFrozen: string
+  /** Over a frozen event's editor, which takes nothing typed into it, and what thaws it from there. */
+  frozenNote: string
+  thawButton: string
   deleteReadingQuestion: string
   deleteObservationQuestion: string
   deleteRefused: string

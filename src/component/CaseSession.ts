@@ -164,8 +164,37 @@ export class CaseSession {
     return true
   }
 
+  /** Whether what an event lists is frozen: it is not edited any more, so that work resting on it stays true (see CaseEventJson.sealed). */
+  static sealed(event: CaseEventJson): boolean {
+    return event.sealed === true
+  }
+
+  /** Freezes what an event lists, or thaws it: the author's own doing, both ways. */
+  seal(track: CaseTrack, sealed: boolean): void {
+    if (sealed) track.event.sealed = true
+    else delete track.event.sealed
+    this.caseChanged = true
+  }
+
+  /**
+   * Copies what an event lists into an event of its own: the same recording under a new id and a file of its own, a reading still reading
+   * the account its original read. The copy is what is edited next, the original being frozen; nothing is copied of a recording not
+   * fetched yet, and nothing of an interview (a feedback interview is held, not copied).
+   */
+  clone(track: CaseTrack, title?: SaidText): CaseTrack | undefined {
+    if (!track.recording) return undefined
+    const account = track.kind === "reading" ? this.accountOf(track) : undefined
+    if (track.kind === "reading" && !account) return undefined
+    const named = title ?? (track.event.title as SaidText | undefined)
+    return this.addObservation(structuredClone(track.recording), track.event.time, named,
+      account ? { account, by: track.event.by } : undefined)
+  }
+
   /** Remembers what a track's recording is now, as loaded or as edited. */
   keep(track: CaseTrack, recording: SightingRecordingJson, fresh = false): void {
+    // A frozen event keeps what it was frozen on: an edit reaching here is refused, not written (see CaseEventJson.sealed). What was just
+    // loaded still goes through, since that IS what it holds.
+    if (!fresh && CaseSession.sealed(track.event)) return
     // In the current version of the format (see SightingMigration): a file of an older one is written back in it once edited.
     recording = SightingMigration.toCurrent(recording)
     track.recording = recording
@@ -400,6 +429,7 @@ export class CaseSession {
    */
   deleteObservation(track: CaseTrack): { deleted: true } | { deleted: false, readings: number } {
     if (track.kind !== "observer") return { deleted: false, readings: 0 }
+    if (CaseSession.sealed(track.event)) return { deleted: false, readings: 0 }
     const readings = this.readingsOf(track).length
     if (readings > 0) return { deleted: false, readings }
     const index = this.tracks.indexOf(track)
@@ -413,6 +443,7 @@ export class CaseSession {
   /** Removes a reading from the case. An account is not removed: a case is its sightings. */
   deleteReading(track: CaseTrack): boolean {
     if (track.kind !== "reading") return false
+    if (CaseSession.sealed(track.event)) return false
     const index = this.tracks.indexOf(track)
     if (index < 0) return false
     this.tracks.splice(index, 1)

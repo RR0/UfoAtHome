@@ -68,6 +68,15 @@ export interface CaseEventJson {
   interpretationOf?: string | string[]
   /** An interview's: the `id`, or the ids, of the sighting events of the witnesses it was held with (see CaseFile.INTERVIEW_EVENT). */
   interviewOf?: string | string[]
+  /**
+   * Whether what this event lists is frozen: once someone has worked ON a reconstruction — an interview held to hear what the witness makes
+   * of it, a hypothesis set against it — a later edit would quietly invalidate that work, so the author freezes the event and clones it to
+   * carry on. Nothing freezes itself: a reconstruction is edited for as long as it is being built, and versions nobody asked for are noise.
+   *
+   * It is `sealed` and not `frozen` in the file because a recording's `frozen` was the data copied from third parties, now `snapshots`
+   * (see Snapshots): that one copies data and leaves the original alone, this one stops the original from changing.
+   */
+  sealed?: boolean
   /** What an event says of itself where its title is not enough: an interview's, what it established. Translatable. */
   summary?: SaidText
 }

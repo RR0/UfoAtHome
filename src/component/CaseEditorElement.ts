@@ -224,10 +224,22 @@ const TEMPLATE = `
   .findings li[data-outcome="holds"] .finding-mark { color: var(--ok); }
   .findings li[data-outcome="fails"] .finding-mark { color: var(--error); }
   .findings li[data-outcome="untested"] .finding-mark { color: var(--ink-faint); }
-  /* The removal, in the card's top right corner rather than a column of its own: what the card says has its whole width below it. */
-  .event-delete { position: absolute; top: 6px; right: 6px; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; min-width: 0; min-height: 0;
+  /* What can be done to the event, in the card's top right corner rather than a column of its own: what the card says has its whole width
+     below it. Cloning and freezing sit beside the removal, in that order: the one that makes a copy, the one that stops the original. */
+  .event-tools { position: absolute; top: 6px; right: 6px; z-index: 1; display: flex; gap: 2px; }
+  .event-delete, .event-tool { display: grid; place-items: center; width: 28px; height: 28px; min-width: 0; min-height: 0;
     padding: 0; border: 0; border-radius: 6px; background: none; color: var(--ink-dim); }
   .event-delete:hover:not(:disabled) { color: var(--error); }
+  .event-tool:hover:not(:disabled) { color: var(--ink); }
+  .event-delete:disabled, .event-tool:disabled { opacity: .4; }
+  /* A frozen event: its padlock shut and lit, and its card dimmed on its left edge, so that a list says at a glance which are still worked on. */
+  .event-card[data-sealed] { border-left: 3px solid var(--glow-dim); }
+  .event-card[data-sealed] .event-freeze { color: var(--glow); }
+  .sealed-chip { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--glow); }
+  /* Said over a frozen event's editor, which takes no input while it is frozen. */
+  .frozen-note { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px;
+    border: 1px solid var(--glow-dim); border-radius: 10px; background: var(--warn-bg); font-size: 14px; }
+  .frozen-note[hidden] { display: none; }
   /* The event open: the way back to the case, and the events before and after. */
   .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
   .crumb-sep { color: var(--ink-faint); }
@@ -311,6 +323,11 @@ const TEMPLATE = `
       <label id="row-recording-id" class="row"><span id="label-recording-id"></span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
       <span id="history-slot" class="history-slot"></span>
     </div>
+    <!-- Over a frozen event: why its editor takes no input, and the way to thaw it (see CaseEventJson.sealed). -->
+    <p id="frozen-note" class="frozen-note" role="status" hidden>
+      <span id="frozen-text"></span>
+      <button id="thaw" type="button" class="pill-btn"><span id="label-thaw"></span></button>
+    </p>
     <section id="recording" class="recording">
       <rr0-sighting-editor id="editor"><span id="recording-dirty" slot="tab-status" class="dirty" role="status" hidden>●</span></rr0-sighting-editor>
     </section>
@@ -497,6 +514,12 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
+    this.byId("thaw").addEventListener("click", () => {
+      const track = this.current
+      if (!this.session || !track) return
+      this.session.seal(track, false)
+      this.refreshRow()
+    })
     this.byId("export").addEventListener("click", () => this.askExport())
     this.byId("source").addEventListener("change", () => this.syncSourceFields())
     this.byId("kind").addEventListener("change", () => this.syncSourceFields())
@@ -693,6 +716,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
+    this.byId("label-thaw").textContent = m.thawButton
     this.byId("delete").setAttribute("aria-label", m.deleteRecording)
   }
 
@@ -1319,18 +1343,49 @@ export class CaseEditorElement extends HTMLElement {
         chip.textContent = m.readingVerdict[verdict]
         links.prepend(chip, ...(said.length > 0 ? [document.createTextNode(" · ")] : []))
       }
+      const sealed = item.track !== undefined && CaseSession.sealed(item.track.event)
+      if (sealed) {
+        card.dataset.sealed = ""
+        const chip = document.createElement("span")
+        chip.className = "sealed-chip"
+        chip.textContent = m.sealedChip
+        links.prepend(chip, ...(links.textContent !== "" ? [document.createTextNode(" · ")] : []))
+      }
+      const tools = document.createElement("span")
+      tools.className = "event-tools"
+      // Only a recording is cloned or frozen: an interview is neither, since hearing the witness again is holding another one.
+      if (item.track) {
+        const copy = document.createElement("button")
+        copy.type = "button"
+        copy.className = "icon-btn event-tool event-copy"
+        copy.innerHTML = Icons.COPY
+        copy.title = m.cloneEvent
+        copy.setAttribute("aria-label", m.cloneEvent)
+        copy.addEventListener("click", () => void this.cloneFromList(index))
+        const freeze = document.createElement("button")
+        freeze.type = "button"
+        freeze.className = "icon-btn event-tool event-freeze"
+        freeze.innerHTML = sealed ? Icons.LOCK : Icons.LOCK_OPEN
+        freeze.title = sealed ? m.unfreezeEvent : m.freezeEvent
+        freeze.setAttribute("aria-label", freeze.title)
+        freeze.setAttribute("aria-pressed", String(sealed))
+        freeze.addEventListener("click", () => void this.toggleFrozen(index))
+        tools.append(copy, freeze)
+      }
       const remove = document.createElement("button")
       remove.type = "button"
       remove.className = "icon-btn event-delete"
       remove.innerHTML = Icons.TRASH
-      remove.title = m.deleteRecording
-      remove.setAttribute("aria-label", m.deleteRecording)
+      remove.title = sealed ? m.deleteFrozen : m.deleteRecording
+      remove.setAttribute("aria-label", remove.title)
+      remove.disabled = sealed
       remove.addEventListener("click", () => void this.deleteFromList(index))
+      tools.append(remove)
       const body = document.createElement("div")
       body.className = "event-body"
       body.append(pill, main, links)
       if (findings && findings.length > 0) body.append(this.findingsList(findings))
-      card.append(body, remove)
+      card.append(body, tools)
       return { card, child }
     })
     // Each observation, interview or reading on its own is an entry of the list, its readings listed within it.
@@ -1448,6 +1503,52 @@ export class CaseEditorElement extends HTMLElement {
     if (!editor.checkVisibility?.()) return
     const box = editor.getBoundingClientRect()
     if (Math.abs(box.top) > 1) editor.scrollIntoView?.({ block: "start", behavior: "smooth" })
+  }
+
+  /**
+   * Clones an event of the list: its recording is fetched if it was not, copied under an id of its own, and opened, since the copy is what
+   * the author carries on with. The original is left as it stands — frozen if it was, which is why a clone is wanted in the first place.
+   */
+  private async cloneFromList(index: number): Promise<void> {
+    const session = this.session
+    const item = session ? (this.items(session) as { track?: CaseTrack }[])[index] : undefined
+    const track = item?.track
+    if (!session || !track) return
+    try {
+      await this.loadTrack(track)
+    } catch {
+      this.showError(this.messages.loadFailed)
+      return
+    }
+    const clone = session.clone(track)
+    if (!clone) return
+    this.refreshRow()
+    const to = (this.items(session) as { track?: CaseTrack }[]).findIndex(other => other.track === clone)
+    if (to >= 0) this.openEvent(to)
+  }
+
+  /** Freezes the event of the list, or thaws it: what rests on a reconstruction stays true only while that reconstruction does not move. */
+  private async toggleFrozen(index: number): Promise<void> {
+    const session = this.session
+    const item = session ? (this.items(session) as { track?: CaseTrack }[])[index] : undefined
+    const track = item?.track
+    if (!session || !track) return
+    // What the editor holds of it is written back before it is frozen, so that freezing keeps the state on screen and not the one on file.
+    if (!CaseSession.sealed(track.event) && this.current === track) this.commit()
+    session.seal(track, !CaseSession.sealed(track.event))
+    this.refreshRow()
+  }
+
+  /**
+   * A frozen event on show: the note says why, and the editor is made inert, so that nothing can be typed into a reconstruction that work
+   * already rests on. It is the whole editor and not each field: a value that could not be written while the form invited it would be the
+   * same silent loss the freezing exists to prevent.
+   */
+  private showFrozen(frozen: boolean): void {
+    this.byId("frozen-note").hidden = !frozen
+    this.byId("frozen-text").textContent = frozen ? this.messages.frozenNote : ""
+    // The attribute and not the property: it is what a browser reads, and what a test can see.
+    this.editor.toggleAttribute("inert", frozen)
   }
 
   /** Asks to delete an event from the list: it is made the one the deletion is about, without leaving the list. */
@@ -1599,8 +1700,10 @@ export class CaseEditorElement extends HTMLElement {
     select.replaceChildren(...items.map((item, index) => new Option(this.optionLabel(item, index), String(index))))
     const shown = this.currentInterview ? items.findIndex(item => item.interview === this.currentInterview) : this.current ? items.findIndex(item => item.track === this.current) : 0
     select.value = String(Math.max(0, shown))
-    // Any recording can leave the case, while the case keeps one; an interview can always.
-    ;(this.byId("delete") as HTMLButtonElement).disabled = this.currentInterview === undefined && session.tracks.length <= 1
+    // Any recording can leave the case, while the case keeps one; an interview can always. A frozen one leaves only once thawed.
+    const frozen = this.currentInterview === undefined && this.current !== undefined && CaseSession.sealed(this.current.event)
+    ;(this.byId("delete") as HTMLButtonElement).disabled = frozen || (this.currentInterview === undefined && session.tracks.length <= 1)
+    this.showFrozen(frozen)
     this.refreshRecordingId(session)
     this.refreshDirty()
   }

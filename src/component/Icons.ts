@@ -23,6 +23,11 @@ export class Icons {
   static readonly NEXT_MARK = Icons.draw(`<path d="M9.5 4l4 4-4 4"/><path d="M5 5.2 7.8 8 5 10.8 2.2 8z"/>`)
   static readonly CLOSE = Icons.draw(`<path d="M4 4l8 8M12 4l-8 8"/>`)
   static readonly PLUS = Icons.draw(`<path d="M8 3v10M3 8h10"/>`)
+  /** One sheet over another: what cloning an event of a case does (see CaseEditorElement). */
+  static readonly COPY = Icons.draw(`<rect x="5.5" y="5.5" width="8" height="8" rx="1.3"/><path d="M10.5 3.2h-7a1.3 1.3 0 0 0-1.3 1.3v7"/>`)
+  /** Shut and open padlocks: an event frozen, and one that can be (see CaseEventJson.sealed). */
+  static readonly LOCK = Icons.draw(`<rect x="3.2" y="7.2" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7.2V5.4a2.4 2.4 0 0 1 4.8 0v1.8"/>`)
+  static readonly LOCK_OPEN = Icons.draw(`<rect x="3.2" y="7.2" width="9.6" height="6.4" rx="1.4"/><path d="M5.6 7.2V5.4a2.4 2.4 0 0 1 4.6-.7"/>`)
   /** What the sky held at that hour, shown on demand: a meteor, a comet, a new star, a satellite, a fireball. */
   static readonly METEOR = Icons.draw(`<path d="M2.5 2.5l7 7"/><path d="M5.5 2.5l5 5"/><circle cx="11.5" cy="11.5" r="2"/>`)
   static readonly COMET = Icons.draw(`<circle cx="11" cy="11" r="2.4"/><path d="M9.3 9.3 2.5 2.5M9 11.2 3 7M11.2 9 7 3"/>`)

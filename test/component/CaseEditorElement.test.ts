@@ -934,6 +934,68 @@ describe("CaseEditorElement's events", () => {
     expect(cards[2].querySelector(".findings")).toBeNull()
   })
 
+  it("clones an event of the case, beside its removal: the copy has a file and an id of its own, reads what the original read, and opens", async () => {
+    const element = await open()
+    await wait()
+    const root = element.shadowRoot!
+    const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
+    const session = element.caseSession!
+    expect(session.tracks).toHaveLength(2)
+    // The account's clone is another account of the case, not a second file at the same address.
+    cards()[0].querySelector<HTMLButtonElement>(".event-copy")!.click()
+    await wait()
+    expect(session.tracks).toHaveLength(3)
+    const copy = session.tracks[2]
+    expect(copy.kind).toBe("observer")
+    expect(copy.event.url).not.toBe(session.tracks[0].event.url)
+    expect(copy.recording!.id).not.toBe(session.tracks[0].recording!.id)
+    // What the author carries on with: the copy is the one opened.
+    expect(root.getElementById("event-item")!.hidden).toBe(false)
+    // A reading's clone still reads the account the original read: a reading of nothing would be no reading.
+    cards().find(card => card.classList.contains("event-child"))!.querySelector<HTMLButtonElement>(".event-copy")!.click()
+    await wait()
+    expect(session.tracks).toHaveLength(4)
+    const readingCopy = session.tracks[3]
+    expect(readingCopy.kind).toBe("reading")
+    // The same account, though the copy names it by that event's id while the original still names it by the recording's (the older form).
+    expect(session.accountOf(readingCopy)).toBe(session.accountOf(session.tracks[1]))
+    expect(session.accountOf(readingCopy)).toBe(session.tracks[0])
+  })
+
+  it("freezes an event: it says so, takes no edit, cannot be deleted, and comes back when thawed", async () => {
+    const element = await open()
+    await wait()
+    const root = element.shadowRoot!
+    const card = () => root.querySelector<HTMLElement>(".event-card")!
+    const session = element.caseSession!
+    const track = session.tracks[0]
+    expect(card().querySelector<HTMLButtonElement>(".event-freeze")!.title).toBe("Freeze this event, so that work resting on it stays true")
+    card().querySelector<HTMLButtonElement>(".event-freeze")!.click()
+    await wait()
+    // Written in the case, so that the freezing outlives the session.
+    expect(JSON.parse(session.files(false)[0].content).events[0].sealed).toBe(true)
+    expect(card().dataset.sealed).toBe("")
+    expect(card().querySelector(".sealed-chip")!.textContent).toBe("Frozen")
+    // Nothing can be typed into it, and it says why rather than dropping what was typed.
+    expect(element.sightingEditor.hasAttribute("inert")).toBe(true)
+    expect(root.getElementById("frozen-note")!.hidden).toBe(false)
+    expect(root.getElementById("frozen-text")!.textContent).toContain("frozen")
+    // An edit that reaches the session anyway is refused, not written.
+    session.keep(track, { ...track.recording!, description: { en: "typed after it was frozen" } } as never)
+    expect((track.recording as { description?: unknown }).description).toBeUndefined()
+    // And it does not leave the case while it is frozen: what rests on it would be left citing nothing.
+    expect(card().querySelector<HTMLButtonElement>(".event-delete")!.disabled).toBe(true)
+    expect(parts(element).remove.disabled).toBe(true)
+    expect(session.deleteObservation(track)).toEqual({ deleted: false, readings: 0 })
+    root.getElementById("thaw")!.click()
+    await wait()
+    expect(JSON.parse(session.files(false)[0].content).events[0].sealed).toBeUndefined()
+    expect(card().dataset.sealed).toBeUndefined()
+    expect(element.sightingEditor.hasAttribute("inert")).toBe(false)
+    session.keep(track, { ...track.recording!, description: { en: "typed once thawed" } } as never)
+    expect((track.recording as { description?: { en: string } }).description!.en).toBe("typed once thawed")
+  })
+
   it("offers Save only when the case is not saved, and says nothing else of it in its header", async () => {
     const element = await open()
     const root = element.shadowRoot!
