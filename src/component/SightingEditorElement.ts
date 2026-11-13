@@ -504,6 +504,7 @@ export class SightingEditorElement extends HTMLElement {
   private readonly durationElement: DurationInputElement
   private readonly exportButton: HTMLButtonElement
   private readonly exportKmlButton: HTMLButtonElement
+  private readonly exportGeoJsonButton: HTMLButtonElement
   /** The header's own Save: the same export as the File section's, the one way to keep what was done. */
   private readonly saveButton: HTMLButtonElement
   /** The recording's tracks under the scene, when laid out (see TimelineTracks). */
@@ -1363,6 +1364,7 @@ export class SightingEditorElement extends HTMLElement {
     this.durationInput = this.durationElement.input
     this.exportButton = this.shadow.getElementById("export") as HTMLButtonElement
     this.exportKmlButton = this.shadow.getElementById("export-kml") as HTMLButtonElement
+    this.exportGeoJsonButton = this.shadow.getElementById("export-geojson") as HTMLButtonElement
     this.saveButton = this.shadow.getElementById("save") as HTMLButtonElement
     this.shareButton = this.shadow.getElementById("share") as HTMLButtonElement
     this.shareDialog = this.shadow.getElementById("share-dialog") as ShareDialogElement
@@ -1965,7 +1967,8 @@ export class SightingEditorElement extends HTMLElement {
     this.recordButton.addEventListener("click", () => this.toggleRecording())
     this.deleteShapeButton.addEventListener("click", () => this.deleteShape())
     this.exportButton.addEventListener("click", () => this.exportJson())
-    this.exportKmlButton.addEventListener("click", () => void this.exportKml())
+    this.exportKmlButton.addEventListener("click", () => void this.exportFigures("kml"))
+    this.exportGeoJsonButton.addEventListener("click", () => void this.exportFigures("geojson"))
     this.saveButton.addEventListener("click", () => this.exportJson())
     this.shareButton.addEventListener("click", () => this.openShare())
     this.importInput.addEventListener("filepick", event => {
@@ -5661,22 +5664,27 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   /**
-   * Writes out what the recording holds geographically, as a Google Earth file — see KmlExport.
+   * Writes out what the recording holds geographically, as a Google Earth file or as GeoJSON — see
+   * GeographicFigures, and the two writers over it.
    *
    * Beside Save rather than in the traces list: what goes out is the whole of what can be laid over
    * a map (where the observer stood, the directions stated, what a reading places, the traces
    * brought in), not any one of those. Its words are the author's writing language: the file is
    * read by whoever they send it to.
    */
-  private async exportKml(): Promise<void> {
-    const [{ KmlExport }, { KML_EXPORT_TEXTS }] = await Promise.all([
-      import("../engine/interop/KmlExport.js"),
-      import("../engine/interop/messages/KmlExportTexts.js")
-    ])
+  private async exportFigures(format: "kml" | "geojson"): Promise<void> {
     const base = this.fileBase()
-    const texts = await KML_EXPORT_TEXTS.load(this.writingLanguage)
-    const kml = KmlExport.of(this.ufoElement.sighting, base, texts, this.said)
-    this.download(new Blob([kml], { type: "application/vnd.google-earth.kml+xml" }), `${base}.kml`)
+    const { GEO_EXPORT_TEXTS } = await import("../engine/interop/messages/GeoExportTexts.js")
+    const texts = await GEO_EXPORT_TEXTS.load(this.writingLanguage)
+    if (format === "kml") {
+      const { KmlExport } = await import("../engine/interop/KmlExport.js")
+      const kml = KmlExport.of(this.ufoElement.sighting, base, texts, this.said)
+      this.download(new Blob([kml], { type: "application/vnd.google-earth.kml+xml" }), `${base}.kml`)
+      return
+    }
+    const { GeoJsonExport } = await import("../engine/interop/GeoJsonExport.js")
+    const json = GeoJsonExport.of(this.ufoElement.sighting, base, texts, this.said)
+    this.download(new Blob([json], { type: "application/geo+json" }), `${base}.geojson`)
   }
 
   private deleteTrace(): void {
@@ -11861,6 +11869,8 @@ export class SightingEditorElement extends HTMLElement {
     this.exportButton.textContent = messages.export
     this.exportKmlButton.textContent = messages.exportKml
     this.exportKmlButton.title = messages.exportKmlHint
+    this.exportGeoJsonButton.textContent = messages.exportGeoJson
+    this.exportGeoJsonButton.title = messages.exportGeoJsonHint
     this.snapshotsPanel.localize(messages)
     this.sectionFilePanel.localize(messages)
     this.eventsPanel.localize(messages.events)

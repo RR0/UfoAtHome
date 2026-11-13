@@ -37,6 +37,11 @@ export class GeoJsonImport {
   private static readonly TITLE_KEYS = ["name", "title", "label", "Name", "NAME", "nom", "libelle", "libellé"]
   /** Where they may give it a colour: the simplestyle spec first (what GitHub, Mapbox and QGIS write). */
   private static readonly COLOR_KEYS = ["stroke", "marker-color", "fill", "color", "colour", "couleur"]
+  /** How a `heights` property of this project's own is read back — see GeoJsonExport. "observer-ground" is a
+   * height over the ground under the point, which is what "relative" means here. */
+  private static readonly HEIGHTS: Record<string, TraceAltitude> = {
+    ground: "ground", relative: "relative", absolute: "absolute", "observer-ground": "relative"
+  }
 
   static fromText(text: string): TraceImportResult {
     let json: unknown
@@ -75,45 +80,46 @@ export class GeoJsonImport {
   /** Walks whatever kind of GeoJSON object this is, carrying down the name and colour a feature gave. */
   private static read(
     node: GeoJsonObject, title: string | undefined, color: string | undefined,
-    out: Omit<InvestigatorTrace, "id">[], skipped: Set<string>
+    out: Omit<InvestigatorTrace, "id">[], skipped: Set<string>, heights?: TraceAltitude
   ): void {
     const type = typeof node.type === "string" ? node.type : undefined
     switch (type) {
       case "FeatureCollection":
-        for (const feature of GeoJsonImport.array(node.features)) GeoJsonImport.read(feature as GeoJsonObject, title, color, out, skipped)
+        for (const feature of GeoJsonImport.array(node.features)) GeoJsonImport.read(feature as GeoJsonObject, title, color, out, skipped, heights)
         return
       case "Feature": {
         const named = GeoJsonImport.titleOf(node.properties) ?? title
         const coloured = GeoJsonImport.colorOf(node.properties) ?? color
+        const counted = GeoJsonImport.heightsOf(node.properties) ?? heights
         // A feature may carry no geometry at all (a row of a table): nothing to draw, and worth saying.
         if (typeof node.geometry !== "object" || node.geometry === null) {
           skipped.add("Feature without geometry")
           return
         }
-        GeoJsonImport.read(node.geometry as GeoJsonObject, named, coloured, out, skipped)
+        GeoJsonImport.read(node.geometry as GeoJsonObject, named, coloured, out, skipped, counted)
         return
       }
       case "GeometryCollection":
-        for (const geometry of GeoJsonImport.array(node.geometries)) GeoJsonImport.read(geometry as GeoJsonObject, title, color, out, skipped)
+        for (const geometry of GeoJsonImport.array(node.geometries)) GeoJsonImport.read(geometry as GeoJsonObject, title, color, out, skipped, heights)
         return
       case "Point":
-        GeoJsonImport.push("point", [node.coordinates as Position], title, color, out)
+        GeoJsonImport.push("point", [node.coordinates as Position], title, color, out, heights)
         return
       case "MultiPoint":
-        for (const position of GeoJsonImport.array(node.coordinates)) GeoJsonImport.push("point", [position as Position], title, color, out)
+        for (const position of GeoJsonImport.array(node.coordinates)) GeoJsonImport.push("point", [position as Position], title, color, out, heights)
         return
       case "LineString":
-        GeoJsonImport.push("line", node.coordinates as Position[], title, color, out)
+        GeoJsonImport.push("line", node.coordinates as Position[], title, color, out, heights)
         return
       case "MultiLineString":
-        for (const line of GeoJsonImport.array(node.coordinates)) GeoJsonImport.push("line", line as Position[], title, color, out)
+        for (const line of GeoJsonImport.array(node.coordinates)) GeoJsonImport.push("line", line as Position[], title, color, out, heights)
         return
       case "Polygon":
         // The first ring is the outline; the others are holes, which a trace has no way to hold.
-        GeoJsonImport.polygon(node.coordinates as Position[][], title, color, out, skipped)
+        GeoJsonImport.polygon(node.coordinates as Position[][], title, color, out, skipped, heights)
         return
       case "MultiPolygon":
-        for (const polygon of GeoJsonImport.array(node.coordinates)) GeoJsonImport.polygon(polygon as Position[][], title, color, out, skipped)
+        for (const polygon of GeoJsonImport.array(node.coordinates)) GeoJsonImport.polygon(polygon as Position[][], title, color, out, skipped, heights)
         return
       default:
         if (type) skipped.add(type)
@@ -122,17 +128,17 @@ export class GeoJsonImport {
 
   private static polygon(
     rings: Position[][] | undefined, title: string | undefined, color: string | undefined,
-    out: Omit<InvestigatorTrace, "id">[], skipped: Set<string>
+    out: Omit<InvestigatorTrace, "id">[], skipped: Set<string>, heights?: TraceAltitude
   ): void {
     const all = GeoJsonImport.array(rings) as Position[][]
     if (all.length === 0) return
     if (all.length > 1) skipped.add("Polygon holes")
-    GeoJsonImport.push("polygon", all[0], title, color, out)
+    GeoJsonImport.push("polygon", all[0], title, color, out, heights)
   }
 
   private static push(
     kind: InvestigatorTrace["kind"], positions: Position[] | undefined, title: string | undefined, color: string | undefined,
-    out: Omit<InvestigatorTrace, "id">[]
+    out: Omit<InvestigatorTrace, "id">[], heights?: TraceAltitude
   ): void {
     const points = GeoJsonImport.points(positions)
     // A ring written closed repeats its first point at the end; a polygon is closed by being one,
@@ -143,8 +149,9 @@ export class GeoJsonImport {
       if (first.lat === last.lat && first.lng === last.lng && first.altM === last.altM) points.pop()
     }
     if (points.length === 0 || (kind === "line" && points.length < 2) || (kind === "polygon" && points.length < 3)) return
-    // GeoJSON's third ordinate is a height above the ellipsoid: metres above sea level, near enough.
-    const altitude: TraceAltitude = points.some(point => point.altM !== undefined) ? "absolute" : "ground"
+    // What the file says of its own heights, where it says anything (see HEIGHTS); failing that,
+    // GeoJSON's third ordinate is a height above the ellipsoid, which is metres above sea level near enough.
+    const altitude: TraceAltitude = heights ?? (points.some(point => point.altM !== undefined) ? "absolute" : "ground")
     out.push({
       kind,
       points,
@@ -164,6 +171,12 @@ export class GeoJsonImport {
       points.push(Number.isFinite(alt) && alt !== 0 ? { lat, lng, altM: alt } : { lat, lng })
     }
     return points
+  }
+
+  /** What the file says its heights are counted from, when it is one of ours — see HEIGHTS. */
+  private static heightsOf(properties: Record<string, unknown> | undefined): TraceAltitude | undefined {
+    const said = properties?.heights
+    return typeof said === "string" ? GeoJsonImport.HEIGHTS[said] : undefined
   }
 
   private static titleOf(properties: Record<string, unknown> | undefined): string | undefined {

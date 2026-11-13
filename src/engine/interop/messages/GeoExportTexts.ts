@@ -7,7 +7,7 @@ import { Messages } from "../../../i18n/MessageCatalog.js"
  * Written into a file that leaves the tool, so the language is the author's writing language rather
  * than the reader's — whoever opens the file in Google Earth reads what the author wrote.
  */
-export interface KmlExportTexts {
+export interface GeoExportTexts {
   /** The document's own name: `{name}` is the recording's file name. */
   document: string
   /** What the document says it is, under its name. */
@@ -35,9 +35,9 @@ export interface KmlExportTexts {
   unnamed: string
 }
 
-export const KML_EXPORT_TEXTS = Messages.catalog<KmlExportTexts>({
-  en: () => import("./KmlExportTexts_en.js").then(m => m.kmlExportTexts_en),
-  fr: () => import("./KmlExportTexts_fr.js").then(m => m.kmlExportTexts_fr),
-  es: () => import("./KmlExportTexts_es.js").then(m => m.kmlExportTexts_es),
-  it: () => import("./KmlExportTexts_it.js").then(m => m.kmlExportTexts_it)
+export const GEO_EXPORT_TEXTS = Messages.catalog<GeoExportTexts>({
+  en: () => import("./GeoExportTexts_en.js").then(m => m.geoExportTexts_en),
+  fr: () => import("./GeoExportTexts_fr.js").then(m => m.geoExportTexts_fr),
+  es: () => import("./GeoExportTexts_es.js").then(m => m.geoExportTexts_es),
+  it: () => import("./GeoExportTexts_it.js").then(m => m.geoExportTexts_it)
 })

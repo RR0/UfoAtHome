@@ -1,6 +1,6 @@
-import type { KmlExportTexts } from "./KmlExportTexts.js"
+import type { GeoExportTexts } from "./GeoExportTexts.js"
 
-export const kmlExportTexts_it = {
+export const geoExportTexts_it = {
   document: "{name} — UFO@home",
   documentNote: "Ciò che questa ricostruzione ha di geografico: dove stava il testimone, le direzioni che la testimonianza dichiara, e dove una lettura colloca ciò che si sarebbe visto. Nulla di qui è una misura del fenomeno.",
   folderObserver: "Testimone",
@@ -17,4 +17,4 @@ export const kmlExportTexts_it = {
   bodyNote: "Dove lo colloca una lettura della testimonianza. L'interpretazione di qualcuno, non la testimonianza.",
   heightNote: "Le altezze sono contate dal suolo da cui il testimone è partito.",
   unnamed: "Fenomeno {id}"
-} satisfies KmlExportTexts
+} satisfies GeoExportTexts

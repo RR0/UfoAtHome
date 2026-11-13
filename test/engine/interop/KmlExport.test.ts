@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { KmlExport } from "../../../src/engine/interop/KmlExport.js"
-import { kmlExportTexts_en } from "../../../src/engine/interop/messages/KmlExportTexts_en.js"
+import { GeographicFigures } from "../../../src/engine/interop/GeographicFigures.js"
+import { geoExportTexts_en } from "../../../src/engine/interop/messages/GeoExportTexts_en.js"
 import { fromSightingJson } from "../../../src/engine/persistence/sightingJson.js"
 import { SaidTexts } from "../../../src/engine/model/SaidText.js"
 
@@ -35,7 +36,7 @@ const coordinatesOf = (kml: string, what: string): number[][] => {
 
 describe("KmlExport", () => {
   it("writes where the observer stood, the directions stated, what a reading places, and the traces brought in", () => {
-    const kml = KmlExport.of(sighting(), "case-maffliers", kmlExportTexts_en, said)
+    const kml = KmlExport.of(sighting(), "case-maffliers", geoExportTexts_en, said)
     expect(kml).toContain("<name>case-maffliers — UFO@home</name>")
     for (const folder of ["Observer", "Lines of sight", "What a reading places", "Investigator's traces"]) {
       expect(kml).toContain(`<name>${folder}</name>`)
@@ -45,19 +46,19 @@ describe("KmlExport", () => {
   })
 
   it("draws a line of sight along the azimuth the account states, at a length it calls conventional", () => {
-    const kml = KmlExport.of(sighting(), "case", kmlExportTexts_en, said)
+    const kml = KmlExport.of(sighting(), "case", geoExportTexts_en, said)
     const [start, end] = coordinatesOf(kml, "Line of sight — the light")
     expect(start[0]).toBeCloseTo(2.3, 6)
     expect(start[1]).toBeCloseTo(49.08, 6)
     // Due east, 5 km: the latitude holds and the longitude grows.
     expect(end[1]).toBeCloseTo(49.08, 3)
     expect(end[0]).toBeGreaterThan(2.3)
-    expect(end[0] - 2.3).toBeCloseTo(KmlExport.SIGHT_LINE_M / (111320 * Math.cos(49.08 * Math.PI / 180)), 2)
+    expect(end[0] - 2.3).toBeCloseTo(GeographicFigures.SIGHT_LINE_M / (111320 * Math.cos(49.08 * Math.PI / 180)), 2)
     expect(kml).toContain("is conventional")
   })
 
   it("puts a body where its own track puts it, 500 m east of the observer", () => {
-    const kml = KmlExport.of(sighting(), "case", kmlExportTexts_en, said)
+    const kml = KmlExport.of(sighting(), "case", geoExportTexts_en, said)
     const [point] = coordinatesOf(kml, "Spierings crane")
     expect(point[1]).toBeCloseTo(49.08, 4)
     expect(point[0] - 2.3).toBeCloseTo(500 / (111320 * Math.cos(49.08 * Math.PI / 180)), 3)
@@ -68,7 +69,7 @@ describe("KmlExport", () => {
   })
 
   it("gives a trace back as it came in: same coordinates, same colour, same altitude mode", () => {
-    const kml = KmlExport.of(sighting(), "case", kmlExportTexts_en, said)
+    const kml = KmlExport.of(sighting(), "case", geoExportTexts_en, said)
     expect(coordinatesOf(kml, "Line of sight T1")).toEqual([[2.3, 49.08, 2], [2.31, 49.081, 50]])
     const mark = kml.split("<Placemark>").find(part => part.includes("Line of sight T1"))!
     // KML writes a colour as aabbggrr, opaque.
@@ -77,7 +78,7 @@ describe("KmlExport", () => {
   })
 
   it("writes a path for an observer who moved, and none for one who stood still", () => {
-    const still = KmlExport.of(sighting(), "case", kmlExportTexts_en, said)
+    const still = KmlExport.of(sighting(), "case", geoExportTexts_en, said)
     expect(still).not.toContain("Observer's path")
     const walked = fromSightingJson({
       version: 4,
@@ -85,13 +86,13 @@ describe("KmlExport", () => {
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 49.08, lng: 2.3 } }, { t: 10000, pose: { lat: 49.081, lng: 2.302 } }] },
       timeline: { keyframes: [] }
     } as never)
-    const moving = KmlExport.of(walked, "case", kmlExportTexts_en, said)
+    const moving = KmlExport.of(walked, "case", geoExportTexts_en, said)
     expect(coordinatesOf(moving, "Observer's path")).toHaveLength(2)
   })
 
   it("writes nothing geographic for a recording with no place: no folder rather than a guess", () => {
     const nowhere = fromSightingJson({ version: 4, timeline: { keyframes: [] } } as never)
-    const kml = KmlExport.of(nowhere, "draft", kmlExportTexts_en, said)
+    const kml = KmlExport.of(nowhere, "draft", geoExportTexts_en, said)
     expect(kml).not.toContain("<Folder>")
     expect(kml).toContain("<name>draft — UFO@home</name>")
   })

@@ -85,6 +85,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   durationPlaceholder: "observation length",
   durationImprecise: "These dates don't precisely enough determine a duration — enter it manually.",
   exportKml: "Export KML",
+  exportGeoJson: "Export GeoJSON",
+  exportGeoJsonHint: "The same, as the GeoJSON every GIS reads: WGS 84, each feature saying which group it is in and what its heights are counted from.",
   exportKmlHint: "Where the observer stood, the directions stated, what a reading places, and the traces brought in — for Google Earth, SVH or QGIS.",
   export: "Save",
   snapshotTitle: "Snapshots",

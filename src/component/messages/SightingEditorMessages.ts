@@ -171,9 +171,11 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
    * it is also what one does to a recording.
    */
   export: string
-  /** The button writing out what the recording holds geographically (see KmlExport), and what it says under it. */
+  /** The buttons writing out what the recording holds geographically (see GeographicFigures), and what each says under it. */
   exportKml: string
   exportKmlHint: string
+  exportGeoJson: string
+  exportGeoJsonHint: string
   /**
    * The data the recording carries frozen beside it (see Snapshots): the title, its explanation, the choice of asking everything live, the
    * name of each group, what is said of one (`{date}` the day it was taken), and the button taking one again.

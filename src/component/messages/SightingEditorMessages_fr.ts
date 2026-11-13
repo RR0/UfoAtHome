@@ -85,6 +85,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   durationPlaceholder: "durée de l'observation",
   durationImprecise: "Ces dates ne permettent pas de déterminer précisément une durée — saisissez-la manuellement.",
   exportKml: "Exporter en KML",
+  exportGeoJson: "Exporter en GeoJSON",
+  exportGeoJsonHint: "La même chose, dans le GeoJSON que lit tout SIG : WGS 84, chaque figure disant à quel groupe elle appartient et depuis quoi ses hauteurs sont comptées.",
   exportKmlHint: "Où se tenait le témoin, les directions énoncées, ce qu'une lecture place et les tracés importés — pour Google Earth, SVH ou QGIS.",
   export: "Sauver",
   snapshotTitle: "Instantanés",
