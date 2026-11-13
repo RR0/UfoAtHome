@@ -983,6 +983,8 @@ describe("CaseEditorElement's events", () => {
     // An edit that reaches the session anyway is refused, not written.
     session.keep(track, { ...track.recording!, description: { en: "typed after it was frozen" } } as never)
     expect((track.recording as { description?: unknown }).description).toBeUndefined()
+    // Its id is outside its editor and is frozen too: renamed, it would be cited by nothing.
+    expect(parts(element).field("recording-id").disabled).toBe(true)
     // And it does not leave the case while it is frozen: what rests on it would be left citing nothing.
     expect(card().querySelector<HTMLButtonElement>(".event-delete")!.disabled).toBe(true)
     expect(parts(element).remove.disabled).toBe(true)
@@ -992,6 +994,7 @@ describe("CaseEditorElement's events", () => {
     expect(JSON.parse(session.files(false)[0].content).events[0].sealed).toBeUndefined()
     expect(card().dataset.sealed).toBeUndefined()
     expect(element.sightingEditor.hasAttribute("inert")).toBe(false)
+    expect(parts(element).field("recording-id").disabled).toBe(false)
     session.keep(track, { ...track.recording!, description: { en: "typed once thawed" } } as never)
     expect((track.recording as { description?: { en: string } }).description!.en).toBe("typed once thawed")
   })

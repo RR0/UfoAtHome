@@ -240,6 +240,8 @@ const TEMPLATE = `
   .frozen-note { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px;
     border: 1px solid var(--glow-dim); border-radius: 10px; background: var(--warn-bg); font-size: 14px; }
   .frozen-note[hidden] { display: none; }
+  /* A field frozen with its event has to LOOK frozen: one that takes nothing while looking as it always did is the silent loss again. */
+  .event-id-row input:disabled { opacity: .5; cursor: not-allowed; }
   /* The event open: the way back to the case, and the events before and after. */
   .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
   .crumb-sep { color: var(--ink-faint); }
@@ -1728,6 +1730,10 @@ export class CaseEditorElement extends HTMLElement {
       const input = this.input("recording-id")
       if (this.shadow.activeElement !== input) input.value = track.event.id ?? ""
       input.placeholder = session.proposedId(track)
+      // The id lives outside the recording's own editor, so freezing it has to reach here too: renaming a frozen event would leave the
+      // interview or the hypothesis that cites it citing nothing.
+      input.disabled = CaseSession.sealed(track.event)
+      input.title = input.disabled ? this.messages.frozenNote : ""
     }
     const { duplicateIds, unresolved } = session.problems()
     const messages = [
