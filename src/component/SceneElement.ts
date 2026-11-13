@@ -114,7 +114,7 @@ import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
-import { resolveDecorSeatAt } from "../engine/model/Decor.js"
+import { DecorAircraft, resolveDecorSeatAt } from "../engine/model/Decor.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
@@ -1210,9 +1210,13 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
-    // What the player's sound button must also answer for: the van's engine, the rain and the wind (see UfoElement.ambientSound).
+    // What the player's sound button must also answer for: the van's engine, an aircraft of the decor in flight, a body of the reading on
+    // show that is heard, the rain and the wind (see UfoElement.ambientSound). Each asks what the scene asks before it plays it, or the
+    // button said there was nothing to hear while the Concorde roared (its aircraft states no engine: what flies is heard by itself).
     this.ufoElement.ambientSound = sighting => sighting.vehicle !== undefined
       || sighting.decor.some(decor => decor.engine !== undefined)
+      || sighting.decor.some(decor => DecorAircraft.kindOf(decor, this.decorModelSounds.get(decor.model?.id ?? "")) !== undefined)
+      || this.interpretationShown?.bodies.some(body => body.sound) === true
       || sighting.weatherTrack.allKeyframes.some(frame => frame.weather.precipitationType !== "none" || frame.weather.windSpeed > 1)
       || this.detonates(sighting)
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<ReferenceViewDetail>).detail))
@@ -2634,7 +2638,11 @@ export class SceneElement extends HTMLElement {
       const id = decor.model?.id
       if (!id || decor.model?.url !== undefined || this.decorModelSounds.has(id)) continue
       this.decorModelSounds.set(id, undefined)
-      void this.sceneRenderer.entryOfDecorModel(id).then(entry => { this.decorModelSounds.set(id, entry?.parameters?.sound) })
+      void this.sceneRenderer.entryOfDecorModel(id).then(entry => {
+        this.decorModelSounds.set(id, entry?.parameters?.sound)
+        // The button was drawn before the catalogue answered: a model that says it is silent takes it away again.
+        this.ufoElement.refreshSoundControls()
+      })
     }
     if (this.aircraftAudio || SceneElement.trafficRuntime) {
       if (!this.aircraftAudio && SceneElement.trafficRuntime) this.aircraftAudio = this.newAircraftAudio(SceneElement.trafficRuntime)
@@ -3231,6 +3239,8 @@ export class SceneElement extends HTMLElement {
     this.interpretationShown = InterpretationKinds.expand(interpretation, InterpretationRegistry.kinds())
     // What is played is then the interpretation, and is called so.
     this.ufoElement.playerTitle = interpretation?.title
+    // A reading whose bodies are heard brings its own sound, which the player's button answers for (see ambientSound).
+    this.ufoElement.refreshSoundControls()
     this.syncAccountHidden()
     this.updateAstronomy(this.lastTimeMs)
     // The bodies have just stood where this interpretation puts them; what the player laid over the picture from them was measured before (see handleTimeUpdate).

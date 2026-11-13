@@ -1,5 +1,5 @@
 import type { Sighting } from "../model/Sighting.js"
-import { resolveDecorPlacementAt } from "../model/Decor.js"
+import { DecorAircraft, resolveDecorPlacementAt } from "../model/Decor.js"
 import type { DecorObject } from "../model/Decor.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftTrack } from "../traffic/AircraftProvider.js"
@@ -16,8 +16,8 @@ import { localMetersToGeo } from "../../render3d/terrain/GeoProjection.js"
  * place over the recording, in geographic coordinates — and nothing here knows how a sound is made of one.
  */
 export class DecorAircraftHearing {
-  /** The sound of a machine nobody said anything of: an airliner's, which is most of what flies. */
-  static readonly DEFAULT_KIND: AircraftKind = "airliner-narrow"
+  /** The sound of a machine nobody said anything of — see DecorAircraft.DEFAULT_KIND. */
+  static readonly DEFAULT_KIND: AircraftKind = DecorAircraft.DEFAULT_KIND
   /** One position a second is plenty for an object a track interpolates between. */
   private static readonly STEP_MS = 1000
   /** How long before the recording the aircraft is taken to have flown on the same course: what is heard at its start left it up to this long before. */
@@ -27,19 +27,14 @@ export class DecorAircraftHearing {
 
   private readonly tracks = new Map<string, { key: string, track: AircraftTrack }>()
 
-  /**
-   * What an aircraft sounds like in flight: what it says itself, else what its model says, else an airliner's. Undefined when it is
-   * silent, or not an aircraft, or does not fly (nothing is heard from a parked one, or from a craft sitting on the ground).
-   */
+  /** What an aircraft sounds like in flight — see DecorAircraft.kindOf, which the sound button asks too. */
   static kindOf(decor: DecorObject, modelSays?: AircraftKind | "silent"): AircraftKind | undefined {
-    if (decor.kind !== "aircraft" || !DecorAircraftHearing.flies(decor)) return undefined
-    const says = decor.aircraftSound ?? modelSays ?? DecorAircraftHearing.DEFAULT_KIND
-    return says === "silent" ? undefined : says
+    return DecorAircraft.kindOf(decor, modelSays)
   }
 
-  /** Whether the aircraft is ever off the ground: a trajectory, one keyframe long if it only sits up there, that leaves it. */
+  /** Whether the aircraft is ever off the ground — see DecorAircraft.flies. */
   static flies(decor: Pick<DecorObject, "track">): boolean {
-    return (decor.track ?? []).some(keyframe => (keyframe.altitudeM ?? 0) > 0)
+    return DecorAircraft.flies(decor)
   }
 
   /**
@@ -55,7 +50,7 @@ export class DecorAircraftHearing {
     const kinds = new Map<string, AircraftKind>()
     const span = Math.max(sighting.observerTrack.duration, (sighting.event.durationSeconds ?? 0) * 1000)
     for (const decor of sighting.decor) {
-      const kind = DecorAircraftHearing.kindOf(decor, modelSound(decor))
+      const kind = DecorAircraft.kindOf(decor, modelSound(decor))
       if (!kind) continue
       const id = `${DecorAircraftHearing.ID_PREFIX}${decor.id}`
       flights.set(id, this.trackOf(decor, id, origin, span))

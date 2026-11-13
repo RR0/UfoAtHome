@@ -750,6 +750,33 @@ export function resolveDecorHeadlightsAt(decor: DecorObject, t: number): Headlig
   return resolveDecorLitAt(decor, t) ? "dipped" : "off"
 }
 
+/**
+ * What a decor aircraft is heard as, which is the rule both the scene's sound and the player's sound button go by: a machine that flies
+ * is not silent unless someone said so (see DecorObject.aircraftSound). Here rather than beside the hearing it feeds (see
+ * DecorAircraftHearing), so that asking whether there is anything to hear costs nothing: the code that works a sound out is loaded
+ * only once one is played.
+ */
+export class DecorAircraft {
+
+  /** The sound of a machine nobody said anything of: an airliner's, which is most of what flies. */
+  static readonly DEFAULT_KIND: AircraftKind = "airliner-narrow"
+
+  /**
+   * What an aircraft sounds like in flight: what it says itself, else what its model says, else an airliner's. Undefined when it is
+   * silent, or not an aircraft, or does not fly (nothing is heard from a parked one, or from a craft sitting on the ground).
+   */
+  static kindOf(decor: DecorObject, modelSays?: AircraftKind | "silent"): AircraftKind | undefined {
+    if (decor.kind !== "aircraft" || !DecorAircraft.flies(decor)) return undefined
+    const says = decor.aircraftSound ?? modelSays ?? DecorAircraft.DEFAULT_KIND
+    return says === "silent" ? undefined : says
+  }
+
+  /** Whether the aircraft is ever off the ground: a trajectory, one keyframe long if it only sits up there, that leaves it. */
+  static flies(decor: Pick<DecorObject, "track">): boolean {
+    return (decor.track ?? []).some(keyframe => (keyframe.altitudeM ?? 0) > 0)
+  }
+}
+
 /** The sun's altitude below which a public lamp's photocell has switched it on. */
 export const PHOTOCELL_SUN_ALTITUDE_DEG = -0.5
 

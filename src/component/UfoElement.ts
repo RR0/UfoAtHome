@@ -3197,6 +3197,11 @@ export class UfoElement extends HTMLElement {
     return this.hasSound
   }
 
+  /** Draws the sound controls again, for whoever answers ambientSound once it knows more than it did (see SceneElement). */
+  refreshSoundControls(): void {
+    this.updateMuteButton()
+  }
+
   /** Whether the recording has anything to hear: a sound track, or what the scene plays around it. None at all means nobody was asked, which is not silence. */
   private get hasSound(): boolean {
     return this.currentSighting.soundTrack.allKeyframes.length > 0 || this.ambientSound?.(this.currentSighting) === true

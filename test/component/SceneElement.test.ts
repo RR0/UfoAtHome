@@ -1180,6 +1180,36 @@ describe("SceneElement air traffic", () => {
     const playbackOf = (element: HTMLElement, state: string) =>
       Object.defineProperty((element as unknown as { ufoElement: object }).ufoElement, "playbackState", { get: () => state, configurable: true })
 
+    /** A recording with nothing to hear of its own: no vehicle, no rain, no wind. */
+    const silentJson = {
+      ...rainyJson,
+      weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none" as const, precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] }
+    }
+
+    it("lets the sound be turned down for an aircraft of the decor in flight, which states no engine: what flies is heard by itself", () => {
+      const element = mount()
+      element.sightingData = silentJson as never
+      expect(element.ufoElement.audible).toBe(false)
+      const flying = { id: "concorde", kind: "aircraft", eastM: 70, northM: 110, track: [{ t: 0, eastM: 70, northM: 110, altitudeM: 2932 }] }
+      element.sightingData = { ...silentJson, decor: [flying] } as never
+      expect(element.ufoElement.audible).toBe(true)
+      // What its author silenced is silent, and the button says so again.
+      element.sightingData = { ...silentJson, decor: [{ ...flying, aircraftSound: "silent" }] } as never
+      expect(element.ufoElement.audible).toBe(false)
+      element.remove()
+    })
+
+    it("lets the sound be turned down for a body of the reading on show that is heard", () => {
+      const element = mount()
+      element.sightingData = silentJson as never
+      expect(element.ufoElement.audible).toBe(false)
+      element.interpretation = { bodies: [{ id: "craft", model: { id: "sphere" }, sound: { kind: "hum" }, track: [{ t: 0, azimuthDeg: 0, altitudeDeg: 20, distanceM: 300 }] }] } as never
+      expect(element.ufoElement.audible).toBe(true)
+      element.interpretation = undefined
+      expect(element.ufoElement.audible).toBe(false)
+      element.remove()
+    })
+
     it("follows the player's volume and mute button, as the weather and the vehicles do", async () => {
       const setLevel = vi.spyOn(AircraftAudio.prototype, "setLevel")
       const { element } = await playingScene()
