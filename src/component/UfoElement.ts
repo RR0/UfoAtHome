@@ -11,6 +11,8 @@ import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
 import { PlayerIcons } from "./PlayerIcons.js"
+import { VideoButton } from "./VideoButton.js"
+import type { SceneFilmer } from "./VideoButton.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { RecordingIssues } from "../engine/persistence/RecordingIssue.js"
@@ -415,6 +417,21 @@ export class UfoElement extends HTMLElement {
   addControl(button: HTMLButtonElement): void {
     this.controlsRight.insertBefore(button, this.fullscreenButton.parentElement === this.controlsRight ? this.fullscreenButton : null)
     this.fitControls()
+  }
+
+  /** The button that films the recording, there while something can film it (see SceneElement.film). */
+  private videoButton?: VideoButton
+
+  /** Who can film the recording on show: the 3D scene composing this player, when the browser can encode a film. Undefined, no button. */
+  set filmer(filmer: SceneFilmer | undefined) {
+    this.videoButton?.element.remove()
+    this.videoButton = filmer ? new VideoButton(filmer) : undefined
+    if (!this.videoButton) {
+      this.fitControls()
+      return
+    }
+    if (this.messages) this.videoButton.messages = this.messages
+    this.addControl(this.videoButton.element)
   }
 
   private readonly observerMapResizeObserver =
@@ -3342,6 +3359,7 @@ export class UfoElement extends HTMLElement {
   private applyMessages(messages: UfoMessages): void {
     this.messages = messages
     // Everything that says something says it now: nothing did before (see messages).
+    if (this.videoButton) this.videoButton.messages = messages
     this.volumeInput.title = messages.volume
     this.volumeInput.setAttribute("aria-label", messages.volume)
     this.updateMoreButton()

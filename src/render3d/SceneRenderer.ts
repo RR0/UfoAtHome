@@ -5139,10 +5139,25 @@ export class SceneRenderer {
       // Frames coming in late is what the pixel count answers to, and only while the picture is
       // being changed: a still one is drawn at every pixel, whatever twinkles in it — see
       // AdaptiveResolution.ratioFor.
-      const ratio = this.resolution.ratioFor(timeMs, intervalMs)
-      if (ratio !== this.renderer.getPixelRatio()) this.applyPixelRatio(ratio)
+      if (!this.pixelRatioHeld) {
+        const ratio = this.resolution.ratioFor(timeMs, intervalMs)
+        if (ratio !== this.renderer.getPixelRatio()) this.applyPixelRatio(ratio)
+      }
     }
     this.drawIfDirty()
+  }
+
+  /** Whether the pixel ratio stays at its maximum whatever the frames cost — see holdPixelRatio. */
+  private pixelRatioHeld = false
+
+  /**
+   * Keeps the scene drawn at every pixel it may have, however late its frames are, or lets the ratio follow them again. A film made frame
+   * by frame (see VideoExport) waits for each of its frames: a picture whose sharpness followed how busy the machine was while it was
+   * being made would not be the observation's, and the encoder wants every frame the same size.
+   */
+  holdPixelRatio(held: boolean): void {
+    this.pixelRatioHeld = held
+    if (held && this.renderer.getPixelRatio() !== this.resolution.maximum) this.applyPixelRatio(this.resolution.maximum)
   }
 
   /**

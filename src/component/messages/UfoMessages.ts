@@ -16,6 +16,11 @@ export interface UfoMessages {
   switchToClockTime: string
   fullscreen: string
   exitFullscreen: string
+  /** The button that films the recording and saves the film (see VideoButton); while it is being made, {percent} of it is made and a
+   * click stops it; and why it failed, {reason}. */
+  recordVideo: string
+  recordingVideo: string
+  videoFailed: string
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
   /** The slider of the sound's level. */

@@ -1111,6 +1111,13 @@ canvas[data-cursor="rotate"] {
   color: rgba(255, 255, 255, 0.92);
   transition: background-color 0.15s ease;
 }
+/* A film being made shows how far it has got in place of its glyph (see VideoButton). */
+.controls button.filming {
+  min-width: 3.6em;
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .controls .round {
   min-width: 2.6em;
   height: 2.6em;

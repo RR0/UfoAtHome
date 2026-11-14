@@ -40,6 +40,8 @@ export class PlayerIcons {
   /** The triangle sits a little left of where its box would centre it: its mass is at the wide
    * end, and a triangle centred by its box looks pushed to the right. */
   static readonly SHARE = PlayerIcons.outline("M14 4l7 7-7 7v-4.2C8.6 13.8 5.4 15.6 3.5 19c.6-5.6 3.4-9.6 10.5-10.8V4z")
+  /** A film camera: a body and its lens (see VideoButton). */
+  static readonly VIDEO = PlayerIcons.outline("M3.5 7h11a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM15.5 10.5l5-3v9l-5-3z")
   /** The chevrons of the fold-out that holds the buttons a narrow player has no room for. */
   static readonly FOLDED = PlayerIcons.svg("M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z")
   static readonly UNFOLDED = PlayerIcons.svg("M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z")

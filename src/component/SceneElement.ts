@@ -1146,8 +1146,10 @@ export class SceneElement extends HTMLElement {
     // long as the page was open. Playing is how the weather is seen to move.
     const playing = this.ufoElement.playbackState === "playing"
     // While playing, the player's own tick is the frame clock (see handleTimeUpdate) and the
-    // renderer runs no loop beside it.
-    this.sceneRenderer.setAnimationsRunning(playing, playing)
+    // renderer runs no loop beside it. While filming, the film's own clock is (see film): the
+    // weather moves as it would have been seen to, and the sound stays with the player.
+    const animated = playing || this.filming
+    this.sceneRenderer.setAnimationsRunning(animated, animated)
     this.weatherAudio.setPaused(!playing)
     this.vehicleAudio.setPaused(!playing)
     this.aircraftAudio?.setPaused(!playing)
@@ -1227,6 +1229,10 @@ export class SceneElement extends HTMLElement {
     // A thumbnail the mouse has left is paused, under its cover again.
     this.ufoElement.addEventListener(MINIFIED_RESET_EVENT, () => this.poster.restore())
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
+    // A film of the recording, where the browser can encode one (see film).
+    if (typeof VideoEncoder !== "undefined" && typeof OffscreenCanvas !== "undefined") {
+      this.ufoElement.filmer = { film: (onProgress, signal) => this.film(onProgress, signal), fileName: () => this.filmFileName() }
+    }
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
     // What the player's sound button must also answer for: the van's engine, an aircraft of the decor in flight, a body of the reading on
@@ -1712,6 +1718,56 @@ export class SceneElement extends HTMLElement {
     if (!context) return false
     context.imageSmoothingQuality = "high"
     context.drawImage(this.sceneCanvas, 0, 0, target.width, target.height)
+    return true
+  }
+
+  /** What the film of the recording is saved as. */
+  private filmFileName(): string {
+    return "observation.mp4"
+  }
+
+  /** Whether a film is being made of the recording (see film): the animations then follow the film's clock. */
+  private filming = false
+
+  /**
+   * The film of the whole recording, made frame by frame (see VideoExport), at the size the scene is drawn at and at every pixel it may
+   * have. The player is paused meanwhile, and put back where it was after.
+   */
+  private async film(onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
+    if (this.filming) throw new Error("Already filming")
+    const { VideoExport } = await import("./VideoExport.js")
+    const player = this.ufoElement
+    const wasAtMs = player.currentTime
+    player.pause()
+    this.filming = true
+    this.sceneRenderer.holdPixelRatio(true)
+    this.syncAnimationsToPlayback()
+    try {
+      return await VideoExport.film({
+        fromMs: 0,
+        toMs: player.seekableDuration,
+        rate: player.playbackRate,
+        width: this.sceneCanvas.width,
+        height: this.sceneCanvas.height,
+        frameAt: (timeMs, clockMs, target) => this.filmFrameAt(timeMs, clockMs, target)
+      }, onProgress, signal)
+    } finally {
+      this.filming = false
+      this.sceneRenderer.holdPixelRatio(false)
+      player.currentTime = wasAtMs
+      this.syncAnimationsToPlayback()
+    }
+  }
+
+  /** Draws the recording at `timeMs` with its animations at `clockMs`, and copies the picture into `target` — see FilmedScene.frameAt. */
+  private filmFrameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D): boolean {
+    if (this.ufoElement.currentTime !== timeMs) this.ufoElement.currentTime = timeMs
+    // Asked for even where nothing has changed since the last instant: the drawing buffer is not kept, there is a frame to draw.
+    this.sceneRenderer.render()
+    const drawn = this.sceneRenderer.framesDrawn
+    this.sceneRenderer.frame(clockMs)
+    if (this.sceneRenderer.framesDrawn === drawn) return false
+    target.drawImage(this.sceneCanvas, 0, 0, target.canvas.width, target.canvas.height)
     return true
   }
 

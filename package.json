@@ -71,6 +71,7 @@
     "@rr0/place": "^0.5.5",
     "@rr0/time": "^2.2.0",
     "astronomy-engine": "^2.1.19",
+    "mediabunny": "1.62.1",
     "satellite.js": "6.0.1",
     "three": "^0.185.1",
     "three-mesh-bvh": "0.9.16"
