@@ -46,6 +46,7 @@ import {
   Vector3,
   WebGLRenderer, Matrix4, Ray } from "three"
 import type { Material, Texture } from "three"
+import type { ControlPasses, ControlPassFrame } from "./ControlPasses.js"
 import { ExposureAccumulation } from "./ExposureAccumulation.js"
 import {
   atmosphericTint,
@@ -5143,6 +5144,33 @@ export class SceneRenderer {
     }
     this.drawIfDirty()
   }
+
+  /**
+   * The frame as it is now, drawn at once, with its control passes (see ControlPasses): the picture as a PNG (read in the same task as it
+   * is drawn, so the canvas needs no preserved buffer), how far each pixel is, and where the phenomenon is. Undefined when the scene is not
+   * ready to draw (its loader still up, its shaders compiling): asked again later. What scripts/generative-assets exports a film from.
+   */
+  async controlFrame(): Promise<({ image: string } & ControlPassFrame) | undefined> {
+    const { ControlPasses } = await import("./ControlPasses.js")
+    this.controlPasses ??= new ControlPasses()
+    this.render()
+    const drawn = this.drawn
+    this.drawIfDirty()
+    if (this.drawn === drawn) return undefined
+    const image = this.renderer.domElement.toDataURL("image/png")
+    const passes = this.controlPasses.draw({
+      renderer: this.renderer,
+      scene: this.scene,
+      camera: this.camera,
+      equidistant: this.usableEquidistantPass(),
+      sky: [this.celestialGroup, ...this.pointLayerHost.clouds(), ...(this.lensFlare ? [this.lensFlare.mesh] : [])],
+      isSolid: mesh => SceneRenderer.isSolidSurface(mesh),
+      drawPhenomena: camera => this.renderPhenomenaPass(camera)
+    })
+    return { image, ...passes }
+  }
+
+  private controlPasses?: ControlPasses
 
   /**
    * The decor the eye is inside of (a flight deck, say, whose box contains the eye), except what the observer is declared to inhabit (observerSide

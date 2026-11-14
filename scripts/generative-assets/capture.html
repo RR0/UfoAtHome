@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Generative assets capture</title>
+  <!-- What scripts/generative-assets/GenerativeAssets.ts films: one recording, paused, with nothing around it and without the pictures
+       of the place laid over it (a photograph over the scene is not the scene). `?src=` is the recording, `&w=`/`&h=` the picture's size. -->
+  <style>html, body { margin: 0; background: #000 }</style>
+</head>
+<body>
+<rr0-sighting id="stage" style="display:block"></rr0-sighting>
+<script type="module">
+  import { registerSighting } from "/src/component/SightingElement.ts"
+  import { registerScene } from "/src/component/SceneElement.ts"
+
+  registerScene()
+  registerSighting()
+  const query = new URLSearchParams(location.search)
+  const stage = document.getElementById("stage")
+  stage.style.width = `${query.get("w") ?? 1280}px`
+  stage.style.height = `${query.get("h") ?? 720}px`
+  stage.sceneElement.showPoster = () => {}
+  stage.setAttribute("show-observer-map", "false")
+  stage.setAttribute("start-time", query.get("t") ?? "0")
+  stage.setAttribute("src", query.get("src"))
+  window.__stage = stage
+</script>
+</body>
+</html>

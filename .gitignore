@@ -35,3 +35,6 @@ perf-out/
 # Working notes from calls with observers: they hold personal details and are never published.
 call-*.md
 __pycache__/
+
+# What scripts/generative-assets exports: a generator's material, rebuilt from the recordings, never committed.
+generative-out/
