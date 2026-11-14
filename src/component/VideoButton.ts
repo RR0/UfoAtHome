@@ -52,8 +52,9 @@ export class VideoButton {
   private share = 0
   private failure?: string
 
-  constructor(private readonly filmer: SceneFilmer) {
-    this.element = document.createElement("button")
+  /** @param element The button the player already shows (see UfoElement.filmer), which this takes over; a new one otherwise. */
+  constructor(private readonly filmer: SceneFilmer, element?: HTMLButtonElement) {
+    this.element = element ?? document.createElement("button")
     this.element.type = "button"
     this.element.id = "video-button"
     this.element.setAttribute("aria-haspopup", "true")
@@ -70,7 +71,7 @@ export class VideoButton {
     for (const type of ["click", "pointerdown", "pointerup", "dblclick"]) this.panel.addEventListener(type, event => event.stopPropagation())
     this.panel.addEventListener("keydown", event => {
       if (event.key !== "Escape") return
-      this.panel.hidden = true
+      this.closeOptions()
       this.element.focus()
     })
     const size = document.createElement("label")
@@ -103,12 +104,35 @@ export class VideoButton {
     this.update()
   }
 
+  /** Opens the options, as the click that loaded this module asked for. */
+  open(): void {
+    if (this.panel.hidden) this.openOptions()
+  }
+
   private toggleOptions(): void {
-    const open = this.panel.hidden
-    if (open) this.fillSizes()
-    this.panel.hidden = !open
-    this.element.setAttribute("aria-expanded", String(open))
-    if (open) this.startButton.focus()
+    if (this.panel.hidden) this.openOptions()
+    else this.closeOptions()
+  }
+
+  private openOptions(): void {
+    this.fillSizes()
+    this.panel.hidden = false
+    this.element.setAttribute("aria-expanded", "true")
+    this.startButton.focus()
+    // Closed by a press anywhere else, as a menu is. Captured, since the picture and the controls stop what reaches them.
+    document.addEventListener("pointerdown", this.closeOnOutside, true)
+  }
+
+  private closeOptions(): void {
+    this.panel.hidden = true
+    this.element.setAttribute("aria-expanded", "false")
+    document.removeEventListener("pointerdown", this.closeOnOutside, true)
+  }
+
+  /** A press outside the options and their button: inside a shadow root, the event's path says where it really landed. */
+  private readonly closeOnOutside = (event: Event): void => {
+    const path = event.composedPath()
+    if (!path.includes(this.panel) && !path.includes(this.element)) this.closeOptions()
   }
 
   /** The sizes on offer, in the picture's proportions as it is now on screen. */
@@ -164,8 +188,7 @@ export class VideoButton {
   }
 
   private async film(options: FilmOptions): Promise<void> {
-    this.panel.hidden = true
-    this.element.setAttribute("aria-expanded", "false")
+    this.closeOptions()
     this.keepOptions(options)
     const filming = new AbortController()
     this.filming = filming

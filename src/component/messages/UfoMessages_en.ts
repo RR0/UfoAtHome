@@ -21,6 +21,7 @@ export const ufoMessages_en: UfoMessages = {
   videoTime: "Time",
   videoMap: "Map",
   videoStart: "Record",
+  videoDescription: "Reconstruction made with UFO@home from the witness's account: a simulation, not a recording of the observation.",
   mute: "Mute",
   volume: "Volume",
   unmute: "Unmute",

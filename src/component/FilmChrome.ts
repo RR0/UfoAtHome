@@ -21,7 +21,7 @@ export interface FilmChromeAt {
 
 /**
  * Writes over a frame of a film what the reader asked to keep of what the player lays over its picture: the account's moment, the
- * time, the map. Never its controls: a film is watched, not operated.
+ * time, the map; and the project's logo, faint, in a corner. Never its controls: a film is watched, not operated.
  *
  * Drawn rather than captured: the player's words are elements laid over the canvas, not in it, and are sized for the screen, not for the
  * film. Here they are sized from the film's own height, so a film made at 2160 lines reads as one made at 720.
@@ -34,12 +34,41 @@ export class FilmChrome {
   /** How much of the film's width a line of the caption may take. */
   static readonly LINE_SHARE = 0.9
   static readonly FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+  /** The project's logo, laid faint in the bottom-right corner of every frame: where the film was made, wherever it is passed on to. */
+  static readonly LOGO_URL = new URL("../../site/assets/logo.png", import.meta.url).href
+  /** Its side, as a share of the film's height, and how much of it shows over the picture. */
+  static readonly LOGO_SHARE = 0.08
+  static readonly LOGO_OPACITY = 0.45
 
-  static paint(target: OffscreenCanvasRenderingContext2D, chrome: FilmChromeAt): void {
+  private static logo?: Promise<ImageBitmap | undefined>
+
+  /** The logo, fetched once: undefined where it cannot be, and the film is then made without it rather than not at all. */
+  static loadLogo(): Promise<ImageBitmap | undefined> {
+    return FilmChrome.logo ??= fetch(FilmChrome.LOGO_URL)
+      .then(response => response.ok ? response.blob() : Promise.reject(new Error(`Logo: ${response.status}`)))
+      .then(blob => createImageBitmap(blob))
+      .catch(error => {
+        console.warn("UFO@home: the film's logo could not be loaded:", error)
+        return undefined
+      })
+  }
+
+  static paint(target: OffscreenCanvasRenderingContext2D, chrome: FilmChromeAt, logo?: CanvasImageSource): void {
     const { width, height } = target.canvas
     const size = Math.max(10, Math.round(height * FilmChrome.TEXT_SHARE))
+    // The caption keeps clear of the logo on either side, so as to stay centred.
+    let captionWidth = width * FilmChrome.LINE_SHARE
     target.save()
     try {
+      if (logo) {
+        const side = Math.round(height * FilmChrome.LOGO_SHARE)
+        const margin = size * FilmChrome.MARGIN
+        target.globalAlpha = FilmChrome.LOGO_OPACITY
+        target.imageSmoothingQuality = "high"
+        target.drawImage(logo, width - margin - side, height - margin - side, side, side)
+        target.globalAlpha = 1
+        captionWidth = Math.min(captionWidth, width - 2 * (side + 2 * margin))
+      }
       if (chrome.map) {
         const map = chrome.map
         target.drawImage(map.canvas, map.left * width, map.top * height, map.width * width, map.height * height)
@@ -54,14 +83,14 @@ export class FilmChrome {
         target.textAlign = "left"
         target.fillText(chrome.time, size * FilmChrome.MARGIN, size * FilmChrome.MARGIN)
       }
-      if (chrome.caption) FilmChrome.paintCaption(target, chrome.caption, size)
+      if (chrome.caption) FilmChrome.paintCaption(target, chrome.caption, size, captionWidth)
     } finally {
       target.restore()
     }
   }
 
   /** The caption centred at the bottom, on as many lines as it needs, its label bold as the player writes it. */
-  private static paintCaption(target: OffscreenCanvasRenderingContext2D, caption: NonNullable<FilmChromeAt["caption"]>, size: number): void {
+  private static paintCaption(target: OffscreenCanvasRenderingContext2D, caption: NonNullable<FilmChromeAt["caption"]>, size: number, lineWidth: number): void {
     const { width, height } = target.canvas
     const bold = `700 ${size}px ${FilmChrome.FONT}`
     const regular = `400 ${size}px ${FilmChrome.FONT}`
@@ -79,7 +108,7 @@ export class FilmChrome {
     let line: { words: typeof measured, width: number } = { words: [], width: 0 }
     for (const word of measured) {
       const wider = line.width + (line.words.length > 0 ? space : 0) + word.width
-      if (line.words.length > 0 && wider > width * FilmChrome.LINE_SHARE) {
+      if (line.words.length > 0 && wider > lineWidth) {
         lines.push(line)
         line = { words: [], width: 0 }
       }

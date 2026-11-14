@@ -20,6 +20,7 @@ export const ufoMessages_it: UfoMessages = {
   videoTime: "Ora",
   videoMap: "Mappa",
   videoStart: "Registra",
+  videoDescription: "Ricostruzione fatta con UFO@home dalla testimonianza: una simulazione, non una registrazione dell'osservazione.",
   mute: "Disattiva audio",
   volume: "Volume",
   unmute: "Attiva audio",

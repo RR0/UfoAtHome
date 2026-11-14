@@ -76,6 +76,18 @@ describe("VideoButton", () => {
     expect(checks.map(check => [check.checked, check.disabled])).toEqual([[true, false], [true, false], [false, true]])
   })
 
+  it("closes its options on a press anywhere else, as a menu does, and not on one inside them", () => {
+    const button = new VideoButton(new FakeFilmer())
+    document.body.append(button.element, button.panel)
+    button.element.click()
+    button.panel.querySelector("select")!.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    expect(button.panel.hidden).toBe(false)
+    document.body.dispatchEvent(new Event("pointerdown", { bubbles: true, composed: true }))
+    expect(button.panel.hidden).toBe(true)
+    button.element.remove()
+    button.panel.remove()
+  })
+
   it("makes the film with what was chosen, and makes the next one the same way", () => {
     const filmer = new FakeFilmer()
     filmer.map = true

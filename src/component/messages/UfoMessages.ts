@@ -29,6 +29,8 @@ export interface UfoMessages {
   videoTime: string
   videoMap: string
   videoStart: string
+  /** What the film's file says of itself, in its metadata: a simulation, not the observation filmed. */
+  videoDescription: string
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
   /** The slider of the sound's level. */

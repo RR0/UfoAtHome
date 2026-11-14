@@ -55,7 +55,6 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
-import { FilmChrome } from "./FilmChrome.js"
 import type { FilmOptions } from "./FilmChrome.js"
 import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
@@ -1755,7 +1754,8 @@ export class SceneElement extends HTMLElement {
    */
   private async film(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
     if (this.filming) throw new Error("Already filming")
-    const { VideoExport } = await import("./VideoExport.js")
+    // Loaded only for a film: few readers make one.
+    const [{ VideoExport }, { FilmChrome }] = await Promise.all([import("./VideoExport.js"), import("./FilmChrome.js")])
     const player = this.ufoElement
     const wasAtMs = player.currentTime
     player.pause()
@@ -1767,6 +1767,7 @@ export class SceneElement extends HTMLElement {
     player.filmMap(options.map)
     this.syncAnimationsToPlayback()
     try {
+      const logo = await FilmChrome.loadLogo()
       const height = options.height ?? this.sceneCanvas.height
       const width = options.height && css.height > 0 ? Math.round(options.height * css.width / css.height) : this.sceneCanvas.width
       return await VideoExport.film({
@@ -1775,8 +1776,18 @@ export class SceneElement extends HTMLElement {
         rate: player.playbackRate,
         width,
         height,
-        frameAt: (timeMs, clockMs, target) => this.filmFrameAt(timeMs, clockMs, target, options),
-        hearInto: context => this.hearInto(context)
+        frameAt: (timeMs, clockMs, target) => {
+          if (!this.filmFrameAt(timeMs, clockMs, target)) return false
+          // What the reader chose to keep of what the player lays over the picture, never its controls.
+          FilmChrome.paint(target, player.filmChrome(options), logo)
+          return true
+        },
+        hearInto: context => this.hearInto(context),
+        about: {
+          title: this.filmName,
+          description: player.filmDescription,
+          source: this.documentUrl ? new URL(this.documentUrl, location.href).href : undefined
+        }
       }, onProgress, signal)
     } finally {
       this.filming = false
@@ -1828,7 +1839,7 @@ export class SceneElement extends HTMLElement {
   }
 
   /** Draws the recording at `timeMs` with its animations at `clockMs`, and copies the picture into `target` — see FilmedScene.frameAt. */
-  private filmFrameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D, options: FilmOptions): boolean {
+  private filmFrameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D): boolean {
     if (this.ufoElement.currentTime !== timeMs) this.ufoElement.currentTime = timeMs
     if (this.filmThunderAtMs !== undefined && timeMs >= this.filmThunderAtMs) {
       this.filmThunderAtMs = undefined
@@ -1840,8 +1851,6 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.frame(clockMs)
     if (this.sceneRenderer.framesDrawn === drawn) return false
     target.drawImage(this.sceneCanvas, 0, 0, target.canvas.width, target.canvas.height)
-    // What the reader chose to keep of what the player lays over the picture, never its controls.
-    FilmChrome.paint(target, this.ufoElement.filmChrome(options))
     return true
   }
 

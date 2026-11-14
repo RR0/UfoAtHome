@@ -11,8 +11,7 @@ import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
 import { PlayerIcons } from "./PlayerIcons.js"
-import { VideoButton } from "./VideoButton.js"
-import type { SceneFilmer } from "./VideoButton.js"
+import type { SceneFilmer, VideoButton } from "./VideoButton.js"
 import type { FilmChromeAt, FilmOptions } from "./FilmChrome.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
@@ -437,21 +436,59 @@ export class UfoElement extends HTMLElement {
     this.fitControls()
   }
 
-  /** The button that films the recording, there while something can film it (see SceneElement.film). */
+  /** The button that films the recording, there while something can film it (see SceneElement.film). Its options and what makes the
+   * film are loaded at its first click (see VideoButton): few readers make one. */
+  private videoElement?: HTMLButtonElement
   private videoButton?: VideoButton
 
   /** Who can film the recording on show: the 3D scene composing this player, when the browser can encode a film. Undefined, no button. */
   set filmer(filmer: SceneFilmer | undefined) {
-    this.videoButton?.element.remove()
+    this.videoElement?.remove()
     this.videoButton?.panel.remove()
-    this.videoButton = filmer ? new VideoButton(filmer) : undefined
-    if (!this.videoButton) {
+    this.videoButton = undefined
+    this.videoElement = undefined
+    if (!filmer) {
       this.fitControls()
       return
     }
-    if (this.messages) this.videoButton.messages = this.messages
-    this.stageElement.append(this.videoButton.panel)
-    this.addControl(this.videoButton.element)
+    const button = document.createElement("button")
+    button.type = "button"
+    button.id = "video-button"
+    button.innerHTML = PlayerIcons.VIDEO
+    this.videoElement = button
+    this.labelVideoButton()
+    button.addEventListener("click", event => {
+      // Not a click on the picture, which plays.
+      event.stopPropagation()
+      void this.loadVideoButton(filmer, button)
+    }, { once: true })
+    // First of the buttons a narrow player folds away, being the least used of them.
+    this.moreButton.after(button)
+    this.fitControls()
+  }
+
+  private async loadVideoButton(filmer: SceneFilmer, button: HTMLButtonElement): Promise<void> {
+    const { VideoButton } = await import("./VideoButton.js")
+    // Another recording, or none, since the click.
+    if (this.videoElement !== button) return
+    const videoButton = new VideoButton(filmer, button)
+    this.videoButton = videoButton
+    if (this.messages) videoButton.messages = this.messages
+    this.stageElement.append(videoButton.panel)
+    videoButton.open()
+  }
+
+  /** What the button says before its module is loaded, which then says it itself. */
+  private labelVideoButton(): void {
+    const button = this.videoElement
+    if (!button || this.videoButton) return
+    button.title = this.messages?.recordVideo ?? ""
+    button.setAttribute("aria-label", button.title)
+  }
+
+  /** What a film of the recording says of itself in its file (see VideoExport): that it is a simulation, not the observation filmed. */
+  get filmDescription(): string | undefined {
+    return this.messages?.videoDescription
   }
 
   /** Whether the recording has a map of where the witness stood (see the map button). */
@@ -3426,6 +3463,7 @@ export class UfoElement extends HTMLElement {
     this.messages = messages
     // Everything that says something says it now: nothing did before (see messages).
     if (this.videoButton) this.videoButton.messages = messages
+    this.labelVideoButton()
     this.volumeInput.title = messages.volume
     this.volumeInput.setAttribute("aria-label", messages.volume)
     this.updateMoreButton()

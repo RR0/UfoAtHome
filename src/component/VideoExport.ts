@@ -26,6 +26,18 @@ export interface FilmedScene {
    * the picture to the sample.
    */
   hearInto(context: BaseAudioContext | undefined): void
+
+  /** What the film's file says of itself (see film): what it is called, what it is, and what it was made from. */
+  readonly about?: FilmAbout
+}
+
+/** What a film's file says of itself, in its metadata. */
+export interface FilmAbout {
+  readonly title?: string
+  /** What it is: a simulation, not a recording of the observation. */
+  readonly description?: string
+  /** The address of the recording it was made from. */
+  readonly source?: string
 }
 
 /**
@@ -41,6 +53,8 @@ export interface FilmedScene {
  */
 export class VideoExport {
   static readonly FRAME_RATE = 30
+  /** Who the film's file says made it. */
+  static readonly MADE_BY = "UFO@home (https://ufoathome.org)"
   /** The film's sound: stereo, as the aircraft are placed left and right of the listener. */
   static readonly CHANNELS = 2
   static readonly SAMPLE_RATE = 48000
@@ -48,6 +62,8 @@ export class VideoExport {
   static readonly FRAME_PATIENCE_MS = 30000
   /** How often the page is let paint while a film is made (see film). */
   static readonly PAINT_EVERY_MS = 100
+  /** The longest a film waits for the page to be painted. */
+  static readonly PAINT_WAIT_MS = 50
   /** How often a frame not yet drawn is asked again. */
   static readonly FRAME_RETRY_MS = 20
 
@@ -73,6 +89,14 @@ export class VideoExport {
     if (!context) throw new Error("No 2D context")
     context.imageSmoothingQuality = "high"
     const output = new Output({ format: new Mp4OutputFormat({ fastStart: "in-memory" }), target: new BufferTarget() })
+    // Whoever is passed the file can read where it comes from: made by UFO@home, when, and from which recording.
+    output.setMetadataTags({
+      artist: VideoExport.MADE_BY,
+      date: new Date(),
+      ...(scene.about?.title ? { title: scene.about.title } : {}),
+      ...(scene.about?.description ? { description: scene.about.description } : {}),
+      ...(scene.about?.source ? { comment: scene.about.source } : {})
+    })
     const video = new CanvasSource(canvas, { codec, quality: QUALITY_HIGH })
     output.addVideoTrack(video, { frameRate: VideoExport.FRAME_RATE })
     const stepMs = 1000 / VideoExport.FRAME_RATE
@@ -108,7 +132,12 @@ export class VideoExport {
         // What the next instant asks for (a tile, a model) arrives in tasks of its own; and now and then the page is painted, its
         // progress with it: a page that went on making frames without ever showing one would look, to the reader as to the browser, hung.
         if (performance.now() - paintedAtMs > VideoExport.PAINT_EVERY_MS && typeof document !== "undefined" && !document.hidden) {
-          await new Promise(resolve => requestAnimationFrame(resolve))
+          // Not longer than PAINT_WAIT_MS: a page out of sight that the browser does not call hidden (a pane put away) is given an
+          // animation frame a second, and a film made there would wait as long every tenth of a second.
+          await new Promise(resolve => {
+            requestAnimationFrame(resolve)
+            setTimeout(resolve, VideoExport.PAINT_WAIT_MS)
+          })
           paintedAtMs = performance.now()
         } else {
           await VideoExport.nextTask()
