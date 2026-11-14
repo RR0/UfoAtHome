@@ -27,10 +27,9 @@ rr0-interview .intervention { margin: 0 0 .4em; border-left: 3px solid var(--spe
 rr0-interview .intervention:hover { background: color-mix(in srgb, var(--speaker) 7%, transparent); }
 rr0-interview .turn { position: relative; padding: .2em .5em; }
 rr0-interview .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
-/* A passage tied to a moment of the observation says so, and the one the replay is at stays said while it is there: a dialogue read
-   beside a replay should show which of its passages is being played, not only flash when it changes. */
-rr0-interview .turn.timed { border-left: 2px solid color-mix(in srgb, currentColor 30%, transparent); padding-left: calc(.5em - 2px); }
-rr0-interview .turn.synced { border-left-color: #fc3; background: color-mix(in srgb, #fc3 12%, transparent); }
+/* The passage the replay is inside stays lit while it is there, instead of a flash that is over before anyone looks. Nothing marks the
+   passages that are merely tied to a moment: each already carries its timecode, which says it (dicté). */
+rr0-interview .turn.synced { background: color-mix(in srgb, #fc3 12%, transparent); }
 rr0-interview .turn .who { font-size: .85em; font-weight: 600; color: var(--speaker); overflow-wrap: anywhere; }
 rr0-interview .turn.is-redacted .who, rr0-interview .turn.goes-on .who { display: none; }
 rr0-interview .turn .said, rr0-interview .turn .redacted { margin: 0; padding: 0; text-indent: 0; white-space: pre-wrap; }
@@ -312,7 +311,6 @@ export class InterviewElement extends HTMLElement {
         turn.append(who, said)
       }
       if (segment.refs?.length) {
-        turn.classList.add("timed")
         const refs = document.createElement("div")
         refs.className = "refs"
         for (const ref of segment.refs) {
@@ -358,6 +356,25 @@ export class InterviewElement extends HTMLElement {
     }
     this.markSynced(best.index)
     return best.index
+  }
+
+  /**
+   * The moments of an observation this dialogue cites: where each passage points, and what was said there. What a replay's own bar marks,
+   * so that a reader sees from the bar alone where the witness said something about (see CaseElement).
+   */
+  momentsCited(sighting?: string): { at: number, quote: string }[] {
+    const json = this.json
+    if (!json) return []
+    const own = InterviewFile.sightingsOf(json)[0]
+    const moments: { at: number, quote: string }[] = []
+    for (const segment of json.segments ?? []) {
+      for (const ref of segment.refs ?? []) {
+        const about = ref.sighting ?? own
+        if (sighting !== undefined && about !== undefined && about !== sighting) continue
+        moments.push({ at: ref.at, quote: InterviewFile.said(segment) ?? "" })
+      }
+    }
+    return moments.sort((a, b) => a.at - b.at)
   }
 
   /** Marks the passage the replay is at, and unmarks the one it has left. */

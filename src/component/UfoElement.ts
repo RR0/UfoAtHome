@@ -168,6 +168,8 @@ export class UfoElement extends HTMLElement {
   private readonly seekInput: HTMLInputElement
   private readonly playbackFlash: HTMLElement
   private readonly milestoneMarks: HTMLElement
+  private readonly citedMarks: HTMLElement
+  private cited: { at: number, quote?: string }[] = []
   private readonly milestoneCaption: HTMLElement
   private readonly timeStartLabel: HTMLElement
   private readonly timeEndLabel: HTMLElement
@@ -681,6 +683,7 @@ export class UfoElement extends HTMLElement {
     this.seekInput = this.shadow.getElementById("seek") as HTMLInputElement
     this.playbackFlash = this.shadow.getElementById("playback-flash")!
     this.milestoneMarks = this.shadow.getElementById("milestone-marks")!
+    this.citedMarks = this.shadow.getElementById("cited-marks")!
     this.milestoneCaption = this.shadow.getElementById("milestone-caption")!
     this.timeStartLabel = this.shadow.getElementById("time-start")!
     this.timeEndLabel = this.shadow.getElementById("time-end")!
@@ -1284,6 +1287,30 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
+   * The moments of this observation that something outside it points at: a passage of an interview, say. Marked on the bar, each a way
+   * to the instant it names. The recording says nothing of them — they are the case's doing, and go when the case says so.
+   */
+  set citedMoments(moments: ReadonlyArray<{ at: number, quote?: string }>) {
+    this.cited = [...moments]
+    this.refreshCitedMarks()
+  }
+
+  private refreshCitedMarks(): void {
+    const duration = this.player.seekableDuration
+    this.citedMarks.replaceChildren(...(duration > 0 ? this.cited : []).map(moment => {
+      const mark = document.createElement("button")
+      mark.type = "button"
+      mark.className = "cited-mark"
+      mark.style.left = `${Math.min(Math.max((moment.at * 1000) / duration, 0), 1) * 100}%`
+      const name = moment.quote ?? ""
+      mark.title = name
+      mark.setAttribute("aria-label", name)
+      mark.addEventListener("click", () => this.player.seek(moment.at * 1000))
+      return mark
+    }))
+  }
+
+  /**
    * Says where the replay has got to, for whoever follows it from outside — a dialogue of the case beside it, say (see CaseElement).
    *
    * Not every frame: ten times a second is finer than anything a reader can read, and an event per frame is the kind of per-frame work
@@ -1674,6 +1701,7 @@ export class UfoElement extends HTMLElement {
         return mark
       })
     )
+    this.refreshCitedMarks()
     this.refreshSeekSegments(duration, milestones.map(milestone => milestone.t))
     this.refreshMomentsPicker(milestones)
   }

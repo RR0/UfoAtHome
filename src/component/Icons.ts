@@ -25,6 +25,8 @@ export class Icons {
   static readonly PLUS = Icons.draw(`<path d="M8 3v10M3 8h10"/>`)
   /** One sheet over another: what cloning an event of a case does (see CaseEditorElement). */
   static readonly COPY = Icons.draw(`<rect x="5.5" y="5.5" width="8" height="8" rx="1.3"/><path d="M10.5 3.2h-7a1.3 1.3 0 0 0-1.3 1.3v7"/>`)
+  /** The history of a case: its events in the order of time. */
+  static readonly CLOCK = Icons.draw(`<circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.6"/>`)
   /** An interview, on the rail of a case's events: what was said, in a bubble. */
   static readonly INTERVIEW = Icons.draw(`<path d="M13.3 9.2a1.6 1.6 0 0 1-1.6 1.6H6.2L3 13.4V4.4a1.6 1.6 0 0 1 1.6-1.6h7.1a1.6 1.6 0 0 1 1.6 1.6z"/><path d="M5.8 6.1h5.1M5.8 8.4h3.2"/>`)
   /** Shut and open padlocks: an event frozen, and one that can be (see CaseEventJson.sealed). */

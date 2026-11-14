@@ -548,6 +548,11 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
   }
 
+  /** The moments of the observation on show that something outside it points at (see UfoElement.citedMoments). */
+  set citedMoments(moments: ReadonlyArray<{ at: number, quote?: string }>) {
+    this.sceneElement.ufoElement.citedMoments = moments
+  }
+
   /** Where the replay stands, in seconds since the beginning of the observation: what a dialogue beside it follows (see CaseElement). */
   get playedSeconds(): number {
     return this.sceneElement.ufoElement.currentTime / 1000

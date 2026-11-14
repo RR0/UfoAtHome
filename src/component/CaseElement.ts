@@ -216,7 +216,10 @@ export class CaseElement extends HTMLElement {
       reader.setAttribute("src", entry.url)
       block.append(reader)
       // Opened while a replay is under way, it starts where that replay stands rather than at the top of the transcript.
-      window.setTimeout(() => this.followReplay(), 300)
+      window.setTimeout(() => {
+        this.followReplay()
+        this.markCitedMoments()
+      }, 300)
     } else {
       const player = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
       // Pointed at the case, not at the file alone: a recording read from its case carries the case's readings and its other witnesses.
@@ -236,6 +239,7 @@ export class CaseElement extends HTMLElement {
     this.shown.set(at, block)
     this.order()
     this.draw()
+    if (entry.kind !== "interview") window.setTimeout(() => this.markCitedMoments(), 300)
   }
 
   /**
@@ -257,9 +261,29 @@ export class CaseElement extends HTMLElement {
     return moved
   }
 
+  /**
+   * Puts on each player's bar the moments its observation is cited at, gathered from the dialogues open beside it: a reader sees from the
+   * bar alone where the witness said something about, and goes there in one click.
+   */
+  private markCitedMoments(): void {
+    for (const [index, block] of this.shown) {
+      const entry = this.entries[index]
+      const player = block.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null
+      if (!entry || !player) continue
+      const moments: { at: number, quote?: string }[] = []
+      for (const [other, mounted] of this.shown) {
+        if (this.entries[other]?.kind !== "interview") continue
+        const reader = mounted.querySelector("rr0-interview") as (HTMLElement & { momentsCited?: (of?: string) => { at: number, quote: string }[] }) | null
+        moments.push(...(reader?.momentsCited?.(entry.event.id) ?? []))
+      }
+      player.citedMoments = moments.sort((a, b) => a.at - b.at)
+    }
+  }
+
   private shut(at: number): void {
     this.shown.get(at)?.remove()
     this.shown.delete(at)
+    this.markCitedMoments()
     this.draw()
   }
 
@@ -323,6 +347,7 @@ export class CaseElement extends HTMLElement {
     info.setAttribute("aria-label", m.caseSummary)
     if (summary === "") this.showSummary(false)
     this.byId("events-heading").textContent = m.eventsHeading
+    this.byId("events-icon").innerHTML = Icons.CLOCK
     const edit = this.byId("edit")
     edit.title = m.editCase
     edit.setAttribute("aria-label", m.editCase)

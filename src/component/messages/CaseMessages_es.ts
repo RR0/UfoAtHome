@@ -2,7 +2,7 @@ import type { CaseMessages } from "./CaseMessages.js"
 
 export const caseMessages_es: CaseMessages = {
   caseHeading: "Caso",
-  eventsHeading: "En el orden del tiempo",
+  eventsHeading: "Historial",
   kindObservation: "Observación",
   kindReading: "Lectura",
   kindInterview: "Entrevista",

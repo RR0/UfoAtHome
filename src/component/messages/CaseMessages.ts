@@ -2,7 +2,7 @@
 export interface CaseMessages {
   /** Over the case's name, saying what is being read. */
   caseHeading: string
-  /** Over the list of what the case holds, in the order of time. */
+  /** Over the list of what the case holds, in the order of time: its history. */
   eventsHeading: string
   /** What kind of event a card is, on its pill. */
   kindObservation: string

@@ -90,6 +90,9 @@ export const html = `
       <div id="seek-dot" class="seek-dot" aria-hidden="true"></div>
       <input id="seek" type="range" min="0" max="0" value="0" step="1"/>
       <div id="milestone-marks" class="milestone-marks"></div>
+      <!-- Moments of this observation that something outside it points at — a passage of an interview of the case, say (see
+           UfoElement.citedMoments). On the bar, where a reader looking for them would look. -->
+      <div id="cited-marks" class="cited-marks"></div>
       <!-- What is under the pointer: the moment's name and time, and the picture itself when the
            element composing this one can draw it (see UfoElement.seekPreviewPainter). -->
       <div id="seek-preview" class="seek-preview" hidden>
@@ -478,6 +481,29 @@ canvas[data-cursor="rotate"] {
   color: inherit;
   font: inherit;
   opacity: 0;
+}
+/* Said, not hidden until pointed at like a milestone: these are the only sign on the bar that a witness spoke of that instant. */
+.cited-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cited-mark {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(0, 0, 0, .55);
+  border-radius: 2px;
+  background: #fc3;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.cited-mark:hover, .cited-mark:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
 }
 .milestone-mark:focus-visible {
   opacity: 1;
