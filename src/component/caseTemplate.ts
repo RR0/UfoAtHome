@@ -8,12 +8,15 @@ export const caseHtml = `
     <!-- The same three in the same order as an observation carries (see sightingTemplate): the way into the editor, this element's own
          toggle, and what it says of itself. A reader moving between a case and an observation finds the buttons where they were. -->
     <span class="case-actions">
+      <!-- Sharing the case: its address and the element that shows it whole (an observation of it is shared from its own player). -->
+      <button id="share" type="button" class="icon-btn" aria-haspopup="dialog"></button>
       <button id="edit" type="button" class="icon-btn"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></button>
       <button id="timeline-button" type="button" class="icon-btn" aria-pressed="true"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.6"/></svg></button>
       <button id="info" type="button" class="icon-btn" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
     </span>
   </div>
   <p id="case-summary" class="case-summary" hidden></p>
+  <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 </header>
 <!-- The chronology, in the upper part: choosing an event opens it below, choosing it again shuts it. Several can be open at once. -->
 <section class="case-timeline">

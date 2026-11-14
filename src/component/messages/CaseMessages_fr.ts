@@ -12,5 +12,6 @@ export const caseMessages_fr: CaseMessages = {
   byAuthor: "par",
   linkAnd: "et",
   caseSummary: "Ce que ce dossier dit de lui-même",
-  editCase: "Modifier ce dossier"
+  editCase: "Modifier ce dossier",
+  shareCase: "Partager ce dossier"
 }

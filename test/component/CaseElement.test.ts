@@ -244,6 +244,29 @@ describe("<rr0-case>, a case read", () => {
     opened.mockRestore()
   })
 
+  it("shares the case itself, as a case: its player's address on the case.json, and <rr0-case> on it", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    root.getElementById("share")!.click()
+    const dialog = root.getElementById("share-dialog")!.shadowRoot!
+    const link = (dialog.getElementById("link") as HTMLTextAreaElement).value
+    expect(new URL(link).pathname).toBe("/play/")
+    expect(new URL(link).searchParams.get("file")).toMatch(/case.*\.json$/)
+    const markup = (dialog.getElementById("embed-markup") as HTMLTextAreaElement).value
+    expect(markup).toMatch(/<rr0-case src="[^"]*case[^"]*\.json"><\/rr0-case>/)
+    expect(markup).not.toContain("<rr0-sighting")
+  })
+
+  it("leaves its observations to be shared one at a time by their players", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const player = root.querySelector("rr0-sighting")!
+    expect(player.hasAttribute("case-named")).toBe(true)
+    ;(player.shadowRoot!.getElementById("share-button") as HTMLButtonElement | null)?.click()
+    // No choice of the whole case: the case is shared from the reader.
+    expect(player.shadowRoot!.getElementById("share-scope-row")!.hidden).toBe(true)
+  })
+
   it("says what reads what, and whose a reading is", async () => {
     const element = await mount()
     const links = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")][1].querySelector(".event-links")!

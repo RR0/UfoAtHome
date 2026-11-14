@@ -22,4 +22,6 @@ export interface CaseMessages {
   caseSummary: string
   /** The way from reading this case to editing it, on the event being read. */
   editCase: string
+  /** What shares the case itself, as against one of its observations (which its player shares). */
+  shareCase: string
 }

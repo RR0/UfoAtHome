@@ -16,6 +16,9 @@ import { TIME_CHANGE_EVENT } from "./UfoElement.js"
 import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
+import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
+import { PlayerIcons } from "./PlayerIcons.js"
+import { AppLocation } from "./AppLocation.js"
 
 export const CASE_ELEMENT_NAME = "rr0-case"
 /** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
@@ -91,6 +94,15 @@ export class CaseElement extends HTMLElement {
       const block = (event.target as HTMLElement | null)?.closest?.(".open-event") as HTMLElement | null
       this.followReplay(block ?? undefined)
     })
+    // The case is shared from here, its observations from their players: two things, each where it is shown.
+    ShareDialogElement.register()
+    const share = this.byId("share")
+    share.innerHTML = PlayerIcons.SHARE
+    const dialog = this.byId("share-dialog") as ShareDialogElement
+    dialog.subject = this.shareSubject
+    share.addEventListener("click", () => {
+      if (this.url) dialog.open()
+    })
     this.byId("edit").addEventListener("click", () => {
       const where = this.editorUrl()
       if (where) window.open(where, "_blank", "noopener")
@@ -100,6 +112,16 @@ export class CaseElement extends HTMLElement {
     this.byId("timeline-button").addEventListener("click", () => {
       this.showTimeline(this.byId("case-events").parentElement!.hidden)
     })
+  }
+
+  /**
+   * What the case's share dialog shares: the case, read whole. The link opens the site's player on its case.json, which mounts this very
+   * element; the embed is this element on the case's absolute address. The player loads it: the case reader comes in its bundle.
+   */
+  private readonly shareSubject: ShareSubject = {
+    module: "rr0-sighting",
+    link: () => `${AppLocation.home()}/play/?file=${encodeURIComponent(this.url ?? "")}`,
+    element: () => `<${CASE_ELEMENT_NAME} src="${this.url ?? ""}"></${CASE_ELEMENT_NAME}>`
   }
 
   private byId(id: string): HTMLElement {
@@ -151,6 +173,7 @@ export class CaseElement extends HTMLElement {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     this.said = new SaidTexts([language, "en"])
     this.messages = await loadCaseMessages(language)
+    await (this.byId("share-dialog") as ShareDialogElement).useLanguage(language)
     this.draw()
   }
 
@@ -412,6 +435,9 @@ export class CaseElement extends HTMLElement {
     if (summary === "") this.showSummary(false)
     this.byId("events-heading").textContent = m.eventsHeading
     this.byId("events-icon").innerHTML = Icons.CLOCK
+    const share = this.byId("share")
+    share.title = m.shareCase
+    share.setAttribute("aria-label", m.shareCase)
     const edit = this.byId("edit")
     edit.title = m.editCase
     edit.setAttribute("aria-label", m.editCase)

@@ -12,5 +12,6 @@ export const caseMessages_es: CaseMessages = {
   byAuthor: "por",
   linkAnd: "y",
   caseSummary: "Lo que este caso dice de sí mismo",
-  editCase: "Editar este caso"
+  editCase: "Editar este caso",
+  shareCase: "Compartir este caso"
 }

@@ -339,6 +339,9 @@ export class ShareDialogElement extends HTMLElement {
     if (typeof this.dialog.showModal === "function") this.dialog.showModal()
     else this.dialog.setAttribute("open", "")
     this.fitLink()
+    // Again once the dialog is laid out: measured before, in a holder whose layout was not settled yet (a case's header), the link's
+    // height came out at its text broken one character a line.
+    requestAnimationFrame(() => this.fitLink())
     this.linkField.select()
   }
 

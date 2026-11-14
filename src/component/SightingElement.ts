@@ -828,7 +828,8 @@ export class SightingElement extends HTMLElement {
    * recordings (the one on show to begin with), or one recording on its own. Not shown for a recording that stands alone.
    */
   private offerShareScope(): void {
-    const inCase = this.caseSource !== undefined && this.entries.length > 1
+    // Held by a case reader (case-named), the case is shared from the reader: this player shares the observation it shows, and only that.
+    const inCase = this.caseSource !== undefined && this.entries.length > 1 && !this.hasAttribute(CASE_NAMED_ATTRIBUTE)
     this.shareScopeRow.hidden = !inCase
     this.shareScope.innerHTML = ""
     this.shareOpens.innerHTML = ""
