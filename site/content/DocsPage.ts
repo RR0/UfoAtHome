@@ -40,7 +40,7 @@ export class DocsPage implements SitePage {
       en: [
         ["/docs/create/", "Create an observation",
           "In the editor, or by writing the file yourself. Both produce the same thing: one JSON file that is yours."],
-        ["/docs/create/interpretation/", "Create an interpretation",
+        ["/docs/create/interpretation/", "Create a reading",
           "In the case editor, or in the case file: an alternative explanation of what was seen, as an observation of its own."],
         ["/docs/create/interview/", "Create an interview",
           "In the case editor, or in the files: who took part, how, and the transcript if you have one."],
@@ -52,7 +52,7 @@ export class DocsPage implements SitePage {
       fr: [
         ["/docs/create/", "Créer une observation",
           "Dans l'éditeur, ou en écrivant le fichier vous-même. Les deux produisent la même chose : un fichier JSON qui est le vôtre."],
-        ["/docs/create/interpretation/", "Créer une interprétation",
+        ["/docs/create/interpretation/", "Créer une lecture",
           "Dans l'éditeur de dossier, ou dans le fichier de dossier : une explication alternative de ce qui a été vu, comme une observation à part."],
         ["/docs/create/interview/", "Créer une interview",
           "Dans l'éditeur de dossier, ou dans les fichiers : qui y a pris part, comment, et la transcription si vous en avez une."],
@@ -64,7 +64,7 @@ export class DocsPage implements SitePage {
       es: [
         ["/docs/create/", "Crear una observación",
           "En el editor, o escribiendo tú mismo el archivo. Ambos producen lo mismo: un archivo JSON que es tuyo."],
-        ["/docs/create/interpretation/", "Crear una interpretación",
+        ["/docs/create/interpretation/", "Crear una lectura",
           "En el editor de casos, o en el archivo del caso: una explicación alternativa de lo que se vio, como una observación aparte."],
         ["/docs/create/interview/", "Crear una entrevista",
           "En el editor de casos, o en los archivos: quién participó, cómo, y la transcripción si la tienes."],
@@ -76,7 +76,7 @@ export class DocsPage implements SitePage {
       it: [
         ["/docs/create/", "Creare un'osservazione",
           "Nell'editor, o scrivendo tu stesso il file. Entrambi producono la stessa cosa: un file JSON che è tuo."],
-        ["/docs/create/interpretation/", "Creare un'interpretazione",
+        ["/docs/create/interpretation/", "Creare una lettura",
           "Nell'editor di casi, o nel file del caso: una spiegazione alternativa di ciò che è stato visto, come osservazione a parte."],
         ["/docs/create/interview/", "Creare un'intervista",
           "Nell'editor di casi, o nei file: chi ha preso parte, come, e la trascrizione se c'è."],
@@ -89,7 +89,7 @@ export class DocsPage implements SitePage {
     const understanding: ReadonlyArray<Card> = ({
       en: [
         ["/docs/case/", "What is a UFO case?",
-          "What a case gathers, the three kinds of event it holds (observations, interpretations, interviews) and how they can be linked."],
+          "What a case gathers, the three kinds of event it holds (observations, readings, interviews) and how they can be linked."],
         ["/docs/format/", "Observations",
           "What an observation is, then what its file holds, field by field. With a whole example."],
         ["/docs/interview/", "Interviews",
@@ -97,7 +97,7 @@ export class DocsPage implements SitePage {
       ],
       fr: [
         ["/docs/case/", "Qu'est-ce qu'un dossier ufologique ?",
-          "Ce qu'un dossier réunit, les trois types d'événements qu'il contient (observations, interprétations, interviews) et comment ils peuvent être liés."],
+          "Ce qu'un dossier réunit, les trois types d'événements qu'il contient (observations, lectures, interviews) et comment ils peuvent être liés."],
         ["/docs/format/", "Les observations",
           "Ce qu'est une observation, puis ce que contient son fichier, champ par champ. Avec un exemple entier."],
         ["/docs/interview/", "Les interviews",
@@ -105,7 +105,7 @@ export class DocsPage implements SitePage {
       ],
       es: [
         ["/docs/case/", "¿Qué es un caso ovni?",
-          "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, interpretaciones, entrevistas) y cómo pueden estar vinculados."],
+          "Lo que reúne un caso, los tres tipos de evento que contiene (observaciones, lecturas, entrevistas) y cómo pueden estar vinculados."],
         ["/docs/format/", "Las observaciones",
           "Qué es una observación, y luego lo que contiene su archivo, campo por campo. Con un ejemplo completo."],
         ["/docs/interview/", "Las entrevistas",
@@ -113,7 +113,7 @@ export class DocsPage implements SitePage {
       ],
       it: [
         ["/docs/case/", "Che cos'è un caso ufologico?",
-          "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, interpretazioni, interviste) e come possono essere collegati."],
+          "Cosa riunisce un caso, i tre tipi di evento che contiene (osservazioni, letture, interviste) e come possono essere collegati."],
         ["/docs/format/", "Le osservazioni",
           "Che cos'è un'osservazione, poi che cosa contiene il suo file, campo per campo. Con un esempio completo."],
         ["/docs/interview/", "Le interviste",

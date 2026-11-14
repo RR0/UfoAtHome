@@ -510,7 +510,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribute</td><td>Passed down through the composed <code>&lt;rr0-scene&gt;</code> to the player that owns them</td></tr>
       <tr><td><code>start-time</code></td><td>attribute</td><td>Where the recording opens, as a length of time from its start: seconds (<code>125</code>), <code>1:30</code>, <code>1m30s</code> or an ISO 8601 duration (<code>PT1M30S</code>). Applied once, to the recording the element loads next; a value past the end opens at the end</td></tr>
       <tr><td><code>start-clock</code></td><td>attribute</td><td>Where the recording opens, as a time said during the observation, in its local time: <code>02:33:15</code>, or with the day <code>2026-08-11T02:33:15</code>. The recording's own start places it; it wins over <code>start-time</code> when it can, and is ignored for a recording that does not say its time of day</td></tr>
-      <tr><td><code>compare-account</code></td><td>attribute</td><td>Starts with the witness's account shown beside any interpretation chosen, and measured against it</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribute</td><td>Starts with the witness's account shown beside any reading chosen, and measured against it</td></tr>
     </table>
     </div>
     <p>A recording that names no witness gets no “account by” line at all, which is the accurate
@@ -553,7 +553,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
       <tr><td><code>start-time</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une durée depuis son début : des secondes (<code>125</code>), <code>1:30</code>, <code>1m30s</code> ou une durée ISO 8601 (<code>PT1M30S</code>). Appliqué une fois, à l'enregistrement que l'élément charge ensuite ; une valeur au-delà de la fin ouvre à la fin</td></tr>
       <tr><td><code>start-clock</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une heure dite pendant l'observation, à son heure locale : <code>02:33:15</code>, ou avec le jour <code>2026-08-11T02:33:15</code>. Le début de l'enregistrement la place ; elle l'emporte sur <code>start-time</code> quand elle le peut, et est ignorée pour un enregistrement qui ne dit pas son heure</td></tr>
-      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit du témoin montré à côté de l'interprétation choisie, et mesuré contre elle</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit du témoin montré à côté de la lecture choisie, et mesuré contre elle</td></tr>
     </table>
     </div>
     <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « compte rendu de » — ce qui
@@ -596,7 +596,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>atributo</td><td>Se transmiten a través del <code>&lt;rr0-scene&gt;</code> compuesto hasta el reproductor que los posee</td></tr>
       <tr><td><code>start-time</code></td><td>atributo</td><td>Dónde se abre la grabación, como una duración desde su inicio: segundos (<code>125</code>), <code>1:30</code>, <code>1m30s</code> o una duración ISO 8601 (<code>PT1M30S</code>). Se aplica una vez, a la grabación que el elemento carga a continuación; un valor más allá del final abre al final</td></tr>
       <tr><td><code>start-clock</code></td><td>atributo</td><td>Dónde se abre la grabación, como una hora dicha durante la observación, en su hora local: <code>02:33:15</code>, o con el día <code>2026-08-11T02:33:15</code>. El inicio de la grabación la sitúa; prevalece sobre <code>start-time</code> cuando puede, y se ignora en una grabación que no dice su hora</td></tr>
-      <tr><td><code>compare-account</code></td><td>atributo</td><td>Empieza con el relato del testigo mostrado junto a la interpretación elegida, y medido contra ella</td></tr>
+      <tr><td><code>compare-account</code></td><td>atributo</td><td>Empieza con el relato del testigo mostrado junto a la lectura elegida, y medido contra ella</td></tr>
     </table>
     </div>
     <p>Una grabación que no nombra a ningún testigo no muestra ninguna línea “relato de”, que es lo exacto
@@ -639,7 +639,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attributo</td><td>Passati attraverso il <code>&lt;rr0-scene&gt;</code> composto fino al lettore che li possiede</td></tr>
       <tr><td><code>start-time</code></td><td>attributo</td><td>Dove si apre la registrazione, come una durata dall'inizio: secondi (<code>125</code>), <code>1:30</code>, <code>1m30s</code> o una durata ISO 8601 (<code>PT1M30S</code>). Applicato una volta, alla registrazione che l'elemento carica dopo; un valore oltre la fine apre alla fine</td></tr>
       <tr><td><code>start-clock</code></td><td>attributo</td><td>Dove si apre la registrazione, come un'ora detta durante l'osservazione, nella sua ora locale: <code>02:33:15</code>, o con il giorno <code>2026-08-11T02:33:15</code>. L'inizio della registrazione la colloca; prevale su <code>start-time</code> quando può, ed è ignorata per una registrazione che non dice la sua ora</td></tr>
-      <tr><td><code>compare-account</code></td><td>attributo</td><td>Parte con il resoconto del testimone mostrato accanto all'interpretazione scelta, e misurato rispetto ad essa</td></tr>
+      <tr><td><code>compare-account</code></td><td>attributo</td><td>Parte con il resoconto del testimone mostrato accanto alla lettura scelta, e misurato rispetto ad essa</td></tr>
     </table>
     </div>
     <p>Una registrazione che non nomina alcun testimone non ha nessuna riga “resoconto di”, ed è la cosa esatta

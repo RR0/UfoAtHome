@@ -152,14 +152,14 @@ export class FaqPage implements SitePage {
         what reached my eye, this big, moving this way. Everything else stays open — which is the
         only way a reconstruction can be used to <em>test</em> a misperception rather than to rule
         one out by construction.</p>
-      <p>3D comes in as an <em>interpretation</em>, kept apart from the account: what the witness
+      <p>3D comes in as a <em>reading</em>, kept apart from the account: what the witness
         believes they saw (at Silly-le-Long, T1 describes one flat grey triangle, seen from the front
         and then from behind), or an analyst's explanation stated in a case file (there, the GEIPAN's
-        light aircraft on final). Each is one choice of the player's <strong>Interpretation</strong>
+        light aircraft on final). Each is one choice of the player's <strong>Reading</strong>
         selector, shown one at a time, with a model, a size and a track in metres. The
         <strong>Compare with the account</strong> button then lays the account's own outlines over it
         and states, instant by instant, how far apart they are in direction, width and height. The
-        account never changes to fit an interpretation: the interpretation answers to it.</p>
+        account never changes to fit a reading: the reading answers to it.</p>
       <p>It also means the tool is honest about size. A recording stores an angle, never metres —
         but it does NOT mean distance is given up on. Where the witness saw the phenomenon cross
         something whose position is known, that crossing is stated in the recording (it passed
@@ -482,14 +482,14 @@ export class FaqPage implements SitePage {
         voilà ce qui est parvenu à mon œil, de cette taille, se déplaçant ainsi. Tout le reste reste
         ouvert — c'est la seule façon qu'une reconstitution ait de <em>tester</em> une méprise au
         lieu de l'exclure par construction.</p>
-      <p>La 3D intervient comme <em>interprétation</em>, tenue à part du compte rendu : ce que
+      <p>La 3D intervient comme <em>lecture</em>, tenue à part du compte rendu : ce que
         le témoin croit avoir vu (à Silly-le-Long, T1 décrit un seul triangle plat et gris, vu de
         face puis de derrière), ou l'explication d'un analyste énoncée dans un dossier (là, l'avion
-        léger en finale du GEIPAN). Chacune est un choix du sélecteur <strong>Interprétation</strong>
+        léger en finale du GEIPAN). Chacune est un choix du sélecteur <strong>Lecture</strong>
         du lecteur, montrée une à la fois, avec un modèle, une taille et une trajectoire en mètres. Le
         bouton <strong>Comparer au compte rendu</strong> superpose alors les contours du compte rendu
         et chiffre, instant après instant, l'écart de direction, de largeur et de hauteur. Le compte
-        rendu ne change jamais pour coller à une interprétation : c'est l'interprétation qui doit lui
+        rendu ne change jamais pour coller à une lecture : c'est la lecture qui doit lui
         répondre.</p>
       <p>Cela rend aussi l'outil honnête sur la taille. Un enregistrement stocke un angle, jamais
         des mètres — mais on ne renonce pas pour autant à la distance. Là où le témoin a vu le phénomène
@@ -820,14 +820,14 @@ export class FaqPage implements SitePage {
         esto es lo que llegó a mi ojo, de este tamaño, moviéndose de esta manera. Todo lo demás queda
         abierto — que es la única forma de que una reconstrucción sirva para <em>poner a prueba</em> una
         confusión en lugar de descartarla por construcción.</p>
-      <p>El 3D entra como <em>interpretación</em>, separada del relato: lo que el testigo
+      <p>El 3D entra como <em>lectura</em>, separada del relato: lo que el testigo
         cree haber visto (en Silly-le-Long, T1 describe un único triángulo plano y gris, visto de frente
         y luego por detrás), o la explicación de un analista expuesta en un expediente (allí, la avioneta
-        en final del GEIPAN). Cada una es una opción del selector <strong>Interpretación</strong> del
+        en final del GEIPAN). Cada una es una opción del selector <strong>Lectura</strong> del
         reproductor, mostrada de una en una, con un modelo, un tamaño y una trayectoria en metros. El
         botón <strong>Comparar con el relato</strong> superpone entonces los contornos del propio relato
         y cifra, instante a instante, cuánto se separan en dirección, anchura y altura. El
-        relato nunca cambia para ajustarse a una interpretación: es la interpretación la que debe responderle.</p>
+        relato nunca cambia para ajustarse a una lectura: es la lectura la que debe responderle.</p>
       <p>También hace que la herramienta sea honesta con el tamaño. Una grabación guarda un ángulo, nunca metros —
         pero eso NO significa renunciar a la distancia. Donde el testigo vio el fenómeno cruzar
         algo cuya posición se conoce, ese cruce se declara en la grabación (pasó
@@ -1143,14 +1143,14 @@ export class FaqPage implements SitePage {
         questo è ciò che è giunto al mio occhio, di questa grandezza, che si muove in questo modo. Tutto il resto rimane
         aperto — ed è l'unico modo in cui una ricostruzione possa servire a <em>mettere alla prova</em> un equivoco anziché
         escluderlo per costruzione.</p>
-      <p>Il 3D entra in gioco come <em>interpretazione</em>, tenuta separata dal resoconto: ciò che il testimone
+      <p>Il 3D entra in gioco come <em>lettura</em>, tenuta separata dal resoconto: ciò che il testimone
         crede di aver visto (a Silly-le-Long, T1 descrive un unico triangolo piatto e grigio, visto di fronte
         e poi da dietro), o la spiegazione di un analista esposta in un dossier (lì, l'aereo leggero
-        in finale del GEIPAN). Ciascuna è una scelta del selettore <strong>Interpretazione</strong> del
+        in finale del GEIPAN). Ciascuna è una scelta del selettore <strong>Lettura</strong> del
         lettore, mostrata una alla volta, con un modello, una grandezza e una traiettoria in metri. Il
         pulsante <strong>Confronta con il resoconto</strong> sovrappone allora i contorni del resoconto stesso
         e indica, istante per istante, quanto distano in direzione, larghezza e altezza. Il
-        resoconto non cambia mai per adattarsi a un'interpretazione: è l'interpretazione che deve rispondergli.</p>
+        resoconto non cambia mai per adattarsi a una lettura: è la lettura che deve rispondergli.</p>
       <p>Rende anche lo strumento onesto sulla grandezza. Una registrazione memorizza un angolo, mai metri —
         ma questo NON significa rinunciare alla distanza. Dove il testimone ha visto il fenomeno attraversare
         qualcosa la cui posizione è nota, quell'attraversamento è dichiarato nella registrazione (è passato

@@ -287,7 +287,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       day by Laurent Chabin (SCEAU) give every satellite's real pass, lit through the Earth's shadow
       and as bright as it was measured to be, Starlink trains included. Before that date no
       individual pass is drawn, because none could be drawn truthfully.</p>
-    <p><strong>Re-entries</strong> are placed by an interpretation, not found: a satellite or rocket
+    <p><strong>Re-entries</strong> are placed by a reading, not found: a satellite or rocket
       stage breaking up into burning pieces, on a path somebody established (orbital elements are off
       by minutes in the last orbit). It is placed on the Earth, 70 to 100 km up, and seen through
       the Earth's curvature from where the witness stood, each piece as bright as its distance
@@ -339,7 +339,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       passage de chaque satellite, éclairé à travers l'ombre de la Terre et aussi brillant qu'on l'a
       mesuré, trains de Starlink compris. Avant cette date, aucun passage individuel n'est tracé,
       faute de pouvoir l'être honnêtement.</p>
-    <p><strong>Les rentrées atmosphériques</strong> sont posées par une interprétation, pas
+    <p><strong>Les rentrées atmosphériques</strong> sont posées par une lecture, pas
       trouvées : un satellite ou un étage de fusée se désagrégeant en morceaux qui brûlent, sur un
       chemin que quelqu'un a établi (les éléments orbitaux sont faux de plusieurs minutes sur la
       dernière orbite). La rentrée est placée sur la Terre, entre 70 et 100 km d'altitude, et vue à
@@ -391,7 +391,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       través de la sombra de la Tierra y tan brillante como se midió, trenes de Starlink incluidos.
       Antes de esa fecha no se dibuja ningún paso individual, porque ninguno podría dibujarse con
       veracidad.</p>
-    <p><strong>Las reentradas atmosféricas</strong> las coloca una interpretación, no se
+    <p><strong>Las reentradas atmosféricas</strong> las coloca una lectura, no se
       encuentran: un satélite o una etapa de cohete que se desintegra en pedazos que arden, sobre un
       camino que alguien estableció (los elementos orbitales yerran en minutos en la última órbita).
       Se sitúa sobre la Tierra, entre 70 y 100 km de altura, y se ve a través de la curvatura de la
@@ -441,7 +441,7 @@ export const CONTEXT_SECTIONS: readonly ContextSection[] = [
       illuminato attraverso l'ombra della Terra e luminoso quanto è stato misurato, treni di Starlink
       compresi. Prima di quella data non viene disegnato alcun passaggio individuale, perché nessuno
       potrebbe esserlo in modo veritiero.</p>
-    <p><strong>I rientri atmosferici</strong> sono collocati da un'interpretazione, non trovati:
+    <p><strong>I rientri atmosferici</strong> sono collocati da una lettura, non trovati:
       un satellite o uno stadio di razzo che si disintegra in pezzi che bruciano, su un percorso che
       qualcuno ha stabilito (gli elementi orbitali sbagliano di minuti nell'ultima orbita). È posto
       sulla Terra, tra 70 e 100 km di quota, e visto attraverso la curvatura della Terra dal punto
