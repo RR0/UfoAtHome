@@ -26,6 +26,7 @@ import { register as registerDateInput } from "./DateInputElement.js"
 import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import type { CaseTrack } from "./CaseSession.js"
+import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { SourceChoices } from "./BasisInputElement.js"
@@ -344,6 +345,8 @@ const TEMPLATE = `
     <!-- The event's id, and on its line the observation's Undo and Redo (see SightingEditorElement.historyControls). -->
     <div class="event-id-row" hidden>
       <label id="row-recording-id" class="row"><span id="label-recording-id"></span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
+      <!-- Who made this reading, or held this interview: an account's is its witness, so it has none here (see CaseEventJson.by). -->
+      <label id="row-event-author" class="row" hidden><span id="label-event-author"></span> <input id="event-author" type="text" size="20" autocomplete="off"/></label>
       <span id="history-slot" class="history-slot"></span>
     </div>
     <!-- Over a frozen event: why its editor takes no input, and the way to thaw it (see CaseEventJson.sealed). -->
@@ -537,6 +540,7 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
+    this.byId("event-author").addEventListener("input", () => this.writeEventAuthor())
     this.byId("thaw").addEventListener("click", () => {
       const track = this.current
       if (!this.session || !track) return
@@ -1300,6 +1304,29 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.byId("next-event") as HTMLButtonElement).disabled = open < 0 || open >= events.length - 1
   }
 
+  /** What one of an event's authors is called: the entry it names on RR0, or the name it was described with (see AgentRef). */
+  private authorName(agent: AgentRef): string {
+    if ("people" in agent) return agent.people
+    if ("org" in agent) return agent.org
+    const described = agent as { title?: unknown, id?: string }
+    return this.said.read(described.title as never) ?? described.id ?? ""
+  }
+
+  /** An event's authors as the author of the case types them: one name each, separated by commas. */
+  private authorsText(by: AgentRef[] | undefined): string {
+    return (by ?? []).map(agent => this.authorName(agent)).filter(name => name !== "").join(", ")
+  }
+
+  /**
+   * The authors typed, back as the file holds them. A name that has not changed keeps the reference it was: an investigator the case
+   * named by their RR0 entry does not become a loose name because the author of the case put a comma elsewhere on the line.
+   */
+  private authorsFrom(text: string, was: AgentRef[] | undefined): AgentRef[] | undefined {
+    const names = text.split(",").map(name => name.trim()).filter(name => name !== "")
+    if (names.length === 0) return undefined
+    return names.map(name => (was ?? []).find(agent => this.authorName(agent) === name) ?? { title: name } as AgentRef)
+  }
+
   /**
    * Which kinds of event the list shows. All of them until the author says otherwise, and the choice holds while the case is open: it is a
    * way of reading a long chronology, not something to write in the case.
@@ -1415,6 +1442,9 @@ export class CaseEditorElement extends HTMLElement {
             ...listed(others.map(other => toEvent(this.optionLabel({ track: other }, session.tracks.indexOf(other)), session.tracks.indexOf(other)))))
         }
       }
+      // Whose reading it is, whose interview it was: an account's author is the witness it is the account of, so it says none.
+      const by = kind === "observation" ? "" : this.authorsText(event.by)
+      if (by !== "") said.push(`${said.length > 0 ? " · " : ""}${kind === "interview" ? m.interviewerField : m.authorField}${m.colon}${by}`)
       links.append(...said)
       const findings = item.track?.kind === "reading" ? this.findingsOf(item.track) : undefined
       const verdict = ReadingVerdicts.of(findings)
@@ -1619,6 +1649,42 @@ export class CaseEditorElement extends HTMLElement {
    * already rests on. It is the whole editor and not each field: a value that could not be written while the form invited it would be the
    * same silent loss the freezing exists to prevent.
    */
+  /**
+   * Who made the event on show: a reading's author, an interview's interviewer. An account has none here, its author being the witness it
+   * is the account of. Written where the case holds it, and on a reading's own recording too, so that the recording shared on its own
+   * still says whose reading it is.
+   */
+  private refreshEventAuthor(): void {
+    const track = this.currentInterview ? undefined : this.current
+    const event = this.currentInterview ?? (track?.kind === "reading" ? track.event : undefined)
+    const row = this.byId("row-event-author")
+    row.hidden = event === undefined
+    if (!event) return
+    this.byId("label-event-author").textContent = this.currentInterview ? this.messages.interviewerField : this.messages.authorField
+    const input = this.input("event-author")
+    if (this.shadow.activeElement !== input) input.value = this.authorsText(event.by)
+    input.disabled = track !== undefined && CaseSession.sealed(track.event)
+  }
+
+  /** Keeps what was typed of the authors, as the file holds them. */
+  private writeEventAuthor(): void {
+    const session = this.session
+    const track = this.currentInterview ? undefined : this.current
+    const event = this.currentInterview ?? (track?.kind === "reading" ? track.event : undefined)
+    if (!session || !event || (track && CaseSession.sealed(track.event))) return
+    const by = this.authorsFrom(this.input("event-author").value, event.by)
+    if (by) event.by = by
+    else delete event.by
+    const interpretation = track?.recording?.interpretation
+    if (interpretation) {
+      if (by) interpretation.by = by
+      else delete interpretation.by
+    }
+    session.touch()
+    this.refreshOverview()
+    this.refreshDirty()
+  }
+
   private showFrozen(frozen: boolean): void {
     this.byId("frozen-note").hidden = !frozen
     this.byId("frozen-text").textContent = frozen ? this.messages.frozenNote : ""
@@ -1779,6 +1845,7 @@ export class CaseEditorElement extends HTMLElement {
     const frozen = this.currentInterview === undefined && this.current !== undefined && CaseSession.sealed(this.current.event)
     ;(this.byId("delete") as HTMLButtonElement).disabled = frozen || (this.currentInterview === undefined && session.tracks.length <= 1)
     this.showFrozen(frozen)
+    this.refreshEventAuthor()
     this.refreshRecordingId(session)
     this.refreshDirty()
   }

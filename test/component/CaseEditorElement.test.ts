@@ -934,6 +934,37 @@ describe("CaseEditorElement's events", () => {
     expect(cards[2].querySelector(".findings")).toBeNull()
   })
 
+  it("says whose a reading is, and lets the author be named or corrected where the case holds it", async () => {
+    const element = await open(undefined, {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1950", title: "An account", url: "account.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", time: "2013-04", title: { en: "A model" },
+          by: [{ people: "CousynAntoine" }], url: "reading.json" }
+      ]
+    })
+    await wait(80)
+    const root = element.shadowRoot!
+    const card = () => [...root.querySelectorAll<HTMLElement>(".event-card")].find(one => one.dataset.kind === "reading")!
+    // An account says no author: its author is the witness it is the account of.
+    expect([...root.querySelectorAll<HTMLElement>(".event-card")].find(one => one.dataset.kind === "observation")!
+      .querySelector(".event-links")!.textContent).not.toContain("Author")
+    expect(card().querySelector(".event-links")!.textContent).toContain("Author: CousynAntoine")
+    card().querySelector<HTMLButtonElement>(".event-open")!.click()
+    await wait()
+    const author = parts(element).field("event-author")
+    expect(root.getElementById("row-event-author")!.hidden).toBe(false)
+    expect(author.value).toBe("CousynAntoine")
+    // A second author, the first one untouched: it stays the entry of RR0 it named, the new one is a name.
+    author.value = "CousynAntoine, GEIPAN"
+    author.dispatchEvent(new Event("input", { bubbles: true }))
+    await wait()
+    const written = JSON.parse(element.caseSession!.files(false)[0].content).events[1]
+    expect(written.by).toEqual([{ people: "CousynAntoine" }, { title: "GEIPAN" }])
+    // The reading's own recording says it too, so that it stands alone when it is shared on its own.
+    expect(element.caseSession!.tracks[1].recording!.interpretation!.by).toEqual(written.by)
+    expect(card().querySelector(".event-links")!.textContent).toContain("Author: CousynAntoine, GEIPAN")
+  })
+
   it("filters the list by kind of event, saying how many of each the case holds, and never empties it", async () => {
     const element = await open(undefined, interviewed())
     // The words come from a catalog fetched after the case: the chips are named once they are there.
