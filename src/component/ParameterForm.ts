@@ -257,6 +257,10 @@ export class ParameterForm {
       } else if (spec.type === "said") {
         input.type = "text"
         input.placeholder = this.read(spec.placeholder) ?? ""
+        // A name, as wide as it is (from 10em, up to the row): "Cirrus SR20 F-HOBS on final (night circuits)" is not "Cirrus SR20 F-HOBS or".
+        input.style.setProperty("field-sizing", "content")
+        input.style.minWidth = "10em"
+        input.style.maxWidth = "100%"
         input.addEventListener("input", () => {
           const target = this.target?.read()
           const values = this.values

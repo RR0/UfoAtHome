@@ -100,6 +100,8 @@ export class CandidatesView {
   background: linear-gradient(90deg, var(--glow-solid) calc(var(--score) * 100%), var(--line) 0); }
 .poher-list .doubt { color: var(--ink-faint); font-size: 12px; }
 .poher-version { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-dim); }
+/* Two of the section's columns: one is narrower than the name of a version ("Poher extended by RR0"). */
+.candidates-section > .poher-version { grid-column: span 2; }
 .candidate-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .kept-variants h4 { margin: 14px 0 6px; font: 600 15px/1.3 var(--serif); }
 .kept-variant { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; margin-bottom: 6px; border: 1px dashed var(--line-strong); border-radius: 10px; }
@@ -512,6 +514,10 @@ export class CandidatesView {
     const m = this.host.messages().candidates
     const label = Object.assign(document.createElement("label"), { className: "poher-version", textContent: m.poherVersion })
     const select = document.createElement("select")
+    // As wide as the version it names, over the theme's fixed width: "Poher extended by RR0" is not "Poher extenc".
+    select.style.setProperty("field-sizing", "content")
+    select.style.width = "auto"
+    select.style.maxWidth = "100%"
     for (const version of Object.keys(PoherMatrix.VERSIONS) as PoherMatrixVersion[]) {
       select.append(Object.assign(document.createElement("option"), { value: version, textContent: m.poherVersions[version], selected: version === this.poherVersion }))
     }

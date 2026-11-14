@@ -151,7 +151,7 @@ const ovalAt = (widthDeg: number, heightDeg: number, altitudeDeg: number, azimut
     // The prints show it dark against the sky, its base in shadow: the witnesses' "silvery" is the account, this is the photograph.
     color: "#2c2c2e",
     ...(transparency === undefined ? {} : { transparency }),
-    title: title("Objet", "Object", "Objeto", "Oggetto")
+    title: title("Phénomène", "Phenomenon", "Fenómeno", "Fenomeno")
   }
 })
 
