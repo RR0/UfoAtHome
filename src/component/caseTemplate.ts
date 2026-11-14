@@ -44,6 +44,7 @@ export const caseCss = `
 }
 .icon-btn:hover, .icon-btn:focus-visible { background: #e0e0e0; }
 /* The report's export wears the same square, its button being its own (see CaseExportElement). */
+.case-export { display: inline-flex; }
 .case-export::part(button) {
   display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; box-sizing: border-box;
   padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333;

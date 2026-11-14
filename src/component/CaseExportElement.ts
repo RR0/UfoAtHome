@@ -22,7 +22,8 @@ export class CaseExportElement extends HTMLElement {
   private static readonly CSS = `
 :host { display: inline-block; position: relative; }
 :host([hidden]) { display: none; }
-button.open { display: inline-flex; align-items: center; gap: 6px; font: inherit; color: inherit; cursor: pointer; }
+/* A button's own type, as its neighbours keep theirs: a size in em taken from the bar's text made it taller than they are. */
+button.open { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .menu { min-width: 16em; max-width: 22em; padding: 4px; border: 1px solid var(--line, #ccc); border-radius: 10px; background: var(--ground, Canvas);
   color: var(--ink, CanvasText); box-shadow: 0 8px 28px rgba(0, 0, 0, .2); font: 400 13px/1.35 var(--sans, system-ui, sans-serif); }
 .menu button { display: block; width: 100%; padding: 6px 10px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
