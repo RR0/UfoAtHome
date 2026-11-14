@@ -98,6 +98,27 @@ describe("A report on a case", () => {
     expect(html).toContain("a party balloon, &lt;its&gt; height guessed")
     expect(html).toContain("sufficient margin")
     expect(html).toContain("@media print")
+    // The case seen from above, and the witness's moments in time.
+    expect(html).toContain('class="plan"')
+    expect(html).toContain('class="timeline"')
+  })
+
+  it("tells the witness's account, where it can be read, and puts witnesses and readings on one map", () => {
+    const json = account() as unknown as Record<string, unknown>
+    json.description = { en: "A light, due north.", fr: "Une lumière, plein nord." }
+    json.sources = [{ title: "A report", authors: ["A. Author"], url: "https://example.org/r.pdf", publication: { publisher: "COBEPS", time: "2016" } }]
+    json.milestones = [{ t: 500, label: "A", note: { en: "It stops" } }]
+    const data = CaseReport.of(caseJson, `${base}case.json`, new Map([[`${base}q.json`, json as unknown as SightingRecordingJson], [`${base}balloon.json`, reading()]]),
+      new SaidTexts(["fr"]))
+    const [witness] = data.witnesses
+    expect(witness.description).toBe("Une lumière, plein nord.")
+    expect(witness.sources).toEqual([{ title: "A report", authors: ["A. Author"], publisher: "COBEPS", time: "2016", url: "https://example.org/r.pdf" }])
+    expect(witness.moments).toEqual([{ t: 500, label: "A", note: "It stops" }])
+    // The first witness is the map's origin; the balloon is 100 m north of them, seen 10° up.
+    expect(witness.at).toEqual({ eastM: 0, northM: 0 })
+    const [first] = data.readings[0].paths[0].points
+    expect(first.eastM).toBeCloseTo(0, 3)
+    expect(first.northM).toBeCloseTo(100 * Math.cos(10 * DEG), 0)
   })
 
   it("writes its data as JSON that says what it is, and its tables as CSV a spreadsheet reads", () => {

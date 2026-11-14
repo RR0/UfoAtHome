@@ -34,6 +34,20 @@ export interface CaseReportTexts {
   sensitivity: string
   comparisons: string
   interviews: string
+  /** A witness's own account, as told. */
+  account: string
+  sources: string
+  /** A witness's place, duration and instrument, before their account. */
+  place: string
+  duration: string
+  instrument: string
+  /** The map of the case, and what it shows. */
+  map: string
+  mapCaption: string
+  /** The scale of the map, `{metres}`. */
+  scale: string
+  /** The strip of a witness's moments, and what it shows. */
+  timelineCaption: string
   /** The figure of a witness's sky. */
   figureCaption: string
   azimuth: string

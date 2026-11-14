@@ -2,6 +2,8 @@ import type { CaseReportData, ReportReading, ReportValue, ReportWitness } from "
 import type { CaseReportTexts } from "./messages/CaseReportTexts.js"
 import { ReportFormat } from "./ReportFormat.js"
 import { SkyFigure } from "./SkyFigure.js"
+import { PlanFigure } from "./PlanFigure.js"
+import { TimelineFigure } from "./TimelineFigure.js"
 
 /**
  * A report on a case as one HTML page standing on its own: its styles and its figures inside it, nothing fetched, so that it can be saved,
@@ -36,6 +38,16 @@ svg.sky .grid { stroke: #e5e7eb; stroke-width: 1; } svg.sky .horizon { stroke: #
 svg.sky .tick { font-size: 10px; fill: #6b7280; } svg.sky .axis { font-size: 11px; fill: #374151; }
 svg.sky .uncertainty { fill: #9ca3af; fill-opacity: .18; stroke: #9ca3af; stroke-opacity: .5; }
 svg.sky .said { fill: #111827; } svg.sky .gap { stroke-width: 1; stroke-dasharray: 3 2; stroke-opacity: .7; }
+svg.plan, svg.timeline { width: 100%; height: auto; display: block; } svg.plan { max-width: 34rem; }
+svg.plan .frame { fill: none; stroke: #e5e7eb; } svg.plan .fan { fill: #9ca3af; fill-opacity: .07; stroke: none; }
+svg.plan .sight { stroke: #6b7280; stroke-width: 1; stroke-dasharray: 4 3; } svg.plan .track { fill: none; stroke-width: 2.2; }
+svg.plan .witness { fill: #111827; } svg.plan .name { font-size: 12px; fill: #111827; } svg.plan .scale { stroke: #374151; stroke-width: 2; }
+svg.plan .north { fill: #374151; } svg.plan .tick, svg.timeline .tick { font-size: 10px; fill: #6b7280; }
+svg.timeline .axis-line { stroke: #9ca3af; } svg.timeline .said { fill: #111827; } svg.timeline .moment { stroke: #b45309; stroke-dasharray: 2 2; }
+svg.timeline .moment-label { font-size: 11px; fill: #b45309; }
+blockquote { margin: .4rem 0 1rem; padding: .4rem .9rem; border-left: 3px solid var(--line); color: #2b2f38; white-space: pre-line; }
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: .1rem .8rem; margin: .3rem 0 .8rem; font-size: .92rem; } dl.facts dt { color: var(--dim); }
+ul.sources { margin: .2rem 0 1rem; padding-left: 1.2rem; font-size: .9rem; }
 .print { float: right; margin: 0 0 .6rem 1rem; padding: .45rem .9rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; font: inherit; cursor: pointer; }
 .scroll { overflow-x: auto; }
 @media print {
@@ -58,9 +70,16 @@ svg.sky .said { fill: #111827; } svg.sky .gap { stroke-width: 1; stroke-dasharra
       `<button type="button" class="print" onclick="print()">${e(texts.print)}</button>`,
       `<h1>${e(title)}</h1>`,
       `<p class="meta">${e(f.fill(texts.generated, { date, version: appVersion }))}${data.case.time ? ` · ${e(data.case.time)}` : ""}</p>`,
+      ...(data.case.summary ? [`<p>${e(data.case.summary)}</p>`] : []),
       `<p class="method">${e(texts.method)}</p>`
     ]
     if (data.readings.length > 0) body.push(`<h2>${e(texts.readingsCompared)}</h2>`, CaseReportHtml.comparedTable(data, f))
+    const plan = PlanFigure.svg(data.witnesses, data.readings, f)
+    if (plan) {
+      const shown = data.readings.filter(reading => reading.paths.length > 0)
+      const legend = shown.map(reading => `<li><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><line x1="1" y1="7" x2="13" y2="7" stroke="${SkyFigure.COLOURS[data.readings.indexOf(reading) % SkyFigure.COLOURS.length]}" stroke-width="2.5"/></svg>${e(reading.title)} (${e(reading.reads)})</li>`)
+      body.push(`<h2>${e(texts.map)}</h2>`, `<figure>${plan}${legend.length ? `<ul class="legend">${legend.join("")}</ul>` : ""}<figcaption>${e(texts.mapCaption)}</figcaption></figure>`)
+    }
     body.push(`<h2>${e(texts.witnesses)}</h2>`)
     for (const witness of data.witnesses) body.push(...CaseReportHtml.witness(witness, data.readings.filter(reading => reading.reads === witness.title), f))
     for (const reading of data.readings) body.push(...CaseReportHtml.reading(reading, data.witnesses.find(witness => witness.title === reading.reads), f))
@@ -97,6 +116,20 @@ ${body.join("\n")}
   private static witness(witness: ReportWitness, readings: readonly ReportReading[], f: ReportFormat): string[] {
     const t = f.texts, c = t.columns, e = CaseReportHtml.escape
     const parts = [`<h3>${e(f.fill(t.witnessHeading, { witness: witness.title }))}</h3>`]
+    const facts: [string, string][] = [[t.columns.time, witness.time ?? ""], [t.place, witness.place ?? ""],
+      [t.duration, witness.durationSeconds !== undefined ? f.instant(witness.durationSeconds * 1000) : ""], [t.instrument, witness.instrument ?? ""]]
+    const stated = facts.filter(([, value]) => value !== "")
+    if (stated.length) parts.push(`<dl class="facts">${stated.map(([name, value]) => `<dt>${e(name)}</dt><dd>${e(value)}</dd>`).join("")}</dl>`)
+    if (witness.description) parts.push(`<h4>${e(t.account)}</h4>`, `<blockquote>${e(witness.description)}</blockquote>`)
+    if (witness.sources.length) {
+      parts.push(`<h4>${e(t.sources)}</h4>`, `<ul class="sources">${witness.sources.map(source => {
+        const what = [source.authors?.join(", "), source.title ? `<em>${e(source.title)}</em>` : "", source.publisher, source.time, source.index].filter(Boolean)
+          .map(part => part!.startsWith("<em>") ? part : e(part!)).join(", ")
+        return `<li>${what}${source.url ? ` <a href="${e(source.url)}">${e(source.url)}</a>` : ""}</li>`
+      }).join("")}</ul>`)
+    }
+    const timeline = TimelineFigure.svg(witness, f)
+    if (timeline) parts.push(`<figure>${timeline}<figcaption>${e(t.timelineCaption)}</figcaption></figure>`)
     // Only the readings that place something to compare: one that explains no phenomenon has no mark, and no place in the legend.
     readings = readings.filter(reading => reading.comparisons.length > 0)
     const figure = SkyFigure.svg(witness, readings, f)
@@ -127,6 +160,7 @@ ${body.join("\n")}
     const parts = [`<h2>${e(f.fill(t.readingHeading, { title: reading.title, witness: reading.reads }))}</h2>`]
     const meta = [reading.by.length ? f.fill(t.by, { names: reading.by.join(", ") }) : "", reading.time ? f.fill(t.made, { time: reading.time }) : ""].filter(Boolean).join(" ")
     if (meta) parts.push(`<p class="meta">${e(meta)}</p>`)
+    if (reading.description) parts.push(`<blockquote>${e(reading.description)}</blockquote>`)
     parts.push(`<h4>${e(t.supposed)}</h4>`, reading.supposed.length ? CaseReportHtml.valuesTable(reading.supposed, f) : `<p>${e(t.noneSupposed)}</p>`)
     parts.push(`<h4>${e(t.findings)}</h4>`)
     parts.push(reading.findings.length ? CaseReportHtml.table([c.finding, c.outcome, c.against, c.origin], reading.findings.map(finding => [
