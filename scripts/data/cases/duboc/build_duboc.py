@@ -31,9 +31,17 @@ import json
 import math
 import pathlib
 import struct
-import subprocess
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from recording_files import RecordingFiles  # noqa: E402
 
 OUT = pathlib.Path("public/demo-data")
+
+def shape_groups(order):
+    """The groups of the account's shapes: one holding them all, named as the format has it, and none at all for a lone shape."""
+    return [{"id": "group-1", "members": list(order)}] if len(order) > 1 else []
+
 
 LAT_MID, LNG_MID = 48 + 50.7 / 60, 3 + 0.9 / 60      # "48°50'7 N / 003°00'9 E" in the report: degrees and decimal minutes
 HEADING = 332.0
@@ -284,14 +292,15 @@ def commander_recording():
     start = aim_at(0)
     end = aim_at(total)
     return {
-        "version": 1,
+        "version": 4,
         "id": "1994-01-28-DubocJeanCharles",
         "tags": ["aerial observation", "airline pilot", "radar"],
-        "time": {"year": 1994, "month": 1, "day": 28, "hour": 13, "minute": 14, "raw": "1994-01-28T13:14"},
+        "time": "1994-01-28T13:14",
         "utcOffsetHours": stated(0, "stated", "the report gives 13:14 GMT (Nice 12:06 GMT, London 14:01 GMT)"),
         "durationSeconds": stated(total, "stated", "\"1 ou 2 mn\" in the report he wrote for Weinstein; the SEPRA's calculations use two minutes (11 nautical miles at 330 kt)"),
-        "place": [stated({"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6), "name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)"},
-                         "stated", "\"48°50'7 N / 003°00'9 E\" in both reports, read as degrees and decimal minutes (48.845 N, 3.015 E): where the airliner was")],
+        "place": stated({"name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)",
+                         "locations": [{"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6)}]},
+                        "stated", "\"48°50'7 N / 003°00'9 E\" in both reports, read as degrees and decimal minutes (48.845 N, 3.015 E): where the airliner was"),
         "observer": {"id": "DubocJeanCharles", "title": "Jean-Charles Duboc"},
         "account": {
             "observerOccupation": tr("commandant de bord, Air France", "captain, Air France"),
@@ -342,7 +351,7 @@ def commander_recording():
         # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
         "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
-        "timeline": {"order": ["disc"], "groups": [["disc"]], "keyframes": frames},
+        "timeline": {"order": ["disc"], "groups": shape_groups(["disc"]), "keyframes": frames},
         "weatherTrack": weather(total, 101),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": airliner(total),
@@ -391,14 +400,15 @@ def copilot_recording():
         fade.append(f)
     frames.append({"t": int(total * 1000) + 1500, "shapes": fade})
     return {
-        "version": 1,
+        "version": 4,
         "id": "1994-01-28-ChauffourValerie",
         "tags": ["aerial observation", "airline pilot", "radar"],
-        "time": {"year": 1994, "month": 1, "day": 28, "hour": 13, "minute": 14, "raw": "1994-01-28T13:14"},
+        "time": "1994-01-28T13:14",
         "utcOffsetHours": stated(0, "stated", "the report gives 13:14 GMT"),
         "durationSeconds": stated(total, "stated", "\"2 à 5 mn\" in her report"),
-        "place": [stated({"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6), "name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)"},
-                         "stated", "\"48°50'7 N / 003°00'9 E\" in her report, read as degrees and decimal minutes")],
+        "place": stated({"name": "Near Coulommiers, Seine-et-Marne, France (airway between the VORs BRY and CLM)",
+                         "locations": [{"lat": round(LAT_MID, 6), "lng": round(LNG_MID, 6)}]},
+                        "stated", "\"48°50'7 N / 003°00'9 E\" in her report, read as degrees and decimal minutes"),
         "observer": {"id": "ChauffourValerie", "title": "Valérie Chauffour"},
         "account": {
             "observerOccupation": tr("copilote, Air France", "co-pilot, Air France"),
@@ -433,7 +443,7 @@ def copilot_recording():
         # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
         "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
-        "timeline": {"order": [lens, arrow], "groups": [[lens, arrow]], "keyframes": frames},
+        "timeline": {"order": [lens, arrow], "groups": shape_groups([lens, arrow]), "keyframes": frames},
         "weatherTrack": weather(total, 120),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": airliner(total, "right", ("lens", "chevron")),
@@ -595,7 +605,7 @@ def hoax_reading(account, eye, spots, explains, title_fr, title_en):
                      "sizeM": {"widthM": round(SPOT_M * stretch, 4), "lengthM": SPOT_M, "heightM": 0.001},
                      "attitude": attitude_of(model_to_world(along), model_to_world(normal)),
                      "appearance": {"color": SPOT_COLOR, "albedo": 0.2, "luminanceCdM2": 9000, "haloScale": 0.2}})
-    reading = {"version": 1, "id": account["id"] + "-hoax"}
+    reading = {"version": 4, "id": account["id"] + "-hoax"}
     for key, value in account.items():
         if key not in ("version", "id", "observer", "account", "description", "sources", "tags", "timeline", "milestones", "interpretation", "_aim"):
             reading[key] = value
@@ -620,7 +630,7 @@ def steward_recording():
     frames = disc_frames(total, aim_at, vanishes=False)
     rec = commander_recording()
     rec.pop("_aim", None)
-    rec["timeline"] = {"order": ["disc"], "groups": [["disc"]], "keyframes": frames}
+    rec["timeline"] = {"order": ["disc"], "groups": shape_groups(["disc"]), "keyframes": frames}
     rec["id"] = "1994-01-28-ChiefSteward"
     rec["observer"] = {"id": "ChiefStewardAF3532", "title": "Le chef steward"}
     rec["account"] = {"observerOccupation": tr("chef steward, Air France", "chief steward, Air France")}
@@ -660,17 +670,11 @@ if __name__ == "__main__":
     accounts = (("observer-duboc.json", commander_rec), ("observer-duboc-copilot.json", copilot_rec), ("observer-duboc-steward.json", steward_rec))
     for name, rec in accounts:
         aim = rec.pop("_aim", None)
-        (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+        RecordingFiles.write(OUT / name, rec)
         print(f"wrote {name} {(OUT / name).stat().st_size} bytes", aim or "")
     for name, rec in readings:
-        (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+        RecordingFiles.write(OUT / name, rec)
         print(f"wrote {name} {(OUT / name).stat().st_size} bytes, {len(rec['interpretation']['bodies'][0]['track'])} keyframes")
-    # This script states version 1 of the format, which is what it was written against; the repository holds the current one. Rather than
-    # teaching it what every version since has changed, what it wrote is brought forward by the one place that knows (see
-    # scripts/migrate-recordings.ts): without this, running it took the case BACKWARDS and the schema rejected it.
-    #
-    # STILL NOT SAFE TO RUN. The version is only half of what this script lags behind: it writes nothing of the three accounts'
-    # `image` (the share card), their `snapshots` (the frozen relief, imagery and map, whose .zip files sit beside them) or one group
-    # of `timeline.groups`, all added to the files after this was written. Running it drops them. Carry them over first.
-    written = [str(OUT / name) for name, _ in (*accounts, *readings)]
-    subprocess.run(["npx", "tsx", "scripts/migrate-recordings.ts", *written], check=True)
+    # A safety net that does nothing while this script states the current version itself, and carries the case forward rather than
+    # backwards if the format moves before this is brought up to it (see scripts/migrate-recordings.ts).
+    RecordingFiles.migrate([OUT / name for name, _ in (*accounts, *readings)])
