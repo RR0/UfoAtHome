@@ -52,7 +52,8 @@ export const caseCss = `
 .event { --kind: var(--rr0-glow, #e8b84b); position: relative; border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
   border-radius: 10px; }
 .event[data-kind="interview"] { --kind: var(--rr0-sky, #7fd4ff); }
-.event[data-kind="reading"] { --kind: color-mix(in srgb, currentColor 45%, transparent); }
+/* Solid enough to be read on the disc: a reading's mark was 45% of the ink and vanished. */
+.event[data-kind="reading"] { --kind: color-mix(in srgb, currentColor 70%, transparent); }
 /* Open, it is lit: the card and what it opened below are the same thing seen twice. */
 .event[data-open] { border-color: var(--kind); background: color-mix(in srgb, var(--kind) 8%, transparent); }
 .event::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); top: calc(-1px - var(--gap) / 2);
@@ -60,8 +61,10 @@ export const caseCss = `
 .event:first-child::after { top: 50%; }
 .event:last-child::after { bottom: 50%; }
 .event:only-child::after { display: none; }
+/* The disc takes the page's own background, not a dark one: on a light page every mark used to be a dark coin, where a reading's dimmed
+   grey icon simply did not show. The Canvas system colour is the page's own, so this follows light and dark by itself. */
 .event-mark { position: absolute; z-index: 1; left: calc(var(--rail) - 24px - 1px); top: 50%; display: grid; place-items: center;
-  width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--rr0-ground, #0b1020); color: var(--kind); }
+  width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--rr0-ground, Canvas); color: var(--kind); }
 .event-mark svg { width: 14px; height: 14px; }
 /* Three columns, not two: the title and the date shared one and overlapped as soon as a title was long. */
 .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
@@ -75,6 +78,8 @@ export const caseCss = `
 .event-meta { grid-area: meta; justify-self: end; font-size: 13px; opacity: .6; white-space: nowrap; }
 .event-links { grid-area: links; font-size: 13px; opacity: .8; }
 .event-links:empty { display: none; }
+/* The card a reference is pointing at, while it is pointed at. */
+.event.aimed { border-color: var(--rr0-sky, #7fd4ff); background: color-mix(in srgb, var(--rr0-sky, #7fd4ff) 10%, transparent); }
 /* Above the hit area the title stretches over the card, as in the editor: otherwise the card swallows the click. */
 .event-ref { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--rr0-sky, #7fd4ff); font: inherit;
   text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }

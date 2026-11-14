@@ -11,7 +11,7 @@ import type { CaseMessages } from "./messages/CaseMessages.js"
 import { Icons } from "./Icons.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { TIME_CHANGE_EVENT } from "./UfoElement.js"
-import { CASE_NAMED_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
+import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
 
@@ -109,10 +109,16 @@ export class CaseElement extends HTMLElement {
     this.byId("info").setAttribute("aria-expanded", String(shown))
   }
 
-  /** Shows the chronology, or hides it: what is open stays open and visible, the list of what could be opened is what goes. */
+  /**
+   * Shows the history, or hides it: what is open stays open and visible, the list of what could be opened is what goes.
+   *
+   * The players follow: while the history is there, it is the way through the case, and a player repeating it in its own toolbar — the
+   * picker of witnesses, the picker of readings — would offer the same choice twice. Hidden, they are the only way left, so they come back.
+   */
   private showTimeline(shown: boolean): void {
     this.byId("case-events").parentElement!.hidden = !shown
     this.byId("timeline-button").setAttribute("aria-pressed", String(shown))
+    for (const player of this.players()) player.toggleAttribute(HIDE_PICKERS_ATTRIBUTE, shown)
   }
 
   connectedCallback(): void {
@@ -234,6 +240,8 @@ export class CaseElement extends HTMLElement {
       const player = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
       // Pointed at the case, not at the file alone: a recording read from its case carries the case's readings and its other witnesses.
       player.setAttribute(CASE_NAMED_ATTRIBUTE, "")
+      // While the history is on show, it is the way through the case: this player's own pickers would say it a second time.
+      player.toggleAttribute(HIDE_PICKERS_ATTRIBUTE, !this.byId("case-events").parentElement!.hidden)
       player.setAttribute("src", this.url ?? "")
       player.setAttribute(OBSERVER_ATTRIBUTE, entry.event.id ?? entry.url)
       for (const option of CaseElement.PASSED_ON) {
@@ -398,6 +406,11 @@ export class CaseElement extends HTMLElement {
         link.textContent = this.entries[to].title
         link.title = m.openEvent
         link.addEventListener("click", () => void this.open(to))
+        // Pointed at or focused, the card it leads to is lit, so that a reference is found without reading the whole history.
+        const aim = (lit: boolean) => this.eventList.querySelector<HTMLElement>(`.event[data-at="${to}"]`)?.classList.toggle("aimed", lit)
+        for (const [name, lit] of [["mouseenter", true], ["mouseleave", false], ["focus", true], ["blur", false]] as const) {
+          link.addEventListener(name, () => aim(lit))
+        }
         return rank === 0 ? [link] : [document.createTextNode(` ${m.linkAnd} `), link]
       }))
     }

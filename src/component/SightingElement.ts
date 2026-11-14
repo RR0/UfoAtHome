@@ -1,6 +1,5 @@
-import { PlayerIcons } from "./PlayerIcons.js"
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
-import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { PlayerIcons } from "./PlayerIcons.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
@@ -78,6 +77,11 @@ export const OBSERVER_ATTRIBUTE = "observer"
 export const CASE_NAMED_ATTRIBUTE = "case-named"
 /** Set by a page that wants the information panel open from the start, as `show-labels` opens the strip of stated values. */
 export const SHOW_INFO_ATTRIBUTE = "show-info"
+/**
+ * Set by whoever already offers the choice this player would offer — a case showing its history, say (see CaseElement): the picker of
+ * witnesses and the picker of readings then stay out of its toolbar, rather than saying the same thing a second time.
+ */
+export const HIDE_PICKERS_ATTRIBUTE = "hide-pickers"
 
 /** The share dialog's choice of the whole case, as opposed to one recording's address. */
 const CASE_SCOPE = "case"
@@ -117,7 +121,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -456,6 +460,12 @@ export class SightingElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
     }
+    if (name === HIDE_PICKERS_ATTRIBUTE) {
+      // Both pickers follow it at once: the witnesses' own, and the readings' (whose row is worked out in offerInterpretations).
+      const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
+      this.setEntries(this.entries, this.caseSource)
+      if (entry) this.offerInterpretations(entry)
+    }
     if (name === SHOW_INFO_ATTRIBUTE) {
       // Asked for from the outside, as a reader would ask for it from the button.
       if (this.hasAttribute(SHOW_INFO_ATTRIBUTE) !== this.infoOpen) this.toggleInfoPanel()
@@ -590,7 +600,7 @@ export class SightingElement extends HTMLElement {
     if (caseSource) this.reportCaseProblems(caseSource.json, entries)
 
     this.toolbarElement.hidden = entries.length === 0
-    const showSelect = entries.length > 1
+    const showSelect = entries.length > 1 && !this.hasAttribute(HIDE_PICKERS_ATTRIBUTE)
     this.observerSelect.hidden = !showSelect
     this.observerText.hidden = showSelect
     this.observerSelect.innerHTML = ""
@@ -868,7 +878,7 @@ export class SightingElement extends HTMLElement {
     } else if (!this.sceneElement.interpretation) {
       void this.chooseInterpretation(value)
     }
-    this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2
+    this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2 || this.hasAttribute(HIDE_PICKERS_ATTRIBUTE)
     this.showConfrontation(this.sceneElement.confrontation)
     this.updateCompareButton()
     this.showVariants(variants)
