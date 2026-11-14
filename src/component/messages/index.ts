@@ -1,4 +1,5 @@
 import { Messages } from "../../i18n/MessageCatalog.js"
+import type { ReadingSensitivityMessages } from "./ReadingSensitivityMessages.js"
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import type { SightingMessages } from "./SightingMessages.js"
@@ -119,6 +120,16 @@ const caseEditorLoaders: Record<UfoLanguage, () => Promise<CaseEditorMessages>> 
   es: () => import("./CaseEditorMessages_es.js").then(m => m.caseEditorMessages_es),
   it: () => import("./CaseEditorMessages_it.js").then(m => m.caseEditorMessages_it)
 }
+
+const readingSensitivityLoaders: Record<UfoLanguage, () => Promise<ReadingSensitivityMessages>> = {
+  en: () => import("./ReadingSensitivityMessages_en.js").then(m => m.readingSensitivityMessages_en),
+  fr: () => import("./ReadingSensitivityMessages_fr.js").then(m => m.readingSensitivityMessages_fr),
+  es: () => import("./ReadingSensitivityMessages_es.js").then(m => m.readingSensitivityMessages_es),
+  it: () => import("./ReadingSensitivityMessages_it.js").then(m => m.readingSensitivityMessages_it)
+}
+
+/** The texts of a reading's sensitivity, shown by the case's player and its editor alike (see ReadingSensitivityElement). */
+export const READING_SENSITIVITY_MESSAGES = Messages.catalog<ReadingSensitivityMessages>(readingSensitivityLoaders)
 
 const interviewLoaders: Record<UfoLanguage, () => Promise<InterviewMessages>> = {
   en: () => import("./InterviewMessages_en.js").then(m => m.interviewMessages_en),

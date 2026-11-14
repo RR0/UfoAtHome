@@ -81,6 +81,7 @@ export const html = `
 <div id="reading-findings" class="reading-findings" hidden>
   <button id="reading-chip" type="button" class="reading-chip" aria-expanded="false" aria-controls="reading-findings-list"><span class="dot"></span><span id="reading-verdict" class="reading-verdict"></span></button>
   <ul id="reading-findings-list" hidden></ul>
+  <rr0-reading-sensitivity id="reading-sensitivity"></rr0-reading-sensitivity>
 </div>
 <!-- The variants the recording keeps (see InterpretationJson.variant): one chip a candidate, with
      its verdict, leading to it; and, while one is on show, each value it moves, the account's struck
@@ -253,6 +254,8 @@ export const css = `
 .reading-findings[data-verdict="unsettled"] .dot { background: #e08a2c; }
 .reading-findings[data-verdict="compatible"] .dot { background: #2e9d5b; }
 .reading-findings ul[hidden] { display: none; }
+.reading-findings rr0-reading-sensitivity { margin-top: 0.3em; font-size: 1em; color: inherit; }
+.reading-findings .reading-chip[hidden] { display: none; }
 .reading-findings ul {
   margin: 0.2em 0 0;
   padding: 0;

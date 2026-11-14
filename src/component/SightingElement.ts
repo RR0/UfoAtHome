@@ -1,4 +1,5 @@
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
+import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
@@ -143,6 +144,9 @@ export class SightingElement extends HTMLElement {
   private readonly editLink: HTMLAnchorElement
   /** What the reading of the case on show was tested against (see showReadingFindings). */
   private readonly readingFindingsElement: HTMLElement
+  /** Whether the reading on show has a sensitivity to say (see ReadingSensitivityElement): said under the picture even when its verdict
+   * is in the strip of chips, which has no place for it. */
+  private readingSensible = false
   /** What sets a reading against its account, in the reader's language: none before the words have come. */
   private readingCheck?: ReadingCheck
   /** What sets a reading in its most favourable configuration, which is how it is shown (see BestCaseSearch.bestSceneOf). */
@@ -300,6 +304,7 @@ export class SightingElement extends HTMLElement {
     this.confrontationElement = this.shadow.getElementById("confrontation")!
     this.confrontationHeading = this.shadow.getElementById("confrontation-heading")!
     this.confrontationList = this.shadow.getElementById("confrontation-list")!
+    ReadingSensitivityElement.register()
     this.readingFindingsElement = this.shadow.getElementById("reading-findings")!
     // Its tests a click away, as the description's text is from its chip: under the picture they ran to a screenful.
     const readingChip = this.shadow.getElementById("reading-chip")!
@@ -1120,8 +1125,17 @@ export class SightingElement extends HTMLElement {
     // Drawn again whatever the strip's last signature: the reading is not part of what it is made from.
     this.summarySignature = "\u0000"
     this.refreshParamSummary()
-    box.hidden = !m || !verdict || this.labelsShown
-    if (!m || !verdict) return
+    // How much it owes to what it supposed, said as the case's editor says it (see ReadingSensitivityElement): a reading nobody tested
+    // has that to say too, when it places bodies.
+    const sensitivity = box.querySelector<ReadingSensitivityElement>("#reading-sensitivity")!
+    this.readingSensible = entry && reading ? ReadingSensitivityElement.resultOf(entry.sighting, reading) !== undefined : false
+    sensitivity.show(entry?.sighting, reading)
+    this.showReadingBox()
+    if (!m || !verdict) {
+      box.querySelector<HTMLElement>("#reading-findings-list")!.hidden = true
+      delete box.dataset.verdict
+      return
+    }
     box.dataset.verdict = verdict
     box.querySelector("#reading-verdict")!.textContent = (findings.length === 1 ? m.readingChipOne : m.readingChip).replace("{verdict}", m.readingVerdict[verdict]).replace("{n}", String(findings.length))
     const list = box.querySelector<HTMLElement>("#reading-findings-list")!
@@ -1553,13 +1567,23 @@ export class SightingElement extends HTMLElement {
     this.labelsToggle.setAttribute("aria-pressed", String(this.labelsShown))
   }
 
+  /** Under the picture, what is not in the strip of chips: the verdict's chip and its findings when the strip is not shown, the sensitivity
+   * whether it is or not. */
+  private showReadingBox(): void {
+    const box = this.readingFindingsElement
+    const verdictHere = this.readingEntry !== undefined && !this.labelsShown
+    box.hidden = !verdictHere && !this.readingSensible
+    box.querySelector<HTMLElement>("#reading-chip")!.hidden = !verdictHere
+    if (!verdictHere) box.querySelector<HTMLElement>("#reading-findings-list")!.hidden = true
+  }
+
   /** Rebuilds the strip from the recording itself, through the same SightingSummary the editor
    * shows the same file with. Read-only here: there is no form behind a player to send anyone
    * back to, so a label is a statement and not a way in. */
   private refreshParamSummary(): void {
     this.paramSummary.hidden = !this.labelsShown
     // The reading's chip is in the strip when the strip is shown, under the picture when it is not (see showReadingFindings).
-    this.readingFindingsElement.hidden = !this.readingEntry || this.labelsShown
+    this.showReadingBox()
     if (!this.labelsShown) {
       this.paramSummary.replaceChildren()
       this.summarySignature = ""

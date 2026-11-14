@@ -12,6 +12,7 @@ import { SaidTexts } from "../engine/model/SaidText.js"
 import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
+import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
@@ -232,6 +233,7 @@ const TEMPLATE = `
   .event-card[data-verdict="unsettled"] .verdict { color: var(--warn); }
   .event-card[data-verdict="compatible"] .verdict { color: var(--ok); }
   .findings { grid-area: findings; margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
+  .event-body > rr0-reading-sensitivity { grid-column: 1 / -1; margin-top: 2px; }
   .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
   .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
   .finding-mark { font-weight: 700; text-align: center; }
@@ -1505,6 +1507,12 @@ export class CaseEditorElement extends HTMLElement {
       body.className = "event-body"
       body.append(pill, main, links)
       if (findings && findings.length > 0) body.append(this.findingsList(findings))
+      if (item.track?.kind === "reading" && item.track.recording) {
+        // How much it owes to what it supposed, said as the case's player says it (see ReadingSensitivityElement).
+        const sensitivity = ReadingSensitivityElement.create()
+        sensitivity.show(this.session?.accountOf(item.track)?.recording, item.track.recording)
+        body.append(sensitivity)
+      }
       // On the rail, in the card's own colour: what kind of event it is. Said twice, here and on the pill, as a word and as a picture.
       const mark = document.createElement("span")
       mark.className = "event-mark"
