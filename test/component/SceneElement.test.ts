@@ -23,6 +23,8 @@ const thunderPlayed: number[] = []
  * actually rebuilt the fall or silently left the previous one standing. */
 const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
 const astronomySet = vi.fn()
+/** Every setting of the observer's own lamps the element hands the renderer: undefined is no beam at all. */
+const headlightsSet: unknown[] = []
 /** The id the mocked renderer answers to a pick of air traffic, if a test points at one. */
 const pickedTraffic: { id?: string } = {}
 /** Every decor list and presence table the element hands the renderer, to see what air traffic reaches it. */
@@ -56,7 +58,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setGait(): void {}
     setTerrainOrigin(): void {}
     setObserverRoute(): void {}
-    setObserverHeadlights(): void {}
+    setObserverHeadlights(headlights: unknown): void { headlightsSet.push(headlights) }
     setStatedRoads(): void {}
     setTraces(): void {}
     setTracesShown(): void {}
@@ -364,6 +366,30 @@ describe("the clouds of a record along the day", () => {
     const held = [{ ...layers[0], instances: [{ id: "c", eastM: 0, northM: 1000, baseM: 3500, thicknessM: 800, widthM: 1500, depthM: 1500, rotationDeg: 0, density: 1 }] }]
     const track = { keyframes: [{ t: 0, weather: { ...weather, cloudLayers: held } }] }
     expect(offsetAt(12, true, { weatherTrack: track })).toEqual(offsetAt(13, true, { weatherTrack: track }))
+  })
+})
+
+describe("the lamps of what the observer rides", () => {
+  /** The last setting the element gave the observer's lamps, for a recording whose witness rides `kind`. */
+  function lampsAboard(kind: string): unknown {
+    const element = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
+    document.body.appendChild(element)
+    headlightsSet.length = 0
+    element.sightingData = { ...rainyJson, place: { locations: [{ lat: 48.9, lng: 2.2 }] }, vehicle: { kind } } as never
+    element.ufoElement.currentTime = 0
+    const last = headlightsSet.at(-1)
+    element.remove()
+    return last
+  }
+
+  it("lights a road vehicle's beam", () => {
+    expect(lampsAboard("van")).toMatchObject({ setting: "auto" })
+  })
+
+  // Two spot lights given to Duboc's A320 left every lit surface undrawn, its flight deck first.
+  it("gives no beam to a machine that is flown", () => {
+    expect(lampsAboard("airliner-narrow")).toBeUndefined()
+    expect(lampsAboard("business-jet")).toBeUndefined()
   })
 })
 

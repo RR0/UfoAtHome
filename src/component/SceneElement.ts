@@ -1297,11 +1297,13 @@ export class SceneElement extends HTMLElement {
 
   /**
    * How the lights of the vehicle the observer rides are set at t, and which way it goes: nothing for a recording that has no vehicle (then the observer
-   * has no beam), "auto" for one that says nothing of its lights (see ObserverVehicle.headlights).
+   * has no beam), "auto" for one that says nothing of its lights (see ObserverVehicle.headlights). Nothing either for a machine that is flown (see
+   * ObserverRide.isRoad): an airliner's cockpit has no dipped beam on a road, and the two spot lights given to Duboc's A320 left every lit surface of
+   * the scene undrawn, its flight deck first.
    */
   private observerHeadlightsAt(sighting: Sighting, t: number): { setting: HeadlightMode | "auto", headingDeg: number } | undefined {
     const vehicle = sighting.vehicle
-    if (!vehicle) return undefined
+    if (!vehicle || !ObserverRide.isRoad(vehicle.kind)) return undefined
     const setting = Headlights.at<HeadlightMode | "auto">(vehicle.headlights ?? "auto", vehicle.headlightKeyframes, t) ?? "auto"
     return { setting, headingDeg: this.travelHeadingAt(sighting, t) }
   }
