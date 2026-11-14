@@ -2,6 +2,7 @@ import { Messages } from "../../i18n/MessageCatalog.js"
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import type { SightingMessages } from "./SightingMessages.js"
+import type { CaseMessages } from "./CaseMessages.js"
 import type { TagNames } from "./TagNames.js"
 import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
@@ -55,6 +56,20 @@ export const SIGHTING_MESSAGES = Messages.catalog<SightingMessages>(sightingLoad
 
 export function loadSightingMessages(language: UfoLanguage): Promise<SightingMessages> {
   return SIGHTING_MESSAGES.load(language)
+}
+
+const caseLoaders: Record<UfoLanguage, () => Promise<CaseMessages>> = {
+  en: () => import("./CaseMessages_en.js").then(m => m.caseMessages_en),
+  fr: () => import("./CaseMessages_fr.js").then(m => m.caseMessages_fr),
+  es: () => import("./CaseMessages_es.js").then(m => m.caseMessages_es),
+  it: () => import("./CaseMessages_it.js").then(m => m.caseMessages_it)
+}
+
+/** The texts of the case reader, one chunk per language (see MessageCatalog). */
+export const CASE_MESSAGES = Messages.catalog<CaseMessages>(caseLoaders)
+
+export function loadCaseMessages(language: UfoLanguage): Promise<CaseMessages> {
+  return CASE_MESSAGES.load(language)
 }
 
 const shareLoaders: Record<UfoLanguage, () => Promise<ShareMessages>> = {

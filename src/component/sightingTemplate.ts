@@ -95,12 +95,6 @@ export const html = `
      dropped into an article is there to be watched, and forty labels under it is a data sheet.
      Read-only here, unlike in the editor, where each one is a way back to its field. -->
 <div id="param-summary" class="param-summary" hidden></div>
-<!-- The case's interviews, where the observation was read from a case that holds any: the dialogue the account comes from, under the
-     render, and each passage that tells of a moment seeks the player to it (see InterviewElement and seekTo). -->
-<section id="case-panel" class="case-panel" hidden>
-  <div id="case-interviews" class="case-interviews"></div>
-  <div id="case-interview-host"></div>
-</section>
 `
 
 export const css = `
@@ -364,22 +358,6 @@ export const css = `
 /* Deliberately quieter than the render it sits under, and wrapping rather than scrolling: this is
    meant to be scanned in one pass, and a strip that hides half of itself off the right edge would
    be worse than not showing it. */
-.case-panel {
-  margin: 8px 0 0; padding: 10px 12px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px;
-  font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto;
-}
-.case-panel[hidden] { display: none; }
-.case-interviews { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
-.case-interviews button {
-  padding: 2px 10px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 999px; background: none;
-  color: inherit; font: inherit; font-size: 13px; cursor: pointer;
-}
-.case-interviews button[aria-pressed="true"] { border-color: currentColor; }
-/* The case's name opens its interviews: a button only where there are any (see SightingElement.updateAccountLine). */
-.case-of button {
-  padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline;
-  text-underline-offset: 2px;
-}
 .param-summary {
   display: flex;
   flex-wrap: wrap;

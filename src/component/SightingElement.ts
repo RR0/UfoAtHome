@@ -5,7 +5,6 @@ import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
-import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
@@ -75,6 +74,8 @@ export const START_CLOCK_ATTRIBUTE = "start-clock"
  * when the case is read, and again whenever it changes, so a link can say which account it is about.
  */
 export const OBSERVER_ATTRIBUTE = "observer"
+/** Set by whoever already names the case around this player (see CaseElement): it then leaves the case unnamed rather than saying it twice. */
+export const CASE_NAMED_ATTRIBUTE = "case-named"
 
 /** The share dialog's choice of the whole case, as opposed to one recording's address. */
 const CASE_SCOPE = "case"
@@ -114,7 +115,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -123,11 +124,6 @@ export class SightingElement extends HTMLElement {
   private readonly accountElement: HTMLElement
   private readonly accountPrefix: HTMLElement
   private readonly caseOfElement: HTMLElement
-  private readonly casePanel: HTMLElement
-  private readonly caseInterviews: HTMLElement
-  private readonly caseInterviewHost: HTMLElement
-  /** The interview of the case on show under the render, by its address; none while the panel is shut. */
-  private interviewShown?: string
   private readonly observerText: HTMLElement
   private readonly observerSelect: HTMLSelectElement
   private readonly infoButton: HTMLButtonElement
@@ -247,14 +243,6 @@ export class SightingElement extends HTMLElement {
     this.accountElement = this.shadow.getElementById("account")!
     this.accountPrefix = this.shadow.getElementById("account-prefix")!
     this.caseOfElement = this.shadow.getElementById("case-of")!
-    this.casePanel = this.shadow.getElementById("case-panel")!
-    this.caseInterviews = this.shadow.getElementById("case-interviews")!
-    this.caseInterviewHost = this.shadow.getElementById("case-interview-host")!
-    // A passage of the dialogue that tells of a moment of the observation takes the player to it (see InterviewElement).
-    this.caseInterviewHost.addEventListener(INTERVIEW_SEEK_EVENT, event => {
-      const { at, sighting } = (event as CustomEvent<{ at: number, sighting?: string }>).detail
-      this.seekTo(at, sighting)
-    })
     this.observerText = this.shadow.getElementById("observer-text")!
     this.observerSelect = this.shadow.getElementById("observer") as HTMLSelectElement
     this.infoButton = this.shadow.getElementById("info-button") as HTMLButtonElement
@@ -1240,78 +1228,14 @@ export class SightingElement extends HTMLElement {
     // permission to reach it.
     this.observerText.textContent = name ?? ""
     // An observation read from a case is shown in its frame: the case is named beside the account, whether or not the case holds several.
-    const inCase = this.caseSource && (this.said.read(this.caseSource.json.title as SaidText | undefined) ?? this.caseSource.json.id)
+    const saidAround = this.hasAttribute(CASE_NAMED_ATTRIBUTE)
+    const inCase = !saidAround && this.caseSource && (this.said.read(this.caseSource.json.title as SaidText | undefined) ?? this.caseSource.json.id)
     this.caseOfElement.hidden = !inCase
-    this.caseOfElement.textContent = ""
-    if (inCase) this.drawCaseLine(`${this.messages?.case ?? ""} ${inCase}`)
+    this.caseOfElement.textContent = inCase ? `${this.messages?.case ?? ""} ${inCase}` : ""
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
     this.editLink.title = (this.messages?.editThisObservation ?? "")
     this.editLink.setAttribute("aria-label", (this.messages?.editThisObservation ?? ""))
-  }
-
-  /** The interviews the case holds, in the order of time, each with its address and what to call it. */
-  private caseInterviews_(): { url: string, label: string }[] {
-    const source = this.caseSource
-    if (!source) return []
-    return (source.json.events ?? [])
-      .filter(event => event.eventType === CaseFile.INTERVIEW_EVENT && typeof event.url === "string" && event.url !== "")
-      .map(event => ({
-        url: new URL(event.url!, source.url).href,
-        label: this.said.read(event.title as SaidText | undefined) ?? String(event.time ?? "").replace("T", " ")
-      }))
-  }
-
-  /**
-   * The case's name beside the account, and, when the case holds interviews, the way into them: the account was given in one, and a reader
-   * who cannot reach it has to take the reconstruction's word for what the witness said.
-   */
-  private drawCaseLine(name: string): void {
-    const interviews = this.caseInterviews_()
-    if (interviews.length === 0) {
-      this.caseOfElement.textContent = name
-      this.casePanel.hidden = true
-      return
-    }
-    const open = document.createElement("button")
-    open.type = "button"
-    open.textContent = name
-    open.title = this.messages?.caseInterviews ?? ""
-    open.setAttribute("aria-expanded", String(!this.casePanel.hidden))
-    open.addEventListener("click", () => {
-      if (this.casePanel.hidden) void this.showCaseInterview(this.interviewShown ?? interviews[0].url)
-      else this.shutCaseInterviews()
-    })
-    this.caseOfElement.replaceChildren(open)
-  }
-
-  private shutCaseInterviews(): void {
-    this.casePanel.hidden = true
-    this.interviewShown = undefined
-    this.caseInterviewHost.replaceChildren()
-    this.updateAccountLine()
-  }
-
-  /** Shows one interview of the case under the render, its reader fetched only now: a player that shows no interview never loads it. */
-  private async showCaseInterview(url: string): Promise<void> {
-    const interviews = this.caseInterviews_()
-    if (interviews.length === 0) return
-    this.interviewShown = url
-    this.casePanel.hidden = false
-    this.caseInterviews.replaceChildren(...interviews.map(interview => {
-      const chip = document.createElement("button")
-      chip.type = "button"
-      chip.textContent = interview.label
-      chip.setAttribute("aria-pressed", String(interview.url === url))
-      chip.addEventListener("click", () => void this.showCaseInterview(interview.url))
-      return chip
-    }))
-    const { register } = await import("./InterviewElement.js")
-    register()
-    const reader = document.createElement("rr0-interview")
-    reader.setAttribute("src", url)
-    this.caseInterviewHost.replaceChildren(reader)
-    this.updateAccountLine()
   }
 
   /** Picks the best available display string out of a People reference — a full name (built from
