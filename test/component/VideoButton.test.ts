@@ -13,6 +13,8 @@ const TEXTS: VideoButtonTexts = {
   videoTime: "Time",
   videoMap: "Map",
   videoStart: "Start",
+  videoKit: "Kit",
+  videoKitHint: "For a generator",
   videoFrom: "From",
   videoTo: "To",
   videoHere: "Here",
@@ -193,6 +195,35 @@ describe("VideoButton", () => {
     start(button)
     filmer.end(new Blob(["film"], { type: "video/mp4" }))
     await vi.waitFor(() => expect(clicked).toEqual(["observation.mp4"]))
+    click.mockRestore()
+  })
+
+  it("offers the kit for a video generator only where the filmer makes one, made as the film would be and saved under its own name", async () => {
+    expect(new VideoButton(new FakeFilmer()).panel.querySelector<HTMLButtonElement>(".video-kit")!.hidden).toBe(true)
+    const filmer = new FakeFilmer()
+    let kitOptions: FilmOptions | undefined
+    const kitter: SceneFilmer = Object.assign(filmer, {
+      generativeKit: (options: FilmOptions) => {
+        kitOptions = options
+        return Promise.resolve(new Blob(["zip"], { type: "application/zip" }))
+      },
+      kitFileName: () => "observation - kit.zip"
+    })
+    const button = new VideoButton(kitter)
+    button.messages = TEXTS
+    const clicked: string[] = []
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      clicked.push(this.download)
+    })
+    URL.createObjectURL ??= () => "blob:kit"
+    button.element.click()
+    const kit = button.panel.querySelector<HTMLButtonElement>(".video-kit")!
+    expect([kit.hidden, kit.textContent, kit.title]).toEqual([false, "Kit", "For a generator"])
+    button.panel.querySelector<HTMLInputElement>(".video-bound input")!.value = "0:05"
+    kit.click()
+    await vi.waitFor(() => expect(clicked).toEqual(["observation - kit.zip"]))
+    expect(kitOptions).toMatchObject({ fromS: 5 })
+    expect(filmer.options).toBeUndefined()
     click.mockRestore()
   })
 

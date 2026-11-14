@@ -20,6 +20,8 @@ export const ufoMessages_es: UfoMessages = {
   videoTime: "Hora",
   videoMap: "Mapa",
   videoStart: "Grabar",
+  videoKit: "Kit para IA generativa",
+  videoKitHint: "Un zip para producir un vídeo realista de esta reconstrucción con un generador de vídeo (Runway, Kling, Luma…): la película sin leyenda, su profundidad, la máscara del fenómeno, un prompt y las instrucciones.",
   videoFrom: "Inicio",
   videoTo: "Fin",
   videoHere: "Aquí",

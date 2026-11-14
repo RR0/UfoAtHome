@@ -1213,6 +1213,27 @@ canvas[data-cursor="rotate"] {
 .video-options .video-start:focus-visible {
   background: #fff;
 }
+/* The kit for a video generator: made from the same options as the film, and second to it (see VideoButton). */
+.video-options .video-kit {
+  padding: 0.4em 0.8em;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.45em;
+  background: transparent;
+  color: inherit;
+  font: 500 12px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+}
+.video-options .video-kit:hover,
+.video-options .video-kit:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+.video-options .video-kit:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.video-options .video-kit[hidden] {
+  display: none;
+}
 /* A film being made shows how far it has got in place of its glyph (see VideoButton). */
 .controls button.filming {
   min-width: 3.6em;

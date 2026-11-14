@@ -5173,14 +5173,29 @@ export class SceneRenderer {
    * ready to draw (its loader still up, its shaders compiling): asked again later. What scripts/generative-assets exports a film from.
    */
   async controlFrame(): Promise<({ image: string } & ControlPassFrame) | undefined> {
-    const { ControlPasses } = await import("./ControlPasses.js")
-    this.controlPasses ??= new ControlPasses()
+    await this.loadControlPasses()
     this.render()
     const drawn = this.drawn
     this.drawIfDirty()
     if (this.drawn === drawn) return undefined
     const image = this.renderer.domElement.toDataURL("image/png")
-    const passes = this.controlPasses.draw({
+    return { image, ...this.drawControlPasses() }
+  }
+
+  /** Loads what drawControlPasses needs: few readers ever ask for it. */
+  async loadControlPasses(): Promise<void> {
+    if (this.controlPasses) return
+    const { ControlPasses } = await import("./ControlPasses.js")
+    this.controlPasses ??= new ControlPasses()
+  }
+
+  /**
+   * The control passes of the frame last drawn (see ControlPasses), the scene being as it was drawn: what the camera saw, where the phenomena
+   * stood. Called once loadControlPasses has resolved; between two frames of a film, say, nothing having moved the scene meanwhile.
+   */
+  drawControlPasses(): ControlPassFrame {
+    if (!this.controlPasses) throw new Error("The control passes are not loaded: see loadControlPasses")
+    return this.controlPasses.draw({
       renderer: this.renderer,
       scene: this.scene,
       camera: this.camera,
@@ -5189,7 +5204,6 @@ export class SceneRenderer {
       isSolid: mesh => SceneRenderer.isSolidSurface(mesh),
       drawPhenomena: camera => this.renderPhenomenaPass(camera)
     })
-    return { image, ...passes }
   }
 
   private controlPasses?: ControlPasses
@@ -5839,6 +5853,11 @@ export class SceneRenderer {
   /** Why a picture's bytes could not be had, if they could not — see ReferenceSystem.failureOf. */
   referenceFailure(src: string): PictureFailure | undefined {
     return this.references?.failureOf(this.documentRelative(src))
+  }
+
+  /** Whether the pictures of the place are laid over the scene now (see setReferencesShown). */
+  get areReferencesShown(): boolean {
+    return this.referencesShown
   }
 
   /** Whether the reader has the pictures on at all — the player's own toggle. */

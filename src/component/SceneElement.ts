@@ -56,6 +56,7 @@ import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
 import type { FilmOptions } from "./FilmChrome.js"
+import type { FilmedScene } from "./VideoExport.js"
 import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
 import { SceneCredits } from "./SceneCredits.js"
@@ -1242,7 +1243,9 @@ export class SceneElement extends HTMLElement {
     if (typeof VideoEncoder !== "undefined" && typeof OffscreenCanvas !== "undefined") {
       this.ufoElement.filmer = {
         film: (options, onProgress, signal) => this.film(options, onProgress, signal),
+        generativeKit: (options, onProgress, signal) => this.generativeKit(options, onProgress, signal),
         fileName: () => this.filmFileName(),
+        kitFileName: () => this.filmFileName().replace(/\.mp4$/, " - kit.zip"),
         pictureSize: () => this.filmPictureSize(),
         hasMap: () => this.ufoElement.hasObserverMap,
         durationS: () => this.ufoElement.seekableDuration / this.filmRate() / 1000,
@@ -1755,9 +1758,56 @@ export class SceneElement extends HTMLElement {
    * have. The player is paused meanwhile, and put back where it was after.
    */
   private async film(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
-    if (this.filming) throw new Error("Already filming")
     // Loaded only for a film: few readers make one.
     const [{ VideoExport }, { FilmChrome }] = await Promise.all([import("./VideoExport.js"), import("./FilmChrome.js")])
+    const logo = await FilmChrome.loadLogo()
+    return this.filmScene(options, scene => VideoExport.film({
+      ...scene,
+      frameAt: (timeMs, clockMs, target) => {
+        if (!scene.frameAt(timeMs, clockMs, target)) return false
+        // What the reader chose to keep of what the player lays over the picture, never its controls.
+        FilmChrome.paint(target, this.ufoElement.filmChrome(options), logo)
+        return true
+      }
+    }, onProgress, signal))
+  }
+
+  /**
+   * The kit for a video generator (see GenerativeKit): the same film, at the same size and over the same part of the observation, but with
+   * nothing laid over its picture (no words, no map, no logo, no photograph of the place: a generator would redraw them as part of the
+   * scene), and its depth and masks alongside.
+   */
+  private async generativeKit(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
+    // Loaded only for a kit: fewer readers still make one.
+    const [{ GenerativeKit }, { generativeKitMessages }, { toSightingJson }] = await Promise.all([
+      import("./GenerativeKit.js"),
+      import("./messages/GenerativeKitMessages.js"),
+      import("../engine/persistence/sightingJson.js")
+    ])
+    const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES)
+    const [texts] = await Promise.all([generativeKitMessages.load(language), this.sceneRenderer.loadControlPasses()])
+    const referencesShown = this.sceneRenderer.areReferencesShown
+    this.sceneRenderer.setReferencesShown(false)
+    try {
+      return await this.filmScene({ ...options, caption: false, time: false, map: false }, scene => GenerativeKit.make({
+        film: scene,
+        drawControlPasses: () => this.sceneRenderer.drawControlPasses(),
+        recording: toSightingJson(this.ufoElement.sighting),
+        title: this.filmName ?? "",
+        source: scene.about?.source
+      }, texts, onProgress, signal))
+    } finally {
+      this.sceneRenderer.setReferencesShown(referencesShown)
+    }
+  }
+
+  /**
+   * Makes something of the recording frame by frame (a film, a kit) through `make`, given the scene as it is filmed: at the height asked for,
+   * or at every pixel the screen has, over the part of the observation asked for. The player is paused meanwhile, and put back where it
+   * was after.
+   */
+  private async filmScene<T>(options: FilmOptions, make: (scene: FilmedScene) => Promise<T>): Promise<T> {
+    if (this.filming) throw new Error("Already filming")
     const player = this.ufoElement
     const wasAtMs = player.currentTime
     player.pause()
@@ -1769,32 +1819,26 @@ export class SceneElement extends HTMLElement {
     player.filmMap(options.map)
     this.syncAnimationsToPlayback()
     try {
-      const logo = await FilmChrome.loadLogo()
       const height = options.height ?? this.sceneCanvas.height
       const width = options.height && css.height > 0 ? Math.round(options.height * css.width / css.height) : this.sceneCanvas.width
       // The start and end are in the observation's seconds, as the counter reads them; the film goes over the recording's own.
       const rate = this.filmRate()
       const toMs = Math.min(player.seekableDuration, options.toS !== undefined ? options.toS * 1000 * rate : player.seekableDuration)
       const fromMs = Math.min(toMs, Math.max(0, (options.fromS ?? 0) * 1000 * rate))
-      return await VideoExport.film({
+      return await make({
         fromMs,
         toMs,
         rate,
         width,
         height,
-        frameAt: (timeMs, clockMs, target) => {
-          if (!this.filmFrameAt(timeMs, clockMs, target)) return false
-          // What the reader chose to keep of what the player lays over the picture, never its controls.
-          FilmChrome.paint(target, player.filmChrome(options), logo)
-          return true
-        },
+        frameAt: (timeMs, clockMs, target) => this.filmFrameAt(timeMs, clockMs, target),
         hearInto: context => this.hearInto(context),
         about: {
           title: this.filmName,
           description: player.filmDescription,
           source: this.documentUrl ? new URL(this.documentUrl, location.href).href : undefined
         }
-      }, onProgress, signal)
+      })
     } finally {
       this.filming = false
       this.sceneRenderer.holdPixelRatio(undefined)

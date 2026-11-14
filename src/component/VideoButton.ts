@@ -5,8 +5,15 @@ import type { FilmOptions } from "./FilmChrome.js"
 export interface SceneFilmer {
   /** The film, as a file. Rejects with the signal's reason once aborted. */
   film(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob>
+  /**
+   * The kit for a video generator (see GenerativeKit), made as the film would be, over the same part and at the same size, as a zip file;
+   * undefined where it cannot be made.
+   */
+  generativeKit?(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob>
   /** What the file is called when saved, extension included. */
   fileName(): string
+  /** What the kit's file is called when saved, extension included. */
+  kitFileName?(): string
   /** The picture's size on screen, in device pixels: the film's own size by default, and the proportions of every other. */
   pictureSize(): { width: number, height: number }
   /** Whether the recording has a map of where the witness stood, to lay over the film. */
@@ -30,6 +37,9 @@ export interface VideoButtonTexts {
   readonly videoTime: string
   readonly videoMap: string
   readonly videoStart: string
+  /** The button that makes the kit for a video generator instead of the film (see SceneFilmer.generativeKit), and what it is for. */
+  readonly videoKit: string
+  readonly videoKitHint: string
   /** Where the film starts and ends, and the button that takes where the playback stands, with its hint. */
   readonly videoFrom: string
   readonly videoTo: string
@@ -58,6 +68,7 @@ export class VideoButton {
    * another recording. */
   private readonly bounds: Record<"from" | "to", { label: HTMLElement, input: HTMLInputElement, here: HTMLButtonElement }>
   private readonly startButton: HTMLButtonElement
+  private readonly kitButton: HTMLButtonElement
   private texts?: VideoButtonTexts
   private filming?: AbortController
   private share = 0
@@ -127,8 +138,14 @@ export class VideoButton {
     this.startButton = document.createElement("button")
     this.startButton.type = "button"
     this.startButton.className = "video-start"
-    this.startButton.addEventListener("click", () => void this.film(this.options()))
+    this.startButton.addEventListener("click", () => void this.film(this.options(), false))
     this.panel.append(this.startButton)
+    this.kitButton = document.createElement("button")
+    this.kitButton.type = "button"
+    this.kitButton.className = "video-kit"
+    this.kitButton.hidden = !this.filmer.generativeKit
+    this.kitButton.addEventListener("click", () => void this.film(this.options(), true))
+    this.panel.append(this.kitButton)
     this.restoreOptions()
     this.update()
   }
@@ -216,6 +233,7 @@ export class VideoButton {
     this.bounds.from.input.setAttribute("aria-invalid", String(fromWrong))
     this.bounds.to.input.setAttribute("aria-invalid", String(toWrong))
     this.startButton.disabled = fromWrong || toWrong || reversed
+    this.kitButton.disabled = this.startButton.disabled
   }
 
   /** Seconds as the player's counter writes them: m:ss, or h:mm:ss past an hour. */
@@ -272,7 +290,8 @@ export class VideoButton {
     }
   }
 
-  private async film(options: FilmOptions): Promise<void> {
+  /** Makes the film, or with `kit` the kit for a video generator made from it, and saves it. */
+  private async film(options: FilmOptions, kit: boolean): Promise<void> {
     this.closeOptions()
     this.keepOptions(options)
     const filming = new AbortController()
@@ -281,11 +300,12 @@ export class VideoButton {
     this.failure = undefined
     this.update()
     try {
-      const film = await this.filmer.film(options, share => {
+      const progress = (share: number) => {
         this.share = share
         this.update()
-      }, filming.signal)
-      this.save(film)
+      }
+      if (kit && this.filmer.generativeKit) this.save(await this.filmer.generativeKit(options, progress, filming.signal), this.filmer.kitFileName?.() ?? "kit.zip")
+      else this.save(await this.filmer.film(options, progress, filming.signal), this.filmer.fileName())
     } catch (error) {
       if (!filming.signal.aborted) {
         this.failure = error instanceof Error ? error.message : String(error)
@@ -297,11 +317,11 @@ export class VideoButton {
     }
   }
 
-  private save(film: Blob): void {
-    const url = URL.createObjectURL(film)
+  private save(file: Blob, name: string): void {
+    const url = URL.createObjectURL(file)
     const link = document.createElement("a")
     link.href = url
-    link.download = this.filmer.fileName()
+    link.download = name
     link.click()
     // Once the download has taken it.
     setTimeout(() => URL.revokeObjectURL(url), 60000)
@@ -327,6 +347,8 @@ export class VideoButton {
     this.checks.time.label.textContent = texts?.videoTime ?? ""
     this.checks.map.label.textContent = texts?.videoMap ?? ""
     this.startButton.textContent = texts?.videoStart ?? ""
+    this.kitButton.textContent = texts?.videoKit ?? ""
+    this.kitButton.title = texts?.videoKitHint ?? ""
     this.bounds.from.label.textContent = texts?.videoFrom ?? ""
     this.bounds.to.label.textContent = texts?.videoTo ?? ""
     for (const { here } of Object.values(this.bounds)) {

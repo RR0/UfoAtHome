@@ -46,8 +46,8 @@ export interface ControlPassFrame {
 /**
  * Draws again the frame the scene has just drawn, as what an image generator can be held to rather than as light: how far each pixel is
  * from the eye, and which pixels are the phenomenon. They are what keeps a generated film to the reconstruction (its geometry, its horizon,
- * where the phenomenon is) and what keeps the phenomenon itself out of the generator's reach — the part of the picture that is the
- * testimony is never redrawn by it.
+ * where the phenomenon is) and what the phenomenon it renders is checked against: the part of the picture that is the testimony may be
+ * made as realistic as the rest, never moved, reshaped or added to.
  *
  * Not a pass of the ordinary frame: only the export of a reconstruction's material for a generator asks for it (see
  * scripts/generative-assets), so it is loaded on demand.
@@ -189,6 +189,11 @@ export class ControlPasses {
     try {
       draw()
       const pixels = new Float32Array(target.width * target.height * 4)
+      // An asynchronous read-back elsewhere (the eye's meter, the sky's tables) can leave its pixel-pack buffer bound, and a synchronous
+      // read then fails with nothing but a console warning, handing back zeros: the kit's depth and masks came back black (see
+      // AtmosphereTables.readSkyViewNow, which met it first).
+      const gl = renderer.getContext() as WebGL2RenderingContext
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
       renderer.readRenderTargetPixels(target, 0, 0, target.width, target.height, pixels)
       return pixels
     } finally {

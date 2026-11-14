@@ -29,6 +29,9 @@ export interface UfoMessages {
   videoTime: string
   videoMap: string
   videoStart: string
+  /** The button that makes the kit for a video generator (see GenerativeKit), and what it is for. */
+  videoKit: string
+  videoKitHint: string
   /** Where the film starts and ends, and the button that sets either to where the playback stands, with its hint. */
   videoFrom: string
   videoTo: string

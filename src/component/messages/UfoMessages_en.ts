@@ -21,6 +21,8 @@ export const ufoMessages_en: UfoMessages = {
   videoTime: "Time",
   videoMap: "Map",
   videoStart: "Record",
+  videoKit: "Generative AI kit",
+  videoKitHint: "A zip to make a realistic video of this reconstruction with a video generator (Runway, Kling, Luma…): the film without captions, its depth, the phenomenon's mask, a prompt and instructions.",
   videoFrom: "Start",
   videoTo: "End",
   videoHere: "Here",

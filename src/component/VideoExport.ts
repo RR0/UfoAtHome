@@ -27,6 +27,12 @@ export interface FilmedScene {
    */
   hearInto(context: BaseAudioContext | undefined): void
 
+  /**
+   * Called once each frame is in the film, with the picture it was made from and its index: what is made alongside the film, frame for
+   * frame (see GenerativeKit), is made here. The next frame is not drawn before it has resolved.
+   */
+  afterFrame?(index: number, picture: OffscreenCanvasRenderingContext2D): Promise<void>
+
   /** What the film's file says of itself (see film): what it is called, what it is, and what it was made from. */
   readonly about?: FilmAbout
 }
@@ -124,6 +130,7 @@ export class VideoExport {
         const timeMs = Math.min(scene.fromMs + index * stepMs * rate, scene.toMs)
         await VideoExport.drawFrame(scene, timeMs, clockStartMs + index * stepMs, context, signal)
         await video.add(index / VideoExport.FRAME_RATE, 1 / VideoExport.FRAME_RATE)
+        await scene.afterFrame?.(index, context)
         onProgress((index + 1) / frames)
         if (sound) {
           if (rendering) await sound.resume()
