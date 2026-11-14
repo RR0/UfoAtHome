@@ -46,6 +46,8 @@ export class VideoExport {
   static readonly SAMPLE_RATE = 48000
   /** How long one frame may take to be drawn before the film is given up: a scene whose relief or decor never arrives. */
   static readonly FRAME_PATIENCE_MS = 30000
+  /** How often the page is let paint while a film is made (see film). */
+  static readonly PAINT_EVERY_MS = 100
   /** How often a frame not yet drawn is asked again. */
   static readonly FRAME_RETRY_MS = 20
 
@@ -91,6 +93,7 @@ export class VideoExport {
       for (let index = 1; index < frames && sound; index++) reached[index] = sound.suspend(index / VideoExport.FRAME_RATE)
       const clockStartMs = performance.now()
       let rendering: Promise<AudioBuffer> | undefined
+      let paintedAtMs = performance.now()
       for (let index = 0; index < frames; index++) {
         signal.throwIfAborted()
         if (index > 0) await reached[index]
@@ -102,8 +105,14 @@ export class VideoExport {
           if (rendering) await sound.resume()
           else rendering = sound.startRendering()
         }
-        // What the next instant asks for (a tile, a model) arrives in tasks of its own.
-        await VideoExport.nextTask()
+        // What the next instant asks for (a tile, a model) arrives in tasks of its own; and now and then the page is painted, its
+        // progress with it: a page that went on making frames without ever showing one would look, to the reader as to the browser, hung.
+        if (performance.now() - paintedAtMs > VideoExport.PAINT_EVERY_MS && typeof document !== "undefined" && !document.hidden) {
+          await new Promise(resolve => requestAnimationFrame(resolve))
+          paintedAtMs = performance.now()
+        } else {
+          await VideoExport.nextTask()
+        }
       }
       if (audio && rendering) await audio.add(await rendering)
       await output.finalize()
@@ -123,7 +132,10 @@ export class VideoExport {
     while (!scene.frameAt(timeMs, clockMs, target)) {
       signal.throwIfAborted()
       if (performance.now() > giveUpAtMs) throw new Error(`No frame at ${Math.round(timeMs)} ms`)
-      await new Promise(resolve => setTimeout(resolve, VideoExport.FRAME_RETRY_MS))
+      // A hidden page's timers are slowed to one a second, and to one a minute after a while: a film made in a tab left behind would
+      // wait that long for every frame not drawn at once. Its tasks are not slowed.
+      if (typeof document !== "undefined" && document.hidden) await VideoExport.nextTask()
+      else await new Promise(resolve => setTimeout(resolve, VideoExport.FRAME_RETRY_MS))
     }
   }
 
