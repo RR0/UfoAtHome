@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { Sighting } from "../../src/engine/model/Sighting.js"
 import { fromSightingJson, toSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 import { createOval } from "../../src/engine/shape/Shape.js"
 
 describe("sightingJson", () => {
@@ -53,7 +53,7 @@ describe("sightingJson", () => {
     // A recording that bookmarks nothing writes no field at all, rather than an empty array every
     // reader would then have to know means the same thing.
     expect(toSightingJson(Sighting.create({ year: 1964 })).milestones).toBeUndefined()
-    expect(fromSightingJson({ version: 1, timeline: { keyframes: [] } }).milestones).toEqual([])
+    expect(fromSightingJson({ version: 4, timeline: { keyframes: [] } }).milestones).toEqual([])
   })
 
   it("round-trips the account's sources as RR0 states them, and writes none when there are none", () => {
@@ -87,7 +87,7 @@ describe("sightingJson", () => {
 
   it("reads a shutter an older recording wrote onto its poses, back when it could vary along the timeline", () => {
     const restored = fromSightingJson({
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       instrument: "slr-35mm-50",
       observerTrack: {
@@ -134,7 +134,7 @@ describe("sightingJson", () => {
 
   it("re-derives the drawing from the stated angle, about the shape's own centre", () => {
     const restored = fromSightingJson({
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -165,7 +165,7 @@ describe("sightingJson", () => {
 
   it("leaves a recording made before angles were stated exactly as it was drawn", () => {
     const restored = fromSightingJson({
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: createOval({ x: 10, y: 20, width: 40, height: 24 }) }] }
@@ -177,7 +177,7 @@ describe("sightingJson", () => {
   })
 
   it("defaults decor to [] for older JSON that predates it", () => {
-    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const restored = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     expect(restored.decor).toEqual([])
   })
 
@@ -189,7 +189,7 @@ describe("sightingJson", () => {
 
   it("round-trips observer (id+title) and the sighting's own id", () => {
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       id: "1948-07-24-ChilesClarence",
       observer: { id: "chiles", title: "Clarence Chiles" },
       timeline: { keyframes: [] },
@@ -217,11 +217,11 @@ describe("sightingJson", () => {
 
   it("neither reads nor writes back the case or the RR0 directory an older recording named", () => {
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       caseId: "ChilesWhitted",
       observer: { id: "ChilesClarence", dirName: "people/c/ChilesClarence" },
       timeline: { keyframes: [] }
-    } as SightingRecordingJsonV1
+    } as SightingRecordingJson
 
     const written = toSightingJson(fromSightingJson(json))
 
@@ -231,7 +231,7 @@ describe("sightingJson", () => {
 
   it("round-trips observer (lastName+firstNames)", () => {
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       observer: { lastName: "Chiles", firstNames: ["Clarence"] },
       timeline: { keyframes: [] }
     }
@@ -265,7 +265,7 @@ describe("sightingJson", () => {
   })
 
   it("defaults to an empty observerTrack when absent from JSON", () => {
-    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const restored = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     expect(restored.observerTrack.allKeyframes).toEqual([])
   })
 
@@ -298,15 +298,15 @@ describe("sightingJson", () => {
   })
 
   it("defaults to an empty weatherTrack when absent from JSON", () => {
-    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const restored = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     expect(restored.weatherTrack.allKeyframes).toEqual([])
   })
 
   it("round-trips endTime and durationSeconds", () => {
     const restored = fromSightingJson({
-      version: 1,
-      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
-      endTime: { year: 1948, month: 7, day: 24, hour: 2, minute: 50 },
+      version: 4,
+      time: "1948-07-24T02:45",
+      endTime: "1948-07-24T02:50",
       durationSeconds: 300,
       timeline: { keyframes: [] }
     })
@@ -316,7 +316,7 @@ describe("sightingJson", () => {
 
   it("round-trips weather", () => {
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       timeline: { keyframes: [] },
       weather: {
         cloudCover: 0.8,
@@ -336,13 +336,13 @@ describe("sightingJson", () => {
   })
 
   it("leaves weather undefined when absent from JSON", () => {
-    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const restored = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     expect(restored.weather).toBeUndefined()
   })
 
   it("round-trips description and tags", () => {
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       description: "Bright light hovering over the field for several minutes.",
       tags: ["hovering", "night"],
       timeline: { keyframes: [] }
@@ -357,7 +357,7 @@ describe("sightingJson", () => {
   })
 
   it("leaves description and tags undefined when absent from JSON", () => {
-    const restored = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const restored = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     expect(restored.event.description).toBeUndefined()
     expect(restored.event.tags).toBeUndefined()
   })

@@ -1,6 +1,30 @@
 import type { PlaceJson } from "@rr0/place"
-import { formatEdtfTime, type SightingTime } from "../model/Sighting.js"
-import type { ReadableSightingJson, SightingRecordingJson } from "./sightingJson.js"
+import { formatEdtfTime, type SightingTime } from "../../src/engine/model/Sighting.js"
+import type { SightingLocation, Snapshots, SightingRecordingJson, TimelineJson } from "../../src/engine/persistence/sightingJson.js"
+
+/**
+ * The shapes the format had before the current version, which only this knows now: the engine reads one version (see FormatVersion), and
+ * what the versions before it wrote lives here, with the code that brings a file forward from them.
+ */
+/** A recording in version 3 of the format: its snapshots under the name `frozen`. */
+export type SightingRecordingJsonV3 = Omit<SightingRecordingJson, "version" | "snapshots"> & { version: 3, frozen?: Snapshots }
+
+/** A recording in version 2: its groups of shapes as lists of members, its events' `who` "observer" or "phenomenon". */
+export type SightingRecordingJsonV2 = Omit<SightingRecordingJsonV3, "version" | "timeline"> & {
+  version: 2
+  timeline: Omit<TimelineJson, "groups"> & { groups?: string[][] }
+}
+
+/** A recording in version 1: its time as the fields of a date, its place as a list of named locations. */
+export type SightingRecordingJsonV1 = Omit<SightingRecordingJsonV3, "version" | "time" | "endTime" | "place"> & {
+  version?: 1
+  time?: SightingTime
+  endTime?: SightingTime
+  place?: SightingLocation[]
+}
+
+/** What a recording may be brought forward from: the current version of the format, or any older one. */
+export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV3 | SightingRecordingJsonV2 | SightingRecordingJsonV1
 
 /** A value as a file may write it: bare, or with its provenance beside it (see Provenance). */
 type Wrapped<T> = T | { value: T, basis?: string, rationale?: string, how?: string }

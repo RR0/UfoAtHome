@@ -6,7 +6,6 @@ import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
 import { formatEdtfTime, parseEdtfTime, type SightingLocation, type SightingTime } from "../model/Sighting.js"
 import type { PlaceJson } from "@rr0/place"
-import { SightingMigration } from "./SightingMigration.js"
 import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
@@ -49,8 +48,8 @@ import { RecordingEvents } from "../events/RecordingEvents.js"
 export interface SightingRecordingJson {
   /** The schema this file was written against, for an editor to check it with: https://ufoathome.org/schema/4/sighting.schema.json. Not read. */
   $schema?: string
-  /** The version of the format this file is written in (see FormatVersion): 4. A file of an older version is read through
-   * SightingMigration; one of a newer version is refused, not misread. */
+  /** The version of the format this file is written in (see FormatVersion): 4, the one version this engine reads. A file of any other
+   * is refused rather than misread; an older one is brought forward outside the player, by scripts/migrate-recordings.ts. */
   version: 4
   /** Which account this is, unique across every recording anywhere: the day it happened, then
    * who saw it ("1964-04-24-ZamoraLonnie"), or where for an anonymous observer. What a case and its
@@ -175,29 +174,6 @@ export interface SightingRecordingJson {
   modules?: string[]
 }
 
-/** A recording in version 1 of the format: its time as the fields of a date, its place as a list of named locations (see SightingMigration). */
-export type SightingRecordingJsonV1 = Omit<SightingRecordingJsonV3, "version" | "time" | "endTime" | "place"> & {
-  version?: 1
-  time?: SightingTime
-  endTime?: SightingTime
-  place?: SightingLocation[]
-}
-
-/** A recording in version 3 of the format: its snapshots under the name `frozen` (see SightingMigration). */
-export type SightingRecordingJsonV3 = Omit<SightingRecordingJson, "version" | "snapshots"> & {
-  version: 3
-  frozen?: Snapshots
-}
-
-/** A recording in version 2 of the format: its groups of shapes as lists of members, its events' `who` "observer" or "phenomenon" (see
- * SightingMigration). */
-export type SightingRecordingJsonV2 = Omit<SightingRecordingJsonV3, "version" | "timeline"> & {
-  version: 2
-  timeline: Omit<TimelineJson, "groups"> & { groups?: string[][] }
-}
-
-/** What a recording may be read from: the current version of the format, or an older one, migrated as it is read. */
-export type ReadableSightingJson = SightingRecordingJson | SightingRecordingJsonV3 | SightingRecordingJsonV2 | SightingRecordingJsonV1
 
 export function toSightingJson(sighting: Sighting): SightingRecordingJson {
   return Provenance.restore(plainSightingJson(sighting), sighting.provenance)
@@ -274,10 +250,16 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
   }
 }
 
-export function fromSightingJson(json: ReadableSightingJson): Sighting {
-  FormatVersion.check(json, "sighting")
-  // In the current version before anything reads it: the rest of the engine only knows that one.
-  const current = SightingMigration.toCurrent(json)
+/** Whom an event of the witness is about: their id, or "observer" for a witness without one (see RecordingEvents). */
+function observerIdOf(json: { observer?: { id?: string } }): string {
+  return json.observer?.id ?? "observer"
+}
+
+export function fromSightingJson(json: SightingRecordingJson): Sighting {
+  // One version, and a file in any other is refused rather than misread (see FormatVersion): what the versions before wrote is brought
+  // forward by scripts/migrate-recordings.ts, outside what is shipped, and a file shared under an older one is read by the UFO@home
+  // pinned beside it.
+  const current = FormatVersion.check(json, "sighting")
   // Off first, so that nothing below has to know a value could have arrived wrapped — see
   // Provenance's own doc comment on why the wrapper lives no longer than the file does.
   const { recording: plain, provenance } = Provenance.strip(current)
@@ -358,7 +340,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
   // Whom each event is about, by an id: the observer's when it says none (see RecordingActors).
-  sighting.events = json.events?.map(event => event.who === undefined ? { ...event, who: SightingMigration.observerIdOf(json) } : event)
+  sighting.events = json.events?.map(event => event.who === undefined ? { ...event, who: observerIdOf(json) } : event)
   // The events of the sky were written in the interpretation before they had a place of their own: read from there too, and moved out.
   const stated = SkyEvents.read(json.skyEvents, json.interpretation)
   sighting.interpretation = stated.interpretation

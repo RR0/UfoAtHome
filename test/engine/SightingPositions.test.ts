@@ -5,7 +5,7 @@ import type { SightingRecordingJson } from "../../src/engine/persistence/sightin
 
 describe("SightingPositions", () => {
   it("writes how a place was said with the numbers of where it now is, and forgets a reference that is gone", () => {
-    const sighting = fromSightingJson({ version: 1, timeline: { keyframes: [] } } as unknown as SightingRecordingJson)
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] } } as unknown as SightingRecordingJson)
     sighting.observerTrack.addKeyframe(0, { lat: 44, lng: 5, elevationM: 0, pitchDeg: 0, fovDeg: 60 })
     sighting.decor = [
       { id: "house", kind: "building", eastM: 100, northM: 0 },

@@ -2,7 +2,6 @@ import type { Snapshots, RecordingSectionName, SectionAnnex } from "../engine/mo
 import { SnapshotGroups, RecordingSections } from "../engine/model/Snapshots.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
-import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { fromSightingJson, toSightingJson, type SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { InputFileElement, InputFilePick } from "./InputFileElement.js"
 import type { JsonPath } from "./JsonPaths.js"
@@ -179,7 +178,7 @@ export class SectionFilePanel {
       const { InputFileElement } = await import("./InputFileElement.js")
       const bytes = await InputFileElement.bytesOf(pick.url ? { url: this.resolve(pick.url) } : pick)
       // As the current version of the format writes it, whichever this file was written in.
-      given = SightingMigration.toCurrent(JSON.parse(new TextDecoder().decode(bytes)))
+      given = FormatVersion.recording(JSON.parse(new TextDecoder().decode(bytes)))
       if (typeof given !== "object" || given === null || RecordingSections.KEYS[name].every(key => given[key] === undefined)) throw new Error("Not this section")
     } catch {
       MessageStyle.show(this.note, this.messages!.annexUnreadable, "warning")

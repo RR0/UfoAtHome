@@ -130,9 +130,9 @@ describe("Variants kept in a recording", () => {
         moved: [{ field: "heading" as const, stated: 205, variant: 225, parameter: "heading", amount: 20, z: 0.9, status: "consolidated" }],
         cost: 0.9, verdict: "consolidated" as const, modelId: "consolidated" }
     }
-    const sighting = fromSightingJson({ version: 1, timeline: { keyframes: [] }, variants: [variant] } as never)
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] }, variants: [variant] } as never)
     expect(sighting.variants).toEqual([variant])
     expect(toSightingJson(sighting).variants).toEqual([variant])
-    expect(toSightingJson(fromSightingJson({ version: 1, timeline: { keyframes: [] } } as never)).variants).toBeUndefined()
+    expect(toSightingJson(fromSightingJson({ version: 4, timeline: { keyframes: [] } } as never)).variants).toBeUndefined()
   })
 })

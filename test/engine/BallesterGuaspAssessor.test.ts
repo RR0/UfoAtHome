@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest"
 import { ASSESSMENT_SOURCES } from "../../src/modules/assessors/assessmentSources.js"
 import type { Assessment } from "../../src/engine/assessment/Assessor.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const ballesterGuasp = ASSESSMENT_SOURCES.find(source => source.id === "ballester-guasp")!
 
-const assess = (json: Partial<SightingRecordingJsonV1>): Promise<Assessment> =>
-  ballesterGuasp.create().assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...json } as SightingRecordingJsonV1))
+const assess = (json: Partial<SightingRecordingJson>): Promise<Assessment> =>
+  ballesterGuasp.create().assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...json } as SightingRecordingJson))
 
 const of = (assessment: Assessment, id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
@@ -88,7 +88,7 @@ describe("BallesterGuaspAssessor", () => {
     const at = (distanceM: number) => assess({
       timeline: { keyframes: [] },
       interpretation: { bodies: [{ id: "sphere", explains: ["boule"], model: { id: "sphere" }, track: [{ t: 0, eastM: distanceM, northM: 0, onGround: true }] }] }
-    } as Partial<SightingRecordingJsonV1>)
+    } as Partial<SightingRecordingJson>)
     expect(of(await at(82), "bg-close")).toMatchObject({ value: 1, basis: "assumed", paths: ["interpretation.bodies.0"] })
     expect(of(await at(400), "bg-close")).toMatchObject({ value: 0, basis: "assumed" })
   })

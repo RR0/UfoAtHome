@@ -334,7 +334,7 @@ describe("undo and redo", () => {
     await edited(element, () => addBuildings(element, 1))
     expect(undo.disabled).toBe(false)
     globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true, json: () => Promise.resolve({ version: 1, timeline: { keyframes: [] }, decor: [] })
+      ok: true, json: () => Promise.resolve({ version: 4, timeline: { keyframes: [] }, decor: [] })
     }) as unknown as typeof fetch
     ;(element.shadowRoot!.getElementById("import-url") as HTMLInputElement).value = "https://example.org/other.json"
     ;(element.shadowRoot!.getElementById("import-url-button") as HTMLButtonElement).click()

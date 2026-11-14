@@ -75,9 +75,9 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
 }
 
 const sampleJson = {
-  version: 1 as const,
-  time: { year: 1948, month: 7, day: 24 },
-  place: [{ lat: 32.3792, lng: -86.3077 }],
+  version: 4 as const,
+  time: "1948-07-24",
+  place: { locations: [{ lat: 32.3792, lng: -86.3077 }] },
   observer: { id: "ChilesWhitted" },
   timeline: {
     keyframes: [
@@ -248,7 +248,7 @@ describe("UfoElement", () => {
   it("currentTime/playbackState reflect seek() and play/pause/stop", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -273,7 +273,7 @@ describe("UfoElement", () => {
   it("moves the observer's body only while the replay plays at about its own pace", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -309,7 +309,7 @@ describe("UfoElement", () => {
   it("dispatches timeupdate with the current time on seek", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -350,7 +350,7 @@ describe("UfoElement", () => {
     const element = await mount()
     element.sightingData = {
       ...sampleJson,
-      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
+      time: "1948-07-24T02:45",
       durationSeconds: 300
     }
     const start = element.shadowRoot!.getElementById("time-start") as HTMLElement
@@ -361,7 +361,7 @@ describe("UfoElement", () => {
 
   it("durationSeconds getter/setter patches the sighting's event and rescales the end label, without rebuilding the timeline", async () => {
     const element = await mount()
-    element.sightingData = { ...sampleJson, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 } }
+    element.sightingData = { ...sampleJson, time: "1948-07-24T02:45" }
     expect(element.durationSeconds).toBeUndefined()
     const end = element.shadowRoot!.getElementById("time-end") as HTMLElement
     expect(end.textContent).toBe("0:00") // single-keyframe timeline: recorded duration is 0
@@ -705,7 +705,7 @@ describe("UfoElement", () => {
   it("selectedSourceIds flags that source's shape as selected on the next paint, only", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -749,7 +749,7 @@ describe("UfoElement", () => {
     // Handles are an editor's, and an editor holds the observer still — see UfoElement.steadyObserver.
     element.steadyObserver = true
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -774,7 +774,7 @@ describe("UfoElement", () => {
   it("selecting multiple sources paints individual outlines plus one shared group-handle overlay", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -802,7 +802,7 @@ describe("UfoElement", () => {
 
   function twoKeyframeSighting() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -986,7 +986,7 @@ describe("UfoElement hover tooltip", () => {
   it("shows a tooltip with the shape's title when hovering it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false, title: "Vaisseau principal" } }] }
@@ -1005,7 +1005,7 @@ describe("UfoElement hover tooltip", () => {
   it("keeps the tooltip hidden when hovering an untitled shape", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
@@ -1033,7 +1033,7 @@ describe("UfoElement hover tooltip", () => {
   it("hides the tooltip on pointerleave", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1, selected: false, title: "Vaisseau principal" } }] }
@@ -1066,9 +1066,9 @@ describe("UfoElement seek range vs. declared duration", () => {
   /** A 6-second recording declared as a 20-second observation — Socorro's own shape. */
   function shortRecordingLongObservation() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       durationSeconds: 20,
-      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+      time: "1964-04-24T17:50",
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -1121,9 +1121,9 @@ describe("UfoElement observation start", () => {
   it("re-reads the observation's start time on refresh", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 20,
-      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+      time: "1964-04-24T17:50",
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -1145,7 +1145,7 @@ describe("switching the counters between clock time and elapsed time", () => {
   /** An observation with a real start time: 17:50, running twenty seconds. */
   const timedSighting = {
     ...sampleJson,
-    time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
+    time: "1964-04-24T17:50",
     durationSeconds: 20
   }
 
@@ -1410,7 +1410,7 @@ describe("the observer's own map", () => {
    * one named moment. */
   function movingObserver(): object {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 83000, shapes: [] }] },
       observerTrack: {
         keyframes: [
@@ -1425,7 +1425,7 @@ describe("the observer's own map", () => {
   /** Someone who stayed where they were: two fixes three metres apart, the same spot. */
   function stationaryObserver(): object {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 20000, shapes: [] }] },
       observerTrack: {
         keyframes: [
@@ -1547,13 +1547,13 @@ describe("the observer's own map", () => {
   it("is not offered for a recording that never said where it happened, asked for or not", async () => {
     // Most recordings in this project say nothing about coordinates, and a control that is there
     // and opens onto nothing is worse than one that appears when it has an answer.
-    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] } })
+    const element = await mountWithMap({ version: 4, timeline: { keyframes: [] } })
     expect(mapParts(element).button.hidden).toBe(true)
     expect(mapParts(element).panel.hidden).toBe(true)
   })
 
   it("is offered as soon as a recording names one place, tracked or not", async () => {
-    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] }, place: [{ lat: 34.05, lng: -106.89 }] })
+    const element = await mountWithMap({ version: 4, timeline: { keyframes: [] }, place: { locations: [{ lat: 34.05, lng: -106.89 }] } })
     expect(mapParts(element).button.hidden).toBe(false)
   })
 
@@ -1695,7 +1695,7 @@ describe("the observer's own map", () => {
     const element = await mountWithMap(movingObserver())
     expect(mapParts(element).panel.hidden).toBe(false)
 
-    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [] } } as never
     expect(mapParts(element).panel.hidden).toBe(true)
     expect(mapParts(element).button.hidden).toBe(true)
   })
@@ -1703,7 +1703,7 @@ describe("the observer's own map", () => {
   it("applies the page's default again for each recording that arrives", async () => {
     // A carousel swaps recordings under one stage. The map opening is about the recording being
     // loaded, not the one it replaced.
-    const element = await mountWithMap({ version: 1, timeline: { keyframes: [] } })
+    const element = await mountWithMap({ version: 4, timeline: { keyframes: [] } })
     expect(mapParts(element).panel.hidden).toBe(true) // nowhere to point it
 
     element.sightingData = movingObserver() as never
@@ -1714,7 +1714,7 @@ describe("the observer's own map", () => {
 describe("the account's named moments", () => {
   function withMilestones(): object {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] },
       milestones: [{ t: 0, label: "A", note: "He hears a roar" }, { t: 500, label: "B", note: "The sound stops" }]
     }
@@ -1836,7 +1836,7 @@ describe("the account's named moments", () => {
     const picture = (id: string, opacity: number) => ({
       id, kind: "view", src: `${id}.jpg`, title: { en: `Picture ${id}` }, opacity, registration: { headingDeg: 0, pitchDeg: 0, fovDeg: 30 }
     })
-    const withPictures = (...pictures: ReturnType<typeof picture>[]) => ({ version: 1, timeline: { keyframes: [] }, references: pictures })
+    const withPictures = (...pictures: ReturnType<typeof picture>[]) => ({ version: 4, timeline: { keyframes: [] }, references: pictures })
 
     it("keeps the single button for one picture, and opens a list of them for several", async () => {
       const element = await mount()
@@ -1876,7 +1876,7 @@ describe("the account's named moments", () => {
   it("offers a picker of the account's moments after the time, and going to one is choosing it", async () => {
     const element = await mount()
     const shadow = element.shadowRoot!
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] } } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 1000, shapes: [] }] } } as never
     expect(shadow.getElementById("moments")!.hidden).toBe(true) // nothing to choose from
 
     element.sightingData = withMilestones() as never
@@ -1953,7 +1953,7 @@ describe("the account's named moments", () => {
 
   it("offers no button to a recording that names no moment", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as never
     expect(parts(element).button.hidden).toBe(true)
   })
 

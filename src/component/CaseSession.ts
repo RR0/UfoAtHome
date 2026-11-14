@@ -1,5 +1,5 @@
+import { FormatVersion } from "../engine/persistence/FormatVersion.js"
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
-import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
@@ -195,8 +195,8 @@ export class CaseSession {
     // A frozen event keeps what it was frozen on: an edit reaching here is refused, not written (see CaseEventJson.sealed). What was just
     // loaded still goes through, since that IS what it holds.
     if (!fresh && CaseSession.sealed(track.event)) return
-    // In the current version of the format (see SightingMigration): a file of an older one is written back in it once edited.
-    recording = SightingMigration.toCurrent(recording)
+    // In the one version of the format this reads, or refused (see FormatVersion).
+    recording = FormatVersion.recording(recording)
     track.recording = recording
     if (fresh) track.loaded = JSON.stringify(recording)
     // What a reading is called is what its own interpretation says: the case's event follows it.

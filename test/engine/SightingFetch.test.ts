@@ -35,9 +35,9 @@ describe("SightingFetch", () => {
   it("puts back in a recording the weather it keeps beside it, and plays with its own when that cannot be read", async () => {
     const weatherTrack = { keyframes: [{ t: 0, weather: { cloudCover: 0.4 } }] }
     const files: Record<string, unknown> = {
-      [`${OTHER}/d/s.json`]: { version: 1, snapshots: { weather: { src: "s.weather.json" } } },
-      [`${OTHER}/d/s.weather.json`]: { version: 1, weatherTrack, weatherSource: { id: "era5", name: "ERA5", url: "u" } },
-      [`${OTHER}/d/t.json`]: { version: 1, weatherTrack: { keyframes: [] }, snapshots: { weather: { src: "gone.json" } } }
+      [`${OTHER}/d/s.json`]: { version: 4, snapshots: { weather: { src: "s.weather.json" } } },
+      [`${OTHER}/d/s.weather.json`]: { version: 4, weatherTrack, weatherSource: { id: "era5", name: "ERA5", url: "u" } },
+      [`${OTHER}/d/t.json`]: { version: 4, weatherTrack: { keyframes: [] }, snapshots: { weather: { src: "gone.json" } } }
     }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url in files ? respond(files[url]) : respond(undefined, false, 404)))
     expect(await SightingFetch.recording(`${OTHER}/d/s.json`)).toMatchObject({ weatherTrack, weatherSource: { id: "era5" } })

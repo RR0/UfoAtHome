@@ -236,7 +236,7 @@ async function waitFor(check: () => boolean, timeoutMs = 20000): Promise<void> {
 
 function oneShapeJson() {
   return {
-    version: 1 as const,
+    version: 4 as const,
     timeline: {
       keyframes: [
         {

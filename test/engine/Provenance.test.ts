@@ -7,7 +7,7 @@ describe("Provenance", () => {
   it("leaves a recording that carries none exactly as it is", () => {
     // Every recording written before this existed is one, and no entry reads as "stated", which is
     // what those files were.
-    const json = { version: 1, time: { year: 1974, month: 5, day: 20 }, timeline: { keyframes: [] } }
+    const json = { version: 4, time: "1974-05-20", timeline: { keyframes: [] } }
 
     const { recording, provenance } = Provenance.strip(json)
 
@@ -17,7 +17,7 @@ describe("Provenance", () => {
 
   it("takes a wrapped value out and remembers where it came from", () => {
     const { recording, provenance } = Provenance.strip({
-      version: 1,
+      version: 4,
       durationSeconds: { value: 120, basis: "assumed", rationale: "\"quelques mn\" gives no number; two taken so the timeline has a length" },
       timeline: { keyframes: [] }
     })
@@ -39,7 +39,7 @@ describe("Provenance", () => {
 
   it("round-trips: what is stripped is put back where it was", () => {
     const json = {
-      version: 1,
+      version: 4,
       durationSeconds: { value: 120, basis: "assumed" },
       place: [{ lat: 48.29, lng: { value: -4.26, basis: "derived", rationale: "geocoded" } }],
       timeline: { keyframes: [] }
@@ -84,15 +84,15 @@ describe("Provenance", () => {
   it("drops provenance for a path the recording no longer has", () => {
     // A shape deleted, a keyframe removed: its provenance goes with it rather than resurrecting an
     // empty wrapper where the value used to be.
-    const { provenance } = Provenance.strip({ id: { value: "x", basis: "assumed" }, version: 1 })
+    const { provenance } = Provenance.strip({ id: { value: "x", basis: "assumed" }, version: 4 })
 
-    expect(Provenance.restore({ version: 1 }, provenance)).toEqual({ version: 1 })
+    expect(Provenance.restore({ version: 4 }, provenance)).toEqual({ version: 4 })
   })
 
   it("survives a full load and save of a recording", () => {
     const json = {
-      version: 1,
-      time: { year: 1974, month: 5, day: 20, hour: 19, minute: 0 },
+      version: 4,
+      time: "1974-05-20T19:00",
       utcOffsetHours: { value: 1, basis: "derived", rationale: "France had no summer time before 1976" },
       timeline: { keyframes: [] }
     } as unknown as SightingRecordingJson
@@ -110,7 +110,7 @@ describe("Provenance", () => {
     // The whole point of stripping: nothing that draws, computes or plays a sighting consults
     // provenance, and none of them had to learn to unwrap.
     const sighting = fromSightingJson({
-      version: 1,
+      version: 4,
       utcOffsetHours: { value: 1, basis: "derived" },
       timeline: { keyframes: [] }
     } as unknown as SightingRecordingJson)
@@ -125,13 +125,13 @@ describe("Provenance expiry", () => {
     // A basis describes one value, not one field: crediting the author's own duration to a machine
     // that guessed a different one is exactly the confusion this format exists to prevent.
     const { recording, provenance } = Provenance.strip<Record<string, unknown>>({
-      version: 1,
+      version: 4,
       durationSeconds: { value: 120, basis: "assumed", rationale: "\"quelques mn\" gives no number" }
     })
 
     recording.durationSeconds = 300
 
-    expect(Provenance.restore(recording, provenance)).toEqual({ version: 1, durationSeconds: 300 })
+    expect(Provenance.restore(recording, provenance)).toEqual({ version: 4, durationSeconds: 300 })
   })
 
   it("keeps it while the value is still the one it was said about", () => {
@@ -146,7 +146,7 @@ describe("Provenance expiry", () => {
 describe("Provenance.restore and what it is given", () => {
   it("never writes into the recording it is given, copying only what lies on the way to a value it wraps", () => {
     const json = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { headingDeg: { value: 110, rationale: "call" }, pitchDeg: 10 } }] },
       timeline: { keyframes: [{ t: 0, shapes: [] }] }
     }

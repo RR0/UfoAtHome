@@ -213,8 +213,8 @@ beforeAll(() => {
 })
 
 
-const account = { version: 1, id: "x-1", observer: { id: "x", title: "Witness" }, timeline: { keyframes: [] } }
-const reading = { version: 1, id: "x-1-interpretation-1", tags: ["interpretation"], timeline: { keyframes: [] }, interpretation: { title: { en: "A model" }, bodies: [] } }
+const account = { version: 4, id: "x-1", observer: { id: "x", title: "Witness" }, timeline: { keyframes: [] } }
+const reading = { version: 4, id: "x-1-interpretation-1", tags: ["interpretation"], timeline: { keyframes: [] }, interpretation: { title: { en: "A model" }, bodies: [] } }
 const caseJson = () => ({
   id: "X",
   events: [
@@ -277,7 +277,7 @@ describe("CaseEditorElement", () => {
   })
 
   it("shows no case row for a recording that is not a case", async () => {
-    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
     document.body.appendChild(element)
@@ -294,7 +294,7 @@ describe("CaseEditorElement", () => {
   }
 
   it("makes a case around a recording that is open, without giving the editor the recording again", async () => {
-    files["https://example.org/d/plain.json"] = { version: 1, id: "1965-07-01-Plain", observer: { id: "Plain", title: "A witness" }, time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0 }, timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "1965-07-01-Plain", observer: { id: "Plain", title: "A witness" }, time: "1965-07-01T05:00", timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
     document.body.appendChild(element)
@@ -468,7 +468,7 @@ describe("CaseEditorElement", () => {
 
   it("adds an observation read from an address", async () => {
     const element = await open()
-    files["https://example.org/other.json"] = { version: 1, id: "other-1", observer: { title: "Other" }, timeline: { keyframes: [] } }
+    files["https://example.org/other.json"] = { version: 4, id: "other-1", observer: { title: "Other" }, timeline: { keyframes: [] } }
     const { add, select, field } = parts(element)
     add.click()
     const source = element.shadowRoot!.getElementById("source") as HTMLSelectElement
@@ -514,7 +514,7 @@ describe("CaseEditorElement", () => {
 
   it("leaves case mode when a plain recording is loaded into the editor", async () => {
     const element = await open()
-    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     const editorRoot = element.sightingEditor.shadowRoot!
     ;(editorRoot.getElementById("import-url") as HTMLInputElement).value = "https://example.org/d/plain.json"
     ;(editorRoot.getElementById("import-url-button") as HTMLButtonElement).click()
@@ -569,7 +569,7 @@ describe("CaseEditorElement", () => {
       const element = await open()
       parts(element).field("case-title").value = "Another title"
       parts(element).field("case-title").dispatchEvent(new Event("input"))
-      files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+      files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
       const editorRoot = element.sightingEditor.shadowRoot!
       const load = () => {
         ;(editorRoot.getElementById("import-url") as HTMLInputElement).value = "https://example.org/d/plain.json"
@@ -593,7 +593,7 @@ describe("CaseEditorElement", () => {
     })
 
     it("warns for a recording alone as well, and not for one that was only opened", async () => {
-      files["https://example.org/d/plain.json"] = { version: 1, id: "plain", observer: { id: "p" }, timeline: { keyframes: [] } }
+      files["https://example.org/d/plain.json"] = { version: 4, id: "plain", observer: { id: "p" }, timeline: { keyframes: [] } }
       vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
       const element = document.createElement("rr0-case-editor") as CaseEditorElement
       document.body.appendChild(element)
@@ -1165,7 +1165,7 @@ describe("CaseEditorElement's events", () => {
     const element = await open(undefined, interviewed())
     files["https://example.org/other/case.json"] = { id: "Other", events: [{ type: "event", eventType: "sighting", id: "o", title: "Other witness", url: "account.json" }] }
     files["https://example.org/other/account.json"] = account
-    files["https://example.org/other/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/other/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     const root = element.shadowRoot!
     const load = async (address: string) => {
       const url = root.getElementById("import-url") as HTMLInputElement
@@ -1230,7 +1230,7 @@ describe("Sharing from an editor", () => {
   })
 
   it("shares a recording that is not a case from the recording's own editor", async () => {
-    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
     document.body.appendChild(element)
@@ -1263,7 +1263,7 @@ describe("The observation's editor, in a case or on its own", () => {
   })
 
   it("draws its own header for a recording that is no case's: its title, Undo and Redo, Share and Save, and no event line", async () => {
-    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
     document.body.appendChild(element)

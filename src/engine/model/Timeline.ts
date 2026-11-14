@@ -25,7 +25,7 @@ export interface TimelineJson {
    * back to first-appearance order (the old implicit behavior), same as if this were `[]`. */
   order?: string[]
   /** The groups of shapes (see ShapeGroupJson). Optional: absent means none. Version 2 of the format wrote each as the list of its
-   * members' sourceIds, without an id (see SightingMigration). */
+   * members' sourceIds, without an id (see scripts/migration, which brings such a file forward). */
   groups?: ShapeGroupJson[]
   /** The length of the observation the keyframes were placed against, in ms, when it is longer than
    * the last keyframe — a shape placed at 0 s then moved at 5 s of a 10 s observation has keyframes

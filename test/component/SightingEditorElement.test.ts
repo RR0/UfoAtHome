@@ -669,9 +669,9 @@ describe("SightingEditorElement observer/time fields", () => {
   it("loading sightingData re-populates the observer/time fields", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
-      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
-      place: [{ lat: 32.3792, lng: -86.3077 }],
+      version: 4,
+      time: "1948-07-24T02:45",
+      place: { locations: [{ lat: 32.3792, lng: -86.3077 }] },
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 0, headingDeg: 45, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
@@ -784,8 +784,8 @@ describe("SightingEditorElement metadata fields", () => {
   it("loading sightingData re-populates the metadata fields", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
-      endTime: { year: 1948, month: 7, day: 24, hour: 3, minute: 0 },
+      version: 4,
+      endTime: "1948-07-24T03:00",
       id: "1948-07-24-ChilesClarence",
       observer: { id: "ChilesClarence", title: "Clarence Chiles", lastName: "Chiles", firstNames: ["Clarence"] },
       description: "Bright light hovering over the field.",
@@ -825,7 +825,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
   it("records a keyframe at the scrubbed-to instant, not always at t=0", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] },
       durationSeconds: 5
@@ -843,7 +843,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
 
   it("editing at two different scrubbed instants produces two independent keyframes", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 5 }
     const shadow = element.shadowRoot!
 
     seekNestedUfoTo(element, 0)
@@ -858,7 +858,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
 
   it("blanking fields at a scrubbed instant removes just that keyframe, leaving others intact", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 5 }
     const shadow = element.shadowRoot!
 
     seekNestedUfoTo(element, 0)
@@ -878,7 +878,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
   it("scrubbing between two observer keyframes repopulates the fields with the interpolated pose", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: {
         keyframes: [
           { t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } },
@@ -902,7 +902,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
   it("pauses on a click on the scene while it plays, not at the end of a drag, and never starts it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
@@ -930,7 +930,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
   it("does not write or resync observer fields while the nested player is playing", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 43.837, lng: 5.993, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: {
         keyframes: [
@@ -955,7 +955,7 @@ describe("SightingEditorElement observer keyframes over time", () => {
   it("does not clobber a field's in-progress value while it's focused (regression: typing a decimal lat/lng)", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 40, lng: 0, elevationM: 0, headingDeg: undefined, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
@@ -1002,7 +1002,7 @@ describe("SightingEditorElement weather keyframes over time", () => {
 
   it("records a weather keyframe at the scrubbed-to instant, not always at t=0", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 5 }
     const shadow = element.shadowRoot!
     seekNestedUfoTo(element, 2000)
     setInput(shadow, "precipitationType", "rain")
@@ -1016,7 +1016,7 @@ describe("SightingEditorElement weather keyframes over time", () => {
 
   it("it starts raining then stops: editing weather at two different scrubbed instants produces two independent keyframes", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 5 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 5 }
     const shadow = element.shadowRoot!
 
     seekNestedUfoTo(element, 0)
@@ -1035,7 +1035,7 @@ describe("SightingEditorElement weather keyframes over time", () => {
   it("scrubbing between two weather keyframes blends continuous fields but holds precipitationType", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       weatherTrack: {
         keyframes: [
           { t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } },
@@ -1058,7 +1058,7 @@ describe("SightingEditorElement weather keyframes over time", () => {
   it("does not write or resync weather fields while the nested player is playing", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] },
       timeline: {
         keyframes: [
@@ -1113,7 +1113,7 @@ describe("SightingEditorElement composes a nested rr0-ufo", () => {
   it("sightingData get/set delegates to the nested ufo element", async () => {
     const element = await mount()
     const json = {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 1, y: 2, width: 3, height: 4 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
@@ -1178,7 +1178,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("changing color while paused at a scrubbed instant writes a keyframe there, leaving other sources at that t untouched", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -1205,7 +1205,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("preserves an existing shape's title when editing its appearance", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false, title: "Observer A" } }] }
@@ -1256,7 +1256,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("derives the same 'Shape N' label from a standard sourceId loaded with no title, not the raw id — same formula addShape() itself fills in with, so clearing a title never jumps to different-looking text", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
       }
@@ -1268,7 +1268,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("falls back to the raw sourceId only when it doesn't follow the ufo-N convention at all (hand-written/older data)", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [{ t: 0, shapes: [{ sourceId: "observer-drawing", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }]
       }
@@ -1319,7 +1319,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("does not write or resync appearance while the nested player is playing", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] },
@@ -1459,7 +1459,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("Delete shape falls back to the next remaining source and resyncs the toolbar to it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [
@@ -1527,7 +1527,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("loading sightingData with different source ids resets the editing target instead of using the stale default", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "observer-a", shape: { kind: "oval", bounds: { x: 5, y: 5, width: 10, height: 10 }, color: "#123456", angle: 0, transparency: 0, haloScale: 1, selected: false } }] }
@@ -1549,7 +1549,7 @@ describe("SightingEditorElement post-hoc appearance editing + multi-shape author
   it("selecting a different source syncs the toolbar from that source's shape at the current playhead", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -1604,7 +1604,7 @@ describe("SightingEditorElement click-to-select", () => {
 
   function twoShapesJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -1701,7 +1701,7 @@ describe("SightingEditorElement click-to-select", () => {
   it("clicking where two shapes overlap selects the topmost (later-added) one", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -1760,7 +1760,7 @@ describe("SightingEditorElement right-click context menu", () => {
 
   function twoShapesJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -1905,7 +1905,7 @@ describe("SightingEditorElement right-click context menu", () => {
   it("both are enabled, with no leftover title, for a shape in the middle of the z-order", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [
@@ -2086,7 +2086,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
 
   function oneShapeJson(overrides: Partial<{ angle: number; transparency: number; haloScale: number }> = {}) {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -2219,7 +2219,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 110, clientY: 110 })) // begin a move-drag
 
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "other", shape: { kind: "oval", bounds: { x: 5, y: 5, width: 10, height: 10 }, color: "#000", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
@@ -2289,7 +2289,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
   it("a landscape drag wraps heading past 360 back to 0, same as typing it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 350, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     }
@@ -2312,7 +2312,7 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
   it("does not start a landscape drag while playing", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 0, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: {
         keyframes: [
@@ -2340,7 +2340,7 @@ describe("SightingEditorElement arrow-key move/resize", () => {
 
   function oneShapeJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -2360,8 +2360,8 @@ describe("SightingEditorElement arrow-key move/resize", () => {
 
   describe("walking the observer with the arrows", () => {
     const facingEast = () => ({
-      version: 1 as const,
-      place: [{ lat: 48.8946, lng: 2.196 }],
+      version: 4 as const,
+      place: { locations: [{ lat: 48.8946, lng: 2.196 }] },
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 48.8946, lng: 2.196, elevationM: 0, headingDeg: 90, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] }
     })
@@ -2428,7 +2428,7 @@ describe("SightingEditorElement arrow-key move/resize", () => {
   it("Shift+arrow never shrinks a shape below MIN_SHAPE_SIZE", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 10, height: 10 }, color: "#39ff14", angle: 0, transparency: 0, haloScale: 1.5, selected: false } }] }]
       }
@@ -2505,7 +2505,7 @@ describe("SightingEditorElement duration input", () => {
   it("loading sightingData with a known durationSeconds pre-fills the input", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 120,
       timeline: { keyframes: [{ t: 0, shapes: [] }] }
     }
@@ -2520,7 +2520,7 @@ describe("SightingEditorElement duration input", () => {
     durationInput.value = "45"
     durationInput.dispatchEvent(new Event("input"))
 
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
 
     expect(durationInput.value).toBe("")
   })
@@ -2611,7 +2611,7 @@ describe("SightingEditorElement export button", () => {
   it("downloads the current sightingData as a JSON file, named from the observer reference", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observer: { id: "chiles" },
       timeline: { keyframes: [{ t: 0, shapes: [] }] }
     }
@@ -2680,11 +2680,11 @@ describe("SightingEditorElement export of a recording that names somebody", () =
 
   const shadowOf = (element: HTMLElement) => element.shadowRoot!
   const button = (element: HTMLElement, id: string) => shadowOf(element).getElementById(id) as HTMLButtonElement
-  const named = { version: 1, observer: { lastName: "Zamora", firstNames: ["Lonnie"] }, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as const
+  const named = { version: 4, observer: { lastName: "Zamora", firstNames: ["Lonnie"] }, timeline: { keyframes: [{ t: 0, shapes: [] }] } } as const
 
   it("asks before saving a name the author just typed, and saves nothing until told to", async () => {
     const { element, downloads, clickSpy } = await mountAndWatchDownloads()
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
     const lastName = shadowOf(element).getElementById("observerLastName") as HTMLInputElement
     lastName.value = "Zamora"
     lastName.dispatchEvent(new Event("input"))
@@ -2700,7 +2700,7 @@ describe("SightingEditorElement export of a recording that names somebody", () =
 
   it("saves nothing when the author goes back", async () => {
     const { element, downloads, clickSpy } = await mountAndWatchDownloads()
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
     const lastName = shadowOf(element).getElementById("observerLastName") as HTMLInputElement
     lastName.value = "Zamora"
     lastName.dispatchEvent(new Event("input"))
@@ -2720,7 +2720,7 @@ describe("SightingEditorElement export of a recording that names somebody", () =
 
   it("writes the names as initials without saving, and then saves without asking", async () => {
     const { element, downloads, clickSpy } = await mountAndWatchDownloads()
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [] }] } }
     const input = (id: string) => shadowOf(element).getElementById(id) as HTMLInputElement
     input("sightingId").value = "1964-04-24-ZamoraLonnie"
     input("observerLastName").value = "Zamora"
@@ -2757,7 +2757,7 @@ describe("SightingEditorElement import controls", () => {
   it("loads a sighting from a picked file, then resets the input", async () => {
     const element = await mount()
     const fileInput = element.shadowRoot!.getElementById("import-file") as HTMLInputElement
-    setFile(fileInput, JSON.stringify({ version: 1, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
+    setFile(fileInput, JSON.stringify({ version: 4, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
     // FileReader.readAsText is genuinely async (a task, not a microtask) — a single setTimeout(0)
     // isn't reliably enough ticks for it to have fired its "load" event yet.
     await waitFor(() => element.sightingData.observer !== undefined)
@@ -2796,7 +2796,7 @@ describe("SightingEditorElement import controls", () => {
 
   it("loads a sighting fetched from the URL field", async () => {
     const element = await mount()
-    const json = { version: 1, observer: { id: "wilcox" }, timeline: { keyframes: [] } }
+    const json = { version: 4, observer: { id: "wilcox" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     urlInput.value = "https://example.org/sighting.json"
@@ -2809,7 +2809,7 @@ describe("SightingEditorElement import controls", () => {
 
   it("shows in the URL field the recording a src attribute opened, as a full address", async () => {
     // The site's ?sighting= link sets src; the field is where a reader looks for which file is open.
-    const json = { version: 1, observer: { id: "zamora" }, timeline: { keyframes: [] } }
+    const json = { version: 4, observer: { id: "zamora" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const element = await mount()
     element.setAttribute("src", "/demo-data/observer-socorro.json")
@@ -2820,14 +2820,14 @@ describe("SightingEditorElement import controls", () => {
   })
 
   it("empties the URL field once a file from disk replaces the recording it named", async () => {
-    const json = { version: 1, observer: { id: "zamora" }, timeline: { keyframes: [] } }
+    const json = { version: 4, observer: { id: "zamora" }, timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(json) }))
     const element = await mount()
     element.setAttribute("src", "https://example.org/sighting.json")
     const urlInput = element.shadowRoot!.getElementById("import-url") as HTMLInputElement
     await waitFor(() => urlInput.value !== "")
     setFile(element.shadowRoot!.getElementById("import-file") as HTMLInputElement,
-      JSON.stringify({ version: 1, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
+      JSON.stringify({ version: 4, observer: { id: "chiles" }, timeline: { keyframes: [] } }))
     await waitFor(() => urlInput.value === "")
     expect(element.sightingData.observer).toEqual({ id: "chiles" })
   })
@@ -2883,7 +2883,7 @@ describe("SightingEditorElement sound keyframes over time", () => {
   // takes off — which is exactly two keyframes at two instants, not one sound for the sighting.
   it("records a sound keyframe at the scrubbed-to instant, not always at t=0", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 10 }
     const shadow = element.shadowRoot!
     setInput(shadow, "soundKind", "none")
     seekNestedUfoTo(element, 4000)
@@ -2899,7 +2899,7 @@ describe("SightingEditorElement sound keyframes over time", () => {
   it("resyncs the sound fields to whatever the track says at the scrubbed-to instant", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 10,
       timeline: { keyframes: [] },
       soundTrack: {
@@ -2919,7 +2919,7 @@ describe("SightingEditorElement sound keyframes over time", () => {
 
   it("lays no title over its scene, where it covered what is pointed at and selected", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, durationSeconds: 10, observer: { id: "w", title: "A witness" }, timeline: { keyframes: [] } }
+    element.sightingData = { version: 4, durationSeconds: 10, observer: { id: "w", title: "A witness" }, timeline: { keyframes: [] } }
     const title = nestedUfo(element)!.shadowRoot!.getElementById("player-title")!
     expect(title.textContent).toBe("A witness")
     expect(title.hidden).toBe(true)
@@ -2933,11 +2933,11 @@ describe("SightingEditorElement sound keyframes over time", () => {
     const shadow = element.shadowRoot!
     const mute = shadow.getElementById("editor-mute") as HTMLButtonElement
     const volume = shadow.getElementById("editor-volume") as HTMLInputElement
-    element.sightingData = { version: 1, durationSeconds: 10, timeline: { keyframes: [] } }
+    element.sightingData = { version: 4, durationSeconds: 10, timeline: { keyframes: [] } }
     // Nothing to hear: a muted speaker that cannot be pressed, and no volume.
     expect([mute.disabled, volume.hidden]).toEqual([true, true])
     element.sightingData = {
-      version: 1, durationSeconds: 10, timeline: { keyframes: [] },
+      version: 4, durationSeconds: 10, timeline: { keyframes: [] },
       soundTrack: { keyframes: [{ t: 0, sound: { kind: "hum", volume: 1, pitchHz: 100 } }] }
     }
     const ufo = nestedUfo(element) as unknown as { muted: boolean, volume: number }
@@ -2954,7 +2954,7 @@ describe("SightingEditorElement sound keyframes over time", () => {
 
   it("disables the fields a silent sighting has no use for, and the pitch a real recording carries itself", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 10 }
     const shadow = element.shadowRoot!
     setInput(shadow, "soundKind", "none")
     expect((shadow.getElementById("soundVolume") as HTMLInputElement).disabled).toBe(true)
@@ -2971,7 +2971,7 @@ describe("SightingEditorElement sound keyframes over time", () => {
 
   it("treats a blank recording URL as no recording at all", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, durationSeconds: 10 }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, durationSeconds: 10 }
     const shadow = element.shadowRoot!
     setInput(shadow, "soundKind", "hum")
     setInput(shadow, "soundSrc", "   ")
@@ -2986,7 +2986,7 @@ describe("SightingEditorElement canvas mode", () => {
 
   function withPicture() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval" as const, bounds: { x: 300, y: 160, width: 40, height: 40 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 44.98, lng: 2.92, elevationM: 0, headingDeg: 288, pitchDeg: 2, fovDeg: 60 } }] },
       references: [{ id: "vue", kind: "photo" as const, src: "https://example.org/vue.jpg", opacity: 0.5, registration: { headingDeg: 275, pitchDeg: -1, fovDeg: 27 } }]
@@ -3512,7 +3512,7 @@ describe("SightingEditorElement multi-select", () => {
 
   function twoShapesJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -3529,7 +3529,7 @@ describe("SightingEditorElement multi-select", () => {
 
   function threeShapesJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -3855,7 +3855,7 @@ describe("SightingEditorElement playback controls", () => {
     // same 10s, so playbackRate starts at 1 (raw timeline-ms == real-ms, the one case a naive
     // mm:ss-of-raw-value read would happen to get right by coincidence).
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
@@ -4259,7 +4259,7 @@ describe("SightingEditorElement decor group", () => {
   it("round-trips decor through the sightingData setter/getter", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [{ id: "decor-1", kind: "streetlight", eastM: 5, northM: -8, lit: true }]
     }
@@ -4510,7 +4510,7 @@ describe("SightingEditorElement decor context menu", () => {
   it("opens the decor menu (not the shape one) when the 3D pick hits a observer", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
     }
@@ -4528,7 +4528,7 @@ describe("SightingEditorElement decor context menu", () => {
   it("disables 'view account' (with an explanatory title) for a observer with no sightingUrl", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10 }]
     }
@@ -4545,7 +4545,7 @@ describe("SightingEditorElement decor context menu", () => {
   it("opens the decor menu for a non-observer decor kind too, but disables 'view account'", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [{ id: "decor-1", kind: "tree", eastM: 0, northM: 10 }]
     }
@@ -4562,7 +4562,7 @@ describe("SightingEditorElement decor context menu", () => {
   it("Masks flyout lists every shape as a checkbox, checked per DecorObject.occludesSourceIds", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           {
@@ -4588,7 +4588,7 @@ describe("SightingEditorElement decor context menu", () => {
   it("toggling a Masks checkbox writes DecorObject.occludesSourceIds without closing the menu", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         keyframes: [
           { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
@@ -4611,13 +4611,13 @@ describe("SightingEditorElement decor context menu", () => {
   it("loads the observer's own recording when 'view account' is clicked", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [{ id: "decor-1", kind: "observer", eastM: 0, northM: 10, sightingUrl: "https://example.org/w.json" }]
     }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => string }
     sceneEl.pickDecorAt = () => "decor-1"
-    const observerJson = { version: 1 as const, observer: { id: "other-observer" }, timeline: { keyframes: [] } }
+    const observerJson = { version: 4 as const, observer: { id: "other-observer" }, timeline: { keyframes: [] } }
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, json: async () => observerJson } as Response)
 
     rightClickCanvas(element)
@@ -4649,7 +4649,7 @@ describe("SightingEditorElement decor click-to-select", () => {
   it("selects a decor object clicked in the 3D scene — the picker/property fields sync to it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       decor: [
         { id: "decor-1", kind: "building", eastM: 0, northM: 10, title: "Maison" },
@@ -4669,7 +4669,7 @@ describe("SightingEditorElement decor click-to-select", () => {
   it("turns the view when dragged from over a decor object, and does not select it", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 0, headingDeg: 180, pitchDeg: 0, fovDeg: 60 } }] },
       timeline: { keyframes: [] },
       decor: [
@@ -4693,7 +4693,7 @@ describe("SightingEditorElement decor click-to-select", () => {
   it("a shape under the pointer wins over decor beneath it — decor is never even picked at that point", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: {
         // clickCanvas clicks at clientX=400/clientY=300 against an 800x600 CSS rect, which
         // canvasPointFromEvent maps to (320,180) in the fixed 640x360 canvas space — bounds must
@@ -4715,7 +4715,7 @@ describe("SightingEditorElement decor click-to-select", () => {
 
   it("clicking empty space (no shape, no decor hit) is a harmless no-op for decor selection — falls through to the existing camera-drag behavior instead", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [] } }
     const sceneEl = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickDecorAt: () => undefined }
     sceneEl.pickDecorAt = () => undefined
 
@@ -4747,7 +4747,7 @@ describe("SightingEditorElement polygon vertex editing", () => {
 
   function polygonShapeJson(points = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 50 }, { x: 0, y: 50 }]) {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -4775,7 +4775,7 @@ describe("SightingEditorElement polygon vertex editing", () => {
 
   function ovalShapeJson() {
     return {
-      version: 1 as const,
+      version: 4 as const,
       timeline: {
         keyframes: [
           {
@@ -5033,7 +5033,7 @@ describe("SightingEditorElement src attribute", () => {
   })
 
   const recording = {
-    version: 1 as const,
+    version: 4 as const,
     durationSeconds: 4,
     id: "1964-04-24-ZamoraLonnie",
     timeline: {
@@ -5110,7 +5110,7 @@ describe("SightingEditorElement observer altitude", () => {
   it("shows the altitude of a loaded recording instead of a hardcoded ground level", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 10,
       timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
       observerTrack: { keyframes: [{ t: 0, pose: { lat: 32.3792, lng: -86.3077, elevationM: 1500, headingDeg: 40, pitchDeg: 0, fovDeg: 60 } }] }
@@ -5528,10 +5528,10 @@ describe("SightingEditorElement inferred weather", () => {
     const getWeather = vi.spyOn(provider, "getWeather")
     const element = await mount(provider)
     element.sightingData = {
-      version: 1,
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0, raw: "1965-07-01T05:00" },
+      version: 4,
+      time: "1965-07-01T05:00",
       utcOffsetHours: 1,
-      place: [{ lat: 43.837, lng: 5.983 }],
+      place: { locations: [{ lat: 43.837, lng: 5.983 }] },
       timeline: { keyframes: [] },
       weatherTrack: { keyframes: [{ t: 0, weather: { ...ON_RECORD, cloudCover: 0.6, storm: true } }] }
     }
@@ -5547,10 +5547,10 @@ describe("SightingEditorElement inferred weather", () => {
     const getWeather = vi.spyOn(provider, "getWeather")
     const element = await mount(provider)
     element.sightingData = {
-      version: 1,
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 0, raw: "1965-07-01T05:00" },
+      version: 4,
+      time: "1965-07-01T05:00",
       utcOffsetHours: 1,
-      place: [{ lat: 43.837, lng: 5.983 }],
+      place: { locations: [{ lat: 43.837, lng: 5.983 }] },
       timeline: { keyframes: [] },
       weatherTrack: { keyframes: [{ t: 0, weather: { ...ON_RECORD, cloudCover: 0.45 } }] },
       weatherSource: SOURCE
@@ -5697,8 +5697,8 @@ describe("SightingEditorElement place search", () => {
   it("restores the place name a recording carries", async () => {
     const element = await mountWith([])
     element.sightingData = {
-      version: 1,
-      place: [{ lat: 34.058, lng: -106.891, name: "Socorro, New Mexico, United States" }],
+      version: 4,
+      place: { name: "Socorro, New Mexico, United States", locations: [{ lat: 34.058, lng: -106.891 }] },
       timeline: { keyframes: [] }
     }
 
@@ -5815,7 +5815,7 @@ describe("SightingEditorElement stated blur", () => {
   it("reads a stated blur back as a bound on distance, through the lens the recording names", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       instrument: "slr-35mm-zoom",
       timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 10, width: 20, height: 20 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }] },
       durationSeconds: 10
@@ -5836,7 +5836,7 @@ describe("SightingEditorElement stated blur", () => {
   it("gives the scene the format of the picture a loaded recording was made in, as it gives it to the shapes' canvas", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
+      version: 4,
       instrument: "roamer-1-120",
       timeline: { keyframes: [{ t: 0, shapes: [] }] },
       durationSeconds: 10
@@ -5886,7 +5886,7 @@ describe("SightingEditorElement date picker", () => {
     return element.shadowRoot!.querySelector(`rr0-date-input[name="${name}"] button.edtf-mode`) as HTMLButtonElement
   }
 
-  const COMPLETE = { version: 1 as const, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+  const COMPLETE = { version: 4 as const, time: "1948-07-24T02:45", timeline: { keyframes: [] }, durationSeconds: 10 }
 
   // The picker writes through the text field, so there is one parse and one write path — and the
   // stored raw string stays canonical, which formatEdtfTime returns verbatim.
@@ -5917,7 +5917,7 @@ describe("SightingEditorElement date picker", () => {
 
   it("opens a date in doubt in EDTF, and an exact full instant in the picker", async () => {
     const element = await mount()
-    element.sightingData = { ...COMPLETE, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, raw: "1948-07-24T02:45~" } }
+    element.sightingData = { ...COMPLETE, time: "1948-07-24T02:45~" }
     expect(edtfMode(element)).toBe(true)
     element.sightingData = COMPLETE
     expect(edtfMode(element)).toBe(false)
@@ -5930,7 +5930,7 @@ describe("SightingEditorElement date picker", () => {
     expect(control<HTMLInputElement>(element, "obs-time-native").value).toBe("1948-07-24T02:45")
 
     // A real recording: eight of the nine that exist state a full instant, this is the ninth.
-    element.sightingData = { version: 1, time: { year: 1987, month: 6, day: 12 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+    element.sightingData = { version: 4, time: "1987-06-12", timeline: { keyframes: [] }, durationSeconds: 10 }
     expect(edtfMode(element)).toBe(true)
     expect(control<HTMLInputElement>(element, "obs-time").value).toBe("1987-06-12")
     expect(control<HTMLInputElement>(element, "obs-time-native").value).toBe("")
@@ -5940,7 +5940,7 @@ describe("SightingEditorElement date picker", () => {
   // to the text field instead, Chiles-Whitted lost its picker and its qualifier.
   it("opens on the picker for a time stated to the second, and keeps the second", async () => {
     const element = await mount()
-    element.sightingData = { version: 1, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, second: 30 }, timeline: { keyframes: [] }, durationSeconds: 10 }
+    element.sightingData = { version: 4, time: "1948-07-24T02:45:30", timeline: { keyframes: [] }, durationSeconds: 10 }
     expect(edtfMode(element)).toBe(false)
     const picker = control<HTMLInputElement>(element, "obs-time-native")
     expect(picker.step).toBe("1")
@@ -6050,8 +6050,8 @@ describe("SightingEditorElement duration and dates", () => {
   it("overrides a duration a loaded recording carried, once its end time is edited", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
-      time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45, raw: "1948-07-24T02:45" },
+      version: 4,
+      time: "1948-07-24T02:45",
       durationSeconds: 10,
       timeline: { keyframes: [] }
     }
@@ -6290,10 +6290,10 @@ describe("SightingEditorElement time zone", () => {
     const element = await mount()
     setInput(element, "utcOffsetHours", "-6")
     element.sightingData = {
-      version: 1,
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      version: 4,
+      time: "1965-07-01T05:45",
       utcOffsetHours: 1,
-      place: [{ lat: 43.837, lng: 5.993 }],
+      place: { locations: [{ lat: 43.837, lng: 5.993 }] },
       timeline: { keyframes: [] }
     }
 
@@ -6304,7 +6304,7 @@ describe("SightingEditorElement time zone", () => {
   it("empties the field for a recording that declares no zone at all", async () => {
     const element = await mount()
     setInput(element, "utcOffsetHours", "-6")
-    element.sightingData = { version: 1, timeline: { keyframes: [] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [] } }
 
     expect(utcOffset(element).value).toBe("")
   })
@@ -6397,9 +6397,9 @@ describe("SightingEditorElement location coherence", () => {
     const element = await mount()
     element.placeSearchProvider = { attribution: { text: "© OSM", url: "https://osm.org/copyright" }, search: () => Promise.resolve([]), reverse }
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 10,
-      place: [{ lat: VALENSOLE.lat, lng: VALENSOLE.lng, name: "the plateau" }],
+      place: { name: "the plateau", locations: [{ lat: VALENSOLE.lat, lng: VALENSOLE.lng }] },
       timeline: { keyframes: [] },
       weatherTrack: { keyframes: [] },
       observerTrack: {
@@ -6542,8 +6542,8 @@ describe("SightingEditorElement time zone picker", () => {
   it("names no zone for a number alone, with no place to tell which: a list's first would say something nobody said", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      version: 4,
+      time: "1965-07-01T05:45",
       utcOffsetHours: 1,
       timeline: { keyframes: [] }
     }
@@ -6569,9 +6569,9 @@ describe("SightingEditorElement time zone picker", () => {
       return zoneAt
     }
     const recording = (extra: object) => ({
-      version: 1,
-      time: { year: 2025, month: 12, day: 30, hour: 16, minute: 10, raw: "2025-12-30T16:10" },
-      place: [{ lat: 48.99, lng: 2.45 }],
+      version: 4,
+      time: "2025-12-30T16:10",
+      place: { locations: [{ lat: 48.99, lng: 2.45 }] },
       timeline: { keyframes: [] },
       ...extra
     })
@@ -6662,8 +6662,8 @@ describe("SightingEditorElement time zone picker", () => {
   it("restores a loaded recording's zone", async () => {
     const element = await mount()
     element.sightingData = {
-      version: 1,
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45, raw: "1965-07-01T05:45" },
+      version: 4,
+      time: "1965-07-01T05:45",
       utcOffsetHours: 1,
       timeZone: "Europe/Paris",
       timeline: { keyframes: [] }
@@ -6679,8 +6679,8 @@ describe("the map of where the observer stood, in the editor", () => {
   })
 
   const stationary = (extra: object = {}) => ({
-    version: 1,
-    place: [{ lat: 48.99, lng: 2.45 }],
+    version: 4,
+    place: { locations: [{ lat: 48.99, lng: 2.45 }] },
     timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 20000, shapes: [] }] },
     observerTrack: {
       keyframes: [
@@ -7038,7 +7038,7 @@ describe("how precisely the gaze fields read back", () => {
     const heading = element.shadowRoot!.getElementById("heading") as HTMLInputElement
     const pitch = element.shadowRoot!.getElementById("pitch") as HTMLInputElement
     element.sightingData = {
-      version: 1,
+      version: 4,
       durationSeconds: 10,
       timeline: { keyframes: [] },
       weatherTrack: { keyframes: [] },
@@ -7113,7 +7113,7 @@ describe("SightingEditorElement account", () => {
     const element = await mount()
 
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [] },
       account: { observerAgeYears: 38, observerOccupation: "boulanger", source: "press" }
     }
@@ -7448,7 +7448,7 @@ describe("SightingEditorElement and a observer's own interpretation", () => {
   it("draws the angles it edits, never the observer's bodies over them", async () => {
     const element = await mount()
     const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation: { bodies: [body] } } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation: { bodies: [body] } } as never
     const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { interpretation: unknown }
     expect(scene.interpretation).toBeUndefined()
   })
@@ -7462,7 +7462,7 @@ describe("SightingEditorElement bodies", () => {
   it("draws the observer's bodies, beside the shapes' outlines, everywhere but in the Shapes part", async () => {
     const element = await mount()
     const interpretation = { title: "A craft", bodies: [{ id: "craft", explains: ["ufo-1"], model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true }] }] }
-    element.sightingData = { version: 1, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] }, interpretation } as never
     const shadow = element.shadowRoot!
     const scene = shadow.querySelector("rr0-scene") as unknown as { interpretation?: unknown, compareAccount: boolean }
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
@@ -7526,7 +7526,7 @@ describe("SightingEditorElement body handles", () => {
 
   async function withBody(): Promise<{ element: SightingEditorElement, canvas: HTMLCanvasElement }> {
     const element = await mount()
-    element.sightingData = { version: 1, timeline: { keyframes: [] }, interpretation: { bodies: [{ id: "craft", model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true, sizeM: { widthM: 4, lengthM: 6, heightM: 2 } }] }] } }
+    element.sightingData = { version: 4, timeline: { keyframes: [] }, interpretation: { bodies: [{ id: "craft", model: { id: "ellipsoid" }, track: [{ t: 0, eastM: 0, northM: 50, onGround: true, sizeM: { widthM: 4, lengthM: 6, heightM: 2 } }] }] } }
     const shadow = element.shadowRoot!
     const tab = (id: string, selector: string) => [...shadow.querySelectorAll<HTMLButtonElement>(selector)].find(t => t.getAttribute("aria-controls") === id)!
     if (shadow.getElementById("group-shape")!.hidden) tab("group-shape", ".group-tab").click()
@@ -7666,7 +7666,7 @@ describe("the account's view selector: shapes (2D) or bodies (3D)", () => {
   })
 
   const ACCOUNT = {
-    version: 1 as const,
+    version: 4 as const,
     timeline: { keyframes: [{ t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 100, y: 100, width: 20, height: 10 } } }] }] },
     interpretation: { bodies: [{ id: "craft", model: { id: "disc" }, track: [{ t: 0, eastM: 0, northM: 30, altitudeAboveGroundM: 5, sizeM: { widthM: 4, lengthM: 4, heightM: 1 } }] }] }
   }
@@ -7726,7 +7726,7 @@ describe("the account's view selector: shapes (2D) or bodies (3D)", () => {
 
   it("is a recording with no interpretation drawn as shapes, and is not offered to a reading", async () => {
     const element = await mountEmpty()
-    element.sightingData = { version: 1, timeline: { keyframes: [] } } as never
+    element.sightingData = { version: 4, timeline: { keyframes: [] } } as never
     expect(select(element).value).toBe("shapes")
     expect(part(element, "account-view-row").hidden).toBe(false)
     element.reading = true

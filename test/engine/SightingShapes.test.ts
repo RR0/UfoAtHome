@@ -21,9 +21,9 @@ function sightingWithShapeOffCentre(): Sighting {
   const width = 48
   const height = 28
   return fromSightingJson({
-    version: 1,
-    time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
-    place: [{ lat: 45, lng: 5 }],
+    version: 4,
+    time: "1965-07-01T05:45",
+    place: { locations: [{ lat: 45, lng: 5 }] },
     timeline: {
       keyframes: [
         {
@@ -149,9 +149,9 @@ describe("a shape's stated direction", () => {
     const projection = ImageProjection.of(Instruments.default, ApparentSize.CANVAS_HEIGHT_PX, 60)
     const centreX = Instruments.frameWidthPx(Instruments.default, ApparentSize.CANVAS_HEIGHT_PX) / 2
     return fromSightingJson({
-      version: 1,
-      time: { year: 1964, month: 4, day: 24, hour: 17, minute: 50 },
-      place: [{ lat: 34.05, lng: -106.89 }],
+      version: 4,
+      time: "1964-04-24T17:50",
+      place: { locations: [{ lat: 34.05, lng: -106.89 }] },
       observerTrack: {
         keyframes: [{ t: 0, pose: { lat: 34.05, lng: -106.89, elevationM: 0, headingDeg, pitchDeg: PITCH, fovDeg: 60 } }]
       },

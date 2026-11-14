@@ -170,7 +170,7 @@ describe("BodyPlacement", () => {
 describe("The observer's eye", () => {
   it("stands at the origin, over the ground there, in a recording with no place yet", async () => {
     const { fromSightingJson } = await import("../../../src/engine/persistence/sightingJson.js")
-    const sighting = fromSightingJson({ version: 1, timeline: { keyframes: [] } })
+    const sighting = fromSightingJson({ version: 4, timeline: { keyframes: [] } })
     const ground = { heightAt: () => 3 }
     expect(BodyPlacement.eyeOf(sighting, 0, ground)).toMatchObject({ eastM: 0, northM: 0, upM: 3 + BodyPlacement.EYE_HEIGHT_M })
   })

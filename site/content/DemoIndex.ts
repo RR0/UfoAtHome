@@ -4,7 +4,7 @@ import type { DemoCatalogue, DemoSectionId } from "./DemoCatalogue.js"
 import { demoPlayUrl } from "./DemoCatalogue.js"
 import { SITE_LANGUAGES, type SiteLanguage } from "../SitePage.js"
 import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
-import { SightingMigration } from "../../src/engine/persistence/SightingMigration.js"
+import { FormatVersion } from "../../src/engine/persistence/FormatVersion.js"
 
 /** One demo as the hub's search sees it. */
 export interface DemoIndexEntry {
@@ -40,7 +40,7 @@ export class DemoIndex {
       Record<SiteLanguage, DemoIndexEntry[]>
     for (const group of this.catalogue.groups) {
       for (const demo of group.demos) {
-        const recording = SightingMigration.toCurrent(JSON.parse(await readFile(join(this.root, "public", demo.src), "utf8")))
+        const recording = FormatVersion.recording(JSON.parse(await readFile(join(this.root, "public", demo.src), "utf8")))
         const date = DemoIndex.isoDate(recording.time)
         const tags: string[] = recording.tags ?? []
         for (const language of SITE_LANGUAGES) {

@@ -57,7 +57,7 @@ describe("PlayShareCard", () => {
   })
 
   it("says of an account without observer, or of a case, its date and what can be done with it", () => {
-    const recording = PlayShareCard.cardOf({ time: { year: 2024, month: 8, day: 12, hour: 22, minute: 30 }, place: [{ name: "Grenoble, Isère, France" }] }, "https://a.org/x/", "fr")
+    const recording = PlayShareCard.cardOf({ time: "2024-08-12T22:30", place: [{ name: "Grenoble, Isère, France" }] }, "https://a.org/x/", "fr")
     expect(recording.description).toBe("12 août 2024, 22:30 · Grenoble, Isère, France. À rejouer sous le ciel réel de la date et du lieu qu'elle énonce.")
     const aCase = PlayShareCard.cardOf({ title: "Cussac", events: [], time: "1967-08-29 10:30" }, "https://a.org/case.json", "en")
     expect(aCase.description).toBe("August 29, 1967, 10:30. Replay it in the real sky of the date and place it states.")

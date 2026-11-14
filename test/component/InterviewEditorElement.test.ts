@@ -122,7 +122,7 @@ describe("InterviewEditorElement's groups", () => {
   })
 
   it("refuses a file that is not an interview transcript, and keeps nothing of it", async () => {
-    files["https://example.org/d/plain.json"] = { version: 1, id: "plain", timeline: { keyframes: [] } }
+    files["https://example.org/d/plain.json"] = { version: 4, id: "plain", timeline: { keyframes: [] } }
     const { element, changes } = await make(event())
     tabs(element)[2].click()
     await wait(100)

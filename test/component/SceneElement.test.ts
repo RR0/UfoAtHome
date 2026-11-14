@@ -239,7 +239,7 @@ beforeAll(() => {
 })
 
 const rainyJson = {
-  version: 1 as const,
+  version: 4 as const,
   durationSeconds: 4,
   timeline: {
     keyframes: [
@@ -295,9 +295,9 @@ it("does not rebuild astronomy for centimetres of observer motion, but follows a
   const element = mount()
   element.sightingData = {
     ...rainyJson,
-    time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+    time: "1965-07-01T05:45",
     utcOffsetHours: 1,
-    place: [{ lat: 43.84, lng: 5.96 }]
+    place: { locations: [{ lat: 43.84, lng: 5.96 }] }
   }
   const internal = element as unknown as { applySceneAt(t: number): void; lastSkyKey?: string; sceneCanvas: HTMLCanvasElement }
   internal.sceneCanvas.height = 600
@@ -337,9 +337,9 @@ describe("the clouds of a record along the day", () => {
     cloudOffsets.length = 0
     element.sightingData = {
       ...rainyJson,
-      time: { year: 2026, month: 10, day: 3, hour, minute: 0 },
+      time: `2026-10-03T${String(hour).padStart(2, "0")}:00`,
       utcOffsetHours: 0,
-      place: [{ lat: 48.9, lng: 2.2 }],
+      place: { locations: [{ lat: 48.9, lng: 2.2 }] },
       weatherTrack: { keyframes: [{ t: 0, weather }] },
       ...(source ? { weatherSource: record } : {}),
       ...extra
@@ -690,7 +690,7 @@ describe("which meteor gets offered", () => {
 
 describe("A account whose observer said what it was", () => {
   const body = { id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-  const recording = { version: 1 as const, place: [{ lat: 34, lng: -106.9 }], timeline: { keyframes: [] }, interpretation: { title: "Own", bodies: [body] } }
+  const recording = { version: 4 as const, place: { locations: [{ lat: 34, lng: -106.9 }] }, timeline: { keyframes: [] }, interpretation: { title: "Own", bodies: [body] } }
 
   it("is drawn in the round, the way they gave it, by every scene", () => {
     const element = mount()
@@ -710,7 +710,7 @@ describe("A account whose observer said what it was", () => {
 })
 
 describe("SceneElement air traffic", () => {
-  const AT = { year: 2025, month: 12, day: 30, hour: 12, minute: 0 }
+  const AT = "2025-12-30T12:00"
   const paris = { lat: 48.99, lng: 2.45, pitchDeg: 0, fovDeg: 60, elevationM: 0 }
   const noon = Date.UTC(2025, 11, 30, 12)
   let sourceNumber = 0
@@ -747,11 +747,11 @@ describe("SceneElement air traffic", () => {
   }
 
   const weatherOf = (weather: object) => ({ keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, cloudBaseM: 2000, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false, ...weather } }] })
-  const mountAt = (time: object | undefined, source: DataSource<AircraftProvider>, weather?: object) => {
+  const mountAt = (time: string | undefined, source: DataSource<AircraftProvider>, weather?: object) => {
     const element = mount()
     element.setAircraftSource(source)
     element.setUpperAirSource(upperAirSource)
-    element.sightingData = { ...rainyJson, ...(weather ? { weatherTrack: weatherOf(weather) } : {}), time, utcOffsetHours: 0, place: [{ lat: paris.lat, lng: paris.lng }] } as never
+    element.sightingData = { ...rainyJson, ...(weather ? { weatherTrack: weatherOf(weather) } : {}), time, utcOffsetHours: 0, place: { locations: [{ lat: paris.lat, lng: paris.lng }] } } as never
     element.ufoElement.sighting.observerTrack.addKeyframe(0, paris)
     const internal = element as unknown as { applySceneAt(t: number): void; sceneCanvas: HTMLCanvasElement }
     internal.sceneCanvas.height = 600
@@ -900,7 +900,7 @@ describe("SceneElement air traffic", () => {
 
   it("does not ask a source about a date it cannot hold", () => {
     const { source, asked } = stubSource(overhead, false)
-    const { element, tick } = mountAt({ year: 1965, month: 7, day: 1, hour: 5, minute: 45 }, source)
+    const { element, tick } = mountAt("1965-07-01T05:45", source)
     tick()
     expect(element.aircraftState.status).toBe("outside")
     expect(asked).toHaveLength(0)
@@ -1135,7 +1135,7 @@ describe("SceneElement air traffic", () => {
     it("plays nothing before there are aircraft, and builds no sound for a scene that never has any", async () => {
       const setVoices = spyOn("setVoices")
       const { source } = stubSource(low, false)
-      const { element, tick } = mountAt({ year: 1965, month: 7, day: 1, hour: 5, minute: 45 }, source, calm)
+      const { element, tick } = mountAt("1965-07-01T05:45", source, calm)
       tick()
       tick(1000)
       expect(setVoices).not.toHaveBeenCalled()

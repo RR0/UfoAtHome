@@ -15,12 +15,12 @@ const of = (criteria: AssessmentCriterion[], id: string): AssessmentCriterion =>
 /** Landévennec as the first real draft wrote it: a moment the observer gave, a place worked out, an
  * altitude nobody could know. */
 const landevennec = {
-  version: 1,
-  time: { year: 1974, month: 5, day: 20, hour: 19, raw: "1974-05-20T19:00" },
+  version: 4,
+  time: "1974-05-20T19:00",
   // Derived, as the real draft marked it: "quelques mn" is no clock reading, so the end was worked
   // out and written with the EDTF approximation suffix rather than as a duration.
-  endTime: { year: 1974, month: 5, day: 20, hour: 19, minute: { value: 10, basis: "derived" }, raw: { value: "1974-05-20T19:10~", basis: "derived" } },
-  place: [{ lat: { value: 48.288, basis: "derived" }, lng: { value: -4.29, basis: "derived" } }],
+  endTime: { value: "1974-05-20T19:10~", basis: "derived" },
+  place: { locations: [{ lat: { value: 48.288, basis: "derived" }, lng: { value: -4.29, basis: "derived" } }] },
   timeline: {
     keyframes: [{
       t: 0,
@@ -44,7 +44,7 @@ describe("CoverageAssessor", () => {
   it("asks the same ten questions of every recording", async () => {
     // A fixed list is the whole point: counting a recording's own fields measures how finely they
     // happen to be cut, and moves when nothing about the sighting has.
-    const bare = await assess({ version: 1, timeline: { keyframes: [] } })
+    const bare = await assess({ version: 4, timeline: { keyframes: [] } })
     const full = await assess(landevennec)
 
     expect(bare.map(criterion => criterion.id)).toEqual(full.map(criterion => criterion.id))
@@ -52,7 +52,7 @@ describe("CoverageAssessor", () => {
   })
 
   it("says nothing is answered in an empty recording, rather than answering zero", async () => {
-    const criteria = await assess({ version: 1, timeline: { keyframes: [] } })
+    const criteria = await assess({ version: 4, timeline: { keyframes: [] } })
 
     expect(criteria.every(criterion => criterion.basis === undefined)).toBe(true)
     expect(criteria.every(criterion => criterion.paths.length === 0)).toBe(true)
@@ -120,7 +120,7 @@ describe("CoverageAssessor", () => {
   })
 
   it("does not count an empty array as an answer", async () => {
-    const criteria = await assess({ version: 1, place: [], timeline: { keyframes: [] } })
+    const criteria = await assess({ version: 4, place: [], timeline: { keyframes: [] } })
 
     expect(of(criteria, "where").basis).toBeUndefined()
   })

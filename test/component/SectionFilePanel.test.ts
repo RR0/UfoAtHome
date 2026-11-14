@@ -58,7 +58,7 @@ describe("SectionFilePanel", () => {
     panel.show("weather")
     const weatherTrack = { keyframes: [{ t: 0, weather: { ...DEFAULT_WEATHER, cloudCover: 0.8 } }] }
     const input = root.querySelector<InputFileElement>("#section-annex-source")!.controls.file
-    Object.defineProperty(input, "files", { configurable: true, value: [new File([JSON.stringify({ version: 1, weatherTrack })], "w.json")] })
+    Object.defineProperty(input, "files", { configurable: true, value: [new File([JSON.stringify({ version: 4, weatherTrack })], "w.json")] })
     input.dispatchEvent(new Event("change"))
     await vi.waitFor(() => expect(sighting.weatherTrack.allKeyframes[0]?.weather.cloudCover).toBe(0.8))
     await panel.take("weather", { file: new File(["{}"], "none.json") })
@@ -69,12 +69,12 @@ describe("SectionFilePanel", () => {
   it("takes the place and the night sky of a file, with what they say of where they came from, and reads them from the file since", async () => {
     const sighting = Sighting.create(undefined, [{ lat: 1, lng: 2 }])
     const { panel } = mounted(sighting)
-    const place = [{ lat: 44.98, lng: 2.92, name: "Cussac" }]
-    await panel.take("place", { file: new File([JSON.stringify({ version: 1, place })], "p.json") })
+    const place = { name: "Cussac", locations: [{ lat: 44.98, lng: 2.92 }] }
+    await panel.take("place", { file: new File([JSON.stringify({ version: 4, place })], "p.json") })
     expect(sighting.event.place?.[0]).toMatchObject({ lat: 44.98, name: "Cussac" })
     expect(sighting.snapshots?.place).toEqual({})
     const lightPollution = { value: 21.2, basis: "derived", rationale: "World Atlas 2015", of: 21.2 }
-    await panel.take("lightPollution", { file: new File([JSON.stringify({ version: 1, lightPollution })], "l.json") })
+    await panel.take("lightPollution", { file: new File([JSON.stringify({ version: 4, lightPollution })], "l.json") })
     expect(sighting.lightPollution).toBe(21.2)
     expect(sighting.provenance.at("lightPollution")?.rationale).toBe("World Atlas 2015")
     // Its annex states it as the recording does, provenance and all.

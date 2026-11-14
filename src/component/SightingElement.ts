@@ -1,6 +1,6 @@
 import { PlayerIcons } from "./PlayerIcons.js"
-import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
-import { SightingMigration } from "../engine/persistence/SightingMigration.js"
+import { FormatVersion } from "../engine/persistence/FormatVersion.js"
+import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { RecordingSource } from "../engine/model/RecordingSource.js"
 import { html, css } from "./sightingTemplate.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
@@ -525,9 +525,9 @@ export class SightingElement extends HTMLElement {
     return this.entries.find(entry => entry.src === this.currentSrc)?.sighting
   }
 
-  set sightingData(readable: ReadableSightingJson) {
-    // A file of an older version of the format is read as the current one (see SightingMigration).
-    const sighting = SightingMigration.toCurrent(readable)
+  set sightingData(readable: SightingRecordingJson) {
+    // One version of the format is read, and a file of any other is refused rather than misread (see FormatVersion).
+    const sighting = FormatVersion.recording(readable)
     this.startPending = true
     this.currentSrc = ""
     this.setEntries([{ src: "", sighting }], undefined)
@@ -583,9 +583,9 @@ export class SightingElement extends HTMLElement {
   }
 
   private setEntries(entries: ObserverEntry[], caseSource: { json: CaseJson, url: string } | undefined): void {
-    // In the current version of the format from here on (see SightingMigration): what this element reads of a recording itself (its date,
+    // In the one version of the format from here on (see FormatVersion): what this element reads of a recording itself (its date,
     // its place, for the information panel) is read in one shape only.
-    this.entries = entries.map(entry => ({ ...entry, sighting: SightingMigration.toCurrent(entry.sighting) }))
+    this.entries = entries.map(entry => ({ ...entry, sighting: FormatVersion.recording(entry.sighting) }))
     this.caseSource = caseSource
     if (caseSource) this.reportCaseProblems(caseSource.json, entries)
 

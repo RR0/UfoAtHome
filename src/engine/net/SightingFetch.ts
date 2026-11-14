@@ -1,5 +1,5 @@
+import { FormatVersion } from "../persistence/FormatVersion.js"
 import { RecordingSections } from "../model/Snapshots.js"
-import { SightingMigration } from "../persistence/SightingMigration.js"
 
 /** What went wrong fetching a recording, as far as a browser will ever let a page find out. */
 export type SightingFetchKind = "cors" | "mixed-content" | "unreachable" | "status" | "malformed"
@@ -44,7 +44,7 @@ export class SightingFetch {
       if (!section?.src || section.live) continue
       try {
         // Its keys as the current version of the format writes them, whichever the annex was written in.
-        const annex = SightingMigration.toCurrent(await SightingFetch.json(new URL(section.src, new URL(url, location.href)).href) as Record<string, unknown>)
+        const annex = FormatVersion.recording(await SightingFetch.json(new URL(section.src, new URL(url, location.href)).href) as Record<string, unknown>)
         RecordingSections.put(name, json, annex)
       } catch {
         // The recording plays with what it holds itself.

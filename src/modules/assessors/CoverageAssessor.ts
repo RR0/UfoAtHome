@@ -25,7 +25,7 @@ interface Question {
  * with its own entry in the registry and its own credit.
  */
 const QUESTIONS: Question[] = [
-  // The date is one EDTF text since version 2 of the format (see SightingMigration).
+  // The date is one EDTF text since version 2 of the format.
   { id: "when", paths: ["time"] },
   { id: "where", paths: ["place.locations.*.lat", "place.locations.*.lng", "observerTrack.keyframes.*.pose.lat", "observerTrack.keyframes.*.pose.lng"] },
   { id: "facing", paths: ["observerTrack.keyframes.*.pose.headingDeg"] },

@@ -77,7 +77,7 @@ describe("An interpretation as another observation", () => {
   })
 
   it("reads its bodies from the interpretation of the recording at its url", async () => {
-    const recording = { version: 1, id: "x-1-interpretation-1", timeline: { keyframes: [] }, interpretation: { title: "From the recording", bodies: [body] } }
+    const recording = { version: 4, id: "x-1-interpretation-1", timeline: { keyframes: [] }, interpretation: { title: "From the recording", bodies: [body] } }
     const events = CaseFile.interpretationEvents(together, "x-1")
     const asked: string[] = []
     const read = await CaseFile.interpretationOf(events[0], "https://example.org/d/case.json", async url => { asked.push(url); return recording })
@@ -90,7 +90,7 @@ describe("An interpretation as another observation", () => {
 describe("The observer's own interpretation", () => {
   it("travels with the recording, unchanged", () => {
     const interpretation = { title: "On its legs", bodies: [body] }
-    const json = { version: 1 as const, id: "x", timeline: { keyframes: [] }, interpretation }
+    const json = { version: 4 as const, id: "x", timeline: { keyframes: [] }, interpretation }
     expect(toSightingJson(fromSightingJson(json)).interpretation).toEqual(interpretation)
   })
 })

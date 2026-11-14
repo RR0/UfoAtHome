@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest"
 import { ASSESSMENT_SOURCES } from "../../src/modules/assessors/assessmentSources.js"
 import type { Assessment } from "../../src/engine/assessment/Assessor.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const poher = ASSESSMENT_SOURCES.find(source => source.id === "poher")!
 
-const assess = (json: Partial<SightingRecordingJsonV1>): Promise<Assessment> =>
-  poher.create().assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...json } as SightingRecordingJsonV1))
+const assess = (json: Partial<SightingRecordingJson>): Promise<Assessment> =>
+  poher.create().assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...json } as SightingRecordingJson))
 
 const of = (assessment: Assessment, id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
@@ -23,10 +23,10 @@ const light = (...aims: [number, number][]) => ({
       }]
     }))
   }
-}) as Partial<SightingRecordingJsonV1>
+}) as Partial<SightingRecordingJson>
 
 /** A craft of the interpretation, on the ground then 10 m up. */
-const landed = { interpretation: { bodies: [{ id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 50, northM: 0, onGround: true }, { t: 5000, eastM: 50, northM: 0, altitudeAboveGroundM: 10 }] }] } } as Partial<SightingRecordingJsonV1>
+const landed = { interpretation: { bodies: [{ id: "craft", model: { id: "sphere" }, track: [{ t: 0, eastM: 50, northM: 0, onGround: true }, { t: 5000, eastM: 50, northM: 0, altitudeAboveGroundM: 10 }] }] } } as Partial<SightingRecordingJson>
 
 describe("PoherAssessor", () => {
   it("rates nothing known as 0, and a light that stays where it is too", async () => {
@@ -50,7 +50,7 @@ describe("PoherAssessor", () => {
     const assessment = await assess(landed)
     expect(assessment.verdict).toBe("3")
     expect(of(assessment, "poher-landing")).toMatchObject({ value: 1, basis: "assumed", paths: ["interpretation.bodies.0"] })
-    const car = await assess({ interpretation: { bodies: [{ id: "car", model: { id: "box" }, track: [{ t: 0, eastM: 50, northM: 0, onGround: true }, { t: 5000, eastM: 80, northM: 0, onGround: true }] }] } } as Partial<SightingRecordingJsonV1>)
+    const car = await assess({ interpretation: { bodies: [{ id: "car", model: { id: "box" }, track: [{ t: 0, eastM: 50, northM: 0, onGround: true }, { t: 5000, eastM: 80, northM: 0, onGround: true }] }] } } as Partial<SightingRecordingJson>)
     expect(car.verdict).toBe("0")
   })
 
@@ -64,7 +64,7 @@ describe("PoherAssessor", () => {
 
   it("reads a sudden disappearance and oscillations off the phenomenon's events", async () => {
     const base = light([90, 20], [95, 20], [100, 20])
-    expect((await assess({ ...base, events: [{ eventType: "vanish", who: "light", t: 2000 }] } as Partial<SightingRecordingJsonV1>)).verdict).toBe("3")
-    expect((await assess({ ...base, events: [{ eventType: "vibrate", who: "light", t: 0, until: 2000 }] } as Partial<SightingRecordingJsonV1>)).verdict).toBe("3")
+    expect((await assess({ ...base, events: [{ eventType: "vanish", who: "light", t: 2000 }] } as Partial<SightingRecordingJson>)).verdict).toBe("3")
+    expect((await assess({ ...base, events: [{ eventType: "vibrate", who: "light", t: 0, until: 2000 }] } as Partial<SightingRecordingJson>)).verdict).toBe("3")
   })
 })

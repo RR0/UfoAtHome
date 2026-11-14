@@ -535,7 +535,7 @@ describe("the weather of a recording", () => {
   } as unknown as WeatherProvider
 
   const station = {
-    version: 1, id: "case", time: { value: { year: 1981, month: 1, day: 8, hour: 17, minute: 0, second: 0 }, basis: "stated", rationale: "r" },
+    version: 4, id: "case", time: { value: "1981-01-08T17:00:00", basis: "stated", rationale: "r" },
     durationSeconds: 40, timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 40000, shapes: [] }] }, place: { locations: [{ lat: 43.4, lng: 6.5 }] },
     weatherSource: { id: "station", name: "A station" },
     weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0.25, cloudBaseM: 3000, relativeHumidity: 0.3, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0 } }] }
@@ -699,7 +699,7 @@ describe("how the keyframes are written", () => {
     const outline = Array.from({ length: 60 }, (_, i) => ({ x: i, y: i % 7 }))
     const polygon = (x: number) => ({ kind: "polygon", bounds: { x, y: 0, width: 60, height: 7 }, points: outline, color: "#ffffff", angle: 0, transparency: 0, haloScale: 1.5, selected: false })
     element.sightingData = {
-      version: 1,
+      version: 4,
       timeline: { keyframes: [0, 100, 200].map(t => ({ t, shapes: [{ sourceId: "p", shape: polygon(t) }] })), order: ["p"], groups: [] }
     } as never
     const inside = element as unknown as { fileText(): string, sightingData: { timeline: { keyframes: unknown[] } } }

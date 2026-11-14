@@ -1,12 +1,12 @@
 /** The three kinds of file UFO@home reads, each with its own schema and its own version. */
 export type FormatName = "sighting" | "case" | "interview"
 
-/** A file states a version of its format that this engine does not read: a newer one, or no version at all. */
+/** A file states a version of its format that this engine does not read: an older one, a newer one, or no version at all. */
 export class FormatVersionError extends Error {
 
   constructor(readonly format: FormatName, readonly found: unknown, readonly supported: number) {
-    super(typeof found === "number" && Number.isInteger(found) && found > supported
-      ? `This ${format} file is in version ${found} of its format; this UFO@home reads up to version ${supported}. Read it with a newer UFO@home.`
+    super(typeof found === "number" && Number.isInteger(found) && found >= 1
+      ? `This ${format} file is in version ${found} of its format; this UFO@home reads version ${supported}. Read it with the UFO@home that reads its version.`
       : `This ${format} file states ${JSON.stringify(found)} as its format version, which is not a version.`)
     this.name = "FormatVersionError"
   }
@@ -28,9 +28,10 @@ export class FormatVersionError extends Error {
  *
  * A file that leaves `version` out is version 1, the only one there was before files were checked: a case never had one.
  *
- * Reading a newer version is refused rather than attempted: the engine would play something other than what the file says, and
- * nothing on screen would say so. An older version is read through a migration (SightingMigration for a recording: version 2 writes
- * the time as EDTF and the place as a PlaceJson, as RR0 does), so that the rest of the engine only ever sees the current version.
+ * This engine reads ONE version of each format, and refuses any other rather than attempting it: it would otherwise play something
+ * other than what the file says, and nothing on screen would say so. Older versions are not converted as a file is read, since nothing
+ * published is written in one; what the versions before wrote is known only to scripts/migration, which brings a file forward outside
+ * what is shipped, and a file shared under an older version is read by the UFO@home pinned beside it (see the share link).
  */
 export class FormatVersion {
 
@@ -54,15 +55,21 @@ export class FormatVersion {
     return stated
   }
 
+  /** `json` as the one version of the recording format this engine reads, refused rather than misread when it is another (see check). */
+  static recording<T>(json: T): T {
+    return FormatVersion.check(json, "sighting")
+  }
+
   /**
-   * Throws a FormatVersionError unless `json` is in a version of `format` this engine reads.
+   * Throws a FormatVersionError unless `json` is in the version of `format` this engine reads.
    *
    * @return `json` itself, to be read.
    */
   static check<T>(json: T, format: FormatName): T {
     const found = FormatVersion.of(json)
     const supported = FormatVersion.CURRENT[format]
-    if (typeof found !== "number" || !Number.isInteger(found) || found < 1 || found > supported) {
+    // One version, not a range: a file of an older one is no longer converted as it is read (see the class comment).
+    if (typeof found !== "number" || !Number.isInteger(found) || found !== supported) {
       throw new FormatVersionError(format, found, supported)
     }
     return json

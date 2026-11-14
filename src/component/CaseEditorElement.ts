@@ -1,6 +1,4 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
-import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
-import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { EditorTheme } from "./EditorTheme.js"
@@ -30,7 +28,7 @@ import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { SourceChoices } from "./BasisInputElement.js"
-import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
+import { FormatVersion, FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import type { InterviewEditorElement, InterviewEvent } from "./InterviewEditorElement.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import type { SightingEditorMessages } from "./messages/SightingEditorMessages.js"
@@ -646,9 +644,9 @@ export class CaseEditorElement extends HTMLElement {
     return this.editor.sightingData
   }
 
-  set sightingData(readable: ReadableSightingJson) {
-    // A file of an older version of the format is read as the current one (see SightingMigration).
-    const json = SightingMigration.toCurrent(readable)
+  set sightingData(readable: SightingRecordingJson) {
+    // One version of the format is read, and a file of any other is refused rather than misread (see FormatVersion).
+    const json = FormatVersion.recording(readable)
     this.closeCase()
     this.editor.sightingData = json
   }
@@ -958,7 +956,7 @@ export class CaseEditorElement extends HTMLElement {
 
   private async loadTrack(track: CaseTrack): Promise<void> {
     if (track.recording) return
-    track.recording = SightingMigration.toCurrent((await SightingFetch.recording(track.url)) as SightingRecordingJson)
+    track.recording = FormatVersion.recording((await SightingFetch.recording(track.url)) as SightingRecordingJson)
     // As it was fetched: what a recording is changed from. A recording shown has it taken again from the form (see showTrack).
     track.loaded = JSON.stringify(track.recording)
   }

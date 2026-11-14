@@ -72,7 +72,7 @@ describe("A case being edited", () => {
   it("adds an observer's account: an event with no interpretationOf, at a file and an id of its own", () => {
     const session = new CaseSession(caseJson(), url)
     session.keep(session.tracks[0], account, true)
-    const added = session.addObservation({ version: 1, id: "1950-05-11-TrentPaul", timeline: { keyframes: [] } } as unknown as SightingRecordingJson, "1950-05-11", "Evelyn Trent")
+    const added = session.addObservation({ version: 4, id: "1950-05-11-TrentPaul", timeline: { keyframes: [] } } as unknown as SightingRecordingJson, "1950-05-11", "Evelyn Trent")
     expect(added.kind).toBe("observer")
     expect(added.recording!.id).toBe("1950-05-11-TrentPaul-2") // the id was taken
     expect(added.event.url).toBe("observer-1950-05-11-trentpaul-2.json")

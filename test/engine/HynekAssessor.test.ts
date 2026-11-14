@@ -1,31 +1,31 @@
 import { describe, expect, it } from "vitest"
 import { ASSESSMENT_SOURCES } from "../../src/modules/assessors/assessmentSources.js"
 import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
-import type { SightingRecordingJsonV1 } from "../../src/engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../../src/engine/persistence/sightingJson.js"
 
 const hynek = ASSESSMENT_SOURCES.find(source => source.id === "hynek")!
 
-const classify = (json: Partial<SightingRecordingJsonV1>): Promise<string | undefined> =>
+const classify = (json: Partial<SightingRecordingJson>): Promise<string | undefined> =>
   hynek.create()
-    .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...json } as SightingRecordingJsonV1))
+    .assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...json } as SightingRecordingJson))
     .then(assessment => assessment.verdict)
 
 /** Landévennec: 20 May 1974, 19:00 legal time in Brittany, which is UTC+1 that year. The Sun is
  * still well up — it sets there around 21:40 local in late May. */
 const evening = {
-  time: { year: 1974, month: 5, day: 20, hour: 19, minute: 0 },
+  time: "1974-05-20T19:00",
   utcOffsetHours: 1,
-  place: [{ lat: 48.288, lng: -4.29 }]
+  place: { locations: [{ lat: 48.288, lng: -4.29 }] }
 }
 
 /** Socorro: 24 April 1964, 17:45 in New Mexico, on UTC-7 two days before that year's switch. */
 const afternoon = {
-  time: { year: 1964, month: 4, day: 24, hour: 17, minute: 45 },
+  time: "1964-04-24T17:45",
   utcOffsetHours: -7,
-  place: [{ lat: 34.06, lng: -106.9 }]
+  place: { locations: [{ lat: 34.06, lng: -106.9 }] }
 }
 
-const night = { ...evening, time: { ...evening.time, hour: 1 } }
+const night = { ...evening, time: evening.time.replace("T19:", "T01:") }
 
 describe("HynekAssessor", () => {
   it("works out daylight from the real Sun, not from the hour on the clock", async () => {
@@ -34,7 +34,7 @@ describe("HynekAssessor", () => {
     expect(await classify(evening)).toBe("dd")
     expect(await classify(afternoon)).toBe("dd")
     expect(await classify(night)).toBe("nl")
-    expect(await classify({ ...evening, time: { ...evening.time, month: 12 } })).toBe("nl")
+    expect(await classify({ ...evening, time: evening.time.replace("-05-", "-12-") })).toBe("nl")
   })
 
   it("declines to choose when the recording says neither when nor where", async () => {
@@ -50,7 +50,7 @@ describe("HynekAssessor", () => {
     // is stored, and no instrument in the registry is a radar. An author cannot fill those in, so
     // saying "unanswered" would send them to do the impossible.
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
+      .assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
     const of = (id: string) => assessment.criteria.find(criterion => criterion.id === id)!
 
     for (const id of ["traces", "radar"]) {
@@ -80,7 +80,7 @@ describe("HynekAssessor", () => {
     expect(await classify(withBeings)).toBe("ce3")
 
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...withBeings } as SightingRecordingJsonV1))
+      .assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...withBeings } as SightingRecordingJson))
     expect(assessment.criteria.find(criterion => criterion.id === "entities")!.paths)
       .toEqual(["decor.0", "decor.1"])
   })
@@ -104,7 +104,7 @@ describe("HynekAssessor", () => {
 
   it("says which of its grounds it worked out", async () => {
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
+      .assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
     const daylight = assessment.criteria.find(criterion => criterion.id === "daylight")!
 
     expect(daylight.basis).toBe("derived")
@@ -113,7 +113,7 @@ describe("HynekAssessor", () => {
 
   it("reaches no score, because it classifies rather than measures", async () => {
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, timeline: { keyframes: [] }, ...evening } as SightingRecordingJsonV1))
+      .assess(fromSightingJson({ version: 4, timeline: { keyframes: [] }, ...evening } as SightingRecordingJson))
 
     expect(assessment.score).toBeUndefined()
     expect(assessment.verdict).toBe("dd")
@@ -124,9 +124,9 @@ describe("HynekAssessor", () => {
     // at 90 m and then 6.5 m. Under Hynek's 150 m line, so a close encounter — from angles and a
     // track, with no metre asserted anywhere in the file. See ShapeDistance.
     const walk = {
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+      time: "1965-07-01T05:45",
       utcOffsetHours: 1,
-      place: [{ lat: 43.845508, lng: 5.9632 }],
+      place: { locations: [{ lat: 43.845508, lng: 5.9632 }] },
       timeline: {
         keyframes: [
           { t: 0, shapes: [shape(2.2234)] },
@@ -144,7 +144,7 @@ describe("HynekAssessor", () => {
     expect(await classify(walk)).toBe("ce1")
 
     const assessment = await hynek.create()
-      .assess(fromSightingJson({ version: 1, ...walk } as unknown as SightingRecordingJsonV1))
+      .assess(fromSightingJson({ version: 4, ...walk } as unknown as SightingRecordingJson))
     const proximity = assessment.criteria.find(criterion => criterion.id === "proximity")!
     expect(proximity.basis).toBe("derived")
     expect(proximity.unsupported).toBeUndefined()
@@ -152,9 +152,9 @@ describe("HynekAssessor", () => {
 
   it("still puts beings above proximity, since CE3 outranks CE1", async () => {
     const walk = {
-      time: { year: 1965, month: 7, day: 1, hour: 5, minute: 45 },
+      time: "1965-07-01T05:45",
       utcOffsetHours: 1,
-      place: [{ lat: 43.845508, lng: 5.9632 }],
+      place: { locations: [{ lat: 43.845508, lng: 5.9632 }] },
       decor: [{ id: "etre-1", kind: "entity" as const, eastM: 2, northM: -6, sizeM: { heightM: 1 } }],
       timeline: {
         keyframes: [

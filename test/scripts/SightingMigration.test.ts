@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
-import { SightingMigration } from "../../../src/engine/persistence/SightingMigration.js"
-import { fromSightingJson, type SightingRecordingJsonV1 } from "../../../src/engine/persistence/sightingJson.js"
+import { SightingMigration } from "../../scripts/migration/SightingMigration.js"
+import type { SightingRecordingJsonV1, SightingRecordingJsonV2 } from "../../scripts/migration/SightingMigration.js"
+import { fromSightingJson } from "../../src/engine/persistence/sightingJson.js"
+import { RecordingActors } from "../../src/engine/events/RecordingActors.js"
+import { FormatVersionError } from "../../src/engine/persistence/FormatVersion.js"
 
+/**
+ * The conversions from the versions the format had before the current one. They are no longer part of what is shipped: the engine reads
+ * one version and refuses any other (see FormatVersion), and this brings a file found in an older one forward, outside the player.
+ */
 describe("SightingMigration", () => {
 
   it("leaves a recording of the current version as it is, the same object", () => {
@@ -50,13 +57,16 @@ describe("SightingMigration", () => {
     expect(migrated).not.toHaveProperty("place")
   })
 
-  it("is what every reader goes through: a file of version 1 reads as it did", () => {
-    const sighting = fromSightingJson({
+  it("is what a file of version 1 must go through now: the engine itself refuses it", () => {
+    const old = {
       version: 1,
       time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 },
       place: [{ lat: 32.3792, lng: -86.3077, name: "Montgomery, Alabama" }],
       timeline: { keyframes: [] }
-    })
+    }
+    expect(() => fromSightingJson(old as never)).toThrow(FormatVersionError)
+    // Brought forward here, it reads as it always did.
+    const sighting = fromSightingJson(SightingMigration.toCurrent(old as SightingRecordingJsonV1))
     expect(sighting.event.time).toMatchObject({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
     expect(sighting.event.place).toEqual([{ lat: 32.3792, lng: -86.3077, name: "Montgomery, Alabama" }])
   })
@@ -68,5 +78,31 @@ describe("SightingMigration", () => {
     expect(migrated.snapshots).toEqual(frozen)
     expect("frozen" in migrated).toBe(false)
     expect(Object.keys(migrated)).toEqual(["version", "snapshots", "decor", "timeline"])
+  })
+})
+
+describe("SightingMigration to version 3", () => {
+  it("makes the phenomenon of version 2 a group of its shapes, and the lights a blink listed a group of it", () => {
+    const part = (sourceId: string) => ({ sourceId, kind: "oval", color: "#fff", widthShare: 0.1 })
+    const sighting = fromSightingJson(SightingMigration.toCurrent({
+      version: 2, observer: { id: "T1" }, place: { locations: [{ lat: 49, lng: 2.7 }] }, timeline: { keyframes: [], groups: [["x", "y"]] },
+      events: [
+        { eventType: "stand", who: "phenomenon", t: 0, until: 10000, params: { place: { lat: 49.01, lng: 2.7 }, metres: [{ t: 0, widthM: 30, heightM: 20 }] } },
+        { eventType: "appearance", who: "phenomenon", t: 0, params: { parts: [part("bar"), part("left"), part("right"), part("red")] } },
+        { eventType: "blink", who: "phenomenon", t: 0, params: { parts: ["red"], onS: 1, offS: 1, off: { transparency: 1 } } },
+        { eventType: "blink", who: "phenomenon", t: 5000, params: { parts: ["left", "right"], onS: 2, offS: 2, off: { transparency: 1 } } }
+      ]
+    } as unknown as SightingRecordingJsonV2))
+    const [stand, , red, pair] = sighting.events!
+    expect(sighting.timeline.groupOf(stand.who!)!.members).toEqual(["bar", "group-3", "red"])
+    expect(red.who).toBe("red")
+    expect(sighting.timeline.leavesOf(pair.who!)).toEqual(["left", "right"])
+    expect(pair.params).not.toHaveProperty("parts")
+    // A group of shapes nothing draws goes.
+    expect(sighting.timeline.groupOf("group-1")).toBeUndefined()
+    expect(RecordingActors.issues(sighting)).toEqual([])
+    // And the lights still blink: the red one is off in its second second.
+    const at = (t: number, id: string) => sighting.timeline.getInterpolatedShapeAt(t, id)?.transparency
+    expect([at(500, "red"), at(1500, "red"), at(1500, "left")]).toEqual([0, 1, 0])
   })
 })

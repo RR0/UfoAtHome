@@ -1,7 +1,5 @@
 import { TimeSpan } from "../engine/model/TimeSpan.js"
 import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.js"
-import type { ReadableSightingJson } from "../engine/persistence/sightingJson.js"
-import { SightingMigration } from "../engine/persistence/SightingMigration.js"
 import type { BasisSourceMessages, SourceChoices } from "./BasisInputElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
@@ -51,7 +49,7 @@ import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.j
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import type { ShareMessages } from "./messages/ShareMessages.js"
 import { AppLocation } from "./AppLocation.js"
-import { FormatVersionError } from "../engine/persistence/FormatVersion.js"
+import { FormatVersion, FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import { NARRATIVE_SOURCES } from "../modules/providers/narrative/narrativeSources.js"
 import { SightingAssessments } from "./SightingAssessments.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
@@ -2479,9 +2477,9 @@ export class SightingEditorElement extends HTMLElement {
     return this.ufoElement.sightingData
   }
 
-  set sightingData(readable: ReadableSightingJson) {
-    // A file of an older version of the format is read as the current one (see SightingMigration).
-    const json = SightingMigration.toCurrent(readable)
+  set sightingData(readable: SightingRecordingJson) {
+    // One version of the format is read, and a file of any other is refused rather than misread (see FormatVersion).
+    const json = FormatVersion.recording(readable)
     // Wherever it came from, it is not the file at the last address until loadUrl says so.
     this.sourceUrl = undefined
     this.endDrag() // an in-progress drag references the OLD timeline's shape — don't let it
@@ -3125,7 +3123,7 @@ export class SightingEditorElement extends HTMLElement {
       const src = json.snapshots?.[section]?.src
       const file = src !== undefined ? files[folder + src] : undefined
       if (!file) continue
-      const kept = SightingMigration.toCurrent(JSON.parse(strFromU8(file)) as Record<string, unknown>)
+      const kept = FormatVersion.recording(JSON.parse(strFromU8(file)) as Record<string, unknown>)
       RecordingSections.put(section, json, kept)
       put = true
     }

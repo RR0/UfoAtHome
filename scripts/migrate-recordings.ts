@@ -17,8 +17,8 @@
  * touched at all, so running this over a whole case rewrites only what it moves.
  */
 import { readFileSync, writeFileSync } from "node:fs"
-import { SightingMigration } from "../src/engine/persistence/SightingMigration.js"
-import type { ReadableSightingJson } from "../src/engine/persistence/sightingJson.js"
+import { SightingMigration } from "./migration/SightingMigration.js"
+import type { ReadableSightingJson } from "./migration/SightingMigration.js"
 
 export class RecordingMigration {
 

@@ -219,12 +219,12 @@ async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
 }
 
 const johnSighting = {
-  version: 1 as const,
+  version: 4 as const,
   observer: { id: "john", title: "Clarence Chiles" },
   timeline: { keyframes: [{ t: 0, shapes: [] }] }
 }
 const janeSighting = {
-  version: 1 as const,
+  version: 4 as const,
   observer: { id: "jane", title: "John Whitted" },
   timeline: { keyframes: [{ t: 100, shapes: [] }] }
 }
@@ -338,8 +338,8 @@ describe("SightingElement", () => {
     // The URL used to be the last resort, and it was a bad one: several recordings this component
     // is pointed at have no observer at all (a sky set up to show a halo is not account), and
     // "Observation of /demo-data/sky-test-halos.json" read as a fault rather than as a name.
-    const anonymousById = { version: 1 as const, observer: { id: "w2" }, timeline: { keyframes: [] } }
-    const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
+    const anonymousById = { version: 4 as const, observer: { id: "w2" }, timeline: { keyframes: [] } }
+    const anonymousNoId = { version: 4 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
     const element = mount()
 
@@ -353,7 +353,7 @@ describe("SightingElement", () => {
   it("says nothing at all where a single recording names no observer", async () => {
     // A sky with no observer is not an account, so the whole "Observation of …" line goes — the ?
     // button that carries the observation's own metadata stays either way.
-    const noObserver = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
+    const noObserver = { version: 4 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
     stubFetch({ "sky.json": noObserver, "john.json": johnSighting })
     const element = mount()
 
@@ -454,7 +454,7 @@ describe("SightingElement", () => {
 
   it("offers the account, in the round when the observer said what it was, and the case's interpretations", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } }
+    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: { locations: [{ lat: 32.4, lng: -86.3 }] }, interpretation: { title: "Own", bodies: [body] } }
     const johnUrl = new URL("john.json", location.href).href
     stubFetch({
       "case.json": { events: [sightingEvent("john.json"), { type: "event", eventType: "interpretation", sighting: "1948-07-24-ChilesClarence", title: "Balloon", by: [{ people: "HynekJosefAllen" }], bodies: [body] }] },
@@ -482,7 +482,7 @@ describe("SightingElement", () => {
   })
 
   it("shows a reading of the case whole, in its own recording, with what it was tested against, and the account again after", async () => {
-    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }] }
+    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: { locations: [{ lat: 32.4, lng: -86.3 }] } }
     const johnUrl = new URL("john.json", location.href).href
     const readingUrl = new URL("reading.json", location.href).href
     // Another hour, which is the reading's claim: its scene is not the account's.
@@ -566,7 +566,7 @@ describe("SightingElement", () => {
 
   it("shows the account in the round alone until the reader asks to compare it with what was seen", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-    stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
+    stubFetch({ "john.json": { ...johnSighting, id: "x", place: { locations: [{ lat: 32.4, lng: -86.3 }] }, interpretation: { title: "Own", bodies: [body] } } })
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
     const compare = shadow.getElementById("compare-account") as HTMLButtonElement
@@ -584,7 +584,7 @@ describe("SightingElement", () => {
 
   it("keeps the choice and the scene in step when moved into a page of another language, and relabels its toggle", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
-    stubFetch({ "john.json": { ...johnSighting, id: "x", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } } })
+    stubFetch({ "john.json": { ...johnSighting, id: "x", place: { locations: [{ lat: 32.4, lng: -86.3 }] }, interpretation: { title: "Own", bodies: [body] } } })
     const element = await connect("john.json")
     const shadow = element.shadowRoot!
     const select = shadow.getElementById("interpretation") as HTMLSelectElement
@@ -697,7 +697,7 @@ describe("SightingElement", () => {
   })
 
   it("opens the info panel on click, showing the app version link and the selected observer's observation metadata (date/location/case, not the observer name — already in the toolbar's account line)", async () => {
-    stubFetch({ "john.json": { ...johnSighting, time: { year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, place: [{ lat: 32.4, lng: -86.3 }] } })
+    stubFetch({ "john.json": { ...johnSighting, time: "1948-07-24T02:45", place: { locations: [{ lat: 32.4, lng: -86.3 }] } } })
     const element = mount()
     element.observerUrls = ["john.json"]
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -766,9 +766,9 @@ describe("SightingElement", () => {
       "john.json": {
         ...johnSighting,
         description: "An orb.",
-        time: { year: 2026, month: 9, day: 28, hour: 19, minute: 45 },
+        time: "2026-09-28T19:45",
         utcOffsetHours: { value: -7, basis: "derived", rationale: "PDT" },
-        place: [{ value: { lat: 33.6, lng: -117.672 }, basis: "assumed", rationale: "city centre" }]
+        place: { value: { locations: [{ lat: 33.6, lng: -117.672 }] }, basis: "assumed", rationale: "city centre" }
       }
     })
     const element = mount()
@@ -1094,9 +1094,9 @@ describe("SightingElement observation time", () => {
     document.body.innerHTML = ""
   })
 
-  async function dateRowFor(time: object, extra: object = {}): Promise<string> {
+  async function dateRowFor(time: string, extra: object = {}): Promise<string> {
     stubFetch({
-      "x.json": { version: 1, time, place: [{ lat: 32.3792, lng: -86.3077 }], timeline: { keyframes: [] }, ...extra }
+      "x.json": { version: 4, time, place: { locations: [{ lat: 32.3792, lng: -86.3077 }] }, timeline: { keyframes: [] }, ...extra }
     })
     const element = mount()
     element.observerUrls = ["x.json"]
@@ -1107,12 +1107,12 @@ describe("SightingElement observation time", () => {
   }
 
   it("shows the observer's own wall-clock time, with an explicit time zone", async () => {
-    const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 }, { utcOffsetHours: -6 })
+    const shown = await dateRowFor("1948-07-24T02:45", { utcOffsetHours: -6 })
     expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the observer's clock, not the reader's
   })
 
   it("shows it unchanged when the time zone is only approximated from the longitude", async () => {
-    const shown = await dateRowFor({ year: 1948, month: 7, day: 24, hour: 2, minute: 45 })
+    const shown = await dateRowFor("1948-07-24T02:45")
     expect(shown).toContain("2:45") // "July 24, 1948 at 2:45 AM" — the observer's clock, not the reader's
   })
 })
@@ -1277,7 +1277,7 @@ describe("SightingElement parameter labels", () => {
   })
 
   it("states the recording when the page asks with show-labels", async () => {
-    stubFetch({ "john.json": { ...johnSighting, place: [{ lat: 32.4, lng: -86.3 }] } })
+    stubFetch({ "john.json": { ...johnSighting, place: { locations: [{ lat: 32.4, lng: -86.3 }] } } })
     const element = await mounted(true)
     expect(element.shadowRoot!.getElementById("param-summary")!.hidden).toBe(false)
     expect(labels(element).some(text => text.includes("32°24′00″ N"))).toBe(true)
@@ -1332,7 +1332,7 @@ describe("SightingElement parameter labels", () => {
    * refuses to carry, because prose doesn't fit on a chip.
    */
   it("stops the info panel repeating what the strip already states, and leaves it the description", async () => {
-    stubFetch({ "john.json": { ...johnSighting, place: [{ lat: 32.4, lng: -86.3 }] } })
+    stubFetch({ "john.json": { ...johnSighting, place: { locations: [{ lat: 32.4, lng: -86.3 }] } } })
     const element = await mounted()
     const shadow = element.shadowRoot!
     ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
@@ -1417,13 +1417,13 @@ describe("Where a recording opens, as the element's attributes say it", () => {
     document.body.innerHTML = ""
   })
 
-  const recording = (time?: Record<string, number>) => ({
-    version: 1 as const,
+  const recording = (time?: string) => ({
+    version: 4 as const,
     observer: { id: "w", title: "A witness" },
     ...(time ? { time } : {}),
     timeline: { keyframes: [{ t: 0, shapes: [] }, { t: 600_000, shapes: [] }] }
   })
-  const openedAt = (attributes: Record<string, string>, time?: Record<string, number>): number => {
+  const openedAt = (attributes: Record<string, string>, time?: string): number => {
     const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
     for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value)
     document.body.appendChild(element)
@@ -1448,16 +1448,16 @@ describe("Where a recording opens, as the element's attributes say it", () => {
   })
 
   it("takes start-clock as a time said during the observation, placed by the recording's own start", () => {
-    const start = { year: 2026, month: 8, day: 11, hour: 2, minute: 30 }
+    const start = "2026-08-11T02:30"
     expect(openedAt({ "start-clock": "02:33:15" }, start)).toBe(195)
     expect(openedAt({ "start-clock": "2026-08-11T02:31" }, start)).toBe(60)
   })
 
   it("lets the time said win over the length when the recording can place it, and falls back on the length when it cannot", () => {
-    const start = { year: 2026, month: 8, day: 11, hour: 2, minute: 30 }
+    const start = "2026-08-11T02:30"
     expect(openedAt({ "start-clock": "02:33", "start-time": "10" }, start)).toBe(180)
     // A recording with no time of day gives a time said nothing to count from.
-    expect(openedAt({ "start-clock": "02:33", "start-time": "10" }, { year: 2026 })).toBe(10)
+    expect(openedAt({ "start-clock": "02:33", "start-time": "10" }, "2026")).toBe(10)
     expect(openedAt({ "start-clock": "02:33" })).toBe(0)
   })
 })

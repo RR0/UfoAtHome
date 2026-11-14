@@ -296,7 +296,7 @@ describe("<rr0-case>, a case read", () => {
     files[new URL("case.json", location.href).href] = caseJson
     files[new URL("observer.json", location.href).href] = account
     files[new URL("reading.json", location.href).href] = account
-    files[new URL("interview.json", location.href).href] = { version: 1, id: "i1", language: "en", speakers: {}, segments: [] }
+    files[new URL("interview.json", location.href).href] = { version: 4, id: "i1", language: "en", speakers: {}, segments: [] }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
       ok: true, status: 200, json: () => Promise.resolve(files[url]), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
     })))
@@ -321,6 +321,24 @@ describe("<rr0-case>, a case read", () => {
     // And the button gives the chronology back.
     root.getElementById("timeline-button")!.click()
     expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(false)
+  })
+
+  it("lights the card a reference points at while it is pointed at, and lets the players pick only when the history is away", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    // The observation names the interview it was told in: pointing at that name lights the interview's own card, and no other.
+    const ref = root.querySelector<HTMLButtonElement>(".event-ref")!
+    ref.dispatchEvent(new Event("mouseenter"))
+    expect([...root.querySelectorAll<HTMLElement>(".event.aimed")].map(card => card.dataset.at)).toEqual(["2"])
+    ref.dispatchEvent(new Event("mouseleave"))
+    expect(root.querySelectorAll(".event.aimed").length).toBe(0)
+    // While the history is there, it is the way through the case: the player says nothing of the other witnesses or readings.
+    const player = element.player!
+    expect(player.hasAttribute("hide-pickers")).toBe(true)
+    root.getElementById("timeline-button")!.click()
+    expect(player.hasAttribute("hide-pickers")).toBe(false)
+    root.getElementById("timeline-button")!.click()
+    expect(player.hasAttribute("hide-pickers")).toBe(true)
   })
 
   it("opens everything the case holds when the page asks for it", async () => {

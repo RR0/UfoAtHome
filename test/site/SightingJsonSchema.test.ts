@@ -27,7 +27,7 @@ describe("sighting.schema.json", () => {
   })
 
   it("rejects a word a closed list does not have", () => {
-    expect(validate({ version: 1, timeline: { keyframes: [] }, account: { source: "rumour" } })).toBe(false)
+    expect(validate({ version: 4, timeline: { keyframes: [] }, account: { source: "rumour" } })).toBe(false)
   })
 
   it("accepts any value wrapped with its provenance", () => {
