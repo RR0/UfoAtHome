@@ -245,6 +245,28 @@ describe("UfoElement", () => {
     expect(seekInput.value).toBe("0")
   })
 
+  // Dicté : the preview over the bar is for passing over it; while the bar is dragged the scene shows the instant, and the preview hid it.
+  it("shows the preview while the pointer passes over the bar, and hides it while the bar is dragged", async () => {
+    const element = await mount()
+    element.sightingData = {
+      version: 4,
+      timeline: {
+        keyframes: [
+          { t: 0, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 0, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] },
+          { t: 1000, shapes: [{ sourceId: "ufo-1", shape: { kind: "oval", bounds: { x: 10, y: 0, width: 10, height: 10 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false } }] }
+        ]
+      }
+    }
+    const root = element.shadowRoot!
+    const seekInput = root.getElementById("seek") as HTMLInputElement
+    seekInput.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 20, right: 200, bottom: 20, x: 0, y: 0, toJSON: () => ({}) })
+    const preview = root.getElementById("seek-preview")!
+    seekInput.dispatchEvent(new MouseEvent("pointermove", { clientX: 100, clientY: 10, buttons: 0 }))
+    expect(preview.hidden).toBe(false)
+    seekInput.dispatchEvent(new MouseEvent("pointermove", { clientX: 120, clientY: 10, buttons: 1 }))
+    expect(preview.hidden).toBe(true)
+  })
+
   it("currentTime/playbackState reflect seek() and play/pause/stop", async () => {
     const element = await mount()
     element.sightingData = {

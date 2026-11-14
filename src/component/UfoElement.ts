@@ -923,6 +923,8 @@ export class UfoElement extends HTMLElement {
       this.suspendForScrub()
       this.seekSnapArmed = true
       this.nameMarkUnder(event)
+      // The scene itself follows the drag: a preview over it would hide the very picture being scrolled through (dicté).
+      this.seekPreview.hidden = true
       this.beginTouchScrub(event)
     })
     this.seekInput.addEventListener("pointerup", event => { this.seekSnapArmed = false; this.endTouchScrub(event) })
@@ -1954,6 +1956,11 @@ export class UfoElement extends HTMLElement {
    * name and time, and the picture when whoever composes this element can draw one.
    */
   private hoverSeek(event: PointerEvent): void {
+    // Only while the pointer passes over the bar: during a drag the scene shows the instant itself, and the preview would cover it.
+    if (event.buttons !== 0) {
+      this.seekPreview.hidden = true
+      return
+    }
     const rect = this.seekInput.getBoundingClientRect()
     const duration = this.player.seekableDuration
     if (rect.width <= 0 || duration <= 0) return
