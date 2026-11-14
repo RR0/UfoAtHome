@@ -220,6 +220,17 @@ vi.mock("../../src/component/messages/ShareMessages_en.js", async original => {
   return { shareMessages_en: WordsAudit.pseudo(actual.shareMessages_en) }
 })
 
+vi.mock("../../src/component/messages/CaseExportMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/CaseExportMessages_en.js")>()
+  return { caseExportMessages_en: WordsAudit.pseudo(actual.caseExportMessages_en) }
+})
+vi.mock("../../src/component/messages/ReadingSensitivityMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/component/messages/ReadingSensitivityMessages_en.js")>()
+  return { readingSensitivityMessages_en: WordsAudit.pseudo(actual.readingSensitivityMessages_en) }
+})
+
 const { register } = await import("../../src/component/CaseEditorElement.js")
 register()
 
