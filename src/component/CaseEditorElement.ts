@@ -139,6 +139,11 @@ const TEMPLATE = `
   .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
+  /* The case's title keeps room to be read on a line or two, and the actions go under it when they do not fit beside it: squeezed by them,
+     a title broke into one word a line. */
+  .editor-head { flex-wrap: wrap; row-gap: 10px; }
+  .editor-head .head-text.title { flex: 1 1 14em; }
+  .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
   .editor-head .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-dim); }
   .editor-head .dirty { display: none !important; }
   /* Two tabs, underlined. */
