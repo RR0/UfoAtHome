@@ -48,16 +48,15 @@ export class CaseElement extends HTMLElement {
   }
 
   private readonly shadow: ShadowRoot
-  private readonly stage: SightingElement
-  private readonly interviewHost: HTMLElement
+  private readonly openEvents: HTMLElement
   private readonly eventList: HTMLElement
+  /** What is open, by the event's place in `entries`: the element showing it, a player or a dialogue reader. */
+  private readonly shown = new Map<number, HTMLElement>()
   private messages?: CaseMessages
   private said = new SaidTexts(["en"])
   private json?: CaseJson
   private url?: string
   private entries: CaseEntry[] = []
-  /** What is being read: an event of the case, by its place in `entries`. */
-  private at = 0
 
   constructor() {
     super()
@@ -68,27 +67,22 @@ export class CaseElement extends HTMLElement {
     frame.innerHTML = caseHtml
     this.shadow.append(style, frame)
     registerSighting()
-    this.stage = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
-    // This element names the case above it: the player would otherwise say it a second time on its own toolbar.
-    this.stage.setAttribute(CASE_NAMED_ATTRIBUTE, "")
-    this.byId("stage-box").append(this.stage)
     this.eventList = this.byId("case-events")
-    this.interviewHost = this.byId("interview-host")
-    // What the page around it listens for, as it would on the player itself: the wrapper is not a wall.
-    this.stage.addEventListener(OBSERVER_CHANGE_EVENT, event => {
-      this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: (event as CustomEvent).detail }))
-    })
-    // A passage of a dialogue that tells of a moment of the observation takes the player to it.
-    this.interviewHost.addEventListener(INTERVIEW_SEEK_EVENT, event => {
+    this.openEvents = this.byId("open-events")
+    // A passage of a dialogue that tells of a moment of an observation takes that observation there, opening it if it was shut.
+    this.openEvents.addEventListener(INTERVIEW_SEEK_EVENT, event => {
       const { at, sighting } = (event as CustomEvent<{ at: number, sighting?: string }>).detail
-      const observation = this.entries.findIndex(entry => entry.kind !== "interview"
-        && (entry.event.id === sighting || entry.url?.endsWith(`/${String(sighting)}.json`)))
-      if (observation >= 0) this.read(observation)
-      this.stage.seekTo(at, sighting)
+      void this.seekObservation(at, sighting)
     })
     this.byId("edit").addEventListener("click", () => {
       const where = this.editorUrl()
       if (where) window.open(where, "_blank", "noopener")
+    })
+    const info = this.byId("info")
+    info.addEventListener("click", () => {
+      const summary = this.byId("case-summary")
+      summary.hidden = !summary.hidden
+      info.setAttribute("aria-expanded", String(!summary.hidden))
     })
   }
 
@@ -106,8 +100,11 @@ export class CaseElement extends HTMLElement {
   attributeChangedCallback(name: string, old: string | null, value: string | null): void {
     if (!this.isConnected || value === old) return
     if (name === "src" && value) void this.load(value)
-    else if (value === null) this.stage.removeAttribute(name)
-    else this.stage.setAttribute(name, value)
+    // Passed on to every player open, and to the next one opened (see open): the host says it of the case, not of one recording.
+    else for (const player of this.players()) {
+      if (value === null) player.removeAttribute(name)
+      else player.setAttribute(name, value)
+    }
   }
 
   private async loadMessages(): Promise<void> {
@@ -126,9 +123,12 @@ export class CaseElement extends HTMLElement {
     this.json = json
     this.entries = (json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined)
       .sort((a, b) => a.when.localeCompare(b.when))
-    this.at = Math.max(0, this.entries.findIndex(entry => entry.kind !== "interview"))
-    this.stage.setAttribute("src", this.url)
+    this.shown.clear()
+    this.openEvents.replaceChildren()
     this.draw()
+    // Opened on its first observation, as the editor opens on one: a case shown with nothing in it says nothing.
+    const first = this.entries.findIndex(entry => entry.kind !== "interview")
+    if (first >= 0) void this.open(first)
   }
 
   private entryOf(event: CaseEventJson): CaseEntry | undefined {
@@ -145,9 +145,10 @@ export class CaseElement extends HTMLElement {
     }
   }
 
-  /** What the player and the editor are pointed at: the event being read, when it has a recording. */
+  /** What the editor is pointed at: the first recording open, else the case alone. */
   private get reading(): CaseEntry | undefined {
-    return this.entries[this.at]
+    const open = [...this.shown.keys()].sort((a, b) => a - b).map(at => this.entries[at])
+    return open.find(entry => entry?.kind !== "interview")
   }
 
   private editorUrl(): string | undefined {
@@ -159,30 +160,74 @@ export class CaseElement extends HTMLElement {
     return editor.href
   }
 
-  /** Reads the event at `at`: an observation or a reading in the player, an interview in the dialogue reader. */
-  private read(at: number): void {
+  /** Opens the event at `at`, or shuts it: what is open is shown below, in the order of time, however many there are. */
+  private async toggle(at: number): Promise<void> {
+    if (this.shown.has(at)) this.shut(at)
+    else await this.open(at)
+  }
+
+  /**
+   * Shows the event at `at` under the chronology: a recording in a player of its own, an interview in the dialogue reader, which is
+   * fetched only now. Several events stay open together — an observation beside the interview it was given in is the whole point.
+   */
+  private async open(at: number): Promise<void> {
     const entry = this.entries[at]
-    if (!entry) return
-    this.at = at
-    if (entry.kind === "interview") void this.showInterview(entry)
-    else {
-      this.interviewHost.replaceChildren()
-      this.byId("interview-box").hidden = true
-      // By the id the case gives it, else by its file: what the player takes to pick one of a case's recordings.
-      this.stage.setAttribute(OBSERVER_ATTRIBUTE, entry.event.id ?? entry.url ?? "")
+    if (!entry || !entry.url || this.shown.has(at)) return
+    const block = document.createElement("section")
+    block.className = "open-event"
+    block.dataset.at = String(at)
+    // A player names its own observation on its toolbar; the dialogue reader names nothing, so the block says which interview it is.
+    if (entry.kind === "interview") {
+      const title = document.createElement("p")
+      title.className = "open-title"
+      title.textContent = entry.title
+      block.append(title)
     }
+    if (entry.kind === "interview") {
+      const { register } = await import("./InterviewElement.js")
+      register()
+      const reader = document.createElement("rr0-interview")
+      reader.setAttribute("src", entry.url)
+      block.append(reader)
+    } else {
+      const player = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+      // Pointed at the case, not at the file alone: a recording read from its case carries the case's readings and its other witnesses.
+      player.setAttribute(CASE_NAMED_ATTRIBUTE, "")
+      player.setAttribute("src", this.url ?? "")
+      player.setAttribute(OBSERVER_ATTRIBUTE, entry.event.id ?? entry.url)
+      // What a page around this element listens for, as it would on the player itself: the wrapper is not a wall.
+      player.addEventListener(OBSERVER_CHANGE_EVENT, event => {
+        this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: (event as CustomEvent).detail }))
+      })
+      block.append(player)
+    }
+    this.shown.set(at, block)
+    this.order()
     this.draw()
   }
 
-  /** The dialogue of an interview, its reader fetched only now: a case nobody opens an interview in never loads it. */
-  private async showInterview(entry: CaseEntry): Promise<void> {
-    if (!entry.url) return
-    this.byId("interview-box").hidden = false
-    const { register } = await import("./InterviewElement.js")
-    register()
-    const reader = document.createElement("rr0-interview")
-    reader.setAttribute("src", entry.url)
-    this.interviewHost.replaceChildren(reader)
+  private shut(at: number): void {
+    this.shown.get(at)?.remove()
+    this.shown.delete(at)
+    this.draw()
+  }
+
+  /** What is open, in the order of time: the order they were opened in is the reader's doing, not the case's. */
+  private order(): void {
+    const blocks = [...this.shown.entries()].sort(([a], [b]) => a - b).map(([, block]) => block)
+    this.openEvents.replaceChildren(...blocks)
+  }
+
+  /** Takes the observation `sighting` names to `at` seconds, opening it when it was shut: what a passage of an interview leads to. */
+  private async seekObservation(at: number, sighting?: string): Promise<void> {
+    const index = this.entries.findIndex(entry => entry.kind !== "interview"
+      && (entry.event.id === sighting || (sighting !== undefined && entry.url?.endsWith(`/${sighting}.json`))))
+    const shown = index >= 0 ? index : this.entries.findIndex(entry => entry.kind !== "interview")
+    if (shown < 0) return
+    if (!this.shown.has(shown)) await this.open(shown)
+    const player = this.shown.get(shown)?.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null
+    player?.seekTo(at, sighting)
+    this.shown.get(shown)?.scrollIntoView({ block: "nearest", behavior: "smooth" })
   }
 
   /** The names an event's authors go by, the last two joined by the language's own word. */
@@ -217,14 +262,19 @@ export class CaseElement extends HTMLElement {
     if (!m || !json) return
     this.byId("case-kind").textContent = m.caseHeading
     this.byId("case-title").textContent = this.said.read(json.title as SaidText | undefined) ?? json.id ?? ""
+    // What the case says of itself is behind the i, as a recording's is behind the player's own: a reader who wants it asks for it.
     const summary = this.said.read((json as { summary?: unknown }).summary as SaidText | undefined) ?? ""
     const summaryElement = this.byId("case-summary")
     summaryElement.textContent = summary
-    summaryElement.hidden = summary === ""
+    const info = this.byId("info")
+    info.hidden = summary === ""
+    info.title = m.caseSummary
+    info.setAttribute("aria-label", m.caseSummary)
+    if (summary === "") summaryElement.hidden = true
     this.byId("events-heading").textContent = m.eventsHeading
     const edit = this.byId("edit")
-    edit.textContent = m.editCase
     edit.title = m.editCase
+    edit.setAttribute("aria-label", m.editCase)
     this.eventList.replaceChildren(...this.entries.map((entry, index) => this.card(entry, index, m)))
   }
 
@@ -233,7 +283,7 @@ export class CaseElement extends HTMLElement {
     item.className = "event"
     item.dataset.kind = entry.kind
     item.dataset.at = String(index)
-    if (index === this.at) item.dataset.reading = ""
+    if (this.shown.has(index)) item.dataset.open = ""
     const mark = document.createElement("span")
     mark.className = "event-mark"
     mark.innerHTML = { observation: Icons.WITNESS, reading: Icons.SUMMARY, interview: Icons.INTERVIEW }[entry.kind]
@@ -247,7 +297,7 @@ export class CaseElement extends HTMLElement {
     open.className = "event-open"
     open.textContent = entry.title
     open.title = m.openEvent
-    open.addEventListener("click", () => this.read(index))
+    open.addEventListener("click", () => void this.toggle(index))
     const meta = document.createElement("span")
     meta.className = "event-meta"
     meta.textContent = entry.when.replace("T", " ")
@@ -261,7 +311,7 @@ export class CaseElement extends HTMLElement {
         link.className = "event-ref"
         link.textContent = this.entries[to].title
         link.title = m.openEvent
-        link.addEventListener("click", () => this.read(to))
+        link.addEventListener("click", () => void this.open(to))
         return rank === 0 ? [link] : [document.createTextNode(` ${m.linkAnd} `), link]
       }))
     }
@@ -274,14 +324,21 @@ export class CaseElement extends HTMLElement {
     return item
   }
 
-  /** The recording the player is showing: what a page around this element reads, as it would off the player. */
-  get sightingData(): unknown {
-    return this.stage.sightingData
+  /** Every player open, in the order of time. */
+  private players(): SightingElement[] {
+    return [...this.shown.entries()].sort(([a], [b]) => a - b)
+      .map(([, block]) => block.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null)
+      .filter((player): player is SightingElement => player !== null)
   }
 
-  /** The player it wraps, for a page that has to reach it (the share dialog, a start time). */
-  get player(): SightingElement {
-    return this.stage
+  /** The recording the first player open is showing: what a page around this element reads, as it would off a player. */
+  get sightingData(): unknown {
+    return this.players()[0]?.sightingData
+  }
+
+  /** The first player open, for a page that has to reach one (the share dialog, a start time). */
+  get player(): SightingElement | undefined {
+    return this.players()[0]
   }
 }
 

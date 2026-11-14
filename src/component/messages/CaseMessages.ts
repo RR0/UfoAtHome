@@ -18,6 +18,8 @@ export interface CaseMessages {
   byAuthor: string
   /** Between the last two things a card names. */
   linkAnd: string
+  /** What the i opens: what the case says of itself. */
+  caseSummary: string
   /** The way from reading this case to editing it, on the event being read. */
   editCase: string
 }

@@ -254,7 +254,7 @@ export class SightingElement extends HTMLElement {
     this.infoCreditsToggle = this.shadow.getElementById("info-credits-toggle") as HTMLButtonElement
     this.infoCreditsList = this.shadow.getElementById("info-credits-list")!
     this.infoCloseButton = this.shadow.getElementById("info-close") as HTMLButtonElement
-    this.labelsToggle = this.shadow.getElementById("info-labels-toggle") as HTMLButtonElement
+    this.labelsToggle = this.shadow.getElementById("labels-button") as HTMLButtonElement
     this.paramSummary = this.shadow.getElementById("param-summary")!
     this.labelsToggle.addEventListener("click", () => { this.showLabels = !this.showLabels })
     // Among the player's own buttons under the picture, as on the video sites — not in this header.
@@ -1480,7 +1480,10 @@ export class SightingElement extends HTMLElement {
   }
 
   private syncLabelsToggle(): void {
-    this.labelsToggle.textContent = this.labelsShown ? (this.messages?.hideLabels ?? "") : (this.messages?.showLabels ?? "")
+    // An icon on the toolbar now, not a line in the panel: what it would say is its title.
+    const says = this.labelsShown ? (this.messages?.hideLabels ?? "") : (this.messages?.showLabels ?? "")
+    this.labelsToggle.title = says
+    this.labelsToggle.setAttribute("aria-label", says)
     this.labelsToggle.setAttribute("aria-pressed", String(this.labelsShown))
   }
 

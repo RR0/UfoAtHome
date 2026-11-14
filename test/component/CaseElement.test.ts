@@ -200,7 +200,10 @@ const mount = async (src = "case.json"): Promise<CaseElement> => {
   const element = document.createElement(CASE_ELEMENT_NAME) as CaseElement
   element.setAttribute("src", src)
   document.body.appendChild(element)
-  await new Promise(resolve => setTimeout(resolve, 40))
+  // Waited for, not timed: the words are a chunk of their own, and a cold runner takes its time over the first import.
+  for (let left = 400; left > 0 && element.shadowRoot!.getElementById("case-title")!.textContent === ""; left--) {
+    await new Promise(resolve => setTimeout(resolve, 5))
+  }
   return element
 }
 
@@ -233,25 +236,43 @@ describe("<rr0-case>, a case read", () => {
     expect(told.textContent).toContain("Told in Interview of Q. B.")
   })
 
-  it("reads an observation in the player it wraps, and an interview in the dialogue reader", async () => {
+  it("opens an event, shuts it again, and keeps several open in the order of time", async () => {
     const element = await mount()
     const root = element.shadowRoot!
     const cards = () => [...root.querySelectorAll<HTMLElement>(".event")]
-    // It opens on the first observation, which the player is pointed at.
-    expect(cards()[0].dataset.reading).toBe("")
-    expect(element.player.getAttribute("src")).toBe(new URL("case.json", location.href).href)
-    cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
-    // The dialogue reader is fetched on this click: waited for, not timed, since a loaded runner takes its time.
+    const open = () => [...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)
     const waitFor = async (check: () => boolean) => {
       for (let left = 200; left > 0 && !check(); left--) await new Promise(resolve => setTimeout(resolve, 5))
       expect(check()).toBe(true)
     }
-    await waitFor(() => root.querySelector("#interview-host rr0-interview") !== null)
-    expect(root.getElementById("interview-box")!.hidden).toBe(false)
-    expect(root.querySelector("#interview-host rr0-interview")!.getAttribute("src")).toBe(new URL("interview.json", location.href).href)
-    // Back to a recording: the dialogue goes, and the player is told which one to show.
+    // It opens on the first observation, and its card says so.
+    expect(open()).toEqual(["0"])
+    expect(cards()[0].dataset.open).toBe("")
+    expect(element.player!.getAttribute("observer")).toBe("qb")
+    // The interview opens beside it, under it, since it comes later in time.
+    cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    await waitFor(() => root.querySelector(".open-event rr0-interview") !== null)
+    expect(open()).toEqual(["0", "2"])
+    expect(root.querySelector(".open-event rr0-interview")!.getAttribute("src")).toBe(new URL("interview.json", location.href).href)
+    // The reading, opened last, takes its own place in time: between the observation and the interview.
     cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
-    expect(root.getElementById("interview-box")!.hidden).toBe(true)
-    expect(element.player.getAttribute("observer")).toBe("reading")
+    await waitFor(() => open().length === 3)
+    expect(open()).toEqual(["0", "1", "2"])
+    // Choosing an open event again shuts it.
+    cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    expect(open()).toEqual(["1", "2"])
+    expect(cards()[0].dataset.open).toBeUndefined()
+  })
+
+  it("says of itself only what the i asks for, and leads to the editor on what is open", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const summary = root.getElementById("case-summary")!
+    expect(summary.hidden).toBe(true)
+    root.getElementById("info")!.click()
+    expect(summary.hidden).toBe(false)
+    expect(summary.textContent).toBe("A night in Normandy.")
+    root.getElementById("info")!.click()
+    expect(summary.hidden).toBe(true)
   })
 })

@@ -330,14 +330,14 @@ describe("SightingElement", () => {
     await new Promise(resolve => setTimeout(resolve, 0))
 
     const account = element.shadowRoot!.getElementById("account") as HTMLElement
-    expect(account.textContent).toContain("Account by")
+    expect(account.textContent).toContain("Observation of")
     expect(account.textContent).toContain("Clarence Chiles")
   })
 
   it("falls back to observer.id, and then to a place in the list — never to the URL", async () => {
     // The URL used to be the last resort, and it was a bad one: several recordings this component
     // is pointed at have no observer at all (a sky set up to show a halo is not account), and
-    // "Account by /demo-data/sky-test-halos.json" read as a fault rather than as a name.
+    // "Observation of /demo-data/sky-test-halos.json" read as a fault rather than as a name.
     const anonymousById = { version: 1 as const, observer: { id: "w2" }, timeline: { keyframes: [] } }
     const anonymousNoId = { version: 1 as const, timeline: { keyframes: [] } }
     stubFetch({ "a.json": johnSighting, "b.json": anonymousById, "c.json": anonymousNoId })
@@ -351,7 +351,7 @@ describe("SightingElement", () => {
   })
 
   it("says nothing at all where a single recording names no observer", async () => {
-    // A sky with no observer is not an account, so the whole "Account by …" line goes — the ?
+    // A sky with no observer is not an account, so the whole "Observation of …" line goes — the ?
     // button that carries the observation's own metadata stays either way.
     const noObserver = { version: 1 as const, id: "sky-test-halos", timeline: { keyframes: [] } }
     stubFetch({ "sky.json": noObserver, "john.json": johnSighting })
@@ -625,13 +625,13 @@ describe("SightingElement", () => {
     ;(shadow.getElementById("info-button") as HTMLButtonElement).click()
     expect(rows()).toContain("A case")
     // Even while the strip states the rest: the strip reads the recording, which cannot say it.
-    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    ;(shadow.getElementById("labels-button") as HTMLButtonElement).click()
     expect(rows()).toContain("A case")
 
     // The same recording given directly belongs to no case at all.
     element.setAttribute("src", "john.json")
     await new Promise(resolve => setTimeout(resolve, 0))
-    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    ;(shadow.getElementById("labels-button") as HTMLButtonElement).click()
     expect(rows()).not.toContain("A case")
   })
 
@@ -859,11 +859,11 @@ describe("SightingElement i18n", () => {
     vi.unstubAllGlobals()
   })
 
-  it("loads the French 'Compte rendu de' prefix when navigator.languages prefers fr", async () => {
+  it("loads the French 'Observation de' prefix when navigator.languages prefers fr", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["fr-FR", "fr"])
     const element = mount()
 
-    await waitFor(() => element.shadowRoot!.getElementById("account-prefix")!.textContent === "Compte rendu de")
+    await waitFor(() => element.shadowRoot!.getElementById("account-prefix")!.textContent === "Observation de")
 
     spy.mockRestore()
   })
@@ -911,16 +911,16 @@ describe("SightingElement i18n", () => {
     // Long enough for a French decision taken at construction to have landed, had it survived.
     await new Promise(resolve => setTimeout(resolve, 20))
     expect(description(element)).toContain("A craft standing on its legs")
-    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Account by")
+    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Observation of")
     spy.mockRestore()
   })
 
-  it("falls back to the English 'Account by' prefix when navigator.languages has no supported match", async () => {
+  it("falls back to the English 'Observation of' prefix when navigator.languages has no supported match", async () => {
     const spy = vi.spyOn(navigator, "languages", "get").mockReturnValue(["de-DE", "de"])
     const element = mount()
     await new Promise(resolve => setTimeout(resolve, 20))
 
-    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Account by")
+    expect(element.shadowRoot!.getElementById("account-prefix")!.textContent).toBe("Observation of")
     spy.mockRestore()
   })
 })
@@ -1304,7 +1304,7 @@ describe("SightingElement parameter labels", () => {
    */
   it("reports what the reader did, and can be reopened afterwards", async () => {
     const element = await mounted(true)
-    ;(element.shadowRoot!.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    ;(element.shadowRoot!.getElementById("labels-button") as HTMLButtonElement).click()
     expect(element.showLabels).toBe(false)
     expect(element.hasAttribute("show-labels")).toBe(false)
 
@@ -1313,9 +1313,9 @@ describe("SightingElement parameter labels", () => {
   })
 
   // Same switch as the attribute, so a reader can always close what a page opened.
-  it("lets the reader turn it on and off from the info panel", async () => {
+  it("lets the reader turn it on and off from the toolbar, beside the editor and the panel", async () => {
     const element = await mounted()
-    const toggle = element.shadowRoot!.getElementById("info-labels-toggle") as HTMLButtonElement
+    const toggle = element.shadowRoot!.getElementById("labels-button") as HTMLButtonElement
     expect(toggle.getAttribute("aria-pressed")).toBe("false")
 
     toggle.click()
@@ -1339,7 +1339,7 @@ describe("SightingElement parameter labels", () => {
     const rows = (): string[] => [...shadow.querySelectorAll("#info-observation-list dt")].map(dt => dt.textContent!)
     expect(rows()).toContain("Location")
 
-    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    ;(shadow.getElementById("labels-button") as HTMLButtonElement).click()
     expect(rows()).not.toContain("Location")
     expect(rows()).not.toContain("Date")
     // Nothing is left here at all only because this fixture states no description; a recording
@@ -1347,7 +1347,7 @@ describe("SightingElement parameter labels", () => {
 
     // And gives them back. The toggle lives inside the panel it re-cuts, so an earlier version
     // that only repopulated "while the panel is open" left these rows gone for good.
-    ;(shadow.getElementById("info-labels-toggle") as HTMLButtonElement).click()
+    ;(shadow.getElementById("labels-button") as HTMLButtonElement).click()
     expect(rows()).toContain("Location")
   })
 

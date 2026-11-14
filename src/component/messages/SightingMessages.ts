@@ -7,6 +7,7 @@ import type { SightingLabels } from "./SightingLabels.js"
 /* `tags` is not repeated here: SightingLabels already names that field, and one string with two
  * homes is one string that can end up translated two ways. */
 export interface SightingMessages extends SightingLabels {
+  /** Before the witness's name on the toolbar: "Observation of Q. B.", as a case calls one of its observations. */
   accountBy: string
   /** A listed observer with no name of any kind in their own recording, `{n}` being their place in
    * the list. Only ever needed for a MANIFEST — a single unnamed observer gets no line at all, see

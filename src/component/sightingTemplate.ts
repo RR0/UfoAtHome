@@ -25,6 +25,9 @@ export const html = `
        behind the version link. Hidden for a recording with no address (set by script, pasted),
        which the editor could not open. -->
   <a id="edit-link" class="edit-link" target="_blank" rel="noopener" hidden><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></a>
+  <!-- Turns the strip of what the recording states on and off, beside the way into the editor and the panel: it was behind the panel,
+       which is one place too far for something a reader turns on while watching (dicté). -->
+  <button id="labels-button" class="info-btn" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4.5h11M2.5 8h7M2.5 11.5h9"/></svg></button>
   <button id="info-button" class="info-btn" type="button" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
   <div id="info-panel" class="info-panel" hidden>
     <button id="info-close" class="info-close" type="button">×</button>
@@ -39,11 +42,6 @@ export const html = `
     <div class="info-footer">
       <a id="info-app-link" href="https://ufoathome.org" target="_blank" rel="noopener"></a>
       <span class="info-footer-actions">
-        <!-- Turns the parameter strip under the render on and off. It lives in the panel rather
-             than on the toolbar because it is a preference about how much this player says, not
-             an action on the observation — and because the panel is what it takes over from: with
-             the strip showing, the rows above become a second, poorer copy of it. -->
-        <button id="info-labels-toggle" class="info-credits-toggle" type="button" aria-pressed="false"></button>
         <button id="info-credits-toggle" class="info-credits-toggle" type="button" aria-expanded="false"></button>
       </span>
     </div>

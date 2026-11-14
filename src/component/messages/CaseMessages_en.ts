@@ -11,5 +11,6 @@ export const caseMessages_en: CaseMessages = {
   passagesHeading: "Told in",
   byAuthor: "by",
   linkAnd: "and",
+  caseSummary: "What this case says of itself",
   editCase: "Edit this case"
 }
