@@ -1,6 +1,5 @@
-import { RoadGrade } from "../engine/place/RoadGrade.js"
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
-import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import { RoadGrade } from "../engine/place/RoadGrade.js"
 import { VehicleAudio } from "../audio/VehicleAudio.js"
 import { VehicleHearing } from "../engine/place/VehicleHearing.js"
 import type { AircraftKind } from "../engine/traffic/AircraftModels.js"
@@ -430,7 +429,16 @@ export class SceneElement extends HTMLElement {
   private thunderTimeoutId?: number
 
   /** Bound once so document.removeEventListener (disconnectedCallback) can actually find it. */
-  private readonly handleFullscreenChange = () => this.resizeToStage()
+  private readonly handleFullscreenChange = () => {
+    this.resizeToStage()
+    // Whatever was open in the top layer went under the stage the moment it entered fullscreen, and would have stayed there: shut, so
+    // that the next hover (or the next click on the credits) puts it back on top. See showHoverTooltip.
+    this.hoverTooltip.hidden = true
+    for (const panel of [this.hoverTooltip, this.shadow.getElementById("credits-panel")]) {
+      if (panel && typeof panel.hidePopover === "function" && panel.matches(":popover-open")) panel.hidePopover()
+    }
+    this.tooltipOver = document.fullscreenElement
+  }
 
   /** Identifies whatever's under the pointer (see pickAt) — a celestial body, a decor object, or (checked
    * first) a visible UFO shape — and shows/moves/hides a text label next to it — an on-demand
@@ -505,6 +513,8 @@ export class SceneElement extends HTMLElement {
   /** Where the pointer last was over the picture, while it is: what is under it is asked again at each frame drawn while playing, a ghost
    * and its light moving under a still pointer (see handleTimeUpdate). */
   private lastHover?: { clientX: number, clientY: number, altKey: boolean }
+  /** What was fullscreen when the hover label last entered the top layer: it has to enter it again above a new one (see showHoverTooltip). */
+  private tooltipOver: Element | null = null
 
   private hoverAt(event: { clientX: number, clientY: number, altKey: boolean }): void {
     this.sceneRenderer.setCompassHovered(true)
@@ -968,7 +978,15 @@ export class SceneElement extends HTMLElement {
     tooltip.hidden = false
     // In the top layer, once open: hidden stays what hides it again. Not every browser, nor the tests' DOM, has popovers: it is then only a fixed box, and the
     // selector below would throw.
-    if (typeof tooltip.showPopover === "function" && !tooltip.matches(":popover-open")) tooltip.showPopover()
+    if (typeof tooltip.showPopover === "function") {
+      // The top layer is a stack in the order things entered it, and going fullscreen puts the stage in it AFTER this popover — which
+      // stays open between hovers, since leaving only sets `hidden`. The label was then painted UNDER the fullscreen stage, that is to
+      // say nowhere. Shown again when the fullscreen element has changed, it re-enters the top layer above it.
+      const over = document.fullscreenElement
+      if (tooltip.matches(":popover-open") && over !== this.tooltipOver) tooltip.hidePopover()
+      if (!tooltip.matches(":popover-open")) tooltip.showPopover()
+      this.tooltipOver = over
+    }
     const { innerWidth, innerHeight } = window
     // Beside the pointer, and kept in the window: to its left near the right edge, above it near the bottom, the pointer staying on the spot it names.
     const gap = 12
