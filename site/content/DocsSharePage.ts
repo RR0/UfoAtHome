@@ -29,27 +29,27 @@ export class DocsSharePage extends DocsSection {
       it: "Condividere un'osservazione"
     },
     description: {
-      en: "Two ways to let somebody see a reconstruction: a link, or two lines on your own page. "
-        + "Both with a working example you can try and copy.",
-      fr: "Deux façons de faire voir une reconstitution : un lien, ou deux lignes sur votre propre "
-        + "page. Les deux avec un exemple qui marche, à essayer et à copier.",
-      es: "Dos maneras de mostrar una reconstrucción a alguien: un enlace, o dos líneas en tu propia "
-        + "página. Ambas con un ejemplo que funciona, para probar y copiar.",
-      it: "Due modi per far vedere una ricostruzione a qualcuno: un link, o due righe sulla tua "
-        + "pagina. Entrambi con un esempio funzionante, da provare e copiare."
+      en: "Three ways to let somebody see a reconstruction: a link, two lines on your own page, or a video file, "
+        + "with a kit to make it realistic with a video generator. The first two with a working example you can try and copy.",
+      fr: "Trois façons de faire voir une reconstitution : un lien, deux lignes sur votre propre page, ou un fichier "
+        + "vidéo, avec un kit pour la rendre réaliste avec un générateur vidéo. Les deux premières avec un exemple qui marche, à essayer et à copier.",
+      es: "Tres maneras de mostrar una reconstrucción a alguien: un enlace, dos líneas en tu propia página, o un archivo "
+        + "de vídeo, con un kit para hacerla realista con un generador de vídeo. Las dos primeras con un ejemplo que funciona, para probar y copiar.",
+      it: "Tre modi per far vedere una ricostruzione a qualcuno: un link, due righe sulla tua pagina, o un file "
+        + "video, con un kit per renderla realistica con un generatore video. I primi due con un esempio funzionante, da provare e copiare."
     },
     modules: ["/lib/rr0-sighting.mjs"],
     asideFromNav: true
   }
 
   private readonly lede: Said<string> = {
-    en: "Both start from the same thing: a recording, at a URL. Nothing is uploaded here and there "
+    en: "The first two start from the same thing: a recording, at a URL; the third, from the player itself. Nothing is uploaded here and there "
       + "is no account — the file stays yours, wherever you keep it.",
-    fr: "Les deux partent de la même chose : un enregistrement, à une URL. Rien n'est téléversé ici "
+    fr: "Les deux premières partent de la même chose : un enregistrement, à une URL ; la troisième, du lecteur lui-même. Rien n'est téléversé ici "
       + "et il n'y a pas de compte — le fichier reste le vôtre, où que vous le gardiez.",
-    es: "Las dos parten de lo mismo: una grabación, en una URL. Aquí no se sube nada y no hay "
+    es: "Las dos primeras parten de lo mismo: una grabación, en una URL; la tercera, del propio reproductor. Aquí no se sube nada y no hay "
       + "cuenta — el archivo sigue siendo tuyo, dondequiera que lo guardes.",
-    it: "Entrambi partono dalla stessa cosa: una registrazione, a un URL. Qui non si carica nulla e "
+    it: "I primi due partono dalla stessa cosa: una registrazione, a un URL; il terzo, dal lettore stesso. Qui non si carica nulla e "
       + "non c'è alcun account — il file resta tuo, ovunque tu lo tenga."
   }
 
@@ -331,6 +331,42 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>3. As a video file</h2>
+    <p>The player's <strong>Record a video of the observation</strong> button (the camera, among its controls) makes an MP4 of the
+      reconstruction, with its sound, to send or publish wherever a video goes. It opens what the video is made with:</p>
+    <ul>
+      <li><strong>Size</strong>: as on screen, or 720, 1080 or 2160 lines, in the picture's proportions;</li>
+      <li><strong>Caption</strong>, <strong>Time</strong>, <strong>Map</strong>: what of the player's words and map is written over the picture;</li>
+      <li><strong>Start</strong> and <strong>End</strong>: the part of the observation filmed, as the counter reads it (<strong>Here</strong> takes where the playback stands); the whole of it by default.</li>
+    </ul>
+    <p><strong>Record</strong> makes it. Each frame is drawn and waited for, however long it takes, so the video runs at 30 frames a second
+      whatever the machine, and the same recording always makes the same video; the button shows how far it has got, and a click on it
+      stops it. Nothing leaves your browser. The file says what it is: a faint logo in a corner, and in its metadata the observation, the
+      address of the recording and the words <em>a simulation, not a recording of the observation</em>. Only in browsers that can encode
+      video (WebCodecs): elsewhere the button is not shown.</p>
+    <h3>A kit for a video generator</h3>
+    <p>The same panel's <strong>Generative AI kit</strong> button makes, from the same size, start and end, a zip for making a realistic
+      version of the reconstruction with a video generator of your choosing (Runway, Kling, Luma, Veo…), on your own account, without
+      letting it invent the testimony:</p>
+    <ul>
+      <li><code>reference.mp4</code>: the video, with its sound, and nothing written over it (no caption, map, logo or photograph of the place: a generator would redraw them as part of the scene);</li>
+      <li><code>depth.mp4</code>: how far each pixel is, white near, black far and for the sky, on one logarithmic scale from 1 m to 20 km;</li>
+      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: in white, where the phenomenon stands, and the sky;</li>
+      <li><code>first-frame.png</code>, for generators that start from an image;</li>
+      <li><code>prompt.txt</code>: a prompt and a negative prompt written from the recording's own statements only (place, time, the phenomenon as drawn, what happens, the weather), never from the testimony's text, every word of which a generator would draw;</li>
+      <li>instructions in your language, and <code>manifest.json</code>, the provenance.</li>
+    </ul>
+    <p>The reference video guides the generator: its geometry, horizon, framing and motion are to be kept, only the textures made
+      photographic. The phenomenon is rendered by the generator like the rest, so that it has the same grain, blur and light. The mask is
+      what the result is <strong>checked</strong> against: a video whose phenomenon leaves it, changes shape, size, colour or motion, or
+      gains details (portholes, lights, reflections) is rejected. It is never pasted back over the result, which would look stuck on.</p>
+    <p class="small">A generated video is a reconstruction, not evidence. Burn into the whole picture that it is generated, cite the
+      recording, and never show it to a witness before interviewing them: a realistic picture can change what they remember.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
     <h2>What a recording needs to be shareable</h2>
     <p><strong>One thing: a public address.</strong> Anywhere a browser can fetch it from — a static
       site, a file host, a repository's pages. A file on your own disk has no URL anybody else can
@@ -449,6 +485,44 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       (voir <a href="/docs/format/">les versions du format</a>). La case épingle aussi le lien : il se
       termine alors par <code>&amp;v=<var>version</var></code>, et la page qu'il ouvre, celle du jour,
       charge le lecteur ou l'éditeur de cette version au même endroit.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>3. En fichier vidéo</h2>
+    <p>Le bouton <strong>Enregistrer une vidéo de l'observation</strong> du lecteur (la caméra, parmi ses commandes) fait un MP4 de
+      la reconstitution, avec son son, à envoyer ou publier partout où va une vidéo. Il ouvre ce avec quoi la vidéo est faite :</p>
+    <ul>
+      <li><strong>Taille</strong> : comme à l'écran, ou 720, 1080 ou 2160 lignes, dans les proportions de l'image ;</li>
+      <li><strong>Légende</strong>, <strong>Heure</strong>, <strong>Carte</strong> : ce qui, des textes et de la carte du lecteur, est écrit sur l'image ;</li>
+      <li><strong>Début</strong> et <strong>Fin</strong> : la partie de l'observation filmée, comme le compteur l'affiche (<strong>Ici</strong> prend l'endroit où en est la lecture) ; toute l'observation par défaut.</li>
+    </ul>
+    <p><strong>Enregistrer</strong> la fabrique. Chaque image est dessinée et attendue, quel que soit le temps qu'elle prend : la vidéo
+      tourne donc à 30 images par seconde quelle que soit la machine, et le même enregistrement fait toujours la même vidéo. Le bouton
+      affiche où elle en est, et un clic dessus l'arrête. Rien ne quitte votre navigateur. Le fichier dit ce qu'il est : un logo discret
+      dans un coin et, dans ses métadonnées, l'observation, l'adresse de l'enregistrement et la mention <em>une simulation, pas un
+      enregistrement de l'observation</em>. Seulement dans les navigateurs qui savent encoder une vidéo (WebCodecs) : ailleurs, le bouton
+      n'apparaît pas.</p>
+    <h3>Un kit pour générateur vidéo</h3>
+    <p>Le bouton <strong>Kit pour IA générative</strong> du même panneau fait, avec la même taille, le même début et la même fin, un zip
+      pour produire une version réaliste de la reconstitution avec le générateur vidéo de votre choix (Runway, Kling, Luma, Veo…), sur
+      votre propre compte, sans le laisser inventer le témoignage :</p>
+    <ul>
+      <li><code>reference.mp4</code> : la vidéo, avec son son, sans rien d'écrit dessus (ni légende, ni carte, ni logo, ni photo du lieu : un générateur les redessinerait comme faisant partie de la scène) ;</li>
+      <li><code>depth.mp4</code> : la distance de chaque pixel, blanc près, noir loin et pour le ciel, sur une même échelle logarithmique de 1 m à 20 km ;</li>
+      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code> : en blanc, la place du phénomène, et le ciel ;</li>
+      <li><code>first-frame.png</code>, pour les générateurs qui partent d'une image ;</li>
+      <li><code>prompt.txt</code> : un prompt et un prompt négatif écrits à partir des seuls énoncés de l'enregistrement (lieu, heure, phénomène tel que dessiné, ce qui se passe, météo), jamais à partir du texte du témoignage, dont un générateur dessinerait chaque mot ;</li>
+      <li>un mode d'emploi dans votre langue, et <code>manifest.json</code>, la provenance.</li>
+    </ul>
+    <p>La vidéo de référence guide le générateur : sa géométrie, son horizon, son cadrage et son mouvement sont à garder, seules les
+      textures sont rendues photographiques. Le phénomène est rendu par le générateur comme le reste, pour qu'il ait le même grain, le même
+      flou et la même lumière. Le masque sert à <strong>contrôler</strong> le résultat : une vidéo dont le phénomène en sort, change de
+      forme, de taille, de couleur ou de mouvement, ou gagne des détails (hublots, lumières, reflets) est rejetée. Il n'est jamais recollé
+      sur le résultat, où il aurait l'air rapporté.</p>
+    <p class="small">Une vidéo générée est une reconstitution, pas une preuve. Incrustez sur toute l'image qu'elle est générée, citez
+      l'enregistrement, et ne la montrez jamais à un témoin avant de l'avoir interrogé : une image réaliste peut modifier son souvenir.</p>
   </div>
 </section>
 
@@ -579,6 +653,43 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 
 <section class="band">
   <div class="wrap prose-wide">
+    <h2>3. Como archivo de vídeo</h2>
+    <p>El botón <strong>Grabar un vídeo de la observación</strong> del reproductor (la cámara, entre sus controles) hace un MP4
+      de la reconstrucción, con su sonido, para enviarlo o publicarlo dondequiera que vaya un vídeo. Abre aquello con lo que se hace el vídeo:</p>
+    <ul>
+      <li><strong>Tamaño</strong>: como en pantalla, o 720, 1080 o 2160 líneas, en las proporciones de la imagen;</li>
+      <li><strong>Leyenda</strong>, <strong>Hora</strong>, <strong>Mapa</strong>: lo que, de los textos y el mapa del reproductor, se escribe sobre la imagen;</li>
+      <li><strong>Inicio</strong> y <strong>Fin</strong>: la parte de la observación filmada, tal como la muestra el contador (<strong>Aquí</strong> toma el punto en que está la reproducción); toda la observación por defecto.</li>
+    </ul>
+    <p><strong>Grabar</strong> lo fabrica. Cada imagen se dibuja y se espera, tarde lo que tarde: el vídeo va así a 30 imágenes por
+      segundo sea cual sea la máquina, y la misma grabación hace siempre el mismo vídeo. El botón muestra por dónde va, y un clic en él lo
+      detiene. Nada sale de tu navegador. El archivo dice lo que es: un logotipo discreto en una esquina y, en sus metadatos, la
+      observación, la dirección de la grabación y la mención <em>una simulación, no una grabación de la observación</em>. Solo en los
+      navegadores que saben codificar vídeo (WebCodecs): en los demás, el botón no aparece.</p>
+    <h3>Un kit para un generador de vídeo</h3>
+    <p>El botón <strong>Kit para IA generativa</strong> del mismo panel hace, con el mismo tamaño, inicio y fin, un zip para producir una
+      versión realista de la reconstrucción con el generador de vídeo que elijas (Runway, Kling, Luma, Veo…), en tu propia cuenta, sin
+      dejar que invente el testimonio:</p>
+    <ul>
+      <li><code>reference.mp4</code>: el vídeo, con su sonido, sin nada escrito encima (ni leyenda, ni mapa, ni logotipo, ni foto del lugar: un generador los redibujaría como parte de la escena);</li>
+      <li><code>depth.mp4</code>: la distancia de cada píxel, blanco cerca, negro lejos y para el cielo, en una misma escala logarítmica de 1 m a 20 km;</li>
+      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: en blanco, el lugar del fenómeno, y el cielo;</li>
+      <li><code>first-frame.png</code>, para los generadores que parten de una imagen;</li>
+      <li><code>prompt.txt</code>: un prompt y un prompt negativo escritos solo a partir de lo que afirma la grabación (lugar, hora, el fenómeno tal como está dibujado, lo que ocurre, el tiempo), nunca a partir del texto del testimonio, del que un generador dibujaría cada palabra;</li>
+      <li>instrucciones en tu idioma, y <code>manifest.json</code>, la procedencia.</li>
+    </ul>
+    <p>El vídeo de referencia guía al generador: hay que conservar su geometría, su horizonte, su encuadre y su movimiento, y solo hacer
+      fotográficas las texturas. El fenómeno lo reproduce el generador como el resto, para que tenga el mismo grano, el mismo desenfoque y
+      la misma luz. La máscara sirve para <strong>controlar</strong> el resultado: se descarta un vídeo cuyo fenómeno se sale de ella,
+      cambia de forma, tamaño, color o movimiento, o gana detalles (ojos de buey, luces, reflejos). Nunca se vuelve a pegar sobre el
+      resultado, donde parecería añadido.</p>
+    <p class="small">Un vídeo generado es una reconstrucción, no una prueba. Incrusta en toda la imagen que es generado, cita la
+      grabación, y no lo muestres nunca a un testigo antes de haberlo entrevistado: una imagen realista puede modificar su recuerdo.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
     <h2>Lo que necesita una grabación para poder compartirse</h2>
     <p><strong>Una cosa: una dirección pública.</strong> Cualquier lugar desde el que un navegador
       pueda obtenerla — un sitio estático, un alojamiento de archivos, las páginas de un repositorio.
@@ -699,6 +810,43 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <a href="/docs/format/">le versioni del formato</a>). La casella fissa anche il link: termina
       allora con <code>&amp;v=<var>version</var></code>, e la pagina che apre, quella di oggi, carica il
       lettore o l'editor di quella versione dallo stesso posto.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>3. Come file video</h2>
+    <p>Il pulsante <strong>Registrare un video dell'osservazione</strong> del lettore (la videocamera, tra i suoi comandi) fa un MP4
+      della ricostruzione, con il suo sonoro, da inviare o pubblicare ovunque vada un video. Apre ciò con cui il video è fatto:</p>
+    <ul>
+      <li><strong>Dimensione</strong>: come sullo schermo, o 720, 1080 o 2160 righe, nelle proporzioni dell'immagine;</li>
+      <li><strong>Didascalia</strong>, <strong>Ora</strong>, <strong>Mappa</strong>: ciò che, dei testi e della mappa del lettore, è scritto sull'immagine;</li>
+      <li><strong>Inizio</strong> e <strong>Fine</strong>: la parte dell'osservazione filmata, come la mostra il contatore (<strong>Qui</strong> prende il punto in cui è la riproduzione); tutta l'osservazione per impostazione predefinita.</li>
+    </ul>
+    <p><strong>Registra</strong> lo produce. Ogni immagine viene disegnata e attesa, qualunque sia il tempo che richiede: il video va così
+      a 30 immagini al secondo qualunque sia la macchina, e la stessa registrazione fa sempre lo stesso video. Il pulsante mostra a che
+      punto è, e un clic su di esso lo ferma. Nulla lascia il tuo browser. Il file dice che cosa è: un logo discreto in un angolo e, nei
+      suoi metadati, l'osservazione, l'indirizzo della registrazione e la dicitura <em>una simulazione, non una registrazione
+      dell'osservazione</em>. Solo nei browser che sanno codificare un video (WebCodecs): altrove, il pulsante non compare.</p>
+    <h3>Un kit per un generatore video</h3>
+    <p>Il pulsante <strong>Kit per IA generativa</strong> dello stesso pannello fa, con la stessa dimensione, lo stesso inizio e la stessa
+      fine, uno zip per produrre una versione realistica della ricostruzione con il generatore video che preferisci (Runway, Kling, Luma,
+      Veo…), sul tuo account, senza lasciargli inventare la testimonianza:</p>
+    <ul>
+      <li><code>reference.mp4</code>: il video, con il suo sonoro, senza nulla scritto sopra (né didascalia, né mappa, né logo, né foto del luogo: un generatore li ridisegnerebbe come parte della scena);</li>
+      <li><code>depth.mp4</code>: la distanza di ogni pixel, bianco vicino, nero lontano e per il cielo, su una stessa scala logaritmica da 1 m a 20 km;</li>
+      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: in bianco, il posto del fenomeno, e il cielo;</li>
+      <li><code>first-frame.png</code>, per i generatori che partono da un'immagine;</li>
+      <li><code>prompt.txt</code>: un prompt e un prompt negativo scritti solo a partire da ciò che afferma la registrazione (luogo, ora, il fenomeno come è disegnato, ciò che accade, il tempo), mai dal testo della testimonianza, di cui un generatore disegnerebbe ogni parola;</li>
+      <li>le istruzioni nella tua lingua, e <code>manifest.json</code>, la provenienza.</li>
+    </ul>
+    <p>Il video di riferimento guida il generatore: la sua geometria, il suo orizzonte, la sua inquadratura e il suo movimento vanno
+      mantenuti, solo le texture rese fotografiche. Il fenomeno è reso dal generatore come il resto, perché abbia la stessa grana, la stessa
+      sfocatura e la stessa luce. La maschera serve a <strong>controllare</strong> il risultato: un video il cui fenomeno ne esce, cambia
+      forma, dimensione, colore o movimento, o acquista dettagli (oblò, luci, riflessi) viene scartato. Non viene mai reincollata sul
+      risultato, dove sembrerebbe aggiunta.</p>
+    <p class="small">Un video generato è una ricostruzione, non una prova. Sovrimprimi su tutta l'immagine che è generato, cita la
+      registrazione, e non mostrarlo mai a un testimone prima di averlo intervistato: un'immagine realistica può modificarne il ricordo.</p>
   </div>
 </section>
 
