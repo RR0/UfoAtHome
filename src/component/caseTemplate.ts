@@ -97,8 +97,10 @@ export const caseCss = `
 .event-ref { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--rr0-sky, #7fd4ff); font: inherit;
   text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 /* What is open: one block per event, each saying which it is, in the order of time. */
-.open-events { display: grid; gap: 14px; }
-.open-event { display: grid; gap: 6px; }
+/* One column as wide as the case, never as wide as what is in it: an implicit "auto" column grew to the player's own widest content,
+   McMinnville's longest reading in its choice (228 letters), and the stage, 16:9 of that, put the photograph beyond the case's edge. */
+.open-events { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.open-event { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .open-event > .open-title { margin: 0; font: 600 13px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .open-event rr0-interview { padding: 10px 12px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px;
   font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto; }
