@@ -207,14 +207,14 @@ ${cards}
       it: "Ciò che non c'è ancora"
     })[language]}</h2>
     <p>${({
-      en: `Observing from an aircraft, radar propagation anomalies. What each one is waiting
+      en: `Radar propagation anomalies. What that one is waiting
          on is on <a href="/roadmap/">the roadmap</a>.`,
-      fr: `L'observation depuis un avion, les anomalies de propagation radar.
-         Le détail, et ce que chacun attend, est sur <a href="/roadmap/">la page des futures évolutions</a>.`,
-      es: `La observación desde un avión, las anomalías de propagación del radar. Lo que
-         espera cada una está en <a href="/roadmap/">la hoja de ruta</a>.`,
-      it: `L'osservazione da un aereo, le anomalie di propagazione radar. Ciò che ciascuna
-         aspetta è nella <a href="/roadmap/">tabella di marcia</a>.`
+      fr: `Les anomalies de propagation radar.
+         Le détail, et ce qu'elles attendent, est sur <a href="/roadmap/">la page des futures évolutions</a>.`,
+      es: `Las anomalías de propagación del radar. Lo que
+         esperan está en <a href="/roadmap/">la hoja de ruta</a>.`,
+      it: `Le anomalie di propagazione radar. Ciò che
+         aspettano è nella <a href="/roadmap/">tabella di marcia</a>.`
     })[language]}</p>
   </div>
 </section>
