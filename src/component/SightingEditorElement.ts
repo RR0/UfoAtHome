@@ -3505,6 +3505,9 @@ export class SightingEditorElement extends HTMLElement {
         input.autocomplete = "off"
         input.spellcheck = false
         input.placeholder = this.said.read(setting.placeholder) ?? ""
+        // At least as wide as its placeholder, in whichever language it came: a field sized to its value says nothing of the words
+        // shown while it is empty ("only if your key spans several" was cut off; the French, longer, more so).
+        if (input.placeholder) input.style.minWidth = `min(${input.placeholder.length + 3}ch, 100%)`
       }
       input.id = `narrative-${setting.id}`
       input.title = this.said.read(setting.hint) ?? ""

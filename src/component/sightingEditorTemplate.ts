@@ -1395,13 +1395,20 @@ select.weather-field:disabled {
 .narrative-settings {
   display: contents;
 }
+/* Each beside its name, as every field of the row: a field that is too long for what is left moves to the next line whole. */
+.narrative-settings > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  max-width: 100%;
+  white-space: nowrap;
+}
 #narrative-key {
   width: 16em;
 }
-/* As wide as what it says, its placeholder while empty: at a fixed 14em, "only if your key spans several" was cut off, French more so. */
+/* As wide as what it says: its value as it is typed, and its placeholder while empty (a minimum set where it is built). */
 #narrative-workspace {
   field-sizing: content;
-  min-width: 14em;
   max-width: 100%;
 }
 /* A failure has to be visible without opening a console. The status line carries three quite
