@@ -19,11 +19,13 @@ import subprocess
 class RecordingFiles:
     """Writes the recordings of a case, keeping what is not the generator's to state and bringing them to the current format version."""
 
-    #: What other tools add to a recording after its generator wrote it, and what the generator must therefore not take away.
-    KEPT = ("image", "snapshots")
+    #: What is added to a recording after its generator wrote it, and what the generator must therefore not take away: the share card
+    #: and the frozen surveys that other tools write, and the instant of the recording that card is taken at, chosen by looking at it
+    #: (see ShareCards). A generator that states one of these itself keeps saying it: what it writes always wins.
+    KEPT = ("summaryTime", "image", "snapshots")
 
     @staticmethod
-    def write(path, recording):
+    def write(path, recording, indent=1):
         """Writes one recording, carrying over the fields of the file it replaces that a generator does not state."""
         path = pathlib.Path(path)
         if path.exists():
@@ -31,7 +33,7 @@ class RecordingFiles:
             kept = {key: previous[key] for key in RecordingFiles.KEPT if key in previous and key not in recording}
             if kept:
                 recording = RecordingFiles.merged(recording, kept, list(previous))
-        path.write_text(json.dumps(recording, ensure_ascii=False, indent=1) + "\n")
+        path.write_text(json.dumps(recording, ensure_ascii=False, indent=indent) + "\n")
         return path
 
     @staticmethod
@@ -50,6 +52,12 @@ class RecordingFiles:
             if name not in out:
                 out[name] = value
         return out
+
+    @staticmethod
+    def shape_groups(order, group_id="group-1"):
+        """The groups of an account's shapes, as version 3 of the format writes them: one holding them all, named, and none at all for a
+        lone shape, which is what the conversion from version 2 made of a group of one."""
+        return [{"id": group_id, "members": list(order)}] if len(order) > 1 else []
 
     @staticmethod
     def migrate(paths):

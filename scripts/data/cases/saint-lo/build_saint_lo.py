@@ -1,3 +1,11 @@
+"""NOT SAFE TO RUN AS IT STANDS: it no longer describes the case the repository holds.
+
+It states the current version of the format, so running it cannot take the case back to an older one. But its CONTENT has been left
+behind, and running it would undo work: the account is stated as events in the file (see RecordingEvents) and this still writes the 101
+poses of an observerTrack; the facades of the surveyed scenery say `plain` where this writes `openings`; and the share card, the chosen
+`summaryTime` and the six frozen surveys are not written here at all. Bring those forward before running it, and check as Duboc's and
+Braine-le-Comte's are checked: rebuilding must leave every file of the case exactly as it is.
+"""
 #!/usr/bin/env python3
 """Saint-Lô, 11 August 2026, about 02:30: a translucent white "half-moon" (a flying wing) crossing the
 whole sky from the north, over the zenith, to the south, then a clockwise spiral just above the tree
@@ -544,19 +552,20 @@ def surveys():
 
 def build():
     return {
-        "version": 1,
+        "version": 4,
         "id": "2026-08-11-SaintLo",
         "tags": ["aerial observation"],
         "summaryTime": 1.5,                  # the card of a shared link: the wing wide, banked, and followed by the eye (the first moment is a small light off to the side)
-        "time": {"year": 2026, "month": 8, "day": 11, "hour": 2, "minute": 30, "raw": "2026-08-11T02:30~"},
+        "time": "2026-08-11T02:30~",
         "utcOffsetHours": stated(2, "derived", "Central European Summer Time on 2026-08-11"),
         "timeZone": "Europe/Paris",
         "durationSeconds": stated(DURATION_MS / 1000, "stated",
             "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye"),
-        "place": [stated({"lat": LAT, "lng": LNG, "name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France"},
-                         "stated",
-                         "the exact spot he stood on, from the Google Maps link he sent on 2026-10-12 "
-                         "(the park of the Musée du Bocage normand, which is open day and night)")],
+        "place": stated({"name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France",
+                         "locations": [{"lat": LAT, "lng": LNG}]},
+                        "stated",
+                        "the exact spot he stood on, from the Google Maps link he sent on 2026-10-12 "
+                        "(the park of the Musée du Bocage normand, which is open day and night)"),
         "observer": {"title": "Q. B."},
         "account": {
             "source": stated("questionnaire", "stated", "he answered in writing, on the mailing list, the questions put to him"),

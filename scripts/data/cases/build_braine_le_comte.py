@@ -6,7 +6,10 @@ Tableau 1 (what each observer gave), Tableau 2 (the investigators' time line), Â
 Writes, into ../../../public/demo-data: observer-braine-le-comte-{akh,bjn,fwy}.json and case-braine-le-comte.json.
 Only the observers' INITIALS are used, as the report gives them.
 """
-import json, math, os, random
+import json, math, os, pathlib, random, sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from recording_files import RecordingFiles  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "public", "demo-data"))
@@ -742,7 +745,7 @@ def reading_recording(code, rec, number, event):
     `interpretation`, and an event of type `sighting` in the case marked `interpretationOf` it."""
     url = f"interpretation-braine-le-comte-{code.lower()}-{number}.json"
     held = {k: v for k, v in event.items() if k in ("title", "bodies", "smoke", "reentries")}
-    reading = {"version": 1, "id": f"{rec['id']}-interpretation-{number}"}
+    reading = {"version": 4, "id": f"{rec['id']}-interpretation-{number}"}
     # The whole scene of the account (a reading edited without its decor, weather and pose shows bodies
     # over bare ground), not its words, its observer, its sources or its shapes.
     for key, value in rec.items():
@@ -778,17 +781,17 @@ def recording(code):
     if age:
         account["observerAgeYears"] = stated(age, "about 40 (\"Â± 40 ans\")" if code == "AKH" else "17 at the time")
     rec = {
-        "version": 1,
+        "version": 4,
         "id": f"2015-07-12-BraineLeComte-{code}",
-        "time": derived({"year": 2015, "month": 7, "day": 12, "hour": 0, "minute": 45, "second": 0},
+        "time": derived("2015-07-12T00:45:00",
                         "the report gives 00:30 to 01:00; the middle of it is taken, and it is the moment at which the report's own "
                         "sky (Arcturus at azimuth 260, elevation 33) is right to the degree (22:45 UTC)"),
         "durationSeconds": duration,
         "utcOffsetHours": derived(2, "Central European Summer Time on 2015-07-12; the report gives 22:30-23:00 UTC for 00:30-01:00"),
         "timeZone": "Europe/Brussels",
-        "place": [assumed({"lat": LAT, "lng": LNG, "name": "Braine-le-Comte, Hainaut, Belgium"},
-                          "the report redacts the address and gives the place to a tenth of a degree only (50.6 N, 4.1 E, 89 m), a garden "
-                          "in a residential area near the Mons-Brussels railway")],
+        "place": assumed({"name": "Braine-le-Comte, Hainaut, Belgium", "locations": [{"lat": LAT, "lng": LNG}]},
+                         "the report redacts the address and gives the place to a tenth of a degree only (50.6 N, 4.1 E, 89 m), a garden "
+                         "in a residential area near the Mons-Brussels railway"),
         "observer": {"id": f"BraineLeComte-2015-{code}", "title": code},
         "account": account,
         "description": description,
@@ -800,7 +803,8 @@ def recording(code):
                                           "there were a few street lamps and the house's own lights"),
         "instrument": "eye",
         "observerTrack": {"keyframes": pose_list},
-        "timeline": {"order": ["pan"] + [sid for sid, *_ in lights], "groups": [["pan"] + [sid for sid, *_ in lights]],
+        "timeline": {"order": ["pan"] + [sid for sid, *_ in lights],
+                     "groups": RecordingFiles.shape_groups(["pan"] + [sid for sid, *_ in lights]),
                      "keyframes": keyframes},
         "milestones": milestones,
         "soundTrack": {"keyframes": [{"t": 0, "sound": stated({"kind": "none", "volume": 0, "pitchHz": 0},
@@ -819,18 +823,16 @@ def recording(code):
 def main():
     os.makedirs(OUT, exist_ok=True)
     readings = []
+    written = []
     for code in ("AKH", "BJN", "FWY"):
         rec = recording(code)
         path = os.path.join(OUT, f"observer-braine-le-comte-{code.lower()}.json")
-        with open(path, "w") as f:
-            json.dump(rec, f, ensure_ascii=False, indent=1)
-            f.write("\n")
+        # What other tools and hands added to these files is kept (see scripts/data/cases/recording_files.py).
+        written.append(RecordingFiles.write(path, rec))
         print(path, os.path.getsize(path), "bytes,", len(rec["timeline"]["keyframes"]), "keyframes")
         for number, event in enumerate((interpretation_event, bird_event), start=1):
             url, reading, case_event = reading_recording(code, rec, number, event(code, phenomenon_keyframes(code)[3]))
-            with open(os.path.join(OUT, url), "w", encoding="utf-8") as f:
-                json.dump(reading, f, ensure_ascii=False, indent=1)
-                f.write("\n")
+            written.append(RecordingFiles.write(os.path.join(OUT, url), reading))
             readings.append(case_event)
     case = {
         "id": "BraineLeComte2015", "title": "Braine-le-Comte", "time": "2015-07-12 00:45",
@@ -841,6 +843,7 @@ def main():
         previous = json.load(open(case_path))
         case = {**{k: previous[k] for k in ("summary", "image") if k in previous}, **case}
         case = {k: case[k] for k in ("id", "title", "summary", "image", "time", "events") if k in case}
+    RecordingFiles.migrate(written)
     with open(case_path, "w") as f:
         json.dump(case, f, ensure_ascii=False, indent=1)
         f.write("\n")

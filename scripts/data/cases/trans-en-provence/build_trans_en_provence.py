@@ -1,3 +1,10 @@
+"""NOT SAFE TO RUN AS IT STANDS: it no longer describes the case the repository holds.
+
+It states the current version of the format, so running it cannot take the case back to an older one. But its CONTENT has been left
+behind, and running it would undo work: the weather of the GEPAN reading names another source and holds cloud layers this does not
+write, and the case's own summary is not written here. Bring those forward before running it, and check as Duboc's and
+Braine-le-Comte's are checked: rebuilding must leave every file of the case exactly as it is.
+"""
 """
 Builds public/demo-data/observer-trans-en-provence.json and case-trans-en-provence.json: Renato
 Nicolaï's sighting of 8 January 1981 at Trans-en-Provence (Var), GEPAN enquiry 81/01.
@@ -29,6 +36,11 @@ Run with: python3 scripts/data/cases/trans-en-provence/build_trans_en_provence.p
 import json
 import math
 import os
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from recording_files import RecordingFiles  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 OUT = os.path.join(ROOT, "public", "demo-data")
@@ -406,15 +418,15 @@ GEPAN_INTERPRETATION = {
 }
 
 recording = {
-    "version": 1,
+    "version": 4,
     "id": "1981-01-08-Trans-en-Provence-Nicolai",
-    "time": {"value": {"year": 1981, "month": 1, "day": 8, "hour": 17, "minute": 0, "second": 0}, "basis": "stated",
+    "time": {"value": "1981-01-08T17:00:00", "basis": "stated",
              "rationale": "\"Il était environ 17 h, le temps commençait à fraîchir\" (statement of 9 January 1981); the report, before the translation, cites the same hour."},
     "durationSeconds": {"value": 40, "basis": "derived",
                         "rationale": "GEPAN: \"the global duration of the sighting is between 30 and 40 seconds\", the arrival \"of the order of a few seconds\", the machine on the ground \"for several seconds\" (Note technique 16). Played at 40 s: it is gone at 35 s and the witness's last look follows."},
     "utcOffsetHours": {"value": 1, "basis": "derived", "rationale": "Central European Time on 8 January 1981 (France had no winter summer time)."},
     "timeZone": "Europe/Paris",
-    "place": [{"value": {"lat": LAT0, "lng": LNG0, "name": "Trans-en-Provence, Var, France"}, "basis": "derived", "rationale": place_why}],
+    "place": {"value": {"name": "Trans-en-Provence, Var, France", "locations": [{"lat": LAT0, "lng": LNG0}]}, "basis": "derived", "rationale": place_why},
     "observer": {"id": "Trans-en-Provence-1981-Nicolai", "title": "Renato Nicolaï (déposition du 9 janvier 1981)"},
     "account": {
         "observerOccupation": said("ancien employé de la S.C.N.I., en invalidité (cœur)", "former S.C.N.I. employee, on a disability pension (heart)",
@@ -465,14 +477,15 @@ recording = {
     "interpretation": ACCOUNT_INTERPRETATION
 }
 
-with open(os.path.join(OUT, "observer-trans-en-provence.json"), "w", encoding="utf-8") as f:
-    f.write(json.dumps(recording, indent=2, ensure_ascii=False) + "\n")
+# What other tools and hands added to these files is kept, and what is written is brought to the current format if this script ever
+# falls behind it (see scripts/data/cases/recording_files.py).
+written = [RecordingFiles.write(os.path.join(OUT, "observer-trans-en-provence.json"), recording, indent=2)]
 
 gepan = json.loads(json.dumps(recording))
 gepan["id"] = "1981-01-08-Trans-en-Provence-Nicolai-gepan"
 gepan["interpretation"] = GEPAN_INTERPRETATION
-with open(os.path.join(OUT, "interpretation-trans-en-provence-gepan.json"), "w", encoding="utf-8") as f:
-    f.write(json.dumps(gepan, indent=2, ensure_ascii=False) + "\n")
+written.append(RecordingFiles.write(os.path.join(OUT, "interpretation-trans-en-provence-gepan.json"), gepan, indent=2))
+RecordingFiles.migrate(written)
 
 case = {
     "id": "TransEnProvence",

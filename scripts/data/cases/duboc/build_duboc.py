@@ -38,10 +38,6 @@ from recording_files import RecordingFiles  # noqa: E402
 
 OUT = pathlib.Path("public/demo-data")
 
-def shape_groups(order):
-    """The groups of the account's shapes: one holding them all, named as the format has it, and none at all for a lone shape."""
-    return [{"id": "group-1", "members": list(order)}] if len(order) > 1 else []
-
 
 LAT_MID, LNG_MID = 48 + 50.7 / 60, 3 + 0.9 / 60      # "48°50'7 N / 003°00'9 E" in the report: degrees and decimal minutes
 HEADING = 332.0
@@ -351,7 +347,7 @@ def commander_recording():
         # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
         "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
-        "timeline": {"order": ["disc"], "groups": shape_groups(["disc"]), "keyframes": frames},
+        "timeline": {"order": ["disc"], "groups": RecordingFiles.shape_groups(["disc"]), "keyframes": frames},
         "weatherTrack": weather(total, 101),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": airliner(total),
@@ -443,7 +439,7 @@ def copilot_recording():
         # Aboard the A320: its cabin is the loudest thing there is, and its fuselage muffles everything outside (see ObserverRide).
         "vehicle": {"kind": "airliner-narrow"},
         "observerTrack": track(total, aim_at, 1.0),
-        "timeline": {"order": [lens, arrow], "groups": shape_groups([lens, arrow]), "keyframes": frames},
+        "timeline": {"order": [lens, arrow], "groups": RecordingFiles.shape_groups([lens, arrow]), "keyframes": frames},
         "weatherTrack": weather(total, 120),
         "soundTrack": {"keyframes": [{"t": 0, "sound": {"kind": "none"}}]},
         "decor": airliner(total, "right", ("lens", "chevron")),
@@ -630,7 +626,7 @@ def steward_recording():
     frames = disc_frames(total, aim_at, vanishes=False)
     rec = commander_recording()
     rec.pop("_aim", None)
-    rec["timeline"] = {"order": ["disc"], "groups": shape_groups(["disc"]), "keyframes": frames}
+    rec["timeline"] = {"order": ["disc"], "groups": RecordingFiles.shape_groups(["disc"]), "keyframes": frames}
     rec["id"] = "1994-01-28-ChiefSteward"
     rec["observer"] = {"id": "ChiefStewardAF3532", "title": "Le chef steward"}
     rec["account"] = {"observerOccupation": tr("chef steward, Air France", "chief steward, Air France")}
