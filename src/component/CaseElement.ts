@@ -10,6 +10,7 @@ import type { UfoLanguage } from "./messages/index.js"
 import type { CaseMessages } from "./messages/CaseMessages.js"
 import { Icons } from "./Icons.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
+import { TIME_CHANGE_EVENT } from "./UfoElement.js"
 import { CASE_NAMED_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
@@ -81,7 +82,7 @@ export class CaseElement extends HTMLElement {
     })
     // The other way round: while a replay runs, the dialogues open beside it follow it, each showing the passage that tells of where it
     // stands. Only when that passage changes, so that reading one is not a scroll that never settles.
-    this.openEvents.addEventListener("timedisplaychange", event => {
+    this.openEvents.addEventListener(TIME_CHANGE_EVENT, event => {
       const block = (event.target as HTMLElement | null)?.closest?.(".open-event") as HTMLElement | null
       this.followReplay(block ?? undefined)
     })

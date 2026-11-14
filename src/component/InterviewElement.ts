@@ -27,6 +27,10 @@ rr0-interview .intervention { margin: 0 0 .4em; border-left: 3px solid var(--spe
 rr0-interview .intervention:hover { background: color-mix(in srgb, var(--speaker) 7%, transparent); }
 rr0-interview .turn { position: relative; padding: .2em .5em; }
 rr0-interview .turn.flash { background: color-mix(in srgb, #fc3 28%, transparent); }
+/* A passage tied to a moment of the observation says so, and the one the replay is at stays said while it is there: a dialogue read
+   beside a replay should show which of its passages is being played, not only flash when it changes. */
+rr0-interview .turn.timed { border-left: 2px solid color-mix(in srgb, currentColor 30%, transparent); padding-left: calc(.5em - 2px); }
+rr0-interview .turn.synced { border-left-color: #fc3; background: color-mix(in srgb, #fc3 12%, transparent); }
 rr0-interview .turn .who { font-size: .85em; font-weight: 600; color: var(--speaker); overflow-wrap: anywhere; }
 rr0-interview .turn.is-redacted .who, rr0-interview .turn.goes-on .who { display: none; }
 rr0-interview .turn .said, rr0-interview .turn .redacted { margin: 0; padding: 0; text-indent: 0; white-space: pre-wrap; }
@@ -79,6 +83,8 @@ export class InterviewElement extends HTMLElement {
   private readonly blocks = new Map<number, HTMLElement>()
   /** The passage last shown by revealAt, so that following a replay does not scroll on every frame. */
   private lastRevealed?: number
+  /** The passage the replay is at, marked for as long as it is there. */
+  private syncedIndex?: number
 
   constructor() {
     super()
@@ -306,6 +312,7 @@ export class InterviewElement extends HTMLElement {
         turn.append(who, said)
       }
       if (segment.refs?.length) {
+        turn.classList.add("timed")
         const refs = document.createElement("div")
         refs.className = "refs"
         for (const ref of segment.refs) {
@@ -349,7 +356,16 @@ export class InterviewElement extends HTMLElement {
       this.lastRevealed = best.index
       this.revealSegment(best.index)
     }
+    this.markSynced(best.index)
     return best.index
+  }
+
+  /** Marks the passage the replay is at, and unmarks the one it has left. */
+  private markSynced(index: number): void {
+    if (index === this.syncedIndex) return
+    if (this.syncedIndex !== undefined) this.blocks.get(this.syncedIndex)?.classList.remove("synced")
+    this.syncedIndex = index
+    this.blocks.get(index)?.classList.add("synced")
   }
 
   /** Shows the segment that tells of an observation's moment, and where it is. */

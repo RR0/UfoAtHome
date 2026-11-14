@@ -287,7 +287,7 @@ describe("<rr0-case>, a case read", () => {
     }
     // What the replay says as it moves: the case passes it on to every dialogue open beside it.
     const player = element.player!
-    root.querySelector(".open-event")!.dispatchEvent(new CustomEvent("timedisplaychange", { bubbles: true, composed: true }))
+    root.querySelector(".open-event")!.dispatchEvent(new CustomEvent("timechange", { bubbles: true, composed: true, detail: { at: 1.2 } }))
     // Where the replay stands, and which observation it is of: the dialogue needs both to find the passage.
     expect(shown).toEqual([[player.playedSeconds, "qb"]])
   })

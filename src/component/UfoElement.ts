@@ -1284,6 +1284,19 @@ export class UfoElement extends HTMLElement {
   }
 
   /**
+   * Says where the replay has got to, for whoever follows it from outside — a dialogue of the case beside it, say (see CaseElement).
+   *
+   * Not every frame: ten times a second is finer than anything a reader can read, and an event per frame is the kind of per-frame work
+   * the render loop must not carry. `timedisplaychange` is NOT this: it fires when the counters swap between the clock and the elapsed
+   * time, which is why something following it never moved.
+   */
+  private sayTimeMoved(t: number): void {
+    if (Math.abs(t - this.timeSaid) < UfoElement.TIME_SAID_EVERY_MS) return
+    this.timeSaid = t
+    this.dispatchEvent(new CustomEvent(TIME_CHANGE_EVENT, { bubbles: true, composed: true, detail: { at: t / 1000 } }))
+  }
+
+  /**
    * Swaps the counters between the time of day and time elapsed.
    *
    * Public because the editor shows the same two values in its own toolbar (see
@@ -2133,7 +2146,12 @@ export class UfoElement extends HTMLElement {
     }
   }
 
+  /** When the replay last said where it was, in ms of the recording (see sayTimeMoved). */
+  private timeSaid = Number.NEGATIVE_INFINITY
+  private static readonly TIME_SAID_EVERY_MS = 100
+
   private onFrame(t: number, shapesBySource: Map<string, Shape>): void {
+    this.sayTimeMoved(t)
     this.canvasRenderer.clear(this.canvas.width, this.canvas.height)
     // Selection handles are an editing affordance — hidden while actively playing.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
@@ -3438,6 +3456,10 @@ export function registerUfo(): void {
 
 /** Fired by <rr0-ufo> (and so through every component that holds one) once a loaded recording has
  * been checked: `detail.issues` is the list of RecordingIssue, empty when there is nothing to say. */
+/** Sent, bubbling and crossing shadow roots, as the replay advances: `detail.at` is where it is, in seconds of the observation. Ten
+ * times a second at most (see sayTimeMoved); never per frame. */
+export const TIME_CHANGE_EVENT = "timechange"
+
 export const RECORDING_ISSUES_EVENT = "recordingissues"
 
 /** Fired by a minified <rr0-ufo> (see MINIFIED_ATTRIBUTE) when the mouse leaves it and it pauses: a composing element
