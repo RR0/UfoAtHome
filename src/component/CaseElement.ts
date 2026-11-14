@@ -74,6 +74,21 @@ export class CaseElement extends HTMLElement {
       const { at, sighting } = (event as CustomEvent<{ at: number, sighting?: string }>).detail
       void this.seekObservation(at, sighting)
     })
+    // The other way round: while a replay runs, the dialogues open beside it follow it, each showing the passage that tells of where it
+    // stands. Only when that passage changes, so that reading one is not a scroll that never settles.
+    this.openEvents.addEventListener("timedisplaychange", event => {
+      const block = (event.target as HTMLElement | null)?.closest?.(".open-event") as HTMLElement | null
+      const at = block ? Number(block.dataset.at) : NaN
+      const entry = Number.isNaN(at) ? undefined : this.entries[at]
+      const player = block?.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null
+      if (!entry || !player) return
+      for (const [index, other] of this.shown) {
+        if (this.entries[index]?.kind !== "interview") continue
+        const reader = other.querySelector("rr0-interview") as (HTMLElement & { revealAt?: (s: number, of?: string) => number | undefined }) | null
+        // The reader shows a passage once and stays there while the replay is still inside it (see InterviewElement.revealAt).
+        reader?.revealAt?.(player.playedSeconds, entry.event.id)
+      }
+    })
     this.byId("edit").addEventListener("click", () => {
       const where = this.editorUrl()
       if (where) window.open(where, "_blank", "noopener")
@@ -322,6 +337,16 @@ export class CaseElement extends HTMLElement {
     body.append(pill, open, meta, links)
     item.append(mark, body)
     return item
+  }
+
+  /** The door a page uses, the same the player offers: fetch this case and show it. */
+  async loadFromSrc(url: string): Promise<void> {
+    await this.load(url)
+  }
+
+  /** The scene of the first player open, for a page that starts the replay itself. */
+  get scene(): unknown {
+    return (this.players()[0] as unknown as { scene?: unknown })?.scene
   }
 
   /** Every player open, in the order of time. */

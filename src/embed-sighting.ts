@@ -6,5 +6,9 @@
  * not just the bare recorded shape.
  */
 import { registerSighting } from "./component/SightingElement.js"
+import { register as registerCase } from "./component/CaseElement.js"
 
 registerSighting()
+// Its reader half comes with it: <rr0-case> is what shows a case.json whole (its chronology, its interviews), and it wraps this very
+// player. Small beside it, and a page given a case can then mount the right element without fetching a second bundle.
+registerCase()

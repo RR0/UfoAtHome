@@ -193,7 +193,13 @@ const mount = async (src = "case.json"): Promise<CaseElement> => {
   files[new URL("case.json", location.href).href] = caseJson
   files[new URL("observer.json", location.href).href] = account
   files[new URL("reading.json", location.href).href] = { ...account, id: "reading", tags: ["interpretation"], interpretation: { title: { en: "A balloon" }, bodies: [] } }
-  files[new URL("interview.json", location.href).href] = { version: 1, id: "i1", language: "fr", speakers: {}, segments: [] }
+  files[new URL("interview.json", location.href).href] = {
+    version: 1, id: "i1", language: "en", interviewOf: "qb", speakers: { witness: { role: "witness", title: "Q. B." } },
+    segments: [
+      { speaker: "witness", start: 0, end: 5, text: "It came from the north.", refs: [{ at: 1 }] },
+      { speaker: "witness", start: 6, end: 9, text: "And it spiralled down." }
+    ]
+  }
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
     ok: true, status: 200, json: () => Promise.resolve(files[url]), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
   })))
@@ -262,6 +268,28 @@ describe("<rr0-case>, a case read", () => {
     cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
     expect(open()).toEqual(["1", "2"])
     expect(cards()[0].dataset.open).toBeUndefined()
+  })
+
+  it("follows a replay in the dialogues open beside it, passage by passage", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const cards = [...root.querySelectorAll<HTMLElement>(".event")]
+    cards[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    for (let left = 200; left > 0 && root.querySelector(".open-event rr0-interview") === null; left--) {
+      await new Promise(resolve => setTimeout(resolve, 5))
+    }
+    const reader = root.querySelector(".open-event rr0-interview") as HTMLElement & { revealAt?: unknown }
+    await new Promise(resolve => setTimeout(resolve, 40))
+    const shown: unknown[] = []
+    ;(reader as unknown as { revealAt: (s: number, of?: string) => undefined }).revealAt = (seconds, of) => {
+      shown.push([seconds, of])
+      return undefined
+    }
+    // What the replay says as it moves: the case passes it on to every dialogue open beside it.
+    const player = element.player!
+    root.querySelector(".open-event")!.dispatchEvent(new CustomEvent("timedisplaychange", { bubbles: true, composed: true }))
+    // Where the replay stands, and which observation it is of: the dialogue needs both to find the passage.
+    expect(shown).toEqual([[player.playedSeconds, "qb"]])
   })
 
   it("says of itself only what the i asks for, and leads to the editor on what is open", async () => {

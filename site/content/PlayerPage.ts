@@ -70,7 +70,24 @@ export class PlayerPage implements SitePage {
     })
     return `const messages = ${messages}
 const demoTitles = ${demoTitles}
-const stage = document.getElementById("player-stage")
+let stage = document.getElementById("player-stage")
+
+/* A case is read by <rr0-case>, an observation alone by <rr0-sighting>: the page mounts whichever the file asks for, keeping the id, the
+   attributes the address set and the listeners put on it. Told apart by shape, as the elements tell them apart themselves: a case lists
+   its events, a recording has none. */
+const isCase = json => !!json && typeof json === "object" && Array.isArray(json.events) && !json.timeline
+const asElement = name => {
+  if (stage.tagName.toLowerCase() === name) return stage
+  const next = document.createElement(name)
+  next.id = stage.id
+  for (const { name: attribute, value } of [...stage.attributes]) {
+    if (attribute !== "id") next.setAttribute(attribute, value)
+  }
+  stage.replaceWith(next)
+  stage = next
+  listenToStage()
+  return next
+}
 const stageBox = document.getElementById("player-stage-box")
 
 /* Brings the simulation into view UNDER the sticky header, not behind it: scrolling it to the very top
@@ -137,10 +154,14 @@ const describe = () => {
 }
 /* The recording the player is showing, as its own address: on a case with several witnesses, the one picked. */
 let shownSrc
-stage.addEventListener("observerchange", event => {
-  shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
-  describe()
-})
+/* Put on whichever element is mounted, and again on the next one (see asElement). */
+const listenToStage = () => {
+  stage.addEventListener("observerchange", event => {
+    shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
+    describe()
+  })
+}
+listenToStage()
 
 const reveal = (source, sighting, fallbackTitle) => {
   stageBox.hidden = false
@@ -200,7 +221,7 @@ const openUrl = async requested => {
       const response = await fetch(candidate)
       if (!response.ok) continue
       const sighting = await response.json() // fail here rather than inside the element
-      await stage.loadFromSrc(candidate)
+      await asElement(isCase(sighting) ? "rr0-case" : "rr0-sighting").loadFromSrc(candidate)
       reveal(new URL(candidate, location.href).href, sighting, requested)
       say("")
       startPlaying()
@@ -266,7 +287,7 @@ const openFiles = async files => {
     return url
   }
   const played = withLocalFiles(sighting)
-  stage.sightingData = played
+  asElement("rr0-sighting").sightingData = played
   reveal(null, sighting, recording.name.replace(/\\.json$/i, ""))
   say(unresolved.size > 0 ? messages.unresolved + [...unresolved].join(", ") : "", unresolved.size > 0 ? "error" : undefined)
   showStage(true)

@@ -542,6 +542,11 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.ufoElement.currentTime = Math.max(0, seconds) * 1000
   }
 
+  /** Where the replay stands, in seconds since the beginning of the observation: what a dialogue beside it follows (see CaseElement). */
+  get playedSeconds(): number {
+    return this.sceneElement.ufoElement.currentTime / 1000
+  }
+
   get observerUrls(): string[] {
     return this.entries.map(entry => entry.src)
   }

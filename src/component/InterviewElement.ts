@@ -77,6 +77,8 @@ export class InterviewElement extends HTMLElement {
   private readonly turns = document.createElement("div")
   /** The block that shows each segment (several segments taken out in a row share one), by the segment's index. */
   private readonly blocks = new Map<number, HTMLElement>()
+  /** The passage last shown by revealAt, so that following a replay does not scroll on every frame. */
+  private lastRevealed?: number
 
   constructor() {
     super()
@@ -321,6 +323,33 @@ export class InterviewElement extends HTMLElement {
       this.blocks.set(index, turn)
     })
     this.turns.replaceChildren(...interventions)
+  }
+
+  /**
+   * Shows the passage that tells of the moment `seconds` into the observation `sighting` names: the one whose reference is closest at or
+   * before it, so that a dialogue follows the replay the way the replay follows the dialogue. Says which passage, so that a caller can
+   * leave it alone while it has not changed, and nothing happens when no passage tells of that moment.
+   */
+  revealAt(seconds: number, sighting?: string): number | undefined {
+    const json = this.json
+    if (!json) return undefined
+    const own = InterviewFile.sightingsOf(json)[0]
+    let best: { index: number, at: number } | undefined
+    json.segments?.forEach((segment, index) => {
+      for (const ref of segment.refs ?? []) {
+        const about = ref.sighting ?? own
+        if (sighting !== undefined && about !== undefined && about !== sighting) continue
+        if (ref.at > seconds + 0.001) continue
+        if (!best || ref.at > best.at) best = { index, at: ref.at }
+      }
+    })
+    if (!best) return undefined
+    // Shown once per passage: a replay running inside one passage would otherwise scroll the dialogue at every frame.
+    if (best.index !== this.lastRevealed) {
+      this.lastRevealed = best.index
+      this.revealSegment(best.index)
+    }
+    return best.index
   }
 
   /** Shows the segment that tells of an observation's moment, and where it is. */
