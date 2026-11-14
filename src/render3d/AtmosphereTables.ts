@@ -96,16 +96,21 @@ export class AtmosphereTables {
   static readonly MULTIPLE_BLOCK = 16
 
   /**
-   * Tables already built on this page, by medium, as plain arrays — or the mark that a scene is
-   * building them right now.
+   * Tables already built on this page, by medium, as plain arrays — or the scene that is building
+   * them right now, so that it alone can take the mark back.
    *
    * Every scene has its own WebGL context and a context cannot read another's textures, but the
    * tables depend on the air alone: twelve scenes of the demos page under the same sky were each
    * compiling the two table shaders and spending a second of GPU on the same numbers, and that was
    * most of what the scattered sky cost a scroll. The first scene builds and reads its tables back;
    * the others upload them as data, and one arriving while the first is still building waits for it.
+   *
+   * The mark is held until the tables are read back, not only while they are drawn: a scene dropped
+   * between the two (a case's player replaced as it opens) left a bare "building" that nobody owned,
+   * and every later scene of the page waited on it for ever — no sky views, so no read-back, so an eye
+   * left at the zenith predicted before any (Trans-en-Provence's dusk a third as bright, at random).
    */
-  private static readonly shared = new Map<string, SharedTables | "building">()
+  private static readonly shared = new Map<string, SharedTables | AtmosphereTables>()
   private building = false
   private adopted?: Texture[]
   private readonly tableUniforms: Record<string, { value: Texture }>
@@ -238,13 +243,13 @@ export class AtmosphereTables {
     if (!this.supported || !this.mediumKey) return false
     if (this.ready) return true
     const shared = AtmosphereTables.shared.get(this.mediumKey)
-    if (shared && shared !== "building") {
+    if (shared && !(shared instanceof AtmosphereTables)) {
       this.adopt(shared)
       return true
     }
-    if (shared === "building" && !this.building) return false
+    if (shared && shared !== this) return false
     if (!shared) {
-      AtmosphereTables.shared.set(this.mediumKey, "building")
+      AtmosphereTables.shared.set(this.mediumKey, this)
       this.building = true
     }
     const previousTarget = this.renderer.getRenderTarget()
@@ -280,10 +285,12 @@ export class AtmosphereTables {
     try {
       const transmittance = await Promise.all([0, 1, 2, 3].map(attachment => this.readRaw(this.transmittance, attachment, Uint16Array)))
       const multiple = await Promise.all([0, 1, 2, 3].map(attachment => this.readRaw(this.multiple, attachment, Float32Array)))
+      // Only while the mark is still this scene's: abandoned meanwhile, it is somebody else's or nobody's.
+      if (AtmosphereTables.shared.get(key) !== this) return
       if (this.mediumKey === key) AtmosphereTables.shared.set(key, { transmittance, multiple })
       else AtmosphereTables.shared.delete(key)
     } catch {
-      AtmosphereTables.shared.delete(key)
+      if (AtmosphereTables.shared.get(key) === this) AtmosphereTables.shared.delete(key)
     }
   }
 
@@ -326,9 +333,9 @@ export class AtmosphereTables {
 
   /** A scene that stops building (disposed, context lost, air changed) must not leave the others waiting. */
   private abandonBuilding(): void {
-    if (!this.building) return
     this.building = false
-    if (AtmosphereTables.shared.get(this.mediumKey) === "building") AtmosphereTables.shared.delete(this.mediumKey)
+    // Whether still drawing or already reading back (see share): the mark is this scene's either way.
+    if (AtmosphereTables.shared.get(this.mediumKey) === this) AtmosphereTables.shared.delete(this.mediumKey)
   }
 
   /**

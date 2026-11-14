@@ -5073,6 +5073,10 @@ export class SceneRenderer {
     this.cancelExposure()
     this.compiling = undefined
     this.cancelScatteredSkyPump()
+    // Tables half built are given up with the context that held them, and the page's other scenes are no longer told to wait for them
+    // (see AtmosphereTables.shared): a case's first player, replaced as the case opens, kept the mark, and the player that took its
+    // place never drew its sky views, nor adapted its eye to them.
+    this.scatteredSky?.invalidate()
     this.renderer.forceContextLoss()
   }
 
