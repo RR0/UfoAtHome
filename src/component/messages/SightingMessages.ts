@@ -18,6 +18,8 @@ export interface SightingMessages extends SightingLabels {
   date: string
   location: string
   case: string
+  /** On the case's name in the toolbar: what opens the interviews the case holds. */
+  caseInterviews: string
   description: string
   /** The info panel's label for where the account can be read as given — see RecordingSource. */
   source: string

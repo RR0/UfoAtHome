@@ -11,6 +11,7 @@ export const sightingMessages_it: SightingMessages = {
   date: "Data",
   location: "Luogo",
   case: "Caso",
+  caseInterviews: "Le interviste di questo caso",
   description: "Descrizione",
   source: "Fonte",
   basis: { established: "accertato", measured: "misurato", stated: "dichiarato", derived: "dedotto", assumed: "supposto", fitted: "adattato" },

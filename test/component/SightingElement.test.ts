@@ -444,9 +444,49 @@ describe("SightingElement", () => {
     const line = element.shadowRoot!.getElementById("case-of")!
     expect(line.hidden).toBe(false)
     expect(line.textContent).toContain("A case")
-    // A recording read on its own is no case's, and says nothing of one.
-    const alone = await connect("john.json")
+    // A recording read on its own is no case's, and says nothing of one. By its full address, as the stub holds it: a relative one is
+    // fetched as written and would answer nothing.
+    const alone = await connect(johnUrl)
     expect(alone.shadowRoot!.getElementById("case-of")!.hidden).toBe(true)
+    // Both loads are let finish before the stub goes: a fetch landing after it throws where nothing can catch it.
+    await new Promise(resolve => setTimeout(resolve, 30))
+  })
+
+  it("opens the case's interviews from its name, and a passage that tells of a moment takes the player to it", async () => {
+    const johnUrl = new URL("john.json", location.href).href
+    const interviewUrl = new URL("interview.json", location.href).href
+    stubFetch({
+      "case.json": {
+        id: "Case", title: "A case",
+        events: [
+          sightingEvent("john.json"),
+          { type: "event", eventType: "interview", id: "i1", interviewOf: "john", time: "1948-07-25", url: "interview.json", title: { en: "Interview of John" } }
+        ]
+      },
+      [johnUrl]: johnSighting,
+      [interviewUrl]: { version: 1, id: "i1", language: "en", speakers: { witness: { role: "witness", title: "John" } }, segments: [] }
+    })
+
+    const element = await connect("case.json")
+    const root = element.shadowRoot!
+    // The case's name is what opens them: a case with no interview leaves it as plain words (see the test above).
+    const opener = root.querySelector<HTMLButtonElement>("#case-of button")!
+    expect(opener.textContent).toContain("A case")
+    expect(root.getElementById("case-panel")!.hidden).toBe(true)
+    opener.click()
+    await new Promise(resolve => setTimeout(resolve, 20))
+    expect(root.getElementById("case-panel")!.hidden).toBe(false)
+    expect([...root.querySelectorAll("#case-interviews button")].map(chip => chip.textContent)).toEqual(["Interview of John"])
+    expect(root.querySelector("#case-interview-host rr0-interview")!.getAttribute("src")).toBe(interviewUrl)
+    // A passage that tells of a moment of the observation takes the player there.
+    const seeks: number[] = []
+    element.seekTo = (seconds: number) => seeks.push(seconds)
+    root.getElementById("case-interview-host")!
+      .dispatchEvent(new CustomEvent("interviewseek", { bubbles: true, detail: { at: 3.5, sighting: "john" } }))
+    expect(seeks).toEqual([3.5])
+    // Shut again from the same name.
+    root.querySelector<HTMLButtonElement>("#case-of button")!.click()
+    expect(root.getElementById("case-panel")!.hidden).toBe(true)
   })
 
   it("offers the account, in the round when the observer said what it was, and the case's interpretations", async () => {
