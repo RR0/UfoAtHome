@@ -1,5 +1,16 @@
 import type { Said } from "../SitePage.js"
 
+/**
+ * The address a demo is watched at: the case where it has one, and what the player is asked to show. A demo of a case shows ALL of it —
+ * what the case says of itself, and every event it holds, each in its own player, in the order of time — with no history to pick from,
+ * since everything in it is already open. A demo of a lone observation just keeps the chips on, which is the player's own default.
+ */
+export function demoPlayUrl(demo: Demo, playerPath = "/play/"): string {
+  const file = demo.playSrc ?? demo.editSrc ?? demo.src
+  const asked = demo.playSrc ? "&info=1&timeline=0&events=all" : ""
+  return `${playerPath}?file=${encodeURIComponent(file)}${asked}`
+}
+
 export interface Demo {
   readonly id: string
   readonly src: string

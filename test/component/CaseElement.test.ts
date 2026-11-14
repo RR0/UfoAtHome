@@ -323,6 +323,28 @@ describe("<rr0-case>, a case read", () => {
     expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(false)
   })
 
+  it("opens everything the case holds when the page asks for it", async () => {
+    files[new URL("case.json", location.href).href] = caseJson
+    files[new URL("observer.json", location.href).href] = account
+    files[new URL("reading.json", location.href).href] = account
+    files[new URL("interview.json", location.href).href] = { version: 1, id: "i1", language: "en", speakers: {}, segments: [] }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
+      ok: true, status: 200, json: () => Promise.resolve(files[url]), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+    })))
+    const element = document.createElement(CASE_ELEMENT_NAME) as CaseElement
+    element.setAttribute("src", "case.json")
+    element.setAttribute("open-events", "all")
+    document.body.appendChild(element)
+    const root = element.shadowRoot!
+    for (let left = 400; left > 0 && root.querySelectorAll(".open-event").length < 3; left--) {
+      await new Promise(resolve => setTimeout(resolve, 5))
+    }
+    // Every event, in the order of time, each in its own player or reader.
+    expect([...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)).toEqual(["0", "1", "2"])
+    expect(root.querySelectorAll(".open-event rr0-sighting").length).toBe(2)
+    expect(root.querySelectorAll(".open-event rr0-interview").length).toBe(1)
+  })
+
   it("says of itself only what the i asks for, and leads to the editor on what is open", async () => {
     const element = await mount()
     const root = element.shadowRoot!

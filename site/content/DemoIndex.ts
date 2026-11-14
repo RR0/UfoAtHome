@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import type { DemoCatalogue, DemoSectionId } from "./DemoCatalogue.js"
+import { demoPlayUrl } from "./DemoCatalogue.js"
 import { SITE_LANGUAGES, type SiteLanguage } from "../SitePage.js"
 import { parseEdtfTime } from "../../src/engine/model/Sighting.js"
 import { SightingMigration } from "../../src/engine/persistence/SightingMigration.js"
@@ -46,7 +47,7 @@ export class DemoIndex {
           index[language].push({
             id: demo.id,
             section: group.section,
-            href: `${DemoIndex.PLAYER_PATH}?file=${encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)}`,
+            href: demoPlayUrl(demo, DemoIndex.PLAYER_PATH),
             title: demo.title[language],
             blurb: demo.blurb[language],
             ...(date ? { date } : {}),

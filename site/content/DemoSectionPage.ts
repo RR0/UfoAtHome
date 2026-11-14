@@ -1,4 +1,4 @@
-import { DemoCatalogue, type DemoSection } from "./DemoCatalogue.js"
+import { DemoCatalogue, demoPlayUrl, type DemoSection } from "./DemoCatalogue.js"
 import type { PageMeta, Said, SiteLanguage, SitePage } from "../SitePage.js"
 
 /**
@@ -142,11 +142,11 @@ for (const card of cards) {
       <p class="prose-wide">${group.intro[language]}</p>
       <div class="demo-grid">
         ${group.demos.map(demo => {
-          const played = encodeURIComponent(demo.playSrc ?? demo.editSrc ?? demo.src)
+          const played = demoPlayUrl(demo, playerPath)
           return `<figure class="demo-card" id="${demo.id}" data-src="${demo.src}">
           <div class="demo-mount"><p class="loading">${loading}</p></div>
           <figcaption>
-            <h3 id="${demo.id}-title"><a href="${playerPath}?file=${played}">${demo.title[language]}</a></h3>
+            <h3 id="${demo.id}-title"><a href="${played}">${demo.title[language]}</a></h3>
             <p>${demo.blurb[language]}</p>
           </figcaption>
         </figure>`

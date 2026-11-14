@@ -11,7 +11,9 @@
  *   `d=` beside it wins over that;
  * - `observer=` which recording of a case opens first;
  * - `labels=0` hides the summary chips, `map=1` opens the observer map, `moments=0` hides the named moments, `compare=1` sets the account beside
- *   the interpretation.
+ *   the interpretation;
+ * - `info=1` opens what the recording — or the case — says of itself; on a case, `timeline=0` hides its history and `events=all` opens every
+ *   event it holds, which is how this site's own demos of a case are linked: everything the case has, in the order of time, no list to pick from.
  *
  * Whether a value is a length or a time of day that can be read is the element's to say (see PlaybackPosition): this only tells a time of day
  * from a length by its shape, to put it in the right attribute, and passes the text on as it was written.
@@ -37,6 +39,11 @@ export class PlayUrl {
   if (params.get("map") === "1") attributes.push(["show-observer-map", ""])
   if (params.get("moments") === "0") attributes.push(["hide-milestones", ""])
   if (params.get("compare") === "1") attributes.push(["compare-account", ""])
+  if (params.get("info") === "1") attributes.push(["show-info", ""])
+  // A case's own two: its history, and what of it is open. Harmless on a recording, which has neither.
+  if (params.get("timeline") === "0") attributes.push(["show-timeline", "false"])
+  const events = said("events")
+  if (events !== "") attributes.push(["open-events", events])
   const observer = said("observer")
   if (observer !== "") attributes.push(["observer", observer])
   return attributes

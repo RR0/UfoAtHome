@@ -18,6 +18,8 @@ import { caseHtml, caseCss } from "./caseTemplate.js"
 export const CASE_ELEMENT_NAME = "rr0-case"
 /** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
 export const SHOW_TIMELINE_ATTRIBUTE = "show-timeline"
+/** What a page wants open from the start: `all`, every event the case holds. Absent, the case opens on its first observation. */
+export const OPEN_EVENTS_ATTRIBUTE = "open-events"
 
 /** One event of the case, as the reader shows it: what the case says of it, and nothing fetched. */
 interface CaseEntry {
@@ -47,7 +49,7 @@ interface CaseEntry {
  */
 export class CaseElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, SHOW_TIMELINE_ATTRIBUTE, OBSERVER_ATTRIBUTE]
+    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, SHOW_TIMELINE_ATTRIBUTE, OPEN_EVENTS_ATTRIBUTE, OBSERVER_ATTRIBUTE]
   }
 
   /** The options a page sets on this element and that its players wear too: what to show from the start. */
@@ -126,6 +128,9 @@ export class CaseElement extends HTMLElement {
     if (!this.isConnected || value === old) return
     if (name === "src" && value) void this.load(value)
     else if (name === SHOW_TIMELINE_ATTRIBUTE) this.showTimeline(value !== "false")
+    else if (name === OPEN_EVENTS_ATTRIBUTE) {
+      if (value === "all") for (let at = 0; at < this.entries.length; at++) void this.open(at)
+    }
     // Passed on to every player open, and to the next one opened (see open): the host says it of the case, not of one recording.
     else for (const player of this.players()) {
       if (value === null) player.removeAttribute(name)
@@ -152,7 +157,12 @@ export class CaseElement extends HTMLElement {
     this.shown.clear()
     this.openEvents.replaceChildren()
     this.draw()
-    // Opened on its first observation, as the editor opens on one: a case shown with nothing in it says nothing.
+    // Everything at once where the page asked for it (a demo of a case shows all of it), else the first observation, as the editor opens
+    // on one: a case shown with nothing in it says nothing.
+    if (this.getAttribute(OPEN_EVENTS_ATTRIBUTE) === "all") {
+      for (let at = 0; at < this.entries.length; at++) await this.open(at)
+      return
+    }
     const first = this.entries.findIndex(entry => entry.kind !== "interview")
     if (first >= 0) void this.open(first)
   }
