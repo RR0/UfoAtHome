@@ -635,6 +635,13 @@ export class SightingElement extends HTMLElement {
     if (!asked) return undefined
     const byId = entries.find(entry => this.plain(entry).observer?.id === asked)
     if (byId) return byId
+    // The name the CASE gives it, which is what a case asks by (see CaseElement): its event's own id, or the id its recording states.
+    // Without this, a case of two recordings of one witness — the same account at two speeds — fell back to the first for both.
+    const source = this.caseSource
+    if (source) {
+      const byCase = entries.find(entry => CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id).includes(asked))
+      if (byCase) return byCase
+    }
     const byFile = entries.find(entry => entry.src.split("/").pop() === asked.split("/").pop())
     if (byFile) return byFile
     return /^\d+$/.test(asked) ? entries[Number(asked) - 1] : undefined

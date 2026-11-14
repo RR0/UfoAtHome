@@ -243,7 +243,9 @@ export class CaseElement extends HTMLElement {
       // While the history is on show, it is the way through the case: this player's own pickers would say it a second time.
       player.toggleAttribute(HIDE_PICKERS_ATTRIBUTE, !this.byId("case-events").parentElement!.hidden)
       player.setAttribute("src", this.url ?? "")
-      player.setAttribute(OBSERVER_ATTRIBUTE, entry.event.id ?? entry.url)
+      // By its address: the id of an event of the case is not what the player looked for (it reads the witness's own id, a file name or a
+      // rank), so two recordings of one witness both opened on the first.
+      player.setAttribute(OBSERVER_ATTRIBUTE, entry.url)
       for (const option of CaseElement.PASSED_ON) {
         const asked = this.getAttribute(option)
         if (asked !== null) player.setAttribute(option, asked)

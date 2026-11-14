@@ -254,7 +254,8 @@ describe("<rr0-case>, a case read", () => {
     // It opens on the first observation, and its card says so.
     expect(open()).toEqual(["0"])
     expect(cards()[0].dataset.open).toBe("")
-    expect(element.player!.getAttribute("observer")).toBe("qb")
+    // By the recording's own address: the id of an event of the case is not a name the player answers to.
+    expect(element.player!.getAttribute("observer")).toBe(new URL("observer.json", location.href).href)
     // The interview opens beside it, under it, since it comes later in time.
     cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
     await waitFor(() => root.querySelector(".open-event rr0-interview") !== null)
