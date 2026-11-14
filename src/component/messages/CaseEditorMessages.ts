@@ -56,6 +56,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   deleteRefused: string
   titleField: string
   authorField: string
+  /** Who made a reading: an investigator, as a witness is who gave an account and an interviewer who held an interview. */
+  investigatorField: string
   /** The dialog of the + button: it adds an event of the case, of the type chosen in it. */
   addTitle: string
   kindField: string

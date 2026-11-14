@@ -9,7 +9,10 @@ export class HelpPopover {
 
   /** Where the popover stands when open, for the selector of its element (`rr0-date-input .edtf-helppop`). */
   static css(selector: string): string {
-    return `${selector}:popover-open { position: fixed; inset: auto; margin: 0 0 .35em; border: 0; position-area: top span-right; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; }`
+    // A tooltip says its text as text: it never takes the look of where it is put (a heading in capitals, spaced, in italics, centred).
+    return `${selector} { text-transform: none; letter-spacing: normal; word-spacing: normal; font-style: normal; font-variant: normal;
+  text-align: start; text-indent: 0; text-decoration: none; white-space: normal; }
+${selector}:popover-open { position: fixed; inset: auto; margin: 0 0 .35em; border: 0; position-area: top span-right; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; }`
   }
 
   /** Makes `popup` the popover of `button`, closed. */

@@ -287,7 +287,11 @@ describe("CaseEditorElement", () => {
     expect(element.sightingData.id).toBe("plain")
   })
 
+  /** Adds a reading of the account at `index`: a reading is a type of event of its own, which then asks what it reads. */
   const chooseAccount = (element: CaseEditorElement, index: string) => {
+    const kind = element.shadowRoot!.getElementById("kind") as HTMLSelectElement
+    kind.value = "reading"
+    kind.dispatchEvent(new Event("change"))
     const of = element.shadowRoot!.getElementById("of") as HTMLSelectElement
     of.value = index
     of.dispatchEvent(new Event("change"))
@@ -343,7 +347,6 @@ describe("CaseEditorElement", () => {
     chooseAccount(element, "0")
     field("title").value = "A hubcap"
     field("author").value = "Cousyn"
-    field("date").value = "2013-06-01"
     await submit(element)
     expect([...select.options]).toHaveLength(3)
     expect(element.sightingData.id).toBe("x-1-interpretation-2")
@@ -359,7 +362,7 @@ describe("CaseEditorElement", () => {
     expect(element.sightingData.id).toBe("x-1")
   })
 
-  it("asks only for an observer and a date when no account is named, and for a title and an author when one is", async () => {
+  it("asks an observation for its witness and its date, and a reading for what it reads, its title and its investigator, dated today", async () => {
     const element = await open()
     const root = element.shadowRoot!
     parts(element).add.click()
@@ -369,6 +372,11 @@ describe("CaseEditorElement", () => {
     expect((root.getElementById("row-observer") as HTMLElement).hidden).toBe(true)
     expect((root.getElementById("row-title") as HTMLElement).hidden).toBe(false)
     expect((root.getElementById("row-author") as HTMLElement).hidden).toBe(false)
+    expect(root.getElementById("label-author")!.textContent).toBe("Investigator")
+    // A reading is made today: its date is not one to choose.
+    const date = root.getElementById("date") as HTMLInputElement
+    expect(date.disabled).toBe(true)
+    expect(date.value).toBe(new Date().toISOString().slice(0, 10))
   })
 
   it("shows the case above the recording being edited, which stands inside a frame of its own", async () => {
@@ -921,7 +929,7 @@ describe("CaseEditorElement's events", () => {
     expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Observation of An account", "Undated", "A model"])
     // Every event on the same footing, in the order of time: a reading is no longer drawn inside the account it reads, it names it.
     expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "reading"])
-    expect(cards[1].querySelector(".event-links")!.textContent).toContain("Interpretation of An account")
+    expect(cards[1].querySelector(".event-links")!.textContent).toContain("Reading of An account")
     const undated = cards[1]
     // It fails only against a supposition, and could not be tested on one point: not settled, orange.
     expect(undated.dataset.verdict).toBe("unsettled")
@@ -948,7 +956,7 @@ describe("CaseEditorElement's events", () => {
     // An account says no author: its author is the witness it is the account of.
     expect([...root.querySelectorAll<HTMLElement>(".event-card")].find(one => one.dataset.kind === "observation")!
       .querySelector(".event-links")!.textContent).not.toContain(" by ")
-    expect(card().querySelector(".event-links")!.textContent).toContain("Interpretation of An account by CousynAntoine")
+    expect(card().querySelector(".event-links")!.textContent).toContain("Reading of An account by CousynAntoine")
     card().querySelector<HTMLButtonElement>(".event-open")!.click()
     await wait()
     const author = parts(element).field("event-author")

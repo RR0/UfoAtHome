@@ -180,7 +180,7 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
       "Saturn": "Saturno"
     },
     "aircraft": "Aeronave {name}",
-    "interpretation": "Interpretación: {name}",
+    "interpretation": "Lectura: {name}",
     "keepVariant": "Guardar esta variante",
     "keptTitle": "Variantes guardadas ({n})",
     "seeKept": "Ver",

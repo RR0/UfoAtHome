@@ -7,7 +7,7 @@ export const caseMessages_fr: CaseMessages = {
   kindReading: "Lecture",
   kindInterview: "Interview",
   openEvent: "Ouvrir cet événement",
-  interpretationOf: "Interprétation de",
+  interpretationOf: "Lecture de",
   passagesHeading: "Relaté dans",
   byAuthor: "par",
   linkAnd: "et",

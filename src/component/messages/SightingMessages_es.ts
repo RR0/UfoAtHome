@@ -29,7 +29,7 @@ export const sightingMessages_es: SightingMessages = {
   shareOptionMilestones: "Mostrar los momentos",
   shareOptionCompare: "Comparar con el relato",
   showLabels: "Mostrar lo que indica",
-  interpretation: "Interpretación",
+  interpretation: "Lectura",
   account: "Relato",
   interpretationBy: "{title}, por {by}",
   confrontation: "Frente al relato",

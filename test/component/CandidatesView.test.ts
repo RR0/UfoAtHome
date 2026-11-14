@@ -195,7 +195,7 @@ describe("CandidatesView variants kept and interpretations", () => {
     } as never)
     view.refresh()
     await new Promise(resolve => setTimeout(resolve, 0))
-    const row = [...section.querySelectorAll(".candidate-head")].find(head => head.textContent!.startsWith("Interpretation: Balloon"))!
+    const row = [...section.querySelectorAll(".candidate-head")].find(head => head.textContent!.startsWith("Reading: Balloon"))!
     expect(row.textContent).toContain("Compatible with consolidated biases")
   })
 })

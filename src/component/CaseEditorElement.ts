@@ -103,6 +103,11 @@ const TEMPLATE = `
   ${InputFont.CSS}
   .toolbar input[type="url"] { width: 18em; max-width: 100%; }
   dialog { max-width: min(30em, 92vw); }
+  /* Adding an event: a popover under its button, which already says what it is for, rather than a window in the middle of the page. */
+  /* By its id: the rule that makes room for the ✕ (see WindowClose) sets position: relative, and must not win here. */
+  dialog#dialog.anchored { position: fixed; z-index: 30; margin: 0; inset: auto; box-shadow: 0 8px 28px rgba(0, 0, 0, .22); border: 1px solid var(--line, #ccc); border-radius: 10px; }
+  dialog.anchored #dialog-title { display: none; }
+  dialog input:disabled { opacity: .75; }
   dialog label { display: flex; align-items: center; gap: .5em; margin: .4em 0; }
   dialog label > span { flex: 0 0 9em; }
   dialog label.check > span { flex: 1 1 auto; }
@@ -381,7 +386,8 @@ const TEMPLATE = `
     <p id="dialog-message" hidden></p>
     <p id="dialog-error" role="alert" hidden></p>
     <div id="fields-add">
-      <label><span id="label-kind"></span> <select id="kind"><option value="observation"></option><option value="interview"></option></select></label>
+      <label><span id="label-kind"></span> <select id="kind"><option value="observation"></option><option value="reading"></option><option value="interview"></option></select></label>
+      <label id="row-of"><span id="label-of"></span> <select id="of"></select></label>
       <label id="row-source"><span id="label-source"></span> <select id="source">
         <option value="blank"></option><option value="file"></option>
       </select></label>
@@ -392,7 +398,6 @@ const TEMPLATE = `
       <label id="row-author"><span id="label-author"></span> <input id="author" type="text"/></label>
       <label id="row-date"><span id="label-date"></span> <input id="date" type="date"/></label>
       <div id="row-file" class="row-input-file"><span id="label-file"></span> <rr0-input-file id="add-source" name="add-source" accept="application/json,.json" no-button keep-file></rr0-input-file></div>
-      <label id="row-of"><span id="label-of"></span> <select id="of"></select></label>
     </div>
     <div id="fields-export">
       <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings"></span></label>
@@ -742,7 +747,7 @@ export class CaseEditorElement extends HTMLElement {
     const source = this.byId("source") as HTMLSelectElement
     ;[m.sourceBlank, m.sourceFile].forEach((label, index) => { source.options[index].textContent = label })
     const kind = this.byId("kind") as HTMLSelectElement
-    ;[m.kindObservation, m.kindInterview].forEach((label, index) => { kind.options[index].textContent = label })
+    ;[m.kindObservation, m.kindReading, m.kindInterview].forEach((label, index) => { kind.options[index].textContent = label })
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
@@ -1964,7 +1969,8 @@ export class CaseEditorElement extends HTMLElement {
     return this.byId("dialog") as HTMLDialogElement
   }
 
-  private openDialog(mode: DialogMode, heading: string, message?: string, okLabel?: string): void {
+  /** @param anchor What the dialog is about, when it is a popover under it rather than a window in the middle (see anchored). */
+  private openDialog(mode: DialogMode, heading: string, message?: string, okLabel?: string, anchor?: HTMLElement): void {
     this.dialogMode = mode
     this.byId("dialog-title").textContent = heading
     const note = this.byId("dialog-message")
@@ -1975,11 +1981,42 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("fields-export").hidden = mode !== "export"
     this.byId("ok").hidden = false
     this.byId("ok").textContent = okLabel ?? (mode === "discard" ? this.messages.discardOk : this.messages.ok)
+    this.dialog.classList.toggle("anchored", anchor !== undefined)
+    if (anchor) {
+      // Under the button, its right edge on the button's, kept within the window: what is added is decided beside where it was asked.
+      const box = anchor.getBoundingClientRect()
+      this.dialog.style.top = `${Math.round(box.bottom + 6)}px`
+      this.dialog.style.right = `${Math.max(8, Math.round(window.innerWidth - box.right))}px`
+      this.dialog.style.left = "auto"
+      if (typeof this.dialog.show === "function") this.dialog.show()
+      else this.dialog.setAttribute("open", "")
+      // As a popover closes: on Escape, and on a press beside it that is not on what opened it.
+      this.beside ??= (event: Event) => {
+        const path = event.composedPath()
+        if (event instanceof KeyboardEvent ? event.key === "Escape" : !path.includes(this.dialog) && !path.includes(this.anchor!)) this.closeDialog()
+      }
+      this.anchor = anchor
+      document.addEventListener("pointerdown", this.beside, true)
+      document.addEventListener("keydown", this.beside, true)
+      return
+    }
+    this.dialog.style.removeProperty("top")
+    this.dialog.style.removeProperty("right")
+    this.dialog.style.removeProperty("left")
     if (typeof this.dialog.showModal === "function") this.dialog.showModal()
     else this.dialog.setAttribute("open", "")
   }
 
+  /** What closes the dialog when it is a popover: a press beside it, Escape (see openDialog). */
+  private beside?: (event: Event) => void
+  /** What the dialog is a popover of, while it is one: a press on it is not a press beside it. */
+  private anchor?: HTMLElement
+
   private closeDialog(): void {
+    if (this.beside) {
+      document.removeEventListener("pointerdown", this.beside, true)
+      document.removeEventListener("keydown", this.beside, true)
+    }
     // Leaving the dialog, agreeing or not, ends what waited for it: agreeing took it first.
     this.pendingLoad = undefined
     if (typeof this.dialog.close === "function") this.dialog.close()
@@ -2008,13 +2045,14 @@ export class CaseEditorElement extends HTMLElement {
   private askAdd(): void {
     const session = this.session
     if (!session) return
-    this.openDialog("add", this.messages.addTitle)
+    this.openDialog("add", this.messages.addTitle, undefined, undefined, this.byId("add"))
     const of = this.byId("of") as HTMLSelectElement
-    of.replaceChildren(new Option(this.messages.interpretationOfNone, ""),
-      ...session.tracks.filter(track => track.kind === "observer")
-        .map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
-    of.value = ""
-    ;(this.byId("kind") as HTMLSelectElement).value = "observation"
+    of.replaceChildren(...session.tracks.filter(track => track.kind === "observer")
+      .map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
+    const kind = this.byId("kind") as HTMLSelectElement
+    kind.value = "observation"
+    // A reading reads an observation: none to read, none to add.
+    kind.options[1].disabled = of.options.length === 0
     const observers = session.tracks.filter(track => track.kind === "observer")
     ;(this.byId("witness") as HTMLSelectElement).replaceChildren(...observers.map(track => new Option(this.labelOf(track, session.tracks.indexOf(track)), String(session.tracks.indexOf(track)))))
     // What an interview is held through: one of the media, the first of which is where it starts.
@@ -2036,12 +2074,13 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   private syncSourceFields(): void {
-    const interview = (this.byId("kind") as HTMLSelectElement).value === "interview"
+    const kind = (this.byId("kind") as HTMLSelectElement).value
+    const interview = kind === "interview"
     const source = (this.byId("source") as HTMLSelectElement).value
-    const reading = !interview && (this.byId("of") as HTMLSelectElement).value !== ""
+    const reading = kind === "reading"
     // An interview is described here, not loaded: no source, no interpretation; it asks whom it was held with, a title and who held it.
     this.byId("row-source").hidden = interview
-    this.byId("row-of").hidden = interview
+    this.byId("row-of").hidden = !reading
     this.byId("row-witness").hidden = !interview
     this.byId("row-medium").hidden = !interview
     if (interview) void this.fillMedia()
@@ -2050,7 +2089,11 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("row-title").hidden = !(interview || reading)
     this.byId("row-author").hidden = !(interview || reading)
     this.byId("label-title").textContent = interview ? this.messages.plainTitleField : this.messages.titleField
-    this.byId("label-author").textContent = interview ? this.messages.interviewerField : this.messages.authorField
+    this.byId("label-author").textContent = interview ? this.messages.interviewerField : this.messages.investigatorField
+    // A reading is dated the day it is made, which is today: what it is a reading of is dated by its observation.
+    const date = this.input("date")
+    date.disabled = reading
+    if (reading) date.value = this.today()
   }
 
   private askExport(): void {
@@ -2121,7 +2164,7 @@ export class CaseEditorElement extends HTMLElement {
       return true
     }
     const of = (this.byId("of") as HTMLSelectElement).value
-    const account = of === "" ? undefined : session.tracks[Number(of)]
+    const account = (this.byId("kind") as HTMLSelectElement).value === "reading" && of !== "" ? session.tracks[Number(of)] : undefined
     const source = (this.byId("source") as HTMLSelectElement).value
     if (account && source === "blank") {
       if (account.kind !== "observer" || !account.recording) return false

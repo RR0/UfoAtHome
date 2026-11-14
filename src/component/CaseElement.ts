@@ -225,18 +225,15 @@ export class CaseElement extends HTMLElement {
     return this.entries.find(other => other.kind === "observation" && ids.includes(other.event.id ?? ""))
   }
 
-  /** What the editor is pointed at: the first recording open, else the case alone. */
-  private get reading(): CaseEntry | undefined {
-    const open = [...this.shown.keys()].sort((a, b) => a - b).map(at => this.entries[at])
-    return open.find(entry => entry?.kind !== "interview")
-  }
 
+  /**
+   * The editor on the case itself, its events listed: the pencil of the case edits the case. What is open below has a pencil of its own,
+   * on its player, for that observation or that reading.
+   */
   private editorUrl(): string | undefined {
     if (!this.url) return undefined
     const editor = new URL("/edit/", location.href)
     editor.searchParams.set("file", this.url)
-    const read = this.reading
-    if (read?.url && read.kind !== "interview") editor.searchParams.set("track", read.url)
     return editor.href
   }
 

@@ -2,7 +2,7 @@ import type { BodyEditorMessages } from "./BodyEditorMessages.js"
 
 export const bodyEditorMessages_es: BodyEditorMessages = {
   intro: "Lo que el testigo dijo que era el fenómeno, en 3D: cada cuerpo representa una o varias de las formas dibujadas. Su movimiento viene del archivo.",
-  interpretationTitle: "Título de la interpretación",
+  interpretationTitle: "Título de la lectura",
   body: "Cuerpo",
   none: "Aún no hay ningún cuerpo: el testigo no dijo nada de lo que era, o falta introducirlo",
   deleteBody: "Eliminar el cuerpo",

@@ -232,10 +232,22 @@ describe("<rr0-case>, a case read", () => {
     expect(root.querySelector(".event-freeze")).toBeNull()
   })
 
+  it("edits the case itself from its own pencil, whatever is open below", async () => {
+    const element = await mount()
+    const opened = vi.spyOn(window, "open").mockReturnValue(null)
+    ;(element.shadowRoot!.getElementById("edit") as HTMLButtonElement).click()
+    const where = new URL(opened.mock.calls[0][0] as string)
+    expect(where.pathname).toBe("/edit/")
+    expect(where.searchParams.get("file")).toMatch(/case.*\.json$/)
+    // No event named: the editor opens on the case, its events listed, not on the observation open below.
+    expect(where.searchParams.has("track")).toBe(false)
+    opened.mockRestore()
+  })
+
   it("says what reads what, and whose a reading is", async () => {
     const element = await mount()
     const links = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")][1].querySelector(".event-links")!
-    expect(links.textContent).toContain("Interpretation of Q. B.")
+    expect(links.textContent).toContain("Reading of Q. B.")
     expect(links.textContent).toContain("by CousynAntoine and GEIPAN")
     // The observation says where it was told.
     const told = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")][0].querySelector(".event-links")!
