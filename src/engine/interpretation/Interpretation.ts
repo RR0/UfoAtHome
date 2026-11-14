@@ -97,7 +97,7 @@ export interface ReadingFinding {
   /** What it was set against. Meaningless for a test that could not be made. */
   against?: FindingGround
   /** Where the measure or the argument comes from, when it is not the text itself. */
-  rationale?: string
+  rationale?: SaidText
   /** The value of the recording it is about, as a path ("time", "place.locations.0.lat", "lighting"), when it is about one: the field an
    * editor marks when it fails. */
   path?: string

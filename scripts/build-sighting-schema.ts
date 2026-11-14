@@ -290,7 +290,10 @@ class JsonSchemaExport {
                 enum: ["established", "measured", "stated", "derived", "assumed", "fitted"],
                 description: "Strongest first: settled away from the account and the reconstruction, read off an instrument, said by the observer (the default), worked out, chosen so the reconstruction has a value at all, or turned to make a hypothesis fit."
               },
-              rationale: { type: "string", description: "The working for a derivation, or what a guess was chosen for." },
+              rationale: {
+                description: "The working for a derivation, or what a guess was chosen for: a string, or one per language ({ \"fr\": …, \"en\": … }) as a title is.",
+                anyOf: [{ type: "string" }, { type: "object", additionalProperties: { type: "string" } }]
+              },
               range: {
                 description: "How far what is known lets it be: a number's least and greatest, or a time's EDTF interval (\"1976-06/1976-07\"). What a reading of the observation may move it within.",
                 anyOf: [{ type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }, { type: "string" }]

@@ -1389,7 +1389,7 @@ export class SightingElement extends HTMLElement {
       .map(path => provenance.at(path)!)
     const basis = known.reduce<Basis>((weakest, entry) => rank[entry.basis] > rank[weakest] ? entry.basis : weakest, "stated")
     // The reasons for the basis shown, not for the stronger ones beside it.
-    const rationales = known.filter(entry => entry.basis === basis && entry.rationale).map(entry => entry.rationale!)
+    const rationales = known.filter(entry => entry.basis === basis && entry.rationale).map(entry => this.said.read(entry.rationale as never) ?? "").filter(text => text !== "")
     return { basis, rationales }
   }
 

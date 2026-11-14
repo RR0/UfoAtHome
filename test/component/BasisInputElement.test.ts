@@ -142,6 +142,17 @@ describe("BasisInputElement", () => {
   })
 })
 
+describe("A justification in several languages", () => {
+  it("is edited in the interface's language, the others kept, and a plain one stays plain", () => {
+    expect(BasisInputElement.rationaleWritten("the report", "le rapport", "fr")).toEqual({ rationale: "le rapport" })
+    expect(BasisInputElement.rationaleWritten({ en: "the report", fr: "le rapport" }, "le rapport, p. 3", "fr"))
+      .toEqual({ rationale: { en: "the report", fr: "le rapport, p. 3" } })
+    // Emptied in one language, it goes from that one; emptied in its last, it goes.
+    expect(BasisInputElement.rationaleWritten({ en: "the report", fr: "le rapport" }, "", "fr")).toEqual({ rationale: { en: "the report" } })
+    expect(BasisInputElement.rationaleWritten({ fr: "le rapport" }, "", "fr")).toEqual({})
+  })
+})
+
 describe("HintElement", () => {
   it("says what a label leaves out, on hover and pressed", () => {
     const hint = HintElement.of("width, and height above the eye")

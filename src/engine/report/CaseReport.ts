@@ -223,7 +223,7 @@ export class CaseReport {
     const location = recording.place?.locations?.[0] as { lat?: number, lng?: number } | undefined
     const lat = start?.lat ?? location?.lat, lng = start?.lng ?? location?.lng
     if (typeof lat === "number" && typeof lng === "number") Object.assign(witness, { lat, lng })
-    witness.values = CaseReport.valuesOf(provenance, recording, () => true)
+    witness.values = CaseReport.valuesOf(provenance, recording, () => true, said)
     const model = WitnessError.MODELS[0]
     const conditions = (recording as { account?: { conditions?: never } }).account?.conditions
     // What each phenomenon is called, from wherever the account names it: a title is stated once, not at every instant.
@@ -246,7 +246,7 @@ export class CaseReport {
         ...(shape.aim ? { aim: { azimuthDeg: shape.aim.azimuthDeg, altitudeDeg: shape.aim.altitudeDeg } } : {}),
         ...(shape.angular ? { angular: shape.angular } : {}),
         ...(entry ? { basis: entry.basis } : {}),
-        ...(entry?.rationale ? { rationale: entry.rationale } : {}),
+        ...(entry?.rationale ? { rationale: said.read(entry.rationale as never) ?? "" } : {}),
         ...(entry?.source ? { source: entry.source } : {})
       }
       if (directionSaid && shape.aim) {
@@ -277,7 +277,7 @@ export class CaseReport {
     const { recording, provenance } = Provenance.strip(json)
     const description = said.read(recording.description as never) ?? said.read(recording.summary as never)
     if (description) reading.description = description
-    reading.supposed = CaseReport.valuesOf(provenance, recording, (path, basis) => path.startsWith("interpretation") && (basis === "assumed" || basis === "fitted"))
+    reading.supposed = CaseReport.valuesOf(provenance, recording, (path, basis) => path.startsWith("interpretation") && (basis === "assumed" || basis === "fitted"), said)
     const words = (text: unknown) => typeof text === "string" ? text : said.read(text as never) ?? ""
     reading.findings = (recording.interpretation?.findings ?? []).map(finding => ({
       text: words(finding.text), outcome: finding.outcome, ...(finding.against ? { against: finding.against } : {}), written: true
@@ -341,14 +341,15 @@ export class CaseReport {
     }
   }
 
-  /** The values `provenance` knows that `keep` keeps, with their value as the recording holds it. */
-  private static valuesOf(provenance: Provenance, recording: unknown, keep: (path: string, basis: Basis) => boolean): ReportValue[] {
+  /** The values `provenance` knows that `keep` keeps, with their value as the recording holds it and their justification in the reader's
+   * language. */
+  private static valuesOf(provenance: Provenance, recording: unknown, keep: (path: string, basis: Basis) => boolean, said: SaidTexts): ReportValue[] {
     return provenance.paths().flatMap(path => {
       const entry = provenance.at(path)!
       if (!keep(path, entry.basis)) return []
       return [{
         path, value: path.split(".").reduce<unknown>((at, step) => (at as Record<string, unknown> | undefined)?.[step], recording), basis: entry.basis,
-        ...(entry.rationale ? { rationale: entry.rationale } : {}), ...(entry.source ? { source: entry.source } : {})
+        ...(entry.rationale ? { rationale: said.read(entry.rationale as never) ?? "" } : {}), ...(entry.source ? { source: entry.source } : {})
       }]
     })
   }

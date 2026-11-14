@@ -46,7 +46,7 @@ const reading = (): SightingRecordingJson => ({
       id: "b", model: { id: "ellipsoid" }, explains: ["ufo"],
       track: {
         value: [0, 1000].map(t => ({ t, azimuthDeg: 0, altitudeDeg: 10, distanceM: 100, sizeM: { widthM: diameter, lengthM: diameter, heightM: diameter } })),
-        basis: "assumed", rationale: "a party balloon, <its> height guessed"
+        basis: "assumed", rationale: { en: "a party balloon, <its> height guessed", fr: "un ballon de fête, <sa> hauteur devinée" }
       }
     }]
   }
@@ -81,6 +81,9 @@ describe("A report on a case", () => {
     const [balloon] = data.readings
     expect(balloon).toMatchObject({ title: "A balloon", reads: "Q. B.", by: ["Antoine Cousyn"], time: "2026-11" })
     expect(balloon.supposed.map(value => value.path)).toEqual(["interpretation.bodies.0.track"])
+    // Its justification in the reader's language, when it is given in several.
+    expect(balloon.supposed[0].rationale).toBe("a party balloon, <its> height guessed")
+    expect(CaseReport.of(caseJson, `${base}case.json`, recordings(), new SaidTexts(["fr"])).readings[0].supposed[0].rationale).toBe("un ballon de fête, <sa> hauteur devinée")
     expect(balloon.comparisons.map(comparison => comparison.agrees)).toEqual([true, true])
     expect(balloon.sensitivity?.agreement).toBe(1)
     expect(balloon.sensitivity?.sufficient).toBe(true)

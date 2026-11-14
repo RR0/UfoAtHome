@@ -537,7 +537,8 @@ export class DocsFormatPage extends DocsSection {
       said) or <code>fitted</code> (moved, within what is known, to see whether a hypothesis can be
       made to fit; <code>rationale</code> says which one). The list of <code>assumed</code> values is
       the list of what to go back to the witness or the file for, which is why it is worth writing
-      even when nothing else is.</p>
+      even when nothing else is. <code>rationale</code> is a string, or one per language as a title is
+      (<code>{ "fr": "…", "en": "…" }</code>): a report on the case is read in its reader's language.</p>
     <p><code>source</code> names what the value rests on, which a basis does not: a basis says what
       KIND of thing it is, this says WHICH thing — the thing somebody would go and look at. One at a
       time: <code>said</code> (<code>{ interview, segment, range }</code>, the passage of an
@@ -1103,7 +1104,8 @@ export class DocsFormatPage extends DocsSection {
       que le témoin ait dit) ou <code>fitted</code> (déplacé, dans ce qu'on sait, pour voir si une
       hypothèse peut coller ; <code>rationale</code> dit laquelle). La liste des valeurs
       <code>assumed</code> est la liste de ce qu'il faut retourner demander au témoin ou au dossier :
-      c'est pourquoi elle vaut d'être écrite même quand rien d'autre ne l'est.</p>
+      c'est pourquoi elle vaut d'être écrite même quand rien d'autre ne l'est. <code>rationale</code> est une chaîne, ou une par
+      langue comme un titre (<code>{ "fr": "…", "en": "…" }</code>) : un rapport sur le dossier se lit dans la langue de son lecteur.</p>
     <p><code>source</code> nomme ce sur quoi la valeur repose, ce qu'une base ne fait pas : la base
       dit de quelle NATURE elle est, ceci dit LAQUELLE — la chose qu'on irait regarder. Une à la
       fois : <code>said</code> (<code>{ interview, segment, range }</code>, le passage d'une
@@ -1663,7 +1665,9 @@ export class DocsFormatPage extends DocsSection {
       <code>assumed</code> (elegido para que la reconstrucción tenga un valor, sin base en nada de lo que
       dijo el testigo) o <code>fitted</code> (desplazado, dentro de lo que se sabe, para ver si una
       hipótesis puede encajar; <code>rationale</code> dice cuál). La lista de valores <code>assumed</code> es la lista de lo que hay que volver a
-      preguntar al testigo o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.</p>
+      preguntar al testigo o buscar en el expediente, y por eso vale la pena escribirla incluso cuando no se escribe nada más.
+      <code>rationale</code> es una cadena, o una por idioma como un título (<code>{ "fr": "…", "en": "…" }</code>): un informe del caso
+      se lee en el idioma de su lector.</p>
     <p><code>source</code> nombra aquello en lo que se apoya el valor, lo que una base no hace: la
       base dice de qué CLASE es, esto dice CUÁL — la cosa que alguien iría a mirar. Una a la vez:
       <code>said</code> (<code>{ interview, segment, range }</code>, el pasaje de una entrevista del
@@ -2222,7 +2226,9 @@ export class DocsFormatPage extends DocsSection {
       <code>assumed</code> (scelto perché la ricostruzione abbia comunque un valore, senza basarsi su nulla di ciò che
       il testimone ha detto) o <code>fitted</code> (spostato, entro ciò che si sa, per vedere se
       un'ipotesi può combaciare; <code>rationale</code> dice quale). L'elenco dei valori <code>assumed</code> è l'elenco di ciò per cui tornare dal testimone
-      o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.</p>
+      o al fascicolo, ed è per questo che vale la pena scriverlo anche quando non si scrive nient'altro.
+      <code>rationale</code> è una stringa, o una per lingua come un titolo (<code>{ "fr": "…", "en": "…" }</code>): un rapporto sul caso
+      si legge nella lingua del suo lettore.</p>
     <p><code>source</code> nomina ciò su cui il valore si appoggia, cosa che una base non fa: la base
       dice di che GENERE è, questo dice QUALE — la cosa che qualcuno andrebbe a guardare. Una alla
       volta: <code>said</code> (<code>{ interview, segment, range }</code>, il passaggio di

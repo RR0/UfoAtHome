@@ -227,4 +227,11 @@ describe("Provenance and what a value rests on", () => {
     expect(provenance.at("lightPollution")).toMatchObject({ basis: "stated", source: { tool: "World Atlas 2016" } })
     expect(Provenance.restore(stripped, provenance)).toEqual({ lightPollution: { value: 2, source: { tool: "World Atlas 2016" } } })
   })
+
+  it("keeps a justification given in several languages, as a title is", () => {
+    const rationale = { fr: "le rapport, tableau 1", en: "the report, table 1" }
+    const { recording: stripped, provenance } = Provenance.strip({ time: { value: "1950", basis: "derived", rationale } })
+    expect(provenance.at("time")?.rationale).toEqual(rationale)
+    expect(Provenance.restore(stripped, provenance)).toEqual({ time: { value: "1950", basis: "derived", rationale } })
+  })
 })

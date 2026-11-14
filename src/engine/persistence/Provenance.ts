@@ -102,8 +102,11 @@ export interface StatedValue<T = unknown> {
   basis?: Basis
   /** Why this value, and why that basis — the working for a derivation ("a 5.5 m carriageway at
    * 20-100 m spans 15 to 3 degrees; 8 taken"), or what a guess was chosen for. Optional because a
-   * stated value's justification is the account itself, which is already in the recording. */
-  rationale?: string
+   * stated value's justification is the account itself, which is already in the recording.
+   *
+   * A plain string, or one per language as a title is (see SaidText): a report on a case is read in its reader's language, and a
+   * justification left in the language its author wrote it in is the one part of it that reader cannot read. */
+  rationale?: SaidText
   /**
    * How it was obtained, from a closed list per kind of value (see WitnessError.HOW): a time read on a `clock`, `anchored` to a dated
    * event or `estimated`; a size `shown-on-the-spot`, through an `arm-length-gauge` or a `recalled-object`; an elevation or a heading
@@ -128,7 +131,8 @@ export type ValueRange = [number, number] | string
 /** What is known about one path, once the value has been taken out of it. */
 export interface ProvenanceEntry {
   basis: Basis
-  rationale?: string
+  /** See StatedValue.rationale. */
+  rationale?: SaidText
   /** See StatedValue.how. */
   how?: string
   /** See StatedValue.range. */

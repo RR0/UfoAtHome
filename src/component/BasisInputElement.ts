@@ -1,3 +1,6 @@
+import { SaidTexts, type SaidText } from "../engine/model/SaidText.js"
+import { HostLocale, selectLocale } from "../i18n/locale.js"
+import { UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import { Provenance, type Basis, type ValueSource } from "../engine/persistence/Provenance.js"
 import { WindowClose } from "./WindowClose.js"
 
@@ -58,7 +61,8 @@ export interface SourceChoices {
 export interface BasisEntry {
   basis: Basis
   how?: string
-  rationale?: string
+  /** A plain string, or one per language (see StatedValue.rationale). */
+  rationale?: SaidText
   /** What it rests on, named (see ValueSource). */
   source?: ValueSource
 }
@@ -197,8 +201,30 @@ rr0-input-basis[hidden] { display: none; }
     if (mark.textContent !== m.basis[basis]) mark.textContent = m.basis[basis]
     if (this.shown?.source) mark.dataset.sourced = "yes"
     else delete mark.dataset.sourced
-    mark.title = this.shown?.rationale ? `${m.title} : ${this.shown.rationale}` : m.title
+    const why = this.rationaleRead()
+    mark.title = why ? `${m.title} : ${why}` : m.title
     mark.setAttribute("aria-label", `${m.title} : ${m.basis[basis]}`)
+  }
+
+  /** The justification in the reader's language, or the one it has. */
+  private rationaleRead(): string | undefined {
+    return new SaidTexts(HostLocale.preferencesFor(this)).read(this.shown?.rationale as never)
+  }
+
+  /** The language a justification typed here is in: the interface's. */
+  private rationaleLanguage(): string {
+    return selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES)
+  }
+
+  /**
+   * A justification as typed, in `language`, written back as the file held it: a plain string stays one; one per language keeps the
+   * others and has this one replaced, or dropped when it is emptied (the last one dropped leaves none).
+   */
+  static rationaleWritten(was: SaidText | undefined, typed: string, language: string): { rationale?: SaidText } {
+    if (was === undefined || typeof was === "string") return typed ? { rationale: typed } : {}
+    const kept = Object.fromEntries(Object.entries(was).filter(([tag]) => tag !== language))
+    const next = typed ? { ...kept, [language]: typed } : kept
+    return Object.keys(next).length > 0 ? { rationale: next } : {}
   }
 
   /** The window where what the value stands on is said: its basis, how (from the host's list), and why. */
@@ -214,7 +240,7 @@ rr0-input-basis[hidden] { display: none; }
     for (const way of this.hows) how.append(new Option(way.label, way.value))
     how.value = this.shown?.how ?? ""
     const rationale = document.createElement("textarea")
-    rationale.value = this.shown?.rationale ?? ""
+    rationale.value = this.rationaleRead() ?? ""
     const labelled = (text: string, control: HTMLElement) => {
       const label = document.createElement("label")
       label.append(Object.assign(document.createElement("span"), { textContent: text }), control)
@@ -228,7 +254,7 @@ rr0-input-basis[hidden] { display: none; }
       this.entry = {
         basis: picked,
         ...(how.value ? { how: how.value } : {}),
-        ...(rationale.value.trim() ? { rationale: rationale.value.trim() } : {}),
+        ...BasisInputElement.rationaleWritten(this.shown?.rationale, rationale.value.trim(), this.rationaleLanguage()),
         ...(source ? { source } : {})
       }
       this.dispatchEvent(new CustomEvent("basischange", { detail: { entry: this.shown }, bubbles: true, composed: true }))

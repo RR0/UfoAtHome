@@ -1,3 +1,5 @@
+import { SaidTexts } from "../engine/model/SaidText.js"
+import { HostLocale } from "../i18n/locale.js"
 import type { Snapshots, RecordingSectionName, SectionAnnex } from "../engine/model/Snapshots.js"
 import { SnapshotGroups, RecordingSections } from "../engine/model/Snapshots.js"
 import type { Sighting } from "../engine/model/Sighting.js"
@@ -113,7 +115,8 @@ export class SectionFilePanel {
       case "place":
         return sighting.event.place?.[0]?.name ?? ""
       case "lightPollution":
-        return sighting.provenance.at("lightPollution")?.rationale ?? (sighting.lightPollution === undefined ? "" : String(sighting.lightPollution))
+        return new SaidTexts(HostLocale.preferencesFor(this.root)).read(sighting.provenance.at("lightPollution")?.rationale as never)
+          ?? (sighting.lightPollution === undefined ? "" : String(sighting.lightPollution))
       case "decor":
         return ""
     }
