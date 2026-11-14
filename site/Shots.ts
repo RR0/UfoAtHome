@@ -246,10 +246,10 @@ export class Shots {
     {
       page: "docs/case", after: "in-the-case-editor", name: "case-events",
       caption: {
-        en: "The case editor: the picker of the case's events, and the + that adds one.",
-        fr: "L'éditeur de dossier : le sélecteur des événements du dossier, et le + qui en ajoute un.",
-        es: 'El editor de casos: el selector de los eventos del caso, y el + que añade uno.',
-        it: "L'editor di casi: il selettore degli eventi del caso, e il + che ne aggiunge uno."
+        en: "The case editor: the events of the case as cards, each with what can be done to it — clone, padlock, bin — and the + that adds one.",
+        fr: "L'éditeur de dossier : les événements du dossier en cartes, chacune avec ce qu'on peut en faire — cloner, cadenas, corbeille — et le + qui en ajoute un.",
+        es: 'El editor de casos: los eventos del caso en tarjetas, cada una con lo que se puede hacer con ella — clonar, candado, papelera — y el + que añade uno.',
+        it: "L'editor di casi: gli eventi del caso in schede, ciascuna con ciò che se ne può fare — clonare, lucchetto, cestino — e il + che ne aggiunge uno."
       }
     },
     {

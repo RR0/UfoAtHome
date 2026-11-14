@@ -102,16 +102,16 @@ const addDialog = (name, fill) => ({
 
 export const SHOTS = [
   {
-    // The picker of a case's events, and the "+" that adds one.
+    // The events of a case as cards, each with what can be done to it, and the "+" that adds one.
     name: "case-events",
     page: EDIT,
     query: SAINT_LO,
-    async take({ page, highlight, boxOf }) {
-      await highlight(page, page.locator("rr0-case-editor #track"))
+    settle: 14000,
+    async take({ page, highlight }) {
+      // The events of the case are cards now, not a picker: what is shown is the button that adds one and the list itself,
+      // where each card carries what can be done to it (clone, padlock, bin).
       await highlight(page, page.locator("rr0-case-editor #add"))
-      const whole = await boxOf([page.locator("rr0-case-editor")], 0)
-      const row = await boxOf([page.locator("rr0-case-editor #events-row")], 10)
-      return { clip: { x: whole.x, y: whole.y, width: whole.width, height: row.y + row.height - whole.y } }
+      return { region: [page.locator("rr0-case-editor #add"), page.locator("rr0-case-editor #event-list")], pad: 10 }
     }
   },
   addDialog("case-add-interview", async page => {
@@ -125,6 +125,7 @@ export const SHOTS = [
     name: "case-file",
     page: EDIT,
     query: SAINT_LO,
+    settle: 14000,
     async take({ page, highlight }) {
       const tabs = page.locator("rr0-case-editor > div .group-tab, rr0-case-editor .case-panel .group-tab").first()
       await page.locator("rr0-case-editor [aria-controls=group-case-file]").click()
@@ -212,16 +213,14 @@ export const SHOTS = [
     }
   },
   {
-    // A case: its identifier, title and the observations it holds, above the editor proper.
+    // A case: its identifier, title and the events it gathers.
     name: "edit-case",
     page: EDIT,
     query: CASE,
-    async take({ page, boxOf }) {
-      // From the case's own title down to where the editor of one observation begins.
-      const whole = await boxOf([page.locator("rr0-case-editor")], 0)
-      const tabs = await boxOf([page.locator(".group-tabs").first()], 0)
-      const pad = 8
-      return { clip: { x: whole.x, y: whole.y, width: whole.width, height: tabs.y - whole.y - 4 } }
+    settle: 14000,
+    async take({ page }) {
+      // The case itself: what it is called and when, and the events it gathers.
+      return { region: [page.locator("rr0-case-editor .case-panel"), page.locator("rr0-case-editor #event-list")], pad: 8 }
     }
   }
 ]
