@@ -996,6 +996,26 @@ describe("CaseEditorElement's events", () => {
     expect(shown()).toEqual(["observation", "interview"])
   })
 
+  it("hides the readings compared when the readings are filtered out of the list", async () => {
+    const element = await open(undefined, {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1950", title: "An account", url: "account.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", time: "2013-04", title: { en: "A model" }, url: "reading.json" }
+      ]
+    })
+    await wait(80)
+    const root = element.shadowRoot!
+    const table = root.getElementById("readings-comparison")!
+    expect(table.hasAttribute("data-filtered")).toBe(false)
+    const readings = () => [...root.querySelectorAll<HTMLButtonElement>(".filter-chip")].find(chip => chip.dataset.kind === "reading")!
+    readings().click()
+    await wait()
+    expect(root.getElementById("readings-comparison")!.hasAttribute("data-filtered")).toBe(true)
+    readings().click()
+    await wait()
+    expect(root.getElementById("readings-comparison")!.hasAttribute("data-filtered")).toBe(false)
+  })
+
   it("makes every reference to another event of the case a link that opens it", async () => {
     const element = await open(undefined, {
       events: [

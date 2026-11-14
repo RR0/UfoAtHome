@@ -240,6 +240,8 @@ const TEMPLATE = `
   .event-card[data-verdict="compatible"] .verdict { color: var(--ok); }
   .findings { grid-area: findings; margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
   .readings-comparison { margin-top: 14px; }
+  /* The readings filtered out of the list are filtered out of their comparison too (see renderFilter). */
+  .readings-comparison[data-filtered] { display: none; }
   .event-body > rr0-reading-sensitivity { grid-column: 1 / -1; margin-top: 2px; }
   .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
   .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
@@ -1783,6 +1785,7 @@ export class CaseEditorElement extends HTMLElement {
   private compareReadings(session: CaseSession): void {
     ReadingsComparisonElement.register()
     const table = this.byId("readings-comparison") as ReadingsComparisonElement
+    table.toggleAttribute("data-filtered", !this.kindsShown.has("reading"))
     const rowsOf = (): ComparedReading[] => session.tracks.flatMap((track, index) => {
       if (track.kind !== "reading") return []
       const account = session.accountOf(track)
