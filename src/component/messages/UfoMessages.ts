@@ -29,6 +29,11 @@ export interface UfoMessages {
   videoTime: string
   videoMap: string
   videoStart: string
+  /** Where the film starts and ends, and the button that sets either to where the playback stands, with its hint. */
+  videoFrom: string
+  videoTo: string
+  videoHere: string
+  videoHereHint: string
   /** What the film's file says of itself, in its metadata: a simulation, not the observation filmed. */
   videoDescription: string
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */

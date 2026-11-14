@@ -2,6 +2,10 @@
 export interface FilmOptions {
   /** The film's height in pixels, its width following the picture's proportions; undefined, the picture's own size on screen. */
   readonly height?: number
+  /** Where the film starts and ends, in seconds of the observation from its start, as the player's counter reads it: undefined, its start
+   * and its end. */
+  readonly fromS?: number
+  readonly toS?: number
   /** Whether the account's moment is written under the picture, as the player writes it. */
   readonly caption: boolean
   /** Whether the time the player shows is written in a corner. */

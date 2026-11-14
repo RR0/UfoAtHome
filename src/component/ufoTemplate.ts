@@ -1157,6 +1157,48 @@ canvas[data-cursor="rotate"] {
 .video-options select option {
   color: #111;
 }
+.video-options .video-bound {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.video-options .video-bound label {
+  flex: 1;
+  justify-content: space-between;
+}
+.video-options .video-bound input {
+  width: 5.5em;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 0.2em 0.35em;
+  border-radius: 0.35em;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+.video-options .video-bound input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.video-options .video-bound input[aria-invalid="true"] {
+  border-color: #ff6b6b;
+}
+.video-options .video-here {
+  padding: 0.2em 0.55em;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.35em;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.video-options .video-here:hover,
+.video-options .video-here:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+.video-options .video-start:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
 .video-options .video-start {
   margin-top: 0.2em;
   padding: 0.45em 0.8em;

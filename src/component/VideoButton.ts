@@ -11,6 +11,9 @@ export interface SceneFilmer {
   pictureSize(): { width: number, height: number }
   /** Whether the recording has a map of where the witness stood, to lay over the film. */
   hasMap(): boolean
+  /** How long the observation lasts, and where its playback stands, in seconds from its start as the player's counter reads them. */
+  durationS(): number
+  positionS(): number
 }
 
 /** What the button and its options say (see UfoMessages). */
@@ -27,6 +30,11 @@ export interface VideoButtonTexts {
   readonly videoTime: string
   readonly videoMap: string
   readonly videoStart: string
+  /** Where the film starts and ends, and the button that takes where the playback stands, with its hint. */
+  readonly videoFrom: string
+  readonly videoTo: string
+  readonly videoHere: string
+  readonly videoHereHint: string
 }
 
 /**
@@ -46,6 +54,9 @@ export class VideoButton {
   private readonly sizeLabel: HTMLElement
   private readonly sizeSelect: HTMLSelectElement
   private readonly checks: Record<"caption" | "time" | "map", { input: HTMLInputElement, label: HTMLElement }>
+  /** Where the film starts and ends: left empty, the observation's start and end. Not kept from one film to the next, which may well be of
+   * another recording. */
+  private readonly bounds: Record<"from" | "to", { label: HTMLElement, input: HTMLInputElement, here: HTMLButtonElement }>
   private readonly startButton: HTMLButtonElement
   private texts?: VideoButtonTexts
   private filming?: AbortController
@@ -80,6 +91,29 @@ export class VideoButton {
     this.sizeSelect = document.createElement("select")
     size.append(this.sizeLabel, this.sizeSelect)
     this.panel.append(size)
+    const bound = (): { label: HTMLElement, input: HTMLInputElement, here: HTMLButtonElement } => {
+      const row = document.createElement("div")
+      row.className = "video-bound"
+      const field = document.createElement("label")
+      const label = document.createElement("span")
+      const input = document.createElement("input")
+      input.type = "text"
+      input.inputMode = "numeric"
+      input.size = 7
+      input.addEventListener("input", () => this.checkBounds())
+      field.append(label, input)
+      const here = document.createElement("button")
+      here.type = "button"
+      here.className = "video-here"
+      here.addEventListener("click", () => {
+        input.value = VideoButton.formatSeconds(this.filmer.positionS())
+        this.checkBounds()
+      })
+      row.append(field, here)
+      this.panel.append(row)
+      return { label, input, here }
+    }
+    this.bounds = { from: bound(), to: bound() }
     const check = (): { input: HTMLInputElement, label: HTMLElement } => {
       const row = document.createElement("label")
       const input = document.createElement("input")
@@ -116,6 +150,7 @@ export class VideoButton {
 
   private openOptions(): void {
     this.fillSizes()
+    this.fillBounds()
     this.panel.hidden = false
     this.element.setAttribute("aria-expanded", "true")
     this.startButton.focus()
@@ -155,10 +190,58 @@ export class VideoButton {
     map.label.parentElement!.classList.toggle("disabled", map.input.disabled)
   }
 
+  /** What the start and end say before they are set: the observation's own. */
+  private fillBounds(): void {
+    this.bounds.from.input.placeholder = VideoButton.formatSeconds(0)
+    this.bounds.to.input.placeholder = VideoButton.formatSeconds(this.filmer.durationS())
+    this.checkBounds()
+  }
+
+  /** The start and end as seconds: undefined for one left empty, NaN for one that says no time of the observation. */
+  private boundsS(): { fromS?: number, toS?: number } {
+    const duration = this.filmer.durationS()
+    const read = (text: string): number | undefined => {
+      const seconds = VideoButton.secondsOf(text)
+      return seconds === undefined || (seconds >= 0 && seconds <= duration + 0.001) ? seconds : NaN
+    }
+    return { fromS: read(this.bounds.from.input.value), toS: read(this.bounds.to.input.value) }
+  }
+
+  /** Marks a start or an end that cannot be filmed, and holds the film back until they can. */
+  private checkBounds(): void {
+    const { fromS, toS } = this.boundsS()
+    const reversed = (fromS ?? 0) >= (toS ?? this.filmer.durationS())
+    const fromWrong = Number.isNaN(fromS) || (reversed && fromS !== undefined)
+    const toWrong = Number.isNaN(toS) || (reversed && toS !== undefined)
+    this.bounds.from.input.setAttribute("aria-invalid", String(fromWrong))
+    this.bounds.to.input.setAttribute("aria-invalid", String(toWrong))
+    this.startButton.disabled = fromWrong || toWrong || reversed
+  }
+
+  /** Seconds as the player's counter writes them: m:ss, or h:mm:ss past an hour. */
+  static formatSeconds(seconds: number): string {
+    const whole = Math.max(0, Math.round(seconds))
+    const h = Math.floor(whole / 3600)
+    const m = Math.floor(whole / 60) % 60
+    const s = String(whole % 60).padStart(2, "0")
+    return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`
+  }
+
+  /** What `text` says in seconds: "1:05", "65", "1:02:03", "12.5"; undefined when it is empty, NaN when it is no duration. */
+  static secondsOf(text: string): number | undefined {
+    const trimmed = text.trim().replace(",", ".")
+    if (trimmed === "") return undefined
+    if (!/^\d+(\.\d+)?$|^\d+(:\d{1,2}){1,2}(\.\d+)?$/.test(trimmed)) return NaN
+    return trimmed.split(":").reduce((total, part) => total * 60 + Number(part), 0)
+  }
+
   private options(): FilmOptions {
     const height = Number(this.sizeSelect.value)
+    const { fromS, toS } = this.boundsS()
     return {
       ...(height > 0 ? { height } : {}),
+      ...(fromS !== undefined && !Number.isNaN(fromS) ? { fromS } : {}),
+      ...(toS !== undefined && !Number.isNaN(toS) ? { toS } : {}),
       caption: this.checks.caption.input.checked,
       time: this.checks.time.input.checked,
       map: this.checks.map.input.checked && !this.checks.map.input.disabled
@@ -181,7 +264,9 @@ export class VideoButton {
 
   private keepOptions(options: FilmOptions): void {
     try {
-      localStorage.setItem(VideoButton.STORAGE_KEY, JSON.stringify(options))
+      // Not where it starts and ends, which is of this recording alone.
+      const { fromS: _from, toS: _to, ...kept } = options
+      localStorage.setItem(VideoButton.STORAGE_KEY, JSON.stringify(kept))
     } catch {
       // Not kept: the next film starts from the defaults.
     }
@@ -242,6 +327,12 @@ export class VideoButton {
     this.checks.time.label.textContent = texts?.videoTime ?? ""
     this.checks.map.label.textContent = texts?.videoMap ?? ""
     this.startButton.textContent = texts?.videoStart ?? ""
+    this.bounds.from.label.textContent = texts?.videoFrom ?? ""
+    this.bounds.to.label.textContent = texts?.videoTo ?? ""
+    for (const { here } of Object.values(this.bounds)) {
+      here.textContent = texts?.videoHere ?? ""
+      here.title = texts?.videoHereHint ?? ""
+    }
     if (!this.panel.hidden) this.fillSizes()
   }
 }

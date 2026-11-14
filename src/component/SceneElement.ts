@@ -1244,7 +1244,9 @@ export class SceneElement extends HTMLElement {
         film: (options, onProgress, signal) => this.film(options, onProgress, signal),
         fileName: () => this.filmFileName(),
         pictureSize: () => this.filmPictureSize(),
-        hasMap: () => this.ufoElement.hasObserverMap
+        hasMap: () => this.ufoElement.hasObserverMap,
+        durationS: () => this.ufoElement.seekableDuration / this.filmRate() / 1000,
+        positionS: () => this.ufoElement.currentTime / this.filmRate() / 1000
       }
     }
     // The weather is heard through this element, the button that silences it is the player's.
@@ -1770,10 +1772,14 @@ export class SceneElement extends HTMLElement {
       const logo = await FilmChrome.loadLogo()
       const height = options.height ?? this.sceneCanvas.height
       const width = options.height && css.height > 0 ? Math.round(options.height * css.width / css.height) : this.sceneCanvas.width
+      // The start and end are in the observation's seconds, as the counter reads them; the film goes over the recording's own.
+      const rate = this.filmRate()
+      const toMs = Math.min(player.seekableDuration, options.toS !== undefined ? options.toS * 1000 * rate : player.seekableDuration)
+      const fromMs = Math.min(toMs, Math.max(0, (options.fromS ?? 0) * 1000 * rate))
       return await VideoExport.film({
-        fromMs: 0,
-        toMs: player.seekableDuration,
-        rate: player.playbackRate,
+        fromMs,
+        toMs,
+        rate,
         width,
         height,
         frameAt: (timeMs, clockMs, target) => {
@@ -1796,6 +1802,12 @@ export class SceneElement extends HTMLElement {
       player.currentTime = wasAtMs
       this.syncAnimationsToPlayback()
     }
+  }
+
+  /** How many of the recording's ms pass in one of the observation's: what a film's start and end are converted with. */
+  private filmRate(): number {
+    const rate = this.ufoElement.playbackRate
+    return rate > 0 ? rate : 1
   }
 
   /** The picture's size on screen, in device pixels: what a film is made at by default. */

@@ -12,7 +12,11 @@ const TEXTS: VideoButtonTexts = {
   videoCaption: "Caption",
   videoTime: "Time",
   videoMap: "Map",
-  videoStart: "Start"
+  videoStart: "Start",
+  videoFrom: "From",
+  videoTo: "To",
+  videoHere: "Here",
+  videoHereHint: "Where it plays"
 }
 
 /** A film made by hand: its progress told and its end decided by the test. */
@@ -43,6 +47,16 @@ class FakeFilmer implements SceneFilmer {
 
   hasMap(): boolean {
     return this.map
+  }
+
+  position = 0
+
+  durationS(): number {
+    return 40
+  }
+
+  positionS(): number {
+    return this.position
   }
 
   end(film: Blob): void {
@@ -86,6 +100,42 @@ describe("VideoButton", () => {
     expect(button.panel.hidden).toBe(true)
     button.element.remove()
     button.panel.remove()
+  })
+
+  it("films the whole observation unless told where to start and end, from the playback or as the counter writes it", () => {
+    const filmer = new FakeFilmer()
+    const button = new VideoButton(filmer)
+    button.messages = TEXTS
+    button.element.click()
+    const [from, to] = [...button.panel.querySelectorAll<HTMLInputElement>(".video-bound input")]
+    expect([from.placeholder, to.placeholder]).toEqual(["0:00", "0:40"])
+    filmer.position = 12.4
+    button.panel.querySelector<HTMLButtonElement>(".video-here")!.click()
+    expect(from.value).toBe("0:12")
+    to.value = "35"
+    to.dispatchEvent(new Event("input"))
+    const startButton = button.panel.querySelector<HTMLButtonElement>(".video-start")!
+    expect(startButton.disabled).toBe(false)
+    // Past the end, or ending before it starts: no film.
+    to.value = "1:05"
+    to.dispatchEvent(new Event("input"))
+    expect([to.getAttribute("aria-invalid"), startButton.disabled]).toEqual(["true", true])
+    to.value = "0:10"
+    to.dispatchEvent(new Event("input"))
+    expect(startButton.disabled).toBe(true)
+    to.value = "0:35"
+    to.dispatchEvent(new Event("input"))
+    startButton.click()
+    expect(filmer.options).toMatchObject({ fromS: 12, toS: 35 })
+    // Of this recording alone: the next film starts from its whole again.
+    expect(localStorage.getItem(VideoButton.STORAGE_KEY)).not.toContain("fromS")
+  })
+
+  it("reads a time as the counter writes it", () => {
+    expect([VideoButton.secondsOf("1:05"), VideoButton.secondsOf("65"), VideoButton.secondsOf("1:02:03"), VideoButton.secondsOf(" ")])
+      .toEqual([65, 65, 3723, undefined])
+    expect(VideoButton.secondsOf("abc")).toBeNaN()
+    expect([VideoButton.formatSeconds(65), VideoButton.formatSeconds(3723)]).toEqual(["1:05", "1:02:03"])
   })
 
   it("makes the film with what was chosen, and makes the next one the same way", () => {
