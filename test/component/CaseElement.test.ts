@@ -232,6 +232,20 @@ describe("<rr0-case>, a case read", () => {
     expect(root.querySelector(".event-freeze")).toBeNull()
   })
 
+  // Braine-le-Comte's six readings, undated, were listed before the three accounts they read.
+  it("lists a reading nobody dated after the account it reads, never before it", async () => {
+    const [sighting, reading, interview] = caseJson.events
+    const undated = { ...reading, time: undefined }
+    caseJson.events = [undated, sighting, interview] as typeof caseJson.events
+    try {
+      const element = await mount()
+      const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")]
+      expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "interview"])
+    } finally {
+      caseJson.events = [sighting, reading, interview]
+    }
+  })
+
   it("edits the case itself from its own pencil, whatever is open below", async () => {
     const element = await mount()
     const opened = vi.spyOn(window, "open").mockReturnValue(null)

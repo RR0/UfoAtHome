@@ -202,8 +202,7 @@ export class CaseElement extends HTMLElement {
     const json = await SightingFetch.recording(this.url) as CaseJson
     if (!CaseFile.isCase(json)) throw new Error(`${url} is not a case: <${CASE_ELEMENT_NAME}> reads a case.json`)
     this.json = json
-    this.entries = (json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined)
-      .sort((a, b) => a.when.localeCompare(b.when))
+    this.entries = CaseElement.inTime((json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined))
     this.shown.clear()
     this.openEvents.replaceChildren()
     this.draw()
@@ -216,6 +215,26 @@ export class CaseElement extends HTMLElement {
     }
     const first = this.entries.findIndex(entry => entry.kind !== "interview")
     if (first >= 0) void this.open(first)
+  }
+
+  /**
+   * The events in the order of time, as the case editor lists them (see CaseEditorElement.eventsInTime). A reading nobody dated came after
+   * the account it reads at least: it takes that account's time, where undated it stood before every observation of the case (Braine-le-Comte's
+   * six readings, McMinnville's, Socorro's, the Concorde's). At the same time an account comes before the readings of it; otherwise the order
+   * is the case's own.
+   */
+  private static inTime(entries: CaseEntry[]): CaseEntry[] {
+    const byId = new Map(entries.filter(entry => entry.event.id !== undefined).map(entry => [entry.event.id, entry]))
+    const timeOf = (entry: CaseEntry): string => {
+      if (entry.when !== "" || entry.kind !== "reading") return entry.when
+      const read = [entry.event.interpretationOf].flat().map(id => id === undefined ? undefined : byId.get(id))
+        .find(account => account !== undefined && account.when !== "")
+      return read?.when ?? ""
+    }
+    const reads = (entry: CaseEntry) => entry.kind === "reading" ? 1 : 0
+    return entries.map((entry, index) => ({ entry, index }))
+      .sort((a, b) => timeOf(a.entry).localeCompare(timeOf(b.entry)) || reads(a.entry) - reads(b.entry) || a.index - b.index)
+      .map(({ entry }) => entry)
   }
 
   private entryOf(event: CaseEventJson): CaseEntry | undefined {
