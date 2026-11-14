@@ -73,7 +73,8 @@ ${HelpPopover.css(".menu")}
     const open = document.createElement("button")
     open.type = "button"
     open.className = "open"
-    open.part.add("button")
+    // As an attribute rather than through `part`, which not every DOM has (a test's).
+    open.setAttribute("part", "button")
     open.title = m.hint
     open.setAttribute("aria-label", m.hint)
     open.setAttribute("aria-haspopup", "menu")
