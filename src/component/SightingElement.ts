@@ -76,6 +76,8 @@ export const START_CLOCK_ATTRIBUTE = "start-clock"
 export const OBSERVER_ATTRIBUTE = "observer"
 /** Set by whoever already names the case around this player (see CaseElement): it then leaves the case unnamed rather than saying it twice. */
 export const CASE_NAMED_ATTRIBUTE = "case-named"
+/** Set by a page that wants the information panel open from the start, as `show-labels` opens the strip of stated values. */
+export const SHOW_INFO_ATTRIBUTE = "show-info"
 
 /** The share dialog's choice of the whole case, as opposed to one recording's address. */
 const CASE_SCOPE = "case"
@@ -115,7 +117,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -453,6 +455,10 @@ export class SightingElement extends HTMLElement {
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
+    }
+    if (name === SHOW_INFO_ATTRIBUTE) {
+      // Asked for from the outside, as a reader would ask for it from the button.
+      if (this.hasAttribute(SHOW_INFO_ATTRIBUTE) !== this.infoOpen) this.toggleInfoPanel()
     }
     if (name === "show-labels") {
       this.applyLabels(this.hasAttribute("show-labels"))

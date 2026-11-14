@@ -292,6 +292,37 @@ describe("<rr0-case>, a case read", () => {
     expect(shown).toEqual([[player.playedSeconds, "qb"]])
   })
 
+  it("takes its options from the page: what to show from the start, and passes them on to its players", async () => {
+    files[new URL("case.json", location.href).href] = caseJson
+    files[new URL("observer.json", location.href).href] = account
+    files[new URL("reading.json", location.href).href] = account
+    files[new URL("interview.json", location.href).href] = { version: 1, id: "i1", language: "en", speakers: {}, segments: [] }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
+      ok: true, status: 200, json: () => Promise.resolve(files[url]), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+    })))
+    const element = document.createElement(CASE_ELEMENT_NAME) as CaseElement
+    element.setAttribute("src", "case.json")
+    element.setAttribute("show-info", "")
+    element.setAttribute("show-labels", "")
+    element.setAttribute("show-timeline", "false")
+    document.body.appendChild(element)
+    for (let left = 400; left > 0 && element.shadowRoot!.getElementById("case-title")!.textContent === ""; left--) {
+      await new Promise(resolve => setTimeout(resolve, 5))
+    }
+    const root = element.shadowRoot!
+    // What the case says of itself is open, its chronology is not, and what is open is still open.
+    expect(root.getElementById("case-summary")!.hidden).toBe(false)
+    expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(true)
+    expect(root.getElementById("timeline-button")!.getAttribute("aria-pressed")).toBe("false")
+    expect([...root.querySelectorAll(".open-event")].length).toBe(1)
+    // The player opened wears the options the case was given.
+    expect(element.player!.hasAttribute("show-labels")).toBe(true)
+    expect(element.player!.hasAttribute("show-info")).toBe(true)
+    // And the button gives the chronology back.
+    root.getElementById("timeline-button")!.click()
+    expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(false)
+  })
+
   it("says of itself only what the i asks for, and leads to the editor on what is open", async () => {
     const element = await mount()
     const root = element.shadowRoot!

@@ -5,8 +5,11 @@ export const caseHtml = `
     <p id="case-kind" class="case-kind"></p>
     <h2 id="case-title" class="case-title"></h2>
     <!-- The same pair the observation carries, for the case: the way into the editor, and what the case says of itself. -->
+    <!-- The same three in the same order as an observation carries (see sightingTemplate): the way into the editor, this element's own
+         toggle, and what it says of itself. A reader moving between a case and an observation finds the buttons where they were. -->
     <span class="case-actions">
       <button id="edit" type="button" class="icon-btn"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></button>
+      <button id="timeline-button" type="button" class="icon-btn" aria-pressed="true"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="4" cy="4" r="1.4"/><circle cx="4" cy="11.5" r="1.4"/><path d="M4 5.6v4.4M7.6 4h6M7.6 11.5h4.4"/></svg></button>
       <button id="info" type="button" class="icon-btn" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
     </span>
   </div>
@@ -28,17 +31,20 @@ export const caseCss = `
 .case-kind { margin: 0; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .case-title { margin: 0; font: 600 24px/1.25 var(--rr0-serif, Georgia, serif); }
 .case-actions { display: flex; gap: 4px; margin-left: auto; }
+/* The very square the observation's own row wears (see sightingTemplate's .edit-link and .info-btn): same size, same border, same
+   background, so that the two rows are one set of buttons seen in two places. */
 .icon-btn {
-  display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-  border-radius: 8px; background: none; color: inherit; cursor: pointer;
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; box-sizing: border-box;
+  padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333; cursor: pointer;
 }
-.icon-btn:hover { border-color: currentColor; }
-.icon-btn[aria-expanded="true"] { border-color: currentColor; background: color-mix(in srgb, currentColor 10%, transparent); }
+.icon-btn:hover, .icon-btn:focus-visible { background: #e0e0e0; }
+.icon-btn[aria-expanded="true"], .icon-btn[aria-pressed="false"] { background: #d8d8d8; }
 .case-summary { margin: 0; font-size: 15px; line-height: 1.5; opacity: .85; }
 .case-summary[hidden] { display: none; }
 /* The chronology: everything on one rail, in the order of time, the kind of each said by an icon on the rail and by a word on its
    pill. What cannot be done while reading is absent, not greyed out. */
 .case-timeline { margin: 0 0 14px; }
+.case-timeline[hidden] { display: none; }
 .events-heading { margin: 0 0 8px; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .case-events { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
 .event { --kind: var(--rr0-glow, #e8b84b); position: relative; border: 1px solid color-mix(in srgb, currentColor 18%, transparent);

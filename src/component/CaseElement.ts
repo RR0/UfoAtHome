@@ -10,11 +10,13 @@ import type { UfoLanguage } from "./messages/index.js"
 import type { CaseMessages } from "./messages/CaseMessages.js"
 import { Icons } from "./Icons.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
-import { CASE_NAMED_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
+import { CASE_NAMED_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
 
 export const CASE_ELEMENT_NAME = "rr0-case"
+/** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
+export const SHOW_TIMELINE_ATTRIBUTE = "show-timeline"
 
 /** One event of the case, as the reader shows it: what the case says of it, and nothing fetched. */
 interface CaseEntry {
@@ -44,8 +46,11 @@ interface CaseEntry {
  */
 export class CaseElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", OBSERVER_ATTRIBUTE]
+    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, SHOW_TIMELINE_ATTRIBUTE, OBSERVER_ATTRIBUTE]
   }
+
+  /** The options a page sets on this element and that its players wear too: what to show from the start. */
+  private static readonly PASSED_ON = ["show-labels", SHOW_INFO_ATTRIBUTE] as const
 
   private readonly shadow: ShadowRoot
   private readonly openEvents: HTMLElement
@@ -78,26 +83,16 @@ export class CaseElement extends HTMLElement {
     // stands. Only when that passage changes, so that reading one is not a scroll that never settles.
     this.openEvents.addEventListener("timedisplaychange", event => {
       const block = (event.target as HTMLElement | null)?.closest?.(".open-event") as HTMLElement | null
-      const at = block ? Number(block.dataset.at) : NaN
-      const entry = Number.isNaN(at) ? undefined : this.entries[at]
-      const player = block?.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null
-      if (!entry || !player) return
-      for (const [index, other] of this.shown) {
-        if (this.entries[index]?.kind !== "interview") continue
-        const reader = other.querySelector("rr0-interview") as (HTMLElement & { revealAt?: (s: number, of?: string) => number | undefined }) | null
-        // The reader shows a passage once and stays there while the replay is still inside it (see InterviewElement.revealAt).
-        reader?.revealAt?.(player.playedSeconds, entry.event.id)
-      }
+      this.followReplay(block ?? undefined)
     })
     this.byId("edit").addEventListener("click", () => {
       const where = this.editorUrl()
       if (where) window.open(where, "_blank", "noopener")
     })
     const info = this.byId("info")
-    info.addEventListener("click", () => {
-      const summary = this.byId("case-summary")
-      summary.hidden = !summary.hidden
-      info.setAttribute("aria-expanded", String(!summary.hidden))
+    info.addEventListener("click", () => this.showSummary(this.byId("case-summary").hidden))
+    this.byId("timeline-button").addEventListener("click", () => {
+      this.showTimeline(this.byId("case-events").parentElement!.hidden)
     })
   }
 
@@ -105,8 +100,22 @@ export class CaseElement extends HTMLElement {
     return this.shadow.getElementById(id)!
   }
 
+  /** Shows what the case says of itself, or hides it: what the i asks for, and what `show-info` asks for from the start. */
+  private showSummary(shown: boolean): void {
+    this.byId("case-summary").hidden = !shown
+    this.byId("info").setAttribute("aria-expanded", String(shown))
+  }
+
+  /** Shows the chronology, or hides it: what is open stays open and visible, the list of what could be opened is what goes. */
+  private showTimeline(shown: boolean): void {
+    this.byId("case-events").parentElement!.hidden = !shown
+    this.byId("timeline-button").setAttribute("aria-pressed", String(shown))
+  }
+
   connectedCallback(): void {
     void this.loadMessages()
+    this.showTimeline(this.getAttribute(SHOW_TIMELINE_ATTRIBUTE) !== "false")
+    this.showSummary(this.hasAttribute(SHOW_INFO_ATTRIBUTE))
     const src = this.getAttribute("src")
     // Said on the console rather than swallowed: a case that cannot be read leaves an empty frame, which says nothing by itself.
     if (src) void this.load(src).catch(error => console.warn(`<${CASE_ELEMENT_NAME}> could not read ${src}:`, error))
@@ -115,6 +124,7 @@ export class CaseElement extends HTMLElement {
   attributeChangedCallback(name: string, old: string | null, value: string | null): void {
     if (!this.isConnected || value === old) return
     if (name === "src" && value) void this.load(value)
+    else if (name === SHOW_TIMELINE_ATTRIBUTE) this.showTimeline(value !== "false")
     // Passed on to every player open, and to the next one opened (see open): the host says it of the case, not of one recording.
     else for (const player of this.players()) {
       if (value === null) player.removeAttribute(name)
@@ -201,15 +211,21 @@ export class CaseElement extends HTMLElement {
     if (entry.kind === "interview") {
       const { register } = await import("./InterviewElement.js")
       register()
-      const reader = document.createElement("rr0-interview")
+      const reader = document.createElement("rr0-interview") as HTMLElement & { revealAt?: (s: number, of?: string) => number | undefined }
       reader.setAttribute("src", entry.url)
       block.append(reader)
+      // Opened while a replay is under way, it starts where that replay stands rather than at the top of the transcript.
+      window.setTimeout(() => this.followReplay(), 300)
     } else {
       const player = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
       // Pointed at the case, not at the file alone: a recording read from its case carries the case's readings and its other witnesses.
       player.setAttribute(CASE_NAMED_ATTRIBUTE, "")
       player.setAttribute("src", this.url ?? "")
       player.setAttribute(OBSERVER_ATTRIBUTE, entry.event.id ?? entry.url)
+      for (const option of CaseElement.PASSED_ON) {
+        const asked = this.getAttribute(option)
+        if (asked !== null) player.setAttribute(option, asked)
+      }
       // What a page around this element listens for, as it would on the player itself: the wrapper is not a wall.
       player.addEventListener(OBSERVER_CHANGE_EVENT, event => {
         this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: (event as CustomEvent).detail }))
@@ -219,6 +235,25 @@ export class CaseElement extends HTMLElement {
     this.shown.set(at, block)
     this.order()
     this.draw()
+  }
+
+  /**
+   * Shows, in every dialogue open, the passage that tells of where a replay stands. `block` is the one that moved; with none, the first
+   * player open is taken, which is what an interview opened in the middle of a replay needs to catch up with it.
+   */
+  private followReplay(block?: HTMLElement): HTMLElement | undefined {
+    const moved = block ?? [...this.shown.values()].find(other => other.querySelector(SIGHTING_ELEMENT_NAME))
+    const at = moved ? Number(moved.dataset.at) : NaN
+    const entry = Number.isNaN(at) ? undefined : this.entries[at]
+    const player = moved?.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null
+    if (!entry || !player) return undefined
+    for (const [index, other] of this.shown) {
+      if (this.entries[index]?.kind !== "interview") continue
+      const reader = other.querySelector("rr0-interview") as (HTMLElement & { revealAt?: (s: number, of?: string) => number | undefined }) | null
+      // The reader shows a passage once and stays there while the replay is still inside it (see InterviewElement.revealAt).
+      reader?.revealAt?.(player.playedSeconds, entry.event.id)
+    }
+    return moved
   }
 
   private shut(at: number): void {
@@ -285,7 +320,7 @@ export class CaseElement extends HTMLElement {
     info.hidden = summary === ""
     info.title = m.caseSummary
     info.setAttribute("aria-label", m.caseSummary)
-    if (summary === "") summaryElement.hidden = true
+    if (summary === "") this.showSummary(false)
     this.byId("events-heading").textContent = m.eventsHeading
     const edit = this.byId("edit")
     edit.title = m.editCase
