@@ -124,8 +124,17 @@ else:
     TURN_3_SIDE = "left"
 
 
-def stated(value, basis, rationale):
-    return {"value": value, "basis": basis, "rationale": rationale}
+def stated(value, basis, rationale, source=None):
+    """`source`: what the value rests on, named (see said)."""
+    entry = {"value": value, "basis": basis, "rationale": rationale}
+    if source is not None:
+        entry["source"] = source
+    return entry
+
+
+def said(segment, start, end):
+    """The passage of the call of 2026-10-13 a value was said in: its turn of speech, and the stretch of its text."""
+    return {"said": {"interview": "interview-qb-1", "segment": segment, "range": [start, end]}}
 
 
 def tr(fr, en):
@@ -499,7 +508,7 @@ def observer_track():
         keys.append({"t": t, "pose": {"lat": LAT, "lng": LNG, "elevationM": 0,
                                       "headingDeg": round(heading, 2), "pitchDeg": round(pitch, 2), "fovDeg": FOV}})
     keys[0]["pose"]["headingDeg"] = stated(GAZE_AZ, "stated",
-        "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)")
+        "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)", said(33, 271, 307))
     keys[0]["pose"]["pitchDeg"] = stated(GAZE_PITCH, "stated",
         "call of 2026-10-13: he looked at the horizon, \"10 degrés\"; it was the movement that took his eyes up")
     return {"keyframes": keys}
@@ -560,7 +569,7 @@ def build():
         "utcOffsetHours": stated(2, "derived", "Central European Summer Time on 2026-08-11"),
         "timeZone": "Europe/Paris",
         "durationSeconds": stated(DURATION_MS / 1000, "stated",
-            "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye"),
+            "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye", said(135, 39, 365)),
         "place": stated({"name": "Parc du Musée du Bocage normand (ferme de Boisjugan), Saint-Lô, Manche, France",
                          "locations": [{"lat": LAT, "lng": LNG}]},
                         "stated",

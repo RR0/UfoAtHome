@@ -18,8 +18,11 @@ END_MS = b.DURATION_MS
 GONE_MS = b.DURATION_MS + 200
 
 
-def wrap(value, basis, rationale):
-    return {"value": value, "basis": basis, "rationale": rationale}
+def wrap(value, basis, rationale, source=None):
+    entry = {"value": value, "basis": basis, "rationale": rationale}
+    if source is not None:
+        entry["source"] = source
+    return entry
 
 
 def side(sign):
@@ -46,7 +49,7 @@ def events(observer):
     return [
         {"type": "event", "eventType": "look", "who": observer, "t": 0, "params": {
             "headingDeg": wrap(b.GAZE_AZ, "stated", "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said "
-                                                     "west-south-west; his friend was the one looking west)"),
+                                                     "west-south-west; his friend was the one looking west)", b.said(33, 271, 307)),
             "pitchDeg": wrap(b.GAZE_PITCH, "stated", "call of 2026-10-13: he looked at the horizon, \"10 degrés\"; it was the movement that took his eyes up"),
             "fovDeg": b.FOV}},
         {"type": "event", "eventType": "follow", "who": observer, "t": 0, "until": END_MS, "params": {
@@ -55,7 +58,8 @@ def events(observer):
             "lagS": wrap(b.EYE_LAG_S, "assumed", "Eyes that follow something fast are a little behind it")}},
         {"type": "event", "eventType": "travel", "who": PHENOMENON, "t": 0, "until": END_MS, "params": {
             "from": wrap({"azimuthDeg": b.START_AZ, "altitudeDeg": b.START_ALT}, "stated",
-                         "call of 2026-10-13: from the north-north-east, about 25 degrees east of north, at \"20-30 degrés\" when first caught"),
+                         "call of 2026-10-13: from the north-north-east, about 25 degrees east of north, at \"20-30 degrés\" when first caught",
+                         b.said(51, 277, 323)),
             "towards": wrap({"azimuthDeg": b.START_AZ, "altitudeDeg": 90}, "stated", "Straight to the zenith, where it was when his eyes got there"),
             "speeds": wrap([{"t": 0, "degPerS": b.UP_SPEED}, {"t": b.ZENITH_MS, "degPerS": b.UP_SPEED}, {"t": b.ZENITH_MS + 600, "degPerS": down},
                             {"t": b.SPIRAL_FROM_MS, "degPerS": round(down * 0.7, 4), "step": True}], "derived",

@@ -91,13 +91,13 @@ export class RecordingCheck {
     }
   }
 
-  private static readonly STATED_KEYS = new Set(["value", "basis", "rationale", "how", "range"])
+  private static readonly STATED_KEYS = new Set(["value", "basis", "rationale", "how", "range", "source"])
 
   private static isObject(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value)
   }
 
-  /** `{ value, basis?, rationale?, how?, range? }` and nothing else — see StatedValue. */
+  /** `{ value, basis?, rationale?, how?, range?, source? }` and nothing else — see StatedValue. */
   private static isStated(value: unknown): value is { value: unknown } {
     return RecordingCheck.isObject(value) && "value" in value
       && Object.keys(value).every(key => RecordingCheck.STATED_KEYS.has(key))

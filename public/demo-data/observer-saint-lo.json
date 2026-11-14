@@ -16,7 +16,8 @@
  "durationSeconds": {
   "value": 5.0,
   "basis": "stated",
-  "rationale": "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye"
+  "rationale": "call of 2026-10-13: \"4 secondes à partir du zénith\" (his written reply: 6 s at most), \"4,5, 5 secondes maximum\" in all, the first half second in the corner of his eye",
+  "source": {"said": {"interview": "interview-qb-1", "segment": 135, "range": [39, 365]}}
  },
  "place": {
   "value": {
@@ -260,7 +261,8 @@
     "headingDeg": {
      "value": 110.0,
      "basis": "stated",
-     "rationale": "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)"
+     "rationale": "call of 2026-10-13: \"je regardais [...] est, sud-est, mais légèrement\" (the written reply said west-south-west; his friend was the one looking west)",
+     "source": {"said": {"interview": "interview-qb-1", "segment": 33, "range": [271, 307]}}
     },
     "pitchDeg": {
      "value": 10.0,
@@ -303,7 +305,8 @@
       "altitudeDeg": 30.0
      },
      "basis": "stated",
-     "rationale": "call of 2026-10-13: from the north-north-east, about 25 degrees east of north, at \"20-30 degrés\" when first caught"
+     "rationale": "call of 2026-10-13: from the north-north-east, about 25 degrees east of north, at \"20-30 degrés\" when first caught",
+     "source": {"said": {"interview": "interview-qb-1", "segment": 51, "range": [277, 323]}}
     },
     "towards": {
      "value": {
