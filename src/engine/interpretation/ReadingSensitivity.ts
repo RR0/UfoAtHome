@@ -32,6 +32,11 @@ export interface KnobMargin {
   /** The narrower side, as a share of how far the search goes that way: 0 is a reading that breaks at the slightest turn, 1 one that
    * holds as far as the search looks. What makes margins in degrees, factors and milliseconds comparable at all. */
   share: number
+  /** How far the value may reasonably be off, each way, in the margin's own units: what the margin is judged against (see
+   * ReadingSensitivity.reference). Undefined where no law says it: the moment of an indication, a body's own size. */
+  reference?: { lower: number, upper: number }
+  /** The share of `reference` the margin covers, on its narrower side, from 0 to 1. */
+  coverage?: number
 }
 
 /** What of a phenomenon at an instant the witness is on record as having said: its direction, its apparent size. */
@@ -59,6 +64,12 @@ export interface ReadingSensitivityResult {
   /** The best turn the search came across, when it reproduces more of the account than the reading as written: the reading is not at its
    * best, and says so rather than being credited with a margin around a value nothing recommends. */
   better?: { bodyId: string, knob: SensitivityKnob, amount: number, agreement: number }
+  /**
+   * Whether every margin that has a reference covers at least half of it each way (see ReadingSensitivity.SUFFICIENT): the reading
+   * holds when what it supposed is moved by as much as such a value is uncertain, and does not rest on a fine-tuning. Undefined when no
+   * margin has a reference, or none is measured.
+   */
+  sufficient?: boolean
 }
 
 /**
@@ -81,6 +92,15 @@ export class ReadingSensitivity {
 
   /** How far each knob is searched, each way: degrees, a factor, or milliseconds. */
   static readonly LIMITS: Readonly<Record<SensitivityKnob, number>> = { azimuth: 45, altitude: 30, distance: 10, size: 10, time: 10_000 }
+  /**
+   * The share of a value's uncertainty a margin must cover, each way, to be sufficient. Not all of it: whether the reading agrees with
+   * what was said is already judged with the same uncertainty, so a margin covers all of it only for a reading dead on what was said.
+   * Half of it is a reading that keeps agreeing when what it supposed is moved by half of what the witness could be off by.
+   */
+  static readonly SUFFICIENT = 0.5
+  /** The share of what was said a reading must reproduce for its robustness to mean anything: below, it is not a likeness, and how
+   * robust it is would be how robust a coincidence is. */
+  static readonly MEASURABLE = 0.5
   /** How many steps outward before the edge is refined, and how many halvings refine it. */
   private static readonly STEPS = 12
   private static readonly HALVINGS = 8
@@ -104,7 +124,8 @@ export class ReadingSensitivity {
    *   Undefined: everything the timeline draws, as if all of it had been said.
    */
   constructor(account: Sighting, private readonly instants: readonly number[], tolerance?: ConfrontationTolerance,
-              private readonly said?: ReadonlyMap<string, SaidAspects>) {
+              private readonly said?: ReadonlyMap<string, SaidAspects>,
+              private readonly references: Partial<Record<SensitivityKnob, { lower: number, upper: number }>> = {}) {
     this.confrontation = new BodyConfrontation(account.timeline, tolerance)
     this.eyeAt = (t: number) => BodyPlacement.eyeOf(account, t, ReadingSensitivity.FLAT)
   }
@@ -125,13 +146,33 @@ export class ReadingSensitivity {
     const said = new Map<string, SaidAspects>()
     const isSaid = (path: string) => account.provenance.paths().some(known =>
       (known === path || known.startsWith(`${path}.`)) && !Provenance.free(account.provenance.at(known)))
+    const model = WitnessError.MODELS[0]
+    const conditions = account.account?.conditions
+    const references: Partial<Record<SensitivityKnob, { lower: number, upper: number }>> = {}
+    // The narrowest each way of what the laws give the directions said: the best-known indication is how well a direction is known.
+    const narrow = (knob: SensitivityKnob, lower: number, upper: number) => {
+      const known = references[knob]
+      references[knob] = known ? { lower: Math.max(known.lower, lower), upper: Math.min(known.upper, upper) } : { lower, upper }
+    }
     keyframes.forEach((key, k) => key.shapes.forEach((state, n) => {
       const at = `timeline.keyframes.${k}.shapes.${n}.shape`
       const aspects = { direction: isSaid(`${at}.aim`), size: isSaid(`${at}.angular`) }
       if (aspects.direction || aspects.size) said.set(`${key.t}/${state.sourceId}`, aspects)
+      const aim = state.shape.aim
+      if (!aspects.direction || !aim) return
+      const entryOf = (axis: string) => account.provenance.at(`${at}.aim.${axis}`) ?? account.provenance.at(`${at}.aim`)
+      for (const [knob, kind, value, axis] of [["azimuth", "heading", aim.azimuthDeg, "azimuthDeg"], ["altitude", "elevation", aim.altitudeDeg, "altitudeDeg"]] as const) {
+        const entry = entryOf(axis)
+        const law = model.law({ kind, value, basis: entry?.basis, how: entry?.how }, conditions)
+        if (law.low !== undefined && law.high !== undefined) narrow(knob, law.low - value, law.high - value)
+      }
     }))
-    const tolerance = BodyConfrontation.lawsOf(WitnessError.MODELS[0], account.account?.conditions)
-    return new ReadingSensitivity(account, keyframes.map(key => key.t), tolerance, said)
+    // A distance nobody anchored is no data at all (see ConsolidatedErrorModel): what a reading supposes of one is as uncertain.
+    const distance = model.law({ kind: "distance", value: 1 }, conditions)
+    const factor = distance.params?.factor
+    if (typeof factor === "number") references.distance = { lower: 1 / factor, upper: factor }
+    const tolerance = BodyConfrontation.lawsOf(model, conditions)
+    return new ReadingSensitivity(account, keyframes.map(key => key.t), tolerance, said, references)
   }
 
   /**
@@ -160,9 +201,18 @@ export class ReadingSensitivity {
         result.margins.push(this.marginOf(bodies, body, knob))
       }
     }
-    result.margins.sort((a, b) => a.share - b.share)
+    // Those judged against an uncertainty first, the least covered first; then those no law gives one for, the tightest first.
+    result.margins.sort((a, b) => a.coverage !== undefined && b.coverage !== undefined ? a.coverage - b.coverage
+      : a.coverage !== undefined ? -1 : b.coverage !== undefined ? 1 : a.share - b.share)
     if (this.best) result.better = this.best
+    const judged = result.margins.filter(margin => margin.coverage !== undefined)
+    if (judged.length > 0 && ReadingSensitivity.measurable(result)) result.sufficient = judged.every(margin => margin.coverage! >= ReadingSensitivity.SUFFICIENT)
     return result
+  }
+
+  /** Whether a result's margins mean anything (see MEASURABLE). */
+  static measurable(result: ReadingSensitivityResult): boolean {
+    return result.compared > 0 && result.agreement >= ReadingSensitivity.MEASURABLE
   }
 
   /** Whether the reading says it chose the body, or its whole track, or any value of it: what is free of it is the body's to turn. */
@@ -220,12 +270,25 @@ export class ReadingSensitivity {
       return { x: 1, reached: true }
     }
     const down = edge(-1), up = edge(1)
-    return {
+    const margin: KnobMargin = {
       bodyId: body.id, knob,
       lower: amount(down.x, -1), upper: amount(up.x, 1),
       lowerReached: down.reached, upperReached: up.reached,
       share: Math.min(down.x, up.x)
     }
+    const reference = this.references[knob]
+    if (reference) {
+      // How much of the way to the reference each side goes: in ratios for a factor, degrees otherwise. A side the search did not find
+      // the end of covers it, and so does a side the law gives no room on (an elevation is overestimated, never under).
+      const along = (moved: number, reasonable: number, reached: boolean) => {
+        const room = factor ? Math.log(reasonable) : reasonable
+        if (reached || Math.abs(room) < 1e-9) return 1
+        return Math.min(1, (factor ? Math.log(moved) : moved) / room)
+      }
+      margin.reference = reference
+      margin.coverage = Math.min(along(margin.lower, reference.lower, down.reached), along(margin.upper, reference.upper, up.reached))
+    }
+    return margin
   }
 
   /** A copy of `body` with `knob` turned by `amount`: degrees or milliseconds added, or a factor applied. */

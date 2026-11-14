@@ -110,7 +110,7 @@ ${HintElement.CSS}
     const style = document.createElement("style")
     style.textContent = ReadingSensitivityElement.CSS
     // Something to unfold only when there is more than the line: a line alone is a paragraph, with no arrow that opens nothing.
-    const robustness = ReadingSensitivityElement.measurable(result)
+    const robustness = ReadingSensitivity.measurable(result)
     const unfolds = (robustness && result.margins.length > 0) || result.better !== undefined
     const details = document.createElement(unfolds ? "details" : "div")
     const summary = document.createElement(unfolds ? "summary" : "p")
@@ -124,8 +124,8 @@ ${HintElement.CSS}
       const list = document.createElement("ul")
       list.append(...result.margins.map((margin, index) => {
         const row = document.createElement("li")
-        if (index === 0) row.dataset.tight = ""
-        row.textContent = this.fill(m.margin, this.marginWords(margin, bodies, m, result))
+        if (margin.coverage !== undefined ? margin.coverage < ReadingSensitivity.SUFFICIENT : index === 0) row.dataset.tight = ""
+        row.textContent = this.fill(margin.reference ? m.marginJudged : m.margin, this.marginWords(margin, bodies, m, result))
         return row
       }))
       details.append(list)
@@ -143,14 +143,6 @@ ${HintElement.CSS}
     this.shadowRoot!.replaceChildren(style, details)
   }
 
-  /**
-   * Whether its margins mean anything: a reading that reproduces less than half of what the witness said is not a likeness, and how
-   * robust it is would be how robust a coincidence is.
-   */
-  static measurable(result: ReadingSensitivityResult): boolean {
-    return result.compared > 0 && result.agreement >= 0.5
-  }
-
   /** The line it comes to: how much of the account it reproduces, then what that is the most tied to, or why there is nothing to say. */
   private sentence(result: ReadingSensitivityResult, bodies: readonly BodyJson[], m: ReadingSensitivityMessages): string {
     if (result.compared === 0) {
@@ -163,9 +155,11 @@ ${HintElement.CSS}
       : agreed === result.compared ? this.fill(m.allAgree, { compared })
         : agreed === 1 ? this.fill(m.agreementOne, { compared }) : this.fill(m.agreement, { agreed: String(agreed), compared })
     if (agreed === 0) return share
-    if (!ReadingSensitivityElement.measurable(result)) return `${share} · ${m.tooFew}`
+    if (!ReadingSensitivity.measurable(result)) return `${share} · ${m.tooFew}`
     if (result.freeBodies.length === 0) return `${share} · ${m.noFreeValue}`
     const tightest = result.margins[0]
+    if (result.sufficient === true) return `${share} · ${m.sufficient}`
+    if (result.sufficient === false && tightest) return `${share} · ${this.fill(m.fineTuned, this.marginWords(tightest, bodies, m, result))}`
     return tightest ? `${share} · ${this.fill(m.tightest, this.marginWords(tightest, bodies, m, result))}` : share
   }
 
@@ -173,7 +167,11 @@ ${HintElement.CSS}
     const end = (amount: number, reached: boolean) => reached ? this.fill(m.atLeast, { value: this.value(margin.knob, amount) }) : this.value(margin.knob, amount)
     return {
       knob: this.knobName(margin.knob, margin.bodyId, bodies, m, result),
-      lower: end(margin.lower, margin.lowerReached), upper: end(margin.upper, margin.upperReached)
+      lower: end(margin.lower, margin.lowerReached), upper: end(margin.upper, margin.upperReached),
+      ...(margin.reference ? {
+        refLower: this.value(margin.knob, margin.reference.lower), refUpper: this.value(margin.knob, margin.reference.upper),
+        coverage: String(Math.round(margin.coverage! * 100))
+      } : {})
     }
   }
 

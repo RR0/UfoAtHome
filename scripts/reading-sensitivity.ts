@@ -33,9 +33,10 @@ for (const e of kase.events) {
   const ms = Math.round(performance.now() - started)
   console.log(`\n${e.url} (${ms} ms, ${instants.length} instants, ${bodies.length} bodies)`)
   console.log(`  agreement ${(r.agreement*100).toFixed(0)} % of ${r.compared}${r.better ? `, better: ${r.better.bodyId} ${r.better.knob} ${r.better.amount.toFixed(2)} -> ${(r.better.agreement*100).toFixed(0)} %` : ""}`)
+  console.log(`  sufficient=${r.sufficient}`)
   console.log(`  holds=${r.holds} compared at ${r.instants} instants, median ${r.medianSeparationDeg?.toFixed(1)}°, free=${r.freeBodies.length} fixed=${r.fixedBodies.length}`)
   for (const m of r.margins.slice(0, 6)) {
     const f = (v: number) => m.knob === "distance" || m.knob === "size" ? `×${v.toFixed(2)}` : m.knob === "time" ? `${Math.round(v)} ms` : `${v.toFixed(1)}°`
-    console.log(`  ${m.bodyId} ${m.knob}: ${f(m.lower)}${m.lowerReached ? "+" : ""} .. ${f(m.upper)}${m.upperReached ? "+" : ""}  share ${m.share.toFixed(2)}`)
+    console.log(`  ${m.bodyId} ${m.knob}: ${f(m.lower)}${m.lowerReached ? "+" : ""} .. ${f(m.upper)}${m.upperReached ? "+" : ""}  share ${m.share.toFixed(2)}${m.reference ? `  vs ${f(m.reference.lower)} .. ${f(m.reference.upper)} covers ${Math.round(m.coverage! * 100)} %` : ""}`)
   }
 }

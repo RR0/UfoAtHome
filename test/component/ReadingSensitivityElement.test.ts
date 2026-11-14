@@ -27,15 +27,16 @@ const account = (azimuths = [0, 0]): SightingRecordingJson => ({
 
 const diameter = 2 * 100 * Math.tan(0.5 * DEG)
 
-/** A reading placing `count` spheres 100 m off where the phenomenon is said, their tracks supposed; `explains` empty to explain nothing. */
-const reading = (count = 1, explains = ["ufo"]): SightingRecordingJson => ({
+/** A reading placing `count` spheres 100 m off where the phenomenon is said, or `offDeg` east of it, their tracks supposed; `explains`
+ * empty to explain nothing. */
+const reading = (count = 1, explains = ["ufo"], offDeg = 0): SightingRecordingJson => ({
   version: 4,
   timeline: { keyframes: [] },
   interpretation: {
     bodies: Array.from({ length: count }, (_, i) => ({
       id: `b${i}`, title: { en: `Balloon ${i + 1}` }, model: { id: "ellipsoid" }, explains,
       track: {
-        value: [0, 1000, 2000].map(t => ({ t, azimuthDeg: 0, altitudeDeg: 10, distanceM: 100, sizeM: { widthM: diameter, lengthM: diameter, heightM: diameter } })),
+        value: [0, 1000, 2000].map(t => ({ t, azimuthDeg: offDeg, altitudeDeg: 10, distanceM: 100, sizeM: { widthM: diameter, lengthM: diameter, heightM: diameter } })),
         basis: "assumed"
       }
     }))
@@ -55,13 +56,27 @@ const rows = (element: ReadingSensitivityElement) => [...element.shadowRoot!.que
 describe("A reading's sensitivity, as the case's player and editor say it", () => {
   afterEach(() => document.body.replaceChildren())
 
-  it("says how much of the account it reproduces and the value it is the most tied to, then each margin", async () => {
+  it("says how much of what the witness said it reproduces and whether its margin is sufficient, then each margin", async () => {
     const element = await shown(account(), reading())
     expect(element.hidden).toBe(false)
-    expect(line(element)).toMatch(/^Sensitivity: reproduces all the witness's 2 indications · tightest: \w+, from /)
+    expect(line(element)).toMatch(/^Sensitivity: reproduces all the witness's 2 indications · sufficient margin\?/)
     // One body supposed: its name goes without saying. No size said: neither its distance nor its size is turned.
     expect(rows(element).map(row => row!.split(":")[0]).sort()).toEqual(["direction", "height", "time"])
     expect(rows(element).join()).not.toContain("Balloon")
+  })
+
+  it("judges each margin against how uncertain the value is, and says the margin is sufficient when it covers half of it", async () => {
+    const element = await shown(account(), reading())
+    expect(line(element)).toContain("sufficient margin")
+    // A direction estimated by a witness is good to about 45° either way (see ConsolidatedErrorModel).
+    expect(rows(element).find(row => row!.startsWith("direction"))).toMatch(/for an uncertainty of -45° to \+45° \(\d+ % covered\)/)
+    expect(rows(element).find(row => row!.startsWith("time"))).toContain("no law says how uncertain it is")
+  })
+
+  it("says a reading is fine-tuned when it agrees only at the edge of what the witness could be off by", async () => {
+    // 44° east of where it was said: still within a witness's 45°, but moved a degree further it is not.
+    const element = await shown(account(), reading(1, ["ufo"], 44))
+    expect(line(element)).toMatch(/fine-tuned: direction covers only \d+ % of its uncertainty/)
   })
 
   it("names the body a margin is of when the reading supposed several", async () => {

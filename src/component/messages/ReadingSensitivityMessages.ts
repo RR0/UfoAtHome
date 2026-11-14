@@ -23,8 +23,15 @@ export interface ReadingSensitivityMessages {
   /** The narrowest margin: `{knob}`, from `{lower}` to `{upper}` about the value the reading chose. `{knob}` is followed by the body it is
    * of, in parentheses, only when the reading supposed several. */
   tightest: string
-  /** One row per value moved: how far it can be moved and the reading still reproduce as much. */
+  /** One row per value moved that no law gives an uncertainty for: how far it can be moved and the reading still reproduce as much. */
   margin: string
+  /** One row per value moved that a law gives an uncertainty for: its margin, that uncertainty (`{refLower}` to `{refUpper}`), and the
+   * share of it the margin covers (`{coverage}`, a percentage). */
+  marginJudged: string
+  /** Every margin covers at least half of its value's uncertainty. */
+  sufficient: string
+  /** One does not: `{knob}`, which covers only `{coverage}` % of it. */
+  fineTuned: string
   /** An end the search did not find, because the reading still holds as far as it looks: `{value}` and beyond. */
   atLeast: string
   /** A move that reproduces more than the reading as written: `{knob}` moved by `{amount}` reproduces `{agreed}` of `{compared}`. */
