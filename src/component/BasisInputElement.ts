@@ -312,6 +312,8 @@ rr0-input-basis[hidden] { display: none; }
       const which = document.createElement("select")
       for (const interview of interviews) which.append(new Option(interview.id === undefined ? m.interviewOnly : interview.label, interview.id ?? ""))
       which.value = of.said?.interview ?? interviews[0]?.id ?? ""
+      // A source may name the case's only interview, which the list offers without its id: that one is still the one meant.
+      if (which.selectedIndex < 0 && interviews.length === 1) which.selectedIndex = 0
       const segment = document.createElement("select")
       const fill = () => {
         const chosen = interviews.find(candidate => (candidate.id ?? "") === which.value) ?? interviews[0]
