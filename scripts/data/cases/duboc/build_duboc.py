@@ -31,6 +31,7 @@ import json
 import math
 import pathlib
 import struct
+import subprocess
 
 OUT = pathlib.Path("public/demo-data")
 
@@ -656,10 +657,20 @@ if __name__ == "__main__":
         ("interpretation-duboc-steward-hoax.json", hoax_reading(steward_rec, EYE_STEWARD, spots, ["disc"],
             "Canular : le point de sa propre lampe, sur la vitre, vu par le chef steward", "Hoax: the spot of his own light on the glass, as the chief steward saw it")),
     )
-    for name, rec in (("observer-duboc.json", commander_rec), ("observer-duboc-copilot.json", copilot_rec), ("observer-duboc-steward.json", steward_rec)):
+    accounts = (("observer-duboc.json", commander_rec), ("observer-duboc-copilot.json", copilot_rec), ("observer-duboc-steward.json", steward_rec))
+    for name, rec in accounts:
         aim = rec.pop("_aim", None)
         (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
         print(f"wrote {name} {(OUT / name).stat().st_size} bytes", aim or "")
     for name, rec in readings:
         (OUT / name).write_text(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
         print(f"wrote {name} {(OUT / name).stat().st_size} bytes, {len(rec['interpretation']['bodies'][0]['track'])} keyframes")
+    # This script states version 1 of the format, which is what it was written against; the repository holds the current one. Rather than
+    # teaching it what every version since has changed, what it wrote is brought forward by the one place that knows (see
+    # scripts/migrate-recordings.ts): without this, running it took the case BACKWARDS and the schema rejected it.
+    #
+    # STILL NOT SAFE TO RUN. The version is only half of what this script lags behind: it writes nothing of the three accounts'
+    # `image` (the share card), their `snapshots` (the frozen relief, imagery and map, whose .zip files sit beside them) or one group
+    # of `timeline.groups`, all added to the files after this was written. Running it drops them. Carry them over first.
+    written = [str(OUT / name) for name, _ in (*accounts, *readings)]
+    subprocess.run(["npx", "tsx", "scripts/migrate-recordings.ts", *written], check=True)
