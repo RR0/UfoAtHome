@@ -28,6 +28,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   kindObservations: string
   kindReadings: string
   kindInterviews: string
+  /** Before the authors a card names: "Interpretation of X and Y by Z". */
+  byAuthor: string
   /** Between the last two events a card names, where it names several: "Interpretation of A and B". */
   linkAnd: string
   /** What a reading's findings come to (see ReadingVerdict), as said on its card. */

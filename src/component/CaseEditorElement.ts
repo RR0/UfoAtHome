@@ -1317,6 +1317,13 @@ export class CaseEditorElement extends HTMLElement {
     return (by ?? []).map(agent => this.authorName(agent)).filter(name => name !== "").join(", ")
   }
 
+  /** The same names as a card says them, the last two joined by the language's own word: "Antoine Cousyn and the GEIPAN". */
+  private authorsSaid(by: AgentRef[] | undefined): string {
+    const names = (by ?? []).map(agent => this.authorName(agent)).filter(name => name !== "")
+    if (names.length < 2) return names.join("")
+    return `${names.slice(0, -1).join(", ")} ${this.messages.linkAnd} ${names[names.length - 1]}`
+  }
+
   /**
    * The authors typed, back as the file holds them. A name that has not changed keeps the reference it was: an investigator the case
    * named by their RR0 entry does not become a loose name because the author of the case put a comma elsewhere on the line.
@@ -1431,20 +1438,23 @@ export class CaseEditorElement extends HTMLElement {
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
           .map(interview => toEvent(this.optionLabel({ interview }, 0), session.tracks.length + session.interviews.indexOf(interview)))
-        if (told.length > 0) said.push(`${m.passagesHeading}${m.colon}`, ...listed(told))
+        if (told.length > 0) said.push(`${m.passagesHeading} `, ...listed(told))
       } else if (item.track) {
         // A reading says every observation it reads, wherever they sit in the chronology: this is the only place that says it.
         const others = [item.track.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
           .map(id => session.tracks.find(other => other.kind === "observer" && (other.event.id === id || other.recording?.id === id)))
           .filter((other): other is CaseTrack => other !== undefined)
         if (others.length > 0) {
-          said.push(`${m.interpretationOf}${m.colon}`,
-            ...listed(others.map(other => toEvent(this.optionLabel({ track: other }, session.tracks.indexOf(other)), session.tracks.indexOf(other)))))
+          // Named as the event is called, without "Observation of" before it: the sentence already says what it reads, and French would
+          // want an article it cannot put in front of a label.
+          said.push(`${m.interpretationOf} `,
+            ...listed(others.map(other => toEvent(this.labelOf(other, session.tracks.indexOf(other)), session.tracks.indexOf(other)))))
         }
       }
-      // Whose reading it is, whose interview it was: an account's author is the witness it is the account of, so it says none.
-      const by = kind === "observation" ? "" : this.authorsText(event.by)
-      if (by !== "") said.push(`${said.length > 0 ? " · " : ""}${kind === "interview" ? m.interviewerField : m.authorField}${m.colon}${by}`)
+      // Whose reading it is, whose interview it was, said as a sentence rather than as a label: "Interpretation of X and Y by Z". An
+      // account's author is the witness it is the account of, so it says none.
+      const by = kind === "observation" ? "" : this.authorsSaid(event.by)
+      if (by !== "") said.push(`${said.length > 0 ? " " : ""}${m.byAuthor} ${by}`)
       links.append(...said)
       const findings = item.track?.kind === "reading" ? this.findingsOf(item.track) : undefined
       const verdict = ReadingVerdicts.of(findings)

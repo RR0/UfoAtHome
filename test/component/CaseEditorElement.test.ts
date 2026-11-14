@@ -921,7 +921,7 @@ describe("CaseEditorElement's events", () => {
     expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Observation of An account", "Undated", "A model"])
     // Every event on the same footing, in the order of time: a reading is no longer drawn inside the account it reads, it names it.
     expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "reading"])
-    expect(cards[1].querySelector(".event-links")!.textContent).toContain("Interpretation of")
+    expect(cards[1].querySelector(".event-links")!.textContent).toContain("Interpretation of An account")
     const undated = cards[1]
     // It fails only against a supposition, and could not be tested on one point: not settled, orange.
     expect(undated.dataset.verdict).toBe("unsettled")
@@ -947,8 +947,8 @@ describe("CaseEditorElement's events", () => {
     const card = () => [...root.querySelectorAll<HTMLElement>(".event-card")].find(one => one.dataset.kind === "reading")!
     // An account says no author: its author is the witness it is the account of.
     expect([...root.querySelectorAll<HTMLElement>(".event-card")].find(one => one.dataset.kind === "observation")!
-      .querySelector(".event-links")!.textContent).not.toContain("Author")
-    expect(card().querySelector(".event-links")!.textContent).toContain("Author: CousynAntoine")
+      .querySelector(".event-links")!.textContent).not.toContain(" by ")
+    expect(card().querySelector(".event-links")!.textContent).toContain("Interpretation of An account by CousynAntoine")
     card().querySelector<HTMLButtonElement>(".event-open")!.click()
     await wait()
     const author = parts(element).field("event-author")
@@ -962,7 +962,7 @@ describe("CaseEditorElement's events", () => {
     expect(written.by).toEqual([{ people: "CousynAntoine" }, { title: "GEIPAN" }])
     // The reading's own recording says it too, so that it stands alone when it is shared on its own.
     expect(element.caseSession!.tracks[1].recording!.interpretation!.by).toEqual(written.by)
-    expect(card().querySelector(".event-links")!.textContent).toContain("Author: CousynAntoine, GEIPAN")
+    expect(card().querySelector(".event-links")!.textContent).toContain("by CousynAntoine and GEIPAN")
   })
 
   it("filters the list by kind of event, saying how many of each the case holds, and never empties it", async () => {
@@ -1002,7 +1002,7 @@ describe("CaseEditorElement's events", () => {
     const reading = [...root.querySelectorAll<HTMLElement>(".event-card")].find(card => card.dataset.kind === "reading")!
     // It reads two accounts: it names both, wherever they sit in the chronology, and naming one is a way to it.
     const refs = [...reading.querySelectorAll<HTMLButtonElement>(".event-ref")]
-    expect(refs.map(ref => ref.textContent)).toEqual(["Observation of An account", "Observation of A close-up"])
+    expect(refs.map(ref => ref.textContent)).toEqual(["An account", "A close-up"])
     expect(reading.querySelector(".event-links")!.textContent).toContain(" and ")
     // Pointed at, the card it leads to is lit, and no other.
     const aimed = () => [...root.querySelectorAll<HTMLElement>(".event-card.event-aimed")]

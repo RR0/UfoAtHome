@@ -18,6 +18,7 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   kindReadings: "Lectures",
   kindInterviews: "Interviews",
   linkAnd: "et",
+  byAuthor: "par",
   kindReading: "Lecture",
   readingsCount: "{n} lecture(s)",
   readingVerdict: { incompatible: "Contredit ce qui est établi", unsettled: "Non tranchée", compatible: "Compatible" },
