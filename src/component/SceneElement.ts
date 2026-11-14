@@ -1794,7 +1794,8 @@ export class SceneElement extends HTMLElement {
         drawControlPasses: () => this.sceneRenderer.drawControlPasses(),
         recording: toSightingJson(this.ufoElement.sighting),
         title: this.filmName ?? "",
-        source: scene.about?.source
+        source: scene.about?.source,
+        language
       }, texts, onProgress, signal))
     } finally {
       this.sceneRenderer.setReferencesShown(referencesShown)

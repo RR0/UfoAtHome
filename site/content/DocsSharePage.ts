@@ -353,7 +353,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <li><code>depth.mp4</code>: how far each pixel is, white near, black far and for the sky, on one logarithmic scale from 1 m to 20 km;</li>
       <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: in white, where the phenomenon stands, and the sky;</li>
       <li><code>first-frame.png</code>, for generators that start from an image;</li>
-      <li><code>prompt.txt</code>: a prompt and a negative prompt written from the recording's own statements only (place, time, the phenomenon as drawn, what happens, the weather), never from the testimony's text, every word of which a generator would draw;</li>
+      <li><code>prompt.txt</code> and <code>negative-prompt.txt</code>: a prompt of at most 2,500 characters and a negative prompt, written from the recording's own statements only (place, time, the phenomenon as drawn, what happens, the weather), never from the testimony's text, every word of which a generator would draw;</li>
       <li>instructions in your language, and <code>manifest.json</code>, the provenance.</li>
     </ul>
     <p>The reference video guides the generator: its geometry, horizon, framing and motion are to be kept, only the textures made
@@ -513,7 +513,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <li><code>depth.mp4</code> : la distance de chaque pixel, blanc près, noir loin et pour le ciel, sur une même échelle logarithmique de 1 m à 20 km ;</li>
       <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code> : en blanc, la place du phénomène, et le ciel ;</li>
       <li><code>first-frame.png</code>, pour les générateurs qui partent d'une image ;</li>
-      <li><code>prompt.txt</code> : un prompt et un prompt négatif écrits à partir des seuls énoncés de l'enregistrement (lieu, heure, phénomène tel que dessiné, ce qui se passe, météo), jamais à partir du texte du témoignage, dont un générateur dessinerait chaque mot ;</li>
+      <li><code>prompt.txt</code> et <code>negative-prompt.txt</code> : un prompt de 2 500 caractères au plus et un prompt négatif, écrits à partir des seuls énoncés de l'enregistrement (lieu, heure, phénomène tel que dessiné, ce qui se passe, météo), jamais à partir du texte du témoignage, dont un générateur dessinerait chaque mot ;</li>
       <li>un mode d'emploi dans votre langue, et <code>manifest.json</code>, la provenance.</li>
     </ul>
     <p>La vidéo de référence guide le générateur : sa géométrie, son horizon, son cadrage et son mouvement sont à garder, seules les
@@ -675,7 +675,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <li><code>depth.mp4</code>: la distancia de cada píxel, blanco cerca, negro lejos y para el cielo, en una misma escala logarítmica de 1 m a 20 km;</li>
       <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: en blanco, el lugar del fenómeno, y el cielo;</li>
       <li><code>first-frame.png</code>, para los generadores que parten de una imagen;</li>
-      <li><code>prompt.txt</code>: un prompt y un prompt negativo escritos solo a partir de lo que afirma la grabación (lugar, hora, el fenómeno tal como está dibujado, lo que ocurre, el tiempo), nunca a partir del texto del testimonio, del que un generador dibujaría cada palabra;</li>
+      <li><code>prompt.txt</code> y <code>negative-prompt.txt</code>: un prompt de 2.500 caracteres como máximo y un prompt negativo, escritos solo a partir de lo que afirma la grabación (lugar, hora, el fenómeno tal como está dibujado, lo que ocurre, el tiempo), nunca a partir del texto del testimonio, del que un generador dibujaría cada palabra;</li>
       <li>instrucciones en tu idioma, y <code>manifest.json</code>, la procedencia.</li>
     </ul>
     <p>El vídeo de referencia guía al generador: hay que conservar su geometría, su horizonte, su encuadre y su movimiento, y solo hacer
@@ -837,7 +837,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <li><code>depth.mp4</code>: la distanza di ogni pixel, bianco vicino, nero lontano e per il cielo, su una stessa scala logaritmica da 1 m a 20 km;</li>
       <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code>: in bianco, il posto del fenomeno, e il cielo;</li>
       <li><code>first-frame.png</code>, per i generatori che partono da un'immagine;</li>
-      <li><code>prompt.txt</code>: un prompt e un prompt negativo scritti solo a partire da ciò che afferma la registrazione (luogo, ora, il fenomeno come è disegnato, ciò che accade, il tempo), mai dal testo della testimonianza, di cui un generatore disegnerebbe ogni parola;</li>
+      <li><code>prompt.txt</code> e <code>negative-prompt.txt</code>: un prompt di 2.500 caratteri al massimo e un prompt negativo, scritti solo a partire da ciò che afferma la registrazione (luogo, ora, il fenomeno come è disegnato, ciò che accade, il tempo), mai dal testo della testimonianza, di cui un generatore disegnerebbe ogni parola;</li>
       <li>le istruzioni nella tua lingua, e <code>manifest.json</code>, la provenienza.</li>
     </ul>
     <p>Il video di riferimento guida il generatore: la sua geometria, il suo orizzonte, la sua inquadratura e il suo movimento vanno

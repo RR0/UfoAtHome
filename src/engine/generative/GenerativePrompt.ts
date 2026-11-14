@@ -38,35 +38,75 @@ export interface PromptClip {
 
 /**
  * What a video generator is told about a reconstruction, written from the recording's own statements and nothing else: the place and the
- * time, where the phenomenon stands and what it looks like as drawn, what happens and when, the weather stated. And what it must not do,
- * since the shortest prompt invites it to fill every gap with the usual picture of a UFO.
+ * time, where the phenomenon stands and what it looks like as drawn, what happens and when, the weather stated (see of). And what it must
+ * not do, since the shortest prompt invites it to fill every gap with the usual picture of a UFO (see NEGATIVE), for the negative prompt
+ * field the generators have apart.
  *
  * In English, the language generators follow best, whatever the reader's (the kit's README is in theirs, see GenerativeKit). The testimony
  * itself is never part of the prompt: a generator would draw every word of it, what the witness did not say included.
  */
 export class GenerativePrompt {
 
-  /** The prompt, then the negative prompt, as plain text. */
+  /**
+   * The most characters a prompt may have: what the generators' prompt fields take (DaVinci's 2 500; Kling's and Runway's are of the
+   * same order). A recording that says more is told shorter (see of), never cut in the middle of what it says.
+   */
+  static readonly MAX_CHARS = 2500
+
+  /** What a generator must not do, for its own negative prompt field: the same for every recording. */
+  static readonly NEGATIVE = "added objects, windows, portholes, lights or beams not in the reference, smoke, people, animals, camera shake beyond the "
+    + "reference, lens flares not in the reference, any change of the phenomenon's shape, size, colour, brightness, position or motion, text, logos.\n"
+
+  /**
+   * The prompt, as plain text of at most MAX_CHARS characters. What happens is told in full if it fits; else each moment by its first
+   * sentence, then by its first words; and if the recording still says too much (dozens of shapes or moments), the last lines are left
+   * out, whole, rather than any line cut short.
+   */
   static of(recording: object, clip: PromptClip): string {
     const source = recording as PromptSource
     const rate = clip.rate && clip.rate > 0 ? clip.rate : 1
     const filmSeconds = (recordingSeconds: number) => Math.max(0, (recordingSeconds - clip.fromSeconds) / rate)
-    const lines = [
-      `Realistic, steady first-person view, as seen by a pedestrian's own eyes, ${source.place?.name ?? "place not stated"}, local time ${source.time ?? "not stated"}.`,
-      "Keep exactly the geometry, horizon, framing, lighting and motion of the reference video: only make the textures (vegetation, ground,",
-      "buildings, clouds, rain) photographic. Render the phenomenon as realistically as the rest (same grain, blur, haze and light), but keep",
-      "its shape, size, colour, brightness, position and motion exactly those of the reference video.",
-      "",
-      "Phenomenon, as drawn by the reconstruction from the testimony:",
-      ...GenerativePrompt.shapes(source, clip.fromSeconds),
-      ...GenerativePrompt.section("What happens:", GenerativePrompt.milestones(source, clip, filmSeconds)),
-      ...GenerativePrompt.section("Weather and light (follow this, not the reference's own colours):", GenerativePrompt.weather(source, clip, filmSeconds)),
-      "",
-      "Negative prompt:",
-      "added objects, windows, portholes, lights or beams not in the reference, smoke, people, animals, camera shake beyond the reference,",
-      "lens flares not in the reference, any change of the phenomenon's shape, size, colour, brightness, position or motion, text, logos."
+    const notes: ((note: string) => string)[] = [
+      note => note,
+      note => GenerativePrompt.firstSentence(note),
+      note => GenerativePrompt.firstWords(GenerativePrompt.firstSentence(note), GenerativePrompt.SHORT_NOTE_CHARS)
     ]
-    return lines.join("\n") + "\n"
+    let text = ""
+    for (const shorten of notes) {
+      const lines = [
+        `Realistic, steady first-person view, as seen by a pedestrian's own eyes, ${source.place?.name ?? "place not stated"}, local time ${source.time ?? "not stated"}. `
+        + "Keep exactly the geometry, horizon, framing, lighting and motion of the reference video: only make the textures (vegetation, ground, "
+        + "buildings, clouds, rain) photographic. Render the phenomenon as realistically as the rest (same grain, blur, haze and light), but keep "
+        + "its shape, size, colour, brightness, position and motion exactly those of the reference video.",
+        "",
+        "Phenomenon, as drawn by the reconstruction from the testimony:",
+        ...GenerativePrompt.shapes(source, clip.fromSeconds),
+        ...GenerativePrompt.section("What happens:", GenerativePrompt.milestones(source, clip, filmSeconds, shorten)),
+        ...GenerativePrompt.section("Weather and light (follow this, not the reference's own colours):", GenerativePrompt.weather(source, clip, filmSeconds))
+      ]
+      text = lines.join("\n") + "\n"
+      if (text.length <= GenerativePrompt.MAX_CHARS) return text
+    }
+    const kept: string[] = []
+    for (const line of text.split("\n")) {
+      if ([...kept, line].join("\n").length + 1 > GenerativePrompt.MAX_CHARS) break
+      kept.push(line)
+    }
+    return kept.join("\n") + "\n"
+  }
+
+  /** How long a moment is told at most once the prompt has to be short, characters. */
+  private static readonly SHORT_NOTE_CHARS = 80
+
+  private static firstSentence(text: string): string {
+    const end = text.search(/[.;!?](\s|$)/)
+    return end >= 0 ? text.slice(0, end + 1) : text
+  }
+
+  private static firstWords(text: string, chars: number): string {
+    if (text.length <= chars) return text
+    const cut = text.lastIndexOf(" ", chars - 1)
+    return text.slice(0, cut > 0 ? cut : chars - 1) + "…"
   }
 
   private static section(title: string, lines: string[]): string[] {
@@ -93,10 +133,10 @@ export class GenerativePrompt {
     })
   }
 
-  private static milestones(source: PromptSource, clip: PromptClip, filmSeconds: (seconds: number) => number): string[] {
+  private static milestones(source: PromptSource, clip: PromptClip, filmSeconds: (seconds: number) => number, shorten: (note: string) => string): string[] {
     return (source.milestones ?? [])
       .filter(milestone => milestone.t / 1000 >= clip.fromSeconds && milestone.t / 1000 <= clip.toSeconds)
-      .map(milestone => `- ${filmSeconds(milestone.t / 1000).toFixed(1)} s into the video: ${GenerativePrompt.text(milestone.note) ?? ""}`)
+      .map(milestone => `- ${filmSeconds(milestone.t / 1000).toFixed(1)} s into the video: ${shorten(GenerativePrompt.text(milestone.note) ?? "")}`)
   }
 
   /** The weather the recording states over the clip, each change once. */

@@ -17,13 +17,14 @@ Fatto con UFO@home (https://ufoathome.org) il {date}.
 - **depth.mp4**: la distanza di ogni pixel, bianco vicino, nero lontano e per il cielo, su una scala logaritmica da {near} m a {far} m, la stessa per tutto il video.
 - **phenomenon-mask.mp4**: in bianco, il posto del fenomeno descritto dal testimone, allargato di {margin} pixel: ciò da cui il fenomeno generato non deve uscire.
 - **sky-mask.mp4**: in bianco, il cielo.
-- **prompt.txt**: il prompt e il prompt negativo, in inglese, scritti solo a partire da ciò che afferma la registrazione.
+- **prompt.txt**: il prompt, in inglese, scritto solo a partire da ciò che afferma la registrazione, di {maxChars} caratteri al massimo.
+- **negative-prompt.txt**: il prompt negativo, ciò che il generatore non deve fare.
 - **manifest.json**: la provenienza e le stesse informazioni, per un programma.
 
 ## Istruzioni
 
 1. Nel generatore, scegliere una modalità che parta da un video («video to video», «restyle», «modify video»…) e dargli reference.mp4. Se il video è troppo lungo per esso, tagliarlo attorno al momento voluto.
-2. Incollare il contenuto di prompt.txt. Regolare la trasformazione al minimo che renda l'immagine realistica: la geometria, l'orizzonte, l'inquadratura e il movimento devono restare quelli del riferimento.
+2. Incollare prompt.txt nel campo del prompt, e negative-prompt.txt in quello del prompt negativo se c'è. Regolare la trasformazione al minimo che renda l'immagine realistica: la geometria, l'orizzonte, l'inquadratura e il movimento devono restare quelli del riferimento.
 3. Se il generatore accetta un video di controllo della profondità («depth»), dargli depth.mp4.
 4. Il generatore rende anche il fenomeno, perché abbia la stessa grana, la stessa sfocatura e la stessa luce del resto. Poi controllare il risultato sovrapponendo phenomenon-mask.mp4 al video generato: se il fenomeno ne esce, cambia forma, dimensione, colore o movimento, o acquista dettagli (oblò, luci, riflessi), scartare il video e ricominciare con una trasformazione più debole.
 5. Sovrimprimere su tutta l'immagine, e non in un angolo: «{label}».

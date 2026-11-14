@@ -130,6 +130,7 @@ class GenerativeAssets {
     this.writePasses(options, size, count, distanceFile, maskFile)
     rmSync(work, { recursive: true, force: true })
     writeFileSync(path.join(options.out, "prompt.txt"), GenerativePrompt.of(recording, { fromSeconds: from, toSeconds: to }))
+    writeFileSync(path.join(options.out, "negative-prompt.txt"), GenerativePrompt.NEGATIVE)
     writeFileSync(path.join(options.out, "manifest.json"), JSON.stringify(this.manifest(options, recording, size, count, from, to), null, 2) + "\n")
     console.log(`${path.relative(this.root, options.out)}: ${count} frames ${size.width}×${size.height}`)
   }
@@ -213,7 +214,8 @@ class GenerativeAssets {
         "depth/ + depth.mp4": `Distance from the eye on a logarithmic scale, 16-bit PNG (the film is 8-bit): 1 - ln(d / ${ControlPassEncoding.DEPTH_NEAR_M} m) / ln(${ControlPassEncoding.DEPTH_FAR_M} m / ${ControlPassEncoding.DEPTH_NEAR_M} m), clamped to 0..1; 0 for the sky. The same scale as the kit the player makes (see ControlPassEncoding).`,
         "phenomenon-mask/ + phenomenon-mask.mp4": `White where the testimony's phenomenon is (grown by ${ControlPassEncoding.MASK_MARGIN_PX} px): what the phenomenon a generator renders is checked against (it must not leave it, change shape, size, colour or motion, or gain details); never pasted back, which would look stuck on.`,
         "sky-mask/ + sky-mask.mp4": "White where nothing solid is: sky and clouds.",
-        "prompt.txt": "Prompt and negative prompt written from the recording's statements only (see GenerativePrompt)."
+        "prompt.txt": `Prompt written from the recording's statements only, at most ${GenerativePrompt.MAX_CHARS} characters (see GenerativePrompt).`,
+        "negative-prompt.txt": "Negative prompt: what a generator must not do."
       },
       notStated: "Everything the testimony does not state is drawn by the reconstruction from data (terrain, decor, weather records) or marked as assumed in the recording: a generator must not be asked to decide it.",
       sound: recording.soundTrack?.keyframes?.length ? "See the recording's soundTrack." : "The recording states no sound (its own words: no noise from the phenomenon); the rain is synthesized by the player and not exported."

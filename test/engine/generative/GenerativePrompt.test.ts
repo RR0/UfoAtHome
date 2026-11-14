@@ -35,7 +35,23 @@ describe("GenerativePrompt", () => {
     expect(prompt).toContain("- from the start: overcast, cloud base 241 m, no precipitation.")
     expect(prompt).toContain("- from 2.0 s into the video: overcast, cloud base 241 m, rain, intensity 0.5.")
     expect(prompt).not.toContain("walking my dog")
-    expect(prompt).toContain("Negative prompt:")
+    expect(prompt).not.toContain("Negative prompt")
+    expect(GenerativePrompt.NEGATIVE).toContain("portholes")
+  })
+
+  it("never says more than a generator's prompt field takes: each moment shortened first, whole lines left out last", () => {
+    const long = "The object turns slowly on itself while its edge flickers, and the witness, who had stopped, takes two steps back "
+      + "towards the railway line. Then it stops again."
+    const chatty = { ...RECORDING, milestones: Array.from({ length: 30 }, (_, index) => ({ t: 15000 + index * 100, note: { en: long } })) }
+    const shortened = GenerativePrompt.of({ ...chatty, milestones: chatty.milestones.slice(0, 12) }, { fromSeconds: 15, toSeconds: 21 })
+    expect(shortened.length).toBeLessThanOrEqual(GenerativePrompt.MAX_CHARS)
+    // Each of the twelve moments still told, by its first sentence.
+    expect(shortened.match(/s into the video: The object turns/g)).toHaveLength(12)
+    expect(shortened).not.toContain("Then it stops again.")
+    const cut = GenerativePrompt.of(chatty, { fromSeconds: 15, toSeconds: 21 })
+    expect(cut.length).toBeLessThanOrEqual(GenerativePrompt.MAX_CHARS)
+    // No line cut in the middle.
+    for (const line of cut.trimEnd().split("\n")) expect(line === "" || /[.:…]$/.test(line)).toBe(true)
   })
 
   it("counts a recording played faster than it happened in the video's seconds", () => {

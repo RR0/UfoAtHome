@@ -17,6 +17,8 @@ export interface KitScene {
   /** The observation's name, and the address of the recording. */
   readonly title: string
   readonly source?: string
+  /** The reader's language, which the instructions are written in: their numbers are written as it writes them. */
+  readonly language: string
 }
 
 /** One of the films made alongside the reference, frame for frame: its encoder, and the canvas each frame is painted into. */
@@ -137,6 +139,7 @@ export class GenerativeKit {
       near: String(ControlPassEncoding.DEPTH_NEAR_M),
       far: String(ControlPassEncoding.DEPTH_FAR_M),
       margin: String(ControlPassEncoding.MASK_MARGIN_PX),
+      maxChars: GenerativePrompt.MAX_CHARS.toLocaleString(kit.language),
       label: texts.label
     }
     const readme = texts.readme.replace(/\{(\w+)\}/g, (whole, key: string) => facts[key] ?? whole)
@@ -148,6 +151,7 @@ export class GenerativeKit {
       clip: { fromSeconds: fromSeconds / rate, toSeconds: toSeconds / rate, fps: VideoExport.FRAME_RATE, frames, width: kit.film.width, height: kit.film.height },
       depth: { encoding: "1 - ln(d / near) / ln(far / near), clamped to 0..1; 0 for the sky", nearM: ControlPassEncoding.DEPTH_NEAR_M, farM: ControlPassEncoding.DEPTH_FAR_M },
       phenomenonMaskMarginPx: ControlPassEncoding.MASK_MARGIN_PX,
+      promptMaxChars: GenerativePrompt.MAX_CHARS,
       label: texts.label
     }
     const stored = { level: 0 as const }
@@ -155,6 +159,7 @@ export class GenerativeKit {
       "reference.mp4": [reference, stored],
       ...Object.fromEntries(films.map(([name, bytes]) => [`${name}.mp4`, [bytes, stored]])),
       "prompt.txt": encoder.encode(GenerativePrompt.of(kit.recording, { fromSeconds, toSeconds, rate })),
+      "negative-prompt.txt": encoder.encode(GenerativePrompt.NEGATIVE),
       [texts.readmeFile]: encoder.encode(readme),
       "manifest.json": encoder.encode(JSON.stringify(manifest, null, 2) + "\n")
     }

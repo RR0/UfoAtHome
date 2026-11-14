@@ -17,13 +17,14 @@ Hecho con UFO@home (https://ufoathome.org) el {date}.
 - **depth.mp4**: la distancia de cada píxel, blanco cerca, negro lejos y para el cielo, en una escala logarítmica de {near} m a {far} m, la misma para todo el vídeo.
 - **phenomenon-mask.mp4**: en blanco, el lugar del fenómeno descrito por el testigo, ampliado {margin} píxeles: de donde el fenómeno generado no debe salir.
 - **sky-mask.mp4**: en blanco, el cielo.
-- **prompt.txt**: el prompt y el prompt negativo, en inglés, escritos solo a partir de lo que afirma el registro.
+- **prompt.txt**: el prompt, en inglés, escrito solo a partir de lo que afirma el registro, de {maxChars} caracteres como máximo.
+- **negative-prompt.txt**: el prompt negativo, lo que el generador no debe hacer.
 - **manifest.json**: la procedencia y la misma información, para un programa.
 
 ## Modo de empleo
 
 1. En el generador, elegir un modo que parta de un vídeo («video to video», «restyle», «modify video»…) y darle reference.mp4. Si el vídeo es demasiado largo para él, cortarlo en torno al momento deseado.
-2. Pegar el contenido de prompt.txt. Ajustar la transformación al mínimo que haga la imagen realista: la geometría, el horizonte, el encuadre y el movimiento deben seguir siendo los de la referencia.
+2. Pegar prompt.txt en el campo del prompt, y negative-prompt.txt en el del prompt negativo si lo hay. Ajustar la transformación al mínimo que haga la imagen realista: la geometría, el horizonte, el encuadre y el movimiento deben seguir siendo los de la referencia.
 3. Si el generador acepta un vídeo de control de profundidad («depth»), darle depth.mp4.
 4. El generador también reproduce el fenómeno, para que tenga el mismo grano, el mismo desenfoque y la misma luz que el resto. Después, controlar el resultado superponiendo phenomenon-mask.mp4 al vídeo generado: si el fenómeno se sale, cambia de forma, tamaño, color o movimiento, o gana detalles (ojos de buey, luces, reflejos), descartar el vídeo y volver a empezar con una transformación más débil.
 5. Incrustar en toda la imagen, y no en una esquina: «{label}».

@@ -6,7 +6,7 @@ export interface GenerativeKitMessages {
   readmeFile: string
   /**
    * The kit's instructions, as Markdown: {title} of the observation, {source} its address, {date} the kit was made, {fps} and {duration}
-   * (seconds) of the reference video, {near} and {far} metres the depth spans, {margin} pixels the phenomenon's mask is grown by, {label}
+   * (seconds) of the reference video, {maxChars} characters the prompt has at most, {near} and {far} metres the depth spans, {margin} pixels the phenomenon's mask is grown by, {label}
    * to burn into the generated video.
    */
   readme: string

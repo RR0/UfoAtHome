@@ -17,13 +17,14 @@ Made with UFO@home (https://ufoathome.org) on {date}.
 - **depth.mp4**: how far each pixel is, white near, black far and for the sky, on a logarithmic scale from {near} m to {far} m, the same for the whole video.
 - **phenomenon-mask.mp4**: in white, where the phenomenon the witness described stands, grown by {margin} pixels: what the generated phenomenon must not leave.
 - **sky-mask.mp4**: in white, the sky.
-- **prompt.txt**: the prompt and the negative prompt, written from the recording's own statements only.
+- **prompt.txt**: the prompt, written from the recording's own statements only, {maxChars} characters at most.
+- **negative-prompt.txt**: the negative prompt, what the generator must not do.
 - **manifest.json**: the provenance and the same information, for a program.
 
 ## How to use it
 
 1. In the generator, choose a mode that starts from a video ("video to video", "restyle", "modify video"…) and give it reference.mp4. If the video is too long for it, cut it around the moment you want.
-2. Paste the contents of prompt.txt. Set the transformation to the lowest that makes the picture realistic: the geometry, the horizon, the framing and the motion must stay those of the reference.
+2. Paste prompt.txt into the prompt field, and negative-prompt.txt into the negative prompt's, if there is one. Set the transformation to the lowest that makes the picture realistic: the geometry, the horizon, the framing and the motion must stay those of the reference.
 3. If the generator takes a depth control video, give it depth.mp4.
 4. The generator renders the phenomenon too, so that it has the same grain, blur and light as the rest. Then check the result by laying phenomenon-mask.mp4 over the generated video: if the phenomenon leaves it, changes shape, size, colour or motion, or gains details (portholes, lights, reflections), reject the video and start again with a weaker transformation.
 5. Burn into the whole picture, not into a corner: "{label}".
