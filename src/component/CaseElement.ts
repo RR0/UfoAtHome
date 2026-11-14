@@ -1,5 +1,6 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import { CaseExportElement } from "./CaseExportElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
@@ -82,6 +83,20 @@ export class CaseElement extends HTMLElement {
     registerSighting()
     this.eventList = this.byId("case-events")
     ReadingsComparisonElement.register()
+    CaseExportElement.register()
+    // What a report is made from: the case and every recording it lists, fetched only when a report is asked for.
+    ;(this.byId("export") as CaseExportElement).source = async () => {
+      const json = this.json!
+      const recordings = new Map<string, SightingRecordingJson>()
+      await Promise.all(this.entries.filter(entry => entry.kind !== "interview" && entry.url).map(async entry => {
+        try {
+          recordings.set(entry.url!, await SightingFetch.recording(entry.url!) as SightingRecordingJson)
+        } catch {
+          // One that cannot be read leaves out what needed it: the report is on what could be read.
+        }
+      }))
+      return { caseJson: json, caseUrl: this.url!, recordings }
+    }
     this.openEvents = this.byId("open-events")
     // A passage of a dialogue that tells of a moment of an observation takes that observation there, opening it if it was shut.
     this.openEvents.addEventListener(INTERVIEW_SEEK_EVENT, event => {

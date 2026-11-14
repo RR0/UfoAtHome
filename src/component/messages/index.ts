@@ -1,4 +1,5 @@
 import { Messages } from "../../i18n/MessageCatalog.js"
+import type { CaseExportMessages } from "./CaseExportMessages.js"
 import type { ReadingSensitivityMessages } from "./ReadingSensitivityMessages.js"
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
@@ -130,6 +131,16 @@ const readingSensitivityLoaders: Record<UfoLanguage, () => Promise<ReadingSensit
 
 /** The texts of a reading's sensitivity, shown by the case's player and its editor alike (see ReadingSensitivityElement). */
 export const READING_SENSITIVITY_MESSAGES = Messages.catalog<ReadingSensitivityMessages>(readingSensitivityLoaders)
+
+const caseExportLoaders: Record<UfoLanguage, () => Promise<CaseExportMessages>> = {
+  en: () => import("./CaseExportMessages_en.js").then(m => m.caseExportMessages_en),
+  fr: () => import("./CaseExportMessages_fr.js").then(m => m.caseExportMessages_fr),
+  es: () => import("./CaseExportMessages_es.js").then(m => m.caseExportMessages_es),
+  it: () => import("./CaseExportMessages_it.js").then(m => m.caseExportMessages_it)
+}
+
+/** The words of the report's export, shown by the case's player and its editor alike (see CaseExportElement). */
+export const CASE_EXPORT_MESSAGES = Messages.catalog<CaseExportMessages>(caseExportLoaders)
 
 const interviewLoaders: Record<UfoLanguage, () => Promise<InterviewMessages>> = {
   en: () => import("./InterviewMessages_en.js").then(m => m.interviewMessages_en),

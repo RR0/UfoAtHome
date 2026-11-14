@@ -42,6 +42,21 @@ export interface KnobMargin {
 /** What of a phenomenon at an instant the witness is on record as having said: its direction, its apparent size. */
 export interface SaidAspects { direction: boolean, size: boolean }
 
+/** One comparison of a reading as written with what the witness said: a phenomenon at an instant, where it was said to be and where the
+ * reading's body is seen from the witness's eye then. */
+export interface ReadingComparison {
+  t: number
+  sourceId: string
+  /** The direction said, when a direction was said then. */
+  said?: { azimuthDeg: number, altitudeDeg: number }
+  /** Where the body is seen. */
+  predicted: { azimuthDeg: number, altitudeDeg: number }
+  /** Degrees between the two, when a direction was said. */
+  separationDeg?: number
+  /** Whether nothing said then contradicts it. */
+  agrees: boolean
+}
+
 /** A reading set against the account under every turn of what it leaves free. */
 export interface ReadingSensitivityResult {
   /** Whether the reading as written reproduces the account at every instant it is compared at. */
@@ -144,8 +159,7 @@ export class ReadingSensitivity {
     const account = fromSightingJson(json)
     const keyframes = Provenance.strip(json).recording.timeline?.keyframes ?? []
     const said = new Map<string, SaidAspects>()
-    const isSaid = (path: string) => account.provenance.paths().some(known =>
-      (known === path || known.startsWith(`${path}.`)) && !Provenance.free(account.provenance.at(known)))
+    const isSaid = (path: string) => ReadingSensitivity.traced(account.provenance, path)
     const model = WitnessError.MODELS[0]
     const conditions = account.account?.conditions
     const references: Partial<Record<SensitivityKnob, { lower: number, upper: number }>> = {}
@@ -208,6 +222,11 @@ export class ReadingSensitivity {
     const judged = result.margins.filter(margin => margin.coverage !== undefined)
     if (judged.length > 0 && ReadingSensitivity.measurable(result)) result.sufficient = judged.every(margin => margin.coverage! >= ReadingSensitivity.SUFFICIENT)
     return result
+  }
+
+  /** Whether the value at `path`, or something of it, is traced to the witness: wrapped with a basis that is not free (see forAccount). */
+  static traced(provenance: Provenance, path: string): boolean {
+    return provenance.paths().some(known => (known === path || known.startsWith(`${path}.`)) && !Provenance.free(provenance.at(known)))
   }
 
   /** Whether a result's margins mean anything (see MEASURABLE). */
@@ -349,6 +368,33 @@ export class ReadingSensitivity {
     const elevation = Math.atan2(height - eye.upM, across) + deg * DEG
     const raised = eye.upM + across * Math.tan(Math.max(-89 * DEG, Math.min(89 * DEG, elevation)))
     return key.altitudeM !== undefined ? { ...key, altitudeM: raised } : { ...key, altitudeAboveGroundM: raised }
+  }
+
+  /**
+   * Each comparison of the reading as written with what the witness said, in the order of time: what a report draws and tables (see
+   * CaseReport). Only what was said, as the margins are measured on.
+   */
+  comparisons(bodies: readonly BodyJson[]): ReadingComparison[] {
+    const placements = bodies.map(body => new BodyPlacement(body, ReadingSensitivity.FLAT, this.eyeAt))
+    const found: ReadingComparison[] = []
+    for (const t of this.instants) {
+      const eye = this.eyeAt(t)
+      if (!eye) continue
+      const states = placements.map(placement => placement.at(t)).filter((state): state is BodyState => state !== undefined)
+      for (const reading of this.confrontation.at(t, states, eye)) {
+        const aspects = this.said ? this.said.get(`${t}/${reading.sourceId}`) : { direction: true, size: true }
+        if (!aspects) continue
+        const counted = reading.disagreements.filter(off => off === "direction" ? aspects.direction : aspects.size)
+        found.push({
+          t, sourceId: reading.sourceId,
+          ...(aspects.direction && reading.stated.aim ? { said: { azimuthDeg: reading.stated.aim.azimuthDeg, altitudeDeg: reading.stated.aim.altitudeDeg } } : {}),
+          predicted: { azimuthDeg: reading.predicted.aim.azimuthDeg, altitudeDeg: reading.predicted.aim.altitudeDeg },
+          ...(aspects.direction && reading.separationDeg !== undefined ? { separationDeg: reading.separationDeg } : {}),
+          agrees: counted.length === 0
+        })
+      }
+    }
+    return found
   }
 
   /** The share of what the reading as written explains that `outcomes` reproduces: a comparison gone missing (a body moved later is not

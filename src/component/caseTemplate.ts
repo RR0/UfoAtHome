@@ -10,6 +10,7 @@ export const caseHtml = `
     <span class="case-actions">
       <!-- Sharing the case: its address and the element that shows it whole (an observation of it is shared from its own player). -->
       <button id="share" type="button" class="icon-btn" aria-haspopup="dialog"></button>
+      <rr0-case-export id="export" class="case-export"></rr0-case-export>
       <button id="edit" type="button" class="icon-btn"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M11.3 1.3a1 1 0 0 1 1.4 0l2 2a1 1 0 0 1 0 1.4l-8.5 8.5-3.4.9.9-3.4 8.6-8.4Zm-7 9.2-.5 1.7 1.7-.5 6.9-6.9-1.2-1.2-6.9 6.9Z" fill="currentColor"/></svg></button>
       <button id="timeline-button" type="button" class="icon-btn" aria-pressed="true"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.6"/></svg></button>
       <button id="info" type="button" class="icon-btn" aria-expanded="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="3.6" r="1.4" fill="currentColor"/><path d="M6 6.5h3v6h1.5V14h-4.5v-1.5H7.5V8H6Z" fill="currentColor"/></svg></button>
@@ -42,6 +43,12 @@ export const caseCss = `
   padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333; cursor: pointer;
 }
 .icon-btn:hover, .icon-btn:focus-visible { background: #e0e0e0; }
+/* The report's export wears the same square, its button being its own (see CaseExportElement). */
+.case-export::part(button) {
+  display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; box-sizing: border-box;
+  padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333;
+}
+.case-export::part(button):hover { background: #e0e0e0; }
 .icon-btn[aria-expanded="true"], .icon-btn[aria-pressed="false"] { background: #d8d8d8; }
 .case-summary { margin: 0; font-size: 15px; line-height: 1.5; opacity: .85; }
 .case-summary[hidden] { display: none; }

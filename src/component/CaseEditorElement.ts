@@ -14,6 +14,7 @@ import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import { CaseExportElement } from "./CaseExportElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
@@ -240,6 +241,9 @@ const TEMPLATE = `
   .event-card[data-verdict="compatible"] .verdict { color: var(--ok); }
   .findings { grid-area: findings; margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
   .readings-comparison { margin-top: 14px; }
+  /* The report's export wears the editor's pill, its button being its own (see CaseExportElement). */
+  .report-export::part(button) { height: 36px; gap: 8px; padding: 0 16px; border: 1px solid var(--line-strong); border-radius: 999px;
+    background: var(--ground-raised); color: var(--ink); font: 600 14px/1 var(--sans); }
   /* The readings filtered out of the list are filtered out of their comparison too (see renderFilter). */
   .readings-comparison[data-filtered] { display: none; }
   .event-body > rr0-reading-sensitivity { grid-column: 1 / -1; margin-top: 2px; }
@@ -300,6 +304,8 @@ const TEMPLATE = `
     </div>
     <div class="head-actions">
       <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also"></span></label>
+      <!-- A report of the case: its readings compared, their findings and sensitivity, as HTML, PDF, JSON or CSV (see CaseExportElement). -->
+      <rr0-case-export id="report-export" class="report-export" variant="pill"></rr0-case-export>
       <!-- The editor on this case, for somebody else (see ShareDialogElement): off while the case has no address to give. -->
       <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case"></span></button>
       <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case"></span></button>
@@ -545,6 +551,17 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("previous-event").addEventListener("click", () => this.stepEvent(-1))
     this.byId("next-event").addEventListener("click", () => this.stepEvent(1))
     this.shareDialog = this.byId("share-dialog") as ShareDialogElement
+    CaseExportElement.register()
+    // What a report is made from: the case as it is being edited, and each of its recordings, loaded where they were not yet.
+    ;(this.byId("report-export") as CaseExportElement).source = async () => {
+      const session = this.session
+      if (!session) throw new Error("No case")
+      this.commit()
+      await Promise.all(session.tracks.filter(track => !track.recording).map(track => this.loadTrack(track).catch(() => undefined)))
+      const recordings = new Map<string, SightingRecordingJson>()
+      for (const track of session.tracks) if (track.recording) recordings.set(track.url, track.recording)
+      return { caseJson: session.json, caseUrl: session.url, recordings }
+    }
     this.shareDialog.subject = this.shareSubject
     this.byId("share-case").addEventListener("click", () => this.openShare())
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
