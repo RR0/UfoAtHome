@@ -14,6 +14,11 @@ export interface CaseExportMessages {
   printHint: string
   jsonHint: string
   csvHint: string
+  /** The option of views of the simulated scene, and what it costs. */
+  pictures: string
+  picturesHint: string
+  /** How far the views are: `{done}` of `{total}`. */
+  drawing: string
   /** While the report is being worked out, and when it could not be. */
   working: string
   failed: string

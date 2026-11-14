@@ -11,6 +11,9 @@ export const caseExportMessages_it = {
   printHint: "Lo stesso rapporto, da stampare o salvare in PDF dal browser",
   jsonHint: "Tutti i dati e tutti i risultati calcolati, per altri strumenti",
   csvHint: "Un file per tabella, per un foglio di calcolo, riuniti in uno zip",
+  pictures: "Includere viste della scena",
+  picturesHint: "Più lungo: la scena viene simulata e fotografata per ciascun testimone e ciascuna lettura",
+  drawing: "Viste della scena: {done} su {total}…",
   working: "Elaborazione del rapporto…",
   failed: "Non è stato possibile elaborare il rapporto."
 } satisfies CaseExportMessages

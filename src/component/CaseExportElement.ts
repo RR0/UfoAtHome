@@ -30,6 +30,8 @@ button.open { display: inline-flex; align-items: center; gap: 6px; font: inherit
 .menu strong { display: block; font-weight: 600; }
 .menu small { display: block; opacity: .7; }
 .status { padding: 6px 10px; opacity: .8; }
+.option { display: flex; gap: 8px; align-items: flex-start; padding: 6px 10px; border-top: 1px solid var(--line, #ddd); margin-top: 4px; cursor: pointer; }
+.option input { margin: 2px 0 0; }
 ${HelpPopover.css(".menu")}
 .menu:popover-open { position-area: bottom span-left; margin: .35em 0 0; }
 `
@@ -41,6 +43,7 @@ ${HelpPopover.css(".menu")}
   private language: UfoLanguage = "en"
   private preferences: readonly string[] = ["en"]
   private status?: HTMLElement
+  private withPictures?: HTMLInputElement
 
   static register(): void {
     if (!customElements.get(CaseExportElement.TAG)) customElements.define(CaseExportElement.TAG, CaseExportElement)
@@ -88,6 +91,14 @@ ${HelpPopover.css(".menu")}
       item.addEventListener("click", () => void this.export(kind, menu))
       return item
     }))
+    // Views of the scene, off by default: they take the scene's simulation, a picture at a time.
+    const option = document.createElement("label")
+    option.className = "option"
+    this.withPictures = Object.assign(document.createElement("input"), { type: "checkbox" })
+    const said = document.createElement("span")
+    said.append(Object.assign(document.createElement("strong"), { textContent: m.pictures }), Object.assign(document.createElement("small"), { textContent: m.picturesHint }))
+    option.append(this.withPictures, said)
+    menu.append(option)
     this.status = Object.assign(document.createElement("p"), { className: "status", hidden: true })
     this.status.setAttribute("role", "status")
     menu.append(this.status)
@@ -102,7 +113,9 @@ ${HelpPopover.css(".menu")}
     this.status!.hidden = false
     try {
       const [{ CaseReportExport }, source] = await Promise.all([import("./CaseReportExport.js"), this.source()])
-      await CaseReportExport.make(kind, source, this.language, this.preferences)
+      await CaseReportExport.make(kind, source, this.language, this.preferences, this.withPictures?.checked ?? false, (done, total) => {
+        this.status!.textContent = m.drawing.replace("{done}", String(done)).replace("{total}", String(total))
+      })
       this.status!.hidden = true
       HelpPopover.show(menu, false)
     } catch {

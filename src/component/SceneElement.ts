@@ -3606,6 +3606,31 @@ export class SceneElement extends HTMLElement {
     this.dispatchEvent(new CustomEvent(CONFRONTATION_EVENT, { detail: readings }))
   }
 
+  /**
+   * A picture of the scene at `t`, `width` pixels across, as a JPEG data URL: for a report (see CaseReportExport), from a scene of its own
+   * kept out of the page and drawn all the same (`always-live`), as the seek bar's preview is (see SeekPreview). Undefined when no frame
+   * comes within a while, which a report says rather than waiting for ever.
+   *
+   * Asked twice: the first frame is the viewfinder, and the pose develops a moment after (see SceneRenderer.startExposure).
+   */
+  async pictureAt(t: number, width = 640): Promise<string | undefined> {
+    const target = document.createElement("canvas")
+    target.width = width
+    target.height = Math.round(width * (this.sceneCanvas.height || 9) / (this.sceneCanvas.width || 16))
+    let drawn = false
+    for (const settle of [1200, 0]) {
+      this.showAt(t)
+      drawn = false
+      for (let frames = 0; frames < 900 && !drawn; frames++) {
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+        drawn = this.snapshotTo(target)
+      }
+      if (!drawn) return undefined
+      if (settle) await new Promise(resolve => setTimeout(resolve, settle))
+    }
+    return target.toDataURL("image/jpeg", 0.85)
+  }
+
   setDistanceHypothesis(sourceId: string, distanceM: number | undefined): void {
     if (distanceM === undefined || !(distanceM > 0)) this.distanceHypotheses.delete(sourceId)
     else this.distanceHypotheses.set(sourceId, distanceM)

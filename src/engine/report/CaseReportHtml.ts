@@ -48,6 +48,10 @@ svg.timeline .moment-label { font-size: 11px; fill: #b45309; }
 blockquote { margin: .4rem 0 1rem; padding: .4rem .9rem; border-left: 3px solid var(--line); color: #2b2f38; white-space: pre-line; }
 dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: .1rem .8rem; margin: .3rem 0 .8rem; font-size: .92rem; } dl.facts dt { color: var(--dim); }
 ul.sources { margin: .2rem 0 1rem; padding-left: 1.2rem; font-size: .9rem; }
+table.pictures { table-layout: fixed; } table.pictures th:first-child { width: 4.5rem; }
+table.pictures td { vertical-align: top; } table.pictures img { display: block; width: 100%; height: auto; border-radius: 3px; }
+table.pictures th { white-space: normal; }
+p.caption { font-size: .85rem; color: var(--dim); margin-top: -.4rem; }
 .print { float: right; margin: 0 0 .6rem 1rem; padding: .45rem .9rem; border: 1px solid var(--line); border-radius: 999px; background: #fff; font: inherit; cursor: pointer; }
 .scroll { overflow-x: auto; }
 @media print {
@@ -137,6 +141,12 @@ ${body.join("\n")}
       const legend = [`<li><svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4" fill="#111827"/></svg>${e(t.saidLegend)}</li>`,
         ...readings.map((reading, index) => `<li>${SkyFigure.legendMark(index)}${e(reading.title)}</li>`)]
       parts.push(`<figure>${figure}<ul class="legend">${legend.join("")}</ul><figcaption>${e(t.figureCaption)}</figcaption></figure>`)
+    }
+    if (witness.pictures?.length) {
+      const columns = witness.pictures[0].views.map(view => view.label)
+      parts.push(`<h4>${e(t.pictures)}</h4>`, `<div class="scroll"><table class="pictures"><thead><tr><th scope="col">${e(t.columns.instant)}</th>${columns.map(label => `<th scope="col">${e(label)}</th>`).join("")}</tr></thead><tbody>${
+        witness.pictures.map(row => `<tr><td class="n">${f.instant(row.t)}</td>${row.views.map(view => `<td>${view.image ? `<img src="${view.image}" alt="${e(view.label)}, ${f.instant(row.t)}">` : `<span class="nothing">${e(t.noPicture)}</span>`}</td>`).join("")}</tr>`).join("")
+      }</tbody></table></div>`, `<p class="caption">${e(t.picturesCaption)}</p>`)
     }
     parts.push(`<h4>${e(t.indications)}</h4>`)
     if (witness.indications.length === 0) parts.push(`<p>${e(t.noIndication)}</p>`)

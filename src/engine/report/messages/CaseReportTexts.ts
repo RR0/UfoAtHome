@@ -48,6 +48,12 @@ export interface CaseReportTexts {
   scale: string
   /** The strip of a witness's moments, and what it shows. */
   timelineCaption: string
+  /** Views of the simulated scene, what they are and are not, and the account's column. */
+  pictures: string
+  picturesCaption: string
+  accountView: string
+  /** A view that could not be drawn. */
+  noPicture: string
   /** The figure of a witness's sky. */
   figureCaption: string
   azimuth: string

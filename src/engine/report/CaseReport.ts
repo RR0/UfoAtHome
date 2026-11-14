@@ -82,6 +82,9 @@ export interface ReportWitness {
   /** Where they stood on the Earth, for the map to put the witnesses together. */
   lat?: number
   lng?: number
+  /** Views of the simulated scene from where they stood, when they were asked for: at a few of the instants they gave an indication, the
+   * account and each reading side by side. Illustrations, set beside the computed gaps that judge them. */
+  pictures?: { t: number, views: { label: string, image?: string }[] }[]
   indications: ReportIndication[]
   /** What the account calls each of its phenomena, by its id. */
   phenomena?: Record<string, string>

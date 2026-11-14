@@ -94,7 +94,7 @@ describe("A report on a case", () => {
     expect(html).toContain("UFO@home 9.9.9")
     // The sky of the witness, said and read, and nothing fetched from anywhere.
     expect(html).toContain('<svg xmlns="http://www.w3.org/2000/svg"')
-    expect(html).not.toMatch(/<(script|link|img)\b[^>]*\b(src|href)=/)
+    expect(html).not.toMatch(/<(script|link|img)\b[^>]*\b(src|href)="(?!data:)/)
     expect(html).toContain("a party balloon, &lt;its&gt; height guessed")
     expect(html).toContain("sufficient margin")
     expect(html).toContain("@media print")
@@ -119,6 +119,15 @@ describe("A report on a case", () => {
     const [first] = data.readings[0].paths[0].points
     expect(first.eastM).toBeCloseTo(0, 3)
     expect(first.northM).toBeCloseTo(100 * Math.cos(10 * DEG), 0)
+  })
+
+  it("sets the views of the scene, when there are some, beside what judges them", () => {
+    const data = report()
+    data.witnesses[0].pictures = [{ t: 0, views: [{ label: "Account", image: "data:image/jpeg;base64,AAAA" }, { label: "A balloon" }] }]
+    const html = CaseReportHtml.of(data, caseReportTexts_en, "en", "9.9.9")
+    expect(html).toContain('<img src="data:image/jpeg;base64,AAAA" alt="Account, 0 s">')
+    expect(html).toContain("no view drawn")
+    expect(html).toContain("An illustration, not evidence")
   })
 
   it("writes its data as JSON that says what it is, and its tables as CSV a spreadsheet reads", () => {

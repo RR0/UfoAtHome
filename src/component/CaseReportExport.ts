@@ -8,6 +8,10 @@ import { CaseReportDataFiles } from "../engine/report/CaseReportData.js"
 import { CaseReportHtml } from "../engine/report/CaseReportHtml.js"
 import { CASE_REPORT_TEXTS } from "../engine/report/messages/CaseReportTexts.js"
 import type { UfoLanguage } from "./messages/index.js"
+import type { CaseReportData } from "../engine/report/CaseReport.js"
+import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
+import { Provenance } from "../engine/persistence/Provenance.js"
+import type { CaseReportTexts } from "../engine/report/messages/CaseReportTexts.js"
 
 /** What a report is made from: the case, where it is, and its recordings by their absolute address. */
 export interface CaseReportSource {
@@ -25,9 +29,14 @@ export type CaseReportKind = "html" | "print" | "json" | "csv"
  */
 export class CaseReportExport {
 
-  static async make(kind: CaseReportKind, source: CaseReportSource, language: UfoLanguage, preferences: readonly string[]): Promise<void> {
+  /**
+   * @param pictures Whether to draw views of the simulated scene (see pictures): longer, so asked for. `progress` says how far that is.
+   */
+  static async make(kind: CaseReportKind, source: CaseReportSource, language: UfoLanguage, preferences: readonly string[],
+                    pictures = false, progress?: (done: number, total: number) => void): Promise<void> {
     const [texts, checkTexts] = await Promise.all([CASE_REPORT_TEXTS.load(language), READING_CHECK_TEXTS.load(language)])
     const data = CaseReport.of(source.caseJson, source.caseUrl, source.recordings, new SaidTexts([...preferences]), new ReadingCheck(checkTexts))
+    if (pictures && kind !== "csv") await CaseReportExport.pictures(data, source, texts, progress)
     const stem = `${source.caseJson.id ?? "case"}-report`
     switch (kind) {
       case "html":
@@ -45,6 +54,74 @@ export class CaseReportExport {
         const files = Object.fromEntries(Object.entries(CaseReportDataFiles.csv(data, texts, language)).map(([name, csv]) => [name, strToU8(`﻿${csv}`)]))
         CaseReportExport.download(new Blob([zipSync(files) as BlobPart], { type: "application/zip" }), `${stem}-tables.zip`)
       }
+    }
+  }
+
+  /** At most this many instants are drawn per witness: the first, the middle and the last they gave a direction at. */
+  private static readonly PICTURED_INSTANTS = 3
+
+  /**
+   * Views of the simulated scene from where each witness stood, at a few of the instants they gave a direction: their account, then each
+   * reading of it that places something. Drawn by a scene of its own, out of the page and drawn all the same, as the seek bar's preview is
+   * (see SceneElement.pictureAt), one recording after the other.
+   */
+  private static async pictures(data: CaseReportData, source: CaseReportSource, texts: CaseReportTexts, progress?: (done: number, total: number) => void): Promise<void> {
+    const { registerScene, SCENE_ELEMENT_NAME } = await import("./SceneElement.js")
+    registerScene()
+    const plans = data.witnesses.map(witness => {
+      const said = witness.indications.filter(indication => indication.directionSaid).map(indication => indication.t)
+      const picked = said.length <= CaseReportExport.PICTURED_INSTANTS ? said : [said[0], said[Math.floor(said.length / 2)], said[said.length - 1]]
+      const readings = data.readings.filter(reading => reading.reads === witness.title && reading.comparisons.length > 0)
+      const recordings = [{ label: texts.accountView, url: witness.url, reading: undefined as string | undefined },
+        ...readings.map(reading => ({ label: reading.title, url: witness.url, reading: reading.url }))]
+      return { witness, instants: [...new Set(picked)], recordings }
+    }).filter(plan => plan.instants.length > 0)
+    const total = plans.reduce((sum, plan) => sum + plan.instants.length * plan.recordings.length, 0)
+    if (total === 0) return
+    const scene = document.createElement(SCENE_ELEMENT_NAME) as import("./SceneElement.js").SceneElement
+    scene.setAttribute("max-pixel-ratio", "1")
+    scene.setAttribute("always-live", "")
+    Object.assign(scene.style, { position: "fixed", left: "-10000px", top: "0", width: "640px", height: "360px", visibility: "hidden", pointerEvents: "none" })
+    document.body.appendChild(scene)
+    let done = 0
+    progress?.(done, total)
+    try {
+      for (const plan of plans) {
+        const rows = plan.instants.map(t => ({ t, views: [] as { label: string, image?: string }[] }))
+        // The account's scene, set once per witness; each reading then lays its bodies over it, as the player shows a reading.
+        const account = source.recordings.get(plan.witness.url)
+        if (account) {
+          scene.documentUrl = plan.witness.url
+          scene.sightingData = account
+        }
+        for (const recording of plan.recordings) {
+          const json = account
+          const readingJson = recording.reading ? source.recordings.get(recording.reading) : undefined
+          for (const row of rows) {
+            let image: string | undefined
+            if (json && (!recording.reading || readingJson)) {
+              // The account shows its own interpretation (the witness's, if any), as the player's "account" choice does.
+              if (row === rows[0]) scene.interpretation = CaseReportExport.bodiesOf(readingJson ?? json, recording.reading ?? plan.witness.url)
+              image = await scene.pictureAt(row.t, 480).catch(() => undefined)
+            }
+            row.views.push({ label: recording.label, ...(image ? { image } : {}) })
+            progress?.(++done, total)
+          }
+        }
+        plan.witness.pictures = rows
+      }
+    } finally {
+      scene.remove()
+    }
+  }
+
+  /** A reading's interpretation as a scene shows it: plain values, and its models at addresses of their own (see CaseFile). */
+  private static bodiesOf(reading: SightingRecordingJson, url: string): InterpretationJson | undefined {
+    const interpretation = Provenance.strip(reading).recording.interpretation
+    if (!interpretation) return undefined
+    return {
+      ...interpretation,
+      bodies: interpretation.bodies.map(body => body.model?.url ? { ...body, model: { ...body.model, url: new URL(body.model.url, url).href } } : body)
     }
   }
 
