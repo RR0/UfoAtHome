@@ -936,7 +936,15 @@ button.preset[aria-pressed="true"] {
 #obs-time, #obs-end-time {
   width: 12em;
 }
+/* What happens at a moment: the rest of its row, from 22em, a sentence being longer than any fixed width. */
+#milestone-item label:has(> #milestoneNote) {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
 #milestoneNote {
+  flex: 1 1 22em;
   min-width: 22em;
 }
 /* As wide as the name they hold, from 10em: "Cirrus SR20 F-HOBS on final (night circuits)" is not "Cirrus SR20 F-HOBS or". */

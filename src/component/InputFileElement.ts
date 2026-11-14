@@ -28,7 +28,8 @@ rr0-input-file { display: inline-flex; align-items: center; gap: .3em; }
 rr0-input-file .input-file-mode { order: -1; font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .15em; }
 rr0-input-file .input-file-mode:hover { text-decoration-thickness: 2px; }
 rr0-input-file .input-file-mode:focus-visible { outline: 2px solid #4af; outline-offset: 2px; border-radius: 2px; }
-rr0-input-file input[type="url"] { width: 18em; max-width: 60vw; }
+/* As long as the address it holds, from 18em: an annex's is longer than that, and cut it says nothing of where it is. */
+rr0-input-file input[type="url"] { field-sizing: content; min-width: 18em; max-width: min(100%, 60vw); }
 rr0-input-file [hidden] { display: none !important; }
 `
 
