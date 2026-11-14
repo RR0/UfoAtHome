@@ -17,6 +17,11 @@ export class AudioUnlock {
 
   private static sessionDeclared = false
 
+  /** Whether `context` plays to the reader's speakers, rather than into a film (see VideoExport): only such a context is unlocked or closed. */
+  static isLive(context: BaseAudioContext | undefined): context is AudioContext {
+    return context !== undefined && typeof AudioContext !== "undefined" && context instanceof AudioContext
+  }
+
   static unlock(context: AudioContext): void {
     AudioUnlock.declarePlayback()
     if (context.state === "running") return

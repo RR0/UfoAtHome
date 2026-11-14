@@ -55,6 +55,8 @@ import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadSceneNames, UFO_SUPPORTED_LANGUAGES } from "./messages/index.js"
 import type { UfoLanguage } from "./messages/index.js"
 import { SceneNaming } from "./messages/SceneNames.js"
+import { FilmChrome } from "./FilmChrome.js"
+import type { FilmOptions } from "./FilmChrome.js"
 import { RailwayTooltip } from "./RailwayTooltip.js"
 import { ScenePoster } from "./ScenePoster.js"
 import { SceneCredits } from "./SceneCredits.js"
@@ -413,9 +415,9 @@ export class SceneElement extends HTMLElement {
   /** Owned here, not by SceneRenderer — the renderer stays audio-agnostic (see its own
    * onLightningFlash callback param), this is the one place that already orchestrates a non-
    * rendering side effect alongside pure rendering (see the terrain-attribution label above). */
-  private readonly weatherAudio = new WeatherAudio()
+  private weatherAudio = new WeatherAudio()
   /** The vehicles the observer hears — see VehicleHearing and VehicleAudio. */
-  private readonly vehicleAudio = new VehicleAudio()
+  private vehicleAudio = new VehicleAudio()
   /** The sound of the aircraft of a record, once there are any: its code comes with them (see trafficRuntime). */
   private aircraftAudio?: InstanceType<TrafficRuntime["AircraftAudio"]>
   private readonly vehicleHearing = new VehicleHearing()
@@ -1055,6 +1057,11 @@ export class SceneElement extends HTMLElement {
    * and cleared by a pause like everything else still in flight. */
   private handleLightningFlash(flash: LightningFlash): void {
     clearTimeout(this.thunderTimeoutId)
+    // A film is made faster or slower than the observation went: its thunder is due at an instant of the recording (see filmFrameAt).
+    if (this.filmSound) {
+      this.filmThunderAtMs = this.lastTimeMs + LightningSchedule.thunderDelayMs(flash) * this.ufoElement.playbackRate
+      return
+    }
     this.thunderTimeoutId = window.setTimeout(() => this.weatherAudio.playThunder(), LightningSchedule.thunderDelayMs(flash))
   }
 
@@ -1079,6 +1086,8 @@ export class SceneElement extends HTMLElement {
 
   /** The player's volume and mute button over every sound this scene plays: the weather, the vehicles, the aircraft. */
   private applyLevel(): void {
+    // A film's sound is at its own level, whatever the reader's.
+    if (this.filmSound) return
     const level = this.ufoElement.level
     this.weatherAudio.setLevel(level)
     this.vehicleAudio.setLevel(level)
@@ -1150,9 +1159,10 @@ export class SceneElement extends HTMLElement {
     // weather moves as it would have been seen to, and the sound stays with the player.
     const animated = playing || this.filming
     this.sceneRenderer.setAnimationsRunning(animated, animated)
-    this.weatherAudio.setPaused(!playing)
-    this.vehicleAudio.setPaused(!playing)
-    this.aircraftAudio?.setPaused(!playing)
+    const heard = playing || this.filmSound !== undefined
+    this.weatherAudio.setPaused(!heard)
+    this.vehicleAudio.setPaused(!heard)
+    this.aircraftAudio?.setPaused(!heard)
     if (playing) this.unlockIfAlreadyActivated()
     // A thunderclap is deliberately delayed by the distance sound travels (see
     // handleLightningFlash); one still in flight belongs to a flash that is no longer happening.
@@ -1231,7 +1241,12 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.seekPreviewPainter = (t, canvas) => this.seekPreviewOf(canvas).paint(t, canvas)
     // A film of the recording, where the browser can encode one (see film).
     if (typeof VideoEncoder !== "undefined" && typeof OffscreenCanvas !== "undefined") {
-      this.ufoElement.filmer = { film: (onProgress, signal) => this.film(onProgress, signal), fileName: () => this.filmFileName() }
+      this.ufoElement.filmer = {
+        film: (options, onProgress, signal) => this.film(options, onProgress, signal),
+        fileName: () => this.filmFileName(),
+        pictureSize: () => this.filmPictureSize(),
+        hasMap: () => this.ufoElement.hasObserverMap
+      }
     }
     // The weather is heard through this element, the button that silences it is the player's.
     this.ufoElement.addEventListener("mutedchange", () => this.applyLevel())
@@ -1721,9 +1736,14 @@ export class SceneElement extends HTMLElement {
     return true
   }
 
-  /** What the film of the recording is saved as. */
+  /** What the film of the recording is called, without its extension: the observation's title, given by the element showing it (see
+   * SightingElement.updateAccountLine). */
+  filmName?: string
+
+  /** What the film of the recording is saved as: its name, without what a file name cannot hold. */
   private filmFileName(): string {
-    return "observation.mp4"
+    const name = (this.filmName ?? "").replace(/[\\/:*?"<>|\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim()
+    return `${name || "observation"}.mp4`
   }
 
   /** Whether a film is being made of the recording (see film): the animations then follow the film's clock. */
@@ -1733,41 +1753,95 @@ export class SceneElement extends HTMLElement {
    * The film of the whole recording, made frame by frame (see VideoExport), at the size the scene is drawn at and at every pixel it may
    * have. The player is paused meanwhile, and put back where it was after.
    */
-  private async film(onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
+  private async film(options: FilmOptions, onProgress: (share: number) => void, signal: AbortSignal): Promise<Blob> {
     if (this.filming) throw new Error("Already filming")
     const { VideoExport } = await import("./VideoExport.js")
     const player = this.ufoElement
     const wasAtMs = player.currentTime
     player.pause()
+    // At the height asked for, or at every pixel the screen has; the width in the picture's proportions as they are on screen.
+    const css = { width: this.sceneCanvas.clientWidth, height: this.sceneCanvas.clientHeight }
+    const ratio = options.height && css.height > 0 ? options.height / css.height : this.sceneRenderer.maxPixelRatio
     this.filming = true
-    this.sceneRenderer.holdPixelRatio(true)
+    this.sceneRenderer.holdPixelRatio(ratio)
+    player.filmMap(options.map)
     this.syncAnimationsToPlayback()
     try {
+      const height = options.height ?? this.sceneCanvas.height
+      const width = options.height && css.height > 0 ? Math.round(options.height * css.width / css.height) : this.sceneCanvas.width
       return await VideoExport.film({
         fromMs: 0,
         toMs: player.seekableDuration,
         rate: player.playbackRate,
-        width: this.sceneCanvas.width,
-        height: this.sceneCanvas.height,
-        frameAt: (timeMs, clockMs, target) => this.filmFrameAt(timeMs, clockMs, target)
+        width,
+        height,
+        frameAt: (timeMs, clockMs, target) => this.filmFrameAt(timeMs, clockMs, target, options),
+        hearInto: context => this.hearInto(context)
       }, onProgress, signal)
     } finally {
       this.filming = false
-      this.sceneRenderer.holdPixelRatio(false)
+      this.sceneRenderer.holdPixelRatio(undefined)
+      player.filmMap(undefined)
       player.currentTime = wasAtMs
       this.syncAnimationsToPlayback()
     }
   }
 
+  /** The picture's size on screen, in device pixels: what a film is made at by default. */
+  private filmPictureSize(): { width: number, height: number } {
+    const ratio = this.sceneRenderer.maxPixelRatio
+    return { width: Math.round(this.sceneCanvas.clientWidth * ratio), height: Math.round(this.sceneCanvas.clientHeight * ratio) }
+  }
+
+  /** The context a film's sound is played into, while one is made (see hearInto). */
+  private filmSound?: BaseAudioContext
+  /** The reader's own players of the scene's sounds, kept aside meanwhile. */
+  private liveSound?: { weather: WeatherAudio, vehicle: VehicleAudio, aircraft?: SceneElement["aircraftAudio"] }
+  /** The instant of the recording a thunderclap heard in a film is due at (see handleLightningFlash). */
+  private filmThunderAtMs?: number
+
+  /**
+   * Plays every sound of the scene into `context`, the recording's own and the scene's (the weather, the vehicles, the aircraft), as they
+   * play to the reader while the recording runs; or back to the reader's speakers with undefined. See FilmedScene.hearInto.
+   */
+  private hearInto(context: BaseAudioContext | undefined): void {
+    if (context) {
+      this.liveSound ??= { weather: this.weatherAudio, vehicle: this.vehicleAudio, aircraft: this.aircraftAudio }
+      this.filmSound = context
+      this.weatherAudio = new WeatherAudio(context)
+      this.vehicleAudio = new VehicleAudio(context)
+      const runtime = SceneElement.trafficRuntime
+      this.aircraftAudio = this.liveSound.aircraft && runtime ? this.newAircraftAudio(runtime) : undefined
+    } else if (this.liveSound) {
+      this.weatherAudio.dispose()
+      this.vehicleAudio.dispose()
+      this.aircraftAudio?.dispose()
+      this.weatherAudio = this.liveSound.weather
+      this.vehicleAudio = this.liveSound.vehicle
+      this.aircraftAudio = this.liveSound.aircraft
+      this.liveSound = undefined
+      this.filmSound = undefined
+      this.filmThunderAtMs = undefined
+    }
+    this.ufoElement.hearInto(context)
+    this.syncAnimationsToPlayback()
+  }
+
   /** Draws the recording at `timeMs` with its animations at `clockMs`, and copies the picture into `target` — see FilmedScene.frameAt. */
-  private filmFrameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D): boolean {
+  private filmFrameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D, options: FilmOptions): boolean {
     if (this.ufoElement.currentTime !== timeMs) this.ufoElement.currentTime = timeMs
+    if (this.filmThunderAtMs !== undefined && timeMs >= this.filmThunderAtMs) {
+      this.filmThunderAtMs = undefined
+      this.weatherAudio.playThunder()
+    }
     // Asked for even where nothing has changed since the last instant: the drawing buffer is not kept, there is a frame to draw.
     this.sceneRenderer.render()
     const drawn = this.sceneRenderer.framesDrawn
     this.sceneRenderer.frame(clockMs)
     if (this.sceneRenderer.framesDrawn === drawn) return false
     target.drawImage(this.sceneCanvas, 0, 0, target.canvas.width, target.canvas.height)
+    // What the reader chose to keep of what the player lays over the picture, never its controls.
+    FilmChrome.paint(target, this.ufoElement.filmChrome(options))
     return true
   }
 
@@ -2747,10 +2821,10 @@ export class SceneElement extends HTMLElement {
   }
 
   private newAircraftAudio(runtime: TrafficRuntime): InstanceType<TrafficRuntime["AircraftAudio"]> {
-    const audio = new runtime.AircraftAudio()
-    audio.setLevel(this.ufoElement.level)
-    if (this.interacted) audio.resume()
-    audio.setPaused(this.ufoElement.playbackState !== "playing")
+    const audio = new runtime.AircraftAudio(this.filmSound)
+    if (!this.filmSound) audio.setLevel(this.ufoElement.level)
+    if (this.interacted || this.filmSound) audio.resume()
+    audio.setPaused(this.ufoElement.playbackState !== "playing" && !this.filmSound)
     return audio
   }
 

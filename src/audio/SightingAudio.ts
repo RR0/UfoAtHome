@@ -58,7 +58,12 @@ interface Voice {
 }
 
 export class SightingAudio {
-  private context?: AudioContext
+  private context?: BaseAudioContext
+
+  /** @param context What to play into instead of the reader's speakers, whose context is made at the first gesture: a film's (see VideoExport). */
+  constructor(context?: BaseAudioContext) {
+    this.context = context
+  }
   private voice?: Voice
   /** Bumped on every voice change, including to silence — a src recording still fetching when the
    * sound has already moved on must be discarded rather than started into nothing (the exact
@@ -75,7 +80,7 @@ export class SightingAudio {
   private master?: GainNode
 
   /** Where every voice is sent, so that one gain silences them all at once, whatever is playing. */
-  private output(context: AudioContext): GainNode {
+  private output(context: BaseAudioContext): GainNode {
     if (!this.master) {
       this.master = context.createGain()
       this.master.gain.value = this.level
@@ -104,7 +109,7 @@ export class SightingAudio {
         return
       }
     }
-    AudioUnlock.unlock(this.context)
+    if (AudioUnlock.isLive(this.context)) AudioUnlock.unlock(this.context)
   }
 
   /**
@@ -145,7 +150,7 @@ export class SightingAudio {
   /** Stops everything and closes the AudioContext — UfoElement's disconnectedCallback. */
   dispose(): void {
     this.silence()
-    void this.context?.close()
+    if (AudioUnlock.isLive(this.context)) void this.context.close()
     this.context = undefined
     this.master = undefined
     this.buffers.clear()
@@ -193,7 +198,7 @@ export class SightingAudio {
 
   /** Two sawtooths a fraction apart, low-passed: the slow beat between them is what makes a drone
    * sound like a machine rather than a test tone. */
-  private buildHum(context: AudioContext, key: string): Voice {
+  private buildHum(context: BaseAudioContext, key: string): Voice {
     const first = context.createOscillator()
     first.type = "sawtooth"
     const second = context.createOscillator()
@@ -224,7 +229,7 @@ export class SightingAudio {
 
   /** A sine with a slight vibrato — a perfectly steady tone reads as electronic, and no real
    * whistling sound holds its pitch that exactly. */
-  private buildWhistle(context: AudioContext, key: string): Voice {
+  private buildWhistle(context: BaseAudioContext, key: string): Voice {
     const oscillator = context.createOscillator()
     oscillator.type = "sine"
     const vibrato = context.createOscillator()
@@ -253,7 +258,7 @@ export class SightingAudio {
   }
 
   /** Brown noise under a low-pass at the reported pitch — no tone at all, just the weight of it. */
-  private buildRumble(context: AudioContext, key: string): Voice {
+  private buildRumble(context: BaseAudioContext, key: string): Voice {
     const source = context.createBufferSource()
     source.buffer = this.brownNoise(context)
     source.loop = true
@@ -283,7 +288,7 @@ export class SightingAudio {
    * The envelope drives the gain param directly, which is why `volume` lands on the modulation's
    * own depth here instead of on an output gain (the gate must reach real zero between bursts).
    */
-  private buildCrackle(context: AudioContext, key: string): Voice {
+  private buildCrackle(context: BaseAudioContext, key: string): Voice {
     const noise = context.createBufferSource()
     noise.buffer = this.whiteNoise(context)
     noise.loop = true
@@ -354,7 +359,7 @@ export class SightingAudio {
     return cached
   }
 
-  private whiteNoise(context: AudioContext): AudioBuffer {
+  private whiteNoise(context: BaseAudioContext): AudioBuffer {
     if (!this.noiseBuffer) {
       const buffer = context.createBuffer(1, Math.floor(context.sampleRate * NOISE_SECONDS), context.sampleRate)
       const samples = buffer.getChannelData(0)
@@ -367,7 +372,7 @@ export class SightingAudio {
   /** White noise integrated into brown (1/f²) noise — white noise low-passed alone still sounds
    * like a hiss with the top taken off, where a rumble's energy really does pile up at the bottom.
    * Re-normalized because integration drifts. */
-  private brownNoise(context: AudioContext): AudioBuffer {
+  private brownNoise(context: BaseAudioContext): AudioBuffer {
     const buffer = context.createBuffer(1, Math.floor(context.sampleRate * NOISE_SECONDS), context.sampleRate)
     const samples = buffer.getChannelData(0)
     let last = 0
@@ -384,7 +389,7 @@ export class SightingAudio {
   }
 
   /** A loop of sharp decaying bursts at irregular intervals, in 0..1 — see buildCrackle. */
-  private crackleEnvelope(context: AudioContext): AudioBuffer {
+  private crackleEnvelope(context: BaseAudioContext): AudioBuffer {
     if (!this.crackleBuffer) {
       const buffer = context.createBuffer(1, Math.floor(context.sampleRate * CRACKLE_SECONDS), context.sampleRate)
       const samples = buffer.getChannelData(0)

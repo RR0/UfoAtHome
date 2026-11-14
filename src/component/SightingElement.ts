@@ -1313,6 +1313,9 @@ export class SightingElement extends HTMLElement {
     const inCase = !saidAround && this.caseSource && (this.said.read(this.caseSource.json.title as SaidText | undefined) ?? this.caseSource.json.id)
     this.caseOfElement.hidden = !inCase
     this.caseOfElement.textContent = inCase ? `${this.messages?.case ?? ""} ${inCase}` : ""
+    // A film of the recording is saved under what this line says (see SceneElement.filmName).
+    const account = name !== undefined ? `${this.messages?.accountBy ?? ""} ${name}`.trim() : undefined
+    this.sceneElement.filmName = [inCase || undefined, account].filter(Boolean).join(" - ") || undefined
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
     this.editLink.title = (this.messages?.editThisObservation ?? "")

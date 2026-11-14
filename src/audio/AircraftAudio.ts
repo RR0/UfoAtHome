@@ -117,7 +117,12 @@ interface Voice {
  * Its own module, and brought in with the aircraft that need it (see trafficRuntime): a scene without aircraft never loads it.
  */
 export class AircraftAudio {
-  private context?: AudioContext
+  private context?: BaseAudioContext
+
+  /** @param context What to play into instead of the reader's speakers, whose context is made at the first gesture: a film's (see VideoExport). */
+  constructor(context?: BaseAudioContext) {
+    this.context = context
+  }
   private noiseBuffer?: AudioBuffer
   private readonly roughBuffers = new Map<number, AudioBuffer>()
   private readonly voices = new Map<string, Voice>()
@@ -143,7 +148,7 @@ export class AircraftAudio {
         return
       }
     }
-    AudioUnlock.unlock(this.context)
+    if (AudioUnlock.isLive(this.context)) AudioUnlock.unlock(this.context)
     this.apply()
   }
 
@@ -168,7 +173,7 @@ export class AircraftAudio {
 
   dispose(): void {
     for (const id of [...this.voices.keys()]) this.release(id)
-    void this.context?.close()
+    if (AudioUnlock.isLive(this.context)) void this.context.close()
     this.context = undefined
     this.master = undefined
     this.bus = undefined
@@ -186,7 +191,7 @@ export class AircraftAudio {
     }
   }
 
-  private build(context: AudioContext, voice: AircraftVoice): Voice {
+  private build(context: BaseAudioContext, voice: AircraftVoice): Voice {
     const output = context.createGain()
     output.gain.value = 0
     let panner: StereoPannerNode | undefined
@@ -297,7 +302,7 @@ export class AircraftAudio {
     return built
   }
 
-  private retarget(context: AudioContext, built: Voice, voice: AircraftVoice): void {
+  private retarget(context: BaseAudioContext, built: Voice, voice: AircraftVoice): void {
     const now = context.currentTime
     const set = (param: AudioParam, value: number) => param.setTargetAtTime(value, now, SMOOTHING_S)
     const pitch = Math.min(MAX_PITCH, Math.max(MIN_PITCH, voice.dopplerRatio))
@@ -356,7 +361,7 @@ export class AircraftAudio {
   }
 
   /** A table of random values, between -1 and 1, smooth between them, `perSecond` of them a second: what a fluctuation is read from. */
-  private roughTable(context: AudioContext, perSecond: number): AudioBuffer {
+  private roughTable(context: BaseAudioContext, perSecond: number): AudioBuffer {
     const kept = this.roughBuffers.get(perSecond)
     if (kept) return kept
     const length = Math.floor(context.sampleRate * ROUGH_SECONDS)
@@ -378,7 +383,7 @@ export class AircraftAudio {
   }
 
   /** The impulse response of a room: noise that dies away, a little darker as it goes, the same in both ears but for its detail. */
-  private roomImpulse(context: AudioContext): AudioBuffer {
+  private roomImpulse(context: BaseAudioContext): AudioBuffer {
     const length = Math.floor(context.sampleRate * REVERB_SECONDS)
     const buffer = context.createBuffer(2, length, context.sampleRate)
     for (let channel = 0; channel < 2; channel++) {
@@ -395,7 +400,7 @@ export class AircraftAudio {
     return buffer
   }
 
-  private busOf(context: AudioContext): AudioNode {
+  private busOf(context: BaseAudioContext): AudioNode {
     if (this.bus) return this.bus
     const master = context.createGain()
     master.gain.value = this.level
@@ -446,7 +451,7 @@ export class AircraftAudio {
     }, RELEASE_S * 1000 * 3)
   }
 
-  private noise(context: AudioContext): AudioBuffer {
+  private noise(context: BaseAudioContext): AudioBuffer {
     if (this.noiseBuffer) return this.noiseBuffer
     const buffer = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate)
     const data = buffer.getChannelData(0)

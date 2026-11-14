@@ -39,7 +39,12 @@ interface LoopHandle {
 }
 
 export class WeatherAudio {
-  private context?: AudioContext
+  private context?: BaseAudioContext
+
+  /** @param context What to play into instead of the reader's speakers, whose context is made at the first gesture: a film's (see VideoExport). */
+  constructor(context?: BaseAudioContext) {
+    this.context = context
+  }
   private readonly buffers = new Map<string, Promise<AudioBuffer>>()
 
   private ambientSource?: AudioBufferSourceNode
@@ -82,7 +87,7 @@ export class WeatherAudio {
   private master?: GainNode
 
   /** Where every bed and every thunderclap is sent, so that one gain silences them all at once. */
-  private output(context: AudioContext): GainNode {
+  private output(context: BaseAudioContext): GainNode {
     if (!this.master) {
       this.master = context.createGain()
       this.master.gain.value = this.gain
@@ -130,7 +135,7 @@ export class WeatherAudio {
         return
       }
     }
-    AudioUnlock.unlock(this.context)
+    if (AudioUnlock.isLive(this.context)) AudioUnlock.unlock(this.context)
   }
 
   /**
@@ -265,7 +270,7 @@ export class WeatherAudio {
   private static readonly CRACK_DECAY_S = 0.25
 
   /** Noise rising in five milliseconds and dying away over CRACK_DECAY_S, made once for the context. */
-  private crackBuffer(context: AudioContext): AudioBuffer {
+  private crackBuffer(context: BaseAudioContext): AudioBuffer {
     if (this.crack?.sampleRate === context.sampleRate) return this.crack
     const length = Math.round(context.sampleRate * WeatherAudio.CRACK_DECAY_S * 6)
     const buffer = context.createBuffer(1, length, context.sampleRate)
@@ -293,7 +298,7 @@ export class WeatherAudio {
     this.ambientGain = undefined
     this.windSource = undefined
     this.windGain = undefined
-    void this.context?.close()
+    if (AudioUnlock.isLive(this.context)) void this.context.close()
     this.context = undefined
     this.master = undefined
     this.buffers.clear()

@@ -1111,6 +1111,66 @@ canvas[data-cursor="rotate"] {
   color: rgba(255, 255, 255, 0.92);
   transition: background-color 0.15s ease;
 }
+/* What a film is made with, over the picture above the button that opens it (see VideoButton). Its own type, as
+   a tooltip's: nothing it says is the page's. */
+.video-options {
+  position: absolute;
+  right: 0.6em;
+  bottom: 3.6em;
+  z-index: 6;
+  display: grid;
+  gap: 0.5em;
+  min-width: 13em;
+  padding: 0.8em 0.9em;
+  border-radius: 0.7em;
+  background: rgba(16, 18, 22, 0.94);
+  color: rgba(255, 255, 255, 0.94);
+  font: 400 13px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+.video-options[hidden] {
+  display: none;
+}
+.video-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+}
+.video-options label.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.video-options .video-size {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25em;
+}
+.video-options select {
+  font: inherit;
+  padding: 0.25em 0.35em;
+  border-radius: 0.35em;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+.video-options select option {
+  color: #111;
+}
+.video-options .video-start {
+  margin-top: 0.2em;
+  padding: 0.45em 0.8em;
+  border: none;
+  border-radius: 0.45em;
+  background: #e8eaed;
+  color: #111;
+  font: 600 13px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+}
+.video-options .video-start:hover,
+.video-options .video-start:focus-visible {
+  background: #fff;
+}
 /* A film being made shows how far it has got in place of its glyph (see VideoButton). */
 .controls button.filming {
   min-width: 3.6em;

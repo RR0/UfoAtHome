@@ -50,7 +50,12 @@ interface Voice {
  * Heard only while the observation's clock runs, like the weather (see WeatherAudio.paused).
  */
 export class VehicleAudio {
-  private context?: AudioContext
+  private context?: BaseAudioContext
+
+  /** @param context What to play into instead of the reader's speakers, whose context is made at the first gesture: a film's (see VideoExport). */
+  constructor(context?: BaseAudioContext) {
+    this.context = context
+  }
   private noiseBuffer?: AudioBuffer
   private readonly voices = new Map<string, Voice>()
   /** What the reader's volume and mute button say, 0 to 1, over everything it plays: the last gain before the speakers. */
@@ -69,7 +74,7 @@ export class VehicleAudio {
         return
       }
     }
-    AudioUnlock.unlock(this.context)
+    if (AudioUnlock.isLive(this.context)) AudioUnlock.unlock(this.context)
     this.apply()
   }
 
@@ -93,12 +98,12 @@ export class VehicleAudio {
 
   dispose(): void {
     for (const id of [...this.voices.keys()]) this.release(id)
-    void this.context?.close()
+    if (AudioUnlock.isLive(this.context)) void this.context.close()
     this.context = undefined
     this.master = undefined
   }
 
-  private masterOf(context: AudioContext): GainNode {
+  private masterOf(context: BaseAudioContext): GainNode {
     if (!this.master) {
       this.master = context.createGain()
       this.master.gain.value = this.level
@@ -119,7 +124,7 @@ export class VehicleAudio {
     }
   }
 
-  private build(context: AudioContext, id: string): Voice {
+  private build(context: BaseAudioContext, id: string): Voice {
     const output = context.createGain()
     output.gain.value = 0
     const cabin = context.createBiquadFilter()
@@ -177,7 +182,7 @@ export class VehicleAudio {
     return voice
   }
 
-  private retarget(context: AudioContext, voice: Voice, { profile, state, noise, inside, windowsOpen, distanceM }: VehicleVoice): void {
+  private retarget(context: BaseAudioContext, voice: Voice, { profile, state, noise, inside, windowsOpen, distanceM }: VehicleVoice): void {
     const now = context.currentTime
     const set = (param: AudioParam, value: number) => param.setTargetAtTime(value, now, SMOOTHING_S)
     const revsPerSecond = state.rpm / 60
@@ -219,7 +224,7 @@ export class VehicleAudio {
     }, RELEASE_S * 1000 * 3)
   }
 
-  private noise(context: AudioContext): AudioBuffer {
+  private noise(context: BaseAudioContext): AudioBuffer {
     if (this.noiseBuffer) return this.noiseBuffer
     const buffer = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate)
     const data = buffer.getChannelData(0)

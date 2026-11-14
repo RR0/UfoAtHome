@@ -21,6 +21,14 @@ export interface UfoMessages {
   recordVideo: string
   recordingVideo: string
   videoFailed: string
+  /** What a film is made with, chosen before it is (see VideoButton): its size, the picture's own on screen being {size}; whether the
+   * account's caption, the time and the map are laid over it; and the button that makes it. */
+  videoSize: string
+  videoSizeScreen: string
+  videoCaption: string
+  videoTime: string
+  videoMap: string
+  videoStart: string
   /** The button beside play, for the recording's sound (the reader's gesture, so a verb). */
   mute: string
   /** The slider of the sound's level. */

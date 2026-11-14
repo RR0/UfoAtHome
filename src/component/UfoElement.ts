@@ -13,6 +13,7 @@ import { SightingAudio } from "../audio/SightingAudio.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { VideoButton } from "./VideoButton.js"
 import type { SceneFilmer } from "./VideoButton.js"
+import type { FilmChromeAt, FilmOptions } from "./FilmChrome.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { RecordingIssues } from "../engine/persistence/RecordingIssue.js"
@@ -254,7 +255,24 @@ export class UfoElement extends HTMLElement {
   /** The sighting's own sound (see SoundTrack), owned here rather than by SceneElement: it is part
    * of the recording, so it must be heard in the plain 2D embed too, not only in the 3D one that
    * happens to own the weather's audio. */
-  private readonly sightingAudio = new SightingAudio()
+  private sightingAudio = new SightingAudio()
+  /** The reader's own player of the recording's sound, kept aside while it plays into a film instead (see hearInto). */
+  private liveSightingAudio?: SightingAudio
+
+  /**
+   * Plays the recording's sound into `context`, as it plays to the reader while the recording runs, or back to the reader's speakers with
+   * undefined: a film's sound (see VideoExport), made while this player stands paused and is moved from instant to instant.
+   */
+  hearInto(context: BaseAudioContext | undefined): void {
+    if (context) {
+      this.liveSightingAudio ??= this.sightingAudio
+      this.sightingAudio = new SightingAudio(context)
+    } else if (this.liveSightingAudio) {
+      this.sightingAudio.dispose()
+      this.sightingAudio = this.liveSightingAudio
+      this.liveSightingAudio = undefined
+    }
+  }
   /** A sound being auditioned while paused (see previewSound), held rather than played and
    * forgotten: every repaint would otherwise silence it, and a repaint follows within a frame or
    * two of any edit on a real case page — which is precisely when a preview is asked for. */
@@ -425,13 +443,61 @@ export class UfoElement extends HTMLElement {
   /** Who can film the recording on show: the 3D scene composing this player, when the browser can encode a film. Undefined, no button. */
   set filmer(filmer: SceneFilmer | undefined) {
     this.videoButton?.element.remove()
+    this.videoButton?.panel.remove()
     this.videoButton = filmer ? new VideoButton(filmer) : undefined
     if (!this.videoButton) {
       this.fitControls()
       return
     }
     if (this.messages) this.videoButton.messages = this.messages
+    this.stageElement.append(this.videoButton.panel)
     this.addControl(this.videoButton.element)
+  }
+
+  /** Whether the recording has a map of where the witness stood (see the map button). */
+  get hasObserverMap(): boolean {
+    return this.observerPath !== undefined
+  }
+
+  /** Whether the map was open before a film opened it (see filmMap). */
+  private mapBeforeFilm?: boolean
+
+  /** Opens the map for a film that lays it over its frames, painted at every instant as it is while playing; or puts it back as it was with
+   * undefined, once the film is made. */
+  filmMap(shown: boolean | undefined): void {
+    if (shown !== undefined) {
+      this.mapBeforeFilm ??= !this.observerMapPanel.hidden
+      if (shown && this.observerPath) this.setObserverMapOpen(true)
+    } else if (this.mapBeforeFilm !== undefined) {
+      this.setObserverMapOpen(this.mapBeforeFilm && this.observerPath !== undefined)
+      this.mapBeforeFilm = undefined
+    }
+  }
+
+  /**
+   * What a film laid over its frame at the instant on show, of what this player lays over its picture (see FilmChrome): the account's
+   * moment, as the caption says it, whether or not the reader has the moments shown; the time, as the counter says it; the map, where it
+   * stands over the picture. Never the controls.
+   */
+  filmChrome(options: FilmOptions): FilmChromeAt {
+    const t = this.currentTime
+    const moment = options.caption && this.sighting.milestones.length > 0 ? resolveMilestoneAt(this.sighting.milestones, t) : undefined
+    const label = moment ? this.said.read(moment.label) ?? "" : undefined
+    const picture = this.canvas.getBoundingClientRect()
+    const panel = options.map && !this.observerMapPanel.hidden ? this.observerMapPanel.getBoundingClientRect() : undefined
+    return {
+      ...(moment ? { caption: { label: label!, note: this.said.read(moment.note) } } : {}),
+      ...(options.time ? { time: this.formatPosition(t) } : {}),
+      ...(panel && picture.width > 0 && picture.height > 0 ? {
+        map: {
+          canvas: this.observerMapCanvas,
+          left: (panel.left - picture.left) / picture.width,
+          top: (panel.top - picture.top) / picture.height,
+          width: panel.width / picture.width,
+          height: panel.height / picture.height
+        }
+      } : {})
+    }
   }
 
   private readonly observerMapResizeObserver =
@@ -2255,7 +2321,7 @@ export class UfoElement extends HTMLElement {
     // dragging the bar through a keyframe shouldn't fire a burst of sound at every position they
     // pass through. A preview outlives repaints on purpose (see previewSound), and playing ends it
     // — the recording itself is what should be heard from then on.
-    if (this.playbackState === "playing") {
+    if (this.playbackState === "playing" || this.liveSightingAudio) {
       this.soundPreview = undefined
       this.sightingAudio.setSound(resolveSoundAt(this.currentSighting, t))
     } else if (this.soundPreview) {

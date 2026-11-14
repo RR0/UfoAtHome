@@ -15,6 +15,13 @@ attribution for.
   [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) — **attribution required**. Source:
   <https://opengameart.org/content/thunder>.
 
+## Libraries bundled with the player
+
+- **[mediabunny](https://mediabunny.dev)** by Vanilagy, [MPL 2.0](https://www.mozilla.org/MPL/2.0/):
+  packs the film of an observation made by the player's video button into an MP4 file
+  (`src/component/VideoExport.ts`). Loaded only when a film is asked for. Used unmodified; its source
+  is that of the npm package `mediabunny`, at the version `package.json` names.
+
 ## Lunar relief (`src/assets/lunar-relief.bin.gz`)
 
 - Heights of the Moon's surface on a 16-samples-a-degree grid (1.9 km), kept only within the band that

@@ -1,4 +1,4 @@
-import { BufferTarget, CanvasSource, getFirstEncodableVideoCodec, Mp4OutputFormat, Output, QUALITY_HIGH } from "mediabunny"
+import { AudioBufferSource, BufferTarget, CanvasSource, getFirstEncodableAudioCodec, getFirstEncodableVideoCodec, Mp4OutputFormat, Output, QUALITY_HIGH } from "mediabunny"
 
 /**
  * A scene as a film is made from it, one frame at a time: what part of the recording, at what speed, and the drawing of one instant.
@@ -19,6 +19,13 @@ export interface FilmedScene {
    * has nothing to show yet, and is asked again.
    */
   frameAt(timeMs: number, clockMs: number, target: OffscreenCanvasRenderingContext2D): boolean
+
+  /**
+   * Plays every sound of the scene into `context` from now on, as it would play to the reader while the recording runs, or back to the
+   * reader's speakers with undefined. Each frame drawn restates them at the instant the context is suspended at: what is heard follows
+   * the picture to the sample.
+   */
+  hearInto(context: BaseAudioContext | undefined): void
 }
 
 /**
@@ -29,10 +36,14 @@ export interface FilmedScene {
  * to draw, and the animations are moved on the film's clock (see FilmedScene.frameAt): the film runs at its frame rate whatever the
  * machine, and the same recording makes the same film.
  *
- * Encoded by the browser itself (WebCodecs), packed by mediabunny: loaded only when a film is asked for (see SceneElement.film).
+ * The sound is rendered alongside, in a context of its own (see FilmedScene.hearInto). Encoded by the browser itself (WebCodecs), packed by
+ * mediabunny: loaded only when a film is asked for (see SceneElement.film).
  */
 export class VideoExport {
   static readonly FRAME_RATE = 30
+  /** The film's sound: stereo, as the aircraft are placed left and right of the listener. */
+  static readonly CHANNELS = 2
+  static readonly SAMPLE_RATE = 48000
   /** How long one frame may take to be drawn before the film is given up: a scene whose relief or decor never arrives. */
   static readonly FRAME_PATIENCE_MS = 30000
   /** How often a frame not yet drawn is asked again. */
@@ -60,28 +71,47 @@ export class VideoExport {
     if (!context) throw new Error("No 2D context")
     context.imageSmoothingQuality = "high"
     const output = new Output({ format: new Mp4OutputFormat({ fastStart: "in-memory" }), target: new BufferTarget() })
-    const source = new CanvasSource(canvas, { codec, quality: QUALITY_HIGH })
-    output.addVideoTrack(source, { frameRate: VideoExport.FRAME_RATE })
+    const video = new CanvasSource(canvas, { codec, quality: QUALITY_HIGH })
+    output.addVideoTrack(video, { frameRate: VideoExport.FRAME_RATE })
+    const stepMs = 1000 / VideoExport.FRAME_RATE
+    const rate = scene.rate > 0 ? scene.rate : 1
+    const filmMs = Math.max(0, scene.toMs - scene.fromMs) / rate
+    const frames = Math.floor(filmMs / stepMs) + 1
+    // Where the browser can encode no sound, the film is made silent rather than not at all.
+    const audioCodec = await getFirstEncodableAudioCodec(["aac", "opus"], { numberOfChannels: VideoExport.CHANNELS, sampleRate: VideoExport.SAMPLE_RATE })
+    const audio = audioCodec ? new AudioBufferSource({ codec: audioCodec, quality: QUALITY_HIGH }) : undefined
+    if (audio) output.addAudioTrack(audio)
+    const sound = audio ? new OfflineAudioContext(VideoExport.CHANNELS, Math.ceil(frames / VideoExport.FRAME_RATE * VideoExport.SAMPLE_RATE), VideoExport.SAMPLE_RATE) : undefined
     await output.start()
     try {
-      const stepMs = 1000 / VideoExport.FRAME_RATE
-      const rate = scene.rate > 0 ? scene.rate : 1
-      const filmMs = Math.max(0, scene.toMs - scene.fromMs) / rate
-      const frames = Math.floor(filmMs / stepMs) + 1
+      if (sound) scene.hearInto(sound)
+      // The sound is rendered as the frames are drawn: suspended at each frame's instant, so that what the frame restates (the rain, an
+      // engine, a voice) starts there. The first frame is drawn before it starts, at its instant 0.
+      const reached: Promise<void>[] = []
+      for (let index = 1; index < frames && sound; index++) reached[index] = sound.suspend(index / VideoExport.FRAME_RATE)
       const clockStartMs = performance.now()
+      let rendering: Promise<AudioBuffer> | undefined
       for (let index = 0; index < frames; index++) {
         signal.throwIfAborted()
+        if (index > 0) await reached[index]
         const timeMs = Math.min(scene.fromMs + index * stepMs * rate, scene.toMs)
         await VideoExport.drawFrame(scene, timeMs, clockStartMs + index * stepMs, context, signal)
-        await source.add(index / VideoExport.FRAME_RATE, 1 / VideoExport.FRAME_RATE)
+        await video.add(index / VideoExport.FRAME_RATE, 1 / VideoExport.FRAME_RATE)
         onProgress((index + 1) / frames)
+        if (sound) {
+          if (rendering) await sound.resume()
+          else rendering = sound.startRendering()
+        }
         // What the next instant asks for (a tile, a model) arrives in tasks of its own.
         await VideoExport.nextTask()
       }
+      if (audio && rendering) await audio.add(await rendering)
       await output.finalize()
     } catch (error) {
       await output.cancel().catch(() => undefined)
       throw error
+    } finally {
+      if (sound) scene.hearInto(undefined)
     }
     const buffer = output.target.buffer
     if (!buffer) throw new Error("Empty film")

@@ -5147,17 +5147,24 @@ export class SceneRenderer {
     this.drawIfDirty()
   }
 
-  /** Whether the pixel ratio stays at its maximum whatever the frames cost — see holdPixelRatio. */
+  /** The most device pixels per CSS pixel the scene is drawn at when nothing holds it: the display's own, at most 2. See AdaptiveResolution. */
+  get maxPixelRatio(): number {
+    return this.resolution.maximum
+  }
+
+  /** Whether the pixel ratio stays where holdPixelRatio put it, whatever the frames cost. */
   private pixelRatioHeld = false
 
   /**
-   * Keeps the scene drawn at every pixel it may have, however late its frames are, or lets the ratio follow them again. A film made frame
-   * by frame (see VideoExport) waits for each of its frames: a picture whose sharpness followed how busy the machine was while it was
-   * being made would not be the observation's, and the encoder wants every frame the same size.
+   * Draws the scene at `ratio` device pixels per CSS pixel, however late its frames are, or lets the ratio follow them again with
+   * undefined. A film made frame by frame (see VideoExport) waits for each of its frames, at the size it was asked for: a picture whose
+   * sharpness followed how busy the machine was while it was being made would not be the observation's, and the encoder wants every frame
+   * the same size. The ratio may then be above the display's own: a film is not bound to the screen it is made on.
    */
-  holdPixelRatio(held: boolean): void {
-    this.pixelRatioHeld = held
-    if (held && this.renderer.getPixelRatio() !== this.resolution.maximum) this.applyPixelRatio(this.resolution.maximum)
+  holdPixelRatio(ratio: number | undefined): void {
+    this.pixelRatioHeld = ratio !== undefined
+    const wanted = ratio ?? this.resolution.maximum
+    if (this.renderer.getPixelRatio() !== wanted) this.applyPixelRatio(wanted)
   }
 
   /**
