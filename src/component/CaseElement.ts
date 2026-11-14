@@ -11,7 +11,7 @@ import type { CaseMessages } from "./messages/CaseMessages.js"
 import { Icons } from "./Icons.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { TIME_CHANGE_EVENT } from "./UfoElement.js"
-import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
+import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
 
@@ -187,6 +187,12 @@ export class CaseElement extends HTMLElement {
     }
   }
 
+  /** The account a reading reads, among the case's events: what the player has to be pointed at to replay that reading. */
+  private accountOf(entry: CaseEntry): CaseEntry | undefined {
+    const ids = [entry.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
+    return this.entries.find(other => other.kind === "observation" && ids.includes(other.event.id ?? ""))
+  }
+
   /** What the editor is pointed at: the first recording open, else the case alone. */
   private get reading(): CaseEntry | undefined {
     const open = [...this.shown.keys()].sort((a, b) => a - b).map(at => this.entries[at])
@@ -245,11 +251,20 @@ export class CaseElement extends HTMLElement {
       player.setAttribute("src", this.url ?? "")
       // By its address: the id of an event of the case is not what the player looked for (it reads the witness's own id, a file name or a
       // rank), so two recordings of one witness both opened on the first.
-      player.setAttribute(OBSERVER_ATTRIBUTE, entry.url)
-      for (const option of CaseElement.PASSED_ON) {
-        const asked = this.getAttribute(option)
-        if (asked !== null) player.setAttribute(option, asked)
-      }
+      //
+      // A reading is not one of the player's entries — those are the case's accounts — it is an interpretation OF one. So it opens the
+      // account it reads and asks for itself among that account's readings; otherwise opening a reading showed an account instead.
+      const read = entry.kind === "reading" ? this.accountOf(entry) : undefined
+      player.setAttribute(OBSERVER_ATTRIBUTE, (read ?? entry).url ?? "")
+      if (entry.kind === "reading") player.setAttribute(INTERPRETATION_ATTRIBUTE, entry.url)
+      // After it is in the document, not before: an option that opens something (the information panel is a popover) cannot act on an
+      // element nobody has inserted yet, and threw where it tried.
+      queueMicrotask(() => {
+        for (const option of CaseElement.PASSED_ON) {
+          const asked = this.getAttribute(option)
+          if (asked !== null) player.setAttribute(option, asked)
+        }
+      })
       // What a page around this element listens for, as it would on the player itself: the wrapper is not a wall.
       player.addEventListener(OBSERVER_CHANGE_EVENT, event => {
         this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: (event as CustomEvent).detail }))

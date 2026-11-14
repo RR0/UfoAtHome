@@ -78,6 +78,11 @@ export const CASE_NAMED_ATTRIBUTE = "case-named"
 /** Set by a page that wants the information panel open from the start, as `show-labels` opens the strip of stated values. */
 export const SHOW_INFO_ATTRIBUTE = "show-info"
 /**
+ * Which reading of the case to replay instead of the account itself: the reading's own address, or the id of its event in the case. What
+ * a case asks for when the reader opens a reading (see CaseElement); the account it reads is what `observer` names.
+ */
+export const INTERPRETATION_ATTRIBUTE = "interpretation"
+/**
  * Set by whoever already offers the choice this player would offer — a case showing its history, say (see CaseElement): the picker of
  * witnesses and the picker of readings then stay out of its toolbar, rather than saying the same thing a second time.
  */
@@ -121,7 +126,7 @@ const APP_EDITOR_URL = `${APP_HOME_URL}/edit/`
  */
 export class SightingElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
+    return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, CASE_NAMED_ATTRIBUTE, START_TIME_ATTRIBUTE, START_CLOCK_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE, COMPARE_ACCOUNT_ATTRIBUTE]
   }
 
   private readonly shadow: ShadowRoot
@@ -443,10 +448,23 @@ export class SightingElement extends HTMLElement {
     // The constructor could only read the browser's list if this element was created before being
     // put anywhere; the page it now stands in may declare a language (see HostLocale).
     if (HostLocale.preferencesFor(this).join() !== this.preferences.join()) this.ready = this.loadLocaleMessages()
+    // Asked for before this element was put anywhere (a case sets its options on a player it is about to insert): acted on now.
+    this.applyAskedInfo()
     const src = this.getAttribute("src")
     if (src) {
       void this.loadFromSrc(src)
     }
+  }
+
+  /**
+   * Opens the information panel, or shuts it, as `show-info` asks.
+   *
+   * Only once this element is in a document: a popover cannot be shown on a disconnected element, which throws — and a case sets this
+   * on a player it has created but not yet inserted.
+   */
+  private applyAskedInfo(): void {
+    if (!this.isConnected) return
+    if (this.hasAttribute(SHOW_INFO_ATTRIBUTE) !== this.infoOpen) this.toggleInfoPanel()
   }
 
   /** Only matters if this element gets removed while the info panel is still open — otherwise
@@ -460,16 +478,17 @@ export class SightingElement extends HTMLElement {
     if (name === "src" && newValue && newValue !== oldValue && this.isConnected) {
       void this.loadFromSrc(newValue)
     }
+    if (name === INTERPRETATION_ATTRIBUTE) {
+      const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
+      if (entry) this.offerInterpretations(entry)
+    }
     if (name === HIDE_PICKERS_ATTRIBUTE) {
       // Both pickers follow it at once: the witnesses' own, and the readings' (whose row is worked out in offerInterpretations).
       const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
       this.setEntries(this.entries, this.caseSource)
       if (entry) this.offerInterpretations(entry)
     }
-    if (name === SHOW_INFO_ATTRIBUTE) {
-      // Asked for from the outside, as a reader would ask for it from the button.
-      if (this.hasAttribute(SHOW_INFO_ATTRIBUTE) !== this.infoOpen) this.toggleInfoPanel()
-    }
+    if (name === SHOW_INFO_ATTRIBUTE) this.applyAskedInfo()
     if (name === "show-labels") {
       this.applyLabels(this.hasAttribute("show-labels"))
     }
@@ -876,7 +895,8 @@ export class SightingElement extends HTMLElement {
         () => Promise.resolve(kept.bodies.length > 0 ? kept : undefined))
     }
     const kept = sameRecording && [...this.interpretationSelect.options].some(option => option.value === previous)
-    const value = kept ? previous : ACCOUNT_OPTION
+    // What the page asked for wins over what was chosen before: a case opening one of its readings says which (see CaseElement).
+    const value = this.askedInterpretation() ?? (kept ? previous : ACCOUNT_OPTION)
     this.interpretationSelect.value = value
     // The scene follows whatever is chosen, including when it was just emptied by the recording
     // being read again (see SceneElement.sightingData) while the choice stayed the same.
@@ -988,6 +1008,19 @@ export class SightingElement extends HTMLElement {
    * Spanish and Italian write it as English does. */
   private get colon(): string {
     return this.language === "fr" ? "\u00a0: " : ": "
+  }
+
+  /** The option of the reading `interpretation` names — its address, or the id of its event in the case — among those just offered. */
+  private askedInterpretation(): string | undefined {
+    const asked = this.getAttribute(INTERPRETATION_ATTRIBUTE)?.trim()
+    const source = this.caseSource
+    if (!asked || !source) return undefined
+    const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
+    if (!entry) return undefined
+    const events = CaseFile.interpretationEvents(source.json, CaseFile.accountIds(source.json, source.url, entry.src, this.plain(entry).id))
+    const at = events.findIndex(event => event.id === asked
+      || (typeof event.url === "string" && new URL(event.url, source.url).href === new URL(asked, location.href).href))
+    return at >= 0 ? `case-${at}` : undefined
   }
 
   private async chooseInterpretation(value: string): Promise<void> {
