@@ -18,5 +18,21 @@ export const readingSensitivityMessages_es = {
   fineTuned: "ajuste fino: {knob} solo cubre el {coverage} % de su incertidumbre",
   atLeast: "{value} y más allá",
   better: "Otro ajuste reproduce más: {knob} {amount}, {agreed} de {compared}",
-  knobs: { azimuth: "dirección", altitude: "altura", distance: "distancia", size: "tamaño", time: "instante" }
+  knobs: { azimuth: "dirección", altitude: "altura", distance: "distancia", size: "tamaño", time: "instante" },
+  comparison: {
+    heading: "Lecturas comparadas ({n})",
+    hint: "Una fila por lectura del caso, confrontada con el relato que lee, como lo dice la sensibilidad de cada lectura: cuántas indicaciones del testigo reproduce, la diferencia mediana entre lo que dijo el testigo y lo que muestra la lectura (solo direcciones), si sus márgenes son suficientes y cuántos valores supuso. Cuantos más valores supone una lectura, más fácil es obtener un parecido.",
+    reading: "Lectura",
+    witness: "Lee",
+    reproduced: "Reproduce",
+    gap: "Diferencia mediana",
+    robustness: "Robustez",
+    supposed: "Valores supuestos",
+    loading: "…",
+    nothing: "nada que confrontar",
+    sufficient: "suficiente",
+    fineTuned: "ajuste fino ({knob})",
+    tooFew: "demasiado poco reproducido",
+    unjudged: "ninguna ley para juzgarla"
+  }
 } satisfies ReadingSensitivityMessages

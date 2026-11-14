@@ -13,6 +13,7 @@ import { ReadingVerdicts } from "../engine/interpretation/ReadingVerdict.js"
 import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
+import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
 import type { ReadingFinding } from "../engine/interpretation/Interpretation.js"
@@ -233,6 +234,7 @@ const TEMPLATE = `
   .event-card[data-verdict="unsettled"] .verdict { color: var(--warn); }
   .event-card[data-verdict="compatible"] .verdict { color: var(--ok); }
   .findings { grid-area: findings; margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; line-height: 1.4; color: var(--ink-dim); }
+  .readings-comparison { margin-top: 14px; }
   .event-body > rr0-reading-sensitivity { grid-column: 1 / -1; margin-top: 2px; }
   .findings li { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 4px; }
   .findings li > .finding-against { grid-column: 2; color: var(--ink-faint); }
@@ -317,6 +319,7 @@ const TEMPLATE = `
       <!-- What the list shows, by kind: a way of reading the chronology, never written in the case (see renderFilter). -->
       <div id="event-filter" class="event-filter" role="group" hidden></div>
       <ol id="event-list" class="event-list"></ol>
+      <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
     </div>
     <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
@@ -1291,6 +1294,7 @@ export class CaseEditorElement extends HTMLElement {
     if (!session) return
     const events = this.eventsInTime(session)
     this.renderEvents(session, events)
+    this.compareReadings(session)
     const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
     const current = events[open]
     if (current) {
@@ -1765,6 +1769,41 @@ export class CaseEditorElement extends HTMLElement {
     if (this.sourceUrl === undefined) return
     this.shareDialog.note = this.session?.dirty ? this.shareMessages?.unsaved : undefined
     this.shareDialog.open()
+  }
+
+  /**
+   * Sets the case's readings side by side under its events, as the case's player does (see ReadingsComparisonElement): as they are being
+   * edited, and loaded when the table is first unfolded. A witness opens that reading in the editor.
+   */
+  private compareReadings(session: CaseSession): void {
+    ReadingsComparisonElement.register()
+    const table = this.byId("readings-comparison") as ReadingsComparisonElement
+    const rowsOf = (): ComparedReading[] => session.tracks.flatMap((track, index) => {
+      if (track.kind !== "reading") return []
+      const account = session.accountOf(track)
+      return [{
+        title: this.labelOf(track, index),
+        witness: account ? this.labelOf(account, session.tracks.indexOf(account)) : "",
+        ...(track.recording ? { reading: track.recording } : {}),
+        ...(account?.recording ? { account: account.recording } : {}),
+        open: () => this.openFromTable(session, track)
+      }]
+    })
+    table.show(rowsOf(), async () => {
+      const needed = session.tracks.filter(track => track.kind === "reading").flatMap(track => [track, session.accountOf(track)])
+        .filter((track): track is CaseTrack => track !== undefined && !track.recording)
+      await Promise.all([...new Set(needed)].map(track => this.loadTrack(track).catch(() => undefined)))
+      return rowsOf()
+    })
+  }
+
+  /** Opens a reading as its card does, through the picker of events: the list goes, the reading takes its place. */
+  private openFromTable(session: CaseSession, track: CaseTrack): void {
+    const index = (this.items(session) as { track?: CaseTrack }[]).findIndex(item => item.track === track)
+    if (index < 0) return
+    const picker = this.byId("track") as HTMLSelectElement
+    picker.value = String(index)
+    picker.dispatchEvent(new Event("change"))
   }
 
   private labelOf(track: CaseTrack, index: number): string {

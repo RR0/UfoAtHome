@@ -38,4 +38,27 @@ export interface ReadingSensitivityMessages {
   better: string
   /** What each value moved is called. */
   knobs: { azimuth: string, altitude: string, distance: string, size: string, time: string }
+  /** The table setting a case's readings side by side (see ReadingsComparisonElement). */
+  comparison: {
+    /** What it is called, folded, with `{n}` readings. */
+    heading: string
+    /** What its columns measure, in the (?) beside the heading. */
+    hint: string
+    /** The column heads. */
+    reading: string
+    witness: string
+    reproduced: string
+    gap: string
+    robustness: string
+    supposed: string
+    /** A reading whose recordings are still on their way. */
+    loading: string
+    /** A reading that cannot be set against what the witness said. */
+    nothing: string
+    /** Robustness: sufficient; fine-tuned on `{knob}`; too little reproduced to measure it; no value to judge it on. */
+    sufficient: string
+    fineTuned: string
+    tooFew: string
+    unjudged: string
+  }
 }

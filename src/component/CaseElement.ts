@@ -1,4 +1,6 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
+import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
@@ -76,6 +78,7 @@ export class CaseElement extends HTMLElement {
     this.shadow.append(style, frame)
     registerSighting()
     this.eventList = this.byId("case-events")
+    ReadingsComparisonElement.register()
     this.openEvents = this.byId("open-events")
     // A passage of a dialogue that tells of a moment of an observation takes that observation there, opening it if it was shut.
     this.openEvents.addEventListener(INTERVIEW_SEEK_EVENT, event => {
@@ -163,6 +166,7 @@ export class CaseElement extends HTMLElement {
     this.shown.clear()
     this.openEvents.replaceChildren()
     this.draw()
+    this.compareReadings()
     // Everything at once where the page asked for it (a demo of a case shows all of it), else the first observation, as the editor opens
     // on one: a case shown with nothing in it says nothing.
     if (this.getAttribute(OPEN_EVENTS_ATTRIBUTE) === "all") {
@@ -185,6 +189,34 @@ export class CaseElement extends HTMLElement {
       title: this.said.read(event.title as SaidText | undefined) ?? event.id ?? "",
       when: String(event.time ?? "")
     }
+  }
+
+  /**
+   * Sets the case's readings side by side under the history (see ReadingsComparisonElement), their recordings fetched only when the table
+   * is unfolded. A reading's title opens it below, as its card does.
+   */
+  private compareReadings(): void {
+    const table = this.byId("readings-comparison") as ReadingsComparisonElement
+    const fetched = new Map<string, Promise<SightingRecordingJson | undefined>>()
+    const fetch = (url: string) => {
+      let known = fetched.get(url)
+      if (!known) {
+        known = SightingFetch.recording(url).then(json => json as SightingRecordingJson, () => undefined)
+        fetched.set(url, known)
+      }
+      return known
+    }
+    const rowsOf = async (load: boolean): Promise<ComparedReading[]> => Promise.all(this.entries.flatMap((entry, at) => {
+      if (entry.kind !== "reading") return []
+      const account = this.accountOf(entry)
+      const row = async (): Promise<ComparedReading> => ({
+        title: entry.title, witness: account?.title ?? "",
+        ...(load && account?.url && entry.url ? { account: await fetch(account.url), reading: await fetch(entry.url) } : {}),
+        open: () => void this.open(at).then(() => this.shown.get(at)?.scrollIntoView({ block: "start", behavior: "smooth" }))
+      })
+      return [row()]
+    }))
+    void rowsOf(false).then(rows => table.show(rows, () => rowsOf(true)))
   }
 
   /** The account a reading reads, among the case's events: what the player has to be pointed at to replay that reading. */

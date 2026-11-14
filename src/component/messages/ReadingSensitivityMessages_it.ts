@@ -18,5 +18,21 @@ export const readingSensitivityMessages_it = {
   fineTuned: "regolazione fine: {knob} copre solo il {coverage} % della sua incertezza",
   atLeast: "{value} e oltre",
   better: "Un'altra regolazione ne riproduce di più: {knob} {amount}, {agreed} su {compared}",
-  knobs: { azimuth: "direzione", altitude: "altezza", distance: "distanza", size: "dimensione", time: "istante" }
+  knobs: { azimuth: "direzione", altitude: "altezza", distance: "distanza", size: "dimensione", time: "istante" },
+  comparison: {
+    heading: "Letture a confronto ({n})",
+    hint: "Una riga per lettura del caso, confrontata con il resoconto che legge, come dice la sensibilità di ciascuna lettura: quante indicazioni del testimone riproduce, lo scarto mediano tra ciò che ha detto il testimone e ciò che mostra la lettura (solo direzioni), se i suoi margini sono sufficienti e quanti valori ha supposto. Più valori una lettura suppone, più è facile ottenere una somiglianza.",
+    reading: "Lettura",
+    witness: "Legge",
+    reproduced: "Riproduce",
+    gap: "Scarto mediano",
+    robustness: "Robustezza",
+    supposed: "Valori supposti",
+    loading: "…",
+    nothing: "niente da confrontare",
+    sufficient: "sufficiente",
+    fineTuned: "regolazione fine ({knob})",
+    tooFew: "troppo poco riprodotto",
+    unjudged: "nessuna legge per giudicarla"
+  }
 } satisfies ReadingSensitivityMessages

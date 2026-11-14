@@ -18,5 +18,21 @@ export const readingSensitivityMessages_fr = {
   fineTuned: "réglage fin : {knob} ne couvre que {coverage} % de son incertitude",
   atLeast: "{value} et au-delà",
   better: "Un autre réglage en reproduit davantage : {knob} {amount}, {agreed} sur {compared}",
-  knobs: { azimuth: "direction", altitude: "hauteur", distance: "distance", size: "taille", time: "instant" }
+  knobs: { azimuth: "direction", altitude: "hauteur", distance: "distance", size: "taille", time: "instant" },
+  comparison: {
+    heading: "Lectures comparées ({n})",
+    hint: "Une ligne par lecture du dossier, confrontée au compte rendu qu'elle lit, comme le dit la sensibilité de chaque lecture : combien des indications du témoin elle reproduit, l'écart médian entre ce qu'a dit le témoin et ce que montre la lecture (directions seulement), si ses marges sont suffisantes, et combien de valeurs elle a supposées. Plus une lecture suppose de valeurs, plus une ressemblance est facile à obtenir.",
+    reading: "Lecture",
+    witness: "Lit",
+    reproduced: "Reproduit",
+    gap: "Écart médian",
+    robustness: "Robustesse",
+    supposed: "Valeurs supposées",
+    loading: "…",
+    nothing: "rien à confronter",
+    sufficient: "suffisante",
+    fineTuned: "réglage fin ({knob})",
+    tooFew: "trop peu reproduit",
+    unjudged: "aucune loi pour en juger"
+  }
 } satisfies ReadingSensitivityMessages

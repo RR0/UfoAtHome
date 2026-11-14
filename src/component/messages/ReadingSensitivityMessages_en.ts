@@ -18,5 +18,21 @@ export const readingSensitivityMessages_en = {
   fineTuned: "fine-tuned: {knob} covers only {coverage} % of its uncertainty",
   atLeast: "{value} and beyond",
   better: "Another setting reproduces more: {knob} {amount}, {agreed} of {compared}",
-  knobs: { azimuth: "direction", altitude: "height", distance: "distance", size: "size", time: "time" }
+  knobs: { azimuth: "direction", altitude: "height", distance: "distance", size: "size", time: "time" },
+  comparison: {
+    heading: "Readings compared ({n})",
+    hint: "One row per reading of the case, set against the account it reads, as each reading's own sensitivity says it: how many of the witness's indications it reproduces, the median gap between what the witness said and what the reading shows (directions only), whether its margins are sufficient, and how many values it supposed. The more values a reading supposes, the easier a likeness is to make.",
+    reading: "Reading",
+    witness: "Reads",
+    reproduced: "Reproduced",
+    gap: "Median gap",
+    robustness: "Robustness",
+    supposed: "Supposed values",
+    loading: "…",
+    nothing: "nothing to compare",
+    sufficient: "sufficient",
+    fineTuned: "fine-tuned ({knob})",
+    tooFew: "too little reproduced",
+    unjudged: "no law to judge it"
+  }
 } satisfies ReadingSensitivityMessages

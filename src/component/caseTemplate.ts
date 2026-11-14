@@ -19,6 +19,7 @@ export const caseHtml = `
 <section class="case-timeline">
   <h3 class="events-heading"><span id="events-icon" class="events-icon" aria-hidden="true"></span><span id="events-heading"></span></h3>
   <ol id="case-events" class="case-events"></ol>
+  <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
 </section>
 <!-- What is open, in the order of time whatever the order they were opened in. -->
 <div id="open-events" class="open-events"></div>
@@ -45,6 +46,7 @@ export const caseCss = `
    pill. What cannot be done while reading is absent, not greyed out. */
 .case-timeline { margin: 0 0 14px; }
 .case-timeline[hidden] { display: none; }
+.readings-comparison { margin-top: 12px; }
 .events-heading { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .events-icon { display: inline-flex; }
 .events-icon svg { width: 14px; height: 14px; }
