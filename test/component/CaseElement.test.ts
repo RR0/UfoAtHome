@@ -351,9 +351,9 @@ describe("<rr0-case>, a case read", () => {
     expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(true)
     expect(root.getElementById("timeline-button")!.getAttribute("aria-pressed")).toBe("false")
     expect([...root.querySelectorAll(".open-event")].length).toBe(1)
-    // The player opened wears the options the case was given.
+    // The player opened wears the options the case was given, but not the case's own information: its panel would cover the picture.
     expect(element.player!.hasAttribute("show-labels")).toBe(true)
-    expect(element.player!.hasAttribute("show-info")).toBe(true)
+    expect(element.player!.hasAttribute("show-info")).toBe(false)
     // And the button gives the chronology back.
     root.getElementById("timeline-button")!.click()
     expect(root.querySelector(".case-timeline")!.hasAttribute("hidden")).toBe(false)

@@ -58,8 +58,11 @@ export class CaseElement extends HTMLElement {
     return ["src", "show-labels", SHOW_INFO_ATTRIBUTE, SHOW_TIMELINE_ATTRIBUTE, OPEN_EVENTS_ATTRIBUTE, OBSERVER_ATTRIBUTE]
   }
 
-  /** The options a page sets on this element and that its players wear too: what to show from the start. */
-  private static readonly PASSED_ON = ["show-labels", SHOW_INFO_ATTRIBUTE] as const
+  /**
+   * The options a page sets on this element and that its players wear too: what to show from the start. Not `show-info`: it opens what the
+   * CASE says of itself, and a demo linked with `info=1` would otherwise open every observation's own panel over its picture as well.
+   */
+  private static readonly PASSED_ON = ["show-labels"] as const
 
   private readonly shadow: ShadowRoot
   private readonly openEvents: HTMLElement
