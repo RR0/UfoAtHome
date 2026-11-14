@@ -57,9 +57,9 @@ describe("How much a reading's likeness owes to what it chose", () => {
     expect(margin("distance").upper).toBeCloseTo(1.5, 1)
     expect(margin("distance").lower).toBeCloseTo(1 / 1.5, 1)
     expect(margin("size").upper).toBeCloseTo(1.5, 1)
-    // Still: when it is does not matter, as far as the search looks one way. Moved later, it is not there yet when it is first seen.
+    // Still: when it does what it does not do does not matter, either way. Its presence is not what is moved in time.
     expect(margin("time").lowerReached).toBe(true)
-    expect(margin("time").upper).toBeLessThan(50)
+    expect(margin("time").upperReached).toBe(true)
     expect(result.margins[0].share).toBeLessThanOrEqual(result.margins[result.margins.length - 1].share)
   })
 
@@ -94,6 +94,34 @@ describe("How much a reading's likeness owes to what it chose", () => {
     // Turned 2° east, it reproduces the two later instants and loses the first: it was not at its best.
     expect(result.better).toMatchObject({ bodyId: "balloon", knob: "azimuth", agreement: 2 / 3 })
     expect(result.better!.amount).toBeGreaterThan(0)
+  })
+
+  it("compares a reading to what the witness is on record as having said, not to what was drawn between", () => {
+    // Said due north at the start and the end; drawn 5° east in between, as an author might fill a timeline.
+    const json = {
+      version: 4,
+      place: { locations: [{ lat: 48, lng: 2 }] },
+      timeline: {
+        keyframes: [0, 1000, 2000].map(t => ({
+          t,
+          shapes: [{
+            sourceId: "ufo",
+            shape: {
+              kind: "oval", bounds: { x: 0, y: 0, width: 1, height: 1 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false,
+              angular: { widthDeg: 1, heightDeg: 1 },
+              aim: t === 1000 ? { azimuthDeg: 5, altitudeDeg: 10 } : { value: { azimuthDeg: 0, altitudeDeg: 10 }, basis: "stated", rationale: "the report" }
+            }
+          }]
+        }))
+      },
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: 48, lng: 2, elevationM: 0, headingDeg: 0, pitchDeg: 10, fovDeg: 60 } }] }
+    } as unknown as SightingRecordingJson
+    const result = ReadingSensitivity.forAccount(json).of([sphere()], supposed())
+    // Two directions said, both reproduced; the one drawn between is not a comparison, and no size was said, so none is compared.
+    expect(result.compared).toBe(2)
+    expect(result.agreement).toBe(1)
+    // Nothing said depends on how far or how big it is: those are not turned, rather than found robust.
+    expect(result.margins.map(m => m.knob).sort()).toEqual(["altitude", "azimuth", "time"])
   })
 
   it("has nothing to confront when no body explains what the account draws", () => {

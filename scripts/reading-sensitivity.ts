@@ -3,8 +3,8 @@
  *
  *   node --import tsx scripts/reading-sensitivity.ts case-braine-le-comte.json
  *
- * The case is read from public/demo-data, and its readings and accounts beside it. With LAWS=1, what counts as a contradiction is the
- * law of each value's error (BodyConfrontation.lawsOf) rather than the fixed tolerances.
+ * The case is read from public/demo-data, and its readings and accounts beside it. Judged as ReadingSensitivity.forAccount judges it;
+ * with ALL=1, against everything the timelines draw, with the fixed tolerances.
  */
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
@@ -29,7 +29,7 @@ for (const e of kase.events) {
   const { recording, provenance } = Provenance.strip(readingJson)
   const bodies = recording.interpretation?.bodies ?? []
   const started = performance.now()
-  const r = new ReadingSensitivity(account, instants, process.env.LAWS ? BodyConfrontation.lawsOf(WitnessError.MODELS[0], account.account?.conditions) : undefined).of(bodies, provenance)
+  const r = (process.env.ALL ? new ReadingSensitivity(account, instants) : ReadingSensitivity.forAccount(accountJson)).of(bodies, provenance)
   const ms = Math.round(performance.now() - started)
   console.log(`\n${e.url} (${ms} ms, ${instants.length} instants, ${bodies.length} bodies)`)
   console.log(`  agreement ${(r.agreement*100).toFixed(0)} % of ${r.compared}${r.better ? `, better: ${r.better.bodyId} ${r.better.knob} ${r.better.amount.toFixed(2)} -> ${(r.better.agreement*100).toFixed(0)} %` : ""}`)

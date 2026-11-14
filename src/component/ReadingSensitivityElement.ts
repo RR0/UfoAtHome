@@ -1,9 +1,8 @@
 import { ReadingSensitivity, type KnobMargin, type ReadingSensitivityResult, type SensitivityKnob } from "../engine/interpretation/ReadingSensitivity.js"
 import type { BodyJson } from "../engine/interpretation/Interpretation.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
-import type { Sighting } from "../engine/model/Sighting.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
-import { fromSightingJson, type SightingRecordingJson } from "../engine/persistence/sightingJson.js"
+import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { HintElement } from "./HintElement.js"
 import type { ReadingSensitivityMessages } from "./messages/ReadingSensitivityMessages.js"
@@ -33,7 +32,7 @@ ${HintElement.CSS}
 `
 
   /** The accounts as models, once for each recording: a recording of several megabytes is not read again at every drawing of a card. */
-  private static readonly models = new WeakMap<SightingRecordingJson, Sighting>()
+  private static readonly sensitivities = new WeakMap<SightingRecordingJson, ReadingSensitivity>()
   /** What was found, by reading: a card is drawn again at every change of the list, and the reading is the same. */
   private static readonly found = new WeakMap<SightingRecordingJson, { account: SightingRecordingJson, result: ReadingSensitivityResult }>()
 
@@ -75,17 +74,16 @@ ${HintElement.CSS}
     const { recording, provenance } = Provenance.strip(reading)
     const bodies = recording.interpretation?.bodies ?? []
     if (bodies.length === 0) return undefined
-    let model = ReadingSensitivityElement.models.get(account)
-    if (!model) {
+    let sensitivity = ReadingSensitivityElement.sensitivities.get(account)
+    if (!sensitivity) {
       try {
-        model = fromSightingJson(account)
+        sensitivity = ReadingSensitivity.forAccount(account)
       } catch {
         return undefined
       }
-      ReadingSensitivityElement.models.set(account, model)
+      ReadingSensitivityElement.sensitivities.set(account, sensitivity)
     }
-    const instants = (Provenance.strip(account).recording.timeline?.keyframes ?? []).map(key => key.t)
-    const result = new ReadingSensitivity(model, instants).of(bodies, provenance)
+    const result = sensitivity.of(bodies, provenance)
     ReadingSensitivityElement.found.set(reading, { account, result })
     return result
   }
@@ -112,7 +110,8 @@ ${HintElement.CSS}
     const style = document.createElement("style")
     style.textContent = ReadingSensitivityElement.CSS
     // Something to unfold only when there is more than the line: a line alone is a paragraph, with no arrow that opens nothing.
-    const unfolds = result.margins.length > 0 || result.better !== undefined
+    const robustness = ReadingSensitivityElement.measurable(result)
+    const unfolds = (robustness && result.margins.length > 0) || result.better !== undefined
     const details = document.createElement(unfolds ? "details" : "div")
     const summary = document.createElement(unfolds ? "summary" : "p")
     const heading = document.createElement("span")
@@ -121,7 +120,7 @@ ${HintElement.CSS}
     summary.append(heading, this.sentence(result, bodies, m), HintElement.of(m.hint))
     summary.style.margin = "0"
     details.append(summary)
-    if (result.margins.length > 0) {
+    if (robustness && result.margins.length > 0) {
       const list = document.createElement("ul")
       list.append(...result.margins.map((margin, index) => {
         const row = document.createElement("li")
@@ -144,15 +143,27 @@ ${HintElement.CSS}
     this.shadowRoot!.replaceChildren(style, details)
   }
 
+  /**
+   * Whether its margins mean anything: a reading that reproduces less than half of what the witness said is not a likeness, and how
+   * robust it is would be how robust a coincidence is.
+   */
+  static measurable(result: ReadingSensitivityResult): boolean {
+    return result.compared > 0 && result.agreement >= 0.5
+  }
+
   /** The line it comes to: how much of the account it reproduces, then what that is the most tied to, or why there is nothing to say. */
   private sentence(result: ReadingSensitivityResult, bodies: readonly BodyJson[], m: ReadingSensitivityMessages): string {
-    if (result.compared === 0) return m.nothingToConfront
+    if (result.compared === 0) {
+      const explains = bodies.some(body => (body.explains?.length ?? 0) > 0)
+      return explains ? m.noneSaid : m.nothingToConfront
+    }
     const compared = String(result.compared)
     const agreed = Math.round(result.agreement * result.compared)
     const share = agreed === 0 ? this.fill(m.noneAgrees, { compared })
       : agreed === result.compared ? this.fill(m.allAgree, { compared })
         : agreed === 1 ? this.fill(m.agreementOne, { compared }) : this.fill(m.agreement, { agreed: String(agreed), compared })
     if (agreed === 0) return share
+    if (!ReadingSensitivityElement.measurable(result)) return `${share} · ${m.tooFew}`
     if (result.freeBodies.length === 0) return `${share} · ${m.noFreeValue}`
     const tightest = result.margins[0]
     return tightest ? `${share} · ${this.fill(m.tightest, this.marginWords(tightest, bodies, m, result))}` : share

@@ -2,16 +2,18 @@ import type { ReadingSensitivityMessages } from "./ReadingSensitivityMessages.js
 
 export const readingSensitivityMessages_en = {
   heading: "Sensitivity:",
-  hint: "How far each value the reading supposed can be moved before it reproduces less of the account. A likeness that holds only within a few tenths of a degree was fitted, not found. The witness's own uncertainty is not moved: it is already in what counts as a contradiction.",
+  hint: "What is compared: each direction or size the recording traces to the witness, with what it rests on, against what the body the reading places would look like from where the witness stood, at the same instant. A gap is a contradiction only beyond what a witness's estimate of that kind may be off. The margins say how far each value the reading supposed can be moved before it reproduces less: a narrow margin is a fine-tuning, a wide one a robust reading.",
   nothingToConfront: "nothing to set against the account: no body of the reading says which phenomenon it is",
-  noneAgrees: "reproduces none of the {compared} comparisons",
-  agreement: "reproduces {agreed} of {compared} comparisons",
-  agreementOne: "reproduces 1 of {compared} comparisons",
-  allAgree: "reproduces all {compared} comparisons",
+  noneSaid: "nothing to set against the account: it traces no direction and no size to the witness",
+  noneAgrees: "reproduces none of the witness's {compared} indications",
+  agreementOne: "reproduces 1 of the witness's {compared} indications",
+  agreement: "reproduces {agreed} of the witness's {compared} indications",
+  allAgree: "reproduces all the witness's {compared} indications",
+  tooFew: "too few to measure how robust it is",
   noFreeValue: "nothing supposed: no value to move",
-  tightest: "most fragile: {knob}, from {lower} to {upper}",
-  margin: "{knob}: from {lower} to {upper}",
+  tightest: "tightest: {knob}, from {lower} to {upper}",
+  margin: "{knob}: holds from {lower} to {upper}",
   atLeast: "{value} and beyond",
-  better: "Another setting reproduces more: {knob} at {amount}, {agreed} of {compared}",
+  better: "Another setting reproduces more: {knob} {amount}, {agreed} of {compared}",
   knobs: { azimuth: "direction", altitude: "height", distance: "distance", size: "size", time: "time" }
 } satisfies ReadingSensitivityMessages

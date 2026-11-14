@@ -1,5 +1,7 @@
 import type { Sighting } from "../model/Sighting.js"
 import { Provenance } from "../persistence/Provenance.js"
+import { fromSightingJson, type SightingRecordingJson } from "../persistence/sightingJson.js"
+import { WitnessError } from "../witness/WitnessError.js"
 import { BodyConfrontation, type ConfrontationTolerance } from "./BodyConfrontation.js"
 import { BodyPlacement, type BodyState, type Ground, type LocalPoint } from "./BodyPlacement.js"
 import type { BodyJson, BodyKeyframe } from "./Interpretation.js"
@@ -31,6 +33,9 @@ export interface KnobMargin {
    * holds as far as the search looks. What makes margins in degrees, factors and milliseconds comparable at all. */
   share: number
 }
+
+/** What of a phenomenon at an instant the witness is on record as having said: its direction, its apparent size. */
+export interface SaidAspects { direction: boolean, size: boolean }
 
 /** A reading set against the account under every turn of what it leaves free. */
 export interface ReadingSensitivityResult {
@@ -94,9 +99,39 @@ export class ReadingSensitivity {
    * @param account The observation the reading reads, as a model: its timeline is what was said, its track is where it was said from.
    * @param instants The times of the account the reading is compared at, milliseconds: those its timeline states a phenomenon at.
    */
-  constructor(account: Sighting, private readonly instants: readonly number[], tolerance?: ConfrontationTolerance) {
+  /**
+   * @param said What the witness is on record as having said, by "instant/phenomenon": only that is compared, each aspect for itself.
+   *   Undefined: everything the timeline draws, as if all of it had been said.
+   */
+  constructor(account: Sighting, private readonly instants: readonly number[], tolerance?: ConfrontationTolerance,
+              private readonly said?: ReadonlyMap<string, SaidAspects>) {
     this.confrontation = new BodyConfrontation(account.timeline, tolerance)
     this.eyeAt = (t: number) => BodyPlacement.eyeOf(account, t, ReadingSensitivity.FLAT)
+  }
+
+  /**
+   * The sensitivity of readings of `json`, as the GEIPAN would have it judged: against what the witness is on record as having said, and
+   * nothing else, and with the uncertainty a witness's estimate has (see BodyConfrontation.lawsOf).
+   *
+   * A timeline is drawn to be played, so it holds far more than was said: a direction every half second where the witness gave three, a
+   * size nobody gave at all. Comparing a reading to those compares two reconstructions with each other, and finds a likeness where neither
+   * is the testimony. So only a direction or a size the recording traces to the witness is compared: wrapped with a basis that is not
+   * free, and saying what it rests on (a "stated" that says nothing more is the default, which the file does not even keep: see
+   * Provenance.set). A bare one, or one supposed, is not.
+   */
+  static forAccount(json: SightingRecordingJson): ReadingSensitivity {
+    const account = fromSightingJson(json)
+    const keyframes = Provenance.strip(json).recording.timeline?.keyframes ?? []
+    const said = new Map<string, SaidAspects>()
+    const isSaid = (path: string) => account.provenance.paths().some(known =>
+      (known === path || known.startsWith(`${path}.`)) && !Provenance.free(account.provenance.at(known)))
+    keyframes.forEach((key, k) => key.shapes.forEach((state, n) => {
+      const at = `timeline.keyframes.${k}.shapes.${n}.shape`
+      const aspects = { direction: isSaid(`${at}.aim`), size: isSaid(`${at}.angular`) }
+      if (aspects.direction || aspects.size) said.set(`${key.t}/${state.sourceId}`, aspects)
+    }))
+    const tolerance = BodyConfrontation.lawsOf(WitnessError.MODELS[0], account.account?.conditions)
+    return new ReadingSensitivity(account, keyframes.map(key => key.t), tolerance, said)
   }
 
   /**
@@ -136,13 +171,19 @@ export class ReadingSensitivity {
     return provenance.paths().some(path => (path === prefix || path.startsWith(`${prefix}.`)) && Provenance.free(provenance.at(path)))
   }
 
-  /** The knobs a body has: no size to turn for one that states none, no height for one standing on the ground all along. */
+  /**
+   * The knobs a body has that something said depends on: no size to turn for one that states none, no height for one standing on the
+   * ground all along, and neither its distance nor its size when the witness gave no size, since moving along the line it is seen on
+   * changes nothing of its direction. A knob nothing depends on would come out as robust as can be, which it is not: it is beside the
+   * point, like the day of the week.
+   */
   private knobsOf(body: BodyJson): SensitivityKnob[] {
-    const knobs: SensitivityKnob[] = ["azimuth", "distance", "time"]
+    const sizeSaid = !this.said || [...this.said.values()].some(aspects => aspects.size)
+    const knobs: SensitivityKnob[] = sizeSaid ? ["azimuth", "distance", "time"] : ["azimuth", "time"]
     if (body.track.some(key => key.altitudeDeg !== undefined || key.altitudeM !== undefined || key.altitudeAboveGroundM !== undefined)) {
       knobs.splice(1, 0, "altitude")
     }
-    if (body.track.some(key => key.sizeM !== undefined)) knobs.push("size")
+    if (sizeSaid && body.track.some(key => key.sizeM !== undefined)) knobs.push("size")
     return knobs
   }
 
@@ -152,8 +193,9 @@ export class ReadingSensitivity {
     // The amount at x in [0, 1] of the way out, each way: linear for an offset, geometric for a factor.
     const amount = (x: number, way: 1 | -1) => factor ? Math.exp(way * x * Math.log(limit)) : way * x * limit
     const holdsAt = (x: number, way: 1 | -1) => {
-      const turned = bodies.map(other => other === body ? this.turned(body, knob, amount(x, way)) : other)
-      const agreement = this.agreementOf(this.score(turned).outcomes)
+      // A time is moved where the track is read, not in the track: its motion moved, not its presence (see score).
+      const turned = knob === "time" ? bodies : bodies.map(other => other === body ? this.turned(body, knob, amount(x, way)) : other)
+      const agreement = this.agreementOf(this.score(turned, knob === "time" ? { body, ms: amount(x, way) } : undefined).outcomes)
       if (agreement > this.nominalAgreement + 1e-9 && (!this.best || agreement > this.best.agreement)) {
         this.best = { bodyId: body.id, knob, amount: amount(x, way), agreement }
       }
@@ -256,23 +298,41 @@ export class ReadingSensitivity {
   }
 
   /** The bodies set against the account at every instant: whether each comparison, "instant/phenomenon", agrees, and the separations. */
-  private score(bodies: readonly BodyJson[]): { instants: number, outcomes: Map<string, boolean>, separations: number[] } {
-    const placements = bodies.map(body => new BodyPlacement(body, ReadingSensitivity.FLAT, this.eyeAt))
+  /**
+   * @param delayed A body whose motion is moved later by `ms` (earlier, negative): it is where it was `ms` before, at every instant it is
+   *   there at all. Its presence is not moved with it: a reading has it appear when the witness first describes it, and a delay that left it
+   *   absent then would break on how the track begins, not on what the reading says. Where its motion has not begun yet, or has ended, it
+   *   is held where it begins or ends.
+   */
+  private score(bodies: readonly BodyJson[], delayed?: { body: BodyJson, ms: number }): { instants: number, outcomes: Map<string, boolean>, separations: number[] } {
+    const placements = bodies.map(body => ({ body, placement: new BodyPlacement(body, ReadingSensitivity.FLAT, this.eyeAt) }))
+    const stateAt = ({ body, placement }: { body: BodyJson, placement: BodyPlacement }, t: number) => {
+      const there = placement.at(t)
+      if (!there || delayed?.body !== body) return there
+      const keys = body.track
+      const moved = Math.min(Math.max(t - delayed.ms, keys[0].t), keys[keys.length - 1].t)
+      return placement.at(moved) ?? there
+    }
     let instants = 0
     const separations: number[] = []
     const outcomes = new Map<string, boolean>()
     for (const t of this.instants) {
       const eye = this.eyeAt(t)
       if (!eye) continue
-      const states = placements.map(placement => placement.at(t)).filter((state): state is BodyState => state !== undefined)
+      const states = placements.map(placed => stateAt(placed, t)).filter((state): state is BodyState => state !== undefined)
       const readings = this.confrontation.at(t, states, eye)
-      if (readings.length) instants++
+      let compared = false
       for (const reading of readings) {
         const pair = `${t}/${reading.sourceId}`
+        const aspects = this.said ? this.said.get(pair) : { direction: true, size: true }
+        if (!aspects) continue
+        compared = true
+        const counted = reading.disagreements.filter(off => off === "direction" ? aspects.direction : aspects.size)
         // Two bodies that explain the same phenomenon: it is reproduced when either does.
-        outcomes.set(pair, outcomes.get(pair) === true || reading.disagreements.length === 0)
-        if (reading.separationDeg !== undefined) separations.push(reading.separationDeg)
+        outcomes.set(pair, outcomes.get(pair) === true || counted.length === 0)
+        if (aspects.direction && reading.separationDeg !== undefined) separations.push(reading.separationDeg)
       }
+      if (compared) instants++
     }
     return { instants, outcomes, separations }
   }

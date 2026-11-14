@@ -15,7 +15,9 @@ const account = (azimuths = [0, 0]): SightingRecordingJson => ({
         sourceId: "ufo",
         shape: {
           kind: "oval", bounds: { x: 0, y: 0, width: 1, height: 1 }, color: "#fff", angle: 0, transparency: 0, haloScale: 0, selected: false,
-          angular: { widthDeg: 1, heightDeg: 1 }, aim: { azimuthDeg, altitudeDeg: 10 }
+          // The directions said, as a report gives them: only what a recording traces to the witness is compared (see
+          // ReadingSensitivity.forAccount). The size is drawn, not said.
+          angular: { widthDeg: 1, heightDeg: 1 }, aim: { value: { azimuthDeg, altitudeDeg: 10 }, basis: "stated", rationale: "the report" }
         }
       }]
     }))
@@ -56,11 +58,10 @@ describe("A reading's sensitivity, as the case's player and editor say it", () =
   it("says how much of the account it reproduces and the value it is the most tied to, then each margin", async () => {
     const element = await shown(account(), reading())
     expect(element.hidden).toBe(false)
-    expect(line(element)).toMatch(/^Sensitivity: reproduces all 2 comparisons · most fragile: \w+, from /)
-    // One body supposed: its name goes without saying.
-    expect(rows(element)).toHaveLength(5)
+    expect(line(element)).toMatch(/^Sensitivity: reproduces all the witness's 2 indications · tightest: \w+, from /)
+    // One body supposed: its name goes without saying. No size said: neither its distance nor its size is turned.
+    expect(rows(element).map(row => row!.split(":")[0]).sort()).toEqual(["direction", "height", "time"])
     expect(rows(element).join()).not.toContain("Balloon")
-    expect(rows(element).find(row => row!.startsWith("distance"))).toMatch(/×0\.6\d to ×1\.(49|5)/)
   })
 
   it("names the body a margin is of when the reading supposed several", async () => {
@@ -69,15 +70,30 @@ describe("A reading's sensitivity, as the case's player and editor say it", () =
   })
 
   it("says one comparison in the singular", async () => {
-    // Said due north, then 5° east: a body that stays north reproduces the first only.
-    const element = await shown(account([0, 5]), reading())
-    expect(line(element)).toContain("reproduces 1 of 2 comparisons")
+    // Said due north, then 60° east, beyond the 45° a witness's estimated heading may be off: a body that stays north reproduces the first.
+    const element = await shown(account([0, 60]), reading())
+    expect(line(element)).toContain("reproduces 1 of the witness's 2 indications")
   })
 
   it("says when there is nothing to set against the account, with no arrow that opens nothing", async () => {
     const element = await shown(account(), reading(1, []))
     expect(line(element)).toContain("no body of the reading says which phenomenon it is")
     expect(element.shadowRoot!.querySelector("details")).toBeNull()
+  })
+
+  it("says when the account traces nothing to the witness", async () => {
+    const bare = account()
+    for (const key of (bare.timeline as unknown as { keyframes: { shapes: { shape: { aim: unknown } }[] }[] }).keyframes) {
+      key.shapes[0].shape.aim = { azimuthDeg: 0, altitudeDeg: 10 }
+    }
+    const element = await shown(bare, reading())
+    expect(line(element)).toContain("it traces no direction and no size to the witness")
+  })
+
+  it("measures no robustness for a reading that reproduces less than half of what was said", async () => {
+    const element = await shown(account([0, 60, 60]), reading())
+    expect(line(element)).toContain("reproduces 1 of the witness's 3 indications · too few to measure how robust it is")
+    expect(rows(element)).toEqual([])
   })
 
   it("is hidden for a reading that places no body", () => {

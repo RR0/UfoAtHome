@@ -2,29 +2,33 @@
 export interface ReadingSensitivityMessages {
   /** What it is called, with the punctuation the language puts before what it comes to. */
   heading: string
-  /** What it measures and why, in the (?) beside the heading. */
+  /** What is compared with what, what counts as a contradiction, and how the margins read, in the (?) beside the heading. */
   hint: string
   /** A reading whose bodies say of none what phenomenon it is: nothing of it can be set against the account. */
   nothingToConfront: string
-  /** Reproduces none of the `{compared}` comparisons. */
+  /** An account that traces no direction and no size to the witness: there is nothing said to set a reading against. */
+  noneSaid: string
+  /** An indication is a direction or a size the witness gave at an instant: reproduces none of the `{compared}`. */
   noneAgrees: string
-  /** Reproduces `{agreed}` of the `{compared}` comparisons (one phenomenon at one instant each). */
-  agreement: string
-  /** Reproduces the only one of the `{compared}` comparisons it reproduces. */
+  /** Reproduces one of the `{compared}` indications. */
   agreementOne: string
+  /** Reproduces `{agreed}` of the `{compared}` indications. */
+  agreement: string
   /** Reproduces all of them. */
   allAgree: string
-  /** Nothing of the reading was supposed: there is nothing to turn. */
+  /** Reproduces less than half of them: its margins would measure how robust a coincidence is, and are not shown. */
+  tooFew: string
+  /** Nothing of the reading was supposed: there is nothing to move. */
   noFreeValue: string
-  /** The value the likeness is the most tied to: `{knob}`, from `{lower}` to `{upper}`. `{knob}` is followed by the body it is of, in
-   * parentheses, only when the reading supposed several. */
+  /** The narrowest margin: `{knob}`, from `{lower}` to `{upper}` about the value the reading chose. `{knob}` is followed by the body it is
+   * of, in parentheses, only when the reading supposed several. */
   tightest: string
-  /** One row per value turned. */
+  /** One row per value moved: how far it can be moved and the reading still reproduce as much. */
   margin: string
   /** An end the search did not find, because the reading still holds as far as it looks: `{value}` and beyond. */
   atLeast: string
-  /** A turn that reproduces more than the reading as written: it was not at its best. */
+  /** A move that reproduces more than the reading as written: `{knob}` moved by `{amount}` reproduces `{agreed}` of `{compared}`. */
   better: string
-  /** What each value turned is called. */
+  /** What each value moved is called. */
   knobs: { azimuth: string, altitude: string, distance: string, size: string, time: string }
 }
