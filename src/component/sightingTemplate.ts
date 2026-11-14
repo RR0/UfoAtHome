@@ -1,6 +1,9 @@
 import { SummaryDescription } from "./SummaryDescription.js"
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
+  <!-- The case this account belongs to, when it was read from one: an observation of a case is shown in its frame, not as a lone
+       recording (the info panel also lists it, but behind a button nobody opens to find out where they are). -->
+  <span id="case-of" class="case-of" hidden></span>
   <span id="account" class="account">
     <span id="account-prefix"></span>
     <span id="observer-text"></span><select id="observer" hidden></select>
@@ -119,6 +122,11 @@ export const css = `
      ufoathome.org's own player wraps it in overflow:hidden, and so can any page it is embedded in. */
   padding: 3px 3px 0;
 }
+.case-of {
+  /* Before the account's own name, dimmer than it: it says where this observation stands, the account says what it is. */
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .75;
+}
+.case-of::after { content: "·"; padding: 0 .4em; opacity: .6; }
 .account {
   /* Shrinks to what the buttons leave and then wraps, the choice of observer under its words: it was
      kept on one line and clipped to "Com…", with the choice itself out of reach, on a phone. */

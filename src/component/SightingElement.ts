@@ -121,6 +121,7 @@ export class SightingElement extends HTMLElement {
   private readonly toolbarElement: HTMLElement
   private readonly accountElement: HTMLElement
   private readonly accountPrefix: HTMLElement
+  private readonly caseOfElement: HTMLElement
   private readonly observerText: HTMLElement
   private readonly observerSelect: HTMLSelectElement
   private readonly infoButton: HTMLButtonElement
@@ -239,6 +240,7 @@ export class SightingElement extends HTMLElement {
     this.toolbarElement = this.shadow.getElementById("toolbar")!
     this.accountElement = this.shadow.getElementById("account")!
     this.accountPrefix = this.shadow.getElementById("account-prefix")!
+    this.caseOfElement = this.shadow.getElementById("case-of")!
     this.observerText = this.shadow.getElementById("observer-text")!
     this.observerSelect = this.shadow.getElementById("observer") as HTMLSelectElement
     this.infoButton = this.shadow.getElementById("info-button") as HTMLButtonElement
@@ -1223,6 +1225,10 @@ export class SightingElement extends HTMLElement {
     // stylesheet away from being read out, and a screen reader does not need the stylesheet's
     // permission to reach it.
     this.observerText.textContent = name ?? ""
+    // An observation read from a case is shown in its frame: the case is named beside the account, whether or not the case holds several.
+    const inCase = this.caseSource && (this.said.read(this.caseSource.json.title as SaidText | undefined) ?? this.caseSource.json.id)
+    this.caseOfElement.hidden = !inCase
+    this.caseOfElement.textContent = inCase ? `${this.messages?.case ?? ""} ${inCase}` : ""
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
     this.editLink.title = (this.messages?.editThisObservation ?? "")

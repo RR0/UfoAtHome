@@ -435,6 +435,20 @@ describe("SightingElement", () => {
     expect(element.observerUrls).toEqual([johnUrl])
   })
 
+  it("names the case an observation was read from, beside the account, even where the case lists one", async () => {
+    const johnUrl = new URL("john.json", location.href).href
+    stubFetch({ "case.json": { id: "Case", title: "A case", events: [sightingEvent("john.json")] }, [johnUrl]: johnSighting })
+
+    const element = await connect("case.json")
+
+    const line = element.shadowRoot!.getElementById("case-of")!
+    expect(line.hidden).toBe(false)
+    expect(line.textContent).toContain("A case")
+    // A recording read on its own is no case's, and says nothing of one.
+    const alone = await connect("john.json")
+    expect(alone.shadowRoot!.getElementById("case-of")!.hidden).toBe(true)
+  })
+
   it("offers the account, in the round when the observer said what it was, and the case's interpretations", async () => {
     const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
     const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: [{ lat: 32.4, lng: -86.3 }], interpretation: { title: "Own", bodies: [body] } }
