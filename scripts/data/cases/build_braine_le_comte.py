@@ -820,19 +820,40 @@ def recording(code):
     return rec
 
 
+# The justifications are written in English above and given in French too (see StatedValue.rationale: a report on the case is read in
+# its reader's language). The French is in braine_le_comte_rationales_fr.json beside this script, by the English it translates: one
+# missing stops the build, rather than leaving a value justified in one language only.
+FRENCH = json.load(open(os.path.join(HERE, "braine_le_comte_rationales_fr.json"), encoding="utf-8"))
+
+
+def bilingual(value):
+    """`value` with every justification written in English given as { en, fr }."""
+    if isinstance(value, dict):
+        out = {key: bilingual(held) for key, held in value.items()}
+        rationale = value.get("rationale")
+        if isinstance(rationale, str):
+            if rationale not in FRENCH:
+                sys.exit(f"No French for the justification: {rationale!r} (add it to braine_le_comte_rationales_fr.json)")
+            out["rationale"] = {"en": rationale, "fr": FRENCH[rationale]}
+        return out
+    if isinstance(value, list):
+        return [bilingual(held) for held in value]
+    return value
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     readings = []
     written = []
     for code in ("AKH", "BJN", "FWY"):
-        rec = recording(code)
+        rec = bilingual(recording(code))
         path = os.path.join(OUT, f"observer-braine-le-comte-{code.lower()}.json")
         # What other tools and hands added to these files is kept (see scripts/data/cases/recording_files.py).
         written.append(RecordingFiles.write(path, rec))
         print(path, os.path.getsize(path), "bytes,", len(rec["timeline"]["keyframes"]), "keyframes")
         for number, event in enumerate((interpretation_event, bird_event), start=1):
             url, reading, case_event = reading_recording(code, rec, number, event(code, phenomenon_keyframes(code)[3]))
-            written.append(RecordingFiles.write(os.path.join(OUT, url), reading))
+            written.append(RecordingFiles.write(os.path.join(OUT, url), bilingual(reading)))
             readings.append(case_event)
     case = {
         "id": "BraineLeComte2015", "title": "Braine-le-Comte", "time": "2015-07-12 00:45",

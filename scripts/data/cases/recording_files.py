@@ -66,4 +66,5 @@ class RecordingFiles:
         A safety net rather than a step: a generator that states the current version writes files this leaves untouched, and one left
         behind by a change of the format is carried forward instead of taking its case backwards (see scripts/migrate-recordings.ts).
         """
-        subprocess.run(["npx", "tsx", "scripts/migrate-recordings.ts", *[str(path) for path in paths]], check=True)
+        # Through node's loader rather than tsx's own command, which opens a pipe a sandbox may refuse.
+        subprocess.run(["node", "--import", "tsx", "scripts/migrate-recordings.ts", *[str(path) for path in paths]], check=True)
