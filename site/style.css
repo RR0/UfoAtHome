@@ -717,12 +717,17 @@ td { color: var(--ink-dim); }
 }
 
 @media (min-width: 56rem) {
+  /* A panel the whole height of the window, under the header, opaque: the bands' full-width borders and
+     backgrounds pass behind it rather than through the list. */
   .page-outline {
-    position: fixed; top: 5rem; left: clamp(0.75rem, 2vw, 2rem); width: clamp(12rem, 18vw, 14rem);
-    max-height: calc(100vh - 6rem); display: flex; flex-direction: column;
+    position: fixed; top: 0; bottom: 0; left: 0;
+    width: calc(clamp(12rem, 18vw, 14rem) + clamp(0.75rem, 2vw, 2rem));
+    padding: calc(var(--site-header-height, 3.5rem) + 1.25rem) 0.5rem 1rem clamp(0.75rem, 2vw, 2rem);
+    background: var(--ground); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
   }
   .page-outline details { display: flex; flex-direction: column; min-height: 0; }
-  .page-outline details[open] > ol { max-height: calc(100vh - 8rem); }
+  .page-outline details[open] > ol { max-height: calc(100vh - var(--site-header-height, 3.5rem) - 4rem); }
   .page-outline summary { pointer-events: none; }
   .has-outline .wrap { margin-left: max(calc(clamp(12rem, 18vw, 14rem) + clamp(1.5rem, 4vw, 3rem)), calc((100vw - var(--wide)) / 2)); margin-right: auto; }
 }
