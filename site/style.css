@@ -718,12 +718,12 @@ td { color: var(--ink-dim); }
 
 @media (min-width: 56rem) {
   /* A panel the whole height of the window, under the header, opaque: the bands' full-width borders and
-     backgrounds pass behind it rather than through the list. */
+     backgrounds pass behind it rather than through the list. No line of its own: its ground sets it apart. */
   .page-outline {
     position: fixed; top: 0; bottom: 0; left: 0;
     width: calc(clamp(12rem, 18vw, 14rem) + clamp(0.75rem, 2vw, 2rem));
     padding: calc(var(--site-header-height, 3.5rem) + 1.25rem) 0.5rem 1rem clamp(0.75rem, 2vw, 2rem);
-    background: var(--ground); border-right: 1px solid var(--line);
+    background: var(--ground);
     display: flex; flex-direction: column;
   }
   .page-outline details { display: flex; flex-direction: column; min-height: 0; }
