@@ -22,8 +22,10 @@ export class PageOutline {
    * Makes the outline follow the reading and fit the screen. A classic script, not a module: it is small and has
    * nothing to import, and the outline is open from the first paint on a wide screen rather than after the modules.
    *
-   * - On a wide screen the outline stands open beside the text; on a narrow one it is a button that opens a panel,
-   *   closed again by the choice of a section.
+   * - On a wide screen the outline stands open beside the text. On a narrow one it is a bar held under the site's
+   *   header, at every width and every point of the page, naming the section being read; a tap opens the list below
+   *   it, and the choice of a section or a tap elsewhere closes it. A button in a corner was there too, and was not
+   *   seen.
    * - The section being read is the last whose heading has gone above the first third of the window; the outline
    *   scrolls itself (never the page) to keep it in sight.
    * - A heading not shown (the panel of a tab not chosen, as the editor's ten groups) is neither listed nor read.
@@ -33,6 +35,12 @@ export class PageOutline {
     constructor(outline) {
       this.details = outline.querySelector("details")
       this.list = outline.querySelector("ol")
+      this.where = outline.querySelector(".page-outline-current")
+      // The bar is held right under the header, whose height depends on how its links wrap.
+      const header = document.querySelector(".site-header")
+      if (header) {
+        new ResizeObserver(() => document.documentElement.style.setProperty("--site-header-height", header.offsetHeight + "px")).observe(header)
+      }
       this.wide = matchMedia("(min-width: 56rem)")
       this.entries = Array.from(this.list.querySelectorAll("a"), link => ({
         link, heading: document.getElementById(decodeURIComponent(link.hash.substring(1)))
@@ -41,6 +49,11 @@ export class PageOutline {
       this.wide.addEventListener("change", () => this.fit())
       this.list.addEventListener("click", event => {
         if (event.target.closest("a") && !this.wide.matches) {
+          this.details.open = false
+        }
+      })
+      document.addEventListener("click", event => {
+        if (!this.wide.matches && this.details.open && !outline.contains(event.target)) {
           this.details.open = false
         }
       })
@@ -81,6 +94,7 @@ export class PageOutline {
       }
       this.current?.link.removeAttribute("aria-current")
       this.current = reading
+      this.where.textContent = reading ? reading.link.textContent : ""
       if (reading) {
         reading.link.setAttribute("aria-current", "location")
         const item = reading.link.parentElement
@@ -108,7 +122,7 @@ export class PageOutline {
     }
     return `<nav class="page-outline" aria-label="${label}">
   <details>
-    <summary>${label}</summary>
+    <summary><span class="page-outline-label">${label}</span><span class="page-outline-current"></span></summary>
     <ol>
       ${items.join("\n      ")}
     </ol>

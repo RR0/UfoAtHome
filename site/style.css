@@ -718,17 +718,33 @@ td { color: var(--ink-dim); }
 }
 
 @media (max-width: 55.99rem) {
-  .page-outline { position: fixed; right: 1rem; bottom: 1rem; max-width: calc(100vw - 2rem); }
+  /* A bar under the site header, held there while the page scrolls: the outline is one tap away wherever one is. */
+  .page-outline {
+    position: sticky; top: var(--site-header-height, 3.2rem);
+    background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+  }
   .page-outline summary {
-    margin-left: auto; width: max-content; padding: 0.55rem 0.9rem; border-radius: 999px;
-    background: var(--ground-raised); border: 1px solid var(--line-strong); color: var(--ink-dim);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    display: flex; align-items: baseline; gap: 0.6rem; padding: 0.55rem clamp(1rem, 4vw, 2.5rem);
+  }
+  .page-outline summary::after { content: "▾"; margin-left: auto; color: var(--ink-faint); }
+  .page-outline details[open] summary::after { content: "▴"; }
+  .page-outline-current {
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--ink); font-size: 0.85rem; font-weight: 400; letter-spacing: 0; text-transform: none;
   }
   .page-outline details[open] > ol {
-    position: absolute; right: 0; bottom: calc(100% + 0.5rem); width: min(22rem, calc(100vw - 2rem));
-    max-height: 60vh; padding: 0.5rem 0; border-radius: 10px;
-    background: var(--ground-raised); border: 1px solid var(--line-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    position: absolute; left: 0; right: 0; top: 100%; margin: 0; max-height: 65vh; padding: 0.4rem 0;
+    background: var(--ground-raised); border-bottom: 1px solid var(--line-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
+  .page-outline details[open] > ol a { padding-left: clamp(1rem, 4vw, 2.5rem); }
+  .page-outline details[open] > ol li.h3 a { padding-left: calc(clamp(1rem, 4vw, 2.5rem) + 1rem); }
+  /* A heading landed on stops below the bar too, not only below the header. */
+  .has-outline h2[id], .has-outline h3[id] { scroll-margin-top: calc(var(--site-header-height, 3.2rem) + 3rem); }
+}
+
+/* On a wide screen the column says where one is by its marked item: the bar's copy of it is not wanted there. */
+@media (min-width: 56rem) {
+  .page-outline-current { display: none; }
 }
 
 @media print {
