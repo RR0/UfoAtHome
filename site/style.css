@@ -706,18 +706,18 @@ td { color: var(--ink-dim); }
 .page-outline a:hover { color: var(--ink); border-left-color: var(--line-strong); }
 .page-outline a[aria-current] { color: var(--ink); border-left-color: var(--glow); background: var(--warn-bg); }
 
-@media (min-width: 64rem) {
+@media (min-width: 56rem) {
   .page-outline {
-    position: fixed; top: 5rem; left: clamp(1rem, 2vw, 2rem); width: 14rem;
+    position: fixed; top: 5rem; left: clamp(0.75rem, 2vw, 2rem); width: clamp(12rem, 18vw, 14rem);
     max-height: calc(100vh - 6rem); display: flex; flex-direction: column;
   }
   .page-outline details { display: flex; flex-direction: column; min-height: 0; }
   .page-outline details[open] > ol { max-height: calc(100vh - 8rem); }
   .page-outline summary { pointer-events: none; }
-  .has-outline .wrap { margin-left: max(17rem, calc((100vw - var(--wide)) / 2)); margin-right: auto; }
+  .has-outline .wrap { margin-left: max(calc(clamp(12rem, 18vw, 14rem) + clamp(1.5rem, 4vw, 3rem)), calc((100vw - var(--wide)) / 2)); margin-right: auto; }
 }
 
-@media (max-width: 63.99rem) {
+@media (max-width: 55.99rem) {
   .page-outline { position: fixed; right: 1rem; bottom: 1rem; max-width: calc(100vw - 2rem); }
   .page-outline summary {
     margin-left: auto; width: max-content; padding: 0.55rem 0.9rem; border-radius: 999px;

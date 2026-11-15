@@ -33,7 +33,7 @@ export class PageOutline {
     constructor(outline) {
       this.details = outline.querySelector("details")
       this.list = outline.querySelector("ol")
-      this.wide = matchMedia("(min-width: 64rem)")
+      this.wide = matchMedia("(min-width: 56rem)")
       this.entries = Array.from(this.list.querySelectorAll("a"), link => ({
         link, heading: document.getElementById(decodeURIComponent(link.hash.substring(1)))
       })).filter(entry => entry.heading)
