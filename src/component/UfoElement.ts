@@ -11,6 +11,7 @@ import type { PlaybackState } from "../engine/playback/Player.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { SightingAudio } from "../audio/SightingAudio.js"
 import { PlayerIcons } from "./PlayerIcons.js"
+import { Icons } from "./Icons.js"
 import type { SceneFilmer, VideoButton } from "./VideoButton.js"
 import type { FilmChromeAt, FilmOptions } from "./FilmChrome.js"
 import { fromSightingJson, toSightingJson } from "../engine/persistence/sightingJson.js"
@@ -1422,6 +1423,8 @@ export class UfoElement extends HTMLElement {
       const mark = document.createElement("button")
       mark.type = "button"
       mark.className = "cited-mark"
+      // What points at it is an interview: its icon, the one the case gives interviews everywhere else, not a keyframe's diamond.
+      mark.innerHTML = Icons.INTERVIEW
       mark.style.left = `${Math.min(Math.max((moment.at * 1000) / duration, 0), 1) * 100}%`
       const name = moment.quote ?? ""
       mark.title = name

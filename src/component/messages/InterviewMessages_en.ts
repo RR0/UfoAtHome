@@ -68,7 +68,7 @@ export const interviewMessages_en: InterviewMessages = {
   transcribeLocal: "Nothing leaves your computer. The first time, the model (about {mb} MB) is downloaded, then kept by the browser.",
   transcribeSends: "The recording will be sent to {name} to be transcribed.",
   transcribeReplaces: "The current transcript will be replaced.",
-  transcribeNoRecording: "Add the interview's recording first (Recordings button) to transcribe it.",
+  transcribeNoRecording: "There is no recording of the interview yet: the button opens the window where you add it.",
   transcribeKey: "Key",
   transcribeKeyGet: "get a key",
   transcribeKeyHint: "Kept in memory until the page is reloaded, never stored",

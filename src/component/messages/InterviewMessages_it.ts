@@ -68,7 +68,7 @@ export const interviewMessages_it: InterviewMessages = {
   transcribeLocal: "Nulla lascia il tuo computer. La prima volta il modello (circa {mb} MB) viene scaricato e poi conservato dal browser.",
   transcribeSends: "La registrazione sarà inviata a {name} per essere trascritta.",
   transcribeReplaces: "La trascrizione attuale sarà sostituita.",
-  transcribeNoRecording: "Aggiungi prima la registrazione dell'intervista (pulsante Registrazioni) per trascriverla.",
+  transcribeNoRecording: "L'intervista non ha ancora una registrazione: il pulsante apre la finestra dove aggiungerla.",
   transcribeKey: "Chiave",
   transcribeKeyGet: "ottieni una chiave",
   transcribeKeyHint: "Tenuta in memoria fino al ricaricamento della pagina, mai salvata",

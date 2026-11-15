@@ -491,15 +491,23 @@ canvas[data-cursor="rotate"] {
 .cited-mark {
   position: absolute;
   top: 50%;
-  width: 9px;
-  height: 9px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  transform: translate(-50%, -50%) rotate(45deg);
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
   border: 1px solid rgba(0, 0, 0, .55);
-  border-radius: 2px;
+  border-radius: 50%;
   background: #fc3;
+  color: #1a1a1a;
   pointer-events: auto;
   cursor: pointer;
+}
+.cited-mark svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
 }
 .cited-mark:hover, .cited-mark:focus-visible {
   outline: 2px solid #fff;

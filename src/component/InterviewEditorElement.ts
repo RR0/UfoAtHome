@@ -997,7 +997,8 @@ export class InterviewEditorElement extends HTMLElement {
     if (key !== this.shadow.activeElement) key.value = SourceCredentials.of(source.id) ?? ""
     if (this.transcribing) return
     const recording = this.player?.recordingUrl()
-    ;(this.shadow.getElementById("transcribe-start") as HTMLButtonElement).disabled = !recording
+    // Never greyed out for want of a recording: pressed then, it opens the window where one is added (see transcribe).
+    ;(this.shadow.getElementById("transcribe-start") as HTMLButtonElement).disabled = false
     const note = this.shadow.getElementById("transcribe-note")!
     if (this.transcribeOutcome) {
       MessageStyle.show(note, this.transcribeOutcome.text, this.transcribeOutcome.kind)
@@ -1059,7 +1060,11 @@ export class InterviewEditorElement extends HTMLElement {
     const m = this.messages
     const event = this.current
     const recording = this.player?.recordingUrl()
-    if (!m || !event || !recording || this.transcribing || this.hasAttribute("readonly")) return
+    if (!m || !event || this.transcribing || this.hasAttribute("readonly")) return
+    if (!recording) {
+      this.player?.showWindow()
+      return
+    }
     const source = dataSourceById(TRANSCRIPTION_SOURCES, InterviewEditorElement.transcriptionSourceId)
     const provider = source.create()
     const controller = this.transcribing = new AbortController()

@@ -238,7 +238,8 @@ export class InterviewPlayer {
     this.track.setAttribute("aria-valuenow", String(Math.round(now)))
   }
 
-  private showWindow(): void {
+  /** Opens the window that lists the recordings, where one is added. */
+  showWindow(): void {
     this.drawRows()
     if (typeof this.window.showModal === "function") this.window.showModal()
     else this.window.setAttribute("open", "")
