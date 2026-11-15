@@ -356,19 +356,34 @@ describe("What the summary shows is what the file holds, and the other way round
     tool(4, "Take all out").click()
     await wait(100)
     expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3, reason: "taken out at proofreading" } })
-    tool(4, "Restore all").click()
-    await wait(100)
-    // Said why, as the author typed it or picked it among what is offered.
-    const reason = element.shadowRoot!.querySelector<HTMLInputElement>("#redact-reason")!
-    expect([...element.shadowRoot!.querySelectorAll("#redact-reasons option")].map(option => option.textContent)).toContain("private life")
-    reason.value = "private life"
-    tool(4, "Take all out").click()
-    await wait(100)
-    expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3, reason: "private life" } })
     expect(edited(changes).segments[4].text).toBeUndefined()
     tool(4, "Restore all").click()
     await wait(100)
     expect(edited(changes).segments[4].text).toBe("Then it left.")
+  })
+
+  it("takes a passage out for a reason picked among those the interview already gives, given again whole, or among the usual ones", async () => {
+    files["https://example.org/d/interview.json"] = {
+      ...dialogue,
+      segments: dialogue.segments.map((segment, n) => n === 2 || n === 3 ? { ...segment, redacted: { reason: { en: "Private life", fr: "Vie privée" } } } : segment)
+    }
+    const { element, changes } = await make({ ...event(), url: "interview.json" })
+    tabs(element)[1].click()
+    await wait(100)
+    const tool = (index: number, label: string) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(`#exchanges .turn[data-segment="${index}"] .turn-tools button`)]
+      .find(button => button.textContent === label)!
+    const reason = element.shadowRoot!.querySelector<HTMLInputElement>("#redact-reason")!
+    const offered = [...element.shadowRoot!.querySelectorAll("#redact-reasons option")].map(option => option.textContent)
+    // The interview's own first, the most given first, then what passages are most often taken out for.
+    expect(offered.slice(0, 3)).toEqual(["Private life", "Place", "identifying detail"])
+    reason.value = "Private life"
+    tool(0, "Take all out").click()
+    await wait(100)
+    expect(edited(changes).segments[0].redacted!.reason).toEqual({ en: "Private life", fr: "Vie privée" })
+    reason.value = "a reason of my own"
+    tool(4, "Take all out").click()
+    await wait(100)
+    expect(edited(changes).segments[4].redacted!.reason).toEqual("a reason of my own")
   })
 
   it("links a witness's passage to a moment of their observation, named after it", async () => {

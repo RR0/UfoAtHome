@@ -489,7 +489,6 @@ export class InterviewEditorElement extends HTMLElement {
     const reason = this.field("redact-reason")
     reason.placeholder = m.redactReason
     reason.title = m.redactReasonHint
-    this.shadow.getElementById("redact-reasons")!.replaceChildren(...m.redactReasons.map(text => new Option(text, text)))
     text("transcribe-start", m.transcribe)
     this.shadow.getElementById("transcribe-hint")!.replaceChildren(HintElement.of(m.transcribeHint))
     text("label-transcribe-with", m.transcribeWith)
@@ -642,6 +641,7 @@ export class InterviewEditorElement extends HTMLElement {
     this.drawn = json
     this.player?.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
     this.renderReview(json)
+    this.renderRedactReasons(json)
     this.selectionMoved()
     this.decorateExchanges(json)
     this.renderTranscribe()
@@ -665,10 +665,41 @@ export class InterviewEditorElement extends HTMLElement {
   }
 
   /** What a passage taken out here is said to be: taken out at proofreading, in the reader's language. */
-  /** Why what is taken out next is taken out: what the author typed or picked beside "Take out the selection", else proofreading. */
+  /**
+   * Why what is taken out next is taken out: what the author typed or picked beside "Take out the selection", else proofreading. A reason
+   * this interview already gives is given again whole, in every language it was written in, not only in the one it was read in.
+   */
   private get redactReason(): SaidText {
     const typed = this.field("redact-reason").value.trim() || this.messages.redactReason
+    const known = this.givenReasons(this.drawn).find(reason => this.said.read(reason) === typed)
+    if (known !== undefined) return typeof known === "string" ? known : { ...known }
     return this.said.write(undefined, typed, this.language) ?? typed
+  }
+
+  /** The reasons `json` already gives for what it took out, the most given first. */
+  private givenReasons(json: InterviewJson | undefined): SaidText[] {
+    const counts = new Map<string, { reason: SaidText, n: number }>()
+    for (const segment of json?.segments ?? []) {
+      for (const redaction of [segment.redacted, ...(segment.parts ?? []).map(part => "redacted" in part ? part.redacted : undefined)]) {
+        if (!redaction) continue
+        const key = JSON.stringify(redaction.reason)
+        const known = counts.get(key)
+        if (known) known.n++
+        else counts.set(key, { reason: redaction.reason, n: 1 })
+      }
+    }
+    return [...counts.values()].sort((a, b) => b.n - a.n).map(entry => entry.reason)
+  }
+
+  /** What the Reason field offers: the reasons this interview already gives, then what passages are most often taken out for. */
+  private renderRedactReasons(json: InterviewJson | undefined): void {
+    const m = this.messages
+    if (!m) return
+    const given = this.givenReasons(json).map(reason => this.said.read(reason) ?? "").filter(text => text !== "")
+    // A usual reason the interview already gives in its own words ("Private life (family…)" for "private life") is offered in those only.
+    const usual = m.redactReasons.filter(text => !given.some(own => own.toLowerCase().startsWith(text.toLowerCase())))
+    const offered = [...new Set([...given, ...usual])]
+    this.shadow.getElementById("redact-reasons")!.replaceChildren(...offered.map(text => new Option(text, text)))
   }
 
   /** What a speaker is called: their name or initials, else their role. */
