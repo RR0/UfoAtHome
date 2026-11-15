@@ -151,6 +151,8 @@ const TEMPLATE = `
   .redact-pop { position: fixed; inset: auto; margin: 0; text-align: start; width: min(24em, calc(100vw - 32px)); box-sizing: border-box; padding: 10px 12px;
     border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground-raised); color: var(--ink); box-shadow: 0 6px 24px rgba(0, 0, 0, .18); }
   .redact-pop[hidden] { display: none; }
+  /* The words the popover is about, still marked once typing the reason has taken the selection away. */
+  ::highlight(rr0-redact-pending) { background-color: var(--warn-bg, #fde9b0); color: inherit; text-decoration: underline 2px var(--glow-dim, #c90); }
   .redact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
   .redact-actions button[hidden] { display: none; }
   .transcribe { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
@@ -937,6 +939,22 @@ export class InterviewEditorElement extends HTMLElement {
     const from = InterviewEditorElement.offsetIn(said, range.startContainer, range.startOffset)
     const to = InterviewEditorElement.offsetIn(said, range.endContainer, range.endOffset)
     this.openRedactPop({ kind: "selection", index, from: Math.min(from, to), to: Math.max(from, to) }, rect)
+    InterviewEditorElement.markPending(range)
+  }
+
+  /** The name the words the popover is about are marked by (see the ::highlight rule), for as long as it is open. */
+  private static readonly PENDING = "rr0-redact-pending"
+
+  /**
+   * Marks `range` as the words to take out, or unmarks them: the browser's own selection is gone as soon as the reason's field has the
+   * focus, and the author would no longer see what they are about to take out. Where highlights are not known, nothing is marked.
+   */
+  private static markPending(range?: Range): void {
+    const highlights = (globalThis as { CSS?: { highlights?: Map<string, unknown> } }).CSS?.highlights
+    const Highlight = (globalThis as { Highlight?: new (...ranges: Range[]) => unknown }).Highlight
+    if (!highlights || !Highlight) return
+    if (range) highlights.set(InterviewEditorElement.PENDING, new Highlight(range.cloneRange()))
+    else highlights.delete(InterviewEditorElement.PENDING)
   }
 
   /** A passage taken out was pressed: the popover opens under it, its reason to say otherwise, and a way to put it back while it is known. */
@@ -956,6 +974,7 @@ export class InterviewEditorElement extends HTMLElement {
   private openRedactPop(target: InterviewEditorElement["redactTarget"] & object, rect: DOMRect, error?: string): void {
     const pop = this.shadow.getElementById("redact-pop")!
     const reason = this.field("redact-reason")
+    InterviewEditorElement.markPending()
     this.redactTarget = target
     const take = this.shadow.getElementById("redact-take") as HTMLButtonElement
     const restore = this.shadow.getElementById("redact-restore") as HTMLButtonElement
@@ -984,6 +1003,7 @@ export class InterviewEditorElement extends HTMLElement {
   private closeRedactPop(): void {
     const pop = this.shadow.getElementById("redact-pop")!
     this.redactTarget = undefined
+    InterviewEditorElement.markPending()
     if (typeof pop.hidePopover === "function" && pop.matches?.(":popover-open")) pop.hidePopover()
     pop.hidden = true
   }

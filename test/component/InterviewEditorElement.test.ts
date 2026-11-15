@@ -592,15 +592,21 @@ describe("What the summary shows is what the file holds, and the other way round
       range.setEnd(text, 5)
       // What Chromium gives of a selection within a shadow tree, which jsdom does not keep.
       ;(root as ShadowRoot & { getSelection: () => unknown }).getSelection = () => ({ rangeCount: 1, getRangeAt: () => range, removeAllRanges: () => undefined })
+      // The words stay marked once the reason's field has taken the selection away.
+      const highlights = new Map<string, unknown>()
+      vi.stubGlobal("CSS", { highlights })
+      vi.stubGlobal("Highlight", class { constructor(readonly range: Range) {} })
       root.querySelector("#exchanges")!.dispatchEvent(new Event("pointerup"))
       await wait(10)
       expect(pop.hidden).toBe(false)
+      expect(highlights.has("rr0-redact-pending")).toBe(true)
       expect(root.querySelector<HTMLButtonElement>("#redact-take")!.hidden).toBe(false)
       const reason = root.querySelector<HTMLInputElement>("#redact-reason")!
       reason.value = "private life"
       root.querySelector<HTMLButtonElement>("#redact-take")!.click()
       await wait(100)
       expect(pop.hidden).toBe(true)
+      expect(highlights.has("rr0-redact-pending")).toBe(false)
       expect(edited(changes).segments[0].parts![0]).toEqual({ redacted: { reason: "private life", words: 1 } })
     })
 
