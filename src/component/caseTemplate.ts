@@ -33,6 +33,12 @@ export const caseHtml = `
 
 export const caseCss = `
 :host { display: block; color: var(--rr0-ink, inherit); container-type: inline-size; }
+/* The buttons' own colours, light and dark, the very ones an observation's popups are drawn with (see sightingTemplate's --pop-*): a page
+   that gives its own (--rr0-button-bg, -fg, -border, -hover, -on, -ring, inherited from anywhere, :root included) has them win. */
+:host { --btn-bg: #f2f2f2; --btn-fg: #222; --btn-border: #ccc; --btn-hover: #e4e4e4; --btn-on: #dbe6f7; --btn-ring: #9bb6e0; }
+@media (prefers-color-scheme: dark) {
+  :host { --btn-bg: #2c2e33; --btn-fg: #e6e6e6; --btn-border: #4a4c52; --btn-hover: #3a3d43; --btn-on: #274066; --btn-ring: #4f7bc4; }
+}
 .case-head { display: grid; gap: 6px; margin: 0 0 12px; }
 .case-bar { display: flex; align-items: baseline; gap: 10px; }
 .case-kind { margin: 0; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
@@ -42,17 +48,19 @@ export const caseCss = `
    background, so that the two rows are one set of buttons seen in two places. */
 .icon-btn {
   flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; box-sizing: border-box;
-  padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333; cursor: pointer;
+  padding: 0; border: 1px solid var(--rr0-button-border, var(--btn-border)); border-radius: 3px; background: var(--rr0-button-bg, var(--btn-bg));
+  color: var(--rr0-button-fg, var(--btn-fg)); cursor: pointer;
 }
-.icon-btn:hover, .icon-btn:focus-visible { background: #e0e0e0; }
+.icon-btn:hover, .icon-btn:focus-visible { background: var(--rr0-button-hover, var(--btn-hover)); }
 /* The report's export wears the same square, its button being its own (see CaseExportElement). */
 .case-export { display: inline-flex; }
 .case-export::part(button) {
   display: inline-flex; align-items: center; justify-content: center; width: 1.8em; height: 1.8em; box-sizing: border-box;
-  padding: 0; border: 1px solid #999; border-radius: 3px; background: #f0f0f0; color: #333;
+  padding: 0; border: 1px solid var(--rr0-button-border, var(--btn-border)); border-radius: 3px; background: var(--rr0-button-bg, var(--btn-bg));
+  color: var(--rr0-button-fg, var(--btn-fg));
 }
-.case-export::part(button):hover { background: #e0e0e0; }
-.icon-btn[aria-expanded="true"], .icon-btn[aria-pressed="false"] { background: #d8d8d8; }
+.case-export::part(button):hover { background: var(--rr0-button-hover, var(--btn-hover)); }
+.icon-btn[aria-expanded="true"], .icon-btn[aria-pressed="false"] { background: var(--rr0-button-on, var(--btn-on)); }
 .case-summary { margin: 0; font-size: 15px; line-height: 1.5; opacity: .85; }
 .case-summary[hidden] { display: none; }
 /* The chronology itself is common to the editor (see CaseTimeline): what cannot be done while reading is absent, not greyed out. */

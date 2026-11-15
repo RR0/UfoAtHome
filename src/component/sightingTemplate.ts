@@ -284,6 +284,9 @@ export const css = `
 .scene-controls [hidden] {
   display: none;
 }
+/* The squares of this row take their colours from the page when it gives them (--rr0-button-bg, -fg, -border, -hover, -on, -ring,
+   inherited from anywhere, :root included), and otherwise from the popups' own light/dark palette below: a light grey square was
+   left glaring on a dark page. */
 .scene-controls button {
   display: inline-flex;
   align-items: center;
@@ -291,22 +294,22 @@ export const css = `
   width: 1.8em;
   height: 1.8em;
   padding: 0;
-  border: 1px solid #999;
+  border: 1px solid var(--rr0-button-border, var(--pop-border));
   border-radius: 3px;
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
-  background: #f0f0f0;
-  color: #333;
+  background: var(--rr0-button-bg, var(--pop-fill));
+  color: var(--rr0-button-fg, var(--pop-fg));
 }
 .scene-controls button[aria-pressed="true"],
 .info-btn[aria-expanded="true"] {
-  outline: 2px solid #39f;
+  outline: 2px solid var(--rr0-button-ring, var(--pop-on-border));
 }
 .scene-controls input[type="range"] {
   width: 5.5em;
   margin: 0;
-  accent-color: #39f;
+  accent-color: var(--rr0-button-ring, var(--pop-on-border));
 }
 /* The pen and the "i" wear the same square as the toggles the playback layer lends this row (see
    .scene-controls button), so the row reads as one set of buttons. */
@@ -319,14 +322,14 @@ export const css = `
   height: 1.8em;
   box-sizing: border-box;
   border-radius: 3px;
-  border: 1px solid #999;
-  background: #f0f0f0;
-  color: #333;
+  border: 1px solid var(--rr0-button-border, var(--pop-border));
+  background: var(--rr0-button-bg, var(--pop-fill));
+  color: var(--rr0-button-fg, var(--pop-fg));
 }
 .edit-link:hover, .edit-link:focus-visible,
 .info-btn:hover, .info-btn:focus-visible,
 .scene-controls button:hover, .scene-controls button:focus-visible {
-  background: #e0e0e0;
+  background: var(--rr0-button-hover, var(--pop-fill-hover));
 }
 /* Same trap as elsewhere: a rule setting display outranks the UA sheet's [hidden]. */
 .edit-link[hidden] {
@@ -344,9 +347,9 @@ export const css = `
   height: 1.8em;
   box-sizing: border-box;
   border-radius: 3px;
-  border: 1px solid #999;
-  background: #f0f0f0;
-  color: #333;
+  border: 1px solid var(--rr0-button-border, var(--pop-border));
+  background: var(--rr0-button-bg, var(--pop-fill));
+  color: var(--rr0-button-fg, var(--pop-fg));
   cursor: pointer;
   font-size: 1em;
   line-height: 1;
