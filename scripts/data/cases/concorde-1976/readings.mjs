@@ -203,7 +203,9 @@ export const READINGS = [
   {
     id: 'dust',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: "La poussière sur l'objectif (configuration la plus favorable)", en: 'The speck on the lens (most favourable configuration)', es: 'La mota en el objetivo (configuración más favorable)', it: "Il granello sull'obiettivo (configurazione più favorevole)" }, distanceM: 2, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: "La poussière sur l'objectif (configuration la plus favorable)", en: 'The speck on the lens (most favourable configuration)', es: 'La mota en el objetivo (configuración más favorable)', it: "Il granello sull'obiettivo (configurazione più favorevole)" }, distanceM: 2, luminanceCdM2: 1e4, albedo: 0, transparency: 0.3 },
+    // As the pane's reflection: at its best as bright as the orb, which is light it sends, not a ball the Sun lights (albedo nil), and
+    // so near the lens that it is out of focus and the ground shows through it. +94 over a ground of 78 on the render, the orb +99.
     by: [{ title: 'Manduck (Straight Dope)' }, { title: 'Telemark (Straight Dope)' }],
     time: '2008-08',
     title: {
@@ -225,7 +227,9 @@ export const READINGS = [
   {
     id: 'film-defect',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: 'Le cheveu dans le couloir (configuration la plus favorable)', en: 'The hair in the gate (most favourable configuration)', es: 'El pelo en la ventanilla (configuración más favorable)', it: 'Il pelo nel quadruccio (configurazione più favorevole)' }, distanceM: 2, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: 'Le cheveu dans le couloir (configuration la plus favorable)', en: 'The hair in the gate (most favourable configuration)', es: 'El pelo en la ventanilla (configuración más favorable)', it: 'Il pelo nel quadruccio (configurazione più favorevole)' }, distanceM: 2, luminanceCdM2: 1e4, albedo: 0, transparency: 0.3 },
+    // As the pane's reflection: at its best as bright as the orb, which is light it sends, not a ball the Sun lights (albedo nil), and
+    // so near the lens that it is out of focus and the ground shows through it. +94 over a ground of 78 on the render, the orb +99.
     by: [{ title: 'beowulff (Straight Dope)' }],
     time: '2008-08',
     title: {
