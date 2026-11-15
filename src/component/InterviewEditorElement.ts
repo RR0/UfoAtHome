@@ -154,6 +154,8 @@ const TEMPLATE = `
   .transcribe .source-credit { font-size: 12px; color: var(--ink-faint); }
   .transcribe-note { margin: .4em 0 0; }
   .transcribe progress { width: 100%; margin-top: 6px; }
+  .redact-reason { display: flex; align-items: center; gap: 6px; font: 600 12px/1.3 var(--sans); color: var(--ink-dim); }
+  .redact-reason input { width: 16em; font-weight: 400; }
   .redact-note { font-size: 13px; color: var(--ink-faint); }
   .redact-note.error { color: var(--error); }
   /* Each turn: its time, which plays from there; what is taken out as a label that says how much, and puts it back while it is known. */
@@ -224,6 +226,8 @@ const TEMPLATE = `
   <div id="review" class="review" hidden></div>
   <div class="redact-row">
     <button id="redact-selection" type="button" class="pill-btn"></button>
+    <label class="redact-reason"><span id="label-redact-reason"></span><input id="redact-reason" type="text" list="redact-reasons" autocomplete="off"/></label>
+    <datalist id="redact-reasons"></datalist>
     <span id="redact-note" class="redact-note" role="status"></span>
   </div>
   <rr0-interview id="exchanges"></rr0-interview>
@@ -481,6 +485,11 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-url", m.transcript)
     HintElement.say(this.shadow.getElementById("label-import-file")!, m.importFile, m.importFileHint)
     text("redact-selection", m.redactSelection)
+    text("label-redact-reason", m.redactReasonLabel)
+    const reason = this.field("redact-reason")
+    reason.placeholder = m.redactReason
+    reason.title = m.redactReasonHint
+    this.shadow.getElementById("redact-reasons")!.replaceChildren(...m.redactReasons.map(text => new Option(text, text)))
     text("transcribe-start", m.transcribe)
     this.shadow.getElementById("transcribe-hint")!.replaceChildren(HintElement.of(m.transcribeHint))
     text("label-transcribe-with", m.transcribeWith)
@@ -656,8 +665,10 @@ export class InterviewEditorElement extends HTMLElement {
   }
 
   /** What a passage taken out here is said to be: taken out at proofreading, in the reader's language. */
+  /** Why what is taken out next is taken out: what the author typed or picked beside "Take out the selection", else proofreading. */
   private get redactReason(): SaidText {
-    return this.said.write(undefined, this.messages.redactReason, this.language) ?? this.messages.redactReason
+    const typed = this.field("redact-reason").value.trim() || this.messages.redactReason
+    return this.said.write(undefined, typed, this.language) ?? typed
   }
 
   /** What a speaker is called: their name or initials, else their role. */

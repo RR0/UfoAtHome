@@ -62,6 +62,10 @@ export interface InterviewMessages extends InputFileMessages {
   unlinkMoment: string
   noMoments: string
   /** Why a passage taken out in the editor was: the reason it is given. */
+  redactReasonLabel: string
+  redactReasonHint: string
+  /** What passages are most often taken out for, offered beside the reason. */
+  redactReasons: string[]
   redactReason: string
   /** `unattributed`: a voice a transcription found, whose it is not said yet. */
   roles: { interviewer: string, interviewee: string, witness: string, unattributed: string }

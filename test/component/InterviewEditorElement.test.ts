@@ -355,7 +355,16 @@ describe("What the summary shows is what the file holds, and the other way round
       .find(button => button.textContent === label)!
     tool(4, "Take all out").click()
     await wait(100)
-    expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3 } })
+    expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3, reason: "taken out at proofreading" } })
+    tool(4, "Restore all").click()
+    await wait(100)
+    // Said why, as the author typed it or picked it among what is offered.
+    const reason = element.shadowRoot!.querySelector<HTMLInputElement>("#redact-reason")!
+    expect([...element.shadowRoot!.querySelectorAll("#redact-reasons option")].map(option => option.textContent)).toContain("private life")
+    reason.value = "private life"
+    tool(4, "Take all out").click()
+    await wait(100)
+    expect(edited(changes).segments[4]).toMatchObject({ redacted: { words: 3, reason: "private life" } })
     expect(edited(changes).segments[4].text).toBeUndefined()
     tool(4, "Restore all").click()
     await wait(100)
