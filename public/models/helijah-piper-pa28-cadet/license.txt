@@ -1,0 +1,11 @@
+Model Information:
+* title:	Piper Pa 28 "Cadet"
+* source:	https://sketchfab.com/3d-models/piper-pa-28-cadet-ba310f1e1ba349c7a54ab9db92e48970
+* author:	helijah (https://sketchfab.com/helijah)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Piper Pa 28 "Cadet"" (https://sketchfab.com/3d-models/piper-pa-28-cadet-ba310f1e1ba349c7a54ab9db92e48970) by helijah (https://sketchfab.com/helijah) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

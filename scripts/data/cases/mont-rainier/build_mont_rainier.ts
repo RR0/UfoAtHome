@@ -1,0 +1,531 @@
+/**
+ * Writes Kenneth Arnold's sighting of 24 June 1947 near Mount Rainier (public/demo-data/observer-arnold.json), its case
+ * (case-mont-rainier.json), and the reading of it as a chain of American white pelicans (interpretation-mont-rainier-pelicans.json).
+ *
+ * Sources: Arnold's own report to the AAF (rr0.org time/1/9/4/7/07/12/Arnold_Report_AAF), and the map of the rr0.org dossier
+ * (science/crypto/ufo/enquete/dossier/MontRainier/Carte.kml) for his assumed path and for where it puts the first and the last object.
+ * Everything else is ASSUMED and says so in its rationale.
+ *
+ * What the witness said is turned into what a witness file holds, directions and angular sizes (see the angular-only rule): each object's
+ * direction at each second is that of the point the dossier's map puts it at, seen from where Arnold was, on a ground that curves away under
+ * the line of sight (refraction included, as the scene draws it). His own reading, nine craft of some fifteen metres flying from Rainier to
+ * Adams, is the witness's interpretation in the same file.
+ *
+ * The pelican reading is solved, not drawn: the leader is put on Arnold's line of sight to Rainier's southern edge at 14:59:00, flying level at
+ * a pelican's cruising speed, and the distance and heading are those that put it on his line of sight to Adams' southern crest 1 min 42 s
+ * later. Where that lands it (a kilometre or so from his aircraft, not twenty miles) is the finding.
+ *
+ * Run with: node --import tsx scripts/data/cases/mont-rainier/build_mont_rainier.ts
+ */
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import { inflateSync } from "node:zlib"
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const demoData = path.join(here, "..", "..", "..", "..", "public", "demo-data")
+const tileCache = path.join(here, "tiles")
+
+type Text = Record<"en" | "fr", string>
+const said = (value: unknown, basis: string, en: string, fr: string) => ({ value, basis, rationale: { en, fr } })
+
+// ---- Ground heights, from the same AWS Terrarium tiles the scene reads (zoom 12, some 25 m a pixel) ----
+
+class Png {
+  /** An 8-bit RGB or RGBA PNG, non-interlaced: what a Terrarium tile is. Its pixels as RGB triples. */
+  static decode(buffer: Buffer): { width: number, height: number, rgb: Uint8Array } {
+    let offset = 8
+    let width = 0, height = 0, channels = 3
+    const idat: Buffer[] = []
+    while (offset < buffer.length) {
+      const length = buffer.readUInt32BE(offset)
+      const type = buffer.toString("ascii", offset + 4, offset + 8)
+      const data = buffer.subarray(offset + 8, offset + 8 + length)
+      if (type === "IHDR") {
+        width = data.readUInt32BE(0)
+        height = data.readUInt32BE(4)
+        if (data[8] !== 8 || data[12] !== 0) throw new Error("Only 8-bit non-interlaced PNGs")
+        channels = data[9] === 6 ? 4 : data[9] === 2 ? 3 : 0
+        if (!channels) throw new Error(`PNG colour type ${data[9]}`)
+      } else if (type === "IDAT") idat.push(data)
+      else if (type === "IEND") break
+      offset += 12 + length
+    }
+    const raw = inflateSync(Buffer.concat(idat))
+    const stride = width * channels
+    const out = new Uint8Array(height * stride)
+    for (let y = 0; y < height; y++) {
+      const filter = raw[y * (stride + 1)]
+      for (let x = 0; x < stride; x++) {
+        const value = raw[y * (stride + 1) + 1 + x]
+        const left = x >= channels ? out[y * stride + x - channels] : 0
+        const up = y > 0 ? out[(y - 1) * stride + x] : 0
+        const upLeft = y > 0 && x >= channels ? out[(y - 1) * stride + x - channels] : 0
+        let predicted = 0
+        switch (filter) {
+          case 0: predicted = 0; break
+          case 1: predicted = left; break
+          case 2: predicted = up; break
+          case 3: predicted = (left + up) >> 1; break
+          case 4: {
+            const p = left + up - upLeft, pa = Math.abs(p - left), pb = Math.abs(p - up), pc = Math.abs(p - upLeft)
+            predicted = pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft
+            break
+          }
+        }
+        out[y * stride + x] = (value + predicted) & 255
+      }
+    }
+    const rgb = new Uint8Array(width * height * 3)
+    for (let i = 0; i < width * height; i++) for (let c = 0; c < 3; c++) rgb[i * 3 + c] = out[i * channels + c]
+    return { width, height, rgb }
+  }
+}
+
+class Terrarium {
+  private static readonly ZOOM = 12
+  private readonly tiles = new Map<string, { width: number, rgb: Uint8Array }>()
+
+  async load(points: { lat: number, lng: number }[]): Promise<void> {
+    mkdirSync(tileCache, { recursive: true })
+    for (const { lat, lng } of points) {
+      const { x, y } = Terrarium.tileOf(lat, lng)
+      const key = `${x}/${y}`
+      if (this.tiles.has(key)) continue
+      const file = path.join(tileCache, `${Terrarium.ZOOM}-${x}-${y}.png`)
+      if (!existsSync(file)) {
+        const response = await fetch(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Terrarium.ZOOM}/${x}/${y}.png`)
+        if (!response.ok) throw new Error(`Terrarium tile ${key}: ${response.status}`)
+        writeFileSync(file, Buffer.from(await response.arrayBuffer()))
+      }
+      this.tiles.set(key, Png.decode(readFileSync(file)))
+    }
+  }
+
+  /** The ground's height above the sea at a point, metres: bilinear between the pixels of its tile. */
+  heightAt(lat: number, lng: number): number {
+    const { x, y, fx, fy } = Terrarium.tileOf(lat, lng)
+    const tile = this.tiles.get(`${x}/${y}`)
+    if (!tile) throw new Error(`No tile for ${lat}, ${lng}`)
+    const px = Math.min(254, Math.floor(fx * 256)), py = Math.min(254, Math.floor(fy * 256))
+    const h = (i: number, j: number) => {
+      const k = ((py + j) * tile.width + px + i) * 3
+      return tile.rgb[k] * 256 + tile.rgb[k + 1] + tile.rgb[k + 2] / 256 - 32768
+    }
+    const u = fx * 256 - px, v = fy * 256 - py
+    return (h(0, 0) * (1 - u) + h(1, 0) * u) * (1 - v) + (h(0, 1) * (1 - u) + h(1, 1) * u) * v
+  }
+
+  private static tileOf(lat: number, lng: number): { x: number, y: number, fx: number, fy: number } {
+    const n = 2 ** Terrarium.ZOOM
+    const xf = (lng + 180) / 360 * n
+    const latRad = lat * Math.PI / 180
+    const yf = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n
+    return { x: Math.floor(xf), y: Math.floor(yf), fx: xf - Math.floor(xf), fy: yf - Math.floor(yf) }
+  }
+}
+
+// ---- Geometry ----
+
+const M_PER_DEG = 111_320
+/** The Earth's radius as a line of sight bends round it (see TerrainReach.SIGHT_EARTH_RADIUS_M). */
+const SIGHT_R = 6_371_000 * 7 / 6
+const FT = 0.3048
+
+interface Geo { lat: number, lng: number, altM: number }
+
+/** Azimuth, elevation and distance of `to` seen from `from`, on a ground curving away under the line of sight. */
+function lookAt(from: Geo, to: Geo): { azimuthDeg: number, altitudeDeg: number, distanceM: number } {
+  const lat = (from.lat + to.lat) / 2
+  const east = (to.lng - from.lng) * M_PER_DEG * Math.cos(lat * Math.PI / 180)
+  const north = (to.lat - from.lat) * M_PER_DEG
+  const level = Math.hypot(east, north)
+  const up = to.altM - from.altM - level * level / (2 * SIGHT_R)
+  return {
+    azimuthDeg: ((Math.atan2(east, north) * 180 / Math.PI) + 360) % 360,
+    altitudeDeg: Math.atan2(up, level) * 180 / Math.PI,
+    distanceM: Math.hypot(level, up)
+  }
+}
+
+function offset(point: Geo, eastM: number, northM: number, upM = 0): Geo {
+  return { lat: point.lat + northM / M_PER_DEG, lng: point.lng + eastM / (M_PER_DEG * Math.cos(point.lat * Math.PI / 180)), altM: point.altM + upM }
+}
+
+function between(a: Geo, b: Geo, f: number): Geo {
+  return { lat: a.lat + (b.lat - a.lat) * f, lng: a.lng + (b.lng - a.lng) * f, altM: a.altM + (b.altM - a.altM) * f }
+}
+
+const r2 = (v: number) => Math.round(v * 100) / 100
+const r3 = (v: number) => Math.round(v * 1000) / 1000
+const r6 = (v: number) => Math.round(v * 1e6) / 1e6
+
+// ---- What the sources say ----
+
+/** Arnold's path on the dossier's map (Carte.kml, "Trajectoire de Kenneth Arnold"), from the end of his turn over Elbe eastwards: points 34 to 46. */
+const ROUTE: [number, number][] = [
+  [-122.2184, 46.7935], [-122.1941, 46.8017], [-122.1707, 46.8076], [-122.1419, 46.8125], [-122.1192, 46.8172], [-122.0893, 46.8214],
+  [-122.0663, 46.825], [-122.0197, 46.8268], [-121.9791, 46.8236], [-121.9455, 46.8142], [-121.9016, 46.7906], [-121.8521, 46.7493],
+  [-121.6846, 46.5683]
+]
+/** "I climbed back up to an altitude of approximately 9,200 feet." */
+const ARNOLD_ALT_M = 9200 * FT
+/** ASSUMED: a CallAir A-3 cruising at some 100 mph. */
+const ARNOLD_SPEED_MS = 44.7
+/** "I hadn't flown more than two or three minutes on my course when a bright flash reflected on my airplane": t = 0, at 14:58. */
+const ON_COURSE_S = 150
+/** Where the dossier's map puts the first object as it passes Rainier's southern edge (14:59:00) and the last as it passes Adams' southern crest
+ * (1 min 42 s later), at the height it gives them. */
+const FIRST_AT_RAINIER: Geo = { lat: 46.846073, lng: -121.763962, altM: 2800 }
+const LAST_AT_ADAMS: Geo = { lat: 46.19207, lng: -121.489044, altM: 2888 }
+/** "approximately 9,500 foot elevation". */
+const OBJECTS_ALT_M = 9500 * FT
+const T_RAINIER_S = 60
+const T_ADAMS_S = 162
+/** "the chain of these saucer like objects were at least five miles long" */
+const CHAIN_M = 5 * 1609.34
+const COUNT = 9
+const DURATION_S = 180
+
+// ---- Arnold's flight ----
+
+function routeLength(): { points: Geo[], at: number[] } {
+  const points = ROUTE.map(([lng, lat]) => ({ lat, lng, altM: ARNOLD_ALT_M }))
+  const at = [0]
+  for (let i = 1; i < points.length; i++) {
+    const d = lookAt(points[i - 1], points[i])
+    at.push(at[i - 1] + Math.hypot(d.distanceM, 0))
+  }
+  return { points, at }
+}
+const route = routeLength()
+
+/** Where Arnold is `t` seconds into the recording, and the heading he flies. */
+function arnoldAt(t: number): { at: Geo, headingDeg: number } {
+  const along = (ON_COURSE_S + t) * ARNOLD_SPEED_MS
+  let i = 1
+  while (i < route.at.length - 1 && route.at[i] < along) i++
+  const f = (along - route.at[i - 1]) / (route.at[i] - route.at[i - 1])
+  return { at: between(route.points[i - 1], route.points[i], f), headingDeg: lookAt(route.points[i - 1], route.points[i]).azimuthDeg }
+}
+
+// ---- The objects, as Arnold places them ----
+
+/** The leader passes Rainier's southern edge at 60 s; the last, CHAIN_M behind it, passes Adams' crest at 162 s. */
+const lineM = lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).distanceM
+const objectSpeed = (lineM + CHAIN_M) / (T_ADAMS_S - T_RAINIER_S)
+function objectAt(k: number, t: number): Geo {
+  const behindM = k * CHAIN_M / (COUNT - 1)
+  const alongM = (t - T_RAINIER_S) * objectSpeed - behindM
+  const p = between(FIRST_AT_RAINIER, LAST_AT_ADAMS, alongM / lineM)
+  return { ...p, altM: OBJECTS_ALT_M }
+}
+
+// ---- Flashes: "two or three of them every few seconds would dip or change their course slightly, just enough for the sun to strike them" ----
+
+function mulberry(seed: number): () => number {
+  let s = seed >>> 0
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0
+    let z = s
+    z = Math.imul(z ^ (z >>> 15), z | 1)
+    z ^= z + Math.imul(z ^ (z >>> 7), z | 61)
+    return ((z ^ (z >>> 14)) >>> 0) / 4294967296
+  }
+}
+const random = mulberry(1947)
+const flashes: number[][] = Array.from({ length: COUNT }, () => [])
+for (let t = 1; t < DURATION_S; t += 3) {
+  const howMany = 2 + Math.floor(random() * 2)
+  for (let n = 0; n < howMany; n++) flashes[Math.floor(random() * COUNT)].push(t + random() * 2.5)
+}
+const flashingAt = (k: number, t: number) => flashes[k].some(f => t >= f && t < f + 0.5)
+
+async function main(): Promise<void> {
+  const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
+  const terrarium = new Terrarium()
+  await terrarium.load(samples.map(t => arnoldAt(t).at))
+  const origin = arnoldAt(0).at
+  const originGround = terrarium.heightAt(origin.lat, origin.lng)
+  const local = (p: Geo) => ({
+    eastM: r2((p.lng - origin.lng) * M_PER_DEG * Math.cos(origin.lat * Math.PI / 180)),
+    northM: r2((p.lat - origin.lat) * M_PER_DEG)
+  })
+
+  // The witness, looking at the leader while it is in sight, at the last of them after.
+  const observerKeys = samples.map(t => {
+    const { at } = arnoldAt(t)
+    const ground = terrarium.heightAt(at.lat, at.lng)
+    const eye = { ...at, altM: ARNOLD_ALT_M }
+    const watched = t < T_ADAMS_S - 20 ? 0 : COUNT - 1
+    const look = lookAt(eye, objectAt(watched, t))
+    return {
+      t: t * 1000,
+      pose: {
+        lat: r6(at.lat), lng: r6(at.lng),
+        elevationM: t === 0
+          ? said(r2(ARNOLD_ALT_M - ground), "derived", "\"approximately 9,200 feet\" above the sea, less the ground under him (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol sous lui (tuiles AWS Terrarium)")
+          : r2(ARNOLD_ALT_M - ground),
+        headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg), fovDeg: 60
+      }
+    }
+  })
+
+  // His aircraft, round his eye: a Piper PA-28 Cadet stands in for his CallAir A-3 (no model of it to be had). In the model the pilot's eye is
+  // 1.15 m ahead of its middle, 0.28 m left of its axis and 0.385 m above its middle (behind the left yoke, 0.8 m from the panel, 0.17 m under
+  // the roof), and the decor states where the model's middle is; the 0.22 m further back and 0.15 m further right are what the scene showed.
+  const cabinTrack = samples.map(t => {
+    const { at, headingDeg } = arnoldAt(t)
+    const h = headingDeg * Math.PI / 180
+    // From the eye back to the model's middle: 1.15 m astern, 0.28 m to the right.
+    const back = 1.37, right = 0.43
+    const middle = offset(at, -back * Math.sin(h) + right * Math.cos(h), -back * Math.cos(h) - right * Math.sin(h))
+    const ground = terrarium.heightAt(at.lat, at.lng)
+    return { t: t * 1000, ...local(middle), altitudeM: r2(ARNOLD_ALT_M - ground + 1.6 - 0.385), headingDeg: r2(headingDeg) }
+  })
+
+  // "There was a DC-4 to the left and to the rear of me approximately fifteen miles distance, and I should judge, at 14,000 foot elevation."
+  // Where it went is not said: ASSUMED flying east, as he was, at a DC-4's cruise of some 100 m/s.
+  const dc4Start = (() => {
+    const { at, headingDeg } = arnoldAt(0)
+    const bearing = (headingDeg - 135) * Math.PI / 180
+    return offset(at, 15 * 1609.34 * Math.sin(bearing), 15 * 1609.34 * Math.cos(bearing))
+  })()
+  await terrarium.load(samples.map(t => offset(dc4Start, t * 100, 0)))
+  const dc4Track = samples.filter(t => t % 10 === 0).map(t => {
+    const p = offset(dc4Start, t * 100, 0)
+    return { t: t * 1000, ...local(p), altitudeM: r2(14000 * FT - terrarium.heightAt(p.lat, p.lng)), headingDeg: 90 }
+  })
+
+  // ---- The account: each object's direction, as the points the dossier's map puts them at, seen from where he was ----
+  const sourceIds = Array.from({ length: COUNT }, (_, k) => `object-${k + 1}`)
+  // "they seemed smaller than the DC-4; but, I should judge their span would have been as wide as the furtherest engines on each side of the
+  // fuselage of the DC-4", that DC-4 fifteen miles off: a DC-4's outer engines are some 17 m apart, 0.04° at 15 miles.
+  const widthDeg = 17 / (15 * 1609.34) * 180 / Math.PI
+  const polygon = Array.from({ length: 25 }, (_, i) => {
+    // His drawing: rounded in front, a point at the back; "their thickness was about 1/20th their width".
+    const a = Math.PI * (i / 24)
+    return i <= 16
+      ? { x: r2(50 - 50 * Math.cos(a * 24 / 16 * 0.5 * 2 > Math.PI ? Math.PI : a * 24 / 16)), y: r2(2.5 - 2.5 * Math.sin(a * 24 / 16)) }
+      : { x: r2(100 - (i - 16) / 8 * 50), y: r2(2.5 + 2.5 * (i - 16) / 8) }
+  })
+  const keyframes = samples.map(t => {
+    const eye = { ...arnoldAt(t).at, altM: ARNOLD_ALT_M }
+    return {
+      t: t * 1000,
+      shapes: sourceIds.map((sourceId, k) => {
+        const look = lookAt(eye, objectAt(k, t))
+        const flash = flashingAt(k, t)
+        const shape: Record<string, unknown> = {
+          aim: t === T_RAINIER_S && k === 0
+            ? said({ azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) }, "derived",
+              "\"one minute to 3 P.M. as the first object of this formation passed the southern edge of Mt. Rainier\": the direction of that edge as the dossier's map places it, from where he is assumed to be",
+              "« une minute avant 15 h, quand le premier objet de cette formation passa le bord sud du mont Rainier » : la direction de ce bord tel que la carte du dossier le place, depuis là où on le suppose")
+            : t === T_ADAMS_S && k === COUNT - 1
+              ? said({ azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) }, "derived",
+                "\"As the last unit of this formation passed the southern most high snow-covered crest of Mt. Adams [...] one minute and forty-two seconds\"",
+                "« Quand le dernier de cette formation passa la crête enneigée la plus au sud du mont Adams [...] une minute et quarante-deux secondes »")
+              : { azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) },
+          angular: { widthDeg: r3(widthDeg), heightDeg: r3(flash ? widthDeg : widthDeg / 20) },
+          kind: "polygon",
+          points: polygon,
+          bounds: { x: 300, y: 178, width: 100, height: 5 },
+          color: flash ? "#ffffff" : "#1c1c1c",
+          // "Mirror Bright" as they flip: a flash.
+          brightness: flash ? 1 : 0,
+          haloScale: flash ? 2 : 0,
+          transparency: 0,
+          title: { en: `Object ${k + 1}`, fr: `Objet ${k + 1}` }
+        }
+        if (t === 0 && k === 0) {
+          shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »")
+          shape.angular = said({ widthDeg: r3(widthDeg), heightDeg: r3(widthDeg / 20) }, "stated",
+            "\"their span would have been as wide as the furtherest engines on each side of the fuselage of the DC-4\" (some 17 m apart, fifteen miles off), measured against a cowling tool held up; \"their thickness was about 1/20th their width\"",
+            "« leur envergure aurait été aussi large que les moteurs les plus éloignés de chaque côté du fuselage du DC-4 » (quelque 17 m, à quinze miles), mesuré contre un outil de capot tenu à bout de bras ; « leur épaisseur était d'environ 1/20 de leur largeur »")
+        }
+        return { sourceId, shape }
+      })
+    }
+  })
+
+  const description: Text = {
+    en: "\"I hadn't flown more than two or three minutes on my course when a bright flash reflected on my airplane. [...] I observed a chain of nine peculiar looking aircraft flying from north to south at approximately 9,500 foot elevation [...] They flew like many times I have observed geese to fly in a rather diagonal chain-like line as if they were linked together. [...] What kept bothering me as I watched them flip and flash in the sun right along their path was the fact that I couldn't make out any tail on them.\" (Report to the AAF, July 1947.)",
+    fr: "« Je n'avais pas volé plus de deux ou trois minutes sur mon cap quand un éclair brillant se refléta sur mon avion. [...] J'observai une chaîne de neuf appareils d'aspect étrange volant du nord au sud à environ 9 500 pieds [...] Ils volaient comme j'ai souvent vu voler des oies, en une ligne plutôt diagonale, comme une chaîne dont ils seraient les maillons. [...] Ce qui continuait de me tracasser, tandis que je les regardais basculer et étinceler au soleil tout le long de leur trajet, c'était que je ne pouvais leur distinguer aucune queue. » (Rapport à l'AAF, juillet 1947.)"
+  }
+  const witnessInterpretation = {
+    title: { en: "Nine craft some fifteen metres across, flying from Rainier to Adams (his own reading)", fr: "Neuf engins d'une quinzaine de mètres, volant du Rainier à l'Adams (sa propre lecture)" },
+    bodies: sourceIds.map((sourceId, k) => ({
+      id: `craft-${k + 1}`,
+      explains: [sourceId],
+      model: { id: "ellipsoid" },
+      track: samples.filter(t => t % 2 === 0).map(t => ({
+        t: t * 1000,
+        ...local(objectAt(k, t)),
+        altitudeM: r2(OBJECTS_ALT_M - originGround),
+        ...(t === 0 ? {
+          sizeM: { widthM: 14, lengthM: 15, heightM: 0.7 },
+          appearance: { color: "#d8dadc", albedo: 0.8 },
+          attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
+        } : {}),
+        // "flip and flash in the sun": banked for an instant.
+        attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: flashingAt(k, t) ? 40 : 0 }
+      }))
+    }))
+  }
+
+  const weather = {
+    cloudCover: said(0, "stated", "\"The sky and air was clear as crystal\"", "« Le ciel et l'air étaient clairs comme du cristal »"),
+    visibilityKm: said(120, "assumed", "\"the air was so clear that it was very easy to see objects and determine their approximate shape and size at almost fifty miles\"; he followed the flashes to Mt Adams, some 90 km off", "« l'air était si clair qu'il était très facile de voir des objets et d'en juger la forme et la taille à près de cinquante miles » ; il suivit les éclats jusqu'au mont Adams, à quelque 90 km"),
+    cloudDarkness: 0, lowerCloudCover: 0, highCloudCover: 0, precipitationType: "none", precipitationIntensity: 0,
+    windSpeed: said(2, "assumed", "\"The air was so smooth that day\"", "« L'air était si calme ce jour-là »"), windDirectionDeg: 270, storm: false
+  }
+
+  const decor = [
+    {
+      id: "callair", kind: "aircraft",
+      title: { en: "His aircraft (a Piper PA-28 stands in for his CallAir A-3)", fr: "Son avion (un Piper PA-28 tient lieu de son CallAir A-3)" },
+      eastM: cabinTrack[0].eastM, northM: cabinTrack[0].northM, headingDeg: cabinTrack[0].headingDeg, sizeM: { widthM: 10.55, lengthM: 7.15, heightM: 2.73 },
+      model: { id: "helijah-piper-pa28-cadet" }, track: cabinTrack
+    },
+    {
+      id: "dc4", kind: "aircraft",
+      title: { en: "DC-4 \"to the left and to the rear of me approximately fifteen miles\"", fr: "DC-4 « à ma gauche et en arrière, à environ quinze miles »" },
+      eastM: dc4Track[0].eastM, northM: dc4Track[0].northM, headingDeg: dc4Track[0].headingDeg, sizeM: { widthM: 35.8, lengthM: 28.6, heightM: 8.4 },
+      model: { id: "poly-google-airliner" }, track: dc4Track
+    }
+  ]
+
+  const recording = {
+    version: 4,
+    id: "1947-06-24-ArnoldKennethE",
+    time: "1947-06-24T14:58:00",
+    utcOffsetHours: -7,
+    timeZone: "America/Los_Angeles",
+    durationSeconds: DURATION_S,
+    summaryTime: T_RAINIER_S + 20,
+    place: { name: "Cascade Range, between Mount Rainier and Mount Adams, Washington", locations: [{ lat: r6(origin.lat), lng: r6(origin.lng) }] },
+    observer: { id: "ArnoldKennethE", title: "Kenneth Arnold" },
+    account: {
+      observerOccupation: { en: "businessman and private pilot", fr: "homme d'affaires et pilote privé" },
+      source: said("letter", "stated", "his written report to the AAF, sent in July 1947, two weeks after", "son rapport écrit à l'AAF, envoyé en juillet 1947, deux semaines après")
+    },
+    description,
+    tags: ["pilot", "daylight disc", "formation"],
+    sources: [{ title: "Sighting report (to the AAF)", authors: ["Kenneth Arnold"], url: "https://rr0.org/time/1/9/4/7/07/12/Arnold_Report_AAF/", publication: { time: "1947-07-12" } }],
+    instrument: "eye",
+    observerTrack: { keyframes: observerKeys },
+    timeline: { keyframes, order: sourceIds, groups: [{ id: "chain", members: sourceIds }] },
+    milestones: [
+      { t: 0, label: "A", note: { en: "A flash on his aircraft: he finds a chain of nine objects north of Rainier.", fr: "Un éclair sur son avion : il découvre une chaîne de neuf objets au nord du Rainier." } },
+      { t: T_RAINIER_S * 1000, label: "B", note: { en: "14:59: the first passes Rainier's southern edge. He starts timing.", fr: "14 h 59 : le premier passe le bord sud du Rainier. Il déclenche son chronométrage." } },
+      { t: T_ADAMS_S * 1000, label: "C", note: { en: "1 min 42 s later: the last passes Adams' southern crest.", fr: "1 min 42 s plus tard : le dernier passe la crête sud de l'Adams." } }
+    ],
+    soundTrack: { keyframes: [] },
+    decor,
+    weatherTrack: { keyframes: [{ t: 0, weather }] },
+    interpretation: witnessInterpretation
+  }
+  writeFileSync(path.join(demoData, "observer-arnold.json"), JSON.stringify(recording, null, 1) + "\n")
+
+  // ---- The pelicans: solved ----
+  // A white pelican cruises at some 10 to 18 m/s with the wind, and loses a metre a second or so in its glides (ASSUMED ranges): the speed and
+  // the rate of climb are solved for within them, with the distance and the heading.
+  const eyeAt = (t: number) => ({ ...arnoldAt(t).at, altM: ARNOLD_ALT_M })
+  const see1 = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S))
+  const see2 = lookAt(eyeAt(T_ADAMS_S), objectAt(COUNT - 1, T_ADAMS_S))
+  const missOf = (d: number, heading: number, speed: number, climb = 0) => {
+    const a = see1.azimuthDeg * Math.PI / 180, e = see1.altitudeDeg * Math.PI / 180
+    const start = offset(eyeAt(T_RAINIER_S), d * Math.cos(e) * Math.sin(a), d * Math.cos(e) * Math.cos(a), d * Math.sin(e))
+    const h = heading * Math.PI / 180, run = speed * (T_ADAMS_S - T_RAINIER_S)
+    const seen = lookAt(eyeAt(T_ADAMS_S), offset(start, run * Math.sin(h), run * Math.cos(h), climb * (T_ADAMS_S - T_RAINIER_S)))
+    const dAz = ((seen.azimuthDeg - see2.azimuthDeg + 540) % 360) - 180
+    return { error: Math.hypot(dAz, seen.altitudeDeg - see2.altitudeDeg), dAz, dAlt: seen.altitudeDeg - see2.altitudeDeg }
+  }
+  // Distance and speed trade against each other (nearer and slower, or farther and faster, cross the same two lines of sight): of the
+  // flights that fit to within a twentieth of a degree, the one at the speed nearest a white pelican's ordinary 13 m/s.
+  const solveAt = (speed: number) => {
+    let found = { error: Infinity, d: 0, heading: 0, speed, climb: 0 }
+    for (let d = 100; d <= 20000; d += d < 2000 ? 10 : 50) {
+      for (let heading = 0; heading < 360; heading += 1) {
+        for (let climb = -1.5; climb <= 0.5; climb += 0.25) {
+          const { error } = missOf(d, heading, speed, climb)
+          if (error < found.error) found = { error, d, heading, speed, climb }
+        }
+      }
+    }
+    const coarse = found
+    for (let d = coarse.d - 60; d <= coarse.d + 60; d += 2) {
+      for (let heading = coarse.heading - 1.5; heading <= coarse.heading + 1.5; heading += 0.1) {
+        for (let climb = Math.max(-1.5, coarse.climb - 0.25); climb <= Math.min(0.5, coarse.climb + 0.25); climb += 0.02) {
+          const { error } = missOf(d, heading, speed, climb)
+          if (error < found.error) found = { error, d, heading, speed, climb }
+        }
+      }
+    }
+    return found
+  }
+  let best = solveAt(13)
+  for (const speed of [12, 14, 11, 15, 10, 16, 17, 18]) {
+    if (best.error < 0.05) break
+    const tried = solveAt(speed)
+    if (tried.error < best.error) best = tried
+  }
+  const miss = missOf(best.d, best.heading, best.speed, best.climb)
+  console.log(`miss: az ${miss.dAz.toFixed(3)}°, alt ${miss.dAlt.toFixed(3)}°`)
+  const pelicanSpeed = best.speed
+  const a = see1.azimuthDeg * Math.PI / 180, e = see1.altitudeDeg * Math.PI / 180
+  const birdStart = offset(eyeAt(T_RAINIER_S), best.d * Math.cos(e) * Math.sin(a), best.d * Math.cos(e) * Math.cos(a), best.d * Math.sin(e))
+  const birdAt = (t: number) => {
+    const run = pelicanSpeed * (t - T_RAINIER_S), h = best.heading * Math.PI / 180
+    return offset(birdStart, run * Math.sin(h), run * Math.cos(h), best.climb * (t - T_RAINIER_S))
+  }
+  const birdPath = [0, T_RAINIER_S, T_ADAMS_S, DURATION_S].map(t => { const p = birdAt(t); return { t: t * 1000, ...local(p), altitudeM: r2(p.altM - originGround) } })
+  console.log(`pelicans: ${best.d} m from him at 14:59, heading ${best.heading.toFixed(1)}° at ${best.speed.toFixed(1)} m/s climbing ${best.climb.toFixed(2)} m/s, off by ${best.error.toFixed(3)}° at 15:00:42; ${r2(birdStart.altM)} m above the sea`)
+
+  const pelicans = {
+    ...recording,
+    id: "1947-06-24-ArnoldKennethE-pelicans",
+    interpretation: {
+      title: {
+        en: `A chain of nine American white pelicans, ${Math.round(best.d / 10) * 10} m from him, flapping and gliding`,
+        fr: `Une chaîne de neuf pélicans d'Amérique, à ${Math.round(best.d / 10) * 10} m de lui, battant des ailes et planant`
+      },
+      bodies: [],
+      birds: [{
+        id: "pelicans",
+        species: "american-white-pelican",
+        count: COUNT,
+        // "in a rather diagonal chain-like line": an echelon.
+        formation: { kind: "echelon", spacing: 1.2 },
+        path: birdPath,
+        originElevationM: r2(originGround),
+        explainsEach: sourceIds,
+        seed: 24
+      }]
+    }
+  }
+  writeFileSync(path.join(demoData, "interpretation-mont-rainier-pelicans.json"), JSON.stringify(pelicans, null, 1) + "\n")
+
+  const caseJson = {
+    id: "MontRainier1947",
+    title: "Mount Rainier",
+    summary: {
+      en: "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading and the pelican one solved from his timings.",
+      fr: "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture et celle des pélicans, résolue à partir de ses chronométrages."
+    },
+    time: "1947-06-24 14:59",
+    events: [
+      { type: "event", eventType: "sighting", id: "arnold", time: "1947-06-24 14:58", title: "Kenneth Arnold", url: "observer-arnold.json" },
+      {
+        type: "event", eventType: "sighting", interpretationOf: "arnold",
+        title: pelicans.interpretation.title,
+        url: "interpretation-mont-rainier-pelicans.json"
+      }
+    ]
+  }
+  writeFileSync(path.join(demoData, "case-mont-rainier.json"), JSON.stringify(caseJson, null, 1) + "\n")
+  const first = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S))
+  console.log(`objects at ${Math.round(objectSpeed)} m/s; leader at 14:59 az ${first.azimuthDeg.toFixed(1)} alt ${first.altitudeDeg.toFixed(2)} at ${(first.distanceM / 1000).toFixed(1)} km; last at Adams az ${see2.azimuthDeg.toFixed(1)} alt ${see2.altitudeDeg.toFixed(2)} at ${(see2.distanceM / 1000).toFixed(1)} km`)
+}
+
+void main()

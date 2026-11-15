@@ -49,6 +49,12 @@ describe("BirdFlock", () => {
     }
   })
 
+  test("each bird can stand for its own phenomenon, measured apart rather than as one flock", () => {
+    const bodies = BirdFlock.bodiesOf({ id: "chain", species: "american-white-pelican", count: 3, formation: { kind: "echelon" }, path, explainsEach: ["o1", "o2"] })
+    expect(bodies.map(body => body.explains)).toEqual([["o1"], ["o2"], undefined])
+    expect(bodies.every(body => body.ensemble === undefined)).toBe(true)
+  })
+
   test("a single bird is the flock itself", () => {
     const [bird] = BirdFlock.bodiesOf({ id: "gull", species: "herring-gull", path })
     expect(bird.id).toBe("gull")

@@ -150,6 +150,7 @@ import type { DecorModelEntry, DecorModelProvider } from "./decor/DecorModelProv
 import { ModelCatalogues } from "../modules/models/ModelCatalogues.js"
 import { loadGltfScene } from "./decor/loadGltfScene.js"
 import { BodySystem, BODY_OVER_LAYER } from "./BodySystem.js"
+import type { BodyFrame } from "./BodySystem.js"
 import type { BodyState, Ground } from "../engine/interpretation/BodyPlacement.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { PhenomenonSystem, PHENOMENON_LAYER } from "./PhenomenonSystem.js"
@@ -2968,7 +2969,15 @@ export class SceneRenderer {
     const { x, z } = this.bodyOrigin
     const originY = this.groundYUnder(x, z)
     const eastScale = this.bodyEastScale
-    return { heightAt: (eastM, northM) => this.groundYUnder(x + eastM * eastScale, z - northM) - originY }
+    // The ground is built curving away round the centre of the widest patch drawn, where it is wide enough to (see TerrainMeshBuilder).
+    const curved = this.farRing?.mesh ?? (this.terrainMesh && this.terrainRadius > TerrainReach.ROADS_MAX_RADIUS_M ? this.terrainMesh : undefined)
+    const dropAt = curved
+      ? (sceneX: number, sceneZ: number) => TerrainReach.curvatureDropM(Math.hypot(sceneX - curved.position.x, sceneZ - curved.position.z))
+      : undefined
+    return {
+      heightAt: (eastM, northM) => this.groundYUnder(x + eastM * eastScale, z - northM) - originY,
+      ...(dropAt ? { dropAt: (eastM: number, northM: number) => dropAt(x + eastM * eastScale, z - northM) - dropAt(x, z) } : {})
+    }
   }
 
   /**
@@ -3003,7 +3012,8 @@ export class SceneRenderer {
       groundYAt: (px, pz) => this.groundYUnder(px, pz), wind, light: this.plumeLight(),
       occluders: [...this.decorGroups.values()],
       transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz),
-      pixelRad: (this.camera.fov * Math.PI) / 180 / Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y)
+      pixelRad: (this.camera.fov * Math.PI) / 180 / Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y),
+      daylight: this.daylightOnBodies()
     }, seconds, sky ? Object.assign((rgb: readonly [number, number, number], luminance: number) => sky.relativeOfLuminance(rgb, luminance), { recorded: sky.recorded }) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
@@ -3024,6 +3034,17 @@ export class SceneRenderer {
    * surface — each light's irradiance times the albedo over π — for a puff lit on half its surface
    * by the sun and all round by the sky and the ground.
    */
+  /** The light falling on what is in the air, for a body under a pixel (see BodyFrame.daylight): the Sun's beam, and the sky's and the ground's. */
+  private daylightOnBodies(): BodyFrame["daylight"] {
+    const sun = this.celestialLight.color, sunI = this.celestialLight.intensity
+    const sky = this.skyLight.color, ground = this.skyLight.groundColor, skyI = this.skyLight.intensity
+    return {
+      towardSun: this.lightDirection,
+      sun: [sun.r * sunI, sun.g * sunI, sun.b * sunI],
+      round: [(sky.r + ground.r) / 2 * skyI, (sky.g + ground.g) / 2 * skyI, (sky.b + ground.b) / 2 * skyI]
+    }
+  }
+
   private plumeLight(): [number, number, number] {
     const sun = this.celestialLight.color
     const sunI = this.celestialLight.intensity * 0.5

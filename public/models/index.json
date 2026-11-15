@@ -2369,6 +2369,27 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
       }
+    },
+    {
+      "id": "helijah-piper-pa28-cadet",
+      "kind": "aircraft",
+      "name": "Piper PA-28 Cadet, a light single-engine aircraft with its cockpit",
+      "parameters": {
+        "sound": "light-piston"
+      },
+      "file": "helijah-piper-pa28-cadet/scene.gltf",
+      "headingOffsetDeg": 90,
+      "sizeM": {
+        "widthM": 10.55,
+        "lengthM": 7.15,
+        "heightM": 2.73
+      },
+      "credit": {
+        "title": "Piper Pa 28 \"Cadet\" (fuselage texture reduced to 1024 px)",
+        "author": "helijah",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://sketchfab.com/3d-models/piper-pa-28-cadet-ba310f1e1ba349c7a54ab9db92e48970"
+      }
     }
   ]
 }

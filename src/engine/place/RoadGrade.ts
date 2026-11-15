@@ -14,7 +14,8 @@ export interface ReliefHeight {
  * the Socorro chase, which is mostly uphill, was drawn and stated as a constant 5° down.
  *
  * Worked out from the relief under the track rather than stated in the file, since it is a fact about
- * the ground and not a testimony: the height ahead of the observer against the height behind, over
+ * the ground and not a testimony: the height ahead of the observer against the height behind (the ground's, plus how far above it they
+ * are, which is how an aircraft's path climbs or does not), over
  * the distance between the two. Zero when they hardly move (a view held at a standstill is not tilted
  * by the hill it stands on), and shrunk by the cosine of how far the view turns from the way they go
  * (looking out of the side window sees no more of the slope than the side of the road has).
@@ -36,7 +37,7 @@ export class RoadGrade {
       const pose = track.getInterpolatedPoseAt(Math.max(0, t))
       if (!pose || pose.lat === undefined || pose.lng === undefined) return undefined
       const local = geoToLocalMeters(pose.lat, pose.lng, origin.lat, origin.lng)
-      return { eastM: local.x, northM: -local.z, heading: pose.headingDeg }
+      return { eastM: local.x, northM: -local.z, heading: pose.headingDeg, aboveM: pose.elevationM ?? 0 }
     }
     const from = at(tMs - RoadGrade.HALF_SPAN_MS)
     const to = at(tMs + RoadGrade.HALF_SPAN_MS)
@@ -45,7 +46,10 @@ export class RoadGrade {
     const distanceM = Math.hypot(to.eastM - from.eastM, to.northM - from.northM)
     const seconds = 2 * RoadGrade.HALF_SPAN_MS / 1000
     if (distanceM / seconds < RoadGrade.MIN_SPEED_MS) return 0
-    const rise = relief.heightAt(to.eastM, to.northM) - relief.heightAt(from.eastM, from.northM)
+    // The way the vehicle itself climbs: the ground under it plus how high above that ground it is. The ground's slope for a car on its road;
+    // for an aircraft holding its altitude over the mountains, nothing, where the slope of the ground under it raised Kenneth Arnold's view
+    // by four degrees.
+    const rise = relief.heightAt(to.eastM, to.northM) + to.aboveM - relief.heightAt(from.eastM, from.northM) - from.aboveM
     const gradeDeg = Math.atan2(rise, distanceM) * 180 / Math.PI
     if (now.heading === undefined) return gradeDeg
     const travelDeg = Math.atan2(to.eastM - from.eastM, to.northM - from.northM) * 180 / Math.PI

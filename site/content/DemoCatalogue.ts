@@ -102,10 +102,10 @@ export class DemoCatalogue {
       section: "sightings",
       heading: { en: "Real sightings", fr: "Des observations réelles", es: "Avistamientos reales", it: "Avvistamenti reali" },
       intro: {
-        en: "Fifteen documented cases, each replayed in the sky of its own reported date, time and place.",
-        fr: "Quinze dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
-        es: "Quince casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
-        it: "Quindici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
+        en: "Sixteen documented cases, each replayed in the sky of its own reported date, time and place.",
+        fr: "Seize dossiers documentés, chacun rejoué dans le ciel de sa propre date, heure et lieu déclarés.",
+        es: "Dieciséis casos documentados, cada uno reproducido en el cielo de su propia fecha, hora y lugar declarados.",
+        it: "Sedici casi documentati, ciascuno riprodotto nel cielo della propria data, ora e luogo dichiarati."
       },
       demos: [
         {
@@ -215,6 +215,20 @@ export class DemoCatalogue {
             fr: "Une nuit de juillet dans le Hainaut, 00:45, sans Lune. Trois témoins sur une pelouse, chacun regardant une partie différente du ciel, voient un boomerang sombre le traverser en dix secondes — avec des lumières orange pour l'un, des lumières rouges pour un autre, et aucune pour le troisième. Ouvrez-le en grand pour changer de témoin.",
             es: "Una noche de julio en el Hainaut, 00:45, sin Luna. Tres testigos en un césped, cada uno mirando una parte distinta del cielo, ven cruzarlo un bumerán oscuro en diez segundos — con luces naranjas para uno, luces rojas para otro, y ninguna para el tercero. Ábrelo a tamaño completo para cambiar de testigo.",
             it: "Una notte di luglio nell'Hainaut, 00:45, senza Luna. Tre testimoni su un prato, ciascuno rivolto a una parte diversa del cielo, vedono attraversarlo un boomerang scuro in dieci secondi — con luci arancioni per uno, luci rosse per un altro, e nessuna per il terzo. Aprilo a schermo intero per cambiare testimone."
+          }
+        },
+        {
+          id: "mont-rainier",
+          src: "/demo-data/observer-arnold.json",
+          // The case, for the player: his own reading and the pelicans, solved from his two timings.
+          playSrc: "/demo-data/case-mont-rainier.json",
+          title: { en: "Mount Rainier, 1947", fr: "Mont Rainier, 1947", es: "Monte Rainier, 1947", it: "Monte Rainier, 1947" },
+          titleIsName: true,
+          blurb: {
+            en: "24 June 1947, 14:59, from the cockpit at 9,200 ft. Kenneth Arnold times a chain of nine flashing objects from Mount Rainier to Mount Adams, 90 km away on a crystal-clear day. Replayed from his report, with his reading and the pelican one his timings put 5.6 km from him. His CallAir A-3 is played by a Piper PA-28.",
+            fr: "24 juin 1947, 14 h 59, depuis le poste à 9 200 pieds. Kenneth Arnold chronomètre une chaîne de neuf objets étincelants du mont Rainier au mont Adams, à 90 km par un jour d'une clarté de cristal. Rejoué d'après son rapport, avec sa lecture et celle des pélicans, que ses chronométrages placent à 5,6 km de lui. Un Piper PA-28 tient lieu de son CallAir A-3.",
+            es: "24 de junio de 1947, 14:59, desde la cabina a 9.200 pies. Kenneth Arnold cronometra una cadena de nueve objetos destellantes del monte Rainier al monte Adams, a 90 km en un día claro como el cristal. Reproducido según su informe, con su lectura y la de los pelícanos, que sus cronometrajes sitúan a 5,6 km de él. Un Piper PA-28 hace de su CallAir A-3.",
+            it: "24 giugno 1947, 14:59, dalla cabina a 9.200 piedi. Kenneth Arnold cronometra una catena di nove oggetti scintillanti dal monte Rainier al monte Adams, a 90 km in una giornata limpida come il cristallo. Riprodotto dal suo rapporto, con la sua lettura e quella dei pellicani, che i suoi cronometraggi collocano a 5,6 km da lui. Un Piper PA-28 fa le veci del suo CallAir A-3."
           }
         },
         {

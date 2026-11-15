@@ -13,6 +13,12 @@ const DEG_TO_RAD = Math.PI / 180
  */
 export interface Ground {
   heightAt(eastM: number, northM: number): number
+  /**
+   * How far the ground at that point curves away under the line of sight, below where it is at the origin, metres (see
+   * TerrainReach.curvatureDropM): what a body at a set height above the sea, tens of kilometres off, sinks by with the ground under it, so
+   * that it keeps its height over that ground. None where the ground is drawn flat.
+   */
+  dropAt?(eastM: number, northM: number): number
 }
 
 /** A point of that same frame. */
@@ -341,7 +347,7 @@ export class BodyPlacement {
       return this.groundUnderFootprint(key.eastM, key.northM, key.sizeM, key.attitude.headingDeg) + key.vertical.aboveGroundM + key.sizeM.heightM / 2
     }
     const from = key.vertical.fromGround
-    if (!from) return key.vertical.upM
+    if (!from) return key.vertical.upM - (this.ground.dropAt?.(key.eastM, key.northM) ?? 0)
     // Counted from the ground it left, and never under the ground it passes over: a lantern drifting low over a rise of the relief (or
     // of what the relief makes of a hedge) rides over it rather than through it.
     const up = key.vertical.upM + this.ground.heightAt(from.eastM, from.northM)

@@ -16,6 +16,16 @@ const HILL = { heightAt: (_east: number, north: number) => north / 10 }
 const FLAT = { heightAt: () => 0 }
 
 describe("RoadGrade", () => {
+  it("does not tilt an aircraft holding its altitude over rising ground: Kenneth Arnold's view went 4° up over the Cascades", () => {
+    const sighting = Sighting.create(undefined, [{ lat: 34, lng: -106 }])
+    for (let t = 0; t <= 20000; t += 1000) {
+      // 45 m/s north over the HILL below, 2 000 m above the sea whatever the ground: as high above it as the hill is not.
+      const northM = 45 * t / 1000
+      sighting.observerTrack.addKeyframe(t, { lat: 34 + northM / 111_320, lng: -106, elevationM: 2000 - northM / 10, headingDeg: 0, pitchDeg: 0, fovDeg: 60 })
+    }
+    expect(Math.abs(RoadGrade.at(sighting, 10000, HILL))).toBeLessThan(0.05)
+  })
+
   it("raises the view by the slope of the road being driven up", () => {
     expect(RoadGrade.at(drive(0), 10000, HILL)).toBeCloseTo(Math.atan(0.1) * 180 / Math.PI, 0)
   })

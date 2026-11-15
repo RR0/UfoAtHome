@@ -76,6 +76,12 @@ export interface BodyFrame {
   transmittance?: (x: number, y: number, z: number) => readonly [number, number, number]
   /** The angle one pixel of the picture covers, radians: under it, a body that glows is drawn as a point source (see BodySystem.points). */
   pixelRad?: number
+  /**
+   * The light falling on what is in the air, in the scene's units: the Sun's (or the Moon's) irradiance on a surface facing it and the way
+   * to it, and the sky's and the ground's, averaged round. What a body that does not glow sends back is drawn from, as a point, when it is
+   * under a pixel (see shineReflected).
+   */
+  daylight?: { towardSun: Vector3, sun: readonly [number, number, number], round: readonly [number, number, number] }
 }
 
 /**
@@ -349,6 +355,7 @@ export class BodySystem {
     // matter at the distances they are seen from.
     if (!(luminanceCdM2 > 0) || !eye || (glowing && glowing.length > 0)) {
       veil?.hide()
+      if (!(luminanceCdM2 > 0) && eye && !(glowing && glowing.length > 0)) this.shineReflected(state, holder, frame, eye)
       return
     }
     if (!veil) {
@@ -484,6 +491,39 @@ export class BodySystem {
       if (!hidden) clear++
     }
     return clear / points.length
+  }
+
+  /**
+   * A body that gives out no light, under a pixel or two: drawn as the point of the light it sends back, as one that glows is (see shine),
+   * rather than hit or missed by the rasteriser, or not drawn at all. A white pelican five kilometres off in the afternoon sun is a speck the
+   * eye sees, a third of a pixel wide: drawn as a shape, it was nothing.
+   *
+   * What it sends back is a matt sphere's of its albedo and colour: the sky's light all round, and the Sun's by the share of its disc the eye
+   * sees lit, Lambert's phase law (sin α + (π − α) cos α) / π at the phase angle α between the Sun and the eye seen from it. A bird is no
+   * sphere, and a wing tilted to the Sun flashes far more than this mean: it is the steady light, not the flash.
+   */
+  private shineReflected(state: BodyState, holder: Group, frame: BodyFrame, eye: Vector3): void {
+    const daylight = frame.daylight
+    if (!daylight || frame.pixelRad === undefined) return
+    const radiusM = this.apparentRadiusM(state, holder, eye)
+    const distanceM = Math.max(holder.position.distanceTo(eye), radiusM * 1.01)
+    const angularRadius = Math.asin(radiusM / distanceM)
+    const pixels = 2 * angularRadius / frame.pixelRad
+    if (pixels >= BodySystem.SHAPE_FULL_PIXELS) return
+    let clear = this.reliefClearShare(eye, holder.position, radiusM)
+    if (clear > 0 && frame.occluders && frame.occluders.length > 0) clear *= this.decorClearShare(holder, eye, frame.occluders)
+    const shape = Math.min(1, Math.max(0, (pixels - BodySystem.SHAPE_FROM_PIXELS) / (BodySystem.SHAPE_FULL_PIXELS - BodySystem.SHAPE_FROM_PIXELS)))
+    this.shapeShares.set(state.id, shape)
+    if (clear <= 0) return
+    const toEye = this.scratch.copy(eye).sub(holder.position).normalize()
+    const alpha = Math.acos(Math.min(1, Math.max(-1, toEye.dot(daylight.towardSun))))
+    const phase = (Math.sin(alpha) + (Math.PI - alpha) * Math.cos(alpha)) / Math.PI
+    const hue = BodySystem.rgbOf(state.appearance.color)
+    const luminance = 0.2126 * hue[0] + 0.7152 * hue[1] + 0.0722 * hue[2] || 1
+    const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
+    const seen = (1 - state.appearance.transparency) * (1 - shape)
+    const light = [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]) * solidAngle * seen) as [number, number, number]
+    this.pointLights.set(state.id, { position: holder.position.clone(), light: this.throughAir(light, holder.position) })
   }
 
   private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
@@ -758,10 +798,19 @@ export class BodySystem {
       const blocked = crossed.length > 0 && this.lightRay.intersectObjects(crossed, true)
         // Glass is looked through, as the Sun's and the Moon's are (see SceneRenderer.isOccludedToward): the windscreen of the van the eye is
         // in took every light seen through it out of the eye's glare.
-        .some(hit => hit.object instanceof Mesh && !own.includes(hit.object) && !(hit.object.material instanceof GlassMaterial) && hit.distance < far - 0.05)
+        .some(hit => hit.object instanceof Mesh && !own.includes(hit.object) && !BodySystem.seeThrough(hit.object.material) && hit.distance < far - 0.05)
       if (!blocked) clear++
     }
     return clear / points.length
+  }
+
+  /**
+   * Whether the eye sees through a surface: glass (see GlassMaterial), and a pane a model draws as merely see-through, mostly clear (the
+   * windows of a light aircraft's cabin, whose file states no glass but an opacity of a few tenths).
+   */
+  private static seeThrough(material: Material | Material[]): boolean {
+    const first = Array.isArray(material) ? material[0] : material
+    return first instanceof GlassMaterial || (first.transparent && first.opacity < 0.5)
   }
 
   private hideLights(id: string): void {

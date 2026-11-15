@@ -1,0 +1,29 @@
+{
+ "id": "MontRainier1947",
+ "title": "Mount Rainier",
+ "summary": {
+  "en": "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading and the pelican one solved from his timings.",
+  "fr": "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture et celle des pélicans, résolue à partir de ses chronométrages."
+ },
+ "time": "1947-06-24 14:59",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "arnold",
+   "time": "1947-06-24 14:58",
+   "title": "Kenneth Arnold",
+   "url": "observer-arnold.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "arnold",
+   "title": {
+    "en": "A chain of nine American white pelicans, 5600 m from him, flapping and gliding",
+    "fr": "Une chaîne de neuf pélicans d'Amérique, à 5600 m de lui, battant des ailes et planant"
+   },
+   "url": "interpretation-mont-rainier-pelicans.json"
+  }
+ ]
+}

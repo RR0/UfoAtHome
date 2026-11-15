@@ -46,6 +46,11 @@ export interface BirdFlockJson {
   originElevationM?: number
   /** The phenomena of the account the flock claims to be, together (see BodyJson.ensemble): a whole flock taken for one craft. */
   explains?: string[]
+  /**
+   * The phenomenon of the account each bird claims to be, in the order of the flock (the leader first): a chain of nine birds taken for a
+   * chain of nine craft, each measured against its own. Instead of `explains`; a bird past the list explains nothing.
+   */
+  explainsEach?: string[]
   /** What the draws start from: where each bird is in the arrangement, how it wanders, when its wings start. 1 when absent. */
   seed?: number
 }
@@ -154,15 +159,16 @@ export class BirdFlock {
         eastM: BirdFlock.round(sample.eastM),
         northM: BirdFlock.round(sample.northM),
         altitudeM: BirdFlock.round(sample.upM - size.heightM / 2),
-        ...(k === 0 ? { sizeM: size } : {}),
+        ...(k === 0 ? { sizeM: size, appearance: { color: species.plumage.color, albedo: species.plumage.albedo } } : {}),
         attitude: { headingDeg: BirdFlock.round(sample.headingDeg), pitchDeg: BirdFlock.round(sample.pitchDeg), rollDeg: BirdFlock.round(sample.rollDeg) },
         motions: { flap: BirdFlock.round(BirdFlock.beatsAt((sample.t - startT) / 1000 - delayS, ownHz, flight, phase), 1000) }
       }))
       const body: BodyJson = {
         id: count > 1 ? `${flock.id}-${index + 1}` : flock.id,
         ...(flock.title ? { title: flock.title } : {}),
-        ...(flock.explains ? { explains: flock.explains } : {}),
-        ...(count > 1 ? { ensemble: flock.id } : {}),
+        ...(flock.explainsEach
+          ? (flock.explainsEach[index] !== undefined ? { explains: [flock.explainsEach[index]] } : {})
+          : { ...(flock.explains ? { explains: flock.explains } : {}), ...(count > 1 ? { ensemble: flock.id } : {}) }),
         model: { id: `ufoathome-bird-${species.build}` },
         shadow: false,
         ...(Object.keys(colours).length > 0 ? { modelParameters: colours } : {}),

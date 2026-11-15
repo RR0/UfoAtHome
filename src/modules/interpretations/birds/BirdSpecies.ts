@@ -34,6 +34,9 @@ export interface BirdSpecies {
   flight: BirdFlightStyle
   /** Its colours, by the model settings of its build (see public/models/index.json): what differs from the build's own. */
   colours?: Partial<Record<BirdColourKey, string>>
+  /** Its plumage as a whole, colour and share of light sent back: what it is drawn as when it is a speck under a pixel (see
+   * BodySystem.shineReflected). ESTIMATES from its colours: some 0.8 for white plumage, 0.25 for a dark one. */
+  plumage: { color: string, albedo: number }
 }
 
 export type BirdBuildId = "gull" | "pelican" | "goose" | "duck" | "plover"
@@ -63,45 +66,45 @@ export class BirdSpecies {
   static readonly ALL: readonly BirdSpecies[] = [
     {
       id: "herring-gull", name: "Herring gull", build: "gull", lengthM: 0.6, wingspanM: 1.4, massKg: 1.0, wingAreaM2: 0.2,
-      flight: { kind: "flapping" }
+      flight: { kind: "flapping" }, plumage: { color: "#e6e8ea", albedo: 0.6 }
     },
     {
       id: "ring-billed-gull", name: "Ring-billed gull", build: "gull", lengthM: 0.48, wingspanM: 1.2, massKg: 0.5, wingAreaM2: 0.14,
-      flight: { kind: "flapping" }, colours: { upperColor: "#b3bbc3" }
+      flight: { kind: "flapping" }, colours: { upperColor: "#b3bbc3" }, plumage: { color: "#e6e8ea", albedo: 0.6 }
     },
     {
       id: "black-headed-gull", name: "Black-headed gull", build: "gull", lengthM: 0.37, wingspanM: 1.0, massKg: 0.28, wingAreaM2: 0.1,
-      flight: { kind: "flapping" }, colours: { upperColor: "#c3c9cf", headColor: "#3d2b24", billColor: "#8f1d1d" }
+      flight: { kind: "flapping" }, colours: { upperColor: "#c3c9cf", headColor: "#3d2b24", billColor: "#8f1d1d" }, plumage: { color: "#e8eaec", albedo: 0.6 }
     },
     {
       id: "brown-pelican", name: "Brown pelican", build: "pelican", lengthM: 1.2, wingspanM: 2.1, massKg: 3.5, wingAreaM2: 0.55,
-      flight: { kind: "bursts", beats: 5, glideS: 3 }
+      flight: { kind: "bursts", beats: 5, glideS: 3 }, plumage: { color: "#7d7468", albedo: 0.25 }
     },
     {
       id: "american-white-pelican", name: "American white pelican", build: "pelican", lengthM: 1.5, wingspanM: 2.7, massKg: 7, wingAreaM2: 0.9,
-      flight: { kind: "bursts", beats: 6, glideS: 3 },
+      flight: { kind: "bursts", beats: 6, glideS: 3 }, plumage: { color: "#f3f2ec", albedo: 0.8 },
       colours: { upperColor: "#f3f2ec", underColor: "#f3f2ec", tipColor: "#1b1c1f", headColor: "#f3f2ec", neckColor: "#f3f2ec", billColor: "#e89a3c" }
     },
     {
       id: "canada-goose", name: "Canada goose", build: "goose", lengthM: 0.95, wingspanM: 1.6, massKg: 4, wingAreaM2: 0.3,
-      flight: { kind: "flapping" }
+      flight: { kind: "flapping" }, plumage: { color: "#8a7c6c", albedo: 0.25 }
     },
     {
       id: "snow-goose", name: "Snow goose", build: "goose", lengthM: 0.75, wingspanM: 1.45, massKg: 2.6, wingAreaM2: 0.25,
-      flight: { kind: "flapping" },
+      flight: { kind: "flapping" }, plumage: { color: "#f3f2ec", albedo: 0.8 },
       colours: { upperColor: "#f3f2ec", underColor: "#f3f2ec", tipColor: "#1b1c1f", headColor: "#f3f2ec", neckColor: "#f3f2ec", billColor: "#d9898a" }
     },
     {
       id: "mallard", name: "Mallard", build: "duck", lengthM: 0.58, wingspanM: 0.9, massKg: 1.1, wingAreaM2: 0.095,
-      flight: { kind: "flapping" }
+      flight: { kind: "flapping" }, plumage: { color: "#8a8074", albedo: 0.3 }
     },
     {
       id: "american-golden-plover", name: "American golden plover", build: "plover", lengthM: 0.26, wingspanM: 0.68, massKg: 0.145, wingAreaM2: 0.038,
-      flight: { kind: "flapping" }
+      flight: { kind: "flapping" }, plumage: { color: "#8a8070", albedo: 0.3 }
     },
     {
       id: "killdeer", name: "Killdeer", build: "plover", lengthM: 0.25, wingspanM: 0.6, massKg: 0.09, wingAreaM2: 0.03,
-      flight: { kind: "flapping" }, colours: { upperColor: "#7a6249", headColor: "#7a6249" }
+      flight: { kind: "flapping" }, colours: { upperColor: "#7a6249", headColor: "#7a6249" }, plumage: { color: "#9a8a72", albedo: 0.3 }
     }
   ]
 
