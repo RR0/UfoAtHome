@@ -684,3 +684,53 @@ td { color: var(--ink-dim); }
 @media (prefers-reduced-motion: reduce) {
   .loading-bar { animation: none; transform: scaleX(.5); }
 }
+
+/* ---------------------------------------------------------------- page outline */
+
+/* PageOutline: the sections of a long page. On a wide screen, a column on the left that stays in place while
+   the text scrolls, the page's columns moved right to leave it room (centred again once there is room for both);
+   on a narrow one, a button in the bottom corner, within reach of a thumb, that opens the list above it. */
+.page-outline { font-size: 0.85rem; z-index: 15; }
+.page-outline summary {
+  cursor: pointer; color: var(--ink-faint); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; list-style: none;
+}
+.page-outline summary::-webkit-details-marker { display: none; }
+.page-outline ol { list-style: none; margin: 0.6rem 0 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; }
+.page-outline li { margin: 0; }
+.page-outline a {
+  display: block; padding: 0.3rem 0.6rem; line-height: 1.35; color: var(--ink-dim); text-decoration: none;
+  border-left: 2px solid var(--line);
+}
+.page-outline li.h3 a { padding-left: 1.5rem; font-size: 0.95em; color: var(--ink-faint); }
+.page-outline a:hover { color: var(--ink); border-left-color: var(--line-strong); }
+.page-outline a[aria-current] { color: var(--ink); border-left-color: var(--glow); background: var(--warn-bg); }
+
+@media (min-width: 64rem) {
+  .page-outline {
+    position: fixed; top: 5rem; left: clamp(1rem, 2vw, 2rem); width: 14rem;
+    max-height: calc(100vh - 6rem); display: flex; flex-direction: column;
+  }
+  .page-outline details { display: flex; flex-direction: column; min-height: 0; }
+  .page-outline details[open] > ol { max-height: calc(100vh - 8rem); }
+  .page-outline summary { pointer-events: none; }
+  .has-outline .wrap { margin-left: max(17rem, calc((100vw - var(--wide)) / 2)); margin-right: auto; }
+}
+
+@media (max-width: 63.99rem) {
+  .page-outline { position: fixed; right: 1rem; bottom: 1rem; max-width: calc(100vw - 2rem); }
+  .page-outline summary {
+    margin-left: auto; width: max-content; padding: 0.55rem 0.9rem; border-radius: 999px;
+    background: var(--ground-raised); border: 1px solid var(--line-strong); color: var(--ink-dim);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  }
+  .page-outline details[open] > ol {
+    position: absolute; right: 0; bottom: calc(100% + 0.5rem); width: min(22rem, calc(100vw - 2rem));
+    max-height: 60vh; padding: 0.5rem 0; border-radius: 10px;
+    background: var(--ground-raised); border: 1px solid var(--line-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@media print {
+  .page-outline { display: none; }
+}

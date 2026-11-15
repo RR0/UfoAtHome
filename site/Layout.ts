@@ -4,6 +4,7 @@ import { Headings } from "./Headings.js"
 import { Shots } from "./Shots.js"
 import { OfflineKit } from "./OfflineKit.js"
 import { ShareCard } from "./ShareCard.js"
+import { PageOutline } from "./PageOutline.js"
 import {
   FALLBACK_LANGUAGE, type PageMeta, SITE_LANGUAGES, type SiteLanguage, type SitePage
 } from "./SitePage.js"
@@ -13,6 +14,7 @@ interface ShellWords {
   readonly locale: string
   readonly mainNavigation: string
   readonly sectionLink: string
+  readonly onThisPage: string
   readonly licensed: (version: string) => string
   readonly createdBy: string
   readonly thisSite: string
@@ -56,28 +58,28 @@ export class Layout {
 
   private static readonly SHELL: Record<SiteLanguage, ShellWords> = {
     en: {
-      locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section",
+      locale: "en_US", mainNavigation: "Main navigation", sectionLink: "Link to this section", onThisPage: "On this page",
       licensed: version => `UFO@home v${version} — ${Licence.mit()} licensed`,
       createdBy: `Created and maintained by <a href="https://rr0.org">RR0</a> — usable without it.`,
       thisSite: "This site", theCode: "The code", contact: "Contact", requestFeature: "Request a feature", licence: "MIT licence",
       previousPage: "Previous page", nextPage: "Next page"
     },
     fr: {
-      locale: "fr_FR", mainNavigation: "Navigation principale", sectionLink: "Lien vers cette section",
+      locale: "fr_FR", mainNavigation: "Navigation principale", sectionLink: "Lien vers cette section", onThisPage: "Sur cette page",
       licensed: version => `UFO@home v${version} — sous licence ${Licence.mit()}`,
       createdBy: `Créé et maintenu par <a href="https://rr0.org">RR0</a> — utilisable sans lui.`,
       thisSite: "Le site", theCode: "Le code", contact: "Contact", requestFeature: "Proposer une amélioration", licence: "Licence MIT",
       previousPage: "Page précédente", nextPage: "Page suivante"
     },
     es: {
-      locale: "es_ES", mainNavigation: "Navegación principal", sectionLink: "Enlace a esta sección",
+      locale: "es_ES", mainNavigation: "Navegación principal", sectionLink: "Enlace a esta sección", onThisPage: "En esta página",
       licensed: version => `UFO@home v${version} — con licencia ${Licence.mit()}`,
       createdBy: `Creado y mantenido por <a href="https://rr0.org">RR0</a> — utilizable sin él.`,
       thisSite: "Este sitio", theCode: "El código", contact: "Contacto", requestFeature: "Proponer una mejora", licence: "Licencia MIT",
       previousPage: "Página anterior", nextPage: "Página siguiente"
     },
     it: {
-      locale: "it_IT", mainNavigation: "Navigazione principale", sectionLink: "Link a questa sezione",
+      locale: "it_IT", mainNavigation: "Navigazione principale", sectionLink: "Link a questa sezione", onThisPage: "In questa pagina",
       licensed: version => `UFO@home v${version} — con licenza ${Licence.mit()}`,
       createdBy: `Creato e mantenuto da <a href="https://rr0.org">RR0</a> — utilizzabile senza di esso.`,
       thisSite: "Questo sito", theCode: "Il codice", contact: "Contatti", requestFeature: "Proporre un miglioramento", licence: "Licenza MIT",
@@ -87,6 +89,7 @@ export class Layout {
 
   private readonly headings = new Headings()
   private readonly shots = new Shots()
+  private readonly outline = new PageOutline()
 
   constructor(private readonly pages: readonly SitePage[], private readonly version: string) {
   }
@@ -198,6 +201,8 @@ export class Layout {
       .join("\n  ")
     const loader = this.moduleLoader(meta.modules ?? [])
     const script = page.script?.(language)
+    const content = this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)
+    const outline = this.outline.render(content, words.onThisPage)
     const scripts = loader || script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${loader}${script ?? ""}\n</script>` : ""
     return `<!doctype html>
 <html lang="${language}">
@@ -221,13 +226,15 @@ ${this.languageRedirect(page, language)}
   <link rel="stylesheet" href="/style.css">
   ${modules}
 </head>
-<body>
+<body${outline ? ` class="has-outline"` : ""}>
 ${this.header(page, language)}
+${outline ?? ""}
 <main>
-${this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)}
+${content}
 </main>
 ${this.siteFooter(language)}
 ${scripts}
+${outline ? PageOutline.SCRIPT : ""}
 ${OfflineKit.REGISTER}
 </body>
 </html>
