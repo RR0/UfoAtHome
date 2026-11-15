@@ -15,7 +15,7 @@ import { InterviewMedia } from "./messages/InterviewMedia.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
-import type { InterviewJson, InterviewSegment } from "../engine/persistence/interviewJson.js"
+import type { InterviewJson, InterviewRedaction, InterviewSegment } from "../engine/persistence/interviewJson.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
 import { InterviewEdits } from "../engine/persistence/InterviewEdits.js"
 import { InterviewPlayer } from "./InterviewPlayer.js"
@@ -146,7 +146,13 @@ const TEMPLATE = `
   .review[data-done] { background: var(--neutral-bg); }
   .review-boxes { display: flex; flex-wrap: wrap; gap: 14px; }
   .review-boxes label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
-  .redact-row { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  /* Where the words selected, or the passage taken out pressed, are: why it is taken out, and what to do with it. Fixed, as it is placed
+     against what it is about (see openRedactPop); in the top layer where popovers are known. */
+  .redact-pop { position: fixed; inset: auto; margin: 0; text-align: start; width: min(24em, calc(100vw - 32px)); box-sizing: border-box; padding: 10px 12px;
+    border: 1px solid var(--line-strong); border-radius: 10px; background: var(--ground-raised); color: var(--ink); box-shadow: 0 6px 24px rgba(0, 0, 0, .18); }
+  .redact-pop[hidden] { display: none; }
+  .redact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+  .redact-actions button[hidden] { display: none; }
   .transcribe { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
   .transcribe-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
   .transcribe-row label { display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
@@ -154,9 +160,10 @@ const TEMPLATE = `
   .transcribe .source-credit { font-size: 12px; color: var(--ink-faint); }
   .transcribe-note { margin: .4em 0 0; }
   .transcribe progress { width: 100%; margin-top: 6px; }
-  .redact-reason { display: flex; align-items: center; gap: 6px; font: 600 12px/1.3 var(--sans); color: var(--ink-dim); }
-  .redact-reason input { width: 16em; font-weight: 400; }
-  .redact-note { font-size: 13px; color: var(--ink-faint); }
+  .redact-reason { display: flex; flex-direction: column; align-items: stretch; gap: 4px; text-align: start; font: 600 12px/1.3 var(--sans); color: var(--ink-dim); }
+  .redact-reason input { box-sizing: border-box; width: 100%; font-weight: 400; }
+  .redact-note { margin: 6px 0 0; font-size: 13px; color: var(--ink-faint); }
+  .redact-note:empty { display: none; }
   .redact-note.error { color: var(--error); }
   /* Each turn: its time, which plays from there; what is taken out as a label that says how much, and puts it back while it is known. */
   #exchanges .turn { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); column-gap: 14px; padding: 8px 10px; }
@@ -171,8 +178,8 @@ const TEMPLATE = `
   .turn-time:hover:not(:disabled) { background: none; text-decoration: underline; }
   #exchanges .bar.redacted-label { width: auto; height: auto; padding: 0 8px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--ink-faint);
     font: 600 12px/1.6 var(--sans); vertical-align: baseline; cursor: default; }
-  #exchanges .bar.redacted-label[data-restorable] { cursor: pointer; }
-  #exchanges .bar.redacted-label[data-restorable]:hover { border-color: var(--glow-dim); color: var(--ink); }
+  #exchanges .bar.redacted-label { cursor: pointer; }
+  #exchanges .bar.redacted-label:hover { border-color: var(--glow-dim); color: var(--ink); }
   .turn-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; margin-top: 6px; }
   .turn-tools button { min-height: 0; padding: 2px 4px; border: 0; background: none; color: var(--ink-faint); font: 600 13px/1.4 var(--sans); }
   .turn-tools button:hover:not(:disabled) { background: none; color: var(--ink); }
@@ -224,11 +231,14 @@ const TEMPLATE = `
     <progress id="transcribe-progress" hidden></progress>
   </div>
   <div id="review" class="review" hidden></div>
-  <div class="redact-row">
-    <button id="redact-selection" type="button" class="pill-btn"></button>
+  <div id="redact-pop" class="redact-pop" role="dialog" hidden>
     <label class="redact-reason"><span id="label-redact-reason"></span><input id="redact-reason" type="text" list="redact-reasons" autocomplete="off"/></label>
     <datalist id="redact-reasons"></datalist>
-    <span id="redact-note" class="redact-note" role="status"></span>
+    <p id="redact-note" class="redact-note" role="status"></p>
+    <div class="redact-actions">
+      <button id="redact-restore" type="button" class="pill-btn"></button>
+      <button id="redact-take" type="button" class="pill-btn primary"></button>
+    </div>
   </div>
   <rr0-interview id="exchanges"></rr0-interview>
 </section>
@@ -297,6 +307,12 @@ export class InterviewEditorElement extends HTMLElement {
    * segment), `segment:all` for a whole turn. Never written anywhere: the file published keeps no trace of it.
    */
   private readonly takenOut = new Map<string, string>()
+  /** What the popover is about: words selected in a passage, as offsets in it, or a passage taken out (its whole when "all"). */
+  private redactTarget?: { kind: "selection", index: number, from: number, to: number } | { kind: "bar", index: number, nth: number | "all", restorable?: string }
+  /** The exchanges being drawn again after the last edit. */
+  private exchangesShown: Promise<void> = Promise.resolve()
+  /** The reason last given to take words out, given again to what is taken out next. */
+  private lastReason?: string
   /** What transcribes the recording, chosen among TRANSCRIPTION_SOURCES: kept for the page, as a key is. */
   private static transcriptionSourceId = TRANSCRIPTION_SOURCES[0].id
   /** The transcription under way, to stop it; undefined when none is. */
@@ -337,11 +353,36 @@ export class InterviewEditorElement extends HTMLElement {
       SourceCredentials.set(InterviewEditorElement.transcriptionSourceId, (event.target as HTMLInputElement).value)
       this.renderTranscribeStart()
     })
-    this.shadow.getElementById("redact-selection")!.addEventListener("click", () => void this.redactSelection())
-    // A press on a passage taken out puts it back, while its text is still known.
-    this.shadow.getElementById("exchanges")!.addEventListener("click", event => {
-      const bar = (event.target as HTMLElement).closest<HTMLElement>(".bar[data-restorable]")
-      if (bar) void this.restore(bar.dataset.restorable!)
+    // Words selected in the exchanges: why they are to be taken out is asked where they are. A passage taken out, pressed: why it was,
+    // to say otherwise, and a way to put it back while its text is known.
+    const exchanges = this.shadow.getElementById("exchanges")!
+    exchanges.addEventListener("pointerup", () => setTimeout(() => this.selectionMade(), 0))
+    exchanges.addEventListener("keyup", event => { if (event.shiftKey) this.selectionMade() })
+    exchanges.addEventListener("click", event => {
+      const bar = (event.target as HTMLElement).closest<HTMLElement>(".bar.redacted-label")
+      if (bar) this.openBar(bar)
+    })
+    exchanges.addEventListener("keydown", event => {
+      const bar = (event.target as HTMLElement).closest<HTMLElement>(".bar.redacted-label")
+      if (bar && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault()
+        this.openBar(bar)
+      }
+    })
+    this.shadow.getElementById("redact-take")!.addEventListener("click", () => void this.redactSelection())
+    this.shadow.getElementById("redact-restore")!.addEventListener("click", () => {
+      const target = this.redactTarget
+      this.closeRedactPop()
+      if (target?.kind === "bar" && target.restorable) void this.restore(target.restorable)
+    })
+    const reason = this.field("redact-reason")
+    reason.addEventListener("change", () => { if (this.redactTarget?.kind === "bar") void this.changeReason() })
+    reason.addEventListener("keydown", event => {
+      if (event.key === "Escape") this.closeRedactPop()
+      if (event.key !== "Enter") return
+      event.preventDefault()
+      if (this.redactTarget?.kind === "selection") void this.redactSelection()
+      else void this.changeReason().then(() => this.closeRedactPop())
     })
   }
 
@@ -357,24 +398,17 @@ export class InterviewEditorElement extends HTMLElement {
 
   connectedCallback(): void {
     this.ready = this.loadLocale()
-    document.addEventListener("selectionchange", this.selectionMoved)
+    document.addEventListener("pointerdown", this.pressedElsewhere, true)
   }
 
-  /** "Take out the selection" can be pressed only while words of the exchanges are selected. */
-  private readonly selectionMoved = (): void => {
-    const button = this.shadow.getElementById("redact-selection") as HTMLButtonElement | null
-    if (button) button.disabled = !this.exchangesSelected()
-  }
-
-  private exchangesSelected(): boolean {
-    const selection = (this.shadow as ShadowRoot & { getSelection?: () => Selection | null }).getSelection?.() ?? document.getSelection()
-    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined
-    const exchanges = this.shadow.getElementById("exchanges")
-    return Boolean(range && !range.collapsed && exchanges?.contains(range.startContainer) && exchanges.contains(range.endContainer))
+  /** A press out of the popover closes it: what it was about is no longer what the author is at. */
+  private readonly pressedElsewhere = (event: Event): void => {
+    const pop = this.shadow.getElementById("redact-pop")
+    if (pop && !pop.hidden && !event.composedPath().includes(pop)) this.closeRedactPop()
   }
 
   disconnectedCallback(): void {
-    document.removeEventListener("selectionchange", this.selectionMoved)
+    document.removeEventListener("pointerdown", this.pressedElsewhere, true)
     // Moving the editor in the page disconnects it and connects it again within the same task: only an editor still out of the page after
     // that has gone, and its text editor must stop (its linter keeps a timer that dispatches on the view, which fails once the window it
     // measured against is closed). See SightingEditorElement's.
@@ -484,7 +518,8 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-summary", m.summary)
     text("label-url", m.transcript)
     HintElement.say(this.shadow.getElementById("label-import-file")!, m.importFile, m.importFileHint)
-    text("redact-selection", m.redactSelection)
+    text("redact-take", m.redactSelection)
+    text("redact-restore", m.redactRestore)
     text("label-redact-reason", m.redactReasonLabel)
     const reason = this.field("redact-reason")
     reason.placeholder = m.redactReason
@@ -642,7 +677,6 @@ export class InterviewEditorElement extends HTMLElement {
     this.player?.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
     this.renderReview(json)
     this.renderRedactReasons(json)
-    this.selectionMoved()
     this.decorateExchanges(json)
     this.renderTranscribe()
   }
@@ -662,15 +696,23 @@ export class InterviewEditorElement extends HTMLElement {
     const text = InterviewEditorElement.pretty(InterviewEditorElement.withEventFields(json as unknown as Record<string, unknown>, event))
     this.fileEditor?.replaceText(text, false)
     this.onEdited(text)
+    // Done once the exchanges show the change: what follows an edit (the popover on a passage just taken out) finds it there.
+    await this.exchangesShown
   }
 
-  /** What a passage taken out here is said to be: taken out at proofreading, in the reader's language. */
   /**
-   * Why what is taken out next is taken out: what the author typed or picked beside "Take out the selection", else proofreading. A reason
-   * this interview already gives is given again whole, in every language it was written in, not only in the one it was read in.
+   * Why what is taken out next is taken out: what the author last gave as a reason (see the popover), else proofreading.
    */
   private get redactReason(): SaidText {
-    const typed = this.field("redact-reason").value.trim() || this.messages.redactReason
+    return this.reasonOf(this.lastReason)
+  }
+
+  /**
+   * The reason `typed` makes: proofreading when it is empty. A reason this interview already gives is given again whole, in every language
+   * it was written in, not only in the one it was read in; another is new, in the author's language only, as nothing translates it.
+   */
+  private reasonOf(typed: string | undefined): SaidText {
+    typed = typed?.trim() || this.messages.redactReason
     const known = this.givenReasons(this.drawn).find(reason => this.said.read(reason) === typed)
     if (known !== undefined) return typeof known === "string" ? known : { ...known }
     return this.said.write(undefined, typed, this.language) ?? typed
@@ -852,6 +894,10 @@ export class InterviewEditorElement extends HTMLElement {
       tools.append(button(m.redactAll, () => void this.editTranscript(next => {
         this.forget(index)
         this.takenOut.set(`${index}:all`, InterviewEdits.redactWhole(next.segments[index], this.redactReason))
+      }).then(() => {
+        // Why, asked at once where the passage now stands.
+        const bar = this.shadow.querySelector<HTMLElement>(`#exchanges .turn[data-segment="${index}"] .bar.redacted-label`)
+        if (bar) this.openBar(bar)
       })))
     }
     const remove = button("", () => void this.editTranscript(next => {
@@ -866,39 +912,138 @@ export class InterviewEditorElement extends HTMLElement {
     return tools
   }
 
-  /** Takes out the words selected in one passage said (see InterviewEdits.redact), or says why it cannot. */
-  private async redactSelection(): Promise<void> {
+  /**
+   * Words were just selected in the exchanges: the popover opens under them, to say why they are to be taken out. What they are is kept
+   * as offsets in their passage, as typing the reason moves the selection into the reason's field.
+   */
+  private selectionMade(): void {
     const m = this.messages
-    const note = this.shadow.getElementById("redact-note")!
-    const say = (text: string, error = false) => {
-      note.textContent = text
-      note.classList.toggle("error", error)
-    }
+    if (!m || this.hasAttribute("readonly")) return
     const selection = (this.shadow as ShadowRoot & { getSelection?: () => Selection | null }).getSelection?.() ?? document.getSelection()
     const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined
-    if (!range || range.collapsed) {
-      say(m.selectionNone)
-      return
-    }
+    const exchanges = this.shadow.getElementById("exchanges")!
+    if (!range || range.collapsed || !exchanges.contains(range.startContainer) || !exchanges.contains(range.endContainer)) return
     const element = (node: Node) => (node instanceof Element ? node : node.parentElement)
     const said = element(range.startContainer)?.closest<HTMLElement>(".said")
-    if (!said || element(range.endContainer)?.closest(".said") !== said || element(range.startContainer)?.closest(".bar") || element(range.endContainer)?.closest(".bar")) {
-      say(m.selectionOnePassage, true)
+    // Words of the tools under a turn, or of its time, are nothing to take out.
+    if (!said && !element(range.endContainer)?.closest(".said")) return
+    const onePassage = said && element(range.endContainer)?.closest(".said") === said && !element(range.startContainer)?.closest(".bar") && !element(range.endContainer)?.closest(".bar")
+    const rect = range.getBoundingClientRect()
+    if (!onePassage) {
+      this.openRedactPop({ kind: "selection", index: -1, from: 0, to: 0 }, rect, m.selectionOnePassage)
       return
     }
     const index = Number(said.closest<HTMLElement>(".turn")!.dataset.segment)
     const from = InterviewEditorElement.offsetIn(said, range.startContainer, range.startOffset)
     const to = InterviewEditorElement.offsetIn(said, range.endContainer, range.endOffset)
+    this.openRedactPop({ kind: "selection", index, from: Math.min(from, to), to: Math.max(from, to) }, rect)
+  }
+
+  /** A passage taken out was pressed: the popover opens under it, its reason to say otherwise, and a way to put it back while it is known. */
+  private openBar(bar: HTMLElement): void {
+    if (this.hasAttribute("readonly")) return
+    const turn = bar.closest<HTMLElement>(".turn")
+    if (!turn) return
+    const index = Number(turn.dataset.segment)
+    const nth = [...turn.querySelectorAll(".bar")].indexOf(bar)
+    const segment = this.drawn?.segments[index]
+    if (!segment) return
+    const which: number | "all" = segment.redacted ? "all" : nth
+    const key = `${index}:${which}`
+    this.openRedactPop({ kind: "bar", index, nth: which, restorable: this.takenOut.has(key) ? key : undefined }, bar.getBoundingClientRect())
+  }
+
+  private openRedactPop(target: InterviewEditorElement["redactTarget"] & object, rect: DOMRect, error?: string): void {
+    const pop = this.shadow.getElementById("redact-pop")!
+    const reason = this.field("redact-reason")
+    this.redactTarget = target
+    const take = this.shadow.getElementById("redact-take") as HTMLButtonElement
+    const restore = this.shadow.getElementById("redact-restore") as HTMLButtonElement
+    take.hidden = target.kind !== "selection"
+    take.disabled = Boolean(error)
+    restore.hidden = target.kind !== "bar" || !target.restorable
+    reason.disabled = Boolean(error)
+    reason.value = target.kind === "bar" ? this.said.read(this.redactionAt(this.drawn, target.index, target.nth)?.reason) ?? "" : this.lastReason ?? ""
+    const note = this.shadow.getElementById("redact-note")!
+    note.textContent = error ?? ""
+    note.classList.toggle("error", Boolean(error))
+    pop.hidden = false
+    if (typeof pop.showPopover === "function" && pop.isConnected) {
+      pop.setAttribute("popover", "manual")
+      if (!pop.matches(":popover-open")) pop.showPopover()
+    }
+    // Under what it is about, or above it where there is no room under; kept within the window.
+    const width = pop.offsetWidth || 320
+    const height = pop.offsetHeight || 120
+    const below = rect.bottom + 6 + height <= window.innerHeight
+    pop.style.top = `${Math.max(8, below ? rect.bottom + 6 : rect.top - 6 - height)}px`
+    pop.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`
+    if (!error) reason.focus({ preventScroll: true })
+  }
+
+  private closeRedactPop(): void {
+    const pop = this.shadow.getElementById("redact-pop")!
+    this.redactTarget = undefined
+    if (typeof pop.hidePopover === "function" && pop.matches?.(":popover-open")) pop.hidePopover()
+    pop.hidden = true
+  }
+
+  /** The `nth` passage taken out of turn `index` (its whole when "all"), as `json` says it. */
+  private redactionAt(json: InterviewJson | undefined, index: number, nth: number | "all"): InterviewRedaction | undefined {
+    const segment = json?.segments[index]
+    if (!segment) return undefined
+    if (nth === "all") return segment.redacted
+    return InterviewEdits.partsOf(segment).flatMap(part => "redacted" in part ? [part.redacted] : [])[nth]
+  }
+
+  /**
+   * Says why the passage the popover is about was taken out, as typed in it. A gap that stands for several turns taken out one after the
+   * other for the same reason (see InterviewElement) has its reason changed for all of them: it is one gap to the reader.
+   */
+  private async changeReason(): Promise<void> {
+    const target = this.redactTarget
+    if (target?.kind !== "bar") return
+    const reason = this.reasonOf(this.field("redact-reason").value)
+    const before = this.redactionAt(this.drawn, target.index, target.nth)
+    if (!before || JSON.stringify(before.reason) === JSON.stringify(reason)) return
+    await this.editTranscript(json => {
+      if (target.nth !== "all") {
+        const redaction = this.redactionAt(json, target.index, target.nth)
+        if (redaction) redaction.reason = reason
+        return
+      }
+      const old = JSON.stringify(json.segments[target.index].redacted?.reason)
+      for (let n = target.index; n < json.segments.length; n++) {
+        const redacted = json.segments[n].redacted
+        if (!redacted || (n > target.index && JSON.stringify(redacted.reason) !== old)) break
+        redacted.reason = reason
+      }
+    })
+  }
+
+  /** Takes out the words the popover is about (see InterviewEdits.redact), for the reason typed in it, or says why it cannot. */
+  private async redactSelection(): Promise<void> {
+    const m = this.messages
+    const target = this.redactTarget
+    if (target?.kind !== "selection" || target.index < 0) return
+    this.lastReason = this.field("redact-reason").value.trim() || undefined
+    const reason = this.redactReason
     let done = false
     await this.editTranscript(json => {
-      const taken = InterviewEdits.redact(json.segments[index], Math.min(from, to), Math.max(from, to), this.redactReason)
+      const taken = InterviewEdits.redact(json.segments[target.index], target.from, target.to, reason)
       if (!taken) return
       done = true
-      this.shiftParts(index, taken.nth)
-      this.takenOut.set(`${index}:${taken.nth}`, taken.text)
+      this.shiftParts(target.index, taken.nth)
+      this.takenOut.set(`${target.index}:${taken.nth}`, taken.text)
     })
-    selection?.removeAllRanges()
-    say(done ? "" : m.selectionOnePassage, !done)
+    if (!done) {
+      const note = this.shadow.getElementById("redact-note")!
+      note.textContent = m.selectionOnePassage
+      note.classList.add("error")
+      return
+    }
+    this.closeRedactPop()
+    ;((this.shadow as ShadowRoot & { getSelection?: () => Selection | null }).getSelection?.() ?? document.getSelection())?.removeAllRanges()
   }
 
   /** Where `node`'s `offset` falls in what `said` shows, counted as the reader's text is (the labels of passages taken out are no text of it). */
@@ -1382,7 +1527,7 @@ export class InterviewEditorElement extends HTMLElement {
       this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "url", event } }))
     }
     this.dispatchEvent(new CustomEvent(INTERVIEW_CHANGE_EVENT, { bubbles: true, composed: true, detail: { field: "transcript", event, text } }))
-    void this.showExchanges()
+    this.exchangesShown = this.showExchanges()
   }
 
   /** The file changed what the summary shows: shown there, and told to the host. */

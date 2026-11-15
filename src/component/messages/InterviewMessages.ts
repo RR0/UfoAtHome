@@ -48,6 +48,7 @@ export interface InterviewMessages extends InputFileMessages {
   redactSelection: string
   redactedWords: string
   redactAll: string
+  redactRestore: string
   restoreAll: string
   editTurn: string
   deleteTurn: string
@@ -55,7 +56,6 @@ export interface InterviewMessages extends InputFileMessages {
   cancelTurn: string
   turnEditHint: string
   selectionOnePassage: string
-  selectionNone: string
   reviewedBy: string
   linkMoment: string
   momentLabel: string

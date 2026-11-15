@@ -362,7 +362,7 @@ describe("What the summary shows is what the file holds, and the other way round
     expect(edited(changes).segments[4].text).toBe("Then it left.")
   })
 
-  it("takes a passage out for a reason picked among those the interview already gives, given again whole, or among the usual ones", async () => {
+  it("asks why where a passage is taken out, and says it again of a passage taken out pressed: free, the interview's own reasons offered first", async () => {
     files["https://example.org/d/interview.json"] = {
       ...dialogue,
       segments: dialogue.segments.map((segment, n) => n === 2 || n === 3 ? { ...segment, redacted: { reason: { en: "Private life", fr: "Vie privée" } } } : segment)
@@ -370,20 +370,44 @@ describe("What the summary shows is what the file holds, and the other way round
     const { element, changes } = await make({ ...event(), url: "interview.json" })
     tabs(element)[1].click()
     await wait(100)
-    const tool = (index: number, label: string) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>(`#exchanges .turn[data-segment="${index}"] .turn-tools button`)]
+    const root = element.shadowRoot!
+    const tool = (index: number, label: string) => [...root.querySelectorAll<HTMLButtonElement>(`#exchanges .turn[data-segment="${index}"] .turn-tools button`)]
       .find(button => button.textContent === label)!
-    const reason = element.shadowRoot!.querySelector<HTMLInputElement>("#redact-reason")!
-    const offered = [...element.shadowRoot!.querySelectorAll("#redact-reasons option")].map(option => option.textContent)
+    const pop = root.querySelector<HTMLElement>("#redact-pop")!
+    const reason = root.querySelector<HTMLInputElement>("#redact-reason")!
+    expect(pop.hidden).toBe(true)
     // The interview's own first, the most given first, then what passages are most often taken out for.
+    const offered = [...root.querySelectorAll("#redact-reasons option")].map(option => option.textContent)
     expect(offered.slice(0, 3)).toEqual(["Private life", "Place", "identifying detail"])
-    reason.value = "Private life"
+
     tool(0, "Take all out").click()
     await wait(100)
+    expect(pop.hidden).toBe(false)
+    expect(reason.value).toBe("taken out at proofreading")
+    expect(root.querySelector<HTMLButtonElement>("#redact-restore")!.hidden).toBe(false)
+    reason.value = "Private life"
+    reason.dispatchEvent(new Event("change"))
+    await wait(100)
+    // One the interview gives is given again whole, its other languages with it.
     expect(edited(changes).segments[0].redacted!.reason).toEqual({ en: "Private life", fr: "Vie privée" })
     reason.value = "a reason of my own"
-    tool(4, "Take all out").click()
+    reason.dispatchEvent(new Event("change"))
     await wait(100)
-    expect(edited(changes).segments[4].redacted!.reason).toEqual("a reason of my own")
+    expect(edited(changes).segments[0].redacted!.reason).toBe("a reason of my own")
+    root.querySelector<HTMLButtonElement>("#redact-restore")!.click()
+    await wait(100)
+    expect(pop.hidden).toBe(true)
+    expect(edited(changes).segments[0].text).toBe("Where were you?")
+
+    // A gap standing for two turns taken out for the same reason is one gap: its reason changes for both.
+    root.querySelector<HTMLElement>('#exchanges .turn[data-segment="2"] .bar')!.click()
+    expect(pop.hidden).toBe(false)
+    expect(reason.value).toBe("Private life")
+    expect(root.querySelector<HTMLButtonElement>("#redact-restore")!.hidden).toBe(true)
+    reason.value = "family"
+    reason.dispatchEvent(new Event("change"))
+    await wait(100)
+    expect([edited(changes).segments[2].redacted!.reason, edited(changes).segments[3].redacted!.reason]).toEqual(["family", "family"])
   })
 
   it("links a witness's passage to a moment of their observation, named after it", async () => {
@@ -554,24 +578,30 @@ describe("What the summary shows is what the file holds, and the other way round
       expect(start.disabled).toBe(false)
     })
 
-    it("lets the selection be taken out only while words of the exchanges are selected", async () => {
+    it("opens where words of the exchanges are selected, to take them out for the reason typed there", async () => {
       files["https://example.org/d/interview.json"] = withRecording
-      const { element } = await make({ ...event(), url: "interview.json" })
+      const { element, changes } = await make({ ...event(), url: "interview.json" })
       tabs(element)[1].click()
       await wait(100)
-      const take = part(element, "redact-selection") as HTMLButtonElement
-      expect(take.disabled).toBe(true)
-      const said = element.shadowRoot!.querySelector("#exchanges .said")!
+      const root = element.shadowRoot!
+      const pop = root.querySelector<HTMLElement>("#redact-pop")!
+      const said = root.querySelector("#exchanges .turn[data-segment='0'] .said")!
+      const text = [...said.childNodes].find(node => node.nodeType === Node.TEXT_NODE)!
       const range = document.createRange()
-      range.selectNodeContents(said)
+      range.setStart(text, 0)
+      range.setEnd(text, 5)
       // What Chromium gives of a selection within a shadow tree, which jsdom does not keep.
-      let selected: Range | undefined = range
-      ;(element.shadowRoot as ShadowRoot & { getSelection: () => unknown }).getSelection = () => ({ rangeCount: selected ? 1 : 0, getRangeAt: () => selected })
-      document.dispatchEvent(new Event("selectionchange"))
-      expect(take.disabled).toBe(false)
-      selected = undefined
-      document.dispatchEvent(new Event("selectionchange"))
-      expect(take.disabled).toBe(true)
+      ;(root as ShadowRoot & { getSelection: () => unknown }).getSelection = () => ({ rangeCount: 1, getRangeAt: () => range, removeAllRanges: () => undefined })
+      root.querySelector("#exchanges")!.dispatchEvent(new Event("pointerup"))
+      await wait(10)
+      expect(pop.hidden).toBe(false)
+      expect(root.querySelector<HTMLButtonElement>("#redact-take")!.hidden).toBe(false)
+      const reason = root.querySelector<HTMLInputElement>("#redact-reason")!
+      reason.value = "private life"
+      root.querySelector<HTMLButtonElement>("#redact-take")!.click()
+      await wait(100)
+      expect(pop.hidden).toBe(true)
+      expect(edited(changes).segments[0].parts![0]).toEqual({ redacted: { reason: "private life", words: 1 } })
     })
 
     it("makes what was found the transcript, every turn a voice to attribute, which a turn's Who speaks gives to a speaker", async () => {
