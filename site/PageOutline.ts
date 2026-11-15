@@ -33,6 +33,8 @@ export class PageOutline {
    *   them (Firefox and Safari in 2026) gets the same from a measure: the last section whose heading has gone above
    *   the first third of the window.
    * - A heading not shown (the panel of a tab not chosen, as the editor's ten groups) is neither listed nor read.
+   * - Once the page's title has gone out of sight, the outline is headed by it instead of "On this page": the
+   *   reader deep in a long page still sees which page it is.
    */
   static readonly SCRIPT = `<script>
   class PageOutlineReading {
@@ -40,6 +42,18 @@ export class PageOutline {
       this.details = outline.querySelector("details")
       this.list = outline.querySelector("ol")
       this.where = outline.querySelector(".page-outline-current")
+      this.label = outline.querySelector(".page-outline-label")
+      const title = document.querySelector("main h1")
+      if (title) {
+        const onThisPage = this.label.textContent
+        const pageTitle = title.textContent.trim()
+        // Out of sight once it has gone up under the header, not before.
+        new IntersectionObserver(([entry]) => {
+          const gone = !entry.isIntersecting && entry.boundingClientRect.top < 0
+          this.label.textContent = gone ? pageTitle : onThisPage
+          this.label.classList.toggle("page-title", gone)
+        }, {rootMargin: "-80px 0px 0px 0px"}).observe(title)
+      }
       // The bar is held right under the header, whose height depends on how its links wrap.
       const header = document.querySelector(".site-header")
       if (header) {
@@ -131,14 +145,19 @@ export class PageOutline {
   /**
    * @param html The page's content, its headings already anchored.
    * @param label What the outline is called ("On this page"), in the page's language.
+   * @param back The page's way back up (its hero's crumb), put first in the outline: where the reader looks to find
+   *   their way around the page is where the way out of it is too, and it stays in sight while the hero scrolls away.
    * @return The outline's markup, or undefined for a page with too few sections to need one.
    */
-  render(html: string, label: string): string | undefined {
+  render(html: string, label: string, back?: string): string | undefined {
     const items = this.headings.sections(html).map(section => `<li class="${section.level}"><a href="#${section.id}">${section.text}</a></li>`)
     if (items.length < PageOutline.MIN_SECTIONS) {
       return undefined
     }
-    return `<nav class="page-outline" aria-label="${label}">
+    // The arrow apart from the words, so that a narrow bar can show the arrow alone.
+    const way = back?.replace(/>←\s*([\s\S]*?)<\/a>$/, '><span aria-hidden="true">←</span> <span class="page-outline-back-text">$1</span></a>')
+    return `<nav class="page-outline" aria-label="${label}">${way ? `
+  <p class="page-outline-back">${way}</p>` : ""}
   <details>
     <summary><span class="page-outline-label">${label}</span><span class="page-outline-current"></span></summary>
     <ol>

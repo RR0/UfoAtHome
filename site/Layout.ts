@@ -201,8 +201,13 @@ export class Layout {
       .join("\n  ")
     const loader = this.moduleLoader(meta.modules ?? [])
     const script = page.script?.(language)
-    const content = this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)
-    const outline = this.outline.render(content, words.onThisPage)
+    let content = this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)
+    // The hero's way back goes to the top of the outline, when there is one (see PageOutline.render).
+    const crumb = /<p class="eyebrow">\s*(<a class="crumb"[^>]*>[\s\S]*?<\/a>)\s*<\/p>/.exec(content)
+    const outline = this.outline.render(content, words.onThisPage, crumb?.[1])
+    if (outline && crumb) {
+      content = content.replace(crumb[0], "")
+    }
     const scripts = loader || script ? `<script type="module">\n// Where this site's own pages load their modules from — see Layout.versioned.\nconst SITE_LIB = ${JSON.stringify(this.versioned("/lib"))}\n${loader}${script ?? ""}\n</script>` : ""
     return `<!doctype html>
 <html lang="${language}">

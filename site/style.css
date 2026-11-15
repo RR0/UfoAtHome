@@ -696,6 +696,20 @@ td { color: var(--ink-dim); }
   letter-spacing: 0.08em; text-transform: uppercase; list-style: none;
 }
 .page-outline summary::-webkit-details-marker { display: none; }
+/* The page's way back, moved from its hero to the top of the outline (PageOutline.render). */
+.page-outline-back {
+  margin: 0 0 0.9rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+}
+/* Its look of the hero (.crumb), not that of an outline item: ochre, no line at its left. */
+.page-outline .page-outline-back a {
+  display: inline; padding: 0; border: 0; background: none; color: var(--glow-dim); line-height: inherit;
+}
+.page-outline .page-outline-back a:hover { color: var(--glow); text-decoration: underline; }
+/* Headed by the page's title once that is out of sight (PageOutline): a title, not a small-caps label. */
+.page-outline-label.page-title {
+  color: var(--ink); font-family: var(--serif); font-size: 0.95rem; font-weight: 600;
+  letter-spacing: 0; text-transform: none; line-height: 1.3;
+}
 /* The links are scroll markers of the sections they lead to: the browser says which one is being read
    (:target-current), and the outline follows the reading without a script measuring anything. */
 .page-outline ol {
@@ -738,11 +752,21 @@ td { color: var(--ink-dim); }
     position: sticky; top: var(--site-header-height, 3.2rem);
     background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
   }
+  .page-outline { display: flex; align-items: baseline; }
+  .page-outline details { flex: 1; min-width: 0; }
+  .page-outline-back { flex: none; margin: 0; padding: 0.55rem 0 0.55rem clamp(1rem, 4vw, 2.5rem); font-size: 1rem; }
+  /* The arrow alone in the bar; its words are still read out. */
+  .page-outline-back-text {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .page-outline-back + details summary { padding-left: 0.8rem; }
   .page-outline summary {
     display: flex; align-items: baseline; gap: 0.6rem; padding: 0.55rem clamp(1rem, 4vw, 2.5rem);
   }
   .page-outline summary::after { content: "▾"; margin-left: auto; color: var(--ink-faint); }
   .page-outline details[open] summary::after { content: "▴"; }
+  /* The page's title, once it heads the bar, leaves room for the section being read. */
+  .page-outline-label { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .page-outline-current {
     flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     color: var(--ink); font-size: 0.85rem; font-weight: 400; letter-spacing: 0; text-transform: none;
