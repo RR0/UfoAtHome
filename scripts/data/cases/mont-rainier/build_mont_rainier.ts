@@ -251,6 +251,12 @@ async function main(): Promise<void> {
     eastM: r2((p.lng - origin.lng) * M_PER_DEG * Math.cos(origin.lat * Math.PI / 180)),
     northM: r2((p.lat - origin.lat) * M_PER_DEG)
   })
+  // A decor's track is laid out as the scene lays the decor round an observer who moves: east in metres of the latitude it is at, not of the
+  // origin's. With the origin's, the cabin slid 1.5 m back along the seven kilometres flown, and the eye went out through its rear.
+  const decorLocal = (p: Geo) => ({
+    eastM: r2((p.lng - origin.lng) * M_PER_DEG * Math.cos(p.lat * Math.PI / 180)),
+    northM: r2((p.lat - origin.lat) * M_PER_DEG)
+  })
 
   // The witness, looking at the leader while it is in sight, at the last of them after.
   const observerKeys = samples.map(t => {
@@ -278,16 +284,15 @@ async function main(): Promise<void> {
   })
 
   // His aircraft, round his eye: a Piper PA-28 Cadet stands in for his CallAir A-3 (no model of it to be had). In the model the pilot's eye is
-  // 1 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, a metre from the panel, a little
-  // over 0.2 m under the roof (which the model glazes). The decor states where the model's middle is; 0.22 m further back and 0.15 m
-  // further right than that are what the scene showed.
+  // 1.1 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, 0.8 m from the panel, a little over
+  // 0.2 m under the roof. The decor states where the model's middle is.
   const cabinTrack = samples.map(t => {
     const { at, headingDeg } = arnoldAt(t)
     const h = headingDeg * Math.PI / 180
-    // From the eye back to the model's middle: 1.15 m astern, 0.28 m to the right.
-    const back = 1.52, right = 0.43
+    // From the eye back to the model's middle, and to its right.
+    const back = 1.1, right = 0.28
     const middle = offset(at, -back * Math.sin(h) + right * Math.cos(h), -back * Math.cos(h) - right * Math.sin(h))
-    return { t: t * 1000, ...local(middle), altitudeM: r2(ARNOLD_ALT_M - originGround + 1.6 - 0.335), headingDeg: r2(headingDeg) }
+    return { t: t * 1000, ...decorLocal(middle), altitudeM: r2(ARNOLD_ALT_M - originGround + 1.6 - 0.335), headingDeg: r2(headingDeg) }
   })
 
   // "There was a DC-4 to the left and to the rear of me approximately fifteen miles distance, and I should judge, at 14,000 foot elevation."
@@ -300,7 +305,7 @@ async function main(): Promise<void> {
   await terrarium.load(samples.map(t => offset(dc4Start, t * 100, 0)))
   const dc4Track = samples.filter(t => t % 10 === 0).map(t => {
     const p = offset(dc4Start, t * 100, 0)
-    return { t: t * 1000, ...local(p), altitudeM: r2(14000 * FT - terrarium.heightAt(p.lat, p.lng)), headingDeg: 90 }
+    return { t: t * 1000, ...decorLocal(p), altitudeM: r2(14000 * FT - terrarium.heightAt(p.lat, p.lng)), headingDeg: 90 }
   })
 
   // ---- The account: each object's direction, as the points the dossier's map puts them at, seen from where he was ----
