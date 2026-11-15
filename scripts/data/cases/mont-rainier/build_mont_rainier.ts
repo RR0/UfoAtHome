@@ -278,8 +278,10 @@ for (let t = 1; t < DURATION_S; t += 3) {
 /** A flash is a glint, not a glow: a tenth of a second or so at its brightest (ASSUMED), between keyframes of its own just before and after. */
 const FLASH_S = 0.1
 const flashingAt = (k: number, t: number) => flashes[k].some(f => Math.abs(t - f) < FLASH_S / 2)
-/** Every flash's own instants: just before it, its height and just after, ms-rounded, in seconds. */
-const flashInstants = flashes.flat().flatMap(f => [f - FLASH_S, f, f + FLASH_S].map(t => Math.round(t * 1000) / 1000))
+/** Every flash's own instants: just before it, its height and just after, ms-rounded, in seconds; and those of each object's own. */
+const instantsOf = (times: number[]) => times.flatMap(f => [f - FLASH_S, f, f + FLASH_S].map(t => Math.round(t * 1000) / 1000))
+const flashInstants = instantsOf(flashes.flat())
+const ownFlashInstants = flashes.map(times => new Set(instantsOf(times)))
 
 async function main(): Promise<void> {
   const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
@@ -397,6 +399,16 @@ async function main(): Promise<void> {
           transparency: 0,
           title: { en: `Object ${k + 1}`, fr: `Objet ${k + 1}` }
         }
+        // After the first, a keyframe states only what changes (the rest holds from the one before): where it is and how it rocks, and
+        // about a flash of its own, how bright and how big. Stated in full each time, the file was thirteen megabytes.
+        if (t !== 0) {
+          const own = ownFlashInstants[k].has(Math.round(t * 1000) / 1000)
+          for (const key of Object.keys(shape)) {
+            if (key === "aim" || key === "angle") continue
+            if (own && (key === "angular" || key === "color" || key === "brightness" || key === "haloScale")) continue
+            delete shape[key]
+          }
+        }
         if (t === 0 && k === 0) {
           shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »")
           shape.angular = said({ widthDeg: r3(widthDeg), heightDeg: r3(widthDeg / 20) }, "stated",
@@ -418,7 +430,7 @@ async function main(): Promise<void> {
       id: `craft-${k + 1}`,
       explains: [sourceId],
       model: { id: "ellipsoid" },
-      track: flashSamples.map(t => ({
+      track: [...new Set([...samples, ...[...ownFlashInstants[k]].filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b).map(t => ({
         t: Math.round(t * 1000),
         ...local(objectAt(k, t)),
         altitudeM: r2(OBJECTS_ALT_M - originGround),
@@ -491,7 +503,7 @@ async function main(): Promise<void> {
     weatherTrack: { keyframes: [{ t: 0, weather }] },
     interpretation: witnessInterpretation
   }
-  writeFileSync(path.join(demoData, "observer-arnold.json"), JSON.stringify(recording, null, 1) + "\n")
+  writeFileSync(path.join(demoData, "observer-arnold.json"), JSON.stringify(recording) + "\n")
   // ---- His later account: the same flight, the objects drawn as the crescent he showed in the 1960s ----
   // The dossier's sketch of how his drawing changed (Shapes.jpg: 1947 round, 1950 round in front and pointed behind, "196x" a crescent,
   // "bat-like") and the drawing itself (CrescentShape.jpg), its dark round spot left out (an outline has no hole). Its exact date is not
@@ -518,9 +530,9 @@ async function main(): Promise<void> {
     fr: "Le même vol tel qu'il le raconta plus tard : les neuf objets dessinés en croissants, « comme des chauves-souris », plutôt qu'en éventails arrondis comme dans son rapport de 1947."
   }
   for (const keyframe of later.timeline.keyframes as { shapes: { shape: Record<string, unknown> }[] }[]) {
-    for (const { shape } of keyframe.shapes) shape.points = crescent
+    for (const { shape } of keyframe.shapes) if (shape.points) shape.points = crescent
   }
-  writeFileSync(path.join(demoData, "observer-arnold-1960s.json"), JSON.stringify(later, null, 1) + "\n")
+  writeFileSync(path.join(demoData, "observer-arnold-1960s.json"), JSON.stringify(later) + "\n")
 
 
   // ---- The pelicans: solved ----
@@ -600,7 +612,7 @@ async function main(): Promise<void> {
       }]
     }
   }
-  writeFileSync(path.join(demoData, "interpretation-mont-rainier-pelicans.json"), JSON.stringify(pelicans, null, 1) + "\n")
+  writeFileSync(path.join(demoData, "interpretation-mont-rainier-pelicans.json"), JSON.stringify(pelicans) + "\n")
 
   const caseJson = {
     id: "MontRainier1947",
@@ -622,7 +634,7 @@ async function main(): Promise<void> {
   }
   // The pelicans read against his later account too: the same birds, set against the crescents.
   const laterPelicans = { ...JSON.parse(JSON.stringify(later)), id: "1947-06-24-ArnoldKennethE-1960s-pelicans", interpretation: pelicans.interpretation }
-  writeFileSync(path.join(demoData, "interpretation-mont-rainier-1960s-pelicans.json"), JSON.stringify(laterPelicans, null, 1) + "\n")
+  writeFileSync(path.join(demoData, "interpretation-mont-rainier-1960s-pelicans.json"), JSON.stringify(laterPelicans) + "\n")
   caseJson.events.push({ type: "event", eventType: "sighting", interpretationOf: "arnold-1960s", title: pelicans.interpretation.title, url: "interpretation-mont-rainier-1960s-pelicans.json" } as never)
   writeFileSync(path.join(demoData, "case-mont-rainier.json"), JSON.stringify(caseJson, null, 1) + "\n")
   const first = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S))
