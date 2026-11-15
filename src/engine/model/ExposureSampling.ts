@@ -1,3 +1,4 @@
+import type { BodyJson } from "../interpretation/Interpretation.js"
 import type { DecorObject } from "./Decor.js"
 import { resolveDecorPlacementAt } from "./Decor.js"
 
@@ -135,5 +136,63 @@ export class ExposureSampling {
     // Standing exactly where the object is: no direction to speak of, and nothing to sample.
     if (length === 0) return { x: 0, y: 1, z: 0 }
     return { x: x / length, y: y / length, z: z / length }
+  }
+
+  /**
+   * How many instants the bodies of an interpretation ask for over a pose from `t0` to `t1` (ms): as for the decor, enough that what crosses
+   * the frame is painted every PIXELS_PER_INSTANT pixels, and as well enough that what moves ON a body (a bird's wings, see
+   * BodyKeyframe.motions) is: a gull a few metres from a phone at a sixtieth of a second is a smear of its wingbeat as much as of its flight,
+   * the "saucer" of so many photographs.
+   *
+   * Read from the keyframes stated in the world (eastM, northM, altitudeM), blended linearly: a sampling rate, not a placement, so neither
+   * the relief nor a keyframe stated from the observer is looked into (such a body asks for nothing here).
+   */
+  static bodyInstants(bodies: readonly BodyJson[], observerElevationM: number, t0: number, t1: number, degPerPixel: number): number {
+    if (!(t1 > t0) || !(degPerPixel > 0)) return 1
+    let widest = 0
+    for (const body of bodies) {
+      const from = ExposureSampling.bodyAt(body, t0)
+      const to = ExposureSampling.bodyAt(body, t1)
+      if (!from || !to) continue
+      const a = { x: from.eastM, y: from.upM - observerElevationM, z: from.northM }
+      const b = { x: to.eastM, y: to.upM - observerElevationM, z: to.northM }
+      const la = Math.hypot(a.x, a.y, a.z), lb = Math.hypot(b.x, b.y, b.z)
+      if (la === 0 || lb === 0) continue
+      const dot = Math.min(1, Math.max(-1, (a.x * b.x + a.y * b.y + a.z * b.z) / la / lb))
+      let travelDeg = Math.acos(dot) * 180 / Math.PI
+      // A movement of its own: a whole cycle sweeps a part of half its width through about a radian and back.
+      let cycles = 0
+      for (const name of Object.keys(to.motions)) cycles = Math.max(cycles, Math.abs(to.motions[name] - (from.motions[name] ?? to.motions[name])))
+      if (cycles > 0) travelDeg += cycles * 2 * (to.halfWidthM / Math.max(lb, 1e-3)) * 180 / Math.PI
+      widest = Math.max(widest, travelDeg)
+    }
+    const asked = Math.ceil(widest / degPerPixel / ExposureSampling.PIXELS_PER_INSTANT)
+    return asked < 2 ? 1 : Math.min(ExposureSampling.MAX_INSTANTS, asked)
+  }
+
+  /** Where a body's world keyframes put it at `t`, and how far along its movements: undefined outside its track or when not so stated. */
+  private static bodyAt(body: BodyJson, t: number): { eastM: number, northM: number, upM: number, halfWidthM: number, motions: Record<string, number> } | undefined {
+    const track = body.track
+    if (track.length === 0 || t < track[0].t || t > track[track.length - 1].t) return undefined
+    let low = 0, high = track.length - 1
+    while (high - low > 1) {
+      const middle = (low + high) >> 1
+      if (track[middle].t <= t) low = middle
+      else high = middle
+    }
+    const a = track[low], b = track[high]
+    if (a.eastM === undefined || a.northM === undefined || b.eastM === undefined || b.northM === undefined) return undefined
+    const share = b.t > a.t ? (t - a.t) / (b.t - a.t) : 0
+    const mix = (x: number, y: number) => x + (y - x) * share
+    const motions: Record<string, number> = {}
+    for (const name of Object.keys(b.motions ?? {})) {
+      const x = a.motions?.[name], y = b.motions![name]
+      motions[name] = x === undefined ? y : mix(x, y)
+    }
+    const width = track.find(key => key.sizeM)?.sizeM?.widthM ?? 1
+    return {
+      eastM: mix(a.eastM, b.eastM), northM: mix(a.northM, b.northM), upM: mix(a.altitudeM ?? 0, b.altitudeM ?? 0),
+      halfWidthM: width / 2, motions
+    }
   }
 }

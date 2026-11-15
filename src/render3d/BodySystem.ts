@@ -9,6 +9,7 @@ import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
 import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import type { NearEmitter } from "./EmitterLights.js"
+import { LightFromBelow } from "./LightFromBelow.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { LitFromWithin } from "./LitFromWithin.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
@@ -172,6 +173,14 @@ export class BodySystem {
     return { ...loaded, scene }
   }
 
+  /** The irradiance from below a body states (see BodyJson.lightFromBelow), in the scene's light units, its colour at a luminance of one. */
+  private belowOf(below: { lux: number, color?: string }): [number, number, number] {
+    const colour = new Color(below.color ?? "#ffffff")
+    const luminance = 0.2126 * colour.r + 0.7152 * colour.g + 0.0722 * colour.b || 1
+    const scale = Math.max(0, below.lux) * this.sceneUnitsPerLux() / luminance
+    return [colour.r * scale, colour.g * scale, colour.b * scale]
+  }
+
   /** The credits of every model on show — beside the decor's in the info panel. */
   get modelCredits(): unknown[] {
     return [...this.credits.values()]
@@ -216,6 +225,7 @@ export class BodySystem {
       if (state.turns) BodySystem.unturn(entry, holder, state.turns)
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       if (state.turns) BodySystem.turn(entry, state.turns)
+      if (state.lightFromBelow && entry.loaded) LightFromBelow.set(holder, this.belowOf(state.lightFromBelow))
       this.shine(state, holder, whole ? undefined : glowing, frame)
       if (whole && glowing) this.hideSpecks(holder, glowing, frame)
       // Drawn as a point under a pixel or two (see shine), its shape shows only its share of the light, and none at all under a pixel and a
@@ -936,7 +946,7 @@ export class BodySystem {
     const material = new MeshStandardMaterial({ roughness: 0.45, metalness: 0 })
     BodySystem.paint(material, state)
     const placeholder = new Mesh(BodySystem.unitGeometry("ellipsoid"), material)
-    placeholder.castShadow = true
+    placeholder.castShadow = state.shadow !== false
     placeholder.receiveShadow = true
     holder.add(placeholder)
     BodySystem.overlay(holder)
@@ -948,8 +958,9 @@ export class BodySystem {
       material.dispose()
       DecorSystem.applyModelParameters(loaded.scene, state.modelParameters, loaded.bindings)
       LitFromWithin.apply(loaded.scene)
+      if (state.lightFromBelow) LightFromBelow.apply(loaded.scene)
       BodySystem.glaze(loaded.scene)
-      holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0))
+      holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0, state.shadow !== false))
       BodySystem.overlay(holder)
       this.credits.set(state.id, loaded.credit)
       const entry = this.built.get(state.id)
@@ -975,7 +986,7 @@ export class BodySystem {
    * The model, turned so its nose faces -Z and fitted into a one-metre cube centred on the origin:
    * the holder's scale then stretches it to the size stated, axis by axis, like a primitive.
    */
-  private static fit(scene: Object3D, headingOffsetDeg: number): Object3D {
+  private static fit(scene: Object3D, headingOffsetDeg: number, castsShadow = true): Object3D {
     const turned = new Group()
     scene.rotation.y = -headingOffsetDeg * DEG_TO_RAD
     turned.add(scene)
@@ -989,7 +1000,7 @@ export class BodySystem {
     fitted.scale.set(1 / Math.max(size.x, 1e-6), 1 / Math.max(size.y, 1e-6), 1 / Math.max(size.z, 1e-6))
     scene.traverse(child => {
       if (!(child instanceof Mesh)) return
-      child.castShadow = true
+      child.castShadow = castsShadow
       child.receiveShadow = true
     })
     return fitted
@@ -1187,7 +1198,7 @@ export class BodySystem {
 
   /** What the body is built from: its model and the settings applied to it once, as it arrives. */
   private static signatureOf(state: BodyState): string {
-    return `${state.model.id ?? ""}|${state.model.url ?? ""}|${state.modelParameters ? JSON.stringify(state.modelParameters) : ""}`
+    return `${state.model.id ?? ""}|${state.model.url ?? ""}|${state.modelParameters ? JSON.stringify(state.modelParameters) : ""}|${state.lightFromBelow ? "below" : ""}|${state.shadow === false ? "unshadowed" : ""}`
   }
 
   /** A primitive, one metre along each axis and centred on the origin. */

@@ -2186,7 +2186,9 @@ export class SceneElement extends HTMLElement {
         window.fromMs,
         exposureSeconds,
         degPerPixel
-      )
+      ),
+      ExposureSampling.bodyInstants(this.interpretationShown?.bodies ?? [], resolveObserverPoseAt(this.ufoElement.sighting, t)?.elevationM ?? 0,
+        window.fromMs, t, degPerPixel)
     )
     if (instants <= 1) {
       this.sceneRenderer.setExposure(1)

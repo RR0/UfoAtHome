@@ -23,10 +23,10 @@ const install = () => ModuleRegistry.install({
 afterEach(() => ModuleRegistry.uninstall("balloons"))
 
 describe("kinds of interpretation", () => {
-  it("are the built-in flares and lanterns, then a module's", () => {
-    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns"])
+  it("are the built-in flares, lanterns and birds, then a module's", () => {
+    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds"])
     install()
-    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "balloons"])
+    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds", "balloons"])
   })
 
   it("compute their bodies beside the interpretation's own, and leave one that states none as it is", () => {

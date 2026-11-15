@@ -4,6 +4,7 @@ import { InterpretationKinds } from "./InterpretationKind.js"
 import type { InterpretationKind } from "./InterpretationKind.js"
 import { FLARE_KIND } from "./flares/flareKind.js"
 import { LANTERN_KIND } from "./lanterns/lanternKind.js"
+import { BIRD_KIND } from "./birds/birdKind.js"
 
 /**
  * Every kind of interpretation computed into bodies (see InterpretationKind): one folder each under src/modules/interpretations. A kind's
@@ -23,6 +24,13 @@ export const INTERPRETATION_SOURCES: DataSource<InterpretationKind>[] = ModuleRe
     credit: "UFO@home",
     creditUrl: "https://ufoathome.org/docs/format/",
     create: () => LANTERN_KIND as InterpretationKind
+  },
+  {
+    id: BIRD_KIND.key,
+    name: "Birds",
+    credit: "UFO@home",
+    creditUrl: "https://ufoathome.org/docs/format/",
+    create: () => BIRD_KIND as InterpretationKind
   }
 ])
 

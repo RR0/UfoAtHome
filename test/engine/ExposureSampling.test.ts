@@ -79,4 +79,32 @@ describe("ExposureSampling.windowEndingAt", () => {
     expect(ExposureSampling.windowEndingAt(5000, 0).ms).toBe(0)
     expect(ExposureSampling.windowEndingAt(5000, undefined as unknown as number).ms).toBe(0)
   })
+
+  describe("bodyInstants", () => {
+    const gull = (motions: boolean) => ({
+      id: "gull", model: { id: "ufoathome-bird-gull" },
+      track: [
+        { t: 0, eastM: -10, northM: 20, altitudeM: 5, sizeM: { widthM: 1.4, lengthM: 0.65, heightM: 0.14 }, ...(motions ? { motions: { flap: 0 } } : {}) },
+        { t: 1000, eastM: 6, northM: 20, altitudeM: 5, ...(motions ? { motions: { flap: 3.6 } } : {}) }
+      ]
+    })
+
+    it("samples a bird crossing close at a sixtieth of a second finely enough to smear it", () => {
+      // 16 m/s at 20 m: 0.8° in 1/60 s, at 0.01° a pixel: some forty instants.
+      const instants = ExposureSampling.bodyInstants([gull(false)], 0, 500, 500 + 1000 / 60, 0.01)
+      expect(instants).toBeGreaterThan(30)
+      expect(instants).toBeLessThan(60)
+    })
+
+    it("asks for more when its wings beat as well", () => {
+      const still = ExposureSampling.bodyInstants([gull(false)], 0, 500, 500 + 1000 / 60, 0.01)
+      expect(ExposureSampling.bodyInstants([gull(true)], 0, 500, 500 + 1000 / 60, 0.01)).toBeGreaterThan(still)
+    })
+
+    it("asks for nothing outside its track, or with no shutter", () => {
+      expect(ExposureSampling.bodyInstants([gull(true)], 0, 2000, 2100, 0.01)).toBe(1)
+      expect(ExposureSampling.bodyInstants([gull(true)], 0, 500, 500, 0.01)).toBe(1)
+    })
+  })
 })
+

@@ -106,8 +106,25 @@ export class BodyConfrontation {
    */
   at(t: number, bodies: BodyState[], eye: LocalPoint, outlineOf?: (body: BodyState) => LocalPoint[] | undefined): ConfrontationReading[] {
     const readings: ConfrontationReading[] = []
+    // Bodies of one ensemble are one thing to the account: a flock taken for a craft. Measured as one, by all their outlines together,
+    // under the ensemble's id (see BodyJson.ensemble).
+    const ensembles = new Map<string, BodyState[]>()
+    const measured: { id: string, explains: string[], predicted: Projection | undefined }[] = []
     for (const body of bodies) {
-      const predicted = BodyConfrontation.projectionOf(body, eye, outlineOf?.(body))
+      if (body.ensemble && body.explains.length > 0) {
+        const members = ensembles.get(body.ensemble)
+        if (members) members.push(body)
+        else ensembles.set(body.ensemble, [body])
+        continue
+      }
+      measured.push({ id: body.id, explains: body.explains, predicted: BodyConfrontation.projectionOf(body, eye, outlineOf?.(body)) })
+    }
+    for (const [id, members] of ensembles) {
+      const outline = members.flatMap(member => outlineOf?.(member) ?? BodyConfrontation.outlineOf(member))
+      measured.push({ id, explains: members[0].explains, predicted: BodyConfrontation.projectionOf(members[0], eye, outline) })
+    }
+    for (const body of measured) {
+      const predicted = body.predicted
       if (!predicted) continue
       for (const sourceId of body.explains) {
         const shape = this.timeline.getInterpolatedShapeAt(t, sourceId)

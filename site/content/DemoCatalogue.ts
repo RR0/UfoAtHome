@@ -534,6 +534,28 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "birds-gulls",
+          src: "/demo-data/sky-test-birds-gulls.json",
+          title: { en: "Gulls", fr: "Des goélands", es: "Gaviotas", it: "Gabbiani" },
+          blurb: {
+            en: "A V of herring gulls crossing a harbour, then one alone passing close to a phone at a sixtieth of a second: its wingbeat and its flight smeared into the blurred \"saucer\" of so many photographs. Place and date assumed.",
+            fr: "Un V de goélands argentés qui traverse un port, puis un seul qui passe tout près d'un téléphone au soixantième de seconde : son battement et son vol étalés en la « soucoupe » floue de tant de photos. Lieu et date supposés.",
+            es: "Una V de gaviotas argénteas que cruza un puerto, y luego una sola que pasa muy cerca de un teléfono a un sesentavo de segundo: su aleteo y su vuelo difuminados en el «platillo» borroso de tantas fotos. Lugar y fecha supuestos.",
+            it: "Una V di gabbiani reali che attraversa un porto, poi uno solo che passa vicinissimo a un telefono a un sessantesimo di secondo: il battito e il volo sfumati nel «disco» sfocato di tante foto. Luogo e data ipotizzati."
+          }
+        },
+        {
+          id: "birds-night",
+          src: "/demo-data/sky-test-birds-night.json",
+          title: { en: "Birds lit from below", fr: "Des oiseaux éclairés par-dessous", es: "Aves iluminadas desde abajo", it: "Uccelli illuminati dal basso" },
+          blurb: {
+            en: "Snow geese in a V over a town at night, their white bellies lit by its street lamps: a silent arc of pale lights crossing the sky. Then a flock of plovers that flies itself, each bird heeding its seven nearest. Place, date and lighting assumed.",
+            fr: "Des oies des neiges en V au-dessus d'une ville la nuit, leur ventre blanc éclairé par les lampadaires : un arc silencieux de lumières pâles qui traverse le ciel. Puis une nuée de pluviers qui vole d'elle-même, chaque oiseau suivant ses sept plus proches voisins. Lieu, date et éclairage supposés.",
+            es: "Gansos nivales en V sobre una ciudad de noche, el vientre blanco iluminado por las farolas: un arco silencioso de luces pálidas que cruza el cielo. Después, una bandada de chorlitos que vuela por sí sola, cada ave atenta a sus siete vecinas más cercanas. Lugar, fecha e iluminación supuestos.",
+            it: "Oche delle nevi in V sopra una città di notte, il ventre bianco illuminato dai lampioni: un arco silenzioso di luci pallide che attraversa il cielo. Poi uno stormo di pivieri che vola da sé, ogni uccello attento ai suoi sette vicini più prossimi. Luogo, data e illuminazione ipotizzati."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

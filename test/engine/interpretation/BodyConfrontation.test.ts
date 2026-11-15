@@ -49,6 +49,17 @@ describe("BodyConfrontation", () => {
     expect(far.widthRatio).toBeCloseTo(0.1, 1)
   })
 
+  it("measures the bodies of one ensemble as one, by all their outlines: a flock taken for one craft", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 1 } } }])
+    // Three birds a metre wide, ten metres apart across the line of sight, a hundred metres off: one band of some 11.5°.
+    const bird = (eastM: number, id: string): BodyState => ({ ...sphereAt(100, 1), id, eastM, ensemble: "flock" })
+    const readings = new BodyConfrontation(timeline).at(0, [bird(-5, "a"), bird(0, "b"), bird(5, "c")], eye)
+    expect(readings).toHaveLength(1)
+    expect(readings[0].bodyId).toBe("flock")
+    expect(readings[0].predicted.angular.widthDeg).toBeCloseTo(degrees(2 * Math.atan(5.5 / 100)), 0)
+  })
+
   it("contradicts a direction off by more than the thing's own half-width", () => {
     const stated = { aim: { azimuthDeg: 10, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 5.7 } }
     const reading = BodyConfrontation.compare("ufo", "craft", stated, BodyConfrontation.projectionOf(sphereAt(100, 10), eye)!)

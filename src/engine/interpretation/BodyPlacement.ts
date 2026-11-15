@@ -31,6 +31,12 @@ export interface BodyState {
   /** See BodyJson.flicker. */
   flicker?: number
   explains: string[]
+  /** See BodyJson.ensemble. */
+  ensemble?: string
+  /** See BodyJson.shadow. */
+  shadow?: boolean
+  /** See BodyJson.lightFromBelow. */
+  lightFromBelow?: { lux: number, color?: string }
   /** See BodyJson.outlineNode. */
   outlineNode?: string
   eastM: number
@@ -104,8 +110,21 @@ export class BodyPlacement {
    * @param eyeAt Where the observer's eye is at an instant, in the same frame — see eyeOf.
    */
   constructor(private readonly body: BodyJson, private readonly ground: Ground, private readonly eyeAt: (t: number) => (LocalPoint & { headingDeg?: number }) | undefined) {
+    // A track stated in the world alone places the same whatever the eye and the relief (the ground is read when a state is asked for, see
+    // at): placed once per body, not each time a body is stood. A flock of eighty birds of six hundred keyframes each cost 6 ms a frame.
+    const known = BodyPlacement.placedInWorld.get(body)
+    if (known) {
+      this.keys = known.keys
+      this.motionKeys = known.motionKeys
+      this.turnKeys = known.turnKeys
+      this.lightKeys = known.lightKeys
+      return
+    }
     const track = [...body.track].sort((a, b) => a.t - b.t)
     this.keys = this.place(track, eyeAt)
+    this.motionKeys = new Map()
+    this.turnKeys = new Map()
+    this.lightKeys = new Map()
     // Each movement from the keyframes that state IT: one stated at 248 s and again at 262 s turns
     // all the way between, whatever keyframes moved the body in the meantime.
     // The same for each light, from the keyframes that name it.
@@ -114,11 +133,18 @@ export class BodyPlacement {
       BodyPlacement.collect(this.turnKeys, key.t, key.turns)
       BodyPlacement.collect(this.lightKeys, key.t, key.lights)
     }
+    if (!body.withObserver && track.every(key => key.azimuthDeg === undefined && key.altitudeDeg === undefined)) {
+      BodyPlacement.placedInWorld.set(body, { keys: this.keys, motionKeys: this.motionKeys, turnKeys: this.turnKeys, lightKeys: this.lightKeys })
+    }
   }
 
-  private readonly motionKeys = new Map<string, { t: number, value: number }[]>()
-  private readonly turnKeys = new Map<string, { t: number, value: number }[]>()
-  private readonly lightKeys = new Map<string, { t: number, value: number }[]>()
+  /** The keyframes of the bodies whose track is stated in the world alone, placed, by body (see the constructor). */
+  private static readonly placedInWorld = new WeakMap<BodyJson, { keys: PlacedKey[], motionKeys: Map<string, { t: number, value: number }[]>,
+    turnKeys: Map<string, { t: number, value: number }[]>, lightKeys: Map<string, { t: number, value: number }[]> }>()
+
+  private readonly motionKeys: Map<string, { t: number, value: number }[]>
+  private readonly turnKeys: Map<string, { t: number, value: number }[]>
+  private readonly lightKeys: Map<string, { t: number, value: number }[]>
 
   private static collect(channels: Map<string, { t: number, value: number }[]>, t: number, values: Record<string, number> | undefined): void {
     for (const [name, value] of Object.entries(values ?? {})) {
@@ -266,6 +292,9 @@ export class BodyPlacement {
       modelParameters: this.body.modelParameters,
       flicker: this.body.flicker,
       explains: this.body.explains ?? [],
+      ...(this.body.ensemble ? { ensemble: this.body.ensemble } : {}),
+      ...(this.body.shadow === false ? { shadow: false } : {}),
+      ...(this.body.lightFromBelow ? { lightFromBelow: this.body.lightFromBelow } : {}),
       outlineNode: this.body.outlineNode,
       eastM,
       northM,

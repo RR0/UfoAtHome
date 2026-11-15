@@ -1,0 +1,149 @@
+{
+  "version": 4,
+  "id": "sky-test-birds-gulls",
+  "tags": [
+    "birds",
+    "misidentification"
+  ],
+  "description": {
+    "en": "Herring gulls over a harbour in the afternoon: a V of nine crossing in front, then one alone passing close to the phone.",
+    "fr": "Des goélands argentés au-dessus d'un port l'après-midi : un V de neuf qui passe devant, puis un seul tout près du téléphone.",
+    "es": "Gaviotas argénteas sobre un puerto por la tarde: una V de nueve que cruza delante, y luego una sola que pasa cerca del teléfono.",
+    "it": "Gabbiani reali sopra un porto nel pomeriggio: una V di nove che passa davanti, poi uno solo vicino al telefono."
+  },
+  "time": "2025-09-14T16:30:00",
+  "utcOffsetHours": 2,
+  "durationSeconds": 40,
+  "place": {
+    "name": "Harbour, Brittany coast (assumed)",
+    "locations": [
+      {
+        "lat": 47.75,
+        "lng": -3.37
+      }
+    ]
+  },
+  "instrument": "phone-landscape",
+  "exposureSeconds": 0.016666666666666666,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0.1,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 2500,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0.1,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 250,
+          "windSpeed": 3,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 47.75,
+          "lng": -3.37,
+          "elevationM": 0,
+          "headingDeg": 0,
+          "pitchDeg": 12,
+          "fovDeg": 50
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Gulls",
+      "fr": "Goélands",
+      "es": "Gaviotas",
+      "it": "Gabbiani"
+    },
+    "bodies": [],
+    "birds": [
+      {
+        "id": "gull-v",
+        "species": "herring-gull",
+        "count": 9,
+        "formation": {
+          "kind": "v",
+          "angleDeg": 80
+        },
+        "seed": 3,
+        "path": [
+          {
+            "t": 0,
+            "eastM": -120,
+            "northM": 90,
+            "altitudeM": 30
+          },
+          {
+            "t": 12000,
+            "eastM": 0,
+            "northM": 80,
+            "altitudeM": 34
+          },
+          {
+            "t": 24000,
+            "eastM": 130,
+            "northM": 60,
+            "altitudeM": 30
+          }
+        ]
+      },
+      {
+        "id": "gull-alone",
+        "species": "herring-gull",
+        "formation": {
+          "kind": "single"
+        },
+        "seed": 7,
+        "path": [
+          {
+            "t": 18000,
+            "eastM": 40,
+            "northM": 25,
+            "altitudeM": 8
+          },
+          {
+            "t": 26000,
+            "eastM": 0,
+            "northM": 18,
+            "altitudeM": 9
+          },
+          {
+            "t": 34000,
+            "eastM": -45,
+            "northM": 22,
+            "altitudeM": 8
+          }
+        ]
+      }
+    ]
+  }
+}

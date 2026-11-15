@@ -4,6 +4,7 @@ import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { FlareSalvoJson } from "../../modules/interpretations/flares/DecoyFlare.js"
 import type { LanternLaunchJson } from "../../modules/interpretations/lanterns/SkyLantern.js"
+import type { BirdFlockJson } from "../../modules/interpretations/birds/BirdFlock.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**
@@ -37,6 +38,8 @@ export interface InterpretationJson {
   flares?: FlareSalvoJson[]
   /** Sky lanterns let go from the ground, computed into bodies when shown — see LanternLaunchJson. */
   lanterns?: LanternLaunchJson[]
+  /** Birds, alone or in flocks, computed into bodies when shown — see BirdFlockJson. */
+  birds?: BirdFlockJson[]
   /**
    * When this interpretation is a VARIANT of the account: what the observer would have to have erred by for the account to be a
    * misperception of a candidate, as the candidate search found it (see CandidateSearch, docs/witness-error-model.md). The account never
@@ -227,6 +230,23 @@ export interface BodyJson {
    * times a second, alike every time the recording is played. Steady when absent.
    */
   flicker?: number
+  /**
+   * Whether it casts a shadow. True when absent. A bird a hundred metres up throws none anyone could see, and eighty of them cast cost
+   * three quarters of the time of a frame: what a flock says false (see BirdFlock).
+   */
+  shadow?: boolean
+  /**
+   * The bodies that together are what they explain: a flock of birds taken for one craft, whose outline is the flock's and not any one
+   * bird's. Bodies of the same `ensemble` are measured as one against what they explain (see BodyConfrontation), under this id. Each on its
+   * own when absent.
+   */
+  ensemble?: string
+  /**
+   * The light that comes up at it from below, from a lit ground under it (a town's streets at night), as the illuminance it gives a
+   * surface facing down, lux, and its colour, CSS (white when absent): what lights the belly of a bird flying over a town. Only the scene's
+   * own light when absent (see LightFromBelow).
+   */
+  lightFromBelow?: { lux: number, color?: string }
   /**
    * Whether the observer carries it: its keyframes, stated FROM THE OBSERVER, are offsets from their eye that go with the eye, instead
    * of points of the world fixed where the eye was at each keyframe's instant. What a thing that is part of the place they stand in

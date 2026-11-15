@@ -1579,6 +1579,796 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://sketchfab.com/3d-models/concorde-british-airways-g-boac-0b2c4ae2e7cb49f692551820af782285"
       }
+    },
+    {
+      "id": "ufoathome-bird-gull",
+      "kind": "entity",
+      "name": "Gull in flight (herring gull build)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#a9b1b9",
+            "label": {
+              "en": "Upper side",
+              "fr": "Dessus",
+              "es": "Parte superior",
+              "it": "Parte superiore"
+            },
+            "hint": {
+              "en": "The back, and the upper side of the wings and tail.",
+              "fr": "Le dos, et le dessus des ailes et de la queue.",
+              "es": "El dorso, y la cara superior de las alas y la cola.",
+              "it": "Il dorso, e la parte superiore delle ali e della coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#f3f2ec",
+            "label": {
+              "en": "Under side",
+              "fr": "Dessous",
+              "es": "Parte inferior",
+              "it": "Parte inferiore"
+            },
+            "hint": {
+              "en": "The belly, and the under side of the wings and tail: what a light from below shows.",
+              "fr": "Le ventre, et le dessous des ailes et de la queue : ce qu'une lumière venue d'en bas montre.",
+              "es": "El vientre, y la cara inferior de las alas y la cola: lo que muestra una luz desde abajo.",
+              "it": "Il ventre, e la parte inferiore delle ali e della coda: ciò che mostra una luce dal basso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tipColor",
+            "fallback": "#1b1c1f",
+            "label": {
+              "en": "Wing tips",
+              "fr": "Bouts des ailes",
+              "es": "Puntas de las alas",
+              "it": "Punte delle ali"
+            },
+            "hint": {
+              "en": "The outer part of the hand: black on most gulls.",
+              "fr": "La partie externe de la main : noire chez la plupart des goélands.",
+              "es": "La parte externa de la mano: negra en la mayoría de las gaviotas.",
+              "it": "La parte esterna della mano: nera nella maggior parte dei gabbiani."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "headColor",
+            "fallback": "#f3f2ec",
+            "label": {
+              "en": "Head",
+              "fr": "Tête",
+              "es": "Cabeza",
+              "it": "Testa"
+            },
+            "hint": {
+              "en": "The head.",
+              "fr": "La tête.",
+              "es": "La cabeza.",
+              "it": "La testa."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "neckColor",
+            "fallback": "#f3f2ec",
+            "label": {
+              "en": "Neck",
+              "fr": "Cou",
+              "es": "Cuello",
+              "it": "Collo"
+            },
+            "hint": {
+              "en": "The neck, where it is held out.",
+              "fr": "Le cou, quand il est tendu.",
+              "es": "El cuello, cuando está extendido.",
+              "it": "Il collo, quando è disteso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "billColor",
+            "fallback": "#e6bd35",
+            "label": {
+              "en": "Bill",
+              "fr": "Bec",
+              "es": "Pico",
+              "it": "Becco"
+            },
+            "hint": {
+              "en": "The bill.",
+              "fr": "Le bec.",
+              "es": "El pico.",
+              "it": "Il becco."
+            }
+          }
+        ],
+        "bindings": {
+          "upperColor": {
+            "materials": [
+              "^upper$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^under$"
+            ]
+          },
+          "tipColor": {
+            "materials": [
+              "^tip-"
+            ]
+          },
+          "headColor": {
+            "materials": [
+              "^head$"
+            ]
+          },
+          "neckColor": {
+            "materials": [
+              "^neck$"
+            ]
+          },
+          "billColor": {
+            "materials": [
+              "^bill$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-bird-gull/bird.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 1.4,
+        "lengthM": 0.653,
+        "heightM": 0.14
+      },
+      "credit": {
+        "title": "Gull in flight (herring gull build), after field guides",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
+      }
+    },
+    {
+      "id": "ufoathome-bird-pelican",
+      "kind": "entity",
+      "name": "Pelican in flight (brown pelican build)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#7d7468",
+            "label": {
+              "en": "Upper side",
+              "fr": "Dessus",
+              "es": "Parte superior",
+              "it": "Parte superiore"
+            },
+            "hint": {
+              "en": "The back, and the upper side of the wings and tail.",
+              "fr": "Le dos, et le dessus des ailes et de la queue.",
+              "es": "El dorso, y la cara superior de las alas y la cola.",
+              "it": "Il dorso, e la parte superiore delle ali e della coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#4f4840",
+            "label": {
+              "en": "Under side",
+              "fr": "Dessous",
+              "es": "Parte inferior",
+              "it": "Parte inferiore"
+            },
+            "hint": {
+              "en": "The belly, and the under side of the wings and tail: what a light from below shows.",
+              "fr": "Le ventre, et le dessous des ailes et de la queue : ce qu'une lumière venue d'en bas montre.",
+              "es": "El vientre, y la cara inferior de las alas y la cola: lo que muestra una luz desde abajo.",
+              "it": "Il ventre, e la parte inferiore delle ali e della coda: ciò che mostra una luce dal basso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tipColor",
+            "fallback": "#3b3631",
+            "label": {
+              "en": "Wing tips",
+              "fr": "Bouts des ailes",
+              "es": "Puntas de las alas",
+              "it": "Punte delle ali"
+            },
+            "hint": {
+              "en": "The outer part of the hand: black on most gulls.",
+              "fr": "La partie externe de la main : noire chez la plupart des goélands.",
+              "es": "La parte externa de la mano: negra en la mayoría de las gaviotas.",
+              "it": "La parte esterna della mano: nera nella maggior parte dei gabbiani."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "headColor",
+            "fallback": "#e9dfb5",
+            "label": {
+              "en": "Head",
+              "fr": "Tête",
+              "es": "Cabeza",
+              "it": "Testa"
+            },
+            "hint": {
+              "en": "The head.",
+              "fr": "La tête.",
+              "es": "La cabeza.",
+              "it": "La testa."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "neckColor",
+            "fallback": "#5a3a2a",
+            "label": {
+              "en": "Neck",
+              "fr": "Cou",
+              "es": "Cuello",
+              "it": "Collo"
+            },
+            "hint": {
+              "en": "The neck, where it is held out.",
+              "fr": "Le cou, quand il est tendu.",
+              "es": "El cuello, cuando está extendido.",
+              "it": "Il collo, quando è disteso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "billColor",
+            "fallback": "#8d8778",
+            "label": {
+              "en": "Bill",
+              "fr": "Bec",
+              "es": "Pico",
+              "it": "Becco"
+            },
+            "hint": {
+              "en": "The bill.",
+              "fr": "Le bec.",
+              "es": "El pico.",
+              "it": "Il becco."
+            }
+          }
+        ],
+        "bindings": {
+          "upperColor": {
+            "materials": [
+              "^upper$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^under$"
+            ]
+          },
+          "tipColor": {
+            "materials": [
+              "^tip-"
+            ]
+          },
+          "headColor": {
+            "materials": [
+              "^head$"
+            ]
+          },
+          "neckColor": {
+            "materials": [
+              "^neck$"
+            ]
+          },
+          "billColor": {
+            "materials": [
+              "^bill$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-bird-pelican/bird.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 2.147,
+        "lengthM": 1.299,
+        "heightM": 0.281
+      },
+      "credit": {
+        "title": "Pelican in flight (brown pelican build), after field guides",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
+      }
+    },
+    {
+      "id": "ufoathome-bird-goose",
+      "kind": "entity",
+      "name": "Goose in flight (Canada goose build)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#6b5d4f",
+            "label": {
+              "en": "Upper side",
+              "fr": "Dessus",
+              "es": "Parte superior",
+              "it": "Parte superiore"
+            },
+            "hint": {
+              "en": "The back, and the upper side of the wings and tail.",
+              "fr": "Le dos, et le dessus des ailes et de la queue.",
+              "es": "El dorso, y la cara superior de las alas y la cola.",
+              "it": "Il dorso, e la parte superiore delle ali e della coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#cfc6b8",
+            "label": {
+              "en": "Under side",
+              "fr": "Dessous",
+              "es": "Parte inferior",
+              "it": "Parte inferiore"
+            },
+            "hint": {
+              "en": "The belly, and the under side of the wings and tail: what a light from below shows.",
+              "fr": "Le ventre, et le dessous des ailes et de la queue : ce qu'une lumière venue d'en bas montre.",
+              "es": "El vientre, y la cara inferior de las alas y la cola: lo que muestra una luz desde abajo.",
+              "it": "Il ventre, e la parte inferiore delle ali e della coda: ciò che mostra una luce dal basso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tipColor",
+            "fallback": "#3a332c",
+            "label": {
+              "en": "Wing tips",
+              "fr": "Bouts des ailes",
+              "es": "Puntas de las alas",
+              "it": "Punte delle ali"
+            },
+            "hint": {
+              "en": "The outer part of the hand: black on most gulls.",
+              "fr": "La partie externe de la main : noire chez la plupart des goélands.",
+              "es": "La parte externa de la mano: negra en la mayoría de las gaviotas.",
+              "it": "La parte esterna della mano: nera nella maggior parte dei gabbiani."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "headColor",
+            "fallback": "#1d1c1b",
+            "label": {
+              "en": "Head",
+              "fr": "Tête",
+              "es": "Cabeza",
+              "it": "Testa"
+            },
+            "hint": {
+              "en": "The head.",
+              "fr": "La tête.",
+              "es": "La cabeza.",
+              "it": "La testa."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "neckColor",
+            "fallback": "#1d1c1b",
+            "label": {
+              "en": "Neck",
+              "fr": "Cou",
+              "es": "Cuello",
+              "it": "Collo"
+            },
+            "hint": {
+              "en": "The neck, where it is held out.",
+              "fr": "Le cou, quand il est tendu.",
+              "es": "El cuello, cuando está extendido.",
+              "it": "Il collo, quando è disteso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "billColor",
+            "fallback": "#1d1c1b",
+            "label": {
+              "en": "Bill",
+              "fr": "Bec",
+              "es": "Pico",
+              "it": "Becco"
+            },
+            "hint": {
+              "en": "The bill.",
+              "fr": "Le bec.",
+              "es": "El pico.",
+              "it": "Il becco."
+            }
+          }
+        ],
+        "bindings": {
+          "upperColor": {
+            "materials": [
+              "^upper$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^under$"
+            ]
+          },
+          "tipColor": {
+            "materials": [
+              "^tip-"
+            ]
+          },
+          "headColor": {
+            "materials": [
+              "^head$"
+            ]
+          },
+          "neckColor": {
+            "materials": [
+              "^neck$"
+            ]
+          },
+          "billColor": {
+            "materials": [
+              "^bill$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-bird-goose/bird.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 1.6,
+        "lengthM": 1.003,
+        "heightM": 0.22
+      },
+      "credit": {
+        "title": "Goose in flight (Canada goose build), after field guides",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
+      }
+    },
+    {
+      "id": "ufoathome-bird-duck",
+      "kind": "entity",
+      "name": "Duck in flight (mallard build)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#6d6457",
+            "label": {
+              "en": "Upper side",
+              "fr": "Dessus",
+              "es": "Parte superior",
+              "it": "Parte superiore"
+            },
+            "hint": {
+              "en": "The back, and the upper side of the wings and tail.",
+              "fr": "Le dos, et le dessus des ailes et de la queue.",
+              "es": "El dorso, y la cara superior de las alas y la cola.",
+              "it": "Il dorso, e la parte superiore delle ali e della coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#b9b2a6",
+            "label": {
+              "en": "Under side",
+              "fr": "Dessous",
+              "es": "Parte inferior",
+              "it": "Parte inferiore"
+            },
+            "hint": {
+              "en": "The belly, and the under side of the wings and tail: what a light from below shows.",
+              "fr": "Le ventre, et le dessous des ailes et de la queue : ce qu'une lumière venue d'en bas montre.",
+              "es": "El vientre, y la cara inferior de las alas y la cola: lo que muestra una luz desde abajo.",
+              "it": "Il ventre, e la parte inferiore delle ali e della coda: ciò che mostra una luce dal basso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tipColor",
+            "fallback": "#4d463d",
+            "label": {
+              "en": "Wing tips",
+              "fr": "Bouts des ailes",
+              "es": "Puntas de las alas",
+              "it": "Punte delle ali"
+            },
+            "hint": {
+              "en": "The outer part of the hand: black on most gulls.",
+              "fr": "La partie externe de la main : noire chez la plupart des goélands.",
+              "es": "La parte externa de la mano: negra en la mayoría de las gaviotas.",
+              "it": "La parte esterna della mano: nera nella maggior parte dei gabbiani."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "headColor",
+            "fallback": "#1f5a35",
+            "label": {
+              "en": "Head",
+              "fr": "Tête",
+              "es": "Cabeza",
+              "it": "Testa"
+            },
+            "hint": {
+              "en": "The head.",
+              "fr": "La tête.",
+              "es": "La cabeza.",
+              "it": "La testa."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "neckColor",
+            "fallback": "#ece9e1",
+            "label": {
+              "en": "Neck",
+              "fr": "Cou",
+              "es": "Cuello",
+              "it": "Collo"
+            },
+            "hint": {
+              "en": "The neck, where it is held out.",
+              "fr": "Le cou, quand il est tendu.",
+              "es": "El cuello, cuando está extendido.",
+              "it": "Il collo, quando è disteso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "billColor",
+            "fallback": "#d9b23a",
+            "label": {
+              "en": "Bill",
+              "fr": "Bec",
+              "es": "Pico",
+              "it": "Becco"
+            },
+            "hint": {
+              "en": "The bill.",
+              "fr": "Le bec.",
+              "es": "El pico.",
+              "it": "Il becco."
+            }
+          }
+        ],
+        "bindings": {
+          "upperColor": {
+            "materials": [
+              "^upper$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^under$"
+            ]
+          },
+          "tipColor": {
+            "materials": [
+              "^tip-"
+            ]
+          },
+          "headColor": {
+            "materials": [
+              "^head$"
+            ]
+          },
+          "neckColor": {
+            "materials": [
+              "^neck$"
+            ]
+          },
+          "billColor": {
+            "materials": [
+              "^bill$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-bird-duck/bird.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.9,
+        "lengthM": 0.633,
+        "heightM": 0.15
+      },
+      "credit": {
+        "title": "Duck in flight (mallard build), after field guides",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
+      }
+    },
+    {
+      "id": "ufoathome-bird-plover",
+      "kind": "entity",
+      "name": "Plover in flight (golden plover build)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#6f6650",
+            "label": {
+              "en": "Upper side",
+              "fr": "Dessus",
+              "es": "Parte superior",
+              "it": "Parte superiore"
+            },
+            "hint": {
+              "en": "The back, and the upper side of the wings and tail.",
+              "fr": "Le dos, et le dessus des ailes et de la queue.",
+              "es": "El dorso, y la cara superior de las alas y la cola.",
+              "it": "Il dorso, e la parte superiore delle ali e della coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#e8e4da",
+            "label": {
+              "en": "Under side",
+              "fr": "Dessous",
+              "es": "Parte inferior",
+              "it": "Parte inferiore"
+            },
+            "hint": {
+              "en": "The belly, and the under side of the wings and tail: what a light from below shows.",
+              "fr": "Le ventre, et le dessous des ailes et de la queue : ce qu'une lumière venue d'en bas montre.",
+              "es": "El vientre, y la cara inferior de las alas y la cola: lo que muestra una luz desde abajo.",
+              "it": "Il ventre, e la parte inferiore delle ali e della coda: ciò che mostra una luce dal basso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tipColor",
+            "fallback": "#3b362c",
+            "label": {
+              "en": "Wing tips",
+              "fr": "Bouts des ailes",
+              "es": "Puntas de las alas",
+              "it": "Punte delle ali"
+            },
+            "hint": {
+              "en": "The outer part of the hand: black on most gulls.",
+              "fr": "La partie externe de la main : noire chez la plupart des goélands.",
+              "es": "La parte externa de la mano: negra en la mayoría de las gaviotas.",
+              "it": "La parte esterna della mano: nera nella maggior parte dei gabbiani."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "headColor",
+            "fallback": "#6f6650",
+            "label": {
+              "en": "Head",
+              "fr": "Tête",
+              "es": "Cabeza",
+              "it": "Testa"
+            },
+            "hint": {
+              "en": "The head.",
+              "fr": "La tête.",
+              "es": "La cabeza.",
+              "it": "La testa."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "neckColor",
+            "fallback": "#e8e4da",
+            "label": {
+              "en": "Neck",
+              "fr": "Cou",
+              "es": "Cuello",
+              "it": "Collo"
+            },
+            "hint": {
+              "en": "The neck, where it is held out.",
+              "fr": "Le cou, quand il est tendu.",
+              "es": "El cuello, cuando está extendido.",
+              "it": "Il collo, quando è disteso."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "billColor",
+            "fallback": "#1d1c1b",
+            "label": {
+              "en": "Bill",
+              "fr": "Bec",
+              "es": "Pico",
+              "it": "Becco"
+            },
+            "hint": {
+              "en": "The bill.",
+              "fr": "Le bec.",
+              "es": "El pico.",
+              "it": "Il becco."
+            }
+          }
+        ],
+        "bindings": {
+          "upperColor": {
+            "materials": [
+              "^upper$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^under$"
+            ]
+          },
+          "tipColor": {
+            "materials": [
+              "^tip-"
+            ]
+          },
+          "headColor": {
+            "materials": [
+              "^head$"
+            ]
+          },
+          "neckColor": {
+            "materials": [
+              "^neck$"
+            ]
+          },
+          "billColor": {
+            "materials": [
+              "^bill$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-bird-plover/bird.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.68,
+        "lengthM": 0.291,
+        "heightM": 0.07
+      },
+      "credit": {
+        "title": "Plover in flight (golden plover build), after field guides",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-birds.ts"
+      }
     }
   ]
 }
