@@ -1,30 +1,56 @@
 # Witness error model and variants under a hypothesis
 
-Design note, nothing implemented. It describes how a recording could carry what is known about the
-errors in each value a witness gives, and how that knowledge would be used: not to blur the
-recording, but to ask whether a candidate explanation is reachable from it.
+Technical note. It describes how a recording carries what is known about the errors in each value a
+witness gives, and how that knowledge is used: not to blur the recording, but to ask whether a
+candidate explanation is reachable from it, and how robust a reading of it is.
+
+It was first written on 2026-10-22 as a design note, before any code; most of it has been built
+since. [Where things stand](#where-things-stand) says what is built and where, and
+[Not done yet](#not-done-yet) what is not. The sections in between keep the reasoning, which is
+still what the code follows.
 
 The error laws themselves are in [testimony-evaluation-leads.md](testimony-evaluation-leads.md)
 (user-facing summary: [ufoathome.org/roadmap/witness](https://ufoathome.org/roadmap/witness/)). This
-note is about the format, the editor, the reader and the search that would put them to work.
+note is about the format, the editor, the reader and the searches that put them to work.
 
 ## Where things stand
 
-- **Provenance exists in the format.** Any field may be written as `{ value, basis, rationale }`
-  (`src/engine/persistence/Provenance.ts`), with `basis` one of `stated` (the default), `derived` or
-  `assumed`. The wrapper is stripped on read and restored on write, so no consumer sees it. The
-  reader shows the weakest basis of each line of its panel; `CoverageAssessor` grades its questions
-  with it.
-- **The editor cannot set it.** Bases are written only by automated paths: the narrative draft, the
-  photo fit of the observer's pose, light pollution. No field shows its basis, and typing over a value
-  drops its basis silently (`ProvenanceEntry.of`, by design).
-- **`stated` conflates two things**: a value the witness estimated or recalled, and a value measured
-  on the spot (a clock read, a compass, an arm's-length gauge) or by an investigator afterwards (a
-  theodolite on site). Their error laws differ by an order of magnitude.
-- **Margins exist only for time**, as EDTF qualifiers (`~`, `?`, `%`) on dates and durations, and
-  they are qualitative.
-- **Tolerances are hard-coded where they are used**: `BodyConfrontation.DIRECTION_TOLERANCE_DEG = 1`
-  and `SIZE_TOLERANCE = 1.5`, the same for every witness, every value, every condition.
+As of November 2026 (UFO@home 0.178):
+
+- **Bases.** Any field may be written as `{ value, basis, how, rationale }`
+  (`src/engine/persistence/Provenance.ts`). `basis` is one of `established`, `measured`, `stated`
+  (the default), `derived`, `assumed` or `fitted` (see the table below); `how` says how a value was
+  obtained, from a closed list per kind of value. The wrapper is stripped on read and restored on
+  write, so no consumer sees it.
+- **Conditions of an account** (`Account.conditions`, `src/engine/model/Account.ts`): delay,
+  version, word used, exposure, independence, dark adaptation, corrected vision, glare and the Moon
+  gauge.
+- **The error model** (`src/engine/witness/WitnessError.ts`): the law of a value's error from its
+  kind, value, basis, `how` and the witness's conditions, each law with its status and sources, and
+  the witness parameters that tie one witness's errors together. Two readings of the literature:
+  `consolidated` and `keul` (sizes shown on the spot), picked in the editor.
+- **The editor** (`src/component/WitnessErrorView.ts`): a basis mark on the start time, the
+  duration, the heading and the apparent width, opening a window to say how the value was obtained;
+  a value typed over goes back to `stated` and says so. Under each, its law, read-only, in its unit,
+  with its status. The Witness section holds the conditions, the Moon gauge and the error parameters,
+  and warns when the laws are stretched to daylight.
+- **Contradictions against the laws** (`BodyConfrontation.lawsOf`,
+  `src/engine/interpretation/BodyConfrontation.ts`): in the editor's scene, an interpretation is
+  contradicted where it is outside the laws, not merely beside the account.
+- **The candidate search** (`src/engine/witness/CandidateSearch.ts`, `src/component/CandidatesView.ts`):
+  per candidate (the Moon and the planets bright enough for that sky, the re-entries and fireballs on
+  record, and the account's own interpretations and readings), the witness parameters that bring the
+  account closest to it, the values they move, the cost and the verdict. Structural variants are
+  declared by candidates. A variant can be seen over the scene, and kept in the recording's
+  `variants` as an interpretation carrying its parameters, cost, verdict and error model.
+- **The sensitivity of a reading** (`src/engine/interpretation/ReadingSensitivity.ts`,
+  `<rr0-reading-sensitivity>`): see [Sensitivity of a reading](#sensitivity-of-a-reading).
+
+Before this work, `stated` conflated what a witness estimated with what was read off an instrument,
+margins existed only for time (as EDTF qualifiers), and the tolerances were hard-coded where they
+were used (`BodyConfrontation.DIRECTION_TOLERANCE_DEG = 1`, `SIZE_TOLERANCE = 1.5`), the same for
+every witness, every value and every condition. The fixed tolerances remain as the case of "no error
+model" (see below).
 
 ## Principle: margins are computed, never typed
 
@@ -76,14 +102,21 @@ No new margin field. Instead, the inputs the error model reads.
 
 ### Per value: how it was obtained
 
-`basis` gains `measured`, ranked above `stated`:
+`basis` gained `measured`, ranked above `stated`. Two more were added in November 2026 at the GEIPAN's
+request (A. Cousyn), both about one danger, a reconstruction made to fit and then read as a
+validation: `established` above all others, and `fitted` below all others.
 
-| Basis      | Meaning                                                                 | Rank (strongest first) |
-|------------|-------------------------------------------------------------------------|------------------------|
-| `measured` | Read off an instrument or gauge, by the witness or an investigator       | 1                      |
-| `stated`   | Estimated or recalled by the witness (default)                           | 2                      |
-| `derived`  | Worked out from stated or measured values plus something checkable      | 3                      |
-| `assumed`  | Chosen so the reconstruction can run                                    | 4                      |
+| Basis         | Meaning                                                                                  | Rank (strongest first) |
+|---------------|------------------------------------------------------------------------------------------|------------------------|
+| `established` | Settled away from both the account and the reconstruction: a register, a survey, a permit, a published orbit | 1 |
+| `measured`    | Read off an instrument or gauge, by the witness or an investigator                       | 2                      |
+| `stated`      | Estimated or recalled by the witness (default)                                           | 3                      |
+| `derived`     | Worked out from stated or measured values plus something checkable                      | 4                      |
+| `assumed`     | Chosen so the reconstruction can run                                                    | 5                      |
+| `fitted`      | Turned to see whether a hypothesis can be made to fit                                   | 6                      |
+
+A reading is judged against `established` values and never against `fitted` ones: agreement with a
+value that was turned to agree is the fitting, not a finding (`ReadingCheck`, `ReadingVerdict`).
 
 and an optional `how`, from a closed list per kind of value, because that is what selects a law:
 
@@ -195,7 +228,9 @@ Per candidate, three outcomes, in the vocabulary of the leads' statuses:
   account.
 
 `BodyConfrontation`'s fixed tolerances become the special case of "no error model": its
-`disagreements` would be computed against the law for each value instead of 1° and ×1.5.
+`disagreements` are computed against the law for each value (`BodyConfrontation.lawsOf`) instead of
+1° and ×1.5. The editor's scene and the sensitivity use the laws; the reader's scene still uses the
+fixed tolerances.
 
 The contradiction rule stays as it is (a stated value contradicted by the computation is shown
 struck through in red, never removed), with one refinement: a value is contradicted only when it is
@@ -240,6 +275,63 @@ No "±" input anywhere.
 `RecordingRules` currently asks for a range in `rationale` when a value is assumed. With `how` and the
 witness conditions, the draft records how each value was obtained instead, and the range is computed.
 
+## Sensitivity of a reading
+
+The candidate search moves the **account** within its laws to reach a candidate. The sensitivity
+asks the reverse question of a **reading** (an interpretation of the account, in a case): how far can
+what the reading itself chose be moved before it reproduces less of the account? A likeness that
+survives only within a degree of a supposed heading was made; one that survives thirty degrees of it
+was found. It answers the GEIPAN's request to "measure the sensitivity of the results to reasonable
+variations of the uncertain parameters", so that an attractive reconstruction is not taken for a
+validation.
+
+### Margins, not sampled variations
+
+Sampling "reasonable variations" would need a range for each value nobody stated, and choosing it
+would be one more free parameter. A margin needs no such choice and lets whoever reads it judge. So
+for each free body of a reading (its fields marked free by `Provenance.free`), five knobs are pushed
+each way until the reading reproduces less of the account than as written:
+
+- direction across the line of sight (up to 45°);
+- height above the horizon (up to 30°);
+- distance along the line of sight (up to ×/÷10);
+- size (up to ×/÷10);
+- time (up to 10 s).
+
+An end that reaches the limit is the limit of the search, not of the reading: it still holds there.
+What the reading reproduces is the share of comparisons (instant × phenomenon) it does not
+contradict, since no real reading reproduces every instant. A turn found to reproduce **more** than
+the reading as written is reported too: that reading was not at its best.
+
+### The witness's error is in the tolerance, not in the knobs
+
+What the witness stated is never turned. How far their estimate may be off is already in what
+counts as a contradiction, through the laws of this note (`BodyConfrontation.lawsOf`, given as the
+tolerance). A margin is called **sufficient** when it covers half the uncertainty of the value each
+way (`ReadingSensitivity.SUFFICIENT`): a reading that keeps agreeing when what it supposed is moved
+by half of what the witness could be off by. Below that, the reading rests on **fine tuning**.
+
+### Only what was said is compared
+
+A timeline is drawn to be played, so it holds far more than was said: a direction every half second
+where the witness gave three, a size nobody gave. Comparing a reading to those would compare two
+reconstructions with each other. Only a direction or a size the recording traces to the witness (a
+basis that is not free, saying what it rests on, or a cited passage of an interview) is compared.
+
+### Where it shows
+
+`<rr0-reading-sensitivity>` shows the margins on each reading's card in the case editor and under the
+image in the reader (`rr0-sighting`, so `rr0-case`). The case report (HTML, JSON, CSV) includes it.
+`scripts/reading-sensitivity.ts <case.json>` prints it from the command line, judged as above; with
+`ALL=1`, against everything the timelines draw, with the fixed tolerances.
+
+### Limits
+
+- The relief is not known to this computation: the ground is flat at the observer's feet.
+- Each knob is turned alone; margins of two knobs turned together are not computed.
+- A reading whose bodies do not say what they explain (no `explains`) has nothing to be confronted
+  with, so it has no margins.
+
 ## Caveats
 
 - Several laws rest on studies known here only through summaries (Jimenez, Peiniger, Keul, Sharps;
@@ -255,9 +347,26 @@ witness conditions, the draft records how each value was obtained instead, and t
 
 ## Order of work
 
-1. `measured` and `how` in the format; the per-field basis marker in the editor.
-2. Witness conditions and the Moon gauge in the format and editor.
-3. The `ErrorModel` seam with the consolidated laws only; laws shown read-only in the editor.
-4. `BodyConfrontation` reads tolerances from the model; contradictions use the laws.
-5. The search, variants as interpretations, verdict chips.
-6. The envelope rendering, if still wanted.
+1. `measured` and `how` in the format; the per-field basis marker in the editor. **Done** (12e3f4e0).
+2. Witness conditions and the Moon gauge in the format and editor. **Done** (12e3f4e0).
+3. The `ErrorModel` seam; laws shown read-only in the editor. **Done** (12e3f4e0), with two models.
+4. `BodyConfrontation` reads tolerances from the model; contradictions use the laws. **Done** in the
+   editor (abfefc1b).
+5. The search, variants as interpretations, verdict chips. **Done** (abfefc1b, e0c4b471).
+6. `established` and `fitted`, and the sensitivity of a reading. **Done** (November 2026).
+
+## Not done yet
+
+- **Date shift and mirror in the search.** Both are laws of the model (a wrong day, month, year or
+  summer time; a heading's sense reversed), but `CandidateSearch` only turns the clock, the heading,
+  the elevation, the size, the duration and the sweep.
+- **Basis marks on every field.** The editor shows them on the start time, the duration, the heading
+  and the apparent width only.
+- **The reader's scene** still confronts interpretations with the fixed tolerances, not the laws
+  (its sensitivity margins do use them).
+- **Drafting by AI**: `RecordingRules` still asks for a range in `rationale` when a value is assumed,
+  rather than how each value was obtained.
+- **The envelope rendering**, if still wanted.
+- **`ErrorModel` as a data source** with its credit: the two models are a fixed list
+  (`WitnessError.MODELS`).
+- **Sensitivity**: relief, and knobs turned together (see its limits).
