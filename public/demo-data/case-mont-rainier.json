@@ -18,6 +18,17 @@
   {
    "type": "event",
    "eventType": "sighting",
+   "id": "arnold-1960s",
+   "time": "1947-06-24 14:58",
+   "title": {
+    "en": "Kenneth Arnold, as he drew them in the 1960s",
+    "fr": "Kenneth Arnold, tels qu'il les dessina dans les années 1960"
+   },
+   "url": "observer-arnold-1960s.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
    "interpretationOf": "arnold",
    "title": {
     "en": "A chain of nine American white pelicans, 5600 m from him, flapping and gliding",

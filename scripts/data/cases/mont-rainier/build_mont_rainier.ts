@@ -485,6 +485,36 @@ async function main(): Promise<void> {
     interpretation: witnessInterpretation
   }
   writeFileSync(path.join(demoData, "observer-arnold.json"), JSON.stringify(recording, null, 1) + "\n")
+  // ---- His later account: the same flight, the objects drawn as the crescent he showed in the 1960s ----
+  // The dossier's sketch of how his drawing changed (Shapes.jpg: 1947 round, 1950 round in front and pointed behind, "196x" a crescent,
+  // "bat-like") and the drawing itself (CrescentShape.jpg), its dark round spot left out (an outline has no hole). Its exact date is not
+  // known: the 1960s. Everything else of what he says is taken to be what he said in 1947.
+  const crescent = (() => {
+    const outer = Array.from({ length: 17 }, (_, i) => {
+      const u = i / 16
+      return { x: r2(100 * u), y: r2(5 * (1 - 0.95 * Math.sin(Math.PI * u))) }
+    })
+    // Its trailing edge, between the two tips: hollowed on each side of a point at the middle, as a bat's wings.
+    const inner = [{ x: 78, y: 2.75 }, { x: 58, y: 5 }, { x: 30, y: 2.75 }]
+    return [...outer, ...inner]
+  })()
+  const later = JSON.parse(JSON.stringify(recording)) as typeof recording & { interpretation?: unknown }
+  delete later.interpretation
+  later.id = "1947-06-24-ArnoldKennethE-1960s"
+  later.account = {
+    observerOccupation: recording.account.observerOccupation,
+    source: said("letter", "stated", "the crescent he drew and showed in the 1960s (the photograph and the sketch of the rr0.org dossier); its exact date is not known",
+      "le croissant qu'il dessina et montra dans les années 1960 (la photographie et le croquis du dossier rr0.org) ; sa date exacte n'est pas connue")
+  }
+  later.description = {
+    en: "The same flight as he told it later: the nine objects drawn as crescents, \"bat-like\", rather than as the rounded fans of his 1947 report.",
+    fr: "Le même vol tel qu'il le raconta plus tard : les neuf objets dessinés en croissants, « comme des chauves-souris », plutôt qu'en éventails arrondis comme dans son rapport de 1947."
+  }
+  for (const keyframe of later.timeline.keyframes as { shapes: { shape: Record<string, unknown> }[] }[]) {
+    for (const { shape } of keyframe.shapes) shape.points = crescent
+  }
+  writeFileSync(path.join(demoData, "observer-arnold-1960s.json"), JSON.stringify(later, null, 1) + "\n")
+
 
   // ---- The pelicans: solved ----
   // A white pelican cruises at some 10 to 18 m/s with the wind, and loses a metre a second or so in its glides (ASSUMED ranges): the speed and
@@ -575,6 +605,7 @@ async function main(): Promise<void> {
     time: "1947-06-24 14:59",
     events: [
       { type: "event", eventType: "sighting", id: "arnold", time: "1947-06-24 14:58", title: "Kenneth Arnold", url: "observer-arnold.json" },
+      { type: "event", eventType: "sighting", id: "arnold-1960s", time: "1947-06-24 14:58", title: { en: "Kenneth Arnold, as he drew them in the 1960s", fr: "Kenneth Arnold, tels qu'il les dessina dans les années 1960" }, url: "observer-arnold-1960s.json" },
       {
         type: "event", eventType: "sighting", interpretationOf: "arnold",
         title: pelicans.interpretation.title,
