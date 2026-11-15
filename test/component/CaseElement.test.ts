@@ -224,7 +224,7 @@ describe("<rr0-case>, a case read", () => {
     const root = element.shadowRoot!
     expect(root.getElementById("case-title")!.textContent).toBe("Saint-Lô")
     expect(root.getElementById("case-summary")!.textContent).toBe("A night in Normandy.")
-    const cards = [...root.querySelectorAll<HTMLElement>(".event")]
+    const cards = [...root.querySelectorAll<HTMLElement>(".event-card")]
     expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "interview"])
     expect(cards.map(card => card.querySelector(".event-open")!.textContent)).toEqual(["Q. B.", "A balloon", "Interview of Q. B."])
     // Nothing of the editor's: no removal, no padlock, no clone.
@@ -239,7 +239,7 @@ describe("<rr0-case>, a case read", () => {
     caseJson.events = [undated, sighting, interview] as typeof caseJson.events
     try {
       const element = await mount()
-      const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")]
+      const cards = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")]
       expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "reading", "interview"])
     } finally {
       caseJson.events = [sighting, reading, interview]
@@ -283,18 +283,18 @@ describe("<rr0-case>, a case read", () => {
 
   it("says what reads what, and whose a reading is", async () => {
     const element = await mount()
-    const links = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")][1].querySelector(".event-links")!
+    const links = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")][1].querySelector(".event-links")!
     expect(links.textContent).toContain("Reading of Q. B.")
     expect(links.textContent).toContain("by CousynAntoine and GEIPAN")
     // The observation says where it was told.
-    const told = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event")][0].querySelector(".event-links")!
+    const told = [...element.shadowRoot!.querySelectorAll<HTMLElement>(".event-card")][0].querySelector(".event-links")!
     expect(told.textContent).toContain("Told in Interview of Q. B.")
   })
 
   it("opens an event, shuts it again, and keeps several open in the order of time", async () => {
     const element = await mount()
     const root = element.shadowRoot!
-    const cards = () => [...root.querySelectorAll<HTMLElement>(".event")]
+    const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
     const open = () => [...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)
     const waitFor = async (check: () => boolean) => {
       for (let left = 200; left > 0 && !check(); left--) await new Promise(resolve => setTimeout(resolve, 5))
@@ -323,7 +323,7 @@ describe("<rr0-case>, a case read", () => {
   it("follows a replay in the dialogues open beside it, passage by passage", async () => {
     const element = await mount()
     const root = element.shadowRoot!
-    const cards = [...root.querySelectorAll<HTMLElement>(".event")]
+    const cards = [...root.querySelectorAll<HTMLElement>(".event-card")]
     cards[2].querySelector<HTMLButtonElement>(".event-open")!.click()
     for (let left = 200; left > 0 && root.querySelector(".open-event rr0-interview") === null; left--) {
       await new Promise(resolve => setTimeout(resolve, 5))
@@ -379,9 +379,9 @@ describe("<rr0-case>, a case read", () => {
     // The observation names the interview it was told in: pointing at that name lights the interview's own card, and no other.
     const ref = root.querySelector<HTMLButtonElement>(".event-ref")!
     ref.dispatchEvent(new Event("mouseenter"))
-    expect([...root.querySelectorAll<HTMLElement>(".event.aimed")].map(card => card.dataset.at)).toEqual(["2"])
+    expect([...root.querySelectorAll<HTMLElement>(".event-card.event-aimed")].map(card => card.dataset.at)).toEqual(["2"])
     ref.dispatchEvent(new Event("mouseleave"))
-    expect(root.querySelectorAll(".event.aimed").length).toBe(0)
+    expect(root.querySelectorAll(".event-card.event-aimed").length).toBe(0)
     // While the history is there, it is the way through the case: the player says nothing of the other witnesses or readings.
     const player = element.player!
     expect(player.hasAttribute("hide-pickers")).toBe(true)

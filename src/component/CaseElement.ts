@@ -20,6 +20,7 @@ import { caseHtml, caseCss } from "./caseTemplate.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { AppLocation } from "./AppLocation.js"
+import { CaseTimeline, type CaseTimelineCard } from "./CaseTimeline.js"
 
 export const CASE_ELEMENT_NAME = "rr0-case"
 /** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
@@ -66,7 +67,8 @@ export class CaseElement extends HTMLElement {
 
   private readonly shadow: ShadowRoot
   private readonly openEvents: HTMLElement
-  private readonly eventList: HTMLElement
+  /** The chronology, drawn as the editor draws its own (see CaseTimeline): its title opens an event or shuts it, a renvoi opens one. */
+  private readonly timeline: CaseTimeline
   /** What is open, by the event's place in `entries`: the element showing it, a player or a dialogue reader. */
   private readonly shown = new Map<number, HTMLElement>()
   private messages?: CaseMessages
@@ -84,7 +86,7 @@ export class CaseElement extends HTMLElement {
     frame.innerHTML = caseHtml
     this.shadow.append(style, frame)
     registerSighting()
-    this.eventList = this.byId("case-events")
+    this.timeline = new CaseTimeline(this.byId("case-events"), at => void this.toggle(at), at => void this.open(at))
     ReadingsComparisonElement.register()
     CaseExportElement.register()
     // What a report is made from: the case and every recording it lists, fetched only when a report is asked for.
@@ -217,24 +219,15 @@ export class CaseElement extends HTMLElement {
     if (first >= 0) void this.open(first)
   }
 
-  /**
-   * The events in the order of time, as the case editor lists them (see CaseEditorElement.eventsInTime). A reading nobody dated came after
-   * the account it reads at least: it takes that account's time, where undated it stood before every observation of the case (Braine-le-Comte's
-   * six readings, McMinnville's, Socorro's, the Concorde's). At the same time an account comes before the readings of it; otherwise the order
-   * is the case's own.
-   */
+  /** The events in the order of time, as the case editor lists them (see CaseTimeline.inTime). */
   private static inTime(entries: CaseEntry[]): CaseEntry[] {
     const byId = new Map(entries.filter(entry => entry.event.id !== undefined).map(entry => [entry.event.id, entry]))
-    const timeOf = (entry: CaseEntry): string => {
-      if (entry.when !== "" || entry.kind !== "reading") return entry.when
-      const read = [entry.event.interpretationOf].flat().map(id => id === undefined ? undefined : byId.get(id))
-        .find(account => account !== undefined && account.when !== "")
-      return read?.when ?? ""
-    }
-    const reads = (entry: CaseEntry) => entry.kind === "reading" ? 1 : 0
-    return entries.map((entry, index) => ({ entry, index }))
-      .sort((a, b) => timeOf(a.entry).localeCompare(timeOf(b.entry)) || reads(a.entry) - reads(b.entry) || a.index - b.index)
-      .map(({ entry }) => entry)
+    return CaseTimeline.inTime(entries, {
+      when: entry => entry.when,
+      kind: entry => entry.kind,
+      read: entry => [entry.event.interpretationOf].flat().map(id => id === undefined ? undefined : byId.get(id))
+        .filter((account): account is CaseEntry => account !== undefined)
+    }).map(({ item }) => item)
   }
 
   private entryOf(event: CaseEventJson): CaseEntry | undefined {
@@ -478,58 +471,17 @@ export class CaseElement extends HTMLElement {
     const edit = this.byId("edit")
     edit.title = m.editCase
     edit.setAttribute("aria-label", m.editCase)
-    this.eventList.replaceChildren(...this.entries.map((entry, index) => this.card(entry, index, m)))
+    this.timeline.render(this.entries.map((entry, index) => this.card(entry, index)), m)
   }
 
-  private card(entry: CaseEntry, index: number, m: CaseMessages): HTMLElement {
-    const item = document.createElement("li")
-    item.className = "event"
-    item.dataset.kind = entry.kind
-    item.dataset.at = String(index)
-    if (this.shown.has(index)) item.dataset.open = ""
-    const mark = document.createElement("span")
-    mark.className = "event-mark"
-    mark.innerHTML = { observation: Icons.WITNESS, reading: Icons.SUMMARY, interview: Icons.INTERVIEW }[entry.kind]
-    mark.setAttribute("aria-hidden", "true")
-    const pill = document.createElement("span")
-    pill.className = "kind-pill"
-    pill.dataset.kind = entry.kind
-    pill.textContent = { observation: m.kindObservation, reading: m.kindReading, interview: m.kindInterview }[entry.kind]
-    const open = document.createElement("button")
-    open.type = "button"
-    open.className = "event-open"
-    open.textContent = entry.title
-    open.title = m.openEvent
-    open.addEventListener("click", () => void this.toggle(index))
-    const meta = document.createElement("span")
-    meta.className = "event-meta"
-    meta.textContent = entry.when.replace("T", " ")
-    const links = document.createElement("span")
-    links.className = "event-links"
+  /** What the card of the entry at `index` says: its kind, its name, its date, what it names and who made it. */
+  private card(entry: CaseEntry, index: number): CaseTimelineCard {
     const linked = this.linkedTo(entry)
-    if (linked) {
-      links.append(`${linked.heading} `, ...linked.to.flatMap((to, rank) => {
-        const link = document.createElement("button")
-        link.type = "button"
-        link.className = "event-ref"
-        link.textContent = this.entries[to].title
-        link.title = m.openEvent
-        link.addEventListener("click", () => void this.open(to))
-        // Pointed at or focused, the card it leads to is lit, so that a reference is found without reading the whole history.
-        const aim = (lit: boolean) => this.eventList.querySelector<HTMLElement>(`.event[data-at="${to}"]`)?.classList.toggle("aimed", lit)
-        for (const [name, lit] of [["mouseenter", true], ["mouseleave", false], ["focus", true], ["blur", false]] as const) {
-          link.addEventListener(name, () => aim(lit))
-        }
-        return rank === 0 ? [link] : [document.createTextNode(` ${m.linkAnd} `), link]
-      }))
+    return {
+      at: index, kind: entry.kind, title: entry.title, meta: entry.when.replace("T", " "), open: this.shown.has(index),
+      ...(linked ? { links: { heading: linked.heading, to: linked.to.map(to => ({ at: to, title: this.entries[to].title })) } } : {}),
+      by: entry.kind === "observation" ? "" : this.authors(entry.event.by)
     }
-    const by = entry.kind === "observation" ? "" : this.authors(entry.event.by)
-    if (by !== "") links.append(`${linked ? " " : ""}${m.byAuthor} ${by}`)
-    const body = document.createElement("div")
-    body.className = "event-body"
-    body.append(pill, open, meta, links)
-    item.append(mark, body)
-    return item
   }
 
   /** The door a page uses, the same the player offers: fetch this case and show it. */

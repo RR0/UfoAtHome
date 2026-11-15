@@ -1,3 +1,5 @@
+import { CaseTimeline } from "./CaseTimeline.js"
+
 /** What a case looks like when it is read, not edited — see CaseElement. */
 export const caseHtml = `
 <header class="case-head">
@@ -22,7 +24,7 @@ export const caseHtml = `
 <!-- The chronology, in the upper part: choosing an event opens it below, choosing it again shuts it. Several can be open at once. -->
 <section class="case-timeline">
   <h3 class="events-heading"><span id="events-icon" class="events-icon" aria-hidden="true"></span><span id="events-heading"></span></h3>
-  <ol id="case-events" class="case-events"></ol>
+  <ol id="case-events" class="event-list"></ol>
   <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
 </section>
 <!-- What is open, in the order of time whatever the order they were opened in. -->
@@ -53,49 +55,13 @@ export const caseCss = `
 .icon-btn[aria-expanded="true"], .icon-btn[aria-pressed="false"] { background: #d8d8d8; }
 .case-summary { margin: 0; font-size: 15px; line-height: 1.5; opacity: .85; }
 .case-summary[hidden] { display: none; }
-/* The chronology: everything on one rail, in the order of time, the kind of each said by an icon on the rail and by a word on its
-   pill. What cannot be done while reading is absent, not greyed out. */
+/* The chronology itself is common to the editor (see CaseTimeline): what cannot be done while reading is absent, not greyed out. */
 .case-timeline { margin: 0 0 14px; }
 .case-timeline[hidden] { display: none; }
 .readings-comparison { margin-top: 12px; }
 .events-heading { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .events-icon { display: inline-flex; }
 .events-icon svg { width: 14px; height: 14px; }
-.case-events { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
-.event { --kind: var(--rr0-glow, #e8b84b); position: relative; border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  border-radius: 10px; }
-.event[data-kind="interview"] { --kind: var(--rr0-sky, #7fd4ff); }
-/* Solid enough to be read on the disc: a reading's mark was 45% of the ink and vanished. */
-.event[data-kind="reading"] { --kind: color-mix(in srgb, currentColor 70%, transparent); }
-/* Open, it is lit: the card and what it opened below are the same thing seen twice. */
-.event[data-open] { border-color: var(--kind); background: color-mix(in srgb, var(--kind) 8%, transparent); }
-.event::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); top: calc(-1px - var(--gap) / 2);
-  bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: color-mix(in srgb, currentColor 18%, transparent); }
-.event:first-child::after { top: 50%; }
-.event:last-child::after { bottom: 50%; }
-.event:only-child::after { display: none; }
-/* The disc takes the page's own background, not a dark one: on a light page every mark used to be a dark coin, where a reading's dimmed
-   grey icon simply did not show. The Canvas system colour is the page's own, so this follows light and dark by itself. */
-.event-mark { position: absolute; z-index: 1; left: calc(var(--rail) - 24px - 1px); top: 50%; display: grid; place-items: center;
-  width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--rr0-ground, Canvas); color: var(--kind); }
-.event-mark svg { width: 14px; height: 14px; }
-/* Three columns, not two: the title and the date shared one and overlapped as soon as a title was long. */
-.event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
-  grid-template-areas: "pill open meta" "links links links"; align-items: center; gap: 4px 12px; padding: 10px 14px; }
-.kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px;
-  background: color-mix(in srgb, var(--kind) 18%, transparent); font: 700 12px/1.5 var(--rr0-sans, system-ui, sans-serif); white-space: nowrap; }
-.event-open { grid-area: open; justify-self: start; padding: 0; border: 0; background: none; color: inherit;
-  font: 600 15px/1.35 var(--rr0-sans, system-ui, sans-serif); text-align: left; cursor: pointer; }
-.event-open::after { content: ""; position: absolute; inset: 0; border-radius: 10px; }
-.event:hover { background: color-mix(in srgb, currentColor 4%, transparent); }
-.event-meta { grid-area: meta; justify-self: end; font-size: 13px; opacity: .6; white-space: nowrap; }
-.event-links { grid-area: links; font-size: 13px; opacity: .8; }
-.event-links:empty { display: none; }
-/* The card a reference is pointing at, while it is pointed at. */
-.event.aimed { border-color: var(--rr0-sky, #7fd4ff); background: color-mix(in srgb, var(--rr0-sky, #7fd4ff) 10%, transparent); }
-/* Above the hit area the title stretches over the card, as in the editor: otherwise the card swallows the click. */
-.event-ref { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--rr0-sky, #7fd4ff); font: inherit;
-  text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 /* What is open: one block per event, each saying which it is, in the order of time. */
 /* One column as wide as the case, never as wide as what is in it: an implicit "auto" column grew to the player's own widest content,
    McMinnville's longest reading in its choice (228 letters), and the stage, 16:9 of that, put the photograph beyond the case's edge. */
@@ -104,8 +70,5 @@ export const caseCss = `
 .open-event > .open-title { margin: 0; font: 600 13px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .open-event rr0-interview { padding: 10px 12px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px;
   font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto; }
-@container (max-width: 640px) {
-  .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "open" "meta" "links"; }
-  .event-meta { justify-self: start; }
-}
+${CaseTimeline.CSS}
 `
