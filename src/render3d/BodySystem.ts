@@ -1,8 +1,9 @@
 import {
   AnimationAction, AnimationMixer, LoopOnce, Box3, BoxGeometry, BufferAttribute, BufferGeometry, Color, ConeGeometry, CylinderGeometry, Group, LatheGeometry, Material, Mesh,
-  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, TorusGeometry, Vector2,
-  Vector3
+  MeshPhysicalMaterial, MeshStandardMaterial, Object3D, Points, type PointsMaterial, Quaternion, Raycaster, SphereGeometry, Sprite, SpriteMaterial,
+  TorusGeometry, Vector2, Vector3
 } from "three"
+import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BODY_PRIMITIVES } from "../engine/interpretation/Interpretation.js"
 import type { BodyPrimitive } from "../engine/interpretation/Interpretation.js"
@@ -206,6 +207,7 @@ export class BodySystem {
     this.lastSet = [states, frame, seconds, display, ids]
     this.pointLights.clear()
     this.shapeShares.clear()
+    this.specksShown.clear()
     this.metered.clear()
     const seen = new Set<string>()
     const emitters: NearEmitter[] = []
@@ -257,6 +259,7 @@ export class BodySystem {
     }
     // Lit by the scene's one pool of lights for what glows (see EmitterLights), as everything that gives out light is.
     this.emit(emitters)
+    for (const [id, speck] of this.specks) if (!this.specksShown.has(id)) speck.visible = false
     const kept = new Set(ids)
     for (const [id, { holder }] of [...this.built]) {
       if (seen.has(id)) continue
@@ -493,38 +496,70 @@ export class BodySystem {
     return clear / points.length
   }
 
+  /** The specks of the bodies that give out no light and are under a pixel or two, by body id (see shineReflected). */
+  private readonly specks = new Map<string, Sprite>()
+  /** The specks set this instant: the others are hidden. */
+  private readonly specksShown = new Set<string>()
+  /** What the eye resolves, radians: a minute of arc (see PhenomenonSystem.legible, which draws the account's shapes the same way). */
+  private static readonly ACUITY_RAD = Math.PI / 180 / 60
+
   /**
-   * A body that gives out no light, under a pixel or two: drawn as the point of the light it sends back, as one that glows is (see shine),
-   * rather than hit or missed by the rasteriser, or not drawn at all. A white pelican five kilometres off in the afternoon sun is a speck the
-   * eye sees, a third of a pixel wide: drawn as a shape, it was nothing.
+   * A body that gives out no light, under a pixel or two: drawn as a speck a pixel and a half wide of the colour it shows, lit, against what
+   * is behind it, at the contrast an eye gives what it cannot resolve: as much as it is narrower than a minute of arc one way and the other,
+   * and what the air between takes of it. Dark against the snow, light against a forest: as a shape it was hit or missed by the rasteriser,
+   * or not drawn at all, and as the point of the light it sends back (what a body that glows is drawn as, see shine) it could only lighten
+   * what is behind it. Kenneth Arnold's craft, edge-on at twenty-six kilometres, and the pelicans of the other reading, were nothing.
    *
-   * What it sends back is a matt sphere's of its albedo and colour: the sky's light all round, and the Sun's by the share of its disc the eye
-   * sees lit, Lambert's phase law (sin α + (π − α) cos α) / π at the phase angle α between the Sun and the eye seen from it. A bird is no
-   * sphere, and a wing tilted to the Sun flashes far more than this mean: it is the steady light, not the flash.
+   * Its colour is a matt sphere's of its albedo and colour: the sky's light all round, and the Sun's by the share of its disc the eye sees
+   * lit, Lambert's phase law (sin α + (π − α) cos α) / π at the phase angle α between the Sun and the eye seen from it. A wing or a hull
+   * tilted to the Sun flashes far more than this mean: it is the steady look, not the flash.
    */
   private shineReflected(state: BodyState, holder: Group, frame: BodyFrame, eye: Vector3): void {
     const daylight = frame.daylight
     if (!daylight || frame.pixelRad === undefined) return
     const radiusM = this.apparentRadiusM(state, holder, eye)
     const distanceM = Math.max(holder.position.distanceTo(eye), radiusM * 1.01)
-    const angularRadius = Math.asin(radiusM / distanceM)
-    const pixels = 2 * angularRadius / frame.pixelRad
+    const pixels = 2 * Math.asin(radiusM / distanceM) / frame.pixelRad
     if (pixels >= BodySystem.SHAPE_FULL_PIXELS) return
     let clear = this.reliefClearShare(eye, holder.position, radiusM)
     if (clear > 0 && frame.occluders && frame.occluders.length > 0) clear *= this.decorClearShare(holder, eye, frame.occluders)
     const shape = Math.min(1, Math.max(0, (pixels - BodySystem.SHAPE_FROM_PIXELS) / (BodySystem.SHAPE_FULL_PIXELS - BodySystem.SHAPE_FROM_PIXELS)))
     this.shapeShares.set(state.id, shape)
     if (clear <= 0) return
+    // How wide and how tall it looks, turned as it is: what the eye's contrast for it goes by.
+    const projection = BodyConfrontation.projectionOf(state, {
+      eastM: eye.x - frame.originX, northM: frame.originZ - eye.z, upM: eye.y - frame.originGroundY
+    })
+    if (!projection) return
+    const resolved = (deg: number) => Math.min(1, deg * Math.PI / 180 / BodySystem.ACUITY_RAD)
+    const contrast = resolved(projection.angular.widthDeg) * resolved(projection.angular.heightDeg)
     const toEye = this.scratch.copy(eye).sub(holder.position).normalize()
     const alpha = Math.acos(Math.min(1, Math.max(-1, toEye.dot(daylight.towardSun))))
     const phase = (Math.sin(alpha) + (Math.PI - alpha) * Math.cos(alpha)) / Math.PI
     const hue = BodySystem.rgbOf(state.appearance.color)
     const luminance = 0.2126 * hue[0] + 0.7152 * hue[1] + 0.0722 * hue[2] || 1
-    const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
-    const seen = (1 - state.appearance.transparency) * (1 - shape)
-    const light = [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]) * solidAngle * seen) as [number, number, number]
-    this.pointLights.set(state.id, { position: holder.position.clone(), light: this.throughAir(light, holder.position) })
+    const radiance = [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
+    // The air takes the contrast it has with what is behind it as it takes its light: by its transmittance.
+    const through = this.frame?.transmittance?.(holder.position.x, holder.position.y, holder.position.z) ?? [1, 1, 1]
+    const air = (through[0] + through[1] + through[2]) / 3
+    let speck = this.specks.get(state.id)
+    if (!speck) {
+      speck = new Sprite(new SpriteMaterial({ transparent: true, depthWrite: false, sizeAttenuation: false, fog: false }))
+      speck.name = `body-speck:${state.id}`
+      this.specks.set(state.id, speck)
+      this.group.add(speck)
+    }
+    speck.position.copy(holder.position)
+    // Without attenuation a sprite's scale is the tangent of the angle it spans.
+    speck.scale.setScalar(frame.pixelRad * BodySystem.LEGIBLE_PIXELS)
+    speck.material.color.setRGB(radiance[0], radiance[1], radiance[2])
+    speck.material.opacity = Math.min(1, contrast * air * clear * (1 - shape) * (1 - state.appearance.transparency))
+    speck.visible = speck.material.opacity > 0
+    this.specksShown.add(state.id)
   }
+
+  /** How wide a speck is drawn, pixels (see shineReflected). */
+  private static readonly LEGIBLE_PIXELS = 1.5
 
   private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
     const transmittance = this.frame?.transmittance?.(at.x, at.y, at.z) ?? [1, 1, 1]
@@ -1299,6 +1334,12 @@ export class BodySystem {
   }
 
   private remove(id: string): void {
+    const speck = this.specks.get(id)
+    if (speck) {
+      speck.removeFromParent()
+      speck.material.dispose()
+      this.specks.delete(id)
+    }
     const entry = this.built.get(id)
     if (!entry) return
     entry.holder.removeFromParent()

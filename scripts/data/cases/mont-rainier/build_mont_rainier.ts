@@ -284,13 +284,13 @@ async function main(): Promise<void> {
   })
 
   // His aircraft, round his eye: a Piper PA-28 Cadet stands in for his CallAir A-3 (no model of it to be had). In the model the pilot's eye is
-  // 1.1 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, 0.8 m from the panel, a little over
-  // 0.2 m under the roof. The decor states where the model's middle is.
+  // 1.3 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, 0.65 m from the panel (the eyes are
+  // at the front of a head over a body sitting on the seat), a little over 0.2 m under the roof. The decor states where the model's middle is.
   const cabinTrack = samples.map(t => {
     const { at, headingDeg } = arnoldAt(t)
     const h = headingDeg * Math.PI / 180
     // From the eye back to the model's middle, and to its right.
-    const back = 1.1, right = 0.28
+    const back = 1.3, right = 0.28
     const middle = offset(at, -back * Math.sin(h) + right * Math.cos(h), -back * Math.cos(h) - right * Math.sin(h))
     return { t: t * 1000, ...decorLocal(middle), altitudeM: r2(ARNOLD_ALT_M - originGround + 1.6 - 0.335), headingDeg: r2(headingDeg) }
   })
