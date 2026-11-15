@@ -1152,6 +1152,14 @@ input.invalid {
 .aircraft-flights-table tbody tr[aria-disabled="true"] {
   cursor: default;
 }
+/* An aircraft the recording declares in its decor, among the candidates of a record. */
+.aircraft-flights-table .flight-basis {
+  font-size: 0.85em;
+  padding: 0 0.4em;
+  border: 1px solid var(--line);
+  border-radius: 0.6em;
+  color: var(--ink-dim);
+}
 .aircraft-flights-table tbody tr.absent {
   opacity: 0.55;
 }

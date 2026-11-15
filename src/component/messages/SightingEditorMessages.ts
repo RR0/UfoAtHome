@@ -284,6 +284,12 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   aircraftFlightAbsent: string
   aircraftFlightNotDrawn: string
   aircraftFlightUnknown: string
+  /** The list's opening line when it holds only aircraft the recording declares in its decor. */
+  aircraftFlightsDeclaredIntro: string
+  /** The tag of an aircraft the recording declares, beside its name. */
+  aircraftFlightDeclared: string
+  /** What that tag means. */
+  aircraftFlightDeclaredHint: string
   /** How the search stands. */
   aircraftLoading: string
   aircraftOutside: string

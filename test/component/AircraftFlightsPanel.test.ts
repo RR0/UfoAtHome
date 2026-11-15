@@ -10,7 +10,10 @@ const TEXTS = {
   aircraftFlightLater: "Later",
   aircraftFlightAbsent: "Absent",
   aircraftFlightNotDrawn: "Not drawn",
-  aircraftFlightUnknown: "Unknown type"
+  aircraftFlightUnknown: "Unknown type",
+  aircraftFlightsDeclaredIntro: "Declared ones",
+  aircraftFlightDeclared: "declared",
+  aircraftFlightDeclaredHint: "In the decor"
 }
 const inSky: AircraftFlightView = { key: "a", type: "Airbus A320", registration: "F-TEST", sky: { distanceKm: 17, azimuthDeg: 79, altitudeDeg: 38.9 }, altitudeFt: 35000, drawn: true, firstMs: 0 }
 const later: AircraftFlightView = { key: "b", drawn: true, firstMs: 90_000 }
@@ -84,5 +87,20 @@ describe("AircraftFlightsPanel", () => {
     expect(shown.selectedKey).toBeUndefined()
     shown.show([], TEXTS)
     expect(container.children).toHaveLength(0)
+  })
+
+  it("tags an aircraft the recording declares, and says it is no candidate", () => {
+    const declared: AircraftFlightView = { ...inSky, key: "decor:concorde", type: "Concorde", registration: undefined, declared: true, drawn: true }
+    const { row, container } = panel([declared])
+    expect(row("decor:concorde").cells[0].textContent).toBe("Concorde declared")
+    expect(row("decor:concorde").querySelector(".flight-basis")?.textContent).toBe("declared")
+    expect(row("decor:concorde").title).toBe("In the decor. Look")
+    expect(container.querySelector(".message-info")?.textContent).toBe("Declared ones")
+  })
+
+  it("keeps the record's caution when declared aircraft are listed among its flights", () => {
+    const declared: AircraftFlightView = { ...inSky, key: "decor:concorde", declared: true }
+    const { container } = panel([declared, inSky])
+    expect(container.querySelector(".message-info")?.textContent).toBe("Candidates")
   })
 })

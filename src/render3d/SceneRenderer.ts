@@ -124,7 +124,7 @@ import { IceHalos } from "../engine/atmosphere/IceHalos.js"
 import { Rainbows } from "../engine/atmosphere/Rainbows.js"
 import { CometTail } from "./CometTail.js"
 import { SatelliteField } from "./SatelliteField.js"
-import type { ReentryFragmentView } from "../modules/sky-events/reentries/Reentry.js"
+import type { ReentryFragmentView, SkyPoint } from "../modules/sky-events/reentries/Reentry.js"
 import { LightningBolt } from "./LightningBolt.js"
 import { LightningSchedule } from "../engine/weather/LightningSchedule.js"
 import type { LightningFlash } from "../engine/weather/LightningSchedule.js"
@@ -4408,8 +4408,33 @@ export class SceneRenderer {
     return this.skyEventDrawnCount("reentries")
   }
 
-  /** Where the aircraft `key` (see TrafficIds.keyOf) is on the picture; undefined when it is not on it: absent then, out of the frame, or behind the ground. */
+  /**
+   * Where a decor object is in the observer's sky as it is drawn now, and how high above the sea: read off the scene rather than worked out
+   * again from its track, because what puts it there (the ground under it, the patch moved under a walking observer) is the scene's.
+   * Undefined when it is not drawn.
+   */
+  decorSkyPoint(id: string): { sky: SkyPoint; altitudeM: number } | undefined {
+    const group = this.decorGroups.get(id)
+    if (!group?.visible) return undefined
+    const toward = new Vector3().copy(group.position).sub(this.camera.position)
+    const distanceM = toward.length()
+    if (distanceM === 0) return undefined
+    const azimuthDeg = ((Math.atan2(toward.x, -toward.z) * 180 / Math.PI) + 360) % 360
+    const altitudeDeg = Math.asin(toward.y / distanceM) * 180 / Math.PI
+    return { sky: { azimuthDeg, altitudeDeg, distanceKm: distanceM / 1000 }, altitudeM: this.siteElevationM + group.position.y }
+  }
+
+  /** Where the aircraft `key` (see TrafficIds.keyOf, TrafficIds.declaredKeyOf) is on the picture; undefined when it is not on it: absent then, out of the frame, or behind the ground. */
     flightScreenPoint(key: string): { ndcX: number; ndcY: number } | undefined {
+    const declared = TrafficIds.declaredIdOf(key)
+    if (declared !== undefined) {
+      const group = this.decorGroups.get(declared)
+      if (!group?.visible) return undefined
+      const toward = new Vector3().copy(group.position).sub(this.camera.position)
+      const point = this.screenPointOf(toward.clone().normalize())
+      // Hidden only by ground before it: a witness who flies sees an aircraft below with the ground behind it.
+      return point && Math.abs(point.ndcX) <= 1 && Math.abs(point.ndcY) <= 1 && !this.groundHides(point.ndcX, point.ndcY, toward.length()) ? point : undefined
+    }
     const prefix = `${TrafficIds.ID_PREFIX}${key}-`
     for (const [id, group] of this.decorGroups) {
       if (!group.visible || !id.startsWith(prefix)) continue
@@ -6873,11 +6898,11 @@ export class SceneRenderer {
    * unseeable as one below the flat horizon. Asking the geometry is the only answer that covers
    * both, and it is one cast, only once a candidate has been found.
    */
-  private groundHides(ndcX: number, ndcY: number): boolean {
+  private groundHides(ndcX: number, ndcY: number, distanceM = Infinity): boolean {
     if (!this.terrainMesh && !this.groundMesh) return false
     this.aimAtScreenPoint(this.ufoOcclusionRaycaster, ndcX, ndcY)
     const ray = this.ufoOcclusionRaycaster.ray
-    return this.groundBlocks(ray.origin, ray.direction, Infinity, UFO_OCCLUSION_MIN_DISTANCE_M)
+    return this.groundBlocks(ray.origin, ray.direction, distanceM, UFO_OCCLUSION_MIN_DISTANCE_M)
   }
 
   /** Finds which decor object (if any) sits under normalized device coordinates — same NDC

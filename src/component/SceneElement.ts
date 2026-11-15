@@ -150,6 +150,11 @@ export interface AircraftFlightView {
   firstMs?: number
   /** Whether it is among the aircraft the scene draws, which are the nearest few of a busy record. */
   drawn: boolean
+  /**
+   * Whether the recording itself declares it in its decor (a Concorde whose path was fitted on a film) rather than a record of traffic
+   * reporting it: a fact the author stated, not a candidate.
+   */
+  declared?: boolean
 }
 
 /** Fired by a scene when the air traffic recorded around its observer for its recording has arrived — see aircraftState. */
@@ -2901,6 +2906,33 @@ export class SceneElement extends HTMLElement {
    * look, since an aircraft in a bright sky is a pixel or two. The order does not depend on the instant, so that the list holds still as it plays.
    */
   get aircraftFlights(): AircraftFlightView[] {
+    return [...this.declaredFlights, ...this.recordedFlights]
+  }
+
+  /**
+   * The aircraft the recording declares in its decor and that fly, first: whatever a record says, they are what the recording is about.
+   * Their decor clamps them at both ends of their track, so they are in the sky all along; where is read off the scene (see decorSkyPoint).
+   */
+  private get declaredFlights(): AircraftFlightView[] {
+    return this.ufoElement.sighting.decor
+      .filter(decor => decor.kind === "aircraft" && DecorAircraft.flies(decor))
+      .map(decor => {
+        const seen = this.sceneRenderer.decorSkyPoint(decor.id)
+        return {
+          key: TrafficIds.declaredKeyOf(decor.id),
+          type: this.said.read(decor.title) || this.naming.decorKind(decor.kind),
+          // Below the horizon too: a witness who flies sees an aircraft under them, and the scene draws it there.
+          sky: seen?.sky,
+          altitudeFt: seen ? seen.altitudeM / 0.3048 : undefined,
+          firstMs: 0,
+          drawn: seen !== undefined,
+          declared: true
+        }
+      })
+  }
+
+  /** The flights of a record of traffic, nearest pass first. */
+  private get recordedFlights(): AircraftFlightView[] {
     const traffic = this.traffic
     if (!traffic?.tracks || traffic.startMs === undefined || !traffic.observer) return []
     const startMs = traffic.startMs
@@ -2938,6 +2970,14 @@ export class SceneElement extends HTMLElement {
   lookAtFlight(key: string, atMs = this.lastTimeMs): boolean {
     const traffic = this.traffic
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, atMs)
+    const declared = TrafficIds.declaredIdOf(key)
+    if (declared !== undefined) {
+      // Where it is drawn now: a declared aircraft is in the sky all along (see declaredFlights), so the instant is the one on show.
+      const seen = this.sceneRenderer.decorSkyPoint(declared)
+      if (!seen || pose?.headingDeg === undefined) return false
+      this.setLookOffset(((((seen.sky.azimuthDeg - pose.headingDeg) % 360) + 540) % 360) - 180, seen.sky.altitudeDeg - (pose.pitchDeg ?? 0))
+      return true
+    }
     const track = traffic?.tracks?.find(candidate => TrafficIds.keyOf(candidate) === key)
     if (!traffic?.observer || traffic.startMs === undefined || !track || pose?.headingDeg === undefined) return false
     const seen = AircraftSighting.seenFrom(track, this.observerAt(atMs, traffic.observer), traffic.startMs + atMs)

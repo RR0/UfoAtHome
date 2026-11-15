@@ -10,6 +10,9 @@ export interface AircraftFlightsTexts {
   aircraftFlightAbsent: string
   aircraftFlightNotDrawn: string
   aircraftFlightUnknown: string
+  aircraftFlightsDeclaredIntro: string
+  aircraftFlightDeclared: string
+  aircraftFlightDeclaredHint: string
 }
 
 /** The cells of one row that change with the instant, or with what the record comes to say of the flight. */
@@ -67,7 +70,8 @@ export class AircraftFlightsPanel {
     }
     const intro = document.createElement("p")
     intro.className = "message-info"
-    intro.textContent = texts.aircraftFlightsIntro
+    // A record's flights are candidates; the aircraft the recording declares are not, and a list of them alone says only that.
+    intro.textContent = flights.every(flight => flight.declared) ? texts.aircraftFlightsDeclaredIntro : texts.aircraftFlightsIntro
     const table = document.createElement("table")
     table.className = "aircraft-flights-table"
     const head = table.createTHead().insertRow()
@@ -100,6 +104,12 @@ export class AircraftFlightsPanel {
     cells.flight = flight
     // Written each time: the aircraft are found before what they are, which comes a moment later (see SceneElement.describeTraffic).
     cells.label.textContent = [flight.type ?? texts.aircraftFlightUnknown, flight.registration].filter(Boolean).join(" · ")
+    if (flight.declared) {
+      const basis = document.createElement("span")
+      basis.className = "flight-basis"
+      basis.textContent = texts.aircraftFlightDeclared
+      cells.label.append(" ", basis)
+    }
     const { row } = cells
     const sky = flight.sky
     const number = (value: number, digits = 0) => value.toLocaleString(undefined, { maximumFractionDigits: digits })
@@ -113,6 +123,7 @@ export class AircraftFlightsPanel {
     const marked = flight.key === this.selected
     row.setAttribute("aria-selected", String(marked))
     const title = marked ? texts.aircraftFlightMarked : said
-    row.title = flight.drawn ? title : `${title}. ${texts.aircraftFlightNotDrawn}`
+    const drawn = flight.drawn || flight.declared ? title : `${title}. ${texts.aircraftFlightNotDrawn}`
+    row.title = flight.declared ? `${texts.aircraftFlightDeclaredHint}. ${drawn}` : drawn
   }
 }

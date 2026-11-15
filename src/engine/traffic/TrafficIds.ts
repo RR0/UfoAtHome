@@ -15,4 +15,20 @@ export class TrafficIds {
   static idOf(track: { icao: number; nonIcao: boolean }, segment: number): string {
     return `${TrafficIds.ID_PREFIX}${TrafficIds.keyOf(track)}-${segment}`
   }
+
+  /**
+   * What the key of an aircraft the recording itself declares in its decor begins with, so that it is listed beside the flights of a record
+   * (see SceneElement.aircraftFlights) without its key ever being taken for an address: an address is hexadecimal, and this is not.
+   */
+  static readonly DECLARED_PREFIX = "decor:"
+
+  /** The key of an aircraft declared in the decor, from its decor id. */
+  static declaredKeyOf(decorId: string): string {
+    return `${TrafficIds.DECLARED_PREFIX}${decorId}`
+  }
+
+  /** The decor id of a declared aircraft's key; undefined for the key of a flight of a record. */
+  static declaredIdOf(key: string): string | undefined {
+    return key.startsWith(TrafficIds.DECLARED_PREFIX) ? key.slice(TrafficIds.DECLARED_PREFIX.length) : undefined
+  }
 }

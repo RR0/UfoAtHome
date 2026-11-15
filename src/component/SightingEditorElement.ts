@@ -7881,6 +7881,7 @@ export class SightingEditorElement extends HTMLElement {
    */
   private syncSkyParts(): void {
     if (!this.isGroupIdOpen("group-weather")) return
+    this.showAircraftFlights()
     for (const part of this.openSkyParts()) void this.loadSkyPartEditor(part)?.then(editor => editor.refresh())
   }
 
@@ -7914,6 +7915,8 @@ export class SightingEditorElement extends HTMLElement {
     if (tab.getAttribute("aria-controls") === "shape-bodies") void this.loadBodyEditor().then(editor => editor.sync())
     const skyPart = [...this.skyParts.values()].find(part => part.tab === tab)
     if (skyPart) void this.loadSkyPartEditor(skyPart)?.then(editor => editor.sync())
+    // The aircraft the recording declares are listed with no record to wait for, so the list is drawn as its part opens.
+    if (tab.getAttribute("aria-controls") === "weather-aircraft") this.showAircraftFlights()
     // What the canvas edits follows the part (see canvasMode), and with it whether bodies are drawn.
     this.syncCanvasMode()
   }
