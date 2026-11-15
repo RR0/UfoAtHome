@@ -1625,8 +1625,12 @@ export class SceneRenderer {
     // a patch reads zero at its own origin, so a observer who never moves is exactly where they were.
     // Kept as its own field so the gait's rise can be added to it absolutely rather than
     // incrementally — see setGait, applied in updateDecorAnchoring a moment later.
-    this.poseElevationM = pose.elevationM
-    this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + pose.elevationM
+    // Someone flying at an altitude above the sea (see ObserverPose.altitudeM) is put at it over whatever relief is drawn under them; what
+    // the cabin round them was stated against is the height over the ground the file had (see poseStatedElevationM).
+    this.poseStatedElevationM = pose.elevationM
+    this.poseAltitudeM = pose.altitudeM
+    this.poseElevationM = pose.altitudeM !== undefined ? Math.max(0, pose.altitudeM - this.siteElevationM - this.groundYUnder(0, 0)) : pose.elevationM
+    this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + this.poseElevationM
     this.camera.position.y = this.poseCameraY
     // Keeps the observer at the centre of their own sky, whatever altitude they are at — see
     // celestialGroup. x/z never move (this renderer keeps the camera on the vertical axis and
@@ -3311,6 +3315,7 @@ export class SceneRenderer {
       // The eye stands on the ground as it is NOW, terraces included: setObserverPose read it before the terraces were
       // put where this instant's frame has them, one tick behind, and a witness walking along a terrace had his eye
       // a metre too low until the next tick (and for good on a paused one).
+      if (this.poseAltitudeM !== undefined) this.poseElevationM = Math.max(0, this.poseAltitudeM - this.siteElevationM - this.groundYUnder(0, 0))
       this.poseCameraY = this.groundYUnder(0, 0) + 1.6 + this.poseElevationM
       this.camera.position.y = this.poseCameraY + this.gaitOffset.upM
       this.celestialGroup.position.y = this.camera.position.y
@@ -3361,7 +3366,7 @@ export class SceneRenderer {
       // metre apart, forty metres a second over a hilly country, those are two heights that differ by a few centimetres and by the second: the man in the
       // seat moved up and down on it.
       const sharesTheEye = placement.altitudeM > SceneRenderer.AIRBORNE_M && Math.hypot(x, z) < SceneRenderer.CABIN_MATE_RANGE_M
-      const groundY = sharesTheEye ? this.poseCameraY - 1.6 - this.poseElevationM : group.userData.footprintGroundY
+      const groundY = sharesTheEye ? this.poseCameraY - 1.6 - this.poseStatedElevationM : group.userData.footprintGroundY
       const y = object.id.startsWith(TrafficIds.ID_PREFIX) ? SceneRenderer.trafficHeight(placement.altitudeM, group.userData.footprintGroundY) : groundY + placement.altitudeM
       group.position.set(x, y, z)
       if (object.kind === "crop") {
@@ -3645,6 +3650,10 @@ export class SceneRenderer {
   /** Where the pose alone puts the eye, before the gait is added — see setGait. */
   private poseCameraY = 1.6
   private poseElevationM = 0
+  /** The pose's own `elevationM`, as the file states it: what the decor of the cabin the eye is in was stated against (see setObserverPose). */
+  private poseStatedElevationM = 0
+  /** The pose's altitude above the sea, for someone flying who states one (see ObserverPose.altitudeM). */
+  private poseAltitudeM?: number
 
   /**
    * How far the observer's own walking has carried their eye off the path at this instant, metres —
@@ -5297,7 +5306,7 @@ export class SceneRenderer {
       const size = DecorSystem.sizeOf(object)
       const reachM = Math.max(size.widthM, size.lengthM) / 2
       // Within the airframe's half length of the eye, across and along, and at its height (the eye is 1.6 m above the pose's elevation)
-      if (Math.hypot(x, z) < reachM && Math.abs(placement.altitudeM - this.poseElevationM - 1.6) < reachM) inside.push(group)
+      if (Math.hypot(x, z) < reachM && Math.abs(placement.altitudeM - this.poseStatedElevationM - 1.6) < reachM) inside.push(group)
     }
     this.cabinGroups = inside
     return inside

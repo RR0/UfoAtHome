@@ -5,6 +5,7 @@ import type { PhenomenonFrame, PlacedPhenomenon } from "../../src/render3d/Pheno
 import { ImageProjection } from "../../src/engine/instrument/ImageProjection.js"
 import { CanvasRenderer } from "../../src/render/CanvasRenderer.js"
 import type { Shape } from "../../src/engine/shape/Shape.js"
+import { createOval } from "../../src/engine/shape/Shape.js"
 
 function oval(overrides: Partial<Shape["bounds"]> = {}, extra: Partial<Shape> = {}): Shape {
   return {
@@ -288,5 +289,28 @@ describe("CanvasRenderer.paintExtent", () => {
     const turned = CanvasRenderer.paintExtent(oval({ width: 40, height: 10 }, { angle: Math.PI / 4 }))
     expect(turned.height).toBeGreaterThan(flat.height)
     expect(turned.height).toBeGreaterThanOrEqual(Math.hypot(40, 10))
+  })
+})
+
+describe("a phenomenon under a pixel", () => {
+  const line = (widthPx: number, heightPx: number, widthDeg: number, heightDeg: number) => ({
+    ...createOval({ x: 100, y: 100, width: widthPx, height: heightPx }),
+    angular: { widthDeg, heightDeg }
+  })
+
+  it("is drawn a pixel and a half wide, at the contrast an eye gives what it cannot resolve: Arnold's thin black line", () => {
+    // 0.04° by a twentieth of that, at 0.2 by 0.01 canvas pixels, two device pixels a canvas pixel.
+    const legible = PhenomenonSystem.legible(line(0.2, 0.01, 0.04, 0.002), 2)
+    expect(legible.bounds.width).toBeCloseTo(0.75, 6)
+    expect(legible.bounds.height).toBeCloseTo(0.75, 6)
+    // As wide as the eye resolves and more one way, a ninth of a minute of arc the other.
+    expect(1 - legible.transparency).toBeCloseTo(0.002 * 60, 6)
+    // Grown about its own centre.
+    expect(legible.bounds.x + legible.bounds.width / 2).toBeCloseTo(100.1, 6)
+  })
+
+  it("is left as it is when it is wide enough", () => {
+    const shape = line(10, 5, 2, 1)
+    expect(PhenomenonSystem.legible(shape, 2)).toBe(shape)
   })
 })

@@ -37,7 +37,7 @@ export class RoadGrade {
       const pose = track.getInterpolatedPoseAt(Math.max(0, t))
       if (!pose || pose.lat === undefined || pose.lng === undefined) return undefined
       const local = geoToLocalMeters(pose.lat, pose.lng, origin.lat, origin.lng)
-      return { eastM: local.x, northM: -local.z, heading: pose.headingDeg, aboveM: pose.elevationM ?? 0 }
+      return { eastM: local.x, northM: -local.z, heading: pose.headingDeg, aboveM: pose.elevationM ?? 0, altitudeM: pose.altitudeM }
     }
     const from = at(tMs - RoadGrade.HALF_SPAN_MS)
     const to = at(tMs + RoadGrade.HALF_SPAN_MS)
@@ -49,7 +49,10 @@ export class RoadGrade {
     // The way the vehicle itself climbs: the ground under it plus how high above that ground it is. The ground's slope for a car on its road;
     // for an aircraft holding its altitude over the mountains, nothing, where the slope of the ground under it raised Kenneth Arnold's view
     // by four degrees.
-    const rise = relief.heightAt(to.eastM, to.northM) + to.aboveM - relief.heightAt(from.eastM, from.northM) - from.aboveM
+    // One who states an altitude above the sea climbs by it alone, whatever relief is drawn under them (see ObserverPose.altitudeM).
+    const rise = to.altitudeM !== undefined && from.altitudeM !== undefined
+      ? to.altitudeM - from.altitudeM
+      : relief.heightAt(to.eastM, to.northM) + to.aboveM - relief.heightAt(from.eastM, from.northM) - from.aboveM
     const gradeDeg = Math.atan2(rise, distanceM) * 180 / Math.PI
     if (now.heading === undefined) return gradeDeg
     const travelDeg = Math.atan2(to.eastM - from.eastM, to.northM - from.northM) * 180 / Math.PI

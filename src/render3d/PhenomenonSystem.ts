@@ -168,7 +168,7 @@ export class PhenomenonSystem {
       }
       mesh.renderOrder = PHENOMENON_RENDER_ORDER + phenomenon.renderOrder
       mesh.visible = !phenomenon.hidden && phenomenon.shape.transparency < 1
-      if (mesh.visible) this.paint(mesh, phenomenon, frame)
+      if (mesh.visible) this.paint(mesh, phenomenon.ghost ? phenomenon : { ...phenomenon, shape: PhenomenonSystem.legible(phenomenon.shape, frame.scale) }, frame)
     }
   }
 
@@ -396,6 +396,39 @@ export class PhenomenonSystem {
     texture.generateMipmaps = false
     mesh.material.map = texture
     mesh.material.needsUpdate = true
+  }
+
+  /** The least a shape is drawn across, device pixels: under it, it is a speck the rasteriser hits or misses. */
+  static readonly LEGIBLE_DEVICE_PX = 1.5
+  /** What the eye resolves, degrees: a minute of arc. Narrower than this, a thing is seen at the contrast it has spread over this. */
+  static readonly ACUITY_DEG = 1 / 60
+
+  /**
+   * A shape as an eye sees it when it is narrower than a pixel or two, one way or both: drawn that wide, as a star is drawn as a point, and
+   * fainter by how much narrower than a minute of arc it is that way, which is the contrast the eye itself gives a thing it cannot resolve.
+   * Kenneth Arnold's objects, "a black thin line" of 0.04° by a twentieth of that, were less than a pixel by a thirtieth of one, and not
+   * drawn at all, while the eye sees a dark line of that thickness against the snow. A screen pixel of an eye's picture is some four
+   * minutes of arc: a shape drawn wider than it is, at the contrast the eye would see it at, is the nearest it can show.
+   */
+  static legible(shape: Shape, devicePxPerCanvasPx: number): Shape {
+    const least = PhenomenonSystem.LEGIBLE_DEVICE_PX / Math.max(devicePxPerCanvasPx, 1e-6)
+    const { width, height } = shape.bounds
+    if (width >= least && height >= least) return shape
+    const angular = shape.angular
+    const contrastOf = (px: number, deg: number | undefined) => {
+      if (px >= least) return 1
+      // Without an angle stated, by the share of the least width it covers.
+      return deg !== undefined && deg > 0 ? Math.min(1, deg / PhenomenonSystem.ACUITY_DEG) : px / least
+    }
+    const contrast = contrastOf(width, angular?.widthDeg) * contrastOf(height, angular?.heightDeg)
+    const grownWidth = Math.max(width, least), grownHeight = Math.max(height, least)
+    const sx = width > 0 ? grownWidth / width : 1, sy = height > 0 ? grownHeight / height : 1
+    return {
+      ...shape,
+      bounds: { x: shape.bounds.x - (grownWidth - width) / 2, y: shape.bounds.y - (grownHeight - height) / 2, width: grownWidth, height: grownHeight },
+      ...("points" in shape && Array.isArray(shape.points) ? { points: shape.points.map(point => ({ x: point.x * sx, y: point.y * sy })) } : {}),
+      transparency: 1 - (1 - shape.transparency) * contrast
+    } as Shape
   }
 
   /** Everything paintShape reads, except where the shape is. */

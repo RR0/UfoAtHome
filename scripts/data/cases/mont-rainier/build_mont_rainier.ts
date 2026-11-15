@@ -255,7 +255,6 @@ async function main(): Promise<void> {
   // The witness, looking at the leader while it is in sight, at the last of them after.
   const observerKeys = samples.map(t => {
     const { at } = arnoldAt(t)
-    const ground = terrarium.heightAt(at.lat, at.lng)
     const eye = { ...at, altM: ARNOLD_ALT_M }
     const watched = t < T_ADAMS_S - 20 ? 0 : COUNT - 1
     const look = lookAt(eye, objectAt(watched, t))
@@ -263,25 +262,32 @@ async function main(): Promise<void> {
       t: t * 1000,
       pose: {
         lat: r6(at.lat), lng: r6(at.lng),
+        // Stated against the ground where the recording starts, the same all along: the scene puts him at `altitudeM` over whatever relief it
+        // draws, and his cabin is stated against this (see ObserverPose.altitudeM).
         elevationM: t === 0
-          ? said(r2(ARNOLD_ALT_M - ground), "derived", "\"approximately 9,200 feet\" above the sea, less the ground under him (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol sous lui (tuiles AWS Terrarium)")
-          : r2(ARNOLD_ALT_M - ground),
-        headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg), fovDeg: 60
+          ? said(r2(ARNOLD_ALT_M - originGround), "derived", "\"approximately 9,200 feet\" above the sea, less the ground where the recording starts (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol où commence l'enregistrement (tuiles AWS Terrarium)")
+          : r2(ARNOLD_ALT_M - originGround),
+        altitudeM: t === 0
+          ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »")
+          : r2(ARNOLD_ALT_M),
+        headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg),
+        // A pilot's field, wider than a lens's: what keeps the frame of his windscreen in sight as he looks ahead (ASSUMED).
+        fovDeg: 75
       }
     }
   })
 
   // His aircraft, round his eye: a Piper PA-28 Cadet stands in for his CallAir A-3 (no model of it to be had). In the model the pilot's eye is
-  // 1.15 m ahead of its middle, 0.28 m left of its axis and 0.385 m above its middle (behind the left yoke, 0.8 m from the panel, 0.17 m under
-  // the roof), and the decor states where the model's middle is; the 0.22 m further back and 0.15 m further right are what the scene showed.
+  // 1 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, a metre from the panel, a little
+  // over 0.2 m under the roof (which the model glazes). The decor states where the model's middle is; 0.22 m further back and 0.15 m
+  // further right than that are what the scene showed.
   const cabinTrack = samples.map(t => {
     const { at, headingDeg } = arnoldAt(t)
     const h = headingDeg * Math.PI / 180
     // From the eye back to the model's middle: 1.15 m astern, 0.28 m to the right.
-    const back = 1.37, right = 0.43
+    const back = 1.52, right = 0.43
     const middle = offset(at, -back * Math.sin(h) + right * Math.cos(h), -back * Math.cos(h) - right * Math.sin(h))
-    const ground = terrarium.heightAt(at.lat, at.lng)
-    return { t: t * 1000, ...local(middle), altitudeM: r2(ARNOLD_ALT_M - ground + 1.6 - 0.385), headingDeg: r2(headingDeg) }
+    return { t: t * 1000, ...local(middle), altitudeM: r2(ARNOLD_ALT_M - originGround + 1.6 - 0.335), headingDeg: r2(headingDeg) }
   })
 
   // "There was a DC-4 to the left and to the rear of me approximately fifteen miles distance, and I should judge, at 14,000 foot elevation."

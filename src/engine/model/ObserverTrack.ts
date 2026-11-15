@@ -24,6 +24,13 @@ export interface ObserverPose {
    * it, the height of a window or a cliff top otherwise. The eye's own height is added on top. */
   elevationM: number
   /**
+   * Metres above the sea, for someone flying, who holds an altitude and not a height over the ground: the scene then puts them there,
+   * whatever its own relief is under them, and `elevationM` is only what that height was over the ground the file was written against.
+   * A pilot at 9,200 feet over the Cascades, stated by his height over the ground read from one source, rose and fell by twenty metres
+   * over the relief another drew, and the view with him. The eye's own height is added on top, as to `elevationM`.
+   */
+  altitudeM?: number
+  /**
    * Degrees clockwise from true north. undefined means the heading is unknown — callers must
    * fall back to azimuth-agnostic rendering in that case, never default to 0, which would
    * silently claim "facing north" for data that never actually recorded a heading.
@@ -130,6 +137,7 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     lat: a.lat === undefined || b.lat === undefined ? undefined : lerpNumber(a.lat, b.lat, t),
     lng: a.lng === undefined || b.lng === undefined ? undefined : lerpNumber(a.lng, b.lng, t),
     elevationM: lerpNumber(a.elevationM, b.elevationM, t),
+    ...(a.altitudeM !== undefined && b.altitudeM !== undefined ? { altitudeM: lerpNumber(a.altitudeM, b.altitudeM, t) } : {}),
     headingDeg:
       a.headingDeg === undefined || b.headingDeg === undefined ? undefined : lerpAngleDeg(a.headingDeg, b.headingDeg, t),
     pitchDeg: lerpNumber(a.pitchDeg, b.pitchDeg, t),
