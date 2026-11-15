@@ -1,4 +1,4 @@
-import { DemoCatalogue } from "./DemoCatalogue.js"
+import { DemoCatalogue, demoPlayUrl } from "./DemoCatalogue.js"
 import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
 
 /** The front page: what you can do with it, one carousel of live reconstructions, and why it is
@@ -42,6 +42,8 @@ export class HomePage implements SitePage {
   script(language: SiteLanguage): string {
     const slides = JSON.stringify(this.catalogue.demos.map(demo => ({
       src: demo.src,
+      // The title is the way into the whole of it: its case where it has one, else the observation, as on the demos' own page.
+      href: demoPlayUrl(demo),
       title: demo.title[language],
       blurb: demo.blurb[language]
     })))
@@ -74,7 +76,7 @@ const armSlideTimer = () => {
 const show = async position => {
   index = (position + slides.length) % slides.length
   const slide = slides[index]
-  caption.innerHTML = "<strong>" + slide.title + "</strong> " + slide.blurb
+  caption.innerHTML = '<strong><a href="' + slide.href + '">' + slide.title + "</a></strong> " + slide.blurb
   for (const [at, dot] of dots.entries()) dot.setAttribute("aria-current", String(at === index))
   clearTimeout(slideTimer)
   try {
