@@ -79,13 +79,42 @@ export class Headings {
     })
   }
 
+  /**
+   * The page's sections, in order: every <h2> and <h3> that has an id, whether generated or written by hand, except a card's title, inside a
+   * link (see withAnchors) or a figure's caption (a demo card), which is not a part of the page one would go to. Read on the anchored page, for its outline (PageOutline).
+   *
+   * @return Each section's heading level, id, and text as markup-free (but still escaped) HTML.
+   */
+  sections(html: string): Array<{ level: "h2" | "h3", id: string, text: string }> {
+    const outside = [...this.linkSpans(html), ...this.spans(html, "figure")]
+    const found: Array<{ level: "h2" | "h3", id: string, text: string }> = []
+    for (const match of html.matchAll(Headings.HEADING)) {
+      const [, tag, attributes, inner] = match
+      const id = /\bid\s*=\s*["']([^"']*)["']/.exec(attributes)?.[1]
+      const offset = match.index
+      if (!id || outside.some(([from, to]) => offset > from && offset < to)) {
+        continue
+      }
+      const text = inner.replace(/<a class="heading-anchor"[^>]*>[\s\S]*?<\/a>/g, "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim()
+      if (text) {
+        found.push({ level: tag as "h2" | "h3", id, text })
+      }
+    }
+    return found
+  }
+
   /** Where a link is open, as [start, end] offsets — the outermost one only, which is all a
    * containment test needs. */
   private linkSpans(html: string): Array<[number, number]> {
+    return this.spans(html, "a")
+  }
+
+  /** Where an element named `tag` is open, as [start, end] offsets — the outermost one only. */
+  private spans(html: string, tag: string): Array<[number, number]> {
     const spans: Array<[number, number]> = []
     let depth = 0
     let start = 0
-    for (const match of html.matchAll(/<a\b[^>]*>|<\/a\s*>/gi)) {
+    for (const match of html.matchAll(new RegExp(`<${tag}\\b[^>]*>|<\\/${tag}\\s*>`, "gi"))) {
       if (match[0].startsWith("</")) {
         depth = Math.max(0, depth - 1)
         if (depth === 0) {

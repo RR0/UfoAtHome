@@ -38,13 +38,13 @@ export class DocsComponentsPage extends DocsSection {
 
   /** Where each tag's own page is, by the tag itself. */
   private static readonly PAGES: ReadonlyArray<readonly [string, string]> = [
-    ["rr0-scene", "/docs/format/#rr0-scene"],
+    ["rr0-scene", "/docs/format/components/#rr0-scene"],
     ["rr0-case-editor", "/docs/case/#rr0-case-editor"],
     ["rr0-interview", "/docs/interview/#rr0-interview"],
     ["rr0-interview-editor", "/docs/interview/#rr0-interview-editor"],
-    ["rr0-date-input", "/docs/format/#rr0-sighting-editor"],
-    ["rr0-sighting-editor", "/docs/format/#rr0-sighting-editor"],
-    ["rr0-sighting", "/docs/format/#rr0-sighting"]
+    ["rr0-date-input", "/docs/format/components/#rr0-sighting-editor"],
+    ["rr0-sighting-editor", "/docs/format/components/#rr0-sighting-editor"],
+    ["rr0-sighting", "/docs/format/components/#rr0-sighting"]
   ]
 
   render(language: SiteLanguage): string {

@@ -99,19 +99,19 @@ export class DocsComponentPage extends DocsSection {
     const prose: Said<string> = {
       fr: `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> est un <a href="/docs/format/">fichier d'observation</a>. `}Ou, après <code>npm install @rr0/ufoathome</code> : <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          Le bundle pèse ${this.doc.size.fr} compressé et enregistre le tag lui-même — rien d'autre à appeler.
-         <a href="/docs/format/#putting-one-in-your-application">La présentation plus haut</a> dit ce que cela suppose par ailleurs,
+         <a href="/docs/format/components/#putting-one-in-your-application">La présentation plus haut</a> dit ce que cela suppose par ailleurs,
          et <a href="/docs/share/">partager une observation</a> a l'exemple complet, à essayer et à copier.`,
       en: `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> is a <a href="/docs/format/">sighting file</a>. `}Or, after <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          The bundle is ${this.doc.size.en} gzipped and registers the tag itself — nothing else to call.
-         <a href="/docs/format/#putting-one-in-your-application">The overview above</a> says what else that involves, and
+         <a href="/docs/format/components/#putting-one-in-your-application">The overview above</a> says what else that involves, and
          <a href="/docs/share/">sharing an observation</a> has the whole example, to try and to copy.`,
       es: `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> es un <a href="/docs/format/">archivo de avistamiento</a>. `}O bien, tras <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          El bundle pesa ${this.doc.size.es} comprimido con gzip y registra la etiqueta por sí mismo — no hay nada más que llamar.
-         <a href="/docs/format/#putting-one-in-your-application">La presentación de arriba</a> explica qué más supone, y
+         <a href="/docs/format/components/#putting-one-in-your-application">La presentación de arriba</a> explica qué más supone, y
          <a href="/docs/share/">compartir una observación</a> tiene el ejemplo completo, para probarlo y copiarlo.`,
       it: `${tag === "rr0-sighting-editor" ? "" : `<code>sighting.json</code> è un <a href="/docs/format/">file di avvistamento</a>. `}Oppure, dopo <code>npm install @rr0/ufoathome</code>: <code>import "@rr0/ufoathome/${this.doc.subpath}"</code>.
          Il bundle pesa ${this.doc.size.it} compresso con gzip e registra il tag da sé — nient'altro da chiamare.
-         <a href="/docs/format/#putting-one-in-your-application">La presentazione sopra</a> dice cos'altro comporta, e
+         <a href="/docs/format/components/#putting-one-in-your-application">La presentazione sopra</a> dice cos'altro comporta, e
          <a href="/docs/share/">condividere un'osservazione</a> ha l'esempio completo, da provare e da copiare.`
     }
     return `

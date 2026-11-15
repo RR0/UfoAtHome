@@ -33,7 +33,7 @@ interface SourceGroup {
  */
 export class DocsSourcesPage {
 
-  private readonly lede: Said<string> = {
+  readonly lede: Said<string> = {
     en: "Nothing the tool draws is invented. Each value comes from a named source, read at a stated "
       + "moment, and where no record exists the interface says so instead of filling the gap.",
     fr: "Rien de ce que l'outil dessine n'est inventé. Chaque valeur vient d'une source nommée, lue à "
@@ -625,8 +625,11 @@ export class DocsSourcesPage {
   /**
    * The sources the page it is on is about, as the technical part of that page: the groups asked for, a table each. The principles are given
    * once, with the page that has the most of them (the observation's); the others say only their own sources.
+   *
+   * @param standalone The section is the whole page (DocsFormatSourcesPage), whose own title and lede already say what it is: no heading of
+   * its own, no lede.
    */
-  section(language: SiteLanguage, ids: ReadonlyArray<string>, withPrinciples: boolean): string {
+  section(language: SiteLanguage, ids: ReadonlyArray<string>, withPrinciples: boolean, standalone = false): string {
     const heading = ({ en: "Sources and choices", fr: "Sources et choix", es: "Fuentes y decisiones", it: "Fonti e scelte" } satisfies Said<string>)[language]
     const principlesHeading = ({ en: "The principles", fr: "Les principes", es: "Los principios", it: "I principi" } satisfies Said<string>)[language]
     const groups = this.groups.filter(group => ids.includes(group.id))
@@ -634,8 +637,8 @@ export class DocsSourcesPage {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>${heading}</h2>
-    <p>${this.lede[language]}</p>${withPrinciples ? `
+    ${standalone ? "" : `<h2>${heading}</h2>
+    <p>${this.lede[language]}</p>`}${withPrinciples ? `
     <h3>${principlesHeading}</h3>
     <ul>
 ${this.principles[language].map(principle => `      <li>${principle}</li>`).join("\n")}

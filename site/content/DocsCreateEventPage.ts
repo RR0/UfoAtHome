@@ -72,7 +72,7 @@ export class DocsCreateEventPage extends DocsSection {
         hand: "In <code>case.json</code>, a reading is an event of type <code>sighting</code> that names, in <code>interpretationOf</code>, the <code>id</code> of the observation it reads (or several), and has a <code>url</code> of its own:",
         handOutro: "Its recording is written like any observation, with <code>bodies</code> that say which shapes they <code>explain</code>.",
         nextHeading: "To go on",
-        next: "<a href=\"/docs/case/\">What a case is</a>, how events are linked, and <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">how a reading is written</a>, field by field."
+        next: "<a href=\"/docs/case/\">What a case is</a>, how events are linked, and <a href=\"/docs/format/readings/#another-reading-an-interpretation-is-another-sighting\">how a reading is written</a>, field by field."
       },
       fr: {
         title: "Créer une lecture",
@@ -90,7 +90,7 @@ export class DocsCreateEventPage extends DocsSection {
         hand: "Dans <code>case.json</code>, une lecture est un événement de type <code>sighting</code> qui nomme, dans <code>interpretationOf</code>, l'<code>id</code> de l'observation qu'il lit (ou de plusieurs), et qui a son propre <code>url</code> :",
         handOutro: "Son enregistrement s'écrit comme toute observation, avec des <code>bodies</code> qui disent quelles formes ils <code>explain</code>.",
         nextHeading: "Pour aller plus loin",
-        next: "<a href=\"/docs/case/\">Ce qu'est un dossier</a>, comment les événements sont liés, et <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">comment s'écrit une lecture</a>, champ par champ."
+        next: "<a href=\"/docs/case/\">Ce qu'est un dossier</a>, comment les événements sont liés, et <a href=\"/docs/format/readings/#another-reading-an-interpretation-is-another-sighting\">comment s'écrit une lecture</a>, champ par champ."
       },
       es: {
         title: "Crear una lectura",
@@ -108,7 +108,7 @@ export class DocsCreateEventPage extends DocsSection {
         hand: "En <code>case.json</code>, una lectura es un evento de tipo <code>sighting</code> que nombra, en <code>interpretationOf</code>, el <code>id</code> de la observación que lee (o de varias), y tiene su propio <code>url</code>:",
         handOutro: "Su grabación se escribe como cualquier observación, con <code>bodies</code> que dicen qué formas <code>explain</code>.",
         nextHeading: "Para seguir",
-        next: "<a href=\"/docs/case/\">Qué es un caso</a>, cómo se vinculan los eventos, y <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">cómo se escribe una lectura</a>, campo por campo."
+        next: "<a href=\"/docs/case/\">Qué es un caso</a>, cómo se vinculan los eventos, y <a href=\"/docs/format/readings/#another-reading-an-interpretation-is-another-sighting\">cómo se escribe una lectura</a>, campo por campo."
       },
       it: {
         title: "Creare una lettura",
@@ -126,7 +126,7 @@ export class DocsCreateEventPage extends DocsSection {
         hand: "In <code>case.json</code>, una lettura è un evento di tipo <code>sighting</code> che nomina, in <code>interpretationOf</code>, l'<code>id</code> dell'osservazione che legge (o di più), e ha un proprio <code>url</code>:",
         handOutro: "La sua registrazione si scrive come qualsiasi osservazione, con <code>bodies</code> che dicono quali forme <code>explain</code>.",
         nextHeading: "Per proseguire",
-        next: "<a href=\"/docs/case/\">Che cos'è un caso</a>, come sono collegati gli eventi, e <a href=\"/docs/format/#another-reading-an-interpretation-is-another-sighting\">come si scrive una lettura</a>, campo per campo."
+        next: "<a href=\"/docs/case/\">Che cos'è un caso</a>, come sono collegati gli eventi, e <a href=\"/docs/format/readings/#another-reading-an-interpretation-is-another-sighting\">come si scrive una lettura</a>, campo per campo."
       }
     },
     interview: {

@@ -14,6 +14,10 @@ import { DemoIndex } from "./content/DemoIndex.js"
 import { DocsPage } from "./content/DocsPage.js"
 import { DocsCreatePage } from "./content/DocsCreatePage.js"
 import { DocsFormatPage } from "./content/DocsFormatPage.js"
+import { DocsFormatContextPage } from "./content/DocsFormatContextPage.js"
+import { DocsFormatReadingsPage } from "./content/DocsFormatReadingsPage.js"
+import { DocsFormatComponentsPage } from "./content/DocsFormatComponentsPage.js"
+import { DocsFormatSourcesPage } from "./content/DocsFormatSourcesPage.js"
 import { DocsSharePage } from "./content/DocsSharePage.js"
 import { DocsModulesPage } from "./content/DocsModulesPage.js"
 import { DocsInterviewPage } from "./content/DocsInterviewPage.js"
@@ -100,7 +104,7 @@ class SiteBuilder {
       new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
-      new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsInterviewPage(), new DocsSharePage(), new DocsModulesPage(),
+      new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsFormatContextPage(), new DocsFormatReadingsPage(), new DocsFormatComponentsPage(), new DocsFormatSourcesPage(), new DocsInterviewPage(), new DocsSharePage(), new DocsModulesPage(),
       new FaqPage(),
       new PrivacyPage(),
       // Written as HTML, with its sub-pages as sub-directories — see HtmlPage and HtmlPageTree.
@@ -292,12 +296,12 @@ class SiteBuilder {
     ["/fr/documentation/", "/docs/"],
     ["/fr/faq/", "/faq/"],
     ["/fr/plan/", "/roadmap/"],
-    // The components' pages and the sources' page, now sections of the pages they belong to (see DocsFormatPage).
-    ["/docs/sources/", "/docs/format/#sources-and-choices"],
-    ["/docs/components/", "/docs/format/#components"],
-    ["/docs/components/scene/", "/docs/format/#rr0-scene"],
-    ["/docs/components/sighting/", "/docs/format/#rr0-sighting"],
-    ["/docs/components/edit/", "/docs/format/#rr0-sighting-editor"]
+    // The components' pages and the sources' page, now pages under the observation's (see DocsFormatSubpage).
+    ["/docs/sources/", "/docs/format/sources/"],
+    ["/docs/components/", "/docs/format/components/"],
+    ["/docs/components/scene/", "/docs/format/components/#rr0-scene"],
+    ["/docs/components/sighting/", "/docs/format/components/#rr0-sighting"],
+    ["/docs/components/edit/", "/docs/format/components/#rr0-sighting-editor"]
   ]
 
   /**

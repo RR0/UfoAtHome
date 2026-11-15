@@ -23,6 +23,16 @@ describe("PageOutline", () => {
     ])
   })
 
+  it("lists a section whose id was written by hand", () => {
+    const html = anchored(sections(4) + `<h3 id="sky">The sky</h3>`)
+    expect(linksIn(outline.render(html, "On this page"))).toContain("h3 sky The sky")
+  })
+
+  it("leaves out a figure's caption, as a demo card's title", () => {
+    const html = anchored(`<figure class="demo-card"><figcaption><h3 id="clouds-title">Clouds</h3></figcaption></figure>` + sections(5))
+    expect(linksIn(outline.render(html, "On this page"))).not.toContain("h3 clouds-title Clouds")
+  })
+
   it("leaves out a card's title, and never takes the text after it for a title", () => {
     const html = anchored(`<a href="/demos/"><h3>A demo card</h3><p>Its caption</p></a>` + sections(5))
     const links = linksIn(outline.render(html, "On this page"))
