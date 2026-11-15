@@ -498,8 +498,8 @@ async function main(): Promise<void> {
     const inner = [{ x: 78, y: 2.75 }, { x: 58, y: 5 }, { x: 30, y: 2.75 }]
     return [...outer, ...inner]
   })()
-  const later = JSON.parse(JSON.stringify(recording)) as typeof recording & { interpretation?: unknown }
-  delete later.interpretation
+  // His own reading kept: the same craft, as he went on describing them.
+  const later = JSON.parse(JSON.stringify(recording)) as typeof recording
   later.id = "1947-06-24-ArnoldKennethE-1960s"
   later.account = {
     observerOccupation: recording.account.observerOccupation,
@@ -613,6 +613,10 @@ async function main(): Promise<void> {
       }
     ]
   }
+  // The pelicans read against his later account too: the same birds, set against the crescents.
+  const laterPelicans = { ...JSON.parse(JSON.stringify(later)), id: "1947-06-24-ArnoldKennethE-1960s-pelicans", interpretation: pelicans.interpretation }
+  writeFileSync(path.join(demoData, "interpretation-mont-rainier-1960s-pelicans.json"), JSON.stringify(laterPelicans, null, 1) + "\n")
+  caseJson.events.push({ type: "event", eventType: "sighting", interpretationOf: "arnold-1960s", title: pelicans.interpretation.title, url: "interpretation-mont-rainier-1960s-pelicans.json" } as never)
   writeFileSync(path.join(demoData, "case-mont-rainier.json"), JSON.stringify(caseJson, null, 1) + "\n")
   const first = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S))
   console.log(`objects at ${Math.round(objectSpeed)} m/s; leader at 14:59 az ${first.azimuthDeg.toFixed(1)} alt ${first.altitudeDeg.toFixed(2)} at ${(first.distanceM / 1000).toFixed(1)} km; last at Adams az ${see2.azimuthDeg.toFixed(1)} alt ${see2.altitudeDeg.toFixed(2)} at ${(see2.distanceM / 1000).toFixed(1)} km`)
