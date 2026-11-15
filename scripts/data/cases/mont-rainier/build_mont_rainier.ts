@@ -275,10 +275,16 @@ for (let t = 1; t < DURATION_S; t += 3) {
   const howMany = 2 + Math.floor(random() * 2)
   for (let n = 0; n < howMany; n++) flashes[Math.floor(random() * COUNT)].push(t + random() * 2.5)
 }
-const flashingAt = (k: number, t: number) => flashes[k].some(f => t >= f && t < f + 0.5)
+/** A flash is a glint, not a glow: a tenth of a second or so at its brightest (ASSUMED), between keyframes of its own just before and after. */
+const FLASH_S = 0.1
+const flashingAt = (k: number, t: number) => flashes[k].some(f => Math.abs(t - f) < FLASH_S / 2)
+/** Every flash's own instants: just before it, its height and just after, ms-rounded, in seconds. */
+const flashInstants = flashes.flat().flatMap(f => [f - FLASH_S, f, f + FLASH_S].map(t => Math.round(t * 1000) / 1000))
 
 async function main(): Promise<void> {
   const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
+  // What the flashes are drawn at: every second, and the instants of each flash, so that a flash is as short as it is.
+  const flashSamples = [...new Set([...samples, ...flashInstants.filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b)
   const terrarium = new Terrarium()
   await terrarium.load(samples.map(t => arnoldAt(t).at))
   const origin = arnoldAt(0).at
@@ -360,10 +366,10 @@ async function main(): Promise<void> {
       ? { x: r2(50 - 50 * Math.cos(a * 24 / 16 * 0.5 * 2 > Math.PI ? Math.PI : a * 24 / 16)), y: r2(2.5 - 2.5 * Math.sin(a * 24 / 16)) }
       : { x: r2(100 - (i - 16) / 8 * 50), y: r2(2.5 + 2.5 * (i - 16) / 8) }
   })
-  const keyframes = samples.map(t => {
+  const keyframes = flashSamples.map(t => {
     const eye = { ...arnoldAt(t).at, altM: ARNOLD_ALT_M }
     return {
-      t: t * 1000,
+      t: Math.round(t * 1000),
       shapes: sourceIds.map((sourceId, k) => {
         const look = lookAt(eye, objectAt(k, t))
         const flash = flashingAt(k, t)
@@ -386,7 +392,8 @@ async function main(): Promise<void> {
           color: flash ? "#ffffff" : "#1c1c1c",
           // "Mirror Bright" as they flip: a flash.
           brightness: flash ? 1 : 0,
-          haloScale: flash ? 2 : 0,
+          // A point of light, not a disc: its glare reaches little past it.
+          haloScale: flash ? 0.4 : 0,
           transparency: 0,
           title: { en: `Object ${k + 1}`, fr: `Objet ${k + 1}` }
         }
@@ -411,15 +418,15 @@ async function main(): Promise<void> {
       id: `craft-${k + 1}`,
       explains: [sourceId],
       model: { id: "ellipsoid" },
-      track: samples.map(t => ({
-        t: t * 1000,
+      track: flashSamples.map(t => ({
+        t: Math.round(t * 1000),
         ...local(objectAt(k, t)),
         altitudeM: r2(OBJECTS_ALT_M - originGround),
         ...(t === 0 ? {
           sizeM: { widthM: 14, lengthM: 15, heightM: 0.7 },
           // "just a black thin line" when level, a mirror's flash when they flipped: a dark polished surface (it mirrors the forest below),
           // whose flash this renderer, which knows no mirror's glint, is given as light (see the keyframes' luminanceCdM2).
-          appearance: { color: "#2a2c30", albedo: 0.08 },
+          appearance: { color: "#2a2c30", albedo: 0.08, haloScale: 0.3 },
           attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
         } : {}),
         // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some
