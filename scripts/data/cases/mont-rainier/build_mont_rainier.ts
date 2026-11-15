@@ -159,6 +159,8 @@ function between(a: Geo, b: Geo, f: number): Geo {
 const r2 = (v: number) => Math.round(v * 100) / 100
 const r3 = (v: number) => Math.round(v * 1000) / 1000
 const r6 = (v: number) => Math.round(v * 1e6) / 1e6
+/** A millimetre of latitude: what the eye's position is written to, which its cabin has to follow to the millimetre (a micro-degree is 11 cm). */
+const r8 = (v: number) => Math.round(v * 1e8) / 1e8
 
 // ---- What the sources say ----
 
@@ -201,7 +203,24 @@ function routeLength(): { points: Geo[], at: number[] } {
 const route = routeLength()
 
 /** Where Arnold is `t` seconds into the recording, and the heading he flies. */
+/**
+ * Where Arnold is `t` seconds into the recording: on the dossier's path with its corners rounded (the mean of where the path puts him over
+ * four seconds), as an aircraft turns. On the path's own corners the eye, which the scene moves along a curve between two keyframes, and his
+ * cabin, which it moves along a straight line, parted by most of a metre, and the eye went out through the cabin's side.
+ */
 function arnoldAt(t: number): { at: Geo, headingDeg: number } {
+  const steps = 16, spanS = 4
+  let lat = 0, lng = 0
+  for (let i = 0; i <= steps; i++) {
+    const p = onRoute(t - spanS / 2 + spanS * i / steps).at
+    lat += p.lat
+    lng += p.lng
+  }
+  const at = { lat: lat / (steps + 1), lng: lng / (steps + 1), altM: ARNOLD_ALT_M }
+  return { at, headingDeg: onRoute(t).headingDeg }
+}
+
+function onRoute(t: number): { at: Geo, headingDeg: number } {
   const along = (ON_COURSE_S + t) * ARNOLD_SPEED_MS
   let i = 1
   while (i < route.at.length - 1 && route.at[i] < along) i++
@@ -214,11 +233,28 @@ function arnoldAt(t: number): { at: Geo, headingDeg: number } {
 /** The leader passes Rainier's southern edge at 60 s; the last, CHAIN_M behind it, passes Adams' crest at 162 s. */
 const lineM = lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).distanceM
 const objectSpeed = (lineM + CHAIN_M) / (T_ADAMS_S - T_RAINIER_S)
+/**
+ * How they moved along their way: "a peculiar weaving motion 'like the tail of a Chinese kite'" (Bequette, East Oregonian, 1947-06-26),
+ * "weaving and ducking in and out [...] They looked like they were rocking" (Oregon Journal, 1947-06-27), "swerved in and out of the high
+ * mountain peaks" (report to the AAF). A wave running down the chain from its head, as down a kite's tail: each object swerves across its
+ * way and dips, and rocks, a little after the one ahead of it. How far, how often and how fast the wave runs are not said: ASSUMED, a
+ * swerve of 150 m and a dip of 60 m (a third and an eighth of a degree at twenty-five kilometres), every six seconds, one wave the length
+ * of the chain.
+ */
+const WEAVE = { acrossM: 150, upM: 60, periodS: 6, rollDeg: 25 }
+function weaveOf(k: number, t: number): { across: number, up: number, roll: number } {
+  const phase = 2 * Math.PI * (t / WEAVE.periodS - k / (COUNT - 1))
+  return { across: WEAVE.acrossM * Math.sin(phase), up: WEAVE.upM * Math.sin(2 * phase), roll: WEAVE.rollDeg * Math.cos(phase) }
+}
+
 function objectAt(k: number, t: number): Geo {
   const behindM = k * CHAIN_M / (COUNT - 1)
   const alongM = (t - T_RAINIER_S) * objectSpeed - behindM
   const p = between(FIRST_AT_RAINIER, LAST_AT_ADAMS, alongM / lineM)
-  return { ...p, altM: OBJECTS_ALT_M }
+  // Across their way: to the right of the course from Rainier to Adams.
+  const course = lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg * Math.PI / 180
+  const weave = weaveOf(k, t)
+  return offset({ ...p, altM: OBJECTS_ALT_M }, weave.across * Math.cos(course), -weave.across * Math.sin(course), weave.up)
 }
 
 // ---- Flashes: "two or three of them every few seconds would dip or change their course slightly, just enough for the sun to strike them" ----
@@ -267,7 +303,7 @@ async function main(): Promise<void> {
     return {
       t: t * 1000,
       pose: {
-        lat: r6(at.lat), lng: r6(at.lng),
+        lat: r8(at.lat), lng: r8(at.lng),
         // Stated against the ground where the recording starts, the same all along: the scene puts him at `altitudeM` over whatever relief it
         // draws, and his cabin is stated against this (see ObserverPose.altitudeM).
         elevationM: t === 0
@@ -287,7 +323,11 @@ async function main(): Promise<void> {
   // 1.3 m ahead of its middle, 0.28 m left of its axis and 0.335 m above its middle: behind the left yoke, 0.65 m from the panel (the eyes are
   // at the front of a head over a body sitting on the seat), a little over 0.2 m under the roof. The decor states where the model's middle is.
   const cabinTrack = samples.map(t => {
-    const { at, headingDeg } = arnoldAt(t)
+    // Round the eye as it is written, and pointing the way it goes over two seconds: the route's own heading turns at once at each of its
+    // corners, and the cabin with it, a quarter of a metre at the eye.
+    const raw = arnoldAt(t).at
+    const at = { lat: r8(raw.lat), lng: r8(raw.lng), altM: raw.altM }
+    const headingDeg = lookAt(arnoldAt(t - 1).at, arnoldAt(t + 1).at).azimuthDeg
     const h = headingDeg * Math.PI / 180
     // From the eye back to the model's middle, and to its right.
     const back = 1.3, right = 0.28
@@ -338,6 +378,8 @@ async function main(): Promise<void> {
                 "« Quand le dernier de cette formation passa la crête enneigée la plus au sud du mont Adams [...] une minute et quarante-deux secondes »")
               : { azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) },
           angular: { widthDeg: r3(widthDeg), heightDeg: r3(flash ? widthDeg : widthDeg / 20) },
+          // "They looked like they were rocking": the outline tilts as the object rocks (see WEAVE).
+          angle: r3(weaveOf(k, t).roll * Math.PI / 180),
           kind: "polygon",
           points: polygon,
           bounds: { x: 300, y: 178, width: 100, height: 5 },
@@ -369,17 +411,21 @@ async function main(): Promise<void> {
       id: `craft-${k + 1}`,
       explains: [sourceId],
       model: { id: "ellipsoid" },
-      track: samples.filter(t => t % 2 === 0).map(t => ({
+      track: samples.map(t => ({
         t: t * 1000,
         ...local(objectAt(k, t)),
         altitudeM: r2(OBJECTS_ALT_M - originGround),
         ...(t === 0 ? {
           sizeM: { widthM: 14, lengthM: 15, heightM: 0.7 },
-          appearance: { color: "#d8dadc", albedo: 0.8 },
+          // "just a black thin line" when level, a mirror's flash when they flipped: a dark polished surface (it mirrors the forest below),
+          // whose flash this renderer, which knows no mirror's glint, is given as light (see the keyframes' luminanceCdM2).
+          appearance: { color: "#2a2c30", albedo: 0.08 },
           attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
         } : {}),
-        // "flip and flash in the sun": banked for an instant.
-        attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: flashingAt(k, t) ? 40 : 0 }
+        // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some
+        // 10⁸ cd/m², ASSUMED from his comparison.
+        attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: r2(flashingAt(k, t) ? 40 : weaveOf(k, t).roll) },
+        ...(t === 0 ? {} : { appearance: { luminanceCdM2: flashingAt(k, t) ? 1e8 : 0 } })
       }))
     }))
   }

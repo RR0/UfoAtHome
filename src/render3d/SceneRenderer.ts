@@ -5982,6 +5982,7 @@ export class SceneRenderer {
   private readonly phenomenaFrustum = new Frustum()
   private readonly phenomenaViewProjection = new Matrix4()
   private readonly occluderSphere = new Sphere()
+  private readonly occluderEye = new Vector3()
   /** Each decor group's bounds in its own frame, and how many objects it held when they were taken: a model arrives after its group. */
   private readonly localBounds = new WeakMap<Object3D, { sphere: Sphere, objects: number }>()
 
@@ -5999,7 +6000,9 @@ export class SceneRenderer {
       this.localBounds.set(group, bounds)
     }
     const sphere = this.occluderSphere.copy(bounds.sphere).applyMatrix4(group.matrixWorld)
-    if (sphere.center.distanceTo(camera.position) - sphere.radius > furthestM) return false
+    // Where the camera is in the world, not in what holds it: the eye's own camera hangs from a rig, and its local position, the origin, put
+    // Kenneth Arnold's cabin 2 km from his eye, too far to hide anything, and his account was drawn over its windscreen's frame.
+    if (sphere.center.distanceTo(camera.getWorldPosition(this.occluderEye)) - sphere.radius > furthestM) return false
     return frustum.intersectsSphere(sphere)
   }
 
@@ -6012,6 +6015,11 @@ export class SceneRenderer {
     const x1 = Math.min(size.x, Math.ceil(((Math.min(1, box.x1) + 1) / 2) * size.x + margin))
     const y1 = Math.min(size.y, Math.ceil(((Math.min(1, box.y1) + 1) / 2) * size.y + margin))
     const narrow = this.narrowCamera.copy(camera)
+    // Where the camera is and looks in the world, not in what holds it: a face of the eye's cube hangs from the cube, turned with the eye, and
+    // its own local turn looked elsewhere, so that the cabin round the eye was never taken as what may hide the account, and the account was
+    // drawn over its windscreen's frame.
+    camera.getWorldPosition(narrow.position)
+    camera.getWorldQuaternion(narrow.quaternion)
     // A view offset is counted from the top left.
     narrow.setViewOffset(size.x, size.y, x0, size.y - y1, Math.max(1, x1 - x0), Math.max(1, y1 - y0))
     narrow.updateMatrixWorld()
