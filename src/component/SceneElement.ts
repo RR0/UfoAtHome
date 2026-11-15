@@ -1675,6 +1675,9 @@ export class SceneElement extends HTMLElement {
   set sightingData(readable: SightingRecordingJson) {
     // One version of the format is read, and a file of any other is refused rather than misread (see FormatVersion).
     const json = FormatVersion.recording(readable)
+    // The title of the interpretation the previous recording was played as is not this one's: a carousel's rocket was called after the
+    // lanterns shown before it. Cleared before the recording is set, which draws its title.
+    this.ufoElement.playerTitle = undefined
     this.ufoElement.sightingData = json
     this.requireModules(json.modules)
     this.upperAirHeardLive = undefined
