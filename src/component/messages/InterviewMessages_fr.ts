@@ -61,5 +61,31 @@ export const interviewMessages_fr: InterviewMessages = {
   unlinkMoment: "Retirer ce lien",
   noMoments: "L'observation n'a pas encore de moment nommé.",
   redactReason: "retiré à la relecture",
-  roles: { interviewer: "Intervieweur", interviewee: "Interviewé", witness: "Témoin" }
+  roles: { interviewer: "Intervieweur", interviewee: "Interviewé", witness: "Témoin", unattributed: "Voix à attribuer" },
+  transcribe: "Transcrire l'enregistrement",
+  transcribeWith: "avec",
+  transcribeHint: "Fait de l'enregistrement de l'entretien des tours de parole, avec leurs instants. À qui est chaque voix reste à dire, tour par tour (Qui parle), puis à faire relire.",
+  transcribeLocal: "Rien ne quitte votre ordinateur. La première fois, le modèle (environ {mb} Mo) est téléchargé, puis gardé par le navigateur.",
+  transcribeSends: "L'enregistrement sera envoyé à {name} pour être transcrit.",
+  transcribeReplaces: "La transcription actuelle sera remplacée.",
+  transcribeNoRecording: "Ajoutez d'abord l'enregistrement de l'entretien (bouton Enregistrements) pour le transcrire.",
+  transcribeKey: "Clé",
+  transcribeKeyGet: "obtenir une clé",
+  transcribeKeyHint: "Gardée en mémoire jusqu'au rechargement de la page, jamais enregistrée",
+  transcribeReading: "Lecture de l'enregistrement…",
+  transcribeLoading: "Téléchargement du modèle : {loaded} sur {total} Mo",
+  transcribeLoadingSoFar: "Téléchargement du modèle : {loaded} Mo",
+  transcribeProgress: "Transcription : {done} sur {total}",
+  transcribeStop: "Arrêter",
+  transcribeDone: "Transcrit par {engine}. Dites à qui est chaque voix (Qui parle), puis faites relire.",
+  transcribeStopped: "Transcription arrêtée : rien n'a été changé.",
+  transcribeErrors: {
+    noKey: "Saisissez d'abord votre clé pour ce service.",
+    key: "Le service a refusé la clé.",
+    rateLimited: "Le service demande d'attendre (quota atteint) : réessayez plus tard.",
+    tooLarge: "L'enregistrement est trop gros pour être lu dans la page : donnez-en l'audio seul.",
+    unsupported: "Ce navigateur ne peut pas faire tourner la transcription.",
+    failed: "La transcription a échoué : {detail}"
+  },
+  whoSpeaks: "Qui parle…"
 }

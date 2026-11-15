@@ -239,7 +239,8 @@ export default { title: "Ball lightning", name: "Ball lightning" }`
     { point: "decorModels", interfacePath: "src/render3d/decor/DecorModelProvider.ts", what: { en: "A catalogue of 3D models", fr: "Un catalogue de modèles 3D", es: "Un catálogo de modelos 3D", it: "Un catalogo di modelli 3D" } },
     { point: "skyEvents", interfacePath: "src/modules/sky-events/SkyEventKind.ts", what: { en: "A type of event of the sky, drawn and edited", fr: "Un type d'événement du ciel, dessiné et édité", es: "Un tipo de evento del cielo, dibujado y editado", it: "Un tipo di evento del cielo, disegnato e modificato" } },
     { point: "interpretations", interfacePath: "src/modules/interpretations/InterpretationKind.ts", what: { en: "A type of interpretation, computed into bodies", fr: "Un type d'interprétation, calculé en corps", es: "Un tipo de interpretación, calculado en cuerpos", it: "Un tipo di interpretazione, calcolato in corpi" } },
-    { point: "perception", interfacePath: "src/engine/observer/ObserverProvider.ts", what: { en: "What bends a witness's perception", fr: "Ce qui modifie la perception d'un témoin", es: "Lo que altera la percepción de un testigo", it: "Ciò che altera la percezione di un testimone" } }
+    { point: "perception", interfacePath: "src/engine/observer/ObserverProvider.ts", what: { en: "What bends a witness's perception", fr: "Ce qui modifie la perception d'un témoin", es: "Lo que altera la percepción de un testigo", it: "Ciò che altera la percezione di un testimone" } },
+    { point: "transcription", interfacePath: "src/engine/transcription/TranscriptionProvider.ts", what: { en: "What turns the recording of an interview into text", fr: "Ce qui transcrit l'enregistrement d'une interview", es: "Lo que transcribe la grabación de una entrevista", it: "Ciò che trascrive la registrazione di un'intervista" } }
   ]
 
   script(): string {

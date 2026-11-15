@@ -130,6 +130,36 @@ export class PrivacyPage implements SitePage {
       }
     },
     {
+      name: "Hugging Face, jsDelivr", host: "huggingface.co, cdn.jsdelivr.net",
+      where: { en: "United States, worldwide network", fr: "États-Unis, réseau mondial", es: "Estados Unidos, red mundial", it: "Stati Uniti, rete mondiale" },
+      why: {
+        en: "Only the first time you transcribe an interview's recording in your browser: the transcription model and the library that runs it are downloaded. Nothing of the recording is sent.",
+        fr: "Seulement la première fois que vous transcrivez l'enregistrement d'une interview dans votre navigateur : le modèle de transcription et la bibliothèque qui le fait tourner sont téléchargés. Rien de l'enregistrement n'est envoyé.",
+        es: "Solo la primera vez que transcribes la grabación de una entrevista en tu navegador: se descargan el modelo de transcripción y la biblioteca que lo ejecuta. No se envía nada de la grabación.",
+        it: "Solo la prima volta che trascrivi la registrazione di un'intervista nel tuo browser: vengono scaricati il modello di trascrizione e la libreria che lo esegue. Nulla della registrazione viene inviato."
+      }
+    },
+    {
+      name: "Groq", host: "api.groq.com",
+      where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
+      why: {
+        en: "Only when you choose it to transcribe an interview: the interview's recording, with your own key.",
+        fr: "Seulement quand vous le choisissez pour transcrire une interview : l'enregistrement de l'interview, avec votre propre clé.",
+        es: "Solo cuando lo eliges para transcribir una entrevista: la grabación de la entrevista, con tu propia clave.",
+        it: "Solo quando lo scegli per trascrivere un'intervista: la registrazione dell'intervista, con la tua chiave."
+      }
+    },
+    {
+      name: "OpenAI", host: "api.openai.com",
+      where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
+      why: {
+        en: "Only when you choose it to transcribe an interview: the interview's recording, with your own key.",
+        fr: "Seulement quand vous le choisissez pour transcrire une interview : l'enregistrement de l'interview, avec votre propre clé.",
+        es: "Solo cuando lo eliges para transcribir una entrevista: la grabación de la entrevista, con tu propia clave.",
+        it: "Solo quando lo scegli per trascrivere un'intervista: la registrazione dell'intervista, con la tua chiave."
+      }
+    },
+    {
       name: "Anthropic (Claude)", host: "api.anthropic.com",
       where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
       why: {

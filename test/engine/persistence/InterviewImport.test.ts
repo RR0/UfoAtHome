@@ -67,4 +67,42 @@ describe("InterviewImport", () => {
   it("holds nothing of an empty file", () => {
     expect(InterviewImport.parse("  \n ")).toBeUndefined()
   })
+
+  it("gives what a transcription found to a voice still to attribute, never to the interviewer, the case's speakers ready for it", () => {
+    const json = InterviewImport.transcribed([
+      { start: 0.004, end: 2.5, text: " Where  were you? " },
+      { start: 3, end: 5, text: "In the park." },
+      { start: 6, end: 6, text: "   " }
+    ], { by: ["BeauJerome"], witnesses: [{ id: "qb", label: "Q. B." }] })!
+    expect(json.speakers).toEqual({
+      interviewer: { role: "interviewer", by: { people: "BeauJerome" } },
+      witness: { role: "witness", title: "Q. B.", of: "qb" },
+      voice: { role: InterviewImport.UNATTRIBUTED }
+    })
+    expect(json.segments).toEqual([
+      { speaker: "voice", start: 0, end: 2.5, text: "Where were you?" },
+      { speaker: "voice", start: 3, end: 5, text: "In the park." }
+    ])
+    // The voice proofreads nothing: whoever it turns out to be does.
+    expect(json.proofreading).toEqual({ interviewer: { status: "pending" }, witness: { status: "pending" } })
+  })
+
+  it("keeps the voices a service told apart as voices, each called as it called it", () => {
+    const json = InterviewImport.transcribed([
+      { start: 0, end: 1, text: "Hello.", speaker: "A" },
+      { start: 1, end: 2, text: "Hi.", speaker: "B" },
+      { start: 2, end: 3, text: "So.", speaker: "A" }
+    ])!
+    expect(json.segments.map(segment => segment.speaker)).toEqual(["voice", "voice2", "voice"])
+    expect(json.speakers.voice2).toEqual({ role: InterviewImport.UNATTRIBUTED, title: "B" })
+    expect(InterviewImport.transcribed([{ start: 0, end: 1, text: " " }])).toBeUndefined()
+  })
+
+  it("drops a voice nobody speaks with any more, and only such a voice", () => {
+    const json = InterviewImport.transcribed([{ start: 0, end: 1, text: "Hello." }], { by: ["BeauJerome"], witnesses: [{ id: "qb", label: "Q. B." }] })!
+    json.segments[0].speaker = "witness"
+    InterviewImport.dropUnheard(json)
+    expect(Object.keys(json.speakers)).toEqual(["interviewer", "witness"])
+    expect(Object.keys(json.proofreading!)).toEqual(["interviewer", "witness"])
+  })
 })

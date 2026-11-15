@@ -156,6 +156,9 @@ export interface InterviewPassage {
 /** Reading an interview transcript. */
 export class InterviewFile {
 
+  /** The role of a voice a transcription found but nobody has said whose it is yet (see InterviewImport.transcribed): it proofreads nothing. */
+  static readonly UNATTRIBUTED = "unattributed"
+
   /** `json` as a transcript, once its version is one this engine reads (see FormatVersion, which throws otherwise). */
   static read(json: unknown): InterviewJson {
     return FormatVersion.check(json, "interview") as InterviewJson

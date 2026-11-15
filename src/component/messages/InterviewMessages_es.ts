@@ -61,5 +61,31 @@ export const interviewMessages_es: InterviewMessages = {
   unlinkMoment: "Quitar este vínculo",
   noMoments: "La observación aún no tiene momentos con nombre.",
   redactReason: "retirado en la revisión",
-  roles: { interviewer: "Entrevistador", interviewee: "Entrevistado", witness: "Testigo" }
+  roles: { interviewer: "Entrevistador", interviewee: "Entrevistado", witness: "Testigo", unattributed: "Voz por atribuir" },
+  transcribe: "Transcribir la grabación",
+  transcribeWith: "con",
+  transcribeHint: "Convierte la grabación de la entrevista en turnos de palabra, con sus tiempos. De quién es cada voz queda por decir, turno por turno (Quién habla), y luego por hacer revisar.",
+  transcribeLocal: "Nada sale de su ordenador. La primera vez, el modelo (unos {mb} MB) se descarga y el navegador lo conserva.",
+  transcribeSends: "La grabación se enviará a {name} para ser transcrita.",
+  transcribeReplaces: "La transcripción actual será reemplazada.",
+  transcribeNoRecording: "Añada primero la grabación de la entrevista (botón Grabaciones) para transcribirla.",
+  transcribeKey: "Clave",
+  transcribeKeyGet: "obtener una clave",
+  transcribeKeyHint: "Se guarda en memoria hasta que se recarga la página, nunca se almacena",
+  transcribeReading: "Leyendo la grabación…",
+  transcribeLoading: "Descargando el modelo: {loaded} de {total} MB",
+  transcribeLoadingSoFar: "Descargando el modelo: {loaded} MB",
+  transcribeProgress: "Transcribiendo: {done} de {total}",
+  transcribeStop: "Detener",
+  transcribeDone: "Transcrito por {engine}. Indique de quién es cada voz (Quién habla) y luego hágalo revisar.",
+  transcribeStopped: "Transcripción detenida: no se ha cambiado nada.",
+  transcribeErrors: {
+    noKey: "Escriba primero su clave para este servicio.",
+    key: "El servicio rechazó la clave.",
+    rateLimited: "El servicio pide esperar (cuota alcanzada): inténtelo más tarde.",
+    tooLarge: "La grabación es demasiado grande para leerse en la página: proporcione solo su audio.",
+    unsupported: "Este navegador no puede ejecutar la transcripción.",
+    failed: "La transcripción ha fallado: {detail}"
+  },
+  whoSpeaks: "Quién habla…"
 }

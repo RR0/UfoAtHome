@@ -1,6 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { register, INTERVIEW_CHANGE_EVENT } from "../../src/component/InterviewEditorElement.js"
 import type { InterviewEditorElement, InterviewEvent } from "../../src/component/InterviewEditorElement.js"
+import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
+import { TranscriptionError } from "../../src/engine/transcription/TranscriptionError.js"
 
 register()
 
@@ -434,6 +436,131 @@ describe("What the summary shows is what the file holds, and the other way round
     await load(element, "empty.txt", "   ")
     expect(part(element, "file-note").hidden).toBe(false)
     expect(part(element, "file-note").textContent).toContain("not an interview transcript")
+  })
+
+  describe("transcribing the recording", () => {
+    afterEach(() => ModuleRegistry.uninstall("test-transcription"))
+
+    /** A way of transcribing given by a module: what it was asked, and what it finds. */
+    const fake = (sendsAudio = false) => {
+      const asked: number[] = []
+      ModuleRegistry.install({
+        id: "test-transcription", name: "Test",
+        contributes: {
+          transcription: [{
+            id: "fake", name: "Fake", credit: "© test", creditUrl: "https://test.example",
+            create: () => ({
+              sendsAudio, engine: "fake-engine", downloadBytes: 5_000_000,
+              transcribe: async ({ samples }: { samples: Float32Array }) => {
+                asked.push(samples.length)
+                return [{ start: 0.5, end: 2, text: "Where were you?" }, { start: 2.5, end: 4, text: "In the park." }]
+              }
+            })
+          }]
+        }
+      })
+      return asked
+    }
+    const withRecording = { ...transcript, recordings: [{ kind: "audio", src: "call.m4a" }] }
+    /** The recording's bytes, and a browser's decoding of them: three seconds of 16 kHz sound. */
+    const decodable = () => {
+      const plain = fetch as unknown as (url: string) => Promise<unknown>
+      vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith(".m4a")
+        ? { ok: true, status: 200, headers: new Headers(), arrayBuffer: async () => new ArrayBuffer(8) }
+        : plain(url)))
+      vi.stubGlobal("OfflineAudioContext", class {
+        async decodeAudioData() {
+          return { numberOfChannels: 1, getChannelData: () => new Float32Array(48_000) }
+        }
+      })
+    }
+    const choose = (element: InterviewEditorElement, id: string) => {
+      const select = part(element, "transcribe-source") as HTMLSelectElement
+      select.value = id
+      select.dispatchEvent(new Event("change"))
+    }
+
+    it("says there is nothing to transcribe without a recording", async () => {
+      fake()
+      const { element } = await make(event())
+      tabs(element)[1].click()
+      expect((part(element, "transcribe-start") as HTMLButtonElement).disabled).toBe(true)
+      expect(part(element, "transcribe-note").textContent).toContain("Add the interview's recording first")
+    })
+
+    it("says what each way does before anything goes: download a model, or send the recording to a service", async () => {
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element } = await make({ ...event(), url: "interview.json" })
+      tabs(element)[1].click()
+      await wait(100)
+      expect([...(part(element, "transcribe-source") as HTMLSelectElement).options].map(option => option.value).slice(0, 3)).toEqual(["whisper-browser", "groq", "openai"])
+      expect(part(element, "transcribe-note").textContent).toContain("Nothing leaves your computer")
+      expect(part(element, "transcribe-note").textContent).toContain("760 MB")
+      expect(part(element, "transcribe-note").textContent).toContain("The current transcript will be replaced")
+      expect(part(element, "transcribe-key-row").hidden).toBe(true)
+      choose(element, "groq")
+      expect(part(element, "transcribe-note").textContent).toContain("The recording will be sent to Groq")
+      expect(part(element, "transcribe-note").classList.contains("message-warning")).toBe(true)
+      expect(part(element, "transcribe-key-row").hidden).toBe(false)
+      choose(element, "whisper-browser")
+    })
+
+    it("makes what was found the transcript, every turn a voice to attribute, which a turn's Who speaks gives to a speaker", async () => {
+      const asked = fake()
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element, changes } = await make({ ...event(), url: "interview.json", by: [{ people: "BeauJerome" }], interviewOf: "qb" })
+      element.witnesses = [{ id: "qb", label: "Q. B." }]
+      decodable()
+      tabs(element)[1].click()
+      await wait(100)
+      choose(element, "fake")
+      ;(part(element, "transcribe-start") as HTMLButtonElement).click()
+      for (let tries = 0; !part(element, "transcribe-note").textContent!.includes("Transcribed") && tries < 50; tries++) await wait(50)
+
+      expect(asked).toEqual([48_000])
+      expect(part(element, "transcribe-note").textContent).toContain("Transcribed by Fake")
+      const json = JSON.parse(changes.filter(change => change.field === "transcript").at(-1)!.text!)
+      expect(json.segments.map((segment: { speaker: string, text: string }) => [segment.speaker, segment.text])).toEqual([["voice", "Where were you?"], ["voice", "In the park."]])
+      expect(json.speakers).toMatchObject({ interviewer: { by: { people: "BeauJerome" } }, witness: { of: "qb" }, voice: { role: "unattributed" } })
+      expect(json.transcription).toMatchObject({ method: "automatic", engine: "fake-engine" })
+      // The recording is the interview's still.
+      expect(json.recordings).toEqual([{ kind: "audio", src: "call.m4a" }])
+
+      const root = element.shadowRoot!
+      for (let tries = 0; !root.querySelector("#speaker-1-witness") && tries < 50; tries++) await wait(50)
+      root.querySelector<HTMLButtonElement>("#speaker-0-interviewer")!.click()
+      await wait(100)
+      root.querySelector<HTMLButtonElement>("#speaker-1-witness")!.click()
+      await wait(100)
+      const attributed = JSON.parse(changes.filter(change => change.field === "transcript").at(-1)!.text!)
+      expect(attributed.segments.map((segment: { speaker: string }) => segment.speaker)).toEqual(["interviewer", "witness"])
+      // No turn is the voice's any more: it is gone, and nobody waits for it to proofread.
+      expect(Object.keys(attributed.speakers)).toEqual(["interviewer", "witness"])
+      expect(Object.keys(attributed.proofreading)).toEqual(["interviewer", "witness"])
+    })
+
+    it("says why it could not, and changes nothing", async () => {
+      ModuleRegistry.install({
+        id: "test-transcription", name: "Test",
+        contributes: {
+          transcription: [{
+            id: "fake", name: "Fake", credit: "© test", creditUrl: "https://test.example",
+            create: () => ({ sendsAudio: true, engine: "fake", transcribe: async () => { throw new TranscriptionError("key") } })
+          }]
+        }
+      })
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element, changes } = await make({ ...event(), url: "interview.json" })
+      decodable()
+      tabs(element)[1].click()
+      await wait(100)
+      choose(element, "fake")
+      ;(part(element, "transcribe-start") as HTMLButtonElement).click()
+      for (let tries = 0; !part(element, "transcribe-note").classList.contains("message-error") && tries < 50; tries++) await wait(50)
+      expect(part(element, "transcribe-note").textContent).toBe("The service refused the key.")
+      expect(changes.filter(change => change.field === "transcript")).toEqual([])
+      expect(part(element, "transcribe-stop").hidden).toBe(true)
+    })
   })
 
   it("says what the interview was held through, among the media, and not nothing once one is said", async () => {

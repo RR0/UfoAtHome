@@ -61,5 +61,31 @@ export const interviewMessages_en: InterviewMessages = {
   unlinkMoment: "Remove this link",
   noMoments: "The observation has no named moment yet.",
   redactReason: "taken out at proofreading",
-  roles: { interviewer: "Interviewer", interviewee: "Interviewee", witness: "Witness" }
+  roles: { interviewer: "Interviewer", interviewee: "Interviewee", witness: "Witness", unattributed: "Voice to attribute" },
+  transcribe: "Transcribe the recording",
+  transcribeWith: "with",
+  transcribeHint: "Turns the interview's recording into turns of speech, with their times. Whose each voice is stays to say, turn by turn (Who speaks), then to have proofread.",
+  transcribeLocal: "Nothing leaves your computer. The first time, the model (about {mb} MB) is downloaded, then kept by the browser.",
+  transcribeSends: "The recording will be sent to {name} to be transcribed.",
+  transcribeReplaces: "The current transcript will be replaced.",
+  transcribeNoRecording: "Add the interview's recording first (Recordings button) to transcribe it.",
+  transcribeKey: "Key",
+  transcribeKeyGet: "get a key",
+  transcribeKeyHint: "Kept in memory until the page is reloaded, never stored",
+  transcribeReading: "Reading the recording…",
+  transcribeLoading: "Downloading the model: {loaded} of {total} MB",
+  transcribeLoadingSoFar: "Downloading the model: {loaded} MB",
+  transcribeProgress: "Transcribing: {done} of {total}",
+  transcribeStop: "Stop",
+  transcribeDone: "Transcribed by {engine}. Say whose each voice is (Who speaks), then have it proofread.",
+  transcribeStopped: "Transcription stopped: nothing was changed.",
+  transcribeErrors: {
+    noKey: "Type your key for this service first.",
+    key: "The service refused the key.",
+    rateLimited: "The service asks to wait (its quota is reached): try again later.",
+    tooLarge: "The recording is too large to be read in the page: give its audio alone.",
+    unsupported: "This browser cannot run the transcription.",
+    failed: "The transcription failed: {detail}"
+  },
+  whoSpeaks: "Who speaks…"
 }

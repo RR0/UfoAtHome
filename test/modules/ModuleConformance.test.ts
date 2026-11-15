@@ -13,6 +13,7 @@ import "../../src/modules/providers/terrain/terrainSources.js"
 import "../../src/modules/providers/time-zone/timeZoneSources.js"
 import "../../src/modules/providers/traffic/aircraftSources.js"
 import "../../src/modules/providers/traffic/upperAirSources.js"
+import "../../src/modules/providers/transcription/transcriptionSources.js"
 import "../../src/modules/providers/weather/weatherSources.js"
 import "../../src/modules/sky-events/skyEventSources.js"
 import { ModuleConformance } from "../../src/modules/ModuleConformance.js"
@@ -22,7 +23,8 @@ import type { ExtensionPointId, ModuleContributions } from "../../src/modules/Mo
 
 const POINTS: Record<ExtensionPointId, true> = {
   weather: true, place: true, timeZone: true, narrative: true, assessment: true, lightPollution: true, aircraft: true, upperAir: true,
-  elevation: true, imagery: true, surroundings: true, decorModels: true, skyEvents: true, interpretations: true, perception: true
+  elevation: true, imagery: true, surroundings: true, decorModels: true, skyEvents: true, interpretations: true, perception: true,
+  transcription: true
 }
 
 const entry = (id: string, built: unknown) => ({ id, name: id, credit: "© ACME", creditUrl: "https://acme.example", create: () => built })

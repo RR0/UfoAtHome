@@ -24,6 +24,10 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
+import { dataSourceById } from "../engine/source/DataSource.js"
+import { SourceCredentials } from "../engine/source/SourceCredentials.js"
+import { TRANSCRIPTION_SOURCES } from "../modules/providers/transcription/transcriptionSources.js"
+import type { TranscriptionProgress } from "../engine/transcription/TranscriptionProvider.js"
 
 export const INTERVIEW_EDITOR_ELEMENT_NAME = "rr0-interview-editor"
 
@@ -143,6 +147,13 @@ const TEMPLATE = `
   .review-boxes { display: flex; flex-wrap: wrap; gap: 14px; }
   .review-boxes label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
   .redact-row { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .transcribe { margin: 0 0 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+  .transcribe-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .transcribe-row label { display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
+  .transcribe-row input[type="password"] { width: 14em; }
+  .transcribe .source-credit { font-size: 12px; color: var(--ink-faint); }
+  .transcribe-note { margin: .4em 0 0; }
+  .transcribe progress { width: 100%; margin-top: 6px; }
   .redact-note { font-size: 13px; color: var(--ink-faint); }
   .redact-note.error { color: var(--error); }
   /* Each turn: its time, which plays from there; what is taken out as a label that says how much, and puts it back while it is known. */
@@ -198,6 +209,18 @@ const TEMPLATE = `
   </div>
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
+  <!-- Transcribing the recording (see TranscriptionProvider): what with, what it sends or downloads, how far it has got. -->
+  <div id="transcribe" class="transcribe">
+    <div class="transcribe-row">
+      <span><button id="transcribe-start" type="button" class="pill-btn primary"></button> <span id="transcribe-hint"></span></span>
+      <label><span id="label-transcribe-with"></span> <select id="transcribe-source"></select></label>
+      <a id="transcribe-credit" class="source-credit" target="_blank" rel="noopener noreferrer"></a>
+      <label id="transcribe-key-row" hidden><span id="label-transcribe-key"></span> <input id="transcribe-key" type="password" autocomplete="off" spellcheck="false"/> <a id="transcribe-key-get" class="source-credit" target="_blank" rel="noopener noreferrer"></a></label>
+      <button id="transcribe-stop" type="button" class="pill-btn" hidden></button>
+    </div>
+    <p id="transcribe-note" class="transcribe-note" role="status"></p>
+    <progress id="transcribe-progress" hidden></progress>
+  </div>
   <div id="review" class="review" hidden></div>
   <div class="redact-row">
     <button id="redact-selection" type="button" class="pill-btn"></button>
@@ -270,6 +293,10 @@ export class InterviewEditorElement extends HTMLElement {
    * segment), `segment:all` for a whole turn. Never written anywhere: the file published keeps no trace of it.
    */
   private readonly takenOut = new Map<string, string>()
+  /** What transcribes the recording, chosen among TRANSCRIPTION_SOURCES: kept for the page, as a key is. */
+  private static transcriptionSourceId = TRANSCRIPTION_SOURCES[0].id
+  /** The transcription under way, to stop it; undefined when none is. */
+  private transcribing?: AbortController
 
   constructor() {
     super()
@@ -294,6 +321,17 @@ export class InterviewEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
+    this.shadow.getElementById("transcribe-start")!.addEventListener("click", () => void this.transcribe())
+    this.shadow.getElementById("transcribe-stop")!.addEventListener("click", () => this.transcribing?.abort())
+    this.shadow.getElementById("transcribe-source")!.addEventListener("change", event => {
+      InterviewEditorElement.transcriptionSourceId = (event.target as HTMLSelectElement).value
+      this.transcribeOutcome = undefined
+      this.renderTranscribe()
+    })
+    // Taken when the field is left, not at each letter.
+    this.shadow.getElementById("transcribe-key")!.addEventListener("change", event => {
+      SourceCredentials.set(InterviewEditorElement.transcriptionSourceId, (event.target as HTMLInputElement).value)
+    })
     this.shadow.getElementById("redact-selection")!.addEventListener("click", () => void this.redactSelection())
     // A press on a passage taken out puts it back, while its text is still known.
     this.shadow.getElementById("exchanges")!.addEventListener("click", event => {
@@ -402,6 +440,7 @@ export class InterviewEditorElement extends HTMLElement {
     for (const box of this.shadow.querySelectorAll<HTMLInputElement>("#witness input")) box.disabled = readonly
     this.field("medium").disabled = readonly
     this.importInput.disabled = readonly
+    this.shadow.getElementById("transcribe")!.hidden = readonly
   }
 
   /** What `by` says as one line: the ids of the people, the names of the organizations, separated by commas. */
@@ -426,6 +465,14 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-url", m.transcript)
     HintElement.say(this.shadow.getElementById("label-import-file")!, m.importFile, m.importFileHint)
     text("redact-selection", m.redactSelection)
+    text("transcribe-start", m.transcribe)
+    this.shadow.getElementById("transcribe-hint")!.replaceChildren(HintElement.of(m.transcribeHint))
+    text("label-transcribe-with", m.transcribeWith)
+    text("label-transcribe-key", m.transcribeKey)
+    text("transcribe-key-get", m.transcribeKeyGet)
+    text("transcribe-stop", m.transcribeStop)
+    this.field("transcribe-key").title = m.transcribeKeyHint
+    this.renderTranscribe()
     this.player?.setMessages(m)
     this.importInput.messages = m
     text("save", m.saveButton)
@@ -571,6 +618,7 @@ export class InterviewEditorElement extends HTMLElement {
     this.player?.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
     this.renderReview(json)
     this.decorateExchanges(json)
+    this.renderTranscribe()
   }
 
   // -- Editing the exchanges (see the design handoff, §5) --------------------------------------------------------------------------
@@ -605,7 +653,8 @@ export class InterviewEditorElement extends HTMLElement {
   /** Who has not proofread the transcript yet, and a box each participant ticks once they have. */
   private renderReview(json: InterviewJson | undefined): void {
     const review = this.shadow.getElementById("review")!
-    const ids = Object.keys(json?.speakers ?? {})
+    // A voice still to attribute proofreads nothing: whoever it turns out to be does.
+    const ids = Object.entries(json?.speakers ?? {}).filter(([, speaker]) => speaker.role !== InterviewFile.UNATTRIBUTED).map(([id]) => id)
     review.hidden = !json || ids.length === 0
     if (!json || ids.length === 0) return
     const done = (id: string) => ["approved", "covered"].includes(json.proofreading?.[id]?.status ?? "")
@@ -719,6 +768,20 @@ export class InterviewEditorElement extends HTMLElement {
         : [{ value: "", label: m.noMoments, disabledReason: m.noMoments }])
     }
     if (!segment.redacted) tools.append(button(m.editTurn, () => this.editTurn(index)))
+    // Whose voice it is: what a transcription leaves to say, turn by turn (see InterviewImport.transcribed), and what an import may get wrong.
+    if (!segment.redacted && !this.hasAttribute("readonly")) {
+      const who = button(m.whoSpeaks, () => undefined)
+      tools.append(who)
+      const menu = new AddMenu(who, `speaker-menu-${index}`, id => void import("../engine/persistence/interviewImport.js").then(({ InterviewImport }) => this.editTranscript(next => {
+        next.segments[index].speaker = id
+        InterviewImport.dropUnheard(next)
+      })), id => `speaker-${index}-${id}`)
+      menu.setKinds(Object.keys(json.speakers ?? {}).map(id => ({
+        value: id,
+        label: this.speakerLabel(json, id),
+        ...(id === segment.speaker ? { disabledReason: this.speakerLabel(json, id) } : {})
+      })))
+    }
     const restorable = this.takenOut.has(`${index}:all`) || [...this.takenOut.keys()].some(key => key.startsWith(`${index}:`))
     if (segment.redacted || (segment.parts && restorable)) {
       const back = button(m.restoreAll, () => void this.restoreAll(index))
@@ -902,6 +965,143 @@ export class InterviewEditorElement extends HTMLElement {
     await this.showExchanges()
     const reader = this.shadow.getElementById("exchanges") as InterviewElement
     reader.revealSegment(index)
+  }
+
+  // -- Transcribing the recording (see TranscriptionProvider) ---------------------------------------------------------------------
+
+  /** What the last transcription came to, shown until another is asked for or another way is chosen. */
+  private transcribeOutcome?: { text: string, kind: "info" | "warning" | "error" }
+
+  /** The way chosen, its credit and key, and what it will do: send the recording, or download a model; nothing when there is no recording. */
+  private renderTranscribe(): void {
+    const m = this.messages
+    if (!m) return
+    const select = this.shadow.getElementById("transcribe-source") as HTMLSelectElement
+    if ([...select.options].map(option => option.value).join() !== TRANSCRIPTION_SOURCES.map(source => source.id).join()) {
+      select.replaceChildren(...TRANSCRIPTION_SOURCES.map(source => {
+        const option = new Option(source.name, source.id)
+        option.title = source.credit
+        return option
+      }))
+    }
+    const source = dataSourceById(TRANSCRIPTION_SOURCES, InterviewEditorElement.transcriptionSourceId)
+    select.value = source.id
+    const credit = this.shadow.getElementById("transcribe-credit") as HTMLAnchorElement
+    credit.href = source.creditUrl
+    credit.textContent = source.credit
+    this.shadow.getElementById("transcribe-key-row")!.hidden = !source.keyUrl
+    ;(this.shadow.getElementById("transcribe-key-get") as HTMLAnchorElement).href = source.keyUrl ?? ""
+    const key = this.field("transcribe-key")
+    if (key !== this.shadow.activeElement) key.value = SourceCredentials.of(source.id) ?? ""
+    if (this.transcribing) return
+    const recording = this.player?.recordingUrl()
+    ;(this.shadow.getElementById("transcribe-start") as HTMLButtonElement).disabled = !recording
+    const note = this.shadow.getElementById("transcribe-note")!
+    if (this.transcribeOutcome) {
+      MessageStyle.show(note, this.transcribeOutcome.text, this.transcribeOutcome.kind)
+      return
+    }
+    if (!recording) {
+      MessageStyle.show(note, m.transcribeNoRecording)
+      return
+    }
+    const provider = source.create()
+    const said = [provider.sendsAudio ? m.transcribeSends.replace("{name}", source.name) : m.transcribeLocal.replace("{mb}", String(Math.round((provider.downloadBytes ?? 0) / 1e6)))]
+    if ((this.drawn?.segments?.length ?? 0) > 0) said.push(m.transcribeReplaces)
+    // Sending a witness's words to someone else is said as a warning: everything else in the editor stays in the browser.
+    MessageStyle.show(note, said.join(" "), provider.sendsAudio ? "warning" : "info")
+  }
+
+  /** While a transcription runs: only Stop can be pressed. */
+  private showTranscribing(running: boolean): void {
+    ;(this.shadow.getElementById("transcribe-start") as HTMLButtonElement).disabled = running
+    this.shadow.getElementById("transcribe-stop")!.hidden = !running
+    ;(this.shadow.getElementById("transcribe-source") as HTMLSelectElement).disabled = running
+    this.field("transcribe-key").disabled = running
+    this.shadow.getElementById("transcribe-progress")!.hidden = !running
+  }
+
+  private showProgress(progress: TranscriptionProgress | "reading"): void {
+    const m = this.messages
+    const note = this.shadow.getElementById("transcribe-note")!
+    const bar = this.shadow.getElementById("transcribe-progress") as HTMLProgressElement
+    const mb = (bytes: number): string => String(Math.round(bytes / 1e6))
+    if (progress === "reading") {
+      bar.removeAttribute("value")
+      MessageStyle.show(note, m.transcribeReading)
+    } else if (progress.stage === "loading") {
+      if (progress.total) {
+        bar.max = progress.total
+        bar.value = progress.loaded
+        MessageStyle.show(note, m.transcribeLoading.replace("{loaded}", mb(progress.loaded)).replace("{total}", mb(progress.total)))
+      } else {
+        bar.removeAttribute("value")
+        MessageStyle.show(note, m.transcribeLoadingSoFar.replace("{loaded}", mb(progress.loaded)))
+      }
+    } else {
+      bar.max = progress.total
+      bar.value = progress.done
+      MessageStyle.show(note, m.transcribeProgress.replace("{done}", InterviewFile.clock(Math.round(progress.done))).replace("{total}", InterviewFile.clock(Math.round(progress.total))))
+    }
+  }
+
+  /**
+   * Transcribes the interview's first recording with the way chosen, and makes what was found the transcript, as an import does: every
+   * stretch given to a voice still to attribute (see InterviewImport.transcribed). What the editor holds changes only once it is all done.
+   */
+  private async transcribe(): Promise<void> {
+    const m = this.messages
+    const event = this.current
+    const recording = this.player?.recordingUrl()
+    if (!m || !event || !recording || this.transcribing || this.hasAttribute("readonly")) return
+    const source = dataSourceById(TRANSCRIPTION_SOURCES, InterviewEditorElement.transcriptionSourceId)
+    const provider = source.create()
+    const controller = this.transcribing = new AbortController()
+    this.transcribeOutcome = undefined
+    this.showTranscribing(true)
+    this.showProgress("reading")
+    try {
+      const [{ TranscriptionAudio }, { TranscriptionError }, { InterviewImport }] = await Promise.all([
+        import("../engine/transcription/TranscriptionAudio.js"),
+        import("../engine/transcription/TranscriptionError.js"),
+        import("../engine/persistence/interviewImport.js")
+      ])
+      const response = await fetch(recording, { signal: controller.signal })
+      if (!response.ok) throw new TranscriptionError("failed", `HTTP ${response.status}`)
+      if (Number(response.headers.get("content-length") ?? 0) > TranscriptionAudio.MAX_BYTES) throw new TranscriptionError("tooLarge")
+      const bytes = await response.arrayBuffer()
+      if (bytes.byteLength > TranscriptionAudio.MAX_BYTES) throw new TranscriptionError("tooLarge")
+      const samples = await TranscriptionAudio.decode(bytes).catch(() => { throw new TranscriptionError("failed", m.loadFailed) })
+      const language = this.drawn?.language ?? this.language
+      const found = await provider.transcribe({ samples, language, signal: controller.signal, progress: progress => this.showProgress(progress) })
+      const held = [event.interviewOf].flat().filter((id): id is string => typeof id === "string")
+      const json = InterviewImport.transcribed(found, {
+        by: (event.by ?? []).flatMap(agent => "people" in agent ? [agent.people] : []),
+        witnesses: this.options.filter(witness => held.length === 0 || held.includes(witness.id)).map(({ id, label }) => ({ id, label }))
+      })
+      if (!json) throw new TranscriptionError("failed", m.exchangesEmpty)
+      if (controller.signal.aborted || this.current !== event) throw new DOMException("Aborted", "AbortError")
+      // What was said, who said it and who proofread it are the transcription's now; the rest of the file (its recordings first) stays. What
+      // was taken out to anonymise the old text is not taken out of the new one, and is not said of it.
+      const { anonymization: _anonymization, ...kept } = await this.transcriptJson(event) ?? {}
+      await this.take({
+        ...kept,
+        ...json,
+        language,
+        transcription: { method: "automatic", engine: provider.engine, note: `Transcribed in UFO@home by ${provider.engine}: whose each voice is was not known, to be attributed, then proofread.` }
+      })
+      this.transcribeOutcome = { text: m.transcribeDone.replace("{engine}", source.name), kind: "info" }
+    } catch (error) {
+      const failure = error as { name?: string, code?: keyof InterviewMessages["transcribeErrors"], detail?: string, message?: string }
+      if (controller.signal.aborted || failure?.name === "AbortError") this.transcribeOutcome = { text: m.transcribeStopped, kind: "info" }
+      else if (failure?.name === "TranscriptionError" && failure.code) {
+        this.transcribeOutcome = { text: m.transcribeErrors[failure.code].replace("{detail}", failure.detail ?? ""), kind: "error" }
+      } else this.transcribeOutcome = { text: m.transcribeErrors.failed.replace("{detail}", String(failure?.message ?? error)), kind: "error" }
+    } finally {
+      this.transcribing = undefined
+      this.showTranscribing(false)
+      this.renderTranscribe()
+    }
   }
 
   private note(message: string | undefined, kind: "info" | "error" = "info"): void {

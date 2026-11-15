@@ -37,6 +37,10 @@ interface InterviewDocText {
   importFormats: ReadonlyArray<string>
   importSpeakers: string
   importLimits: string
+  transcribeHeading: string
+  transcribe: string
+  transcribeWays: ReadonlyArray<string>
+  transcribeVoices: string
   dataHeading: string
   data: string
   field: string
@@ -119,7 +123,7 @@ export class DocsInterviewPage extends DocsSection {
       fileRows: [
         ["version, id, language", "<code>1</code>; the interview's id; the language it was held in"],
         ["title, time, medium, by, interviewOf, summary", "The same as the event's"],
-        ["speakers", "Who speaks, by an id of your choice: <code>{ role, by?, title?, of? }</code>. <code>role</code> is <code>interviewer</code> or <code>witness</code>; <code>by</code> an agent for the interviewer; <code>title</code> what a witness is called (initials where unnamed) and <code>of</code> the observation they gave"],
+        ["speakers", "Who speaks, by an id of your choice: <code>{ role, by?, title?, of? }</code>. <code>role</code> is <code>interviewer</code>, <code>witness</code>, or <code>unattributed</code> for a voice a transcription found that nobody has named yet; <code>by</code> an agent for the interviewer; <code>title</code> what a witness is called (initials where unnamed) and <code>of</code> the observation they gave"],
         ["transcription", "How the text was obtained: <code>method</code> (<code>automatic</code> or <code>manual</code>), <code>engine</code>, and a free <code>note</code>"],
         ["proofreading", "Who approved it, by speaker (see below)"],
         ["anonymization", "What was replaced (<code>replaced</code>) and what stands in its place (<code>marker</code>)"],
@@ -155,6 +159,13 @@ export class DocsInterviewPage extends DocsSection {
       ],
       importSpeakers: "The names found are matched to the interview's: one that is among those who held it is an interviewer, one that is a witness of the case is that witness. Otherwise the first to speak is the interviewer and the others are witnesses; <code>Q</code> always asks and <code>R</code> or <code>A</code> always answers. All are <code>pending</code> approval, and the note says what file it came from.",
       importLimits: "It guesses, and says so: what it gets wrong is corrected in the File group. Word processor and PDF files are not read: save them as text first. A colon in a sentence is not taken for a speaker unless a name comes back often enough.",
+      transcribeHeading: "Transcribing the recording",
+      transcribe: "Once the interview has a recording (the <strong>Recordings</strong> button of the player), <strong>Transcribe the recording</strong>, at the top of the Exchanges group, makes its turns of speech, with their times. It replaces the transcript in place; the recordings, the title and the rest of the file stay. Two ways, chosen beside the button:",
+      transcribeWays: [
+        "<strong>Whisper, in your browser</strong> (the default): nothing leaves your computer. The first time, the model (Whisper large-v3-turbo, about 760 MB) is downloaded, then kept by the browser. On a recent computer with WebGPU it transcribes about six times faster than the recording plays (an hour and a half in about a quarter of an hour); without WebGPU it is much slower.",
+        "<strong>A service on your own key</strong> (Groq, OpenAI): faster, and the recording is <strong>sent</strong> to it, which the editor says before anything goes. The key is asked for beside the choice, kept in the page's memory until it is reloaded, and never stored."
+      ],
+      transcribeVoices: "A transcription does not know whose each voice is: every turn is given to a <em>voice to attribute</em> (role <code>unattributed</code>), never guessed to be the interviewer's or the witness's. The case's interviewers and witnesses are speakers already, and <strong>Who speaks…</strong> under each turn gives it to the right one; a voice nobody speaks with any more goes. A voice to attribute is not asked to proofread. The file says how it was made: <code>transcription.method</code> is <code>automatic</code> and <code>engine</code> names the model. Another way of transcribing can be added as a module (see <a href='/docs/modules/'>Modules</a>, point <code>transcription</code>).",
       dataHeading: "In code",
       data: "<code>@rr0/data</code> reads and writes the same files: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> for the event, <code>fromFileJson</code> / <code>toFileJson</code> for the file, and <code>proofread</code> says whether everyone approved. In UFO@home, <code>InterviewFile.toVtt</code> makes subtitles from a transcript, <code>InterviewFile.passagesAbout</code> lists the turns that tell of an observation, and <code>InterviewImport.parse</code> reads a foreign file.",
       field: "Field",
@@ -185,7 +196,7 @@ export class DocsInterviewPage extends DocsSection {
       fileRows: [
         ["version, id, language", "<code>1</code> ; l'id de l'interview ; la langue dans laquelle elle s'est tenue"],
         ["title, time, medium, by, interviewOf, summary", "Les mêmes que ceux de l'événement"],
-        ["speakers", "Qui parle, sous un id de votre choix : <code>{ role, by?, title?, of? }</code>. <code>role</code> vaut <code>interviewer</code> ou <code>witness</code> ; <code>by</code> est l'agent de l'enquêteur ; <code>title</code> comment on appelle un témoin (ses initiales s'il n'est pas nommé) et <code>of</code> l'observation qu'il a donnée"],
+        ["speakers", "Qui parle, sous un id de votre choix : <code>{ role, by?, title?, of? }</code>. <code>role</code> vaut <code>interviewer</code>, <code>witness</code>, ou <code>unattributed</code> pour une voix trouvée par une transcription que personne n'a encore nommée ; <code>by</code> est l'agent de l'enquêteur ; <code>title</code> comment on appelle un témoin (ses initiales s'il n'est pas nommé) et <code>of</code> l'observation qu'il a donnée"],
         ["transcription", "Comment le texte a été obtenu : <code>method</code> (<code>automatic</code> ou <code>manual</code>), <code>engine</code>, et une <code>note</code> libre"],
         ["proofreading", "Qui l'a approuvée, par locuteur (voir plus bas)"],
         ["anonymization", "Ce qui a été remplacé (<code>replaced</code>) et ce qui le remplace (<code>marker</code>)"],
@@ -221,6 +232,13 @@ export class DocsInterviewPage extends DocsSection {
       ],
       importSpeakers: "Les noms trouvés sont rapprochés de ceux de l'interview : un nom qui est parmi ceux qui l'ont menée est un enquêteur, un nom qui est un témoin du dossier est ce témoin. Sinon, le premier à parler est l'enquêteur et les autres sont des témoins ; <code>Q</code> interroge toujours et <code>R</code> ou <code>A</code> répond toujours. Tous sont en attente d'approbation (<code>pending</code>), et la note dit de quel fichier cela vient.",
       importLimits: "Il devine, et le dit : ce qu'il rate se corrige dans le groupe Fichier. Les fichiers de traitement de texte et les PDF ne sont pas lus : enregistrez-les d'abord en texte. Un deux-points dans une phrase n'est pas pris pour un locuteur tant qu'un nom ne revient pas assez souvent.",
+      transcribeHeading: "Transcrire l'enregistrement",
+      transcribe: "Une fois que l'interview a un enregistrement (bouton <strong>Enregistrements</strong> du lecteur), <strong>Transcrire l'enregistrement</strong>, en haut du groupe Échanges, en fait les tours de parole, avec leurs instants. La transcription est remplacée sur place ; les enregistrements, le titre et le reste du fichier restent. Deux façons, au choix à côté du bouton :",
+      transcribeWays: [
+        "<strong>Whisper, dans votre navigateur</strong> (par défaut) : rien ne quitte votre ordinateur. La première fois, le modèle (Whisper large-v3-turbo, environ 760 Mo) est téléchargé, puis gardé par le navigateur. Sur un ordinateur récent avec WebGPU, il transcrit environ six fois plus vite que l'enregistrement ne se joue (une heure et demie en un quart d'heure environ) ; sans WebGPU, c'est beaucoup plus lent.",
+        "<strong>Un service sur votre propre clé</strong> (Groq, OpenAI) : plus rapide, et l'enregistrement lui est <strong>envoyé</strong>, ce que l'éditeur dit avant que rien ne parte. La clé est demandée à côté du choix, gardée dans la mémoire de la page jusqu'à son rechargement, et jamais enregistrée."
+      ],
+      transcribeVoices: "Une transcription ne sait pas à qui est chaque voix : chaque tour est donné à une <em>voix à attribuer</em> (rôle <code>unattributed</code>), jamais supposée être celle de l'enquêteur ou du témoin. Les enquêteurs et les témoins du dossier sont déjà des locuteurs, et <strong>Qui parle…</strong>, sous chaque tour, le donne au bon ; une voix à qui plus aucun tour n'est donné disparaît. Une voix à attribuer n'a pas à relire. Le fichier dit comment il a été fait : <code>transcription.method</code> vaut <code>automatic</code> et <code>engine</code> nomme le modèle. Une autre façon de transcrire peut s'ajouter comme module (voir <a href='/docs/modules/'>Modules</a>, point <code>transcription</code>).",
       dataHeading: "En code",
       data: "<code>@rr0/data</code> lit et écrit les mêmes fichiers : <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> pour l'événement, <code>fromFileJson</code> / <code>toFileJson</code> pour le fichier, et <code>proofread</code> dit si tous ont approuvé. Dans UFO@home, <code>InterviewFile.toVtt</code> fait des sous-titres d'une transcription, <code>InterviewFile.passagesAbout</code> liste les tours qui racontent une observation, et <code>InterviewImport.parse</code> lit un fichier étranger.",
       field: "Champ",
@@ -251,7 +269,7 @@ export class DocsInterviewPage extends DocsSection {
       fileRows: [
         ["version, id, language", "<code>1</code>; el id de la entrevista; el idioma en que se celebró"],
         ["title, time, medium, by, interviewOf, summary", "Los mismos que los del evento"],
-        ["speakers", "Quién habla, con un id a tu elección: <code>{ role, by?, title?, of? }</code>. <code>role</code> es <code>interviewer</code> o <code>witness</code>; <code>by</code> el agente del entrevistador; <code>title</code> cómo se llama un testigo (sus iniciales si no se nombra) y <code>of</code> la observación que dio"],
+        ["speakers", "Quién habla, con un id a tu elección: <code>{ role, by?, title?, of? }</code>. <code>role</code> es <code>interviewer</code>, <code>witness</code>, o <code>unattributed</code> para una voz encontrada por una transcripción que nadie ha nombrado todavía; <code>by</code> el agente del entrevistador; <code>title</code> cómo se llama un testigo (sus iniciales si no se nombra) y <code>of</code> la observación que dio"],
         ["transcription", "Cómo se obtuvo el texto: <code>method</code> (<code>automatic</code> o <code>manual</code>), <code>engine</code> y una <code>note</code> libre"],
         ["proofreading", "Quién la aprobó, por hablante (véase más abajo)"],
         ["anonymization", "Lo que se sustituyó (<code>replaced</code>) y lo que ocupa su lugar (<code>marker</code>)"],
@@ -287,6 +305,13 @@ export class DocsInterviewPage extends DocsSection {
       ],
       importSpeakers: "Los nombres hallados se emparejan con los de la entrevista: uno que figura entre quienes la realizaron es un entrevistador, uno que es testigo del caso es ese testigo. Si no, el primero en hablar es el entrevistador y los demás testigos; <code>Q</code> siempre pregunta y <code>R</code> o <code>A</code> siempre responde. Todos quedan pendientes de aprobación (<code>pending</code>), y la nota dice de qué archivo procede.",
       importLimits: "Adivina, y lo dice: lo que falla se corrige en el grupo Archivo. Los archivos de procesador de texto y los PDF no se leen: guárdalos antes como texto. Unos dos puntos en una frase no se toman por un hablante mientras un nombre no se repita lo bastante.",
+      transcribeHeading: "Transcribir la grabación",
+      transcribe: "Cuando la entrevista tiene una grabación (botón <strong>Grabaciones</strong> del reproductor), <strong>Transcribir la grabación</strong>, en lo alto del grupo Intercambios, saca de ella los turnos de palabra, con sus tiempos. Reemplaza la transcripción en su sitio; las grabaciones, el título y el resto del archivo se quedan. Dos maneras, a elegir junto al botón:",
+      transcribeWays: [
+        "<strong>Whisper, en tu navegador</strong> (por defecto): nada sale de tu ordenador. La primera vez se descarga el modelo (Whisper large-v3-turbo, unos 760 MB), que el navegador conserva. En un ordenador reciente con WebGPU transcribe unas seis veces más rápido de lo que dura la grabación (hora y media en un cuarto de hora aproximadamente); sin WebGPU es mucho más lento.",
+        "<strong>Un servicio con tu propia clave</strong> (Groq, OpenAI): más rápido, y la grabación se le <strong>envía</strong>, lo que el editor dice antes de que nada salga. La clave se pide junto a la elección, se guarda en la memoria de la página hasta que se recarga y nunca se almacena."
+      ],
+      transcribeVoices: "Una transcripción no sabe de quién es cada voz: cada turno se da a una <em>voz por atribuir</em> (rol <code>unattributed</code>), nunca se supone que sea la del entrevistador o la del testigo. Los entrevistadores y los testigos del caso ya son hablantes, y <strong>Quién habla…</strong>, bajo cada turno, lo da al correcto; una voz a la que ya no se da ningún turno desaparece. A una voz por atribuir no se le pide revisar. El archivo dice cómo se hizo: <code>transcription.method</code> es <code>automatic</code> y <code>engine</code> nombra el modelo. Otra manera de transcribir puede añadirse como módulo (ver <a href='/docs/modules/'>Módulos</a>, punto <code>transcription</code>).",
       dataHeading: "En código",
       data: "<code>@rr0/data</code> lee y escribe los mismos archivos: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> para el evento, <code>fromFileJson</code> / <code>toFileJson</code> para el archivo, y <code>proofread</code> dice si todos aprobaron. En UFO@home, <code>InterviewFile.toVtt</code> hace subtítulos de una transcripción, <code>InterviewFile.passagesAbout</code> enumera los turnos que cuentan una observación e <code>InterviewImport.parse</code> lee un archivo ajeno.",
       field: "Campo",
@@ -317,7 +342,7 @@ export class DocsInterviewPage extends DocsSection {
       fileRows: [
         ["version, id, language", "<code>1</code>; l'id dell'intervista; la lingua in cui si è tenuta"],
         ["title, time, medium, by, interviewOf, summary", "Gli stessi dell'evento"],
-        ["speakers", "Chi parla, con un id a scelta: <code>{ role, by?, title?, of? }</code>. <code>role</code> è <code>interviewer</code> o <code>witness</code>; <code>by</code> l'agente dell'intervistatore; <code>title</code> come si chiama un testimone (le iniziali se non è nominato) e <code>of</code> l'osservazione che ha dato"],
+        ["speakers", "Chi parla, con un id a scelta: <code>{ role, by?, title?, of? }</code>. <code>role</code> è <code>interviewer</code>, <code>witness</code>, o <code>unattributed</code> per una voce trovata da una trascrizione che nessuno ha ancora nominato; <code>by</code> l'agente dell'intervistatore; <code>title</code> come si chiama un testimone (le iniziali se non è nominato) e <code>of</code> l'osservazione che ha dato"],
         ["transcription", "Come è stato ottenuto il testo: <code>method</code> (<code>automatic</code> o <code>manual</code>), <code>engine</code> e una <code>note</code> libera"],
         ["proofreading", "Chi l'ha approvata, per parlante (vedi sotto)"],
         ["anonymization", "Ciò che è stato sostituito (<code>replaced</code>) e ciò che ne prende il posto (<code>marker</code>)"],
@@ -353,6 +378,13 @@ export class DocsInterviewPage extends DocsSection {
       ],
       importSpeakers: "I nomi trovati vengono abbinati a quelli dell'intervista: uno tra chi l'ha condotta è un intervistatore, uno che è testimone del caso è quel testimone. Altrimenti il primo a parlare è l'intervistatore e gli altri testimoni; <code>Q</code> chiede sempre e <code>R</code> o <code>A</code> risponde sempre. Tutti restano in attesa di approvazione (<code>pending</code>), e la nota dice da quale file proviene.",
       importLimits: "Tira a indovinare, e lo dice: ciò che sbaglia si corregge nel gruppo File. I file di elaboratori di testo e i PDF non vengono letti: salvali prima come testo. Due punti in una frase non sono presi per un parlante finché un nome non ritorna abbastanza spesso.",
+      transcribeHeading: "Trascrivere la registrazione",
+      transcribe: "Quando l'intervista ha una registrazione (pulsante <strong>Registrazioni</strong> del lettore), <strong>Trascrivi la registrazione</strong>, in cima al gruppo Scambi, ne ricava i turni di parola, con i loro tempi. La trascrizione viene sostituita sul posto; le registrazioni, il titolo e il resto del file restano. Due modi, da scegliere accanto al pulsante:",
+      transcribeWays: [
+        "<strong>Whisper, nel tuo browser</strong> (predefinito): nulla lascia il tuo computer. La prima volta il modello (Whisper large-v3-turbo, circa 760 MB) viene scaricato e poi conservato dal browser. Su un computer recente con WebGPU trascrive circa sei volte più veloce della durata della registrazione (un'ora e mezza in circa un quarto d'ora); senza WebGPU è molto più lento.",
+        "<strong>Un servizio con la tua chiave</strong> (Groq, OpenAI): più veloce, e la registrazione gli viene <strong>inviata</strong>, cosa che l'editor dice prima che parta qualsiasi cosa. La chiave viene chiesta accanto alla scelta, tenuta nella memoria della pagina fino al ricaricamento e mai salvata."
+      ],
+      transcribeVoices: "Una trascrizione non sa di chi sia ogni voce: ogni turno è dato a una <em>voce da attribuire</em> (ruolo <code>unattributed</code>), mai supposta essere quella dell'intervistatore o del testimone. Gli intervistatori e i testimoni del caso sono già parlanti, e <strong>Chi parla…</strong>, sotto ogni turno, lo dà a quello giusto; una voce a cui non è più dato alcun turno scompare. A una voce da attribuire non si chiede di rileggere. Il file dice come è stato fatto: <code>transcription.method</code> è <code>automatic</code> e <code>engine</code> nomina il modello. Un altro modo di trascrivere può aggiungersi come modulo (vedi <a href='/docs/modules/'>Moduli</a>, punto <code>transcription</code>).",
       dataHeading: "Nel codice",
       data: "<code>@rr0/data</code> legge e scrive gli stessi file: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> per l'evento, <code>fromFileJson</code> / <code>toFileJson</code> per il file, e <code>proofread</code> dice se tutti hanno approvato. In UFO@home, <code>InterviewFile.toVtt</code> ricava sottotitoli da una trascrizione, <code>InterviewFile.passagesAbout</code> elenca i turni che raccontano un'osservazione e <code>InterviewImport.parse</code> legge un file altrui.",
       field: "Campo",
@@ -515,6 +547,13 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
     </ul>
     <p>${t.importSpeakers}</p>
     <p>${t.importLimits}</p>
+
+    <h2>${t.transcribeHeading}</h2>
+    <p>${t.transcribe}</p>
+    <ul>
+      ${t.transcribeWays.map(way => `<li>${way}</li>`).join("\n      ")}
+    </ul>
+    <p>${t.transcribeVoices}</p>
 
     <h2>${t.techHeading}</h2>
     <p>${t.techIntro}</p>

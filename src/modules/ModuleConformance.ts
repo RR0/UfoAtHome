@@ -64,7 +64,8 @@ export class ModuleConformance {
     decorModels: ["attribution", "entries", "entry"],
     skyEvents: ["key", "messages", "simulation"],
     interpretations: ["key", "messages", "bodiesOf"],
-    perception: ["id", "messages", "sources", "settings", "perceive"]
+    perception: ["id", "messages", "sources", "settings", "perceive"],
+    transcription: ["sendsAudio", "engine", "transcribe"]
   }
 
   /** The fields of a weather that go from 0 to 1, when they are there. */

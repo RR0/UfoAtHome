@@ -1,4 +1,6 @@
 import type { InterviewJson, InterviewSegment, InterviewSpeaker } from "./interviewJson.js"
+import { InterviewFile } from "./interviewJson.js"
+import type { TranscribedSegment } from "../transcription/TranscriptionProvider.js"
 
 /** What the file being read is about, when the case already says: who held the interview, and with whom. */
 export interface InterviewImportHints {
@@ -35,6 +37,53 @@ export class InterviewImport {
     if (!match) return undefined
     const [, h, m, s, fraction] = match
     return Number(h ?? 0) * 3600 + Number(m) * 60 + Number(s) + (fraction ? Number(`0.${fraction}`) : 0)
+  }
+
+  /** The role of a voice a transcription found but nobody has said whose it is yet. */
+  static readonly UNATTRIBUTED = InterviewFile.UNATTRIBUTED
+
+  /**
+   * The interview a transcription of its recording found (see TranscriptionProvider). Whose each voice is, a transcription does not know:
+   * every stretch is given to a voice still to attribute (one per voice the service told apart, else one for all), never guessed to be the
+   * interviewer's or the witness's. Those who held it (`hints.by`) and the witnesses it was held with (`hints.witnesses`) are speakers already,
+   * for each stretch to be given to the right one; a voice nobody speaks with any more is then dropped (see InterviewImport.dropUnheard).
+   */
+  static transcribed(found: TranscribedSegment[], hints: InterviewImportHints = {}): InterviewJson | undefined {
+    const said = found.filter(segment => segment.text.trim() !== "")
+    if (said.length === 0) return undefined
+    const speakers: Record<string, InterviewSpeaker> = {}
+    hints.by?.forEach((person, n) => { speakers[n === 0 ? "interviewer" : `interviewer${n + 1}`] = { role: "interviewer", by: { people: person } } })
+    hints.witnesses?.forEach((witness, n) => { speakers[n === 0 ? "witness" : `witness${n + 1}`] = { role: "witness", title: witness.label, of: witness.id } })
+    const voices = new Map<string, string>()
+    const voiceOf = (label: string | undefined): string => {
+      const key = label ?? ""
+      let id = voices.get(key)
+      if (id === undefined) {
+        id = voices.size === 0 ? "voice" : `voice${voices.size + 1}`
+        voices.set(key, id)
+        speakers[id] = { role: InterviewImport.UNATTRIBUTED, ...(label ? { title: label } : {}) }
+      }
+      return id
+    }
+    const segments: InterviewSegment[] = said.map(segment => ({
+      speaker: voiceOf(segment.speaker),
+      start: Math.round(segment.start * 100) / 100,
+      end: Math.round(Math.max(segment.start, segment.end) * 100) / 100,
+      text: segment.text.trim().replace(/\s+/g, " ")
+    }))
+    // A voice nobody has named cannot proofread: those it turns out to be will.
+    const proofreading = Object.fromEntries(Object.entries(speakers).filter(([, speaker]) => speaker.role !== InterviewImport.UNATTRIBUTED).map(([id]) => [id, { status: "pending" as const }]))
+    return { version: 1, speakers, proofreading, segments }
+  }
+
+  /** Drops from `json` the voices still to attribute that no stretch is given to any more, and what is said of their proofreading. */
+  static dropUnheard(json: InterviewJson): void {
+    const heard = new Set(json.segments.map(segment => segment.speaker))
+    for (const [id, speaker] of Object.entries(json.speakers)) {
+      if (speaker.role !== InterviewImport.UNATTRIBUTED || heard.has(id)) continue
+      delete json.speakers[id]
+      if (json.proofreading) delete json.proofreading[id]
+    }
   }
 
   /** The interview a file holds, or undefined when it holds nothing that reads as one. */

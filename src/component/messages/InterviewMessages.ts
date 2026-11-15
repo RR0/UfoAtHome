@@ -63,7 +63,42 @@ export interface InterviewMessages extends InputFileMessages {
   noMoments: string
   /** Why a passage taken out in the editor was: the reason it is given. */
   redactReason: string
-  roles: { interviewer: string, interviewee: string, witness: string }
+  /** `unattributed`: a voice a transcription found, whose it is not said yet. */
+  roles: { interviewer: string, interviewee: string, witness: string, unattributed: string }
+  /** The button that transcribes the interview's recording (see TranscriptionProvider). */
+  transcribe: string
+  /** The picker of what transcribes it. */
+  transcribeWith: string
+  /** What `transcribe` does, in its (?). */
+  transcribeHint: string
+  /** Said of a transcription run in the reader's browser: `{mb}`, what its first use downloads. */
+  transcribeLocal: string
+  /** Said of a service the recording is sent to: `{name}`. */
+  transcribeSends: string
+  /** Said when the interview already has a transcript, which a transcription replaces. */
+  transcribeReplaces: string
+  /** Said when there is no recording to transcribe. */
+  transcribeNoRecording: string
+  transcribeKey: string
+  transcribeKeyGet: string
+  /** That a key typed is kept in memory only. */
+  transcribeKeyHint: string
+  /** While the recording is decoded. */
+  transcribeReading: string
+  /** While the model downloads: `{loaded}` and `{total}`, in MB. */
+  transcribeLoading: string
+  /** While the model downloads, its size unknown: `{loaded}` MB. */
+  transcribeLoadingSoFar: string
+  /** While it transcribes: `{done}` and `{total}`, as times of the recording. */
+  transcribeProgress: string
+  transcribeStop: string
+  /** Once done: `{engine}`. */
+  transcribeDone: string
+  transcribeStopped: string
+  /** Why it did not happen (see TranscriptionError): `failed` says `{detail}`. */
+  transcribeErrors: { noKey: string, key: string, rateLimited: string, tooLarge: string, unsupported: string, failed: string }
+  /** The turn tool that gives a turn to another speaker. */
+  whoSpeaks: string
   importFile: string
   /** What `importFile` leaves out, in its (?). */
   importFileHint: string

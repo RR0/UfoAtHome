@@ -190,6 +190,12 @@ export class InterviewPlayer {
     this.play.disabled = false
   }
 
+  /** Where the first recording can be read from (a file picked from the disk included), what a transcription reads; undefined when there is none. */
+  recordingUrl(): string | undefined {
+    const first = this.recordings[0]
+    return first && first.src !== "" ? this.urlOf(first.src) : undefined
+  }
+
   private urlOf(src: string): string {
     const picked = this.picked.get(src)
     if (picked) return picked
