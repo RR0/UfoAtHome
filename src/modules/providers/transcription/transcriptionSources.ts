@@ -6,11 +6,13 @@ import { LazyTranscriptionProvider } from "../../../engine/transcription/LazyTra
 
 const GROQ_ID = "groq"
 const OPENAI_ID = "openai"
+const ASSEMBLYAI_ID = "assemblyai"
 
 /**
  * Everything the interview editor can transcribe a recording with. The first, Whisper in the reader's own browser, is the default: it
  * sends nothing anywhere, as the editor promises of everything else. The others are services the reader holds a key to (see
- * DataSource.keyUrl, SourceCredentials), to which the recording is sent: faster, and the editor says so before anything goes.
+ * DataSource.keyUrl, SourceCredentials), to which the recording is sent: faster, and the editor says so before anything goes. AssemblyAI is
+ * the one that tells the voices apart, so that who each one is is said once per voice rather than once per turn.
  */
 export const TRANSCRIPTION_SOURCES: DataSource<TranscriptionProvider>[] = ModuleRegistry.point("transcription").provide(ModuleRegistry.BUILT_IN, [
   {
@@ -45,6 +47,18 @@ export const TRANSCRIPTION_SOURCES: DataSource<TranscriptionProvider>[] = Module
         base: "https://api.openai.com/v1",
         model: "whisper-1",
         key: () => SourceCredentials.of(OPENAI_ID)
+      }))
+  },
+  {
+    id: ASSEMBLYAI_ID,
+    name: "AssemblyAI",
+    credit: "AssemblyAI, voices told apart, on your own key",
+    creditUrl: "https://www.assemblyai.com/legal/terms-of-service",
+    keyUrl: "https://www.assemblyai.com/app/api-keys",
+    create: () => new LazyTranscriptionProvider(true, "AssemblyAI (speaker labels)",
+      async () => new (await import("./AssemblyAiTranscriptionProvider.js")).AssemblyAiTranscriptionProvider({
+        base: "https://api.assemblyai.com",
+        key: () => SourceCredentials.of(ASSEMBLYAI_ID)
       }))
   }
 ])

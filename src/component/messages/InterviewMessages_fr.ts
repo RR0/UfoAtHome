@@ -75,6 +75,8 @@ export const interviewMessages_fr: InterviewMessages = {
   transcribeReading: "Lecture de l'enregistrement…",
   transcribeLoading: "Téléchargement du modèle : {loaded} sur {total} Mo",
   transcribeLoadingSoFar: "Téléchargement du modèle : {loaded} Mo",
+  transcribeSending: "Envoi de l'enregistrement à {name}…",
+  transcribeWaiting: "{name} transcrit l'enregistrement…",
   transcribeProgress: "Transcription : {done} sur {total}",
   transcribeStop: "Arrêter",
   transcribeDone: "Transcrit par {engine}. Dites à qui est chaque voix (Qui parle), puis faites relire.",
@@ -87,5 +89,6 @@ export const interviewMessages_fr: InterviewMessages = {
     unsupported: "Ce navigateur ne peut pas faire tourner la transcription.",
     failed: "La transcription a échoué : {detail}"
   },
+  voiceNamed: "Voix {name}",
   whoSpeaks: "Qui parle…"
 }

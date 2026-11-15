@@ -647,6 +647,8 @@ export class InterviewEditorElement extends HTMLElement {
   private speakerLabel(json: InterviewJson, id: string): string {
     const name = InterviewFile.speakerName(json, id)
     const role = json.speakers?.[id]?.role
+    // A voice a service told apart is called as it called it: "Voice A", until it is said whose it is.
+    if (role === InterviewFile.UNATTRIBUTED && json.speakers[id].title) return this.messages.voiceNamed.replace("{name}", name)
     return name === role && role in this.messages.roles ? this.messages.roles[role as keyof InterviewMessages["roles"]] : name
   }
 
@@ -768,13 +770,13 @@ export class InterviewEditorElement extends HTMLElement {
         : [{ value: "", label: m.noMoments, disabledReason: m.noMoments }])
     }
     if (!segment.redacted) tools.append(button(m.editTurn, () => this.editTurn(index)))
-    // Whose voice it is: what a transcription leaves to say, turn by turn (see InterviewImport.transcribed), and what an import may get wrong.
+    // Whose voice it is: what a transcription leaves to say, once per voice a service told apart, else turn by turn (see
+    // InterviewImport.attribute), and what an import may get wrong.
     if (!segment.redacted && !this.hasAttribute("readonly")) {
       const who = button(m.whoSpeaks, () => undefined)
       tools.append(who)
       const menu = new AddMenu(who, `speaker-menu-${index}`, id => void import("../engine/persistence/interviewImport.js").then(({ InterviewImport }) => this.editTranscript(next => {
-        next.segments[index].speaker = id
-        InterviewImport.dropUnheard(next)
+        InterviewImport.attribute(next, index, id)
       })), id => `speaker-${index}-${id}`)
       menu.setKinds(Object.keys(json.speakers ?? {}).map(id => ({
         value: id,
@@ -1038,6 +1040,10 @@ export class InterviewEditorElement extends HTMLElement {
         bar.removeAttribute("value")
         MessageStyle.show(note, m.transcribeLoadingSoFar.replace("{loaded}", mb(progress.loaded)))
       }
+    } else if (progress.stage === "sending" || progress.stage === "waiting") {
+      bar.removeAttribute("value")
+      const name = dataSourceById(TRANSCRIPTION_SOURCES, InterviewEditorElement.transcriptionSourceId).name
+      MessageStyle.show(note, (progress.stage === "sending" ? m.transcribeSending : m.transcribeWaiting).replace("{name}", name))
     } else {
       bar.max = progress.total
       bar.value = progress.done

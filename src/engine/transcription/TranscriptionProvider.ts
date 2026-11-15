@@ -11,6 +11,10 @@ export interface TranscribedSegment {
 export type TranscriptionProgress =
   /** Downloading what it needs the first time (a model): bytes so far out of `total`, when known. */
   | { stage: "loading", loaded: number, total?: number }
+  /** Sending the recording to a service, which tells nothing of how far it got. */
+  | { stage: "sending" }
+  /** A service transcribing what it was sent, while the page waits without knowing how far it got. */
+  | { stage: "waiting" }
   /** Transcribing: seconds of the recording done out of `total`. */
   | { stage: "transcribing", done: number, total: number }
 

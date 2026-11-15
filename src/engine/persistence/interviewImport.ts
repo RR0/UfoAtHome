@@ -76,6 +76,20 @@ export class InterviewImport {
     return { version: 1, speakers, proofreading, segments }
   }
 
+  /**
+   * Gives the turn at `index` to the speaker `id`. When it was a voice a service told apart (an unattributed voice it named, "A"), every
+   * turn of that voice goes with it: the service heard them as one person, and saying who once is enough. A voice nobody told apart
+   * (Whisper's, which holds every turn) is said turn by turn. A voice left with no turn is then dropped.
+   */
+  static attribute(json: InterviewJson, index: number, id: string): void {
+    const from = json.segments[index]?.speaker
+    if (from === undefined) return
+    const voice = json.speakers[from]
+    const whole = voice?.role === InterviewImport.UNATTRIBUTED && voice.title !== undefined
+    json.segments.forEach((segment, n) => { if (n === index || (whole && segment.speaker === from)) segment.speaker = id })
+    InterviewImport.dropUnheard(json)
+  }
+
   /** Drops from `json` the voices still to attribute that no stretch is given to any more, and what is said of their proofreading. */
   static dropUnheard(json: InterviewJson): void {
     const heard = new Set(json.segments.map(segment => segment.speaker))

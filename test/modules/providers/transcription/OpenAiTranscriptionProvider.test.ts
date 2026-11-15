@@ -68,7 +68,7 @@ describe("OpenAiTranscriptionProvider", () => {
 describe("TRANSCRIPTION_SOURCES", () => {
   it("offers Whisper in the browser first, which sends nothing, then services on the reader's own key, which send the recording", () => {
     const providers = TRANSCRIPTION_SOURCES.map(source => [source.id, source.create().sendsAudio, Boolean(source.keyUrl)])
-    expect(providers).toEqual([["whisper-browser", false, false], ["groq", true, true], ["openai", true, true]])
+    expect(providers).toEqual([["whisper-browser", false, false], ["groq", true, true], ["openai", true, true], ["assemblyai", true, true]])
     expect(TRANSCRIPTION_SOURCES[0].create().downloadBytes).toBeGreaterThan(0)
   })
 

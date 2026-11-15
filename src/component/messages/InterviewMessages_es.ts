@@ -75,6 +75,8 @@ export const interviewMessages_es: InterviewMessages = {
   transcribeReading: "Leyendo la grabación…",
   transcribeLoading: "Descargando el modelo: {loaded} de {total} MB",
   transcribeLoadingSoFar: "Descargando el modelo: {loaded} MB",
+  transcribeSending: "Enviando la grabación a {name}…",
+  transcribeWaiting: "{name} transcribe la grabación…",
   transcribeProgress: "Transcribiendo: {done} de {total}",
   transcribeStop: "Detener",
   transcribeDone: "Transcrito por {engine}. Indique de quién es cada voz (Quién habla) y luego hágalo revisar.",
@@ -87,5 +89,6 @@ export const interviewMessages_es: InterviewMessages = {
     unsupported: "Este navegador no puede ejecutar la transcripción.",
     failed: "La transcripción ha fallado: {detail}"
   },
+  voiceNamed: "Voz {name}",
   whoSpeaks: "Quién habla…"
 }

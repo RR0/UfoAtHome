@@ -75,6 +75,8 @@ export const interviewMessages_en: InterviewMessages = {
   transcribeReading: "Reading the recording…",
   transcribeLoading: "Downloading the model: {loaded} of {total} MB",
   transcribeLoadingSoFar: "Downloading the model: {loaded} MB",
+  transcribeSending: "Sending the recording to {name}…",
+  transcribeWaiting: "{name} is transcribing the recording…",
   transcribeProgress: "Transcribing: {done} of {total}",
   transcribeStop: "Stop",
   transcribeDone: "Transcribed by {engine}. Say whose each voice is (Who speaks), then have it proofread.",
@@ -87,5 +89,6 @@ export const interviewMessages_en: InterviewMessages = {
     unsupported: "This browser cannot run the transcription.",
     failed: "The transcription failed: {detail}"
   },
+  voiceNamed: "Voice {name}",
   whoSpeaks: "Who speaks…"
 }

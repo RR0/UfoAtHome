@@ -105,4 +105,16 @@ describe("InterviewImport", () => {
     expect(Object.keys(json.speakers)).toEqual(["interviewer", "witness"])
     expect(Object.keys(json.proofreading!)).toEqual(["interviewer", "witness"])
   })
+
+  it("gives every turn of a voice a service told apart at once, and a voice nobody told apart turn by turn", () => {
+    const told = InterviewImport.transcribed([
+      { start: 0, end: 1, text: "Q?", speaker: "A" }, { start: 1, end: 2, text: "R.", speaker: "B" }, { start: 2, end: 3, text: "Q2?", speaker: "A" }
+    ], { by: ["BeauJerome"], witnesses: [{ id: "qb", label: "Q. B." }] })!
+    InterviewImport.attribute(told, 0, "interviewer")
+    expect(told.segments.map(segment => segment.speaker)).toEqual(["interviewer", "voice2", "interviewer"])
+    expect(told.speakers.voice).toBeUndefined()
+    const one = InterviewImport.transcribed([{ start: 0, end: 1, text: "Q?" }, { start: 1, end: 2, text: "R." }], { by: ["BeauJerome"] })!
+    InterviewImport.attribute(one, 0, "interviewer")
+    expect(one.segments.map(segment => segment.speaker)).toEqual(["interviewer", "voice"])
+  })
 })

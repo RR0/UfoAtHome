@@ -90,6 +90,8 @@ export interface InterviewMessages extends InputFileMessages {
   /** While the model downloads, its size unknown: `{loaded}` MB. */
   transcribeLoadingSoFar: string
   /** While it transcribes: `{done}` and `{total}`, as times of the recording. */
+  transcribeSending: string
+  transcribeWaiting: string
   transcribeProgress: string
   transcribeStop: string
   /** Once done: `{engine}`. */
@@ -98,6 +100,7 @@ export interface InterviewMessages extends InputFileMessages {
   /** Why it did not happen (see TranscriptionError): `failed` says `{detail}`. */
   transcribeErrors: { noKey: string, key: string, rateLimited: string, tooLarge: string, unsupported: string, failed: string }
   /** The turn tool that gives a turn to another speaker. */
+  voiceNamed: string
   whoSpeaks: string
   importFile: string
   /** What `importFile` leaves out, in its (?). */

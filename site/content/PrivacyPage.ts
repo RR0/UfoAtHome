@@ -160,6 +160,16 @@ export class PrivacyPage implements SitePage {
       }
     },
     {
+      name: "AssemblyAI", host: "api.assemblyai.com",
+      where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
+      why: {
+        en: "Only when you choose it to transcribe an interview: the interview's recording, with your own key. The transcript is deleted from it once read.",
+        fr: "Seulement quand vous le choisissez pour transcrire une interview : l'enregistrement de l'interview, avec votre propre clé. La transcription y est effacée une fois lue.",
+        es: "Solo cuando lo eliges para transcribir una entrevista: la grabación de la entrevista, con tu propia clave. La transcripción se borra allí una vez leída.",
+        it: "Solo quando lo scegli per trascrivere un'intervista: la registrazione dell'intervista, con la tua chiave. La trascrizione vi viene cancellata una volta letta."
+      }
+    },
+    {
       name: "Anthropic (Claude)", host: "api.anthropic.com",
       where: { en: "United States", fr: "États-Unis", es: "Estados Unidos", it: "Stati Uniti" },
       why: {
