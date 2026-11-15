@@ -139,7 +139,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Event</th><th>Fires</th><th>Where to listen</th></tr>
       <tr><td><code>ended</code></td><td>Once, when playback runs off the end without looping. Not on a pause, and not on a scrub to the end</td><td>Anywhere: it bubbles and is <i lang="en">composed</i>, so it crosses out of <code>&lt;rr0-scene&gt;</code> and <code>&lt;rr0-sighting&gt;</code> and reaches the element you put on the page. This is how you play several recordings in turn</td></tr>
       <tr><td><code>timedisplaychange</code></td><td>When the counters switch between clock time and elapsed time</td><td>Anywhere, same as above</td></tr>
-      <tr><td><code>timeupdate</code></td><td>Every playback tick and every seek, with <code>detail.time</code></td><td>On this element only. It neither bubbles nor is composed, so a page holding an <code>&lt;rr0-scene&gt;</code> has to reach its <code>ufoElement</code> — it is meant for the elements composing this one</td></tr>
+      <tr><td><code>timeupdate</code></td><td>Every playback tick and every seek, with <code>detail.time</code></td><td>On this element only. It neither bubbles nor is composed, so a page holding an <code>&lt;rr0-scene&gt;</code> has to reach its <code>ufoElement</code> — it is meant for the elements that contain this one</td></tr>
     </table>
     </div>`,
       fr: `<div class="table-scroll">
@@ -147,7 +147,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
       <tr><td><code>ended</code></td><td>Une fois, quand la lecture atteint la fin sans boucler. Ni à la pause, ni à un déplacement manuel jusqu'à la fin</td><td>N'importe où : il est <i lang="en">bubbling</i> et <i lang="en">composed</i>, donc il sort de <code>&lt;rr0-scene&gt;</code> et de <code>&lt;rr0-sighting&gt;</code> et atteint l'élément que vous avez posé sur la page. C'est ainsi qu'on enchaîne plusieurs enregistrements</td></tr>
       <tr><td><code>timedisplaychange</code></td><td>Quand les compteurs basculent entre heure et temps écoulé</td><td>N'importe où, comme ci-dessus</td></tr>
-      <tr><td><code>timeupdate</code></td><td>À chaque image de lecture et à chaque déplacement, avec <code>detail.time</code></td><td>Sur cet élément seulement. Il n'est ni <i lang="en">bubbling</i> ni <i lang="en">composed</i> : une page qui tient un <code>&lt;rr0-scene&gt;</code> doit passer par son <code>ufoElement</code> — il est destiné aux éléments qui composent celui-ci</td></tr>
+      <tr><td><code>timeupdate</code></td><td>À chaque image de lecture et à chaque déplacement, avec <code>detail.time</code></td><td>Sur cet élément seulement. Il n'est ni <i lang="en">bubbling</i> ni <i lang="en">composed</i> : une page qui tient un <code>&lt;rr0-scene&gt;</code> doit passer par son <code>ufoElement</code> — il est destiné aux éléments qui contiennent celui-ci</td></tr>
     </table>
     </div>`,
       es: `<div class="table-scroll">
@@ -155,7 +155,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Evento</th><th>Cuándo</th><th>Dónde escucharlo</th></tr>
       <tr><td><code>ended</code></td><td>Una vez, cuando la reproducción llega al final sin repetirse en bucle. No al pausar, ni al arrastrar hasta el final</td><td>En cualquier parte: es <i lang="en">bubbling</i> y <i lang="en">composed</i>, así que sale de <code>&lt;rr0-scene&gt;</code> y de <code>&lt;rr0-sighting&gt;</code> y llega al elemento que pusiste en la página. Así se reproducen varias grabaciones una tras otra</td></tr>
       <tr><td><code>timedisplaychange</code></td><td>Cuando los contadores cambian entre la hora del reloj y el tiempo transcurrido</td><td>En cualquier parte, igual que arriba</td></tr>
-      <tr><td><code>timeupdate</code></td><td>En cada paso de la reproducción y en cada salto, con <code>detail.time</code></td><td>Solo en este elemento. No es <i lang="en">bubbling</i> ni <i lang="en">composed</i>, así que una página que contiene un <code>&lt;rr0-scene&gt;</code> tiene que llegar a su <code>ufoElement</code> — está pensado para los elementos que componen este</td></tr>
+      <tr><td><code>timeupdate</code></td><td>En cada paso de la reproducción y en cada salto, con <code>detail.time</code></td><td>Solo en este elemento. No es <i lang="en">bubbling</i> ni <i lang="en">composed</i>, así que una página que contiene un <code>&lt;rr0-scene&gt;</code> tiene que llegar a su <code>ufoElement</code> — está pensado para los elementos que lo contienen</td></tr>
     </table>
     </div>`,
       it: `<div class="table-scroll">
@@ -163,7 +163,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><th>Evento</th><th>Quando</th><th>Dove ascoltarlo</th></tr>
       <tr><td><code>ended</code></td><td>Una volta, quando la riproduzione arriva alla fine senza ripartire in loop. Non a una pausa, né trascinando fino alla fine</td><td>Ovunque: è <i lang="en">bubbling</i> e <i lang="en">composed</i>, quindi esce da <code>&lt;rr0-scene&gt;</code> e da <code>&lt;rr0-sighting&gt;</code> e raggiunge l'elemento che hai messo nella pagina. È così che si riproducono più registrazioni una dopo l'altra</td></tr>
       <tr><td><code>timedisplaychange</code></td><td>Quando i contatori passano dall'ora dell'orologio al tempo trascorso, o viceversa</td><td>Ovunque, come sopra</td></tr>
-      <tr><td><code>timeupdate</code></td><td>A ogni passo della riproduzione e a ogni salto, con <code>detail.time</code></td><td>Solo su questo elemento. Non è né <i lang="en">bubbling</i> né <i lang="en">composed</i>, quindi una pagina che contiene un <code>&lt;rr0-scene&gt;</code> deve passare dal suo <code>ufoElement</code> — è pensato per gli elementi che compongono questo</td></tr>
+      <tr><td><code>timeupdate</code></td><td>A ogni passo della riproduzione e a ogni salto, con <code>detail.time</code></td><td>Solo su questo elemento. Non è né <i lang="en">bubbling</i> né <i lang="en">composed</i>, quindi una pagina che contiene un <code>&lt;rr0-scene&gt;</code> deve passare dal suo <code>ufoElement</code> — è pensato per gli elementi che lo contengono</td></tr>
     </table>
     </div>`
     },
@@ -238,8 +238,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>toggleMilestones()</code></td><td>method</td><td>What that button does</td></tr>
     </table>
     </div>
-    <p>Those two are the only <em>positive</em> and <em>negative</em> defaults this element has, and
-      the difference is deliberate. A recording's named moments are its own words about itself, so
+    <p>The named moments and the map are the only two things this element shows or hides by default
+      (the moments shown, the map hidden), and the difference is deliberate. A recording's named moments are its own words about itself, so
       they show wherever they exist; the map costs tile requests to a third party the first time it
       opens, which is not a page's to spend on a reader's behalf without saying so. Either way the
       reader keeps both buttons, beside the fullscreen one — a page setting a default is not a page
@@ -256,9 +256,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>La forme dessinée par un témoin, debout dans le ciel, l'horizon, la météo et le sol réels de
-      la date, de l'heure et du lieu de l'enregistrement, cachée par ce qui se tenait devant — avec
-      les commandes de lecture en dessous. C'est l'élément sur lequel les deux autres se construisent.</p>
+    <p>La forme dessinée par un témoin, placée dans le ciel, l'horizon, la météo et le sol réels de
+      la date, de l'heure et du lieu de l'enregistrement, et masquée par ce qui se trouvait devant
+      elle, avec les commandes de lecture en dessous. C'est l'élément sur lequel les deux autres se construisent.</p>
     <pre><code>&lt;rr0-scene src="sighting.json"&gt;&lt;/rr0-scene&gt;</code></pre>
     <div class="table-scroll">
     <table>
@@ -266,9 +266,9 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple (voir <a href="/docs/format/">le format</a>) — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose</td></tr>
-      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>La couche de lecture qu'il compose — la chronologie, les commandes, le canevas du pointeur — et par elle tous les membres de lecture ci-dessous</td></tr>
+      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>La couche de lecture qu'il contient (la chronologie, les commandes, le canevas du pointeur) et, par elle, tous les membres de lecture décrits plus bas</td></tr>
       <tr><td><code>sceneRenderer</code></td><td>propriété (lecture)</td><td>Le moteur de rendu 3D, pour ce que rien d'autre n'expose</td></tr>
-      <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Absent par défaut : utile pour régler un cap, du bruit pour regarder</td></tr>
+      <tr><td><code>show-compass</code></td><td>attribut</td><td>Les repères N/NE/E/… sur l'horizon. Désactivé par défaut : utile pour régler une direction pendant la saisie, gênant pour qui regarde</td></tr>
       <tr><td><code>star-catalog-src</code> / <code>deep-star-catalog-src</code></td><td>attribut</td><td>D'où charger le catalogue d'étoiles, quand vous en hébergez votre propre copie plutôt que celle posée à côté du bundle : le niveau de base (jusqu'à la magnitude 7,5, chargé par toute scène) et le niveau profond (de 7,5 à 9, chargé seulement par un enregistrement dont l'instrument va au-delà de 7,5)</td></tr>
       <tr><td><code>max-pixel-ratio</code></td><td>attribut</td><td>Le nombre maximal de pixels de l'écran par pixel CSS auquel la scène peut dessiner ; celui de l'écran, jusqu'à 2, s'il est absent. La scène le baisse d'elle-même tant que ses images sont en retard</td></tr>
       <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis tels quels à la couche de lecture ci-dessous — à écrire sur la balise que votre page contient réellement</td></tr>
@@ -279,19 +279,19 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       vous pointez.</p>
     <p>Le bouton <q>©</q> dans son coin liste les crédits de ce qu'il montre — l'imagerie du sol et
       de la carte, les modèles, les photos du lieu, les sons. Dans <code>&lt;rr0-sighting&gt;</code>,
-      ce bouton est masqué : ils sont dans son panneau <q>i</q>.</p>
+      ce bouton est masqué : les crédits figurent alors dans son panneau <q>i</q>.</p>
 
     <h2>La lecture, sur <code>ufoElement</code></h2>
-    <p>Tout ce qui rejoue l'enregistrement vit une propriété plus bas, sur la couche de lecture —
-      <code>scene.ufoElement.play()</code> — la même que les deux autres composants atteignent par
-      leur propre <code>scene</code>.</p>
+    <p>Tout ce qui sert à rejouer l'enregistrement se trouve un niveau plus bas, sur la couche de
+      lecture (<code>scene.ufoElement.play()</code>) : la même couche que les deux autres composants
+      atteignent par leur propre propriété <code>scene</code>.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
       <tr><td><code>src</code></td><td>attribut</td><td>URL d'un enregistrement, chargée à la connexion et à chaque changement</td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>L'enregistrement comme objet simple (voir <a href="/docs/format/">le format</a>) — à relire après modification, ou à poser au lieu d'utiliser <code>src</code></td></tr>
       <tr><td><code>sighting</code></td><td>propriété (lecture)</td><td>Le modèle vivant : date et lieu réels, plus la chronologie de l'enregistrement</td></tr>
-      <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose — jouer avant sa résolution trouve une chronologie de longueur nulle</td></tr>
+      <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut. À attendre quand l'enregistrement doit être arrivé avant toute autre chose : lancer la lecture avant que la promesse soit résolue tombe sur une chronologie vide</td></tr>
       <tr><td><code>play()</code> / <code>pause()</code></td><td>méthode</td><td>Dire quel état on veut, plutôt que basculer l'état courant</td></tr>
       <tr><td><code>togglePlayPause()</code></td><td>méthode</td><td>Ce que font le bouton et le clic</td></tr>
       <tr><td><code>playbackState</code></td><td>propriété (lecture)</td><td><code>"stopped"</code>, <code>"playing"</code> ou <code>"paused"</code></td></tr>
@@ -303,26 +303,27 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>canvasElement</code> / <code>renderer</code></td><td>propriété (lecture)</td><td>Le <code>&lt;canvas&gt;</code>, et ce qui peint dessus</td></tr>
       <tr><td><code>enableClickToPlay</code></td><td>propriété</td><td>Si un clic bascule la lecture et un double-clic le plein écran (les deux, ou aucun). Le double-clic remet aussi la lecture dans l'état où elle était avant son premier clic. À mettre à false là où le canevas vous sert à autre chose</td></tr>
       <tr><td><code>fullscreenTarget</code></td><td>propriété</td><td>Quel élément le bouton plein écran agrandit. <code>&lt;rr0-scene&gt;</code> y met sa propre scène, pour que ce soit le ciel qui s'agrandisse et non la seule surcouche. Là où le navigateur n'offre pas de plein écran (un iPhone, une iframe sans <code>allow="fullscreen"</code>), l'élément remplit la fenêtre à la place, et Échap en sort de même</td></tr>
-      <tr><td><code>show-observer-map</code></td><td>attribut</td><td>Si la carte d'où se tenait le témoin s'ouvre d'emblée : présent, il l'ouvre, <code>"false"</code> la garde fermée. Absent, l'enregistrement décide : son propre <code>observerMap</code> s'il en énonce un, sinon ouverte quand le témoin s'est déplacé (une marche à travers champ, un trajet en voiture, un vol), fermée quand il est resté sur place. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu</td></tr>
+      <tr><td><code>show-observer-map</code></td><td>attribut</td><td>Si la carte de l'endroit où se tenait le témoin est ouverte au départ : présent, l'attribut l'ouvre, <code>"false"</code> la garde fermée. Absent, l'enregistrement décide : son propre <code>observerMap</code> s'il en énonce un, sinon ouverte quand le témoin s'est déplacé (une marche à travers champ, un trajet en voiture, un vol), fermée quand il est resté sur place. Il décide de l'état de <em>départ</em> de la carte, pas de son existence : le bouton est là pour tout enregistrement qui énonce un lieu</td></tr>
       <tr><td><code>toggleObserverMap()</code></td><td>méthode</td><td>Ce que fait ce bouton. Sur la carte elle-même, la molette zoome autour du pointeur, un glisser déplace le terrain, et ses propres boutons zooment et reviennent au trajet entier. Zoomée, elle se recentre sur le témoin dès qu'il en atteint le bord, pour qu'il n'en sorte jamais</td></tr>
       <tr><td><code>observerPlacing</code></td><td>propriété</td><td>Si un clic sur le sol de la carte émet <code>observerplace</code> avec <code>{ lat, lng }</code> — désactivé par défaut, car où se tenait le témoin, c'est à l'enregistrement de le dire. L'éditeur l'active et écrit la position à la tête de lecture</td></tr>
       <tr><td><code>hide-milestones</code></td><td>attribut</td><td>Retirer les moments nommés du récit — les repères sur la barre, la légende qui nomme celui qu'on joue, et les points lettrés sur la carte. Ils sont là partout où un enregistrement en nomme, donc c'est la seule façon de dire le contraire</td></tr>
       <tr><td><code>toggleMilestones()</code></td><td>méthode</td><td>Ce que fait ce bouton</td></tr>
     </table>
     </div>
-    <p>Ces deux-là sont les seuls défauts <em>positif</em> et <em>négatif</em> de cet élément, et la
-      différence est voulue. Les moments nommés d'un enregistrement sont ses propres mots sur
-      lui-même : ils s'affichent partout où ils existent. La carte, elle, coûte des requêtes de
-      tuiles à un tiers dès la première ouverture, et ce n'est pas à une page de les dépenser au nom
-      d'un lecteur sans le dire. Dans les deux cas le lecteur garde les deux boutons, à côté de celui
-      du plein écran : une page qui pose un défaut n'interdit pas le contraire.</p>
+    <p>Les moments nommés et la carte sont les deux seules choses que cet élément affiche ou masque
+      par défaut (les moments affichés, la carte masquée), et cette différence est voulue. Les
+      moments nommés d'un enregistrement sont ses propres mots sur lui-même : ils s'affichent
+      partout où ils existent. La carte, elle, demande ses tuiles à un service tiers dès sa première
+      ouverture, et ce n'est pas à une page d'engager ces requêtes au nom d'un visiteur sans le lui
+      dire. Dans les deux cas le visiteur garde les deux boutons, à côté de celui du plein écran :
+      qu'une page choisisse l'état de départ ne l'empêche pas de passer à l'autre.</p>
     <p>La barre d'outils et les boutons du coin n'apparaissent que tant que le pointeur survole
       l'image, en lecture comme en pause, ou quand le clavier y amène le focus. Un écran tactile, qui
       n'a pas de pointeur pour survoler, les garde affichés.</p>
     <p>Quand la barre de temps a le focus, les touches font comme sur un site de vidéos :
       <kbd>←</kbd> recule de 5 s, <kbd>→</kbd> avance de 5 s, et <kbd>Espace</kbd> lance ou met en
-      pause. Lancer ou mettre en pause, au clavier, au bouton ou d'un clic sur l'image, en montre
-      le signe un instant au milieu de l'image.</p>
+      pause. Chaque lancement ou mise en pause, au clavier, au bouton ou d'un clic sur l'image,
+      affiche brièvement son symbole au centre de l'image.</p>
   </div>
 </section>
 `,
@@ -383,8 +384,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>toggleMilestones()</code></td><td>método</td><td>Lo que hace ese botón</td></tr>
     </table>
     </div>
-    <p>Esos dos son los únicos valores por defecto <em>positivo</em> y <em>negativo</em> que tiene este elemento, y
-      la diferencia es deliberada. Los momentos con nombre de una grabación son sus propias palabras sobre sí misma, así que
+    <p>Los momentos con nombre y el mapa son las dos únicas cosas que este elemento muestra u oculta por defecto
+      (los momentos visibles, el mapa oculto), y la diferencia es deliberada. Los momentos con nombre de una grabación son sus propias palabras sobre sí misma, así que
       se muestran allí donde existen; el mapa cuesta peticiones de teselas a un tercero la primera vez que se
       abre, y no le corresponde a una página gastarlas en nombre de un lector sin decirlo. En ambos casos el
       lector conserva los dos botones, junto al de pantalla completa — que una página fije un valor por defecto no significa que
@@ -455,8 +456,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       <tr><td><code>toggleMilestones()</code></td><td>metodo</td><td>Ciò che fa quel pulsante</td></tr>
     </table>
     </div>
-    <p>Quei due sono gli unici valori predefiniti <em>positivo</em> e <em>negativo</em> di questo elemento, e
-      la differenza è voluta. I momenti nominati di una registrazione sono le sue stesse parole su di sé, quindi
+    <p>I momenti nominati e la mappa sono le sole due cose che questo elemento mostra o nasconde per impostazione predefinita
+      (i momenti visibili, la mappa nascosta), e la differenza è voluta. I momenti nominati di una registrazione sono le sue stesse parole su di sé, quindi
       si mostrano ovunque esistano; la mappa costa richieste di tile a una terza parte la prima volta che si
       apre, e non spetta a una pagina spenderle per conto di un lettore senza dirlo. In entrambi i casi il
       lettore conserva i due pulsanti, accanto a quello dello schermo intero — una pagina che imposta un valore predefinito non è una pagina
@@ -501,7 +502,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Member</th><th>Kind</th><th>What it does</th></tr>
-      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several — told apart by their shape. A bare array of recordings is refused: list them as the sighting events of a case</td></tr>
+      <tr><td><code>src</code></td><td>attribute</td><td>A single recording, or a <a href="/docs/format/#several-observers-the-case">case</a> whose sighting events list several (the element tells the two apart by their structure). A bare array of recordings is refused: list them as the sighting events of a case</td></tr>
       <tr><td><code>observerUrls</code></td><td>property</td><td>The recordings to show, as a plain array of URLs, instead of <code>src</code>. Setting it again keeps the witness on show if the new list still has them</td></tr>
       <tr><td><code>sightingData</code></td><td>property</td><td>One recording, set directly — for a page holding one in memory rather than at a URL</td></tr>
       <tr><td><code>scene</code></td><td>property (read)</td><td>The composed <code>&lt;rr0-scene&gt;</code>, and through <code>scene.ufoElement</code> the playback members</td></tr>
@@ -536,43 +537,46 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Le choix par défaut pour une observation réelle, à un témoin ou plusieurs. Il compose un
-      <code>&lt;rr0-scene&gt;</code> et ajoute la barre d'outils : qui témoigne, et le panneau
-      <q>i</q> avec les métadonnées de l'observation et ses crédits, et un bouton de partage : le lien qui la rejoue, et ses lignes d'intégration.</p>
+    <p>Le composant à utiliser pour une observation réelle, qu'il y ait un témoin ou plusieurs. Il
+      contient un <code>&lt;rr0-scene&gt;</code> et y ajoute une barre d'outils : le choix du témoin,
+      le panneau <q>i</q> (métadonnées de l'observation et crédits) et un bouton de partage (le lien
+      qui rejoue l'observation et le code pour l'intégrer).</p>
     <pre><code>&lt;rr0-sighting src="sighting.json"&gt;&lt;/rr0-sighting&gt;
 &lt;rr0-sighting src="case.json"&gt;&lt;/rr0-sighting&gt;  &lt;!-- un dossier, et tous ses témoins --&gt;</code></pre>
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs — reconnus à leur forme. Un simple tableau d'enregistrements est refusé : listez-les comme événements sighting d'un dossier</td></tr>
-      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code>. Le reposer garde le témoin affiché si la nouvelle liste le contient encore</td></tr>
+      <tr><td><code>src</code></td><td>attribut</td><td>Un enregistrement, ou un <a href="/docs/format/#several-observers-the-case">dossier</a> dont les événements sighting en listent plusieurs (l'élément distingue l'un de l'autre à leur structure). Un simple tableau d'enregistrements est refusé : listez-les comme événements sighting d'un dossier</td></tr>
+      <tr><td><code>observerUrls</code></td><td>propriété</td><td>Les enregistrements à montrer, comme simple tableau d'URLs, au lieu de <code>src</code>. Lui donner une nouvelle liste garde le témoin affiché si elle le contient encore</td></tr>
       <tr><td><code>sightingData</code></td><td>propriété</td><td>Un enregistrement posé directement — pour une page qui en tient un en mémoire plutôt qu'à une URL</td></tr>
-      <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> composé, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
+      <tr><td><code>scene</code></td><td>propriété (lecture)</td><td>Le <code>&lt;rr0-scene&gt;</code> qu'il contient, et par <code>scene.ufoElement</code> les membres de lecture</td></tr>
       <tr><td><code>loadFromSrc(url)</code></td><td>méthode (async)</td><td>Ce que déclenche l'attribut</td></tr>
-      <tr><td><code>show-labels</code></td><td>attribut</td><td>Le bandeau de chips qui énoncent l'enregistrement sous l'image, rangés par groupe (résumé, observation, position, moment, météo, son, témoin) : la date dite en toutes lettres avec son jour de la semaine, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier, défilant au-delà d'une hauteur maximale, à la place des chips. Absent par défaut sur l'élément — la page du lecteur l'active — et un lecteur peut l'ouvrir ou le fermer depuis le panneau <q>i</q></td></tr>
-      <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> composé jusqu'au lecteur qui les porte</td></tr>
+      <tr><td><code>show-labels</code></td><td>attribut</td><td>Sous l'image, un bandeau de pastilles qui résument l'enregistrement, rangées par groupe (résumé, observation, position, moment, météo, son, témoin). La date y est écrite en toutes lettres avec son jour de la semaine ; une pastille <q>Description</q> montre les premiers mots du récit et, d'un clic, affiche le texte entier à la place des pastilles (avec défilement au-delà d'une hauteur maximale). Désactivé par défaut sur l'élément (la page du lecteur l'active) ; le visiteur peut l'ouvrir ou le fermer depuis le panneau <q>i</q></td></tr>
+      <tr><td><code>show-observer-map</code> / <code>hide-milestones</code></td><td>attribut</td><td>Transmis à travers le <code>&lt;rr0-scene&gt;</code> qu'il contient jusqu'à la couche de lecture qui les gère</td></tr>
       <tr><td><code>start-time</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une durée depuis son début : des secondes (<code>125</code>), <code>1:30</code>, <code>1m30s</code> ou une durée ISO 8601 (<code>PT1M30S</code>). Appliqué une fois, à l'enregistrement que l'élément charge ensuite ; une valeur au-delà de la fin ouvre à la fin</td></tr>
-      <tr><td><code>start-clock</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une heure dite pendant l'observation, à son heure locale : <code>02:33:15</code>, ou avec le jour <code>2026-08-11T02:33:15</code>. Le début de l'enregistrement la place ; elle l'emporte sur <code>start-time</code> quand elle le peut, et est ignorée pour un enregistrement qui ne dit pas son heure</td></tr>
-      <tr><td><code>compare-account</code></td><td>attribut</td><td>Démarre avec le récit du témoin montré à côté de la lecture choisie, et mesuré contre elle</td></tr>
+      <tr><td><code>start-clock</code></td><td>attribut</td><td>Où l'enregistrement s'ouvre, comme une heure dite pendant l'observation, à son heure locale : <code>02:33:15</code>, ou avec le jour <code>2026-08-11T02:33:15</code>. Elle est située par rapport au début déclaré de l'enregistrement ; elle l'emporte sur <code>start-time</code> quand elle le peut, et est ignorée pour un enregistrement qui n'indique pas l'heure de la journée</td></tr>
+      <tr><td><code>compare-account</code></td><td>attribut</td><td>Affiche dès le départ le récit du témoin à côté de la lecture choisie, et le compare à elle</td></tr>
     </table>
     </div>
-    <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « compte rendu de » — ce qui
-      est exact pour un ciel réglé pour montrer un halo.</p>
+    <p>Un enregistrement qui ne nomme aucun témoin n'affiche aucune ligne « compte rendu de » : c'est
+      ce qu'il faut pour un ciel préparé seulement pour montrer un halo.</p>
     <p>L'enregistrement de chaque témoin est chargé dès que la liste est connue : en choisir
       un autre est immédiat. La liste nomme chacun par son <code>title</code>, sinon ses prénoms et
-      son nom, sinon son <code>id</code> ; celui qui ne nomme personne est numéroté selon sa place
-      dans la liste.</p>
+      son nom, sinon son <code>id</code> ; un enregistrement qui ne nomme personne est numéroté selon
+      sa place dans la liste.</p>
     <p>Le panneau <q>i</q> s'ouvre en <i lang="en">popover</i>, que ferment Échap ou un clic à
       l'extérieur (seulement un clic à l'extérieur, sur un navigateur sans <i lang="en">popover</i>).
-      Il énonce le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags le
-      quittent tant que le bandeau <code>show-labels</code> les énonce déjà. La date est à l'heure de
-      le témoin (<code>utcOffsetHours</code>, ou une heure approchée depuis la longitude), pas à
-      celle du lecteur. La version en pied de panneau ouvre cette observation dans l'éditeur. La description le
-      quitte aussi tant que les chips sont affichés : elle est dans leur boîte <q>Résumé</q>, qu'un clic ouvre.</p>
+      Il indique le dossier, la date, le lieu, le compte rendu et les tags ; date, lieu et tags n'y
+      figurent pas quand le bandeau <code>show-labels</code> les affiche déjà. La date est donnée à
+      l'heure locale du témoin (<code>utcOffsetHours</code>, ou un décalage estimé d'après la
+      longitude), pas à celle du visiteur. Le numéro de version, en bas du panneau, ouvre cette
+      observation dans l'éditeur. La description n'y figure pas non plus quand les pastilles sont
+      affichées : elle est alors dans leur groupe <q>Résumé</q>, qu'un clic ouvre.</p>
     <p>Le bouton <q>Partager</q>, parmi ceux du lecteur, ouvre une seule fenêtre qui donne le lien ou le code d'intégration
       (le code dans un éditeur qui passe à la ligne et qu'on peut modifier), pour le lecteur ou pour l'éditeur, avec
-      les options de <a href="/docs/share/">la page de partage</a>, chacune proposée telle que le lecteur est. Le code d'intégration charge l'élément depuis l'endroit d'où cette copie a elle-même été
-      chargée : un extrait copié depuis une copie locale ou de recette renvoie à cette copie.</p>
+      les options décrites sur <a href="/docs/share/">la page de partage</a>, chacune réglée d'emblée sur l'état actuel du lecteur. Le code
+      d'intégration charge l'élément depuis l'endroit d'où cet exemplaire du lecteur a lui-même été chargé :
+      un extrait copié depuis une installation locale ou de recette pointe donc vers elle.</p>
   </div>
 </section>
 `,
@@ -587,7 +591,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Miembro</th><th>Tipo</th><th>Qué hace</th></tr>
-      <tr><td><code>src</code></td><td>atributo</td><td>Una sola grabación, o un <a href="/docs/format/#several-observers-the-case">caso</a> cuyos eventos sighting enumeran varias — se distinguen por su forma. Un simple array de grabaciones se rechaza: enuméralas como los eventos sighting de un caso</td></tr>
+      <tr><td><code>src</code></td><td>atributo</td><td>Una sola grabación, o un <a href="/docs/format/#several-observers-the-case">caso</a> cuyos eventos sighting enumeran varias (el elemento distingue uno de otro por su estructura). Un simple array de grabaciones se rechaza: enuméralas como los eventos sighting de un caso</td></tr>
       <tr><td><code>observerUrls</code></td><td>propiedad</td><td>Las grabaciones que mostrar, como simple array de URL, en lugar de <code>src</code>. Volver a asignarla mantiene el testigo mostrado si la nueva lista aún lo contiene</td></tr>
       <tr><td><code>sightingData</code></td><td>propiedad</td><td>Una grabación, asignada directamente — para una página que la tiene en memoria en lugar de en una URL</td></tr>
       <tr><td><code>scene</code></td><td>propiedad (lectura)</td><td>El <code>&lt;rr0-scene&gt;</code> compuesto, y a través de <code>scene.ufoElement</code> los miembros de reproducción</td></tr>
@@ -630,7 +634,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Membro</th><th>Tipo</th><th>Cosa fa</th></tr>
-      <tr><td><code>src</code></td><td>attributo</td><td>Una sola registrazione, o un <a href="/docs/format/#several-observers-the-case">caso</a> i cui eventi sighting ne elencano diverse — distinti dalla loro forma. Un semplice array di registrazioni viene rifiutato: elencale come eventi sighting di un caso</td></tr>
+      <tr><td><code>src</code></td><td>attributo</td><td>Una sola registrazione, o un <a href="/docs/format/#several-observers-the-case">caso</a> i cui eventi sighting ne elencano diverse (l'elemento distingue l'uno dall'altro dalla loro struttura). Un semplice array di registrazioni viene rifiutato: elencale come eventi sighting di un caso</td></tr>
       <tr><td><code>observerUrls</code></td><td>proprietà</td><td>Le registrazioni da mostrare, come semplice array di URL, invece di <code>src</code>. Reimpostarla mantiene il testimone mostrato se la nuova lista lo contiene ancora</td></tr>
       <tr><td><code>sightingData</code></td><td>proprietà</td><td>Una registrazione, impostata direttamente — per una pagina che ne tiene una in memoria invece che a un URL</td></tr>
       <tr><td><code>scene</code></td><td>proprietà (lettura)</td><td>Il <code>&lt;rr0-scene&gt;</code> composto, e attraverso <code>scene.ufoElement</code> i membri di riproduzione</td></tr>
@@ -675,7 +679,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
       <tr><td><code>observerchange</code></td><td>Quand l'enregistrement affiché change : chargé, posé par <code>sightingData</code>, ou un autre témoin choisi dans la liste. <code>detail.src</code> est son adresse, vide pour un enregistrement posé par script</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting&gt;</code> lui-même, puis relisez son <code>sightingData</code> (sa description, son identifiant)</td></tr>
-      <tr><td><code>recordingissues</code></td><td>Une fois un enregistrement chargé vérifié contre le format : <code>detail.issues</code> liste ce qui n'a pas été joué comme écrit (une clé que rien ne lit, une valeur du mauvais type ou hors de sa liste, une valeur inventée parce que le fichier l'omettait), chacun avec son <code>kind</code> et son <code>path</code>. Vide quand il n'y a rien à dire. La même liste s'affiche sur l'image derrière un ⚠, et en console</td><td>N'importe où au-dessus de l'élément : il traverse toutes les racines fantômes</td></tr>
+      <tr><td><code>recordingissues</code></td><td>Une fois qu'un enregistrement chargé a été vérifié par rapport au format : <code>detail.issues</code> liste ce qui n'a pas été joué comme écrit (une clé que rien ne lit, une valeur du mauvais type ou hors de sa liste, une valeur inventée parce que le fichier l'omettait), chacun avec son <code>kind</code> et son <code>path</code>. Vide quand il n'y a rien à dire. La même liste s'affiche sur l'image derrière un ⚠, et en console</td><td>N'importe où au-dessus de l'élément : il sort de tous les <i lang="en">shadow roots</i></td></tr>
     </table>
     </div>`,
       es: `<div class="table-scroll">
@@ -708,7 +712,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `<div class="table-scroll">
     <table>
       <tr><th>Événement</th><th>Quand</th><th>Où l'écouter</th></tr>
-      <tr><td><code>sightingchange</code></td><td>Après une modification : un champ écrit, un instrument choisi, un fuseau dérivé, une forme déplacée sur la timeline</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting-editor&gt;</code> lui-même, puis relisez son <code>sightingData</code></td></tr>
+      <tr><td><code>sightingchange</code></td><td>Après une modification : un champ écrit, un instrument choisi, un fuseau dérivé, une forme déplacée sur la chronologie</td><td>Sur cet élément. Il n'est pas <i lang="en">bubbling</i> : écoutez sur le <code>&lt;rr0-sighting-editor&gt;</code> lui-même, puis relisez son <code>sightingData</code></td></tr>
     </table>
     </div>`,
       es: `<div class="table-scroll">
@@ -741,7 +745,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       en: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Everything above plus the authoring toolbar. Put it on a page where people should be able to
+    <p>A scene (<code>&lt;rr0-scene&gt;</code>) plus the authoring toolbar. Put it on a page where people should be able to
       describe or correct an observation themselves.</p>
     <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
@@ -762,7 +766,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       fr: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Tout ce qui précède, plus la barre d'outils de saisie. À poser sur une page où l'on doit
+    <p>Une scène (<code>&lt;rr0-scene&gt;</code>), plus la barre d'outils de saisie. À poser sur une page où l'on doit
       pouvoir décrire ou corriger une observation soi-même.</p>
     <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
@@ -772,8 +776,8 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
     <div class="table-scroll">
     <table>
       <tr><th>Membre</th><th>Nature</th><th>Rôle</th></tr>
-      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Donne accès au canevas, à la chronologie et au travail d'apparence</td></tr>
-      <tr><td><code>appearance</code></td><td>propriété</td><td>L'allure de la prochaine forme dessinée : <code>{ presetId, color, transparency, haloScale, blur, brightness }</code>, <code>presetId</code> valant <code>"oval"</code> ou <code>"polygon"</code> et les autres étant les <a href="/docs/format/#what-was-seen">champs de forme</a> de même nom. La poser ne prend que les champs donnés</td></tr>
+      <tr><td><code>ufoElement</code></td><td>propriété (lecture)</td><td>Donne accès au canevas, à la chronologie et aux réglages d'apparence</td></tr>
+      <tr><td><code>appearance</code></td><td>propriété</td><td>L'allure de la prochaine forme dessinée : <code>{ presetId, color, transparency, haloScale, blur, brightness }</code>, <code>presetId</code> valant <code>"oval"</code> ou <code>"polygon"</code> et les autres étant les <a href="/docs/format/#what-was-seen">champs de forme</a> de même nom. Lui affecter un objet ne modifie que les champs fournis</td></tr>
       <tr><td><code>sightingchange</code></td><td>événement</td><td>Émis après chaque modification — le signal unique que l'enregistrement a changé</td></tr>
     </table>
     </div>
@@ -783,7 +787,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       es: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Todo lo anterior más la barra de herramientas de edición. Ponlo en una página donde la gente deba poder
+    <p>Una escena (<code>&lt;rr0-scene&gt;</code>) más la barra de herramientas de edición. Ponlo en una página donde la gente deba poder
       describir o corregir una observación por sí misma.</p>
     <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>
@@ -804,7 +808,7 @@ export const COMPONENT_DOCS: ComponentDoc[] = [
       it: `
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Tutto quanto sopra più la barra degli strumenti di creazione. Mettilo in una pagina dove le persone devono poter
+    <p>Una scena (<code>&lt;rr0-scene&gt;</code>) più la barra degli strumenti di creazione. Mettilo in una pagina dove le persone devono poter
       descrivere o correggere un'osservazione da sé.</p>
     <pre><code>&lt;rr0-sighting-editor&gt;&lt;/rr0-sighting-editor&gt;
 &lt;rr0-sighting-editor src="sighting.json"&gt;&lt;/rr0-sighting-editor&gt;</code></pre>

@@ -101,7 +101,7 @@ export class DocsFormatPage extends DocsSection {
 
   /** The pages under this one, where the technical side goes on: one line each, so that a reader knows what is there before going. */
   private further(language: SiteLanguage): string {
-    const heading: Said<string> = { en: "Further on", fr: "Plus loin", es: "Más adelante", it: "Più avanti" }
+    const heading: Said<string> = { en: "Continued on other pages", fr: "La suite, sur d'autres pages", es: "La continuación, en otras páginas", it: "Il seguito, in altre pagine" }
     const pages: ReadonlyArray<readonly [string, Said<string>, Said<string>]> = [
       ["/docs/format/context/", DocsFormatContextPage.TITLE, {
         en: "the witness's movements and what they did, the instrument, the sound, the decor and the vehicles, what happened in the sky, and the weather with its clouds.",
@@ -130,7 +130,7 @@ export class DocsFormatPage extends DocsSection {
     ]
     // French puts a space before the colon, the others do not.
     const colon = language === "fr" ? " :" : ":"
-    return `<h2>${heading[language]}</h2>
+    return `<h2 id="further-on">${heading[language]}</h2>
     <ul>
 ${pages.map(([href, title, what]) => `      <li><a href="${href}"><strong>${title[language]}</strong></a>${colon} ${what[language]}</li>`).join("\n")}
     </ul>
@@ -184,7 +184,7 @@ if (movedTo) {
       <tr><td><code>utcOffsetHours</code></td><td>The LEGAL time the witness's clock was on (+1 for France in 1965). Absent means it is approximated from the longitude, which cannot know legal time or a daylight-saving switch</td></tr>
       <tr><td><code>timeZone</code></td><td>The IANA zone the offset was derived from (<code>"Europe/Paris"</code>): the rule, where <code>utcOffsetHours</code> is the number it gave at that date. Only the number is read to place the sky; the zone is what lets the offset be derived again when the date changes</td></tr>
       <tr><td><code>place</code></td><td>Where it happened, as RR0's events write a place (<a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>'s <code>PlaceJson</code>): <code>{ name, locations: [{ lat, lng }] }</code>, <code>name</code> being the fully qualified place name the coordinates were resolved from</td></tr>
-      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous witness. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when nobody has given them one</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, all optional; omit entirely for an anonymous witness. <code>id</code> is a reference to the person (on RR0, their directory: <code>"ZamoraLonnie"</code>); the other fields describe them when they have no <code>id</code> yet</td></tr>
       <tr><td><code>description</code></td><td>The account in prose — one string, or one per language (see below)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>What stands for the observation where it is only linked to and never played: the card a shared link shows (see <a href="/docs/share/">Sharing</a>). <code>image</code> is a picture, an address (absolute, relative to the file, or an RR0 path from the site root); <code>summary</code> a sentence or two, one string or one per language. Absent, the card shows the logo and says who saw it, in which case and when, as far as the file tells. <code>summaryTime</code> is the second of the recording at which the picture of the card is photographed (0 by default: the first image), for a recording whose first image does not show the phenomenon; only the project's capture tool reads it, never the player</td></tr>
       <tr><td><code>tags</code></td><td>A list of strings, written in English: they are technical terms, and two recordings that share one have to match on it. Each reader is shown them in their own language where a translation is known, which is the case today for ${this.tags()}. The list is not closed: anything else is shown as written, and classification codes (<code>"RR3"</code>, <code>"NL"</code>) or case references (<code>"Blue Book 8729"</code>) are written as they are. One changes the replay: <code>paralysis</code> keeps the witness's view still</td></tr>
@@ -217,7 +217,7 @@ if (movedTo) {
       <tr><th>Field</th><th>Meaning</th></tr>
       <tr><td><code>id</code></td><td>The case's own identifier. On rr0.org it is the dossier's directory and may be left out; a case file standing alone states it</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>The case's name, and when it happened as RR0 writes a time (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). The player names a case it opens by its title</td></tr>
-      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see below); the others (an article, a film, a confession) are RR0's An event bears an <code>id</code> when a reading names it, and only then: it belongs to the case, so it has to be unique among the case's events and nowhere else, and a reference is read in the file that writes it. An <code>interpretationOf</code> that no event bears is read, as it used to be, as the <code>id</code> a recording the case lists states; one that matches neither is a fault of the case, which the player reports on its console, the editor above its recordings, and the skill's <code>validate.py</code> when it is given the case file.</td></tr>
+      <tr><td><code>events</code></td><td>The case's chronology. Only the <code>sighting</code> ones are replayed, each by its <code>url</code>, read relative to the case file's own address (so the same case works from its dossier's page and from anywhere else); the ones marked <code>interpretationOf</code> are readings of one of them (see <a href="/docs/format/readings/#another-reading-an-interpretation-is-another-sighting">${DocsFormatReadingsPage.TITLE.en}</a>); the others (an article, a film, a confession) are RR0's ordinary events. An event bears an <code>id</code> when a reading names it, and only then: it belongs to the case, so it has to be unique among the case's events and nowhere else, and a reference is read in the file that writes it. An <code>interpretationOf</code> that no event bears is read, as it used to be, as the <code>id</code> a recording the case lists states; one that matches neither is a fault of the case, which the player reports on its console, the editor above its recordings, and the skill's <code>validate.py</code> when it is given the case file.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>What a shared link to the case shows, as for a recording (see <a href="/docs/share/">Sharing</a>): a picture, and a sentence or two, one string or one per language</td></tr>
     </table>
     </div>
@@ -285,7 +285,7 @@ if (movedTo) {
       <tr><td><code>brightness</code></td><td>How dazzling: a veil, aperture spikes, a core clipped to white</td></tr>
       <tr><td><code>blur</code></td><td>How indistinct the witness said the edges looked</td></tr>
       <tr><td><code>angular</code></td><td>Its apparent size in degrees — see below</td></tr>
-      <tr><td><code>aim</code></td><td>Where it was in the witness's sky: the direction of its centre, <code>azimuthDeg</code> clockwise from true north and <code>altitudeDeg</code> above the horizon. Not the way the witness was facing, which is the pose's <code>headingDeg</code> and <code>pitchDeg</code> — see below</td></tr>
+      <tr><td><code>aim</code></td><td>Where it was in the witness's sky: the direction of its centre, <code>azimuthDeg</code> clockwise from true north and <code>altitudeDeg</code> above the horizon. Not the way the witness was facing, which is the pose's <code>headingDeg</code> and <code>pitchDeg</code> (see <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.en}</a>)</td></tr>
     </table>
     </div>
     <p><strong><code>aim</code> places it, <code>angular</code> sizes it.</strong> <code>bounds</code>
@@ -363,7 +363,7 @@ if (movedTo) {
       from your disk with the pictures and models it names. The player checks it the same way on
       loading, and says what it could not play as written behind a ⚠ over the picture: a key
       nothing reads, a word outside its list, and what it had to make up because a shape's first
-      keyframe left it out (a field held from the keyframe before is the rule above, not a
+      keyframe left it out (a field held from the keyframe before is the <a href="#four-rules-that-decide-what-a-file-means">first of the four rules</a> below, not a
       problem).</p>
 
     <h3>Versions of the format</h3>
@@ -372,12 +372,12 @@ if (movedTo) {
     <p>A player reads ONE version and refuses any other, newer or older, with a message saying so, rather than playing
       something the file does not say. Older versions are not converted as a file is read: a file written in one is brought
       forward by a tool, <code>scripts/migrate-recordings.ts</code>, outside the player, and a file shared under an older
-      version goes on playing because a share pins the UFO@home that reads it (see Sharing).</p>
+      version goes on playing because a share pins the UFO@home that reads it (see <a href="/docs/share/">Sharing</a>).</p>
     <p>What each version changed, which is what that tool knows. Version 2 writes <code>time</code> and
       <code>endTime</code> as EDTF text instead of the fields of a date (<code>{ "year": 1964, "month": 4, … }</code>), and
       <code>place</code> as one place instead of a list of locations each with its own name, so that a recording and an event
-      of RR0 say “when” and “where” alike. Version 3 says whom every event is about by an id (<code>who</code>, see the events
-      above), and writes a group of shapes as <code>{ id, members }</code> instead of the list of its members; the shapes a
+      of RR0 say “when” and “where” alike. Version 3 says whom every event is about by an id (<code>who</code>, see the events in
+      <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.en}</a>), and writes a group of shapes as <code>{ id, members }</code> instead of the list of its members; the shapes a
       <code>blink</code> listed in its <code>parts</code> become a group of their own. Version 4 calls <code>snapshots</code> what version 3 called <code>frozen</code>, since what it holds is a copy of what the sources answered, not the original frozen somewhere.</p>
     <p>Each version has its own schema, at an address that names it:
       <code>https://ufoathome.org/schema/4/sighting.schema.json</code> (and
@@ -401,13 +401,13 @@ if (movedTo) {
       the file MEANS, and the pixels are re-derived from it on load — write the angle, and let a
       wrong guess at the pixels be corrected for you.</p>
 
-    <h2>Larger ones to read</h2>
-    <p>Every demo on this site is a plain file you can open. These four are the ones worth reading
+    <h2 id="larger-ones-to-read">Larger example files to read</h2>
+    <p>Every demo on this site is a plain file you can open. These eight are the ones worth reading
       to see how a real recording is put together:</p>
     <div class="table-scroll">
     <table>
       <tr><th>File</th><th>What to look at in it</th></tr>
-      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>A real case: a witness, a case id shared with a second recording, ten keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>A real case: one witness, one of the two recordings that <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a> lists, eight keyframes, a looked-up <code>weatherTrack</code> with its <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>No phenomenon at all: a sky set once (a single <code>weatherTrack</code> keyframe, a cirrostratus veil and its crystals' alignment), photographed through an <code>instrument</code>, a phone, whose <code>observerTrack</code> pans, tilts, rolls and zooms, and moves the lens's ghosts with it</td></tr>
       <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Three cloud layers with metre-based altitude, thickness, size, density and wind, evolving on the weather timeline — and in the first one an <code>instances</code> entry: one cloud of the field, placed and sized in metres, that grows and darkens over the two minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>An <code>instrument</code>, an <code>exposureSeconds</code> and an <code>iso</code>, and a <code>decor</code> aircraft with a <code>track</code> and nine <code>lights</code> at their real flash rates, landing lights included</td></tr>
@@ -465,19 +465,19 @@ if (movedTo) {
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>version</code></td><td>La version du format : <code>4</code> (voir Versions du format)</td></tr>
-      <tr><td><code>id</code></td><td>Quel compte rendu c'est, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un témoin anonyme (<code>"1964-04-24-Socorro"</code>). Ce par quoi un dossier le désigne n'est pas cet id mais celui de son événement (voir plus bas).</td></tr>
+      <tr><td><code>id</code></td><td>L'identifiant de ce compte rendu, unique parmi tous les enregistrements : le jour, puis qui l'a vu (<code>"1964-04-24-ZamoraLonnie"</code>), ou le lieu pour un témoin anonyme (<code>"1964-04-24-Socorro"</code>). Un dossier ne le désigne pas par cet id, mais par l'id de l'événement qui le liste (voir plus bas).</td></tr>
       <tr><td><code>time</code>, <code>endTime</code></td><td>La date écrite en <a href="https://www.loc.gov/standards/datetime/">EDTF</a>, à l'heure légale de <code>utcOffsetHours</code>, comme l'écrivent les événements de RR0 : <code>"1964-04-24T17:50"</code>, <code>"1954"</code>, <code>"1948-07-24T02:45~"</code> (approximative), <code>"2025-06?"</code> (incertaine), <code>"1965-07-01%"</code> (les deux), <code>"19XX"</code> (une année masquée), <code>"2022-21"</code> (le printemps 2022), ou <code>"05:00"</code> seul pour une heure dont on a oublié la date. Chaque partie est facultative en partant de la droite : c'est ainsi que le format énonce « 1954 » ou « vers 05:00 ». C'est un sous-ensemble d'EDTF (niveau 0, ces qualificatifs sur la date entière, années masquées, saisons) ; <a href="https://www.npmjs.com/package/@rr0/time"><code>@rr0/time</code></a> est le modèle EDTF complet de RR0, dans lequel l'outillage d'UFO@home convertit les dates d'un enregistrement</td></tr>
       <tr><td><code>durationSeconds</code></td><td>Une alternative à <code>endTime</code>, et c'est elle qui l'emporte si les deux sont là</td></tr>
-      <tr><td><code>durationText</code></td><td>La durée telle qu'elle a été énoncée quand elle n'était pas exacte : une durée ISO 8601 avec un doute (<code>PT10M~</code>) ou une plage (<code>PT5M/PT10M</code>). <code>durationSeconds</code> est alors l'unique durée à laquelle on joue, choisie à partir d'elle</td></tr>
-      <tr><td><code>utcOffsetHours</code></td><td>L'heure LÉGALE de la montre du témoin (+1 pour la France en 1965). Absent, elle est approchée depuis la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
-      <tr><td><code>timeZone</code></td><td>Le fuseau IANA dont le décalage a été dérivé (<code>"Europe/Paris"</code>) : la règle, là où <code>utcOffsetHours</code> est le nombre qu'elle donnait à cette date. Seul le nombre sert à placer le ciel ; le fuseau permet de dériver à nouveau le décalage quand la date change</td></tr>
+      <tr><td><code>durationText</code></td><td>La durée telle qu'elle a été énoncée quand elle n'était pas exacte : une durée ISO 8601 avec un doute (<code>PT10M~</code>) ou une plage (<code>PT5M/PT10M</code>). <code>durationSeconds</code> est alors la seule durée rejouée, choisie d'après cet énoncé</td></tr>
+      <tr><td><code>utcOffsetHours</code></td><td>Le décalage de l'heure LÉGALE qu'indiquait la montre du témoin (+1 pour la France en 1965). S'il est absent, il est estimé d'après la longitude, qui ne peut connaître ni l'heure légale ni un changement d'heure</td></tr>
+      <tr><td><code>timeZone</code></td><td>Le fuseau IANA d'où le décalage a été tiré (<code>"Europe/Paris"</code>). Le fuseau est la règle, et <code>utcOffsetHours</code> le nombre que cette règle donnait à cette date. Seul le nombre sert à placer le ciel ; le fuseau permet de recalculer le décalage quand la date change</td></tr>
       <tr><td><code>place</code></td><td>Où cela s'est passé, comme les événements de RR0 écrivent un lieu (le <code>PlaceJson</code> de <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>) : <code>{ name, locations: [{ lat, lng }] }</code>, <code>name</code> étant le nom qualifié depuis lequel les coordonnées ont été résolues</td></tr>
-      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un témoin anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand personne ne lui en a encore donné</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tous facultatifs ; à omettre entièrement pour un témoin anonyme. <code>id</code> est une référence à la personne (sur RR0, son répertoire : <code>"ZamoraLonnie"</code>) ; les autres champs la décrivent quand elle n'a pas encore d'<code>id</code></td></tr>
       <tr><td><code>description</code></td><td>Le récit en prose — une chaîne, ou une par langue (voir plus bas)</td></tr>
-      <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Ce qui tient lieu de l'observation là où elle n'est que citée, jamais jouée : la carte qu'affiche un lien partagé (voir <a href="/docs/share/">Partager</a>). <code>image</code> est une image, une adresse (absolue, relative au fichier, ou un chemin RR0 depuis la racine du site) ; <code>summary</code> une phrase ou deux, une chaîne ou une par langue. Absents, la carte montre le logo et dit qui l'a vue, dans quel dossier et quand, pour autant que le fichier le dise. <code>summaryTime</code> est la seconde de l'enregistrement où l'on photographie l'image de la carte (0 par défaut : la première image), pour un enregistrement dont la première image ne montre pas le phénomène ; seul l'outil de capture du projet le lit, jamais le lecteur</td></tr>
-      <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui en partagent un doivent s'y égaler. Chaque lecteur les voit dans sa langue lorsqu'une traduction est connue, ce qui est le cas aujourd'hui de ${this.tags()}. La liste n'est pas fermée : tout autre tag est affiché tel qu'écrit, et les codes de classement (<code>"RR3"</code>, <code>"NL"</code>) ou les références de dossier (<code>"Blue Book 8729"</code>) s'écrivent tels quels. Un seul change le rejeu : <code>paralysis</code> immobilise la vue du témoin</td></tr>
-      <tr><td><code>account</code></td><td>Qui l'a vu et comment le récit a circulé : <code>observerAgeYears</code> (à l'époque), <code>observerBirth</code> (date de naissance, tenue en phase avec lui), <code>observerPerception</code> (vision des couleurs, alcool, fatigue : seulement ce qui diffère d'un témoin typique), <code>observerOccupation</code>, <code>source</code> (comment il est parvenu à qui a écrit l'enregistrement : <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>social-media</code>, <code>press</code>) et <code>followedUp</code> (si le témoin a été revu ensuite), et pour les méthodes d'évaluation (voir <a href="https://rr0.org/science/crypto/ufo/enquete/methode/Ballester-Guasp.html">Ballester-Guasp</a>) : <code>observerOccupationKind</code> (<code>student</code>, <code>worker</code>, <code>farmer</code>, <code>homemaker</code>, <code>merchant</code>, <code>business</code>, <code>employee</code>, <code>artist</code>, <code>technician</code>, <code>police</code>, <code>pilot</code>, <code>military</code>), <code>observerGraduate</code>, <code>enquiryMinutes</code> (temps passé par l'enquêteur avec le témoin), <code>observersRelation</code> (<code>friends</code>, <code>family</code>, <code>professional</code>, <code>none</code>), <code>activity</code> (<code>leisure</code>, <code>travelling</code>, <code>cultural</code>, <code>working</code>) et <code>strangeness</code> (chacun des sept facteurs jugés par les enquêteurs, vrai ou faux : <code>appearance</code>, <code>movement</code>, <code>incongruity</code>, <code>detection</code>, <code>close</code>, <code>beings</code>, <code>traces</code>)</td></tr>
-      <tr><td><code>sources</code></td><td>Où lire le récit tel qu'il a été donné, sous la forme d'une <a href="https://www.npmjs.com/package/@rr0/data">source RR0</a> : <code>[{ type, title, authors, url, publication: { publisher, time }, index }]</code>, <code>type</code> valant <code>book</code> ou <code>article</code>, ou rien pour une page web ou un post, qui n'est alors que son <code>url</code>. Affichées dans le panneau <q>?</q> du lecteur, en lien quand elles ont une adresse ; reprises telles quelles dans un dossier RR0</td></tr>
+      <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Ce qui représente l'observation là où elle est seulement citée, sans être jouée : la carte qu'affiche un lien partagé (voir <a href="/docs/share/">Partager</a>). <code>image</code> est une image, une adresse (absolue, relative au fichier, ou un chemin RR0 depuis la racine du site) ; <code>summary</code> une phrase ou deux, une chaîne ou une par langue. S'ils sont absents, la carte montre le logo et dit qui l'a vue, dans quel dossier et quand, pour autant que le fichier le dise. <code>summaryTime</code> est la seconde de l'enregistrement à laquelle est capturée l'image de la carte (0 par défaut : la première image), pour un enregistrement dont la première image ne montre pas le phénomène ; seul l'outil de capture du projet le lit, jamais le lecteur</td></tr>
+      <tr><td><code>tags</code></td><td>Une liste de chaînes, écrites en anglais : ce sont des termes techniques, et deux enregistrements qui portent le même tag doivent l'écrire à l'identique. Chacun les voit dans sa langue lorsqu'une traduction est connue, ce qui est le cas aujourd'hui de ${this.tags()}. La liste n'est pas fermée : tout autre tag est affiché tel qu'écrit, et les codes de classement (<code>"RR3"</code>, <code>"NL"</code>) ou les références de dossier (<code>"Blue Book 8729"</code>) s'écrivent tels quels. Un seul change le rejeu : <code>paralysis</code> immobilise la vue du témoin</td></tr>
+      <tr><td><code>account</code></td><td>Qui l'a vu et comment le récit a circulé : <code>observerAgeYears</code> (à l'époque), <code>observerBirth</code> (date de naissance, tenue en accord avec l'âge), <code>observerPerception</code> (vision des couleurs, alcool, fatigue : seulement ce qui diffère d'un témoin typique), <code>observerOccupation</code>, <code>source</code> (comment le récit est parvenu à l'auteur de l'enregistrement : <code>on-site</code>, <code>interview</code>, <code>telephone</code>, <code>questionnaire</code>, <code>letter</code>, <code>social-media</code>, <code>press</code>) et <code>followedUp</code> (si le témoin a été revu ensuite), et pour les méthodes d'évaluation (voir <a href="https://rr0.org/science/crypto/ufo/enquete/methode/Ballester-Guasp.html">Ballester-Guasp</a>) : <code>observerOccupationKind</code> (<code>student</code>, <code>worker</code>, <code>farmer</code>, <code>homemaker</code>, <code>merchant</code>, <code>business</code>, <code>employee</code>, <code>artist</code>, <code>technician</code>, <code>police</code>, <code>pilot</code>, <code>military</code>), <code>observerGraduate</code>, <code>enquiryMinutes</code> (temps passé par l'enquêteur avec le témoin), <code>observersRelation</code> (<code>friends</code>, <code>family</code>, <code>professional</code>, <code>none</code>), <code>activity</code> (<code>leisure</code>, <code>travelling</code>, <code>cultural</code>, <code>working</code>) et <code>strangeness</code> (chacun des sept facteurs jugés par les enquêteurs, vrai ou faux : <code>appearance</code>, <code>movement</code>, <code>incongruity</code>, <code>detection</code>, <code>close</code>, <code>beings</code>, <code>traces</code>)</td></tr>
+      <tr><td><code>sources</code></td><td>Où lire le récit tel qu'il a été donné, sous la forme d'une <a href="https://www.npmjs.com/package/@rr0/data">source RR0</a> : <code>[{ type, title, authors, url, publication: { publisher, time }, index }]</code>, <code>type</code> valant <code>book</code> ou <code>article</code>, ou absent pour une page web ou un post, qui se réduit alors à son <code>url</code>. Affichées dans le panneau <q>?</q> du lecteur, en lien quand elles ont une adresse ; reprises telles quelles dans un dossier RR0</td></tr>
       <tr><td><code>milestones</code></td><td>Les moments nommés du récit, affichés sur la barre de lecture : <code>[{ t, label, note }]</code>, <code>label</code> étant la lettre ou le numéro qu'utilise le récit lui-même (<code>"A"</code>, <code>"B"</code>) ou deux ou trois mots, <code>note</code> ce qui s'est passé alors, dans les mots du récit si possible (une chaîne, ou une par langue)</td></tr>
       <tr><td><code>roads</code></td><td>Les routes ou chemins que dessine le plan du récit, quand la carte ne les a pas : <code>[{ id, title, surface, widthM, path, source }]</code>, <code>surface</code> valant <code>paved</code>, <code>gravel</code> ou <code>dirt</code>, <code>path</code> étant l'axe en <code>[{ eastM, northM }]</code> depuis le lieu du témoin au départ, et <code>source</code> le plan ou le relevé d'où il est tiré</td></tr>
     </table>
@@ -505,7 +505,7 @@ if (movedTo) {
       <tr><th>Champ</th><th>Sens</th></tr>
       <tr><td><code>id</code></td><td>L'identifiant du dossier lui-même. Sur rr0.org c'est le répertoire du dossier, et il peut être omis ; un fichier de dossier isolé l'énonce</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Le nom du dossier, et sa date comme RR0 l'écrit (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Le lecteur nomme un dossier qu'il ouvre par son titre</td></tr>
-      <tr><td><code>events</code></td><td>La chronologie du dossier. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de dossier (si bien que le même dossier marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir plus bas) ; les autres (un article, un film, un aveu) sont ceux de RR0 Un événement porte un <code>id</code> quand une lecture le désigne, et seulement alors : il appartient au dossier, donc il doit être unique parmi les événements du dossier et nulle part ailleurs, et une référence se lit dans le fichier qui l'écrit. Un <code>interpretationOf</code> qu'aucun événement ne porte est lu, comme avant, comme l'<code>id</code> que déclare un enregistrement que le dossier liste ; celui qui ne correspond à aucun des deux est une faute du dossier, que le lecteur signale sur sa console, l'éditeur au-dessus de ses enregistrements, et le <code>validate.py</code> du skill quand on lui donne le fichier du dossier.</td></tr>
+      <tr><td><code>events</code></td><td>La chronologie du dossier. Seuls les <code>sighting</code> sont rejoués, chacun par son <code>url</code>, lue relativement à l'adresse du fichier de dossier (si bien que le même dossier marche depuis la page de son dossier comme depuis n'importe où) ; ceux marqués <code>interpretationOf</code> sont des lectures de l'un d'eux (voir <a href="/docs/format/readings/#another-reading-an-interpretation-is-another-sighting">${DocsFormatReadingsPage.TITLE.fr}</a>) ; les autres (un article, un film, un aveu) sont les événements ordinaires de RR0. Un événement ne porte un <code>id</code> que si une lecture le désigne. Cet <code>id</code> appartient au dossier : il doit être unique parmi les événements du dossier, et seulement là, et une référence à cet <code>id</code> se cherche dans le fichier où elle est écrite. Un <code>interpretationOf</code> qui n'est l'<code>id</code> d'aucun événement est lu, comme autrefois, comme l'<code>id</code> déclaré par l'un des enregistrements que liste le dossier ; s'il ne correspond à aucun des deux, c'est une erreur du dossier, que signalent le lecteur sur sa console, l'éditeur au-dessus de ses enregistrements, et le <code>validate.py</code> du skill quand on lui donne le fichier du dossier.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Ce que montre un lien partagé vers le dossier, comme pour un enregistrement (voir <a href="/docs/share/">Partager</a>) : une image, et une phrase ou deux, une chaîne ou une par langue</td></tr>
     </table>
     </div>
@@ -515,7 +515,7 @@ if (movedTo) {
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
       (<a href="/play/?file=/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
 
-    <h2>Le dire en plusieurs langues</h2>
+    <h2>Un texte en plusieurs langues</h2>
     <p>Un enregistrement se transmet d'un lecteur à un autre : chaque champ écrit par un auteur peut
       donc porter une chaîne par langue au lieu d'une seule — <code>description</code>, le
       <code>title</code> d'une forme ou d'un élément de décor, le <code>label</code> et la
@@ -528,26 +528,26 @@ if (movedTo) {
 }</code></pre>
     <p>Les clés sont des étiquettes de langue telles qu'un navigateur les donne (<code>fr</code>,
       <code>en</code>, <code>pt-BR</code>), et aucune n'est obligatoire. Une chaîne simple reste
-      parfaitement valide et signifie « dans la langue où cela a été écrit » — ce qu'est tout
-      enregistrement antérieur. Un lecteur dont aucune langue n'est présente reçoit ce que le
-      fichier A, plutôt qu'un champ vide : une traduction manquante ne doit jamais transformer ce
+      parfaitement valide et signifie « dans la langue où cela a été écrit » : c'est le cas de tout
+      enregistrement écrit avant cette possibilité. Une personne dont aucune des langues ne figure dans le fichier reçoit ce que le
+      fichier contient, plutôt qu'un champ vide : une traduction manquante ne doit jamais transformer ce
       qu'un témoin a dit en ce qu'il n'a pas dit.</p>
-    <p>La langue reçue est celle du navigateur, sauf si la page en dit autre chose : un
-      <code>lang</code> sur l'élément lui-même, ou sur ce qui l'entoure, est pris d'abord — un
-      article qui déclare sa langue a déjà énoncé dans quelle langue son lecteur le lit. La liste du
-      navigateur vient ensuite : déclarer une langue force donc un choix sans jeter les autres.</p>
-    <p>L'éditeur montre une langue, celle du lecteur, et n'écrit que dans celle-là — ouvrir le
-      fichier dans l'autre langue et taper est donc la façon d'ajouter une traduction, et un auteur
-      ne peut pas effacer celle d'un autre.</p>
+    <p>La langue affichée est celle du navigateur, sauf si la page en indique une autre : un attribut
+      <code>lang</code> sur l'élément lui-même, ou sur un élément qui le contient, passe en premier (un
+      article qui déclare sa langue a déjà dit dans quelle langue on le lit). Les langues du
+      navigateur viennent ensuite : déclarer une langue impose donc un premier choix sans exclure les autres.</p>
+    <p>L'éditeur montre une seule langue, celle de la personne qui l'utilise, et n'écrit que dans celle-là :
+      pour ajouter une traduction, on ouvre donc le fichier dans l'autre langue et on tape le texte, et un auteur
+      ne peut pas effacer la traduction d'un autre.</p>
 
     <h2>Ce qui a été vu</h2>
     <p><code>timeline.keyframes</code> est une liste de <code>{ t, shapes }</code>, <code>t</code> en
-      millisecondes depuis le début. Chaque forme porte un <code>sourceId</code> — plusieurs formes
-      peuvent partager une chronologie (le phénomène, une flamme qui traîne, une seconde lumière) — et
-      une <code>shape</code>. <code>timeline.span</code> indique la durée de l'observation, en millisecondes, quand elle dure plus
-      longtemps que la dernière image clé : un phénomène qui quitte l'image avant la fin du film. Sans lui, la frise est réputée finir
-      à sa dernière image clé et se trouve étirée sur la durée déclarée de l'observation, si bien que tout ce que place
-      l'enregistrement avance moins vite que le film posé dessus.</p>
+      millisecondes depuis le début. Chaque forme porte un <code>sourceId</code> et
+      une <code>shape</code> ; plusieurs formes peuvent partager une même chronologie (le phénomène, une flamme qui traîne, une seconde lumière).
+      <code>timeline.span</code> indique la durée de l'observation, en millisecondes, quand elle se prolonge au-delà de la
+      dernière image clé (par exemple un phénomène qui quitte l'image avant la fin du film). Sans ce champ, la chronologie est censée finir
+      à sa dernière image clé et elle est étirée sur toute la durée déclarée de l'observation : tout ce que place
+      l'enregistrement avance alors moins vite que le film sur lequel il est posé.</p>
     <pre data-json="timeline.keyframes.shapes.shape"><code>{
   "kind": "oval",
   "bounds": { "x": 0, "y": 0, "width": 0, "height": 0 },
@@ -565,7 +565,7 @@ if (movedTo) {
     <div class="table-scroll">
     <table>
       <tr><th>Champ</th><th>Sens</th></tr>
-      <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code> : <code>[{ x, y }]</code> en pixels depuis le coin haut gauche de <code>bounds</code>, couvrant sa largeur et sa hauteur, pour que le contour s'étire avec lui quand l'angle redimensionne la boîte. Quand <code>bounds</code> est omis (le cas courant : il est déduit de <code>aim</code> et <code>angular</code>), écrire <code>points</code> en FRACTIONS de la boîte, de 0 à 1, et non en pixels</td></tr>
+      <tr><td><code>kind</code></td><td><code>oval</code>, ou <code>polygon</code>, qui prend alors aussi <code>points</code> : <code>[{ x, y }]</code> en pixels depuis le coin haut gauche de <code>bounds</code>, couvrant sa largeur et sa hauteur, pour que le contour s'étire avec lui quand l'angle redimensionne la boîte. Quand <code>bounds</code> est omis (le cas courant : il est déduit de <code>aim</code> et <code>angular</code>), écrivez <code>points</code> en FRACTIONS de la boîte, de 0 à 1, et non en pixels</td></tr>
       <tr><td><code>title</code></td><td>Son nom, affiché au survol ; une chaîne, ou une par langue</td></tr>
       <tr><td><code>color</code></td><td>N'importe quelle couleur CSS</td></tr>
       <tr><td><code>angle</code></td><td>Son inclinaison, en radians autour de son propre centre, positive dans le sens horaire à l'écran</td></tr>
@@ -574,13 +574,13 @@ if (movedTo) {
       <tr><td><code>brightness</code></td><td>L'éblouissement : un voile, les aigrettes du diaphragme, un cœur saturé au blanc</td></tr>
       <tr><td><code>blur</code></td><td>À quel point le témoin a dit les contours indistincts</td></tr>
       <tr><td><code>angular</code></td><td>Sa taille apparente en degrés — voir plus bas</td></tr>
-      <tr><td><code>aim</code></td><td>Où il était dans le ciel du témoin : la direction de son centre, <code>azimuthDeg</code> dans le sens horaire depuis le nord vrai et <code>altitudeDeg</code> au-dessus de l'horizon. Pas la direction où regardait le témoin, qui est le <code>headingDeg</code> et le <code>pitchDeg</code> de la pose — voir plus bas</td></tr>
+      <tr><td><code>aim</code></td><td>Où il était dans le ciel du témoin : la direction de son centre, <code>azimuthDeg</code> dans le sens horaire depuis le nord vrai et <code>altitudeDeg</code> au-dessus de l'horizon. Pas la direction où regardait le témoin, donnée par le <code>headingDeg</code> et le <code>pitchDeg</code> de la pose (voir <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.fr}</a>)</td></tr>
     </table>
     </div>
     <p><strong><code>aim</code> le place, <code>angular</code> le dimensionne.</strong>
       <code>bounds</code> est la projection des deux sur le canevas fixe de 640×360, au cap et au
-      champ de la pose, à travers l'instrument de l'enregistrement ; il est redérivé au chargement, si
-      bien qu'un fichier survit à un changement de canevas, de champ, d'instrument, ou de direction
+      champ de la pose, à travers l'instrument de l'enregistrement ; il est recalculé au chargement, si
+      bien qu'un fichier reste valable après un changement de canevas, de champ, d'instrument, ou de direction
       du regard. Si les pixels et les angles divergent, les angles gagnent : déplacer
       <code>bounds</code> dans un fichier ne fait rien tant que <code>aim</code> est là. Un fichier
       écrit à la main peut omettre <code>bounds</code> entièrement.</p>
@@ -611,40 +611,40 @@ if (movedTo) {
       que le témoin ait dit) ou <code>fitted</code> (déplacé, dans ce qu'on sait, pour voir si une
       hypothèse peut coller ; <code>rationale</code> dit laquelle). La liste des valeurs
       <code>assumed</code> est la liste de ce qu'il faut retourner demander au témoin ou au dossier :
-      c'est pourquoi elle vaut d'être écrite même quand rien d'autre ne l'est. <code>rationale</code> est une chaîne, ou une par
+      c'est pourquoi elle vaut d'être écrite même quand on n'écrit la provenance d'aucune autre valeur. <code>rationale</code> est une chaîne, ou une par
       langue comme un titre (<code>{ "fr": "…", "en": "…" }</code>) : un rapport sur le dossier se lit dans la langue de son lecteur.</p>
-    <p><code>source</code> nomme ce sur quoi la valeur repose, ce qu'une base ne fait pas : la base
-      dit de quelle NATURE elle est, ceci dit LAQUELLE — la chose qu'on irait regarder. Une à la
-      fois : <code>said</code> (<code>{ interview, segment, range }</code>, le passage d'une
+    <p><code>source</code> nomme ce sur quoi la valeur repose, ce que <code>basis</code> ne fait pas : <code>basis</code>
+      dit de quelle NATURE est ce fondement, <code>source</code> dit LEQUEL (la chose qu'on irait vérifier). Une seule source par
+      valeur : <code>said</code> (<code>{ interview, segment, range }</code>, le passage d'une
       interview du dossier où elle a été dite, <code>interview</code> étant l'<code>id</code> de cet
       événement et <code>segment</code> le tour de parole), <code>document</code> avec
       <code>at</code> (une page, un numéro de question) et <code>url</code>, <code>picture</code>
       (l'<code>id</code> d'une photo de l'enregistrement sur laquelle elle a été mesurée) ou
       <code>tool</code> (SVH, IPACO, QGIS, un théodolite). Une hypothèse de travail n'en nomme
-      aucune, ce que <code>assumed</code> et <code>fitted</code> disent déjà, et lui en donner une
-      serait le seul mensonge que ce champ existe pour empêcher.</p>
+      aucune (c'est déjà ce que disent <code>assumed</code> et <code>fitted</code>) : lui en donner une
+      serait précisément le mensonge que ce champ existe pour empêcher.</p>
     <p>Une source <code>said</code> est aussi tout l'historique de ce que le témoin a déclaré. Un
       témoin auprès de qui on retourne corrige certaines choses et laisse le reste tel quel : une
       valeur corrigée cite donc l'interview LA PLUS RÉCENTE, et celle que personne n'a reprise
-      continue de citer LA PREMIÈRE. Quelle interview chaque valeur cite <em>est</em> le relevé de ce
-      qui a changé et de ce qui n'a pas changé, et il n'y a aucune version de la reconstitution à
-      conserver pour le montrer. Laquelle est la plus récente, c'est au dossier de le dire, par les
+      continue de citer LA PREMIÈRE. L'interview que cite chaque valeur <em>est</em> le relevé de ce
+      qui a changé et de ce qui n'a pas changé : nul besoin de conserver une version de la
+      reconstitution pour le montrer. Laquelle est la plus récente, c'est au dossier de le dire, par les
       dates de ses événements d'interview.</p>
-    <p>Dans l'éditeur, elle s'écrit dans la fenêtre de la pastille de base de la valeur : ce sur quoi
-      elle repose, puis les champs de cette nature. Les passages proposés sont les interviews du
+    <p>Dans l'éditeur, la source se saisit dans la fenêtre qu'ouvre la pastille de base de la valeur : on choisit ce sur quoi
+      elle repose, puis on remplit les champs de ce type. Les passages proposés sont les interviews du
       dossier, donc un enregistrement ouvert seul n'en propose aucun ; les photos proposées sont
-      celles de l'enregistrement. Une base libre ne propose aucun champ.</p>
-    <p>Les deux bouts de cette liste sont ce qui empêche une ressemblance de passer pour une preuve.
+      celles de l'enregistrement. Une base libre (<code>assumed</code> ou <code>fitted</code>) ne propose aucun champ.</p>
+    <p>Les deux extrémités de la liste des bases (<code>established</code> et <code>fitted</code>) empêchent une ressemblance de passer pour une preuve.
       Seul ce qui est <code>established</code> ne doit rien au témoignage ni à la reconstitution :
-      c'est ce qui en fait la seule chose contre laquelle juger une reconstitution. Une valeur
+      c'est pourquoi c'est la seule chose à laquelle confronter une reconstitution. Une valeur
       <code>fitted</code> est l'inverse : plus une reconstitution en compte, plus une ressemblance
       est facile à obtenir, aussi rien n'est jamais confronté à une telle valeur. La déplacer n'est
       pas une contradiction et s'y accorder n'est pas un résultat : elle est là pour être
       déplacée.</p>
-    <p><code>range</code> dit jusqu'où ce qu'on sait laisse aller une valeur, quand c'est plus que la valeur : le plus petit et le plus
+    <p><code>range</code> dit jusqu'où ce qu'on sait permet d'aller pour une valeur, quand ce qu'on sait ne se réduit pas à cette valeur : le plus petit et le plus
       grand d'un nombre (<code>[50, 52]</code>), ou l'intervalle EDTF d'une date (<code>"1976-06/1976-07"</code>). La valeur est celle choisie
-      dedans pour dessiner la scène. Une lecture de l'observation peut la déplacer n'importe où dans sa plage, et contredit ce qu'on sait
-      au-delà ; une valeur indiquée ou déduite sans plage est ce qu'on sait, une valeur supposée sans plage est libre.</p>
+      dedans pour dessiner la scène. Une lecture de l'observation peut la déplacer n'importe où dans cette plage ; au-delà, elle contredit ce qu'on sait.
+      Sans plage, une valeur énoncée (<code>stated</code>) ou déduite (<code>derived</code>) est exactement ce qu'on sait, et une valeur supposée (<code>assumed</code>) est libre.</p>
 
     <h2>Vérifier un fichier</h2>
     <p>Le format est aussi publié en <a href="${new URL(FormatVersion.schemaUrl("sighting")).pathname}">JSON Schema</a>, engendré
@@ -653,10 +653,10 @@ if (movedTo) {
       inconnue y échoue. Il ne dit rien de ce qui peut être omis, question de sens à laquelle répond
       cette page. Pour voir le résultat, ouvrez le fichier dans <a href="/play/">le lecteur</a>,
       depuis un lien, ou depuis votre disque avec les images et modèles qu'il nomme.
-      Le lecteur le vérifie de la même façon au chargement, et dit derrière un ⚠ sur l'image ce
-      qu'il n'a pas pu jouer comme écrit : une clé que rien ne lit, un mot hors de sa liste, et ce
-      qu'il a dû inventer parce que la première keyframe d'une forme l'omettait (un champ tenu
-      depuis la keyframe précédente relève de la règle ci-dessus, pas d'un problème).</p>
+      Le lecteur le vérifie de la même façon au chargement, et signale, derrière un ⚠ sur l'image, ce
+      qu'il n'a pas pu jouer tel qu'écrit : une clé que rien ne lit, un mot hors de sa liste, et ce
+      qu'il a dû inventer parce que la première keyframe d'une forme l'omettait (un champ repris
+      de la keyframe précédente relève de la <a href="#four-rules-that-decide-what-a-file-means">première des quatre règles</a> plus bas, ce n'est pas un problème).</p>
 
     <h3>Versions du format</h3>
     <p>Un fichier indique la version de son format dans <code>version</code> : <code>4</code> depuis novembre 2026. C'est la version du FORMAT, pas celle d'UFO@home : ajouter un champ ne la
@@ -665,12 +665,12 @@ if (movedTo) {
       plutôt que de jouer autre chose que ce que dit le fichier. Les anciennes versions ne sont pas converties à la lecture :
       un fichier écrit dans l'une d'elles se remonte avec un outil, <code>scripts/migrate-recordings.ts</code>, hors du lecteur,
       et un fichier partagé sous une version ancienne continue de se jouer parce qu'un partage fige l'UFO@home qui le lit
-      (voir Partage).</p>
-    <p>Ce qu'a changé chaque version, et que cet outil connaît. La version 2 écrit
+      (voir <a href="/docs/share/">Partager</a>).</p>
+    <p>Voici ce qu'a changé chaque version (c'est ce que cet outil sait convertir). La version 2 écrit
       <code>time</code> et <code>endTime</code> en texte EDTF plutôt qu'en champs d'une date (<code>{ "year": 1964, "month": 4, … }</code>),
       et <code>place</code> comme un lieu plutôt que comme une liste de positions portant chacune son nom, pour qu'un
       enregistrement et un événement de RR0 disent « quand » et « où » de la même façon. La version 3 dit de qui est chaque
-      événement par un id (<code>who</code>, voir les événements plus haut), et écrit un groupe de formes <code>{ id, members }</code>
+      événement par un id (<code>who</code>, voir les événements dans <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.fr}</a>), et écrit un groupe de formes <code>{ id, members }</code>
       plutôt que la liste de ses membres ; les formes que listaient les <code>parts</code> d'un <code>blink</code> deviennent un
       groupe à elles. La version 4 appelle <code>snapshots</code> ce que la version 3 appelait <code>frozen</code>, puisque ce
       qu'il contient est une copie de ce que les sources ont répondu, pas l'original figé quelque part.</p>
@@ -681,10 +681,10 @@ if (movedTo) {
       celle d'après laquelle il a été écrit dans <code>"$schema"</code>, dont se servent des
       éditeurs comme VS Code pour le vérifier pendant la frappe ; le lecteur ne le lit pas.</p>
 
-    <h2>Un fichier entier</h2>
-    <p>Le plus petit enregistrement qui énonce encore quelque chose — un ovale silencieux traversant
+    <h2>Un fichier complet, le plus petit possible</h2>
+    <p>Voici le plus petit enregistrement qui dise encore quelque chose : un ovale silencieux traversant
       le ciel en douze secondes, à une date réelle et en un lieu réel. Tout le reste du format est
-      facultatif, et tout ce qui suit sert à quelque chose :</p>
+      facultatif, et chaque ligne de ce qui suit a son utilité :</p>
     <pre data-json=""><code>${this.escape(this.example)}</code></pre>
     <p class="small">Pour le modifier et le voir jouer, collez-le dans <a href="/edit/">l'éditeur</a>,
       qui complète sur chaque clé du format, propose les mots que chacune accepte, et dit
@@ -693,34 +693,34 @@ if (movedTo) {
       sur ce site : vous pouvez le récupérer, et
       <a href="/play/?file=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
       Remarquez que <code>angular</code> et <code>bounds</code> y figurent tous deux : l'angle est ce
-      que le fichier SIGNIFIE, et les pixels en sont redérivés au chargement — écrivez l'angle, et
-      laissez corriger une mauvaise estimation des pixels.</p>
+      que le fichier SIGNIFIE, et les pixels en sont recalculés au chargement : écrivez l'angle, et
+      une estimation erronée des pixels sera corrigée pour vous.</p>
 
-    <h2>De plus gros, à lire</h2>
-    <p>Chaque démo de ce site est un simple fichier que vous pouvez ouvrir. Ces quatre-là valent la
-      lecture pour voir comment un vrai enregistrement est bâti :</p>
+    <h2 id="larger-ones-to-read">D'autres exemples, plus complets</h2>
+    <p>Chaque démo de ce site est un simple fichier que vous pouvez ouvrir. Ces huit fichiers valent la
+      lecture pour voir comment un vrai enregistrement est construit :</p>
     <div class="table-scroll">
     <table>
       <tr><th>Fichier</th><th>Ce qu'il faut y regarder</th></tr>
-      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un vrai dossier : un témoin, un identifiant de dossier partagé avec un second enregistrement, dix keyframes, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
-      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène : un ciel réglé une fois (une seule image clé de <code>weatherTrack</code>, un voile de cirrostratus et l'alignement de ses cristaux), photographié par un <code>instrument</code>, un téléphone, dont l'<code>observerTrack</code> tourne, s'incline, roule et zoome, et déplace avec lui les reflets de l'objectif</td></tr>
-      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses avec altitude, épaisseur, taille, densité et vent en mètres, évoluant sur la timeline météo — et dans la première une entrée <code>instances</code> : un nuage du champ, placé et dimensionné en mètres, qui grossit et s'assombrit sur les deux minutes</td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un vrai dossier : un témoin, l'un des deux enregistrements que liste <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>, huit images clés, un <code>weatherTrack</code> relevé avec son <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Aucun phénomène : un ciel réglé une fois (une seule image clé de <code>weatherTrack</code>, un voile de cirrostratus et l'alignement de ses cristaux), photographié par un <code>instrument</code> (un téléphone) dont l'<code>observerTrack</code> tourne, s'incline, roule et zoome, et déplace avec lui les reflets de l'objectif</td></tr>
+      <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Trois couches nuageuses avec altitude, épaisseur, taille, densité et vent en mètres, évoluant sur la chronologie météo ; dans la première, une entrée <code>instances</code> : un nuage particulier de la couche, placé et dimensionné en mètres, qui grossit et s'assombrit sur les deux minutes</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code>, un <code>exposureSeconds</code> et un <code>iso</code>, et un décor d'aéronef avec sa <code>track</code> et neuf <code>lights</code> à leurs cadences réelles, phares d'atterrissage compris</td></tr>
-      <tr><td><a href="/demo-data/sky-test-reentry.json"><code>sky-test-reentry.json</code></a></td><td>Aucun phénomène : des <code>skyEvents</code> avec une <code>reentries</code>, le lanceur de Zond 4 se désagrégeant au-dessus du Kentucky en 1968, son chemin dérivé, son horaire, ses hauteurs et son éclat supposés, chaque valeur avec sa provenance</td></tr>
-      <tr><td><a href="/demo-data/observer-csg2-falcon.json"><code>observer-csg2-falcon.json</code></a></td><td>Le compte rendu de Ron Lee (SeeSat-L) du deuxième étage qui a lancé CSG-2 (Falcon 9, 31 janvier 2022), vu depuis Falcon (Colorado) freinant pour quitter son orbite et vidangeant ses réservoirs en tournant : des <code>skyEvents</code> avec une <code>launches</code> munie de <code>jets</code>, l'orbite tirée des éléments Space-Track de CSG-2, le freinage, les vidanges et la rotation supposés avec leur provenance ; l'une des trois vues de <a href="/demo-data/case-csg2.json"><code>case-csg2.json</code></a>, les autres sa montée vue de Nassau et sa fin vue d'Oklahoma City, témoins supposés</td></tr>
-      <tr><td><a href="/demo-data/sky-test-laser-meudon.json"><code>sky-test-laser-meudon.json</code></a></td><td>Aucun phénomène : des <code>skyEvents</code> avec un <code>beams</code>, le laser vert de 10 W que l'Observatoire de Paris a tiré de sa coupole de Meudon à sa coupole de Paris le 9 octobre 2026, vu du parc de Meudon, la hauteur de l'émetteur et l'ouverture supposées avec leur provenance, la lumière calculée</td></tr>
+      <tr><td><a href="/demo-data/sky-test-reentry.json"><code>sky-test-reentry.json</code></a></td><td>Aucun phénomène : des <code>skyEvents</code> contenant une entrée <code>reentries</code> : le lanceur de Zond 4 se désagrégeant au-dessus du Kentucky en 1968 ; son chemin est déduit, son horaire, ses hauteurs et son éclat sont supposés, chaque valeur avec sa provenance</td></tr>
+      <tr><td><a href="/demo-data/observer-csg2-falcon.json"><code>observer-csg2-falcon.json</code></a></td><td>Le compte rendu de Ron Lee (SeeSat-L), depuis Falcon (Colorado), du deuxième étage qui a lancé CSG-2 (Falcon 9, 31 janvier 2022), freinant pour quitter son orbite et vidangeant ses réservoirs tout en tournant sur lui-même : des <code>skyEvents</code> contenant une entrée <code>launches</code> munie de <code>jets</code> ; l'orbite est tirée des éléments Space-Track de CSG-2, le freinage, les vidanges et la rotation sont supposés, avec leur provenance. C'est l'une des trois vues de <a href="/demo-data/case-csg2.json"><code>case-csg2.json</code></a> : les deux autres montrent sa montée vue de Nassau et sa fin vue d'Oklahoma City, avec des témoins supposés</td></tr>
+      <tr><td><a href="/demo-data/sky-test-laser-meudon.json"><code>sky-test-laser-meudon.json</code></a></td><td>Aucun phénomène : des <code>skyEvents</code> contenant une entrée <code>beams</code> : le laser vert de 10 W que l'Observatoire de Paris a tiré de sa coupole de Meudon vers sa coupole de Paris le 9 octobre 2026, vu du parc de Meudon ; la hauteur de l'émetteur et l'ouverture du faisceau sont supposées, avec leur provenance, et la lumière est calculée</td></tr>
       <tr><td><a href="/demo-data/instrument-instamatic.json"><code>instrument-instamatic.json</code></a></td><td>La même observation que <code>observer-socorro.json</code>, à un champ près. Comparez les deux</td></tr>
     </table>
     </div>
 
     <h2>Quatre règles qui décident du sens d'un fichier</h2>
     <ul class="plain">
-      <li><strong>Les champs discrets sont tenus, les continus sont interpolés.</strong> Une forme
+      <li><strong>Les champs discrets sont maintenus, les continus sont interpolés.</strong> Une forme
         absente d'un keyframe ultérieur reste dans son état, et de même tout champ qu'un keyframe
         omet dans une forme qu'il énonce : un keyframe qui ne donne qu'un nouvel <code>aim</code>
         déplace la forme et garde tout le reste (énoncer <code>bounds</code> sans <code>aim</code> ni
         <code>angular</code> est lu comme la déplacer par ses pixels) ; une forme dont le premier keyframe est
-        à cinq secondes est déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être
+        à cinq secondes est déjà dessinée, dans cet état, dès l'instant zéro. Pour qu'une chose cesse d'être
         visible, posez-lui un keyframe à <code>transparency: 1</code>.</li>
       <li><strong>Des angles, rien d'autre.</strong> Aucune taille ni distance réelle n'est stockée
         où que ce soit. Les mètres sont déduits, en inégalités, de ce que le phénomène a été déclaré
@@ -730,7 +730,7 @@ if (movedTo) {
         position dans l'espace.</li>
       <li><strong>Absent n'est pas zéro.</strong> Pas de piste sonore signifie que personne n'a posé
         la question ; <code>kind: "none"</code> signifie que le témoin a déclaré n'avoir rien
-        entendu. La même distinction traverse la météo et les nuages de glace.</li>
+        entendu. La même distinction vaut pour la météo et les nuages de glace.</li>
     </ul>
     <p class="small">Cette page est la référence du format. Le raisonnement derrière chaque champ est
       dans les commentaires de documentation de son type, que les extraits ci-dessus proposent à la
@@ -765,7 +765,7 @@ if (movedTo) {
       <tr><td><code>utcOffsetHours</code></td><td>La hora LEGAL que marcaba el reloj del testigo (+1 para Francia en 1965). Si falta, se aproxima a partir de la longitud, que no puede conocer la hora legal ni un cambio de horario de verano</td></tr>
       <tr><td><code>timeZone</code></td><td>La zona IANA de la que se derivó el desfase (<code>"Europe/Paris"</code>): la regla, mientras que <code>utcOffsetHours</code> es el número que daba en esa fecha. Solo se lee el número para situar el cielo; la zona es lo que permite derivar de nuevo el desfase cuando cambia la fecha</td></tr>
       <tr><td><code>place</code></td><td>Dónde ocurrió, como los eventos de RR0 escriben un lugar (el <code>PlaceJson</code> de <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>): <code>{ name, locations: [{ lat, lng }] }</code>, siendo <code>name</code> el nombre completo del lugar a partir del cual se resolvieron las coordenadas</td></tr>
-      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, todos opcionales; se omite por completo para un testigo anónimo. <code>id</code> es una referencia a la persona (en RR0, su directorio: <code>"ZamoraLonnie"</code>); los demás campos la describen cuando nadie le ha dado uno</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, todos opcionales; se omite por completo para un testigo anónimo. <code>id</code> es una referencia a la persona (en RR0, su directorio: <code>"ZamoraLonnie"</code>); los demás campos la describen cuando aún no tiene <code>id</code></td></tr>
       <tr><td><code>description</code></td><td>El relato en prosa — una cadena, o una por idioma (véase más abajo)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Lo que representa la observación donde solo se enlaza y nunca se reproduce: la tarjeta que muestra un enlace compartido (véase <a href="/docs/share/">Compartir</a>). <code>image</code> es una imagen, una dirección (absoluta, relativa al archivo, o una ruta RR0 desde la raíz del sitio); <code>summary</code> una o dos frases, una cadena o una por idioma. Ausentes, la tarjeta muestra el logotipo y dice quién la vio, en qué caso y cuándo, hasta donde lo diga el archivo. <code>summaryTime</code> es el segundo de la grabación en que se fotografía la imagen de la tarjeta (0 por defecto: la primera imagen), para una grabación cuya primera imagen no muestra el fenómeno; solo la herramienta de captura del proyecto lo lee, nunca el reproductor</td></tr>
       <tr><td><code>tags</code></td><td>Una lista de cadenas, escritas en inglés: son términos técnicos, y dos grabaciones que comparten uno tienen que coincidir en él. A cada lector se le muestran en su propio idioma cuando se conoce una traducción, que hoy es el caso de ${this.tags()}. La lista no está cerrada: cualquier otra se muestra tal como está escrita, y los códigos de clasificación (<code>"RR3"</code>, <code>"NL"</code>) o las referencias de caso (<code>"Blue Book 8729"</code>) se escriben tal cual. Una cambia la reproducción: <code>paralysis</code> mantiene inmóvil la vista del testigo</td></tr>
@@ -798,7 +798,7 @@ if (movedTo) {
       <tr><th>Campo</th><th>Significado</th></tr>
       <tr><td><code>id</code></td><td>El identificador propio del caso. En rr0.org es el directorio del expediente y puede omitirse; un archivo de caso independiente lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>El nombre del caso, y cuándo ocurrió tal como RR0 escribe una hora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). El reproductor nombra un caso que abre por su título</td></tr>
-      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase abajo); los demás (un artículo, una película, una confesión) son de RR0 Un evento lleva un <code>id</code> cuando una lectura lo designa, y solo entonces: pertenece al caso, así que debe ser único entre los eventos del caso y en ninguna otra parte, y una referencia se lee en el archivo que la escribe. Un <code>interpretationOf</code> que ningún evento lleva se lee, como antes, como el <code>id</code> que declara una grabación que el caso enumera; el que no corresponde a ninguno de los dos es un fallo del caso, que el reproductor señala en su consola, el editor sobre sus grabaciones, y el <code>validate.py</code> del skill cuando se le da el archivo del caso.</td></tr>
+      <tr><td><code>events</code></td><td>La cronología del caso. Solo se reproducen los <code>sighting</code>, cada uno por su <code>url</code>, leída respecto a la dirección del propio archivo de caso (de modo que el mismo caso funciona desde la página de su expediente y desde cualquier otro lugar); los marcados con <code>interpretationOf</code> son lecturas de uno de ellos (véase <a href="/docs/format/readings/#another-reading-an-interpretation-is-another-sighting">${DocsFormatReadingsPage.TITLE.es}</a>); los demás (un artículo, una película, una confesión) son los eventos ordinarios de RR0. Un evento lleva un <code>id</code> cuando una lectura lo designa, y solo entonces: pertenece al caso, así que debe ser único entre los eventos del caso y en ninguna otra parte, y una referencia se lee en el archivo que la escribe. Un <code>interpretationOf</code> que ningún evento lleva se lee, como antes, como el <code>id</code> que declara una grabación que el caso enumera; el que no corresponde a ninguno de los dos es un fallo del caso, que el reproductor señala en su consola, el editor sobre sus grabaciones, y el <code>validate.py</code> del skill cuando se le da el archivo del caso.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Lo que muestra un enlace compartido al caso, como para una grabación (véase <a href="/docs/share/">Compartir</a>): una imagen, y una o dos frases, una cadena o una por idioma</td></tr>
     </table>
     </div>
@@ -867,7 +867,7 @@ if (movedTo) {
       <tr><td><code>brightness</code></td><td>Cuánto deslumbra: un velo, las puntas del diafragma, un núcleo saturado a blanco</td></tr>
       <tr><td><code>blur</code></td><td>Lo difusos que el testigo dijo que se veían los bordes</td></tr>
       <tr><td><code>angular</code></td><td>Su tamaño aparente en grados — véase más abajo</td></tr>
-      <tr><td><code>aim</code></td><td>Dónde estaba en el cielo del testigo: la dirección de su centro, <code>azimuthDeg</code> en sentido horario desde el norte verdadero y <code>altitudeDeg</code> sobre el horizonte. No hacia dónde miraba el testigo, que es el <code>headingDeg</code> y el <code>pitchDeg</code> de la pose — véase más abajo</td></tr>
+      <tr><td><code>aim</code></td><td>Dónde estaba en el cielo del testigo: la dirección de su centro, <code>azimuthDeg</code> en sentido horario desde el norte verdadero y <code>altitudeDeg</code> sobre el horizonte. No hacia dónde miraba el testigo, que es el <code>headingDeg</code> y el <code>pitchDeg</code> de la pose (véase <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.es}</a>)</td></tr>
     </table>
     </div>
     <p><strong><code>aim</code> lo sitúa, <code>angular</code> lo dimensiona.</strong> <code>bounds</code>
@@ -946,7 +946,7 @@ if (movedTo) {
       lo comprueba del mismo modo al cargar, e indica tras un ⚠ sobre la imagen lo que no pudo reproducir
       tal como está escrito: una clave que nada lee, una palabra fuera de su lista, y lo que tuvo que
       inventar porque el primer fotograma clave de una forma lo omitía (un campo mantenido desde el
-      fotograma clave anterior es la regla de arriba, no un problema).</p>
+      fotograma clave anterior es la <a href="#four-rules-that-decide-what-a-file-means">primera de las cuatro reglas</a> de más abajo, no un problema).</p>
 
     <h3>Versiones del formato</h3>
     <p>Un archivo indica la versión de su formato en <code>version</code>: <code>4</code> desde noviembre de 2026. Es la versión del FORMATO, no la de UFO@home: añadir un campo no la
@@ -955,12 +955,12 @@ if (movedTo) {
       en lugar de reproducir algo distinto de lo que el archivo dice. Las versiones antiguas no se convierten al leer: un
       archivo escrito en una de ellas se actualiza con una herramienta, <code>scripts/migrate-recordings.ts</code>, fuera del
       reproductor, y un archivo compartido bajo una versión antigua sigue reproduciéndose porque al compartir se fija el
-      UFO@home que lo lee (ver Compartir).</p>
+      UFO@home que lo lee (ver <a href="/docs/share/">Compartir</a>).</p>
     <p>Lo que cambió cada versión, que es lo que esa herramienta conoce. La versión 2 escribe <code>time</code> y
       <code>endTime</code> como texto EDTF en lugar de los campos de una fecha (<code>{ "year": 1964, "month": 4, … }</code>), y
       <code>place</code> como un lugar en vez de una lista de ubicaciones con su propio nombre cada una, para que una grabación y
       un evento de RR0 digan «cuándo» y «dónde» del mismo modo. La versión 3 dice de quién es cada evento mediante un id
-      (<code>who</code>, ver los eventos más arriba), y escribe un grupo de formas como <code>{ id, members }</code> en lugar de la
+      (<code>who</code>, ver los eventos en <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.es}</a>), y escribe un grupo de formas como <code>{ id, members }</code> en lugar de la
       lista de sus miembros; las formas que un <code>blink</code> listaba en sus <code>parts</code> pasan a ser un grupo propio.
       La versión 4 llama <code>snapshots</code> a lo que la versión 3 llamaba <code>frozen</code>, ya que lo que contiene es una
       copia de lo que respondieron las fuentes, no el original congelado en alguna parte.</p>
@@ -986,13 +986,13 @@ if (movedTo) {
       el archivo SIGNIFICA, y los píxeles se vuelven a derivar de él al cargar — escribe el ángulo, y deja
       que se te corrija una estimación errónea de los píxeles.</p>
 
-    <h2>Otros más grandes para leer</h2>
-    <p>Cada demo de este sitio es un simple archivo que puedes abrir. Estos cuatro son los que vale la
+    <h2 id="larger-ones-to-read">Otros ejemplos, más completos</h2>
+    <p>Cada demo de este sitio es un simple archivo que puedes abrir. Estos ocho son los que vale la
       pena leer para ver cómo se construye una grabación real:</p>
     <div class="table-scroll">
     <table>
       <tr><th>Archivo</th><th>Qué mirar en él</th></tr>
-      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso real: un testigo, un id de caso compartido con una segunda grabación, diez fotogramas clave, un <code>weatherTrack</code> consultado con su <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso real: un testigo, una de las dos grabaciones que enumera <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>, ocho fotogramas clave, un <code>weatherTrack</code> consultado con su <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Ningún fenómeno: un cielo preparado una vez (un solo fotograma clave de <code>weatherTrack</code>, un velo de cirrostratos y la alineación de sus cristales), fotografiado con un <code>instrument</code>, un teléfono, cuyo <code>observerTrack</code> gira, se inclina, rueda y hace zoom, y desplaza con él los reflejos del objetivo</td></tr>
       <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Tres capas de nubes con altitud, espesor, tamaño, densidad y viento en metros, evolucionando en la línea de tiempo meteorológica — y en la primera una entrada <code>instances</code>: una nube del campo, situada y dimensionada en metros, que crece y se oscurece a lo largo de los dos minutos</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code>, un <code>exposureSeconds</code> y un <code>iso</code>, y una aeronave de <code>decor</code> con una <code>track</code> y nueve <code>lights</code> a sus cadencias de destello reales, luces de aterrizaje incluidas</td></tr>
@@ -1055,7 +1055,7 @@ if (movedTo) {
       <tr><td><code>utcOffsetHours</code></td><td>L'ora LEGALE su cui era regolato l'orologio del testimone (+1 per la Francia nel 1965). Se manca, viene approssimata dalla longitudine, che non può conoscere l'ora legale né un passaggio all'ora estiva</td></tr>
       <tr><td><code>timeZone</code></td><td>Il fuso IANA da cui è stato ricavato lo scarto (<code>"Europe/Paris"</code>): la regola, mentre <code>utcOffsetHours</code> è il numero che dava a quella data. Per collocare il cielo si legge solo il numero; il fuso è ciò che permette di ricavare di nuovo lo scarto quando la data cambia</td></tr>
       <tr><td><code>place</code></td><td>Dove è successo, come gli eventi di RR0 scrivono un luogo (il <code>PlaceJson</code> di <a href="https://www.npmjs.com/package/@rr0/place"><code>@rr0/place</code></a>): <code>{ name, locations: [{ lat, lng }] }</code>, dove <code>name</code> è il nome completo del luogo da cui sono state ricavate le coordinate</td></tr>
-      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tutti facoltativi; da omettere del tutto per un testimone anonimo. <code>id</code> è un riferimento alla persona (su RR0, la sua directory: <code>"ZamoraLonnie"</code>); gli altri campi la descrivono quando nessuno gliene ha ancora dato uno</td></tr>
+      <tr><td><code>observer</code></td><td><code>{ id, title, lastName, firstNames }</code>, tutti facoltativi; da omettere del tutto per un testimone anonimo. <code>id</code> è un riferimento alla persona (su RR0, la sua directory: <code>"ZamoraLonnie"</code>); gli altri campi la descrivono quando non ha ancora un <code>id</code></td></tr>
       <tr><td><code>description</code></td><td>Il resoconto in prosa — una stringa, o una per lingua (vedi sotto)</td></tr>
       <tr><td><code>image</code>, <code>summary</code>, <code>summaryTime</code></td><td>Ciò che rappresenta l'osservazione dove è solo collegata e mai riprodotta: la scheda che mostra un link condiviso (vedi <a href="/docs/share/">Condividere</a>). <code>image</code> è un'immagine, un indirizzo (assoluto, relativo al file, o un percorso RR0 dalla radice del sito); <code>summary</code> una o due frasi, una stringa o una per lingua. Assenti, la scheda mostra il logo e dice chi l'ha vista, in quale caso e quando, per quanto lo dica il file. <code>summaryTime</code> è il secondo della registrazione in cui si fotografa l'immagine della scheda (0 per default: la prima immagine), per una registrazione la cui prima immagine non mostra il fenomeno; solo lo strumento di cattura del progetto lo legge, mai il lettore</td></tr>
       <tr><td><code>tags</code></td><td>Un elenco di stringhe, scritte in inglese: sono termini tecnici, e due registrazioni che ne condividono uno devono coincidere su di esso. A ogni lettore vengono mostrati nella sua lingua quando se ne conosce una traduzione, come avviene oggi per ${this.tags()}. L'elenco non è chiuso: qualsiasi altro viene mostrato come è scritto, e i codici di classificazione (<code>"RR3"</code>, <code>"NL"</code>) o i riferimenti di caso (<code>"Blue Book 8729"</code>) si scrivono così come sono. Uno cambia la riproduzione: <code>paralysis</code> tiene immobile la vista del testimone</td></tr>
@@ -1088,7 +1088,7 @@ if (movedTo) {
       <tr><th>Campo</th><th>Significato</th></tr>
       <tr><td><code>id</code></td><td>L'identificativo proprio del caso. Su rr0.org è la directory del fascicolo e può essere omesso; un file di caso a sé stante lo indica</td></tr>
       <tr><td><code>title</code>, <code>time</code></td><td>Il nome del caso, e quando è avvenuto come RR0 scrive un'ora (<code>"1948-07-24 02:45"</code>, <code>"1954"</code>). Il lettore designa un caso che apre con il suo titolo</td></tr>
-      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi sotto); gli altri (un articolo, un filmato, una confessione) sono di RR0 Un evento porta un <code>id</code> quando una lettura lo designa, e solo allora: appartiene al caso, quindi deve essere unico fra gli eventi del caso e in nessun altro posto, e un riferimento si legge nel file che lo scrive. Un <code>interpretationOf</code> che nessun evento porta è letto, come prima, come l'<code>id</code> che dichiara una registrazione che il caso elenca; quello che non corrisponde a nessuno dei due è un difetto del caso, che il lettore segnala sulla sua console, l'editor sopra le sue registrazioni, e il <code>validate.py</code> dello skill quando gli si dà il file del caso.</td></tr>
+      <tr><td><code>events</code></td><td>La cronologia del caso. Vengono riprodotti solo i <code>sighting</code>, ciascuno tramite il suo <code>url</code>, letto rispetto all'indirizzo del file di caso stesso (così lo stesso caso funziona dalla pagina del suo fascicolo e da qualsiasi altro luogo); quelli contrassegnati da <code>interpretationOf</code> sono letture di uno di essi (vedi <a href="/docs/format/readings/#another-reading-an-interpretation-is-another-sighting">${DocsFormatReadingsPage.TITLE.it}</a>); gli altri (un articolo, un filmato, una confessione) sono gli eventi ordinari di RR0. Un evento porta un <code>id</code> quando una lettura lo designa, e solo allora: appartiene al caso, quindi deve essere unico fra gli eventi del caso e in nessun altro posto, e un riferimento si legge nel file che lo scrive. Un <code>interpretationOf</code> che nessun evento porta è letto, come prima, come l'<code>id</code> che dichiara una registrazione che il caso elenca; quello che non corrisponde a nessuno dei due è un difetto del caso, che il lettore segnala sulla sua console, l'editor sopra le sue registrazioni, e il <code>validate.py</code> dello skill quando gli si dà il file del caso.</td></tr>
       <tr><td><code>image</code>, <code>summary</code></td><td>Ciò che mostra un link condiviso al caso, come per una registrazione (vedi <a href="/docs/share/">Condividere</a>): un'immagine, e una o due frasi, una stringa o una per lingua</td></tr>
     </table>
     </div>
@@ -1157,7 +1157,7 @@ if (movedTo) {
       <tr><td><code>brightness</code></td><td>Quanto abbaglia: un velo, le punte del diaframma, un nucleo saturato al bianco</td></tr>
       <tr><td><code>blur</code></td><td>Quanto indistinti il testimone ha detto che apparivano i bordi</td></tr>
       <tr><td><code>angular</code></td><td>La sua dimensione apparente in gradi — vedi sotto</td></tr>
-      <tr><td><code>aim</code></td><td>Dove si trovava nel cielo del testimone: la direzione del suo centro, <code>azimuthDeg</code> in senso orario dal nord vero e <code>altitudeDeg</code> sopra l'orizzonte. Non la direzione in cui guardava il testimone, che è l'<code>headingDeg</code> e il <code>pitchDeg</code> della posa — vedi sotto</td></tr>
+      <tr><td><code>aim</code></td><td>Dove si trovava nel cielo del testimone: la direzione del suo centro, <code>azimuthDeg</code> in senso orario dal nord vero e <code>altitudeDeg</code> sopra l'orizzonte. Non la direzione in cui guardava il testimone, che è l'<code>headingDeg</code> e il <code>pitchDeg</code> della posa (vedi <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.it}</a>)</td></tr>
     </table>
     </div>
     <p><strong><code>aim</code> lo colloca, <code>angular</code> lo dimensiona.</strong> <code>bounds</code>
@@ -1236,7 +1236,7 @@ if (movedTo) {
       lo verifica allo stesso modo al caricamento, e indica dietro un ⚠ sull'immagine ciò che non ha potuto riprodurre
       così come è scritto: una chiave che nulla legge, una parola fuori dal suo elenco, e ciò che ha dovuto
       inventare perché il primo fotogramma chiave di una forma lo ometteva (un campo mantenuto dal
-      fotogramma chiave precedente è la regola di cui sopra, non un problema).</p>
+      fotogramma chiave precedente è la <a href="#four-rules-that-decide-what-a-file-means">prima delle quattro regole</a> più sotto, non un problema).</p>
 
     <h3>Versioni del formato</h3>
     <p>Un file indica la versione del suo formato in <code>version</code>: <code>4</code> da novembre 2026. È la versione del FORMATO, non quella di UFO@home: aggiungere un campo non la
@@ -1245,12 +1245,12 @@ if (movedTo) {
       anziché riprodurre qualcosa di diverso da ciò che il file dice. Le versioni precedenti non vengono convertite alla
       lettura: un file scritto in una di esse viene portato avanti con uno strumento, <code>scripts/migrate-recordings.ts</code>,
       fuori dal lettore, e un file condiviso sotto una versione precedente continua a riprodursi perché una condivisione fissa
-      l'UFO@home che lo legge (vedi Condivisione).</p>
+      l'UFO@home che lo legge (vedi <a href="/docs/share/">Condividere</a>).</p>
     <p>Che cosa ha cambiato ogni versione, ed è ciò che quello strumento conosce. La versione 2 scrive <code>time</code> ed
       <code>endTime</code> come testo EDTF anziché come campi di una data (<code>{ "year": 1964, "month": 4, … }</code>), e
       <code>place</code> come un luogo anziché come un elenco di posizioni ciascuna con il proprio nome, perché una
       registrazione e un evento di RR0 dicano «quando» e «dove» allo stesso modo. La versione 3 dice di chi è ogni evento
-      tramite un id (<code>who</code>, vedi gli eventi sopra), e scrive un gruppo di forme come <code>{ id, members }</code>
+      tramite un id (<code>who</code>, vedi gli eventi in <a href="/docs/format/context/#everything-around-it">${DocsFormatContextPage.TITLE.it}</a>), e scrive un gruppo di forme come <code>{ id, members }</code>
       anziché l'elenco dei suoi membri; le forme che un <code>blink</code> elencava nelle sue <code>parts</code> diventano un
       gruppo a sé. La versione 4 chiama <code>snapshots</code> ciò che la versione 3 chiamava <code>frozen</code>, poiché ciò che
       contiene è una copia di quanto hanno risposto le fonti, non l'originale congelato da qualche parte.</p>
@@ -1276,13 +1276,13 @@ if (movedTo) {
       il file SIGNIFICA, e i pixel ne vengono ricavati di nuovo al caricamento — scrivi l'angolo, e lascia
       che una stima errata dei pixel venga corretta per te.</p>
 
-    <h2>Altri più grandi da leggere</h2>
-    <p>Ogni demo di questo sito è un semplice file che puoi aprire. Questi quattro sono quelli che vale la pena
+    <h2 id="larger-ones-to-read">Altri esempi, più completi</h2>
+    <p>Ogni demo di questo sito è un semplice file che puoi aprire. Questi otto sono quelli che vale la pena
       leggere per vedere come è costruita una registrazione reale:</p>
     <div class="table-scroll">
     <table>
       <tr><th>File</th><th>Che cosa guardarci</th></tr>
-      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso reale: un testimone, un id di caso condiviso con una seconda registrazione, dieci fotogrammi chiave, un <code>weatherTrack</code> consultato con il suo <code>weatherSource</code></td></tr>
+      <tr><td><a href="/demo-data/observer-chiles.json"><code>observer-chiles.json</code></a></td><td>Un caso reale: un testimone, una delle due registrazioni elencate da <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>, otto fotogrammi chiave, un <code>weatherTrack</code> consultato con il suo <code>weatherSource</code></td></tr>
       <tr><td><a href="/demo-data/sky-test-halos.json"><code>sky-test-halos.json</code></a></td><td>Nessun fenomeno: un cielo preparato una volta (un solo fotogramma chiave di <code>weatherTrack</code>, un velo di cirrostrati e l'allineamento dei suoi cristalli), fotografato con un <code>instrument</code>, un telefono, il cui <code>observerTrack</code> ruota, si inclina, rolla e zooma, e sposta con sé i riflessi dell'obiettivo</td></tr>
       <tr><td><a href="/demo-data/sky-test-clouds.json"><code>sky-test-clouds.json</code></a></td><td>Tre strati di nuvole con altitudine, spessore, dimensione, densità e vento in metri, che evolvono sulla linea temporale del meteo — e nel primo una voce <code>instances</code>: una nuvola del campo, collocata e dimensionata in metri, che cresce e si scurisce nel corso dei due minuti</td></tr>
       <tr><td><a href="/demo-data/sky-test-aircraft.json"><code>sky-test-aircraft.json</code></a></td><td>Un <code>instrument</code>, un <code>exposureSeconds</code> e un <code>iso</code>, e un aeromobile di <code>decor</code> con una <code>track</code> e nove <code>lights</code> alle loro cadenze di lampeggio reali, fari di atterraggio compresi</td></tr>

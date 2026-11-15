@@ -141,10 +141,10 @@ ${FormatVersion.schemaUrl("sighting")} .
         recognise what they saw.</li>
     </ul>
     <p>A witness who has only their own account can do this inside the editor: type it in the
-      <em>Summary</em> tab, choose what drafts it (Claude today: your own API key, and the
-      model), and the editor drafts the rest of the recording from it, sending nothing anywhere but
+      <em>Summary</em> tab, choose what drafts it (today Claude, with your own API key and the
+      model of your choice), and the editor drafts the rest of the recording from it, sending nothing anywhere but
       to that model.</p>
-    <p class="small">An account is personal data. Before handing documents to an online assistant,
+    <p class="small">A witness's account is personal data. Before handing documents to an online assistant,
       remove what identifies the witness unless they agreed to it, and check what the service
       keeps. And an assistant can be wrong with confidence: the file is only as good as the
       documents behind it and the checking after it.</p>
@@ -175,8 +175,8 @@ ${FormatVersion.schemaUrl("sighting")} .
   <div class="wrap prose-wide">
     <h2>1. Dans l'éditeur</h2>
     <p>La voie ordinaire, et celle à prendre sauf raison contraire. Dessinez ce qui a été vu, dites
-      quand et où, enregistrez le mouvement — et le ciel, la météo et le sol sont relevés pour vous
-      plutôt que remémorés.</p>
+      quand et où, enregistrez le mouvement. Le ciel, la météo et le terrain sont alors retrouvés pour vous,
+      au lieu d'être laissés à la mémoire.</p>
     <p class="doc-try-actions">
       <a class="btn btn-primary" href="/edit/">Ouvrir l'éditeur</a>
       <a class="btn" href="/edit/#manual">Lire le manuel</a>
@@ -184,8 +184,8 @@ ${FormatVersion.schemaUrl("sighting")} .
     <p>Cela se termine par <strong>Sauver</strong>, qui vous remet un fichier. Ce fichier est
       l'enregistrement complet : il n'y a pas de compte, et rien n'est conservé ici. Posez-le
       quelque part avec une adresse publique et il est prêt à <a href="/docs/share/">partager</a>.</p>
-    <p>Vous en avez déjà un et voulez le modifier ? L'éditeur s'ouvre sur un enregistrement
-      existant — le panneau <q>?</q> de toute reconstitution publiée porte le lien qui le fait.</p>
+    <p>Vous en avez déjà un et voulez le modifier ? L'éditeur peut ouvrir un enregistrement
+      existant : le lien pour cela se trouve dans le panneau <q>?</q> de chaque reconstitution publiée.</p>
   </div>
 </section>
 
@@ -201,7 +201,7 @@ ${FormatVersion.schemaUrl("sighting")} .
     <p>L'assistant ne sait du dossier que ce que vous lui donnez, et du format que ce que disent ces
       pages. Demandez-lui donc la discipline que garderait un enquêteur :</p>
     <pre class="doc-prompt"><code>Voici les documents d'un dossier d'observation. Construis un enregistrement
-UFO@home de ce que l'observateur a vu : le fichier JSON décrit sur
+UFO@home de ce que le témoin a vu : le fichier JSON décrit sur
 https://ufoathome.org/docs/format/ , vérifié avec
 ${FormatVersion.schemaUrl("sighting")} .
 
@@ -209,19 +209,19 @@ ${FormatVersion.schemaUrl("sighting")} .
   tu as calculée sous la forme {"value": ..., "basis": "derived",
   "rationale": "..."} et chaque valeur que tu as dû choisir avec
   "basis": "assumed".
-- Le phénomène n'est que des angles : sa direction (aim) et sa taille
-  apparente (angular) à chaque instant. Les mètres donnés par
-  l'observateur vont dans "interpretation", jamais dans les formes.
-- Un enregistrement par observateur. S'il y en a plusieurs, écris aussi
-  le fichier de dossier qui les liste (voir « Plusieurs observateurs :
+- Le phénomène n'est décrit que par des angles : sa direction (aim) et
+  sa taille apparente (angular) à chaque instant. Les mètres donnés par
+  le témoin vont dans "interpretation", jamais dans les formes.
+- Un enregistrement par témoin. S'il y en a plusieurs, écris aussi
+  le fichier de dossier qui les liste (voir « Plusieurs témoins :
   le dossier »).
 - Prends les personnes, véhicules, arbres et bâtiments dans le catalogue
   https://ufoathome.org/models/index.json , par id : n'invente jamais
   un modèle.
 - Dis dans "summary", en une phrase ou deux, de quoi parle le dossier.
 - Liste les contradictions entre les documents, et les questions à
-  reposer à l'observateur ou à l'enquêteur.</code></pre>
-    <p>Deux choses encore à lui dire. Ce que le lecteur calcule de lui-même d'après la date et le lieu (le ciel, les planètes, la Lune et les éclipses, les satellites, le relief et l'imagerie) ne s'écrit pas dans le fichier : la page <a href="/docs/format/sources/">Sources et choix</a> liste ce qui est lu et d'où, et le fichier n'a à apporter que ce que disent les documents. Et les modèles se choisissent dans le <a href="/models/index.json">catalogue</a> par leur <code>id</code>, qui dit aussi quels réglages chacun offre (<code>modelParameters</code>) : une personne n'est jamais dessinée comme une forme intégrée.</p>
+  reposer au témoin ou à l'enquêteur.</code></pre>
+    <p>Deux choses encore à lui dire. Ce que le lecteur calcule de lui-même d'après la date et le lieu (le ciel, les planètes, la Lune et les éclipses, les satellites, le relief et l'imagerie) ne s'écrit pas dans le fichier : la page <a href="/docs/format/sources/">Sources et choix</a> liste ce qui est lu et d'où, et le fichier n'a à apporter que ce que disent les documents. Et les modèles se choisissent dans le <a href="/models/index.json">catalogue</a> par leur <code>id</code>, qui dit aussi quels réglages chacun offre (<code>modelParameters</code>) : une personne n'est jamais dessinée avec une des formes de base.</p>
     <p>Ou installez le <strong>skill UFO@home</strong> dans votre assistant : les mêmes consignes,
       avec la méthode, les règles du format, le schéma, un exemple et un validateur qui ne demande
       que Python, si bien qu'il ne reste qu'à lui confier les documents.
@@ -230,7 +230,7 @@ ${FormatVersion.schemaUrl("sighting")} .
       <a href="/skill/SKILL.md">le lire d'abord</a>.</p>
     <p>Puis vérifiez ce qu'il a écrit, comme vous vérifieriez le travail d'un collègue :</p>
     <ul>
-      <li><strong>Jouez-le.</strong> Ouvrez-le dans <a href="/play/">le lecteur</a>, depuis votre
+      <li><strong>Rejouez-le.</strong> Ouvrez-le dans <a href="/play/">le lecteur</a>, depuis votre
         ordinateur avec les photos qu'il nomme. Le phénomène est-il là où les dessins le mettent,
         devant les bons arbres, à la bonne hauteur au-dessus de l'horizon ? Dites ce qui cloche, et
         faites-le corriger.</li>
@@ -243,11 +243,11 @@ ${FormatVersion.schemaUrl("sighting")} .
       <li><strong>Montrez-le au témoin.</strong> Le seul test qui compte est qu'il reconnaisse
         ce qu'il a vu.</li>
     </ul>
-    <p>Un témoin qui n'a que son propre récit peut le faire dans l'éditeur : il le tape dans
-      l'onglet <em>Résumé</em>, choisit ce qui le rédige (Claude aujourd'hui : sa propre clé
-      d'API, et le modèle), et l'éditeur rédige le reste de l'enregistrement à partir de lui, sans
-      rien envoyer ailleurs qu'à ce modèle.</p>
-    <p class="small">Un compte rendu est une donnée personnelle. Avant de confier des documents à un
+    <p>Un témoin qui n'a que son propre récit peut le faire dans l'éditeur : il tape ce récit dans
+      l'onglet <em>Résumé</em>, choisit le service qui rédigera (aujourd'hui Claude, avec sa propre
+      clé d'API et le modèle de son choix), et l'éditeur rédige à partir de ce récit le reste de
+      l'enregistrement, sans rien envoyer à qui que ce soit d'autre que ce modèle.</p>
+    <p class="small">Un témoignage est une donnée personnelle. Avant de confier des documents à un
       assistant en ligne, retirez ce qui identifie le témoin s'il n'y a pas consenti, et
       vérifiez ce que le service conserve. Et un assistant peut se tromper avec assurance : le
       fichier ne vaut que par les documents qui le fondent et la vérification qui le suit.</p>
@@ -257,15 +257,15 @@ ${FormatVersion.schemaUrl("sighting")} .
 <section class="band">
   <div class="wrap prose-wide">
     <h2>3. À la main, ou depuis vos propres archives</h2>
-    <p>Un enregistrement est un fichier de forme documentée : rien ne vous empêche d'en écrire un
-      dans un éditeur de texte, ni d'en engendrer mille depuis une base que vous avez déjà : c'est
-      exactement ce que l'éditeur lui-même écrit.</p>
+    <p>Un enregistrement est un fichier dont la forme est documentée, et c'est exactement ce que
+      l'éditeur écrit. Rien ne vous empêche donc d'en écrire un dans un éditeur de texte, ou d'en
+      générer mille à partir d'une base de données que vous avez déjà.</p>
   </div>
 </section>
 <section class="band">
   <div class="wrap prose-wide">
-    <p>Tout ce que l'éditeur écrit, champ par champ, avec un fichier entier à taper et les démos qui
-      valent la lecture, est sur sa propre page : <a href="/docs/format/">le fichier d'observation</a>.</p>
+    <p>Tout ce que l'éditeur écrit, champ par champ, avec un exemple de fichier complet et des
+      démos à étudier, est décrit sur une page à part : <a href="/docs/format/">le fichier d'observation</a>.</p>
     <p class="doc-try-actions"><a class="btn btn-primary" href="/docs/format/">Lire le format</a></p>
   </div>
 </section>

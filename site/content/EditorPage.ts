@@ -205,7 +205,7 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2 id="case">A case, and its observations</h2>
-    <p>The address may be a case's <code>case.json</code>. The editor then shows <strong>the case</strong> on top and, inside the same container, the observation being edited in a container of its own. <code>&amp;track=</code> names the recording it opens on.</p>
+    <p>The address may be a case's <code>case.json</code>. The editor then shows <strong>the case</strong> on top and, below it, in a frame of its own within the same editor, the observation being edited. <code>&amp;track=</code> names the recording it opens on.</p>
     <ul class="plain">
       <li><strong>The case</strong> has an <em>ID</em>, a <em>title</em> and a date — the same picker, qualifier and EDTF text as an observation's start — and <em>Save</em> in the File tab.</li>
       <li>Two tabs, as a recording's editor has: <strong>Events</strong> and <strong>File</strong>. The File tab shows <code>case.json</code> as text, which can be edited (what reads as a case is the case at once, what does not yet is said and leaves the case as it was), loaded from a JSON file or an address in place of the case open (asked first when changes were not saved), and saved. Its keys are completed from the case's own description, <a href="/case.schema.json"><code>case.schema.json</code></a>, generated from the type like the recording's.</li>
@@ -355,9 +355,9 @@ if (docs) {
       <h3>Environment</h3>
       <p>What stood around the witness, at a real distance east and north: buildings with their
         floors and windows, trees, streetlights, vehicles, aircraft — and <strong>other
-        witnesses</strong>. This is the only thing that can put a number on a distance: if the object
+        witnesses</strong>. This is the only thing that can put a number on a distance: if the phenomenon
         passed <em>behind</em> that hangar it was at least that far, if <em>in front of</em> that
-        tree, at most. Each crossing narrows the object's real width from one side for the whole
+        tree, at most. Each crossing narrows the phenomenon's real width from one side for the whole
         recording; the result appears under the apparent size, and reads “unknown” when nothing
         crosses its line of sight, which is the honest answer for most sightings.</p>
       <p><strong>The scenery comes by itself, where a place has been surveyed.</strong> When you give the recording a place (by name, by coordinates, or by moving the witness), the editor asks the survey that covers it for what stands within a hundred metres, and puts each tree, building, bridge and span of electric line in the list, at its measured place, height and width: in France, the IGN's LiDAR HD (a scan of the whole country from the air) for the trees and buildings, and its map for the bridges and the overhead lines, with their voltage. Nothing to press. A line under the list says how many were found, and a choice beside it says which survey it comes from: <em>IGN LiDAR HD + BD TOPO</em> (the default, which knows the most), the laser alone, the map alone, or <em>File</em>, which keeps the scenery the recording says and asks no survey any more, even as the witness moves (the choice is the recording's, and links to its item of the Files tab), or <em>None</em>, which leaves the scenery to you and takes away what a survey had brought (Undo puts it back; what you placed stays; your browser remembers the choice: asking sends the place to that service). Choosing another survey asks it at once for the place the recording stands at, and replaces what the first brought. Elsewhere, and wherever no survey covers the place, nothing is asked and nothing is said.
@@ -391,19 +391,19 @@ if (docs) {
     <div class="group-doc">
       <h3>Sky</h3>
       <p>The one group that is not account. Weather is a measurable fact about a place at an
-        instant, and the two groups above already state both — so it is looked up from ERA5, the
+        instant, and the Location and Date groups already state both, so it is looked up from ERA5, the
         ECMWF reanalysis, and shown <em>read-only</em> above a line naming the dataset and the exact
         UTC instant described. A wrong time zone shows up there before it shows up in the sky.</p>
       <p>Choosing <strong>File</strong> rather than <strong>Open-Meteo</strong> (in <strong>Data sources</strong>, behind the gear at the top right of the group, <strong>Weather</strong>, in the <strong>Sky</strong> group) reads the weather from the recording's own file (inside it, or in a file beside it: see the Files tab) and asks nobody for it any more: the values stay what they were, with the record they came from, and the fields become editable; once changed, the weather is the witness's and the record is no longer named. A recording that names a source is replayed exactly as authored and never looked up again, so a published case file reads identically offline.</p>
       <p>A lookup writes a weather keyframe at the start, at each whole hour and at the end of the
         recording, each at wherever the witness stands at that moment; the track is laid out again
         when the recording's length changes.</p>
-      <p>The group has three handles of its own, one part open at a time like the groups
-        themselves: <strong>Precipitation</strong> — its type and intensity, and the
+      <p>The group has tabs of its own, one open at a time like the groups
+        themselves. The first three are <strong>Precipitation</strong> (its type and intensity, and the
         <strong>Storm</strong> box, which is where a weather code reports a thunderstorm, beside
-        rain and hail, and which turns on the lightning and the thunder at its real delay —
-        <strong>Clouds</strong>, and <strong>Wind</strong>, the direction it blows toward and its
-        speed, which is what carries every cloud that has no wind of its own.</p>
+        rain and hail, and which turns on the lightning and the thunder at its real delay),
+        <strong>Clouds</strong>, and <strong>Wind</strong> (the direction it blows toward and its
+        speed, which is what carries every cloud that has no wind of its own).</p>
       <p>The clouds are the <strong>Clouds</strong> part of this group. A looked-up sky
         arrives as three of them, the low, middle and high bands of the record; a sky the witness
         described is as many as they saw. Every number in the panel is written into the recording
@@ -467,22 +467,23 @@ if (docs) {
         stars are drawn only as far as this project's catalogue goes; and a rainbow is mentioned only
         when rain was reported.
         Whether any of it explains anything is the reader's conclusion, never the file's claim.</p>
+      <p><strong>Aircraft</strong>, a tab of <strong>Sky</strong>, says which aircraft a record has around the witness. adsb.lol asks for nothing. Flightradar24 asks for your own subscription and its key, typed there, which stays in the page's memory until you reload it. Each question spends credits of that subscription, usually 400 to 550 and at most about 900: one is asked when its source is chosen and again when the place or the time changes. The line under the key says how many flights were traced, within what radius and at what cost, or why the source did not answer. Only the eight nearest at the middle of the recording get a track, and how far back you can ask depends on your plan (30 days for the cheapest). The list gives each flight's type, registration, distance, direction, height in the sky and altitude at the instant on show, nearest pass first: in a bright sky an aircraft is a pixel or two, or less, so this is what says who was there. Choose one to turn the view toward it and ring it on the picture; for one that is not there yet, the recording goes to when it is. Choose it again to remove the ring, which is in no image taken of the scene. Turning the view changes nothing in the recording, and none of this is written into it: these are compatible candidates, never an identification.</p>
     </div>
 
     <div class="group-doc">
       <h3>Phenomenon</h3>
-      <p>The object itself. Oval or polygon, colour, transparency, halo, <strong>brilliance</strong>
+      <p>The phenomenon itself. Oval or polygon, colour, transparency, halo, <strong>brilliance</strong>
         (how dazzling it was — a light you cannot look at washes out the field around it, throws the
         spikes its aperture makes, and clips to white, which no halo does) and <strong>blur</strong>
         (how indistinct its edges looked). Several shapes can share one timeline — a craft, a
         trailing flame, a second object — each with its own name, and grouped, reordered or deleted
         from the canvas's own context menu.</p>
       <p><strong>Apparent width</strong>, <strong>real width</strong> and <strong>distance</strong>
-        are three readings of one relation, kept in step: edit any one and one of the other two
+        are three expressions of one relation, kept in step: edit any one and one of the other two
         follows — the one <strong>Hold</strong> pins never moves. Only the angle is the recording's;
         the real width is derived, and the distance is where the scene draws the shape, a hypothesis
         to try rather than a statement. Through an eye at 60° across a 360-pixel canvas, one degree
-        is exactly 6 pixels and the full Moon about 3 — so an object 3.5 m wide at 90 m is 13 pixels
+        is exactly 6 pixels and the full Moon about 3 — so a phenomenon 3.5 m wide at 90 m is 13 pixels
         across, not the 90 an author reaches for unaided. Getting this wrong is the single most
         common way a reconstruction ends up false.</p>
       <p>That distance is never saved with the recording, and <strong>Withdraw the distance
@@ -515,53 +516,7 @@ if (docs) {
         movement is stated in the file, and shown here. The picture draws the bodies, with the shapes
         beside them as outlines to read them against, whichever group is open, except in the Shapes
         part, where the shapes are drawn alone and in full.</p>
-      <p><strong>Aircraft</strong>, a tab of <strong>Sky</strong>, says which aircraft a record has around the witness. adsb.lol asks for nothing. Flightradar24 asks for your own subscription and its key, typed there, which stays in the page's memory until you reload it. Each question spends credits of that subscription, usually 400 to 550 and at most about 900: one is asked when its source is chosen and again when the place or the time changes. The line under the key says how many flights were traced, within what radius and at what cost, or why the source did not answer. Only the eight nearest at the middle of the recording get a track, and how far back you can ask depends on your plan (30 days for the cheapest). The list gives each flight's type, registration, distance, direction, height in the sky and altitude at the instant on show, nearest pass first: in a bright sky an aircraft is a pixel or two, or less, so this is what says who was there. Choose one to turn the view toward it and ring it on the picture; for one that is not there yet, the recording goes to when it is. Choose it again to remove the ring, which is in no image taken of the scene. Turning the view changes nothing in the recording, and none of this is written into it: these are compatible candidates, never an identification.</p>
       <p>What happened in the sky while the recording runs, as facts (a laser shot, a rocket launch), is not part of the Phenomenon group but of <strong>Sky</strong>, beside the state the sky was in (precipitation, clouds, wind): it is neither the reading of the account nor decor, which outlasts the observation. Its <strong>Beams</strong> tab lists the beams of light (a laser, a searchlight): the points of each one's path (where it leaves the emitter, any mirror, where it ends), its wavelength, power, divergence and when it is on; how bright it shows is what the air scatters of it, computed. Its <strong>Launches</strong> tab lists the rocket launches, their path, engine and plume. Its <strong>Lanterns</strong> tab, beside them, is a reading of the account rather than a fact: sky lanterns let go from the ground, those its lights were. Each launch states where they are let go (metres east and north of the recording's place), how many, between which seconds, how long they burn and how hot, the shapes they stand for, the wind at the ground and aloft, the air's temperature and its gusts, and the lantern itself: its light, its shape (round at the mouth and square at the top, or a balloon with a lobed top) and the colour of its paper, which tints its light; their flights are computed, each lantern climbing, drifting and going out on its own. An empty field shows, greyed, the value in use. These are drawn whatever group is open.</p>
-    </div>
-    </div>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap prose-wide">
-    <h2>Point at anything and it names itself</h2>
-    <p>Hovering the scene names what is under the pointer. A star gives its name, and with <kbd>Alt</kbd> held its
-      magnitude and how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
-      near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
-      any comet up that night answer the same way, and so does everything in the environment: a
-      building, a tree, another witness. With <kbd>Alt</kbd> held, an object of the environment also
-      says its size and how far it stands from the eye (“Tree 19 — 2 × 2 × 11.8 m, 540 m away”):
-      the measure is taken only then.</p>
-    <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
-      horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
-      what could have been seen from where the witness stood.</p>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap">
-    <h2>Rules worth knowing</h2>
-    <div class="prose-wide">
-      <ul class="plain">
-        <li><strong>A keyframe is held, not faded.</strong> A shape left out of a later keyframe
-          stays as it was; one whose first keyframe is at five seconds is already painted, in that
-          state, from zero. To make something stop being visible, keyframe it at transparency 1.</li>
-        <li><strong>Declared outranks deduced.</strong> “It went into a cloud” is stated by the
-          witness, never worked out by geometry — this format describes an appearance on a field of
-          view, not a position in space, so nothing in it <em>can</em> know whether cloud came
-          between them.</li>
-        <li><strong>Paused is paused.</strong> Falling rain, twinkling stars, lightning, lens flare,
-          ambient sound — all stop with the player. A paused replay is one instant of a sighting;
-          weather still going on over it would be your own room, not the witness's evening.</li>
-        <li><strong>Out of sight, nothing runs.</strong> A scene scrolled past, or in a panel that is
-          closed, draws and computes nothing, and a replay that was playing is paused. It is
-          drawn again when it comes back, and the play button starts the replay again.</li>
-        <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
-          the weather, before 1957 for satellites, orbital elements before 2021 — the field
-          stays editable and the interface says which of the two it is.</li>
-              <li><strong>The text and the picture follow each other.</strong> While the File group is open, putting the caret in a decor object or a shape of the text selects it on the picture, and selecting one on the picture selects its lines in the text (the group stays open: the text has the priority over the panel of what you click). The lines changed since the recording was loaded, or last saved or exported, have a blue bar in the margin and a light tint. <kbd>F7</kbd> goes to the next changed zone, <kbd>Shift</kbd>+<kbd>F7</kbd> to the previous one. What you edit, or undo, on the form or the picture is shown the same way in the text, whether it has the focus or not. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) searches the text, and replaces.</li>
-              <li><strong>Everything can be taken back.</strong> The two arrows at the end of the tabs, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>, step back and forward through what you changed, in any group and on the render. The history is that of the File group's text editor, loaded the first time you touch anything, and forgotten when another recording is loaded. Deleting something (a shape, a decor object, a named moment), by its bin or with <kbd>Delete</kbd> or <kbd>Backspace</kbd>, asks nothing: undo puts it back.</li>
-      </ul>
     </div>
 
     <div class="group-doc">
@@ -625,7 +580,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Files</h3>
-      <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries as a snapshot beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>snapshots</code> in the format). The picker names only what each holds; where it is, its file says: its address, which a file of yours or another address replaces. The recording's own address keeps it inside the recording, and the recording's text is then shown under it with its section highlighted; another address where there is no file yet is where Save writes it. An annex says when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON. The weather, the place, the night sky and the scenery are among them too, inside the recording or in a file of their own. Whatever is picked, <strong>Save</strong> gives its data. Every source the editor or the scene would ask (the place's geocoder, the night sky's atlas, relief, imagery, roads, water, railways, air aloft, weather) is picked between the service asked live and <strong>File</strong>: in its group (Location, Environment, Weather), one kind of data at a time (<strong>Data</strong>, then its source),, which reads it from the recording's files and links to its item here; a file not taken yet is taken at the next save.</p>
+      <p>The files the recording is made of, picked one at a time above the tab: the recording itself, and each annex it carries as a snapshot beside it (relief, photograph of the ground, roads, water, railways, air aloft, map photograph; see <code>snapshots</code> in the format). The picker names each file only by what it holds; where it is shows in its file field: an address, which you can replace with a file of yours or another address. Giving an annex the recording's own address keeps it inside the recording, whose text is then shown under it with the annex's section highlighted; an address where there is no file yet is where Save will write it. An annex says when and from whom it was taken, with <strong>Refresh</strong> to take it again, <strong>Save</strong> to have its file, and its text to edit when it is JSON. The weather, the place, the night sky and the scenery are among them too, inside the recording or in a file of their own. Whatever is picked, <strong>Save</strong> gives its data. Every source the editor or the scene would ask (the place's geocoder, the night sky's atlas, relief, imagery, roads, water, railways, air aloft, weather) is picked in its group (Location, Environment, Sky), one kind of data at a time (<strong>Data</strong>, then its source), between the service asked live and <strong>File</strong>. <strong>File</strong> reads that data from the recording's files and links to its item here; a file not taken yet is taken at the next save.</p>
       <p>The recording itself. <strong>Load sighting file</strong> brings an existing recording in, <em>from your disk</em> or, a click on these words, <em>from an address</em>, and <strong>Save</strong> hands you the file. <strong>Export KML</strong> hands you a Google Earth file instead, holding what the reconstruction has that a map can take: where the witness stood, their path when they moved, the direction stated for each phenomenon at each keyframe, where a reading places what would have been seen, and the traces brought in, given back as they came. Open it in Google Earth, in SVH or in QGIS and lay it over your own geometry. A line of sight is a direction and nothing else, so it is drawn at a conventional five kilometres that its own description calls conventional: read its bearing, not its end. Heights are counted from the ground the witness set off from, which the file states. <strong>Export GeoJSON</strong> writes the same thing in the format every GIS reads: WGS 84 with no <code>crs</code> member, as RFC 7946 requires, each feature saying which group it belongs to and what its heights are counted from, since GeoJSON has folders for neither. A dot after this tab says the recording holds changes not saved; loading another file or address while it does asks first. Under them,
         the same recording as JSON text, kept in step both ways: what you change in the form or on
         the render appears in it, and a text that parses becomes the recording as soon as you stop
@@ -636,6 +591,52 @@ if (docs) {
         first time this group is opened, so it costs nothing to those who never leave the form.</p>
       <p><strong>Modules</strong>, the last item of the picker, adds what others publish: imagery, relief, 3D models, a source of weather, an event of the sky. Paste a module's address and press <strong>Add</strong>: your modules stay in this browser, can be turned off or removed, and can be saved to a file to load elsewhere. <strong>Named by this recording</strong> says the recording needs it. <strong>Check</strong> tries a module against what UFO@home expects of it and says what is wrong and what it could not try, asking its services with the recording's place and date; it says nothing of its data being right, or of it being safe. See <a href="/docs/modules/">how to add your own</a>.</p>
     </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Point at anything and it names itself</h2>
+    <p>Hovering the scene names what is under the pointer. A star gives its name, and with <kbd>Alt</kbd> held its
+      magnitude and how high it stood — “Venus, mag −4, 8° above the horizon” answers a report of a bright light
+      near the horizon on its own, where a bare name would not. The Sun, the Moon, the planets and
+      any comet up that night answer the same way, and so does everything in the environment: a
+      building, a tree, another witness. With <kbd>Alt</kbd> held, an object of the environment also
+      says its size and how far it stands from the eye (“Tree 19 — 2 × 2 × 11.8 m, 540 m away”):
+      the measure is taken only then.</p>
+    <p>What the ground hides does not answer. A star behind a hill is as unseeable as one below the
+      horizon, so neither is offered — a reconstruction is not a list of what is in the sky, it is
+      what could have been seen from where the witness stood.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Rules worth knowing</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>A keyframe is held, not faded.</strong> A shape left out of a later keyframe
+          stays as it was; one whose first keyframe is at five seconds is already painted, in that
+          state, from zero. To make something stop being visible, keyframe it at transparency 1.</li>
+        <li><strong>Declared outranks deduced.</strong> “It went into a cloud” is stated by the
+          witness, never worked out by geometry — this format describes an appearance on a field of
+          view, not a position in space, so nothing in it <em>can</em> know whether cloud came
+          between them.</li>
+        <li><strong>Paused is paused.</strong> Falling rain, twinkling stars, lightning, lens flare,
+          ambient sound — all stop with the player. A paused replay is one instant of a sighting;
+          weather still going on over it would be your own room, not the witness's evening.</li>
+        <li><strong>Out of sight, nothing runs.</strong> A scene scrolled past, or in a panel that is
+          closed, draws and computes nothing, and a replay that was playing is paused. It is
+          drawn again when it comes back, and the play button starts the replay again.</li>
+        <li><strong>Nothing is invented.</strong> Where a record does not exist — before 1940 for
+          the weather, before 1957 for satellites, orbital elements before 2021 — the field
+          stays editable and the interface says which of the two it is.</li>
+              <li><strong>The text and the picture follow each other.</strong> While the Files group is open, putting the caret in a decor object or a shape of the text selects it on the picture, and selecting one on the picture selects its lines in the text (the group stays open: the text has the priority over the panel of what you click). The lines changed since the recording was loaded, or last saved or exported, have a blue bar in the margin and a light tint. <kbd>F7</kbd> goes to the next changed zone, <kbd>Shift</kbd>+<kbd>F7</kbd> to the previous one. What you edit, or undo, on the form or the picture is shown the same way in the text, whether it has the focus or not. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) searches the text, and replaces.</li>
+              <li><strong>Everything can be taken back.</strong> The two arrows at the end of the tabs, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>, step back and forward through what you changed, in any group and on the render. The history is that of the Files group's text editor, loaded the first time you touch anything, and forgotten when another recording is loaded. Deleting something (a shape, a decor object, a named moment), by its bin or with <kbd>Delete</kbd> or <kbd>Backspace</kbd>, asks nothing: undo puts it back.</li>
+      </ul>
+    </div>
+
   </div>
 </section>
 
@@ -684,17 +685,17 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2 id="case">Un dossier, et ses observations</h2>
-    <p>L'adresse peut être le <code>case.json</code> d'un dossier. L'éditeur montre alors <strong>le dossier</strong> en haut et, dans le même conteneur, l'observation en cours d'édition dans un conteneur à part. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
+    <p>L'adresse peut être le <code>case.json</code> d'un dossier. L'éditeur montre alors <strong>le dossier</strong> en haut et, dessous, dans un cadre à part au sein du même éditeur, l'observation en cours d'édition. <code>&amp;track=</code> nomme l'enregistrement sur lequel il s'ouvre.</p>
     <ul class="plain">
       <li><strong>Le dossier</strong> a un <em>identifiant</em>, un <em>titre</em> et une date — le même sélecteur, le même qualificatif et le même texte EDTF que le début d'une observation — et <em>Sauver</em> dans l'onglet Fichier.</li>
       <li>Deux onglets, comme l'éditeur d'un enregistrement : <strong>Événements</strong> et <strong>Fichier</strong>. L'onglet Fichier montre <code>case.json</code> en texte, qu'on peut modifier (ce qui se lit comme un dossier est aussitôt le dossier, ce qui ne se lit pas encore est signalé et laisse le dossier comme il était), charger depuis un fichier JSON ou une adresse à la place du dossier ouvert (avec une question d'abord si des changements ne sont pas sauvés), et sauver. Ses clés sont complétées d'après la description propre au dossier, <a href="/case.schema.json"><code>case.schema.json</code></a>, générée depuis le type comme celle d'un enregistrement.</li>
-      <li><strong>Événements</strong> : un sélecteur liste ce que contient le dossier : les comptes rendus des témoins (« Observation de Q. B. ») et les lectures qu'on en fait, chacun un enregistrement à part, et les entretiens (« Interview de Q. B. »). En choisir un l'ouvre dessous, et ce qu'on a changé dans les autres est conservé. Un compte rendu ou une lecture s'ouvre dans l'éditeur d'un enregistrement ; un entretien, qui n'est pas un enregistrement, s'ouvre dans un <code>&lt;rr0-interview&gt;</code> : son titre, les témoins avec qui il a eu lieu (à cocher parmi les témoins du dossier, au moins un, parfois plusieurs), quand, par quel moyen (face à face, téléphone, visioconférence, chat, mail, courrier), qui l'a mené (un ou plusieurs enquêteurs) et sa description. Il a trois groupes, comme l'éditeur d'un enregistrement : le <em>Résumé</em>, qui contient cela ; les <em>Échanges</em>, qui lisent l'interview comme un dialogue (qui a dit quoi ; le temps de chaque tour en infobulle ; un passage retiré du fichier publié est noirci, sa raison en infobulle ; un passage qui raconte un moment de l'observation a un lien qui montre l'observation à ce moment, et l'observation liste ces passages dessous, chacun un lien en retour) ; et le <em>Fichier</em>, qui contient la transcription de l'interview avec l'adresse de son fichier, en texte à modifier, à charger depuis un fichier ou une adresse et à sauver. Le fichier contient tout ce que montre le résumé, et les deux restent identiques, quel que soit celui qu'on modifie.</li>
+      <li><strong>Événements</strong> : un sélecteur liste ce que contient le dossier : les comptes rendus des témoins (« Observation de Q. B. ») et les lectures qu'on en fait, chacun un enregistrement à part, et les entretiens (« Interview de Q. B. »). En choisir un l'ouvre dessous, et ce qu'on a changé dans les autres est conservé. Un compte rendu ou une lecture s'ouvre dans l'éditeur d'un enregistrement ; un entretien, qui n'est pas un enregistrement, s'ouvre dans un <code>&lt;rr0-interview&gt;</code> : son titre, les témoins avec qui il a eu lieu (à cocher parmi les témoins du dossier, au moins un, parfois plusieurs), quand, par quel moyen (face à face, téléphone, visioconférence, chat, mail, courrier), qui l'a mené (un ou plusieurs enquêteurs) et sa description. Comme l'éditeur d'un enregistrement, il est découpé en groupes, ici trois. Le <em>Résumé</em> contient ce qui précède. Les <em>Échanges</em> présentent l'interview comme un dialogue : qui a dit quoi, avec le moment de chaque prise de parole en infobulle. Un passage retiré du fichier publié y est noirci, et la raison du retrait est en infobulle. Un passage qui raconte un moment de l'observation porte un lien qui montre l'observation à ce moment ; en retour, l'observation liste ces passages sous elle, chacun avec un lien vers l'interview. Le <em>Fichier</em> contient la transcription de l'interview et l'adresse de son fichier, en texte que l'on peut modifier, charger depuis un fichier ou une adresse, et sauver. Le fichier contient tout ce que montre le résumé, et les deux restent identiques, quel que soit celui qu'on modifie.</li>
       <li>Un compte rendu a un <strong>identifiant</strong> dans le dossier, par lequel une lecture le désigne : proposé d'après le nom de famille du témoin (<code>trent</code>, puis <code>trent-2</code> s'il est pris) et affiché en grisé tant qu'il n'est pas gardé, ou saisi. Il est fait de lettres, de chiffres, de tirets et de soulignés, et aucun autre événement du dossier ne peut le porter. Le changer le change dans toutes les lectures qui le désignaient, et on ne peut pas le vider tant que l'une le fait. Une lecture qui désigne un identifiant que rien ne porte est signalée au-dessus des enregistrements.</li>
       <li><strong>+</strong> (infobulle : <em>Ajouter un événement</em>) ouvre, sous le bouton, ce que sera l'événement : son <em>Type</em>, puis ce que ce type demande. Une <em>Observation</em> est un enregistrement, vierge, depuis un fichier ou depuis une adresse, avec son témoin et sa date. Une <em>Lecture</em> demande de quelle observation elle est la <em>Lecture de</em>, son titre et son <em>Enquêteur</em> ; elle est datée du jour, ce qui ne se change pas, et le dossier la liste marquée <code>interpretationOf</code>. Vierge, elle commence comme une copie de toute la scène du compte rendu qu'elle lit. Une <em>Interview</em> se décrit sur place : avec quel témoin (un des témoins du dossier), un titre et qui l'a menée ; l'adresse de sa transcription se renseigne ensuite. Échap ou un clic à côté le referme.</li>
       <li><strong>Rapport</strong> (dans l'en-tête du dossier, et aussi sur le lecteur de dossier) exporte un rapport du dossier : les indications de chaque témoin et ce sur quoi elles reposent, les lectures comparées, les valeurs supposées, constats et sensibilité de chaque lecture, et une figure du ciel de chaque témoin avec l'endroit où chaque lecture place le phénomène. En page autonome (<em>HTML</em>), imprimé ou enregistré en <em>PDF</em> par le navigateur, en données (<em>JSON</em>, avec tous les résultats calculés) ou en tableaux pour un tableur (<em>CSV</em>, dans un zip). Il est établi d'après le dossier tel qu'il est en cours d'édition.</li>
-      <li>La carte de chaque lecture dit sa <strong>sensibilité</strong> : combien des indications du témoin elle reproduit (seulement les directions et tailles que l'enregistrement attribue au témoin, jugées avec l'incertitude d'un témoin), puis, dépliée, de combien chaque valeur qu'elle a supposée peut être décalée avant qu'elle reproduise moins, au regard de l'incertitude de cette valeur : <em>marge suffisante</em> ou <em>réglage fin</em>. Sous les événements, <strong>Lectures comparées</strong> les met côte à côte, groupées par hypothèse sur les témoins pour lesquels elle est lue, avec le nombre de valeurs que chacune a supposées ; le lecteur de dossier montre la même chose.</li>
-      <li><strong>Une lecture est listée sous l'observation qu'elle lit</strong>, reliée à elle, et dit à quoi elle a été confrontée : chacun de ses constats avec sa marque (✓ tient, ✗ échoue, ? non testable), et sa carte en rouge quand elle contredit ce qui est établi, en orange quand elle n'est pas tranchée, en vert quand tous ses tests tiennent, sans couleur tant que personne ne l'a testée. Outre les constats qu'elle écrit (<code>findings</code>), l'éditeur la confronte de lui-même à son compte rendu : sa date et son lieu dans ce qu'on sait de ceux du compte rendu (la <code>range</code> d'une valeur), et son Soleil, composé de sa date, de son heure, de son lieu et de son cap, qui doit éclairer la scène comme l'image la montre (<code>lighting</code>). Dans une lecture, le sélecteur de date ne propose que ces dates, une date ou un lieu saisis au-delà sont ramenés dans la marge, une heure que la lumière exclut à la plus proche de ce jour qu'elle permet, et ce qui contredit encore le compte rendu marque son champ en rouge, avec pourquoi. Une lecture qui dit comment le phénomène s'est retrouvé dans l'image (<code>mechanism</code>) est placée dans sa CONFIGURATION LA PLUS FAVORABLE et mesurée ainsi : la tache posée là où elle reste au plus près du phénomène tout au long, la goutte poussée dans le sens qui la suit le mieux, le reflet sous le Soleil que le compte rendu permet qui le pose au plus près. L'écart qui subsiste est un constat calculé plutôt qu'écrit, et c'est cette configuration que la scène montre.</li>
-      <li><strong>Le cadenas gèle un événement</strong>, et l'icône à côté en clone un — un enregistrement seulement, puisque réentendre un témoin, c'est tenir une autre interview. Gelez une reconstitution dès qu'un travail s'appuie DESSUS : une interview tenue pour savoir ce que le témoin en fait, une hypothèse confrontée à elle. Plus rien ne s'y saisit alors, elle ne peut être ni supprimée ni voir son id renommé, une note au-dessus de son éditeur dit pourquoi, et sa carte porte <em>Gelé</em> avec un bord atténué. Ce que l'éditeur tenait y est écrit d'abord, pour que le gel garde ce qui est à l'écran et non ce qui était au fichier. <strong>Cloner</strong> la copie sous un id à elle et ouvre la copie, qui est celle qu'on continue ; l'original reste tel quel, gelé s'il l'était, ce qui est toute la raison d'un clone. Le clone d'une lecture garde ce qu'elle lit et de qui elle est.</li>
+      <li>La carte de chaque lecture dit sa <strong>sensibilité</strong>. D'abord, combien des indications du témoin elle reproduit (seulement les directions et tailles que l'enregistrement attribue au témoin, jugées avec l'incertitude d'un témoin). Puis, quand on la déplie, de combien chaque valeur qu'elle a supposée peut être décalée avant que la lecture reproduise moins d'indications, comparé à l'incertitude de cette valeur : <em>marge suffisante</em> ou <em>réglage fin</em>. Sous les événements, <strong>Lectures comparées</strong> met les lectures côte à côte, regroupées par hypothèse (une même hypothèse pouvant valoir pour plusieurs témoins), avec le nombre de valeurs que chacune a supposées ; le lecteur de dossier montre la même chose.</li>
+      <li><strong>Une lecture est listée sous l'observation qu'elle lit</strong>, reliée à elle, et dit à quoi elle a été confrontée : chacun de ses constats avec sa marque (✓ tient, ✗ échoue, ? non testable), et sa carte en rouge quand elle contredit ce qui est établi, en orange quand elle n'est pas tranchée, en vert quand tous ses tests tiennent, sans couleur tant que personne ne l'a testée. Outre les constats qu'elle écrit (<code>findings</code>), l'éditeur la confronte de lui-même à son compte rendu. Il vérifie que sa date et son lieu restent dans la marge connue de ceux du compte rendu (la <code>range</code> d'une valeur). Il vérifie aussi que son Soleil, qui découle de sa date, de son heure, de son lieu et de son cap, éclaire la scène comme le montre l'image (<code>lighting</code>). Dans une lecture, le sélecteur de date ne propose donc que les dates de cette marge ; une date ou un lieu saisis en dehors y sont ramenés ; une heure que la lumière exclut est ramenée à l'heure permise la plus proche ce jour-là ; et ce qui contredit encore le compte rendu marque son champ en rouge, avec la raison. Une lecture qui dit comment le phénomène s'est retrouvé dans l'image (<code>mechanism</code>) est placée dans sa CONFIGURATION LA PLUS FAVORABLE, et c'est là qu'elle est mesurée : une tache est posée là où elle reste au plus près du phénomène tout au long, une goutte est poussée dans le sens qui le suit le mieux, un reflet est calculé pour la position du Soleil (parmi celles que permet le compte rendu) qui le pose au plus près. L'écart qui subsiste est un constat calculé plutôt qu'écrit, et c'est cette configuration que la scène montre.</li>
+      <li><strong>Le cadenas gèle un événement</strong>, et l'icône à côté en clone un (un enregistrement seulement : réentendre un témoin, c'est tenir une autre interview). Gelez une reconstitution dès qu'un travail s'appuie DESSUS : une interview tenue pour savoir ce que le témoin en pense, une hypothèse confrontée à elle. On ne peut alors plus rien y saisir, ni la supprimer, ni renommer son id ; une note au-dessus de son éditeur dit pourquoi, et sa carte porte <em>Gelé</em> avec un bord atténué. Ce que l'éditeur tenait y est écrit d'abord, pour que le gel garde ce qui est à l'écran et non ce qui était au fichier. <strong>Cloner</strong> la copie sous un id à elle et ouvre la copie, qui est celle qu'on continue ; l'original reste tel quel, gelé s'il l'était, ce qui est toute la raison d'un clone. Le clone d'une lecture garde ce qu'elle lit et de qui elle est.</li>
       <li>La <strong>corbeille</strong> retire du dossier l'événement affiché ; le fichier d'un enregistrement n'est pas supprimé. Une observation qu'une lecture lit encore ne peut pas être retirée : supprimez d'abord ses lectures. Un dossier garde au moins un enregistrement.</li>
       <li><strong>Sauver</strong> demande s'il faut sauver aussi les observations : oui écrit un zip du dossier et de chaque observation à côté, non n'écrit que <code>case.json</code>.</li>
       <li>Un enregistrement ouvert seul a dessous <em>Ajouter à un dossier</em> : cela crée un dossier autour de cet enregistrement, sans toucher à ce qu'on est en train d'éditer.</li>
@@ -726,9 +727,9 @@ if (docs) {
         <h3>Lui donner un mouvement</h3>
         <p>Placez la tête de lecture à un instant de l'observation et mettez la forme là où elle
           était alors : glissez-la, dimensionnez-la avec ses poignées ou modifiez ses champs. Chacun de
-          ces gestes écrit un <strong>keyframe</strong> à cet instant. Recommencez à un autre instant et
+          ces gestes écrit une <strong>image clé</strong> à cet instant. Recommencez à un autre instant et
           la lecture passe de l'un à l'autre en interpolant : deux ou trois suffisent souvent pour une
-          ligne droite ou une dérive lente. Pour un trajet que deux keyframes ne dessineraient pas,
+          ligne droite ou une dérive lente. Pour un trajet que deux images clés ne dessineraient pas,
           appuyez plutôt sur <strong>Enregistrer</strong> et déplacez le curseur sur le canevas le long
           de ce trajet, puis <strong>Arrêter</strong> : la lecture rejoue le geste sur la durée
           <em>réelle</em> de l'observation, donc cinq minutes de lecture pour une observation de cinq
@@ -769,14 +770,14 @@ if (docs) {
       <p>Qui a livré le récit — et, tout aussi important, <strong>à travers quoi il a
         observé</strong>. Un œil n'est pas un objectif : à l'œil nu un angle reste un angle, un
         appareil le projette en <code>f·tan θ</code>, et les deux dessinent des images réellement
-        différentes. Choisissez un appareil et sa <strong>focale</strong>, son
+        différentes. Choisissez un appareil : sa <strong>focale</strong>, son
         <strong>diaphragme</strong>, son <strong>temps de pose</strong> et sa <strong>mise au
-        point</strong> deviennent accessibles — chacun désactivé là où l'appareil le fixait, car le
+        point</strong> deviennent accessibles, chacun désactivé si l'appareil l'imposait, car le
         propriétaire d'un appareil à mise au point fixe n'avait rien à choisir. Les instruments
-        étrangers à la date de l'observation ne sont pas proposés, sauf celui que l'enregistrement
+        anachroniques à la date de l'observation ne sont pas proposés, sauf celui que l'enregistrement
         nomme déjà, gardé et signalé. Un appareil qui enregistre prend aussi sa <strong>sensibilité</strong> (ISO) : vide, un téléphone la règle lui-même ; indiquée, elle est réglée à la main, comme en mode manuel. Et la <strong>mesure de la lumière</strong> d'un téléphone dit comment il a lu la lumière : la moyenne de toute l'image (anciens téléphones, caméscopes), qui brûle en blanc une lumière vive dans une image sombre, ou en protégeant les hautes lumières (téléphones récents, par défaut), qui garde orange une lanterne à vingt mètres et assombrit le reste de la nuit.</p>
       <p><strong>Pellicule</strong> : pour un appareil qui en prend une, la liste propose celles de son format, celles qui n'étaient pas en vente l'année de l'enregistrement étant grisées avec leurs dates. Une pellicule donne la sensibilité et la réponse à la lumière, noir et blanc compris. La liste ne contient que ce qu'une source date : une pellicule absente est une pellicule que personne n'a encore cherchée. <strong>Caméra 35 mm, vue à la télévision</strong> ajoute ce qu'ajoute une telle copie : contraste, flou, poussières, tremblement et grain.</p>
-      <p>Le cadre d'un appareil est inscrit dans l'élément à ses propres proportions, bandes noires
+      <p>Le cadre d'un appareil est inscrit dans la zone de rendu à ses propres proportions, bandes noires
         comprises, et son champ devient celui par défaut ; l'œil, ou un appareil de modèle inconnu,
         est dessiné en 16:9 avec un champ vertical de 60°. Changer d'instrument reprojette les formes :
         elles gardent leurs angles, donc se déplacent autant qu'elles changent de taille. Le temps de
@@ -802,13 +803,13 @@ if (docs) {
         sur <strong>Localiser</strong> : latitude et longitude sont remplies par le géocodeur
         d'OpenStreetMap, tous les candidats restent listés, et en choisir un autre déplace le
         témoin. Ce qui est stocké est le nom <em>qualifié</em> qui a été résolu, pour qu'un lecteur
-        ultérieur retombe au même endroit. Déplacez une coordonnée à la main et un nom venu d'une
-        recherche est redérivé, ou effacé — un nom décrivant un endroit où l'observation n'a plus
+        ultérieur retombe au même endroit. Si vous modifiez une coordonnée à la main, un nom venu d'une
+        recherche est recalculé d'après la nouvelle position, ou effacé : un nom décrivant un endroit où l'observation n'a plus
         lieu serait une fausse déclaration écrite. Un nom que vous avez tapé vous-même est gardé tel
         quel et jamais remplacé, même si aucune recherche ne le trouve.</p>
       <p><strong>Cap</strong> est la direction regardée, <strong>Inclinaison</strong> de combien
         vers le haut ou le bas, et <strong>Altitude</strong> s'entend au-dessus du niveau de la mer,
-        plancher fixé par la hauteur du sol à cet endroit : un témoin dans les Alpes n'est pas à
+        sans pouvoir descendre sous la hauteur du sol à cet endroit : un témoin dans les Alpes n'est pas à
         0 m. Les sources de relief et d'imagerie se choisissent ici même, sous les coordonnées dont
         elles décrivent le sol.</p>
       <p>Position, cap et inclinaison s'écrivent à la tête de lecture, comme une image clé de la
@@ -823,17 +824,17 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Chronologie</h3>
-      <p>Un début, une fin, une durée — et un <strong>fuseau horaire</strong>, qui est la règle et
-        non le nombre. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
+      <p>Un début, une fin, une durée, et un <strong>fuseau horaire</strong>, c'est-à-dire la règle de calcul de l'heure
+        et non un simple décalage. Choisissez le fuseau du témoin et le décalage est dérivé des règles de ce
         fuseau <em>à la date de l'observation</em> : Valensole en juillet 1965 donne UTC+1, pas
         l'UTC+2 d'aujourd'hui, la France n'ayant rétabli l'heure d'été qu'en 1976.</p>
       <p>Le fuseau est rempli d'après les coordonnées, et ne remplace jamais celui que vous avez
         choisi. Les frontières de fuseaux sont grossières (Montgomery, en Alabama, tombe dans
-        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) : les deux sont donc une seule chose dite dans les deux sens, tenue en phase : choisissez un fuseau et le décalage suit ; saisissez un décalage et un fuseau qui l'indique ce jour-là est choisi (celui du lieu quand il convient). Le seul autre choix est <em>inconnu</em>, qui n'a pas de décalage, et un nombre qu'aucun fuseau n'indique ce jour-là est refusé. Un décalage qu'aucune horloge à cette longitude
-        n'aurait pu suivre est signalé, l'heure solaire du méridien dans son infobulle. Modifier l'une
+        America/Chicago, qui avait l'heure d'été en 1948 quand l'Alabama ne l'avait pas) . Fuseau et décalage sont donc une seule information, réglable par l'un ou l'autre et toujours cohérente : choisissez un fuseau et le décalage suit ; saisissez un décalage et l'éditeur choisit un fuseau qui donnait ce décalage ce jour-là (celui du lieu quand il convient). Le seul autre choix est <em>inconnu</em>, qui n'a pas de décalage, et un nombre qu'aucun fuseau n'indique ce jour-là est refusé. Un décalage qu'aucune horloge à cette longitude
+        n'aurait pu suivre est signalé, avec l'heure solaire du méridien en infobulle. Modifier l'une
         des deux dates retire une durée explicite dès que les deux dates donnent une durée exacte à
         elles seules.</p>
-      <p>Chaque date est soit <strong>précise</strong> — un sélecteur, pour un instant complet exact — soit dite en <strong>EDTF</strong>, un texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date, ou toute date en doute, qui se termine par <code>?</code> (incertain), <code>~</code> (approximatif) ou <code>%</code> (les deux). Le bouton à côté dit laquelle c'est et bascule de l'une à l'autre. Survoler le texte montre, dans son infobulle, ce qui a été compris (« → juillet 1965 — incertaine »), et un <strong>(?)</strong> dans le champ liste la syntaxe. La plupart des archives ont besoin de l'EDTF : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ. La <strong>durée</strong> se dit de la même façon : précise, un nombre de secondes, ou telle qu'elle a été énoncée — une durée ISO 8601 avec un doute ou une plage (<code>PT10M~</code>, <code>PT5M/PT10M</code>) — et, entre parenthèses après elle, l'unique durée à laquelle la simulation est jouée.
+      <p>Chaque date est soit <strong>précise</strong> — un sélecteur, pour un instant complet exact — soit dite en <strong>EDTF</strong>, un texte, pour tout ce qu'un sélecteur ne sait pas dire : une année seule, un mois, une heure sans date, ou toute date en doute, qui se termine par <code>?</code> (incertain), <code>~</code> (approximatif) ou <code>%</code> (les deux). Le bouton à côté dit laquelle c'est et bascule de l'une à l'autre. Survoler le texte montre, dans son infobulle, ce qui a été compris (« → juillet 1965 — incertaine »), et un <strong>(?)</strong> dans le champ liste la syntaxe. La plupart des archives ont besoin de l'EDTF : sur 241 dossiers de rr0.org, 43 % n'énoncent qu'une année et 17 % seulement une date avec une heure. La date d'un dossier est le même champ. La <strong>durée</strong> se saisit de la même façon : précise (un nombre de secondes), ou telle qu'elle a été énoncée (une durée ISO 8601 avec un doute ou une plage : <code>PT10M~</code>, <code>PT5M/PT10M</code>). Entre parenthèses après elle s'affiche la durée unique sur laquelle la simulation est jouée.
       <p><strong>Moments</strong> nomme l'instant de la tête de lecture (A, B, C… comme les croquis
         des enquêtes), avec une phrase de ce qui s'y passe. En choisir un dans la liste y va ;
         <strong>🎯</strong> retourne à celui affiché, ce que la liste ne peut pas faire une fois la
@@ -845,20 +846,20 @@ if (docs) {
       <p>Ce qui se tenait autour du témoin, à une distance réelle vers l'est et vers le nord :
         bâtiments avec leurs étages et leurs fenêtres, arbres, lampadaires, véhicules, aéronefs —
         et <strong>d'autres témoins</strong>. C'est la seule chose qui puisse mettre un nombre sur
-        une distance : si l'objet est passé <em>derrière</em> ce hangar il était au moins aussi
+        une distance : si le phénomène est passé <em>derrière</em> ce hangar il était au moins aussi
         loin, <em>devant</em> cet arbre, au plus. Chaque croisement resserre d'un côté la largeur
-        réelle de l'objet, pour tout l'enregistrement ; le résultat s'affiche sous la taille
+        réelle du phénomène, pour tout l'enregistrement ; le résultat s'affiche sous la taille
         apparente, et dit « inconnue » quand rien ne croise sa ligne de visée — la réponse honnête
         pour la plupart des observations.</p>
-      <p><strong>Le décor vient tout seul, là où un lieu a été relevé.</strong> Quand vous donnez un lieu à l'enregistrement (par son nom, par ses coordonnées, ou en déplaçant le témoin), l'éditeur demande au relevé qui le couvre ce qui se trouve dans un rayon de cent mètres, et met chaque arbre, bâtiment, pont et portée de ligne électrique dans la liste, à sa place, sa hauteur et sa largeur mesurées : en France, le LiDAR HD de l'IGN (un balayage aérien du pays entier) pour les arbres et les bâtiments, et sa carte pour les ponts et les lignes aériennes, avec leur tension. Rien à presser. Une ligne sous la liste dit combien ont été trouvés, et un choix à côté dit de quel relevé ils viennent : <em>IGN LiDAR HD + BD TOPO</em> (par défaut, celui qui en sait le plus), le laser seul, la carte seule, ou <em>Fichier</em>, qui garde le décor que dit l'enregistrement et ne demande plus aucun relevé, même quand le témoin se déplace (le choix est celui de l'enregistrement, et renvoie à son élément de l'onglet Fichiers), ou <em>Aucun</em>, qui laisse le décor à vous seul et retire ce qu'un relevé avait apporté (Annuler le remet ; ce que vous avez placé reste ; votre navigateur retient le choix : demander envoie le lieu à ce service). Choisir un autre relevé l'interroge aussitôt sur le lieu où se tient l'enregistrement, et remplace ce que le premier avait apporté. Ailleurs, et partout où aucun relevé ne couvre le lieu, rien n'est demandé et rien n'est dit.
-        Ce qui est pris est celui du jour du relevé, qui n'est pas celui de l'enregistrement : gardez-le, déplacez-le, redimensionnez-le ou supprimez-le, comme n'importe quoi d'autre. De chaque sorte il n'apporte rien là où vous en avez placé vous-même (ce que vous avez placé reste), et jamais ajouté à un enregistrement qui est seulement chargé. Déplacer le témoin vers un autre lieu remplace ce qu'un relevé avait apporté pour le premier, et rien d'autre.</p>
+      <p><strong>Le décor vient tout seul, là où un lieu a été relevé.</strong> Quand vous donnez un lieu à l'enregistrement (par son nom, par ses coordonnées, ou en déplaçant le témoin), l'éditeur demande au relevé qui le couvre ce qui se trouve dans un rayon de cent mètres, et met chaque arbre, bâtiment, pont et portée de ligne électrique dans la liste, à sa place, sa hauteur et sa largeur mesurées : en France, le LiDAR HD de l'IGN (un balayage aérien du pays entier) pour les arbres et les bâtiments, et sa carte pour les ponts et les lignes aériennes, avec leur tension. Aucun bouton à presser. Une ligne sous la liste dit combien ont été trouvés, et un choix à côté dit de quel relevé ils viennent : <em>IGN LiDAR HD + BD TOPO</em> (par défaut, celui qui en sait le plus), le laser seul, la carte seule, ou <em>Fichier</em>, qui garde le décor que dit l'enregistrement et ne demande plus aucun relevé, même quand le témoin se déplace (le choix est celui de l'enregistrement, et renvoie à son élément de l'onglet Fichiers), ou <em>Aucun</em>, qui laisse le décor à vous seul et retire ce qu'un relevé avait apporté (Annuler le remet, et ce que vous avez placé vous-même reste). Votre navigateur retient ce choix. Interroger un relevé envoie le lieu au service qui le fournit. Choisir un autre relevé l'interroge aussitôt sur le lieu où se tient l'enregistrement, et remplace ce que le premier avait apporté. Ailleurs, et partout où aucun relevé ne couvre le lieu, rien n'est demandé et rien n'est dit.
+        Le décor ainsi obtenu est celui du jour du relevé, pas celui de l'observation : gardez-le, déplacez-le, redimensionnez-le ou supprimez-le, comme n'importe quel autre élément. Pour chaque type d'élément (arbres, bâtiments…), le relevé n'apporte rien si vous en avez déjà placé vous-même (ceux que vous avez placés restent), et il n'ajoute jamais rien à un enregistrement simplement chargé. Déplacer le témoin vers un autre lieu remplace ce qu'un relevé avait apporté pour le premier, et rien d'autre.</p>
       <p>Le relevé <strong>nomme</strong> aussi ce dont il connaît le nom. Un bâtiment prend le nom de la zone que la carte lui donne (<em>Mairie de Saint-Lô</em>, une poste, un beffroi), les parties de l'un étant numérotées ; un pont est nommé d'après la route qu'il porte (<em>Pont (Rue de Carentan)</em>), une portée de ligne d'après sa tension ; les autres sont numérotés comme tout ce que vous ajoutez. En France les <strong>routes</strong> de la scène viennent de la même carte, avec leurs noms, plutôt que d'OpenStreetMap, qui trop souvent ne répondait pas. Les bâtiments, comme les arbres, se tiennent sur le sol le plus bas sous eux, puisqu'ils sont construits dans la pente ; et une portée de ligne touche le sol à ses deux poteaux.</p>
       <p>Le <strong>rayon</strong> à côté du choix dit jusqu'où autour du témoin le relevé est interrogé, de 20 m à 3 km (100 m par défaut, et le navigateur le retient) : un rayon plus large ramène les bâtiments, ponts et lignes plus éloignés, tirés de la carte. Le laser, qui donne les arbres, n'est interrogé que dans 150 m. Hors de France, où le laser n'a pas volé, les bâtiments viennent d'OpenStreetMap (tout ce que ses bénévoles ont écrit d'un bâtiment est dessiné : hauteur, toit, couleurs ; le reste est un bâtiment ordinaire), sans arbres ; on la choisit dans la liste des relevés pour l'avoir n'importe où.</p>
       <p>Les <strong>lampadaires, feux, passages piétons et panneaux</strong> viennent avec tout relevé, d'OpenStreetMap ; à Paris les lampadaires viennent de l'inventaire de la ville elle-même (Paris Data), chaque lampe à sa place avec la couleur et le flux de sa lumière, l'orange d'une lampe au sodium comme le blanc d'une LED. OpenStreetMap est souvent lent ou en panne : la ligne sous le relevé dit alors que l'éclairage est attendu, et le plante quand il arrive, sans que vous ayez rien à faire (une étape de l'historique), ou dit qu'il n'est pas disponible pour l'instant, avec un bouton <strong>Réessayer</strong>.</p>
       <p>Pendant que le décor est recherché, un <strong>spinner</strong> couvre l'image ; choisir « Aucun » dans la liste des relevés arrête l'attente (ce que le relevé répond ensuite est jeté). Ce qui a été pris est <strong>daté</strong> : la ligne d'état donne le jour du vol du laser, de la photo aérienne et de la dernière édition de la carte, et chaque objet garde le jour le plus récent dont il est tiré (<code>surveyedOn</code>). Quand ce jour est <strong>postérieur à l'observation</strong>, un avertissement le dit, et continue de le dire si la date de l'observation est modifiée ensuite : le décor est alors un repère, pas ce qui se tenait là.</p>
       <p>Le <strong>toit</strong> d'un bâtiment est lu aussi : dans le laser, un toit à deux ou quatre pentes (et dans quel sens court son faîte) ou plat, le bâtiment montant alors jusqu'au faîte ; dans la photo aérienne, sa couleur (tuile, ardoise, zinc), prise sans le vert des arbres qui le recouvrent. Un toit que le relevé ne sait pas lire reste une simple boîte, pas une supposition.</p>
       <p>Les <strong>murs</strong> sont dessinés comme des murs : la couleur de la matière que la carte énonce pour eux (pierre, brique, béton, parpaing, bois ; un enduit clair, un peu différent d'une maison à l'autre, là où elle n'en énonce pas, soit deux bâtiments sur cinq), avec des fenêtres à chaque étage et une porte au rez-de-chaussée de la face avant. Ce sont les fenêtres typiques d'une façade, pas celles de cette maison, et certaines sont éclairées quand le Soleil est bien sous l'horizon : environ la moitié le soir, presque aucune de trois à cinq heures du matin, quelques-unes de plus à l'aube, selon l'heure de l'horloge (toujours les mêmes fenêtres, donc celles allumées à trois heures le sont encore à vingt et une). Les heures suivent l'enquête Emploi du temps de l'INSEE (2009-2010 : la moitié des couples dorment à 22 h 40 et la moitié sont levés à 7 h, neuf personnes sur dix dorment de 1 h à 6 h) ; la courbe entre ces points, les deux sur cent toujours debout et la moitié des fenêtres allumées quand tout le monde est debout sont des hypothèses. Tout ce qui concerne les murs et le toit (leur couleur, des murs nus, la forme du toit, sa hauteur et son faîte) peut ensuite être modifié dans les propriétés du bâtiment, comme n'importe quel autre décor.</p>
-      <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Environnement s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Glissez l'objet sélectionné pour le porter sur le sol ; avec <kbd>Maj</kbd> il ne va qu'est-ouest, avec <kbd>Alt</kbd> que nord-sud, avec <kbd>Ctrl</kbd> que haut-bas. Maintenez <kbd>Cmd</kbd> (ou deux de ces touches) pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre. Tourner la vue fixe la pose de la caméra à l'instant affiché ; maintenez <kbd>Alt</kbd> pendant qu'elle tourne (<kbd>Cmd</kbd>+<kbd>Alt</kbd> depuis un objet) et cette clé fixe la vue de cet instant seul : la rotation de la caméra vers elle et depuis elle est laissée hors de l'image, que la pose d'une caméra de cinéma filerait sinon. Une légende sur la scène le dit pendant que la vue tourne.</p>
+      <p><strong>Cliquez un objet sur l'image pour le sélectionner :</strong> le groupe Décor s'ouvre sur lui, encadré, prêt à être déplacé, dimensionné ou tourné. Glissez l'objet sélectionné pour le porter sur le sol ; avec <kbd>Maj</kbd> il ne va qu'est-ouest, avec <kbd>Alt</kbd> que nord-sud, avec <kbd>Ctrl</kbd> que haut-bas. Maintenez <kbd>Cmd</kbd> (ou deux de ces touches) pendant l'appui et c'est la vue qui tourne, comme au-dessus du sol nu — le moyen de la tourner depuis une forêt, où chaque appui tombe sur un arbre. Tourner la vue fixe la pose de la caméra à l'instant affiché. Maintenez <kbd>Alt</kbd> pendant qu'elle tourne (<kbd>Cmd</kbd>+<kbd>Alt</kbd> depuis un objet) et cette image clé ne fixe la vue que de cet instant : la rotation de la caméra pour y arriver et en repartir n'est pas filée dans l'image, alors qu'elle le serait avec une pose de caméra de cinéma. Une légende sur la scène le dit pendant que la vue tourne.</p>
       <p><strong>Plusieurs témoins, et leurs points de vue.</strong> Un témoin placé ici peut porter
         l'URL de son <em>propre</em> enregistrement, et un clic droit sur lui dans la scène propose
         de le consulter — ce qui charge son récit et vous place là où il se tenait, regardant où il
@@ -868,13 +869,13 @@ if (docs) {
         tourne le témoin courant vers ce qui est sélectionné.</p>
       <p>Publiés ensemble, ces enregistrements deviennent le sélecteur de témoin que voit un
         lecteur — voir <a href="/docs/format/#several-observers-the-case">le dossier</a> qui les liste.</p>
-      <p>Au-delà de la place et de la taille, un objet a les <strong>propriétés de son genre</strong>, dessinées d'après ce que le genre dit qu'il laisse régler : étages, étage où se tient le témoin et une fenêtre par côté pour un bâtiment ; les fenêtres d'une voiture, dont le pare-brise et la lunette arrière ne s'ouvrent jamais ; la portée, le tablier et le garde-corps d'un pont ; les poteaux et le brin d'une ligne aérienne. Un champ vide ne dit rien et montre, en grisé, la valeur qu'utilise la scène. Un modèle porte ses propres couleurs : la <strong>Couleur</strong> unique n'est donc proposée que pour les formes de base ; un modèle peut offrir à la place la couleur d'une de ses parties — le costume d'une silhouette, les feuilles d'un arbre — ou un interrupteur d'une de ses parties — le train d'atterrissage rentré d'un avion de ligne — et tout autre réglage qui lui est propre, qui apparaissent ici de la même façon.</p>
+      <p>Au-delà de la place et de la taille, un objet a les <strong>propriétés de son type</strong>, présentées d'après ce que ce type permet de régler : étages, étage où se tient le témoin et une fenêtre par côté pour un bâtiment ; les fenêtres d'une voiture, dont le pare-brise et la lunette arrière ne s'ouvrent jamais ; la portée, le tablier et le garde-corps d'un pont ; les poteaux et le brin d'une ligne aérienne. Un champ vide ne dit rien et montre, en grisé, la valeur qu'utilise la scène. Un modèle porte ses propres couleurs : la <strong>Couleur</strong> unique n'est donc proposée que pour les formes de base ; un modèle peut offrir à la place la couleur d'une de ses parties — le costume d'une silhouette, les feuilles d'un arbre — ou un interrupteur d'une de ses parties — le train d'atterrissage rentré d'un avion de ligne — et tout autre réglage qui lui est propre, qui apparaissent ici de la même façon.</p>
       <p>Un décor peut aussi <strong>se déplacer</strong> (un avion qui traverse le ciel, une
         voiture qui passe) et porter des <strong>feux</strong> aux cadences réelles et
         réglementaires : anticollision de 40 à 100 éclats par minute, feux de détresse de 60 à 120.
         Sur une pose longue, cette cadence est dessinée : les lampes fixes laissent des traits, les
         clignotantes des points à intervalles réguliers — c'est exactement ce qui distingue la photo
-        d'un avion de ligne de celle d'un objet qui ne clignote pas.</p>
+        d'un avion de ligne de celle d'un phénomène qui ne clignote pas.</p>
       <p>Les <strong>jeux de lampes prêts à l'emploi</strong> proposés pour un objet sont ceux qui conviennent au modèle dont il est dessiné, mis à l'échelle de la machine : on n'offre pas à un avion de ligne ceux d'un hélicoptère, une voiture de police reçoit ses gyrophares. Le modèle dit aussi quel bruit fait un aéronef en vol (un A350 s'entend comme un gros porteur, la doublure de quelque chose dont personne n'a rapporté le bruit est silencieuse) et donne son moteur à un véhicule.</p>
       <p>Les <strong>feux d'un véhicule</strong> sont un réglage et non un interrupteur, car tout le monde ne les met pas, ni comme il faut : <strong>éteints</strong>, <strong>feux de position</strong> (qui montrent le véhicule et n'éclairent rien), <strong>feux de croisement</strong>, <strong>feux de route</strong> (loin, étroits, éblouissants) ou <strong>antibrouillards</strong> (bas et larges). On le choisit dans le groupe <em>État</em> de l'objet, à l'instant où l'on veut qu'il change : c'est écrit comme une image clé, comme l'interrupteur des lampes, et cela tient jusqu'à la suivante. Un faisceau éclaire vraiment la route, les bas-côtés, les arbres et les murs devant le véhicule. Le véhicule où roule le témoin (le <code>vehicle</code> de l'enregistrement) met ses feux de croisement tout seul à partir du crépuscule, sauf si le fichier dit autre chose.</p>
     </div>
@@ -882,20 +883,20 @@ if (docs) {
     <div class="group-doc">
       <h3>Ciel</h3>
       <p>Le seul groupe qui ne soit pas un compte rendu. La météo est un fait mesurable en un lieu à
-        un instant, et les deux groupes ci-dessus énoncent déjà les deux — elle est donc relevée
+        un instant, et les groupes Lieu et Chronologie énoncent déjà l'un et l'autre : elle est donc relevée
         dans ERA5, la réanalyse de l'ECMWF, et affichée <em>en lecture seule</em> au-dessus d'une
         ligne nommant le jeu de données et l'instant UTC exact décrit. Un mauvais fuseau horaire s'y
         voit avant de se voir dans le ciel.</p>
-      <p>Choisir <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> (dans <strong>Sources des données</strong>, derrière la roue dentée en haut à droite du groupe, <strong>Météo</strong>, dans le groupe <strong>Ciel</strong>) lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle du témoin et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
+      <p>Dans le groupe <strong>Ciel</strong>, la roue dentée en haut à droite ouvre <strong>Sources des données</strong>. Y choisir, pour <strong>Météo</strong>, <strong>Fichier</strong> plutôt qu'<strong>Open-Meteo</strong> lit la météo dans le fichier de l'enregistrement (en lui-même, ou dans un fichier à côté : voir l'onglet Fichiers) et ne la redemande plus à personne : les valeurs restent ce qu'elles étaient, avec le relevé dont elles viennent, et les champs deviennent modifiables ; modifiée, la météo devient celle du témoin et le relevé n'est plus nommé. Un enregistrement qui nomme une source est rejoué tel qu'il a été composé et n'est jamais reconsulté : un dossier publié se lit à l'identique hors ligne.</p>
       <p>Une consultation écrit un point météo au début, à chaque heure pleine et à la fin de
         l'enregistrement, chacun là où se tient le témoin à ce moment ; la piste est redisposée
         quand la durée de l'enregistrement change.</p>
-      <p>Le groupe a trois onglets à lui, une partie ouverte à la fois comme les groupes eux-mêmes :
-        <strong>Précipitations</strong> — leur type et leur intensité, et la case
-        <strong>Orage</strong>, qui est là où un code météo signale un orage, à côté de la pluie et
-        de la grêle, et qui allume les éclairs et le tonnerre à son vrai retard —
-        <strong>Nuages</strong>, et <strong>Vent</strong>, la direction vers laquelle il souffle et
-        sa force, qui est ce qui porte tout nuage sans vent propre.</p>
+      <p>Le groupe a ses propres onglets, un seul ouvert à la fois comme les groupes eux-mêmes. Les trois premiers sont
+        <strong>Précipitations</strong> (leur type et leur intensité, et la case
+        <strong>Orage</strong> : un code météo y signale un orage, à côté de la pluie et
+        de la grêle, et elle allume les éclairs et le tonnerre avec son vrai retard),
+        <strong>Nuages</strong>, et <strong>Vent</strong> (la direction vers laquelle il souffle et
+        sa force ; c'est lui qui porte tout nuage qui n'a pas de vent propre).</p>
       <p>Les nuages sont la partie <strong>Nuages</strong> de ce groupe. Un ciel relevé
         arrive en trois couches, les bandes basse, moyenne et haute du relevé ; un ciel décrit par
         le témoin en compte autant qu'il en a vu. Chaque nombre du panneau est écrit dans
@@ -942,12 +943,12 @@ if (docs) {
         <strong>densité</strong> et une <strong>obscurité</strong> qui, vide, est celle de la couche.
         Posez-le à deux instants et il dérive, grossit ou s'assombrit entre les deux ; par-dessus,
         il suit le vent de la couche comme tout autre nuage.</p>
-      <p>Toute modification des nuages retire la météo au relevé : la source est abandonnée et
+      <p>Toute modification des nuages détache la météo du relevé : la source est abandonnée et
         aucune consultation ultérieure ne peut écraser ce que vous avez réglé. Rechoisissez
         <strong>Open-Meteo</strong> comme source et les trois couches du relevé reviennent, à la place des
         vôtres. La seule exception est l'<strong>alignement des cristaux</strong>, proposé sur une
-        couche de cirrus seulement : aucun relevé météo ne le mesure, il reste donc modifiable avec
-        ERA5. Des cristaux culbutant donnent un anneau nu ; des plaquettes à plat et des colonnes
+        couche de cirrus seulement : aucun relevé météo ne le mesure, il reste donc modifiable même
+        quand la météo vient d'ERA5. Des cristaux culbutant donnent un anneau nu ; des plaquettes à plat et des colonnes
         roulantes donnent parhélies, arcs et pilier.</p>
       <p>Dessous se trouve la ligne <strong>« Ciel : »</strong> — en lecture seule, et qui n'est même
         pas un relevé. Une pluie de météores est une position sur l'orbite terrestre et l'orbite
@@ -966,24 +967,25 @@ if (docs) {
         de ce projet ; et un arc-en-ciel n'est mentionné que si de la pluie a été signalée.
         Que cela explique ou non quelque chose est la conclusion du lecteur, jamais l'affirmation du
         fichier.</p>
+      <p><strong>Avions</strong>, un onglet de <strong>Ciel</strong>, dit quels avions un relevé contient autour du témoin. adsb.lol ne demande rien. Flightradar24 demande votre propre abonnement et sa clé, saisie là, qui reste dans la mémoire de la page jusqu'à ce que vous la rechargiez. Chaque demande dépense des crédits de cet abonnement, d'ordinaire 400 à 550 et au plus environ 900 : une est faite quand sa source est choisie, puis quand le lieu ou l'heure change. La ligne sous la clé dit combien de vols ont été tracés, dans quel rayon et pour quel coût, ou pourquoi la source n'a pas répondu. Seuls les huit plus proches au milieu de l'enregistrement ont une trace, et jusqu'où vous pouvez remonter dépend de votre formule (30 jours pour la moins chère). La liste donne le type, l'immatriculation, la distance, la direction, la hauteur dans le ciel et l'altitude de chaque vol à l'instant affiché, du passage le plus proche au plus lointain : dans un ciel clair, un avion fait un pixel ou deux, voire moins, et c'est donc elle qui dit qui était là. Choisissez-en un pour tourner la vue vers lui et l'entourer sur l'image ; s'il n'est pas encore là, l'enregistrement va au moment où il y est. Choisissez-le de nouveau pour retirer l'anneau, qui ne figure dans aucune image tirée de la scène. Tourner la vue ne change rien à l'enregistrement, et rien de cela n'y est écrit : ce sont des candidats compatibles, jamais une identification.</p>
     </div>
 
     <div class="group-doc">
       <h3>Phénomène</h3>
-      <p>L'objet lui-même. Ovale ou polygone, couleur, transparence, halo, <strong>éclat</strong>
+      <p>Le phénomène lui-même. Ovale ou polygone, couleur, transparence, halo, <strong>éclat</strong>
         (à quel point il éblouissait — une lumière qu'on ne peut pas regarder délave le champ autour
         d'elle, projette les aigrettes du diaphragme et sature au blanc, ce qu'aucun halo ne fait)
         et <strong>flou</strong> (à quel point ses contours paraissaient indistincts). Plusieurs
         formes peuvent partager une même chronologie — un engin, une flamme qui traîne, un second
-        objet — chacune avec son nom, groupées, réordonnées ou supprimées depuis le menu contextuel
+        phénomène — chacune avec son nom, groupées, réordonnées ou supprimées depuis le menu contextuel
         du canevas.</p>
       <p><strong>Largeur apparente</strong>, <strong>largeur réelle</strong> et
-        <strong>distance</strong> sont trois lectures d'une même relation, tenues en accord : modifiez
+        <strong>distance</strong> sont trois expressions d'une même relation, tenues en accord : modifiez
         l'une et l'une des deux autres suit — celle que <strong>Maintenir</strong> retient ne bouge
         jamais. Seul l'angle appartient à l'enregistrement ; la largeur réelle en découle, et la
         distance est celle à laquelle la scène dessine la forme, une hypothèse à essayer plutôt qu'un
         énoncé. À l'œil nu sur 60° répartis sur un canevas de
-        360 pixels, un degré fait exactement 6 pixels et la pleine Lune environ 3 — un objet de
+        360 pixels, un degré fait exactement 6 pixels et la pleine Lune environ 3 — un phénomène de
         3,5 m à 90 m fait donc 13 pixels de large, et non les 90 vers lesquels va la main. S'y
         tromper est la première cause de reconstitution fausse.</p>
       <p>Cette distance n'est jamais enregistrée avec l'observation, et <strong>Retirer l'hypothèse
@@ -1001,14 +1003,14 @@ if (docs) {
         exigé avant qu'il soit dessiné. <strong>Titre de la lecture</strong>, en haut de cette partie, nomme ce que l'enregistrement affirme — « Engin sur ses jambes », « Avril 2013 : une maquette au bout d'un fil » — et est toujours proposé : en saisir un crée la lecture avant qu'un corps le fasse. <strong>+</strong> ajoute un corps (et la lecture, si
         l'enregistrement n'en a pas) : il représente la forme sélectionnée, dans sa direction, à la
         distance où la scène la dessine et à la taille que sa largeur apparente donne là, en une
-        seule image clé à la tête de lecture ; posé au sol à cette distance quand la ligne de visée y
-        entre avant ; sans forme, là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
+        seule image clé à la tête de lecture ; ou posé au sol si la ligne de visée le touche avant cette
+        distance ; sans forme sélectionnée, il est placé là où le témoin regarde. 🎯 tourne le témoin vers le corps. Un
         enregistrement peut ne tenir que des corps : sa dernière forme se supprime.
         <strong>À</strong> la tête de lecture, la position du corps (depuis le témoin, ou dans le
         monde), sa taille et son attitude sont affichées telles qu'elles sont à cet instant ; en
         modifier une écrit une image clé là, et c'est ainsi qu'un corps reçoit son mouvement :
         déplacer la tête de lecture, modifier de nouveau. Une telle image clé ne dit rien d'autre :
-        la lumière, la flamme et les parties mobiles du corps continuent comme avant. Cette partie ouverte, un corps se prend aussi sur l'image : le glisser le
+        la lumière, la flamme et les parties mobiles du corps continuent comme avant. Quand cette partie est ouverte, on peut aussi saisir un corps sur l'image : le glisser le
         déplace d'autant que le pointeur tourne (sur le relief s'il est au sol, à la même distance
         s'il vole), et la molette au-dessus de lui le rapproche ou l'éloigne. Le corps affiché
         est encadré de poignées : un coin le dimensionne en entier, un côté l'étire à l'horizontale,
@@ -1018,64 +1020,16 @@ if (docs) {
         affiché ici. L'image dessine les corps, avec les formes à côté en contours pour les
         confronter, quel que soit le groupe ouvert, sauf dans la partie Formes, où les formes sont
         dessinées seules et en entier.</p>
-      <p><strong>Avions</strong>, un onglet de <strong>Ciel</strong>, dit quels avions un relevé contient autour du témoin. adsb.lol ne demande rien. Flightradar24 demande votre propre abonnement et sa clé, saisie là, qui reste dans la mémoire de la page jusqu'à ce que vous la rechargiez. Chaque demande dépense des crédits de cet abonnement, d'ordinaire 400 à 550 et au plus environ 900 : une est faite quand sa source est choisie, puis quand le lieu ou l'heure change. La ligne sous la clé dit combien de vols ont été tracés, dans quel rayon et pour quel coût, ou pourquoi la source n'a pas répondu. Seuls les huit plus proches au milieu de l'enregistrement ont une trace, et jusqu'où vous pouvez remonter dépend de votre formule (30 jours pour la moins chère). La liste donne le type, l'immatriculation, la distance, la direction, la hauteur dans le ciel et l'altitude de chaque vol à l'instant affiché, du passage le plus proche au plus lointain : dans un ciel clair, un avion fait un pixel ou deux, voire moins, et c'est donc elle qui dit qui était là. Choisissez-en un pour tourner la vue vers lui et l'entourer sur l'image ; s'il n'est pas encore là, l'enregistrement va au moment où il y est. Choisissez-le de nouveau pour retirer l'anneau, qui ne figure dans aucune image tirée de la scène. Tourner la vue ne change rien à l'enregistrement, et rien de cela n'y est écrit : ce sont des candidats compatibles, jamais une identification.</p>
       <p>Ce qui s'est passé dans le ciel pendant l'enregistrement, en tant que faits (un tir laser, un lancement de fusée), n'est pas dans le groupe Phénomène mais dans <strong>Ciel</strong>, à côté de l'état du ciel (précipitations, nuages, vent) : ce n'est ni la lecture du compte rendu, ni le décor, qui dure plus longtemps que l'observation. Sa partie <strong>Faisceaux</strong> liste les faisceaux de lumière (un laser, un projecteur) : les points de leur trajet (où il quitte l'émetteur, d'éventuels miroirs, où il finit), leur longueur d'onde, leur puissance, leur divergence et quand ils sont allumés ; leur éclat est ce que l'air en diffuse, calculé. Sa partie <strong>Lancements</strong> liste les lancements de fusée, leur chemin, leur moteur et leur panache. Sa partie <strong>Lanternes</strong>, à côté, est une lecture du compte rendu plutôt qu'un fait : des lanternes célestes lâchées du sol, ce qu'étaient ses lumières. Chaque lâcher indique d'où elles partent (en mètres à l'est et au nord du lieu de l'enregistrement), combien, entre quelles secondes, combien de temps elles brûlent et à quelle chaleur, les formes qu'elles représentent, le vent au sol et en altitude, la température de l'air et ses rafales, et la lanterne elle-même : sa lumière, sa forme (ronde à la base et carrée au sommet, ou en montgolfière au sommet en lobes) et la couleur de son papier, qui teinte sa lumière ; leurs vols sont calculés, chaque lanterne montant, dérivant et s'éteignant à sa façon. Un champ vide montre, en grisé, la valeur utilisée. Ils sont dessinés quel que soit le groupe ouvert.</p>
-    </div>
-    </div>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap prose-wide">
-    <h2>Pointez n'importe quoi, cela se nomme</h2>
-    <p>Survoler la scène nomme ce qui est sous le curseur. Une étoile donne son nom, et <kbd>Alt</kbd> enfoncé sa
-      magnitude et sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
-      de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
-      planètes et toute comète levée cette nuit-là répondent de même, et tout l'environnement
-      aussi : un bâtiment, un arbre, un autre témoin. Avec <kbd>Alt</kbd> enfoncée, un objet de
-      l'environnement dit aussi sa taille et sa distance à l'œil (« Arbre 19 — 2 × 2 × 11,8 m, à 540 m ») :
-      la mesure n'est prise qu'alors.</p>
-    <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
-      étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
-      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait le témoin.</p>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap">
-    <h2>Quelques règles à connaître</h2>
-    <div class="prose-wide">
-      <ul class="plain">
-        <li><strong>Un keyframe est tenu, pas fondu.</strong> Une forme absente d'un keyframe
-          ultérieur reste dans son état ; une forme dont le premier keyframe est à cinq secondes est
-          déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être visible, posez-lui un
-          keyframe à transparence 1.</li>
-        <li><strong>L'énoncé l'emporte sur le déduit.</strong> « Il est entré dans un nuage » est
-          énoncé par le témoin, jamais calculé par la géométrie : ce format décrit une apparence
-          dans un champ de vision, pas une position dans l'espace, donc rien en lui <em>ne peut</em>
-          savoir si un nuage s'est interposé.</li>
-        <li><strong>En pause, tout est en pause.</strong> Pluie qui tombe, scintillement des étoiles,
-          éclairs, reflets d'objectif, ambiances sonores — tout s'arrête avec le lecteur. Une lecture
-          en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
-          pièce, pas la soirée du témoin.</li>
-        <li><strong>Hors de vue, rien ne tourne.</strong> Une scène qu'on a fait défiler, ou dans un
-          panneau fermé, ne dessine ni ne calcule rien, et une lecture en cours est mise en pause.
-          Elle est redessinée à son retour, et c'est le bouton de lecture qui relance la lecture.</li>
-        <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
-          météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
-          le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
-              <li><strong>Le texte et l'image se suivent.</strong> Tant que le groupe Fichier est ouvert, placer le curseur dans un objet de décor ou une forme du texte le sélectionne sur l'image, et le sélectionner sur l'image sélectionne ses lignes dans le texte (le groupe reste ouvert : le texte a la priorité sur le panneau de ce que vous cliquez). Les lignes modifiées depuis le chargement de l'enregistrement, ou depuis la dernière sauvegarde ou le dernier export, ont une barre bleue dans la marge et une teinte claire. <kbd>F7</kbd> va à la zone modifiée suivante, <kbd>Maj</kbd>+<kbd>F7</kbd> à la précédente. Ce que vous modifiez, ou annulez, sur le formulaire ou sur l'image est montré de la même façon dans le texte, qu'il ait le focus ou non. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) cherche dans le texte, et remplace.</li>
-              <li><strong>Tout peut se défaire.</strong> Les deux flèches au bout des onglets, ou <kbd>Ctrl</kbd>+<kbd>Z</kbd> et <kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>Z</kbd>, reviennent en arrière et en avant sur ce que vous avez changé, dans n'importe quel groupe et sur le rendu. L'historique est celui de l'éditeur de texte du groupe Fichier, chargé la première fois que vous touchez à quelque chose, et oublié quand un autre enregistrement est chargé. Supprimer quelque chose (une forme, un élément de décor, un moment nommé), par sa poubelle ou avec <kbd>Suppr</kbd> ou <kbd>Retour arrière</kbd>, ne demande rien : annuler le remet.</li>
-      </ul>
     </div>
 
     <div class="group-doc">
       <h3>Son</h3>
       <p>La moitié de ce qui rend ces récits étranges tient au son — le plus souvent à son absence.
         Un <strong>timbre</strong> (bourdonnement, sifflement, grondement, crépitement, ou aucun),
-        une <strong>intensité</strong> et une <strong>hauteur</strong>, keyframés sur la même
+        une <strong>intensité</strong> et une <strong>hauteur</strong>, posés en images clés sur la même
         horloge que la forme : un engin posé silencieux au sol et entendu seulement au décollage,
-        cela fait deux keyframes.</p>
+        cela fait deux images clés.</p>
       <p>Le son est <em>synthétisé</em> à partir de cette description, exactement comme la forme est
         dessinée à partir de la sienne, sans un octet d'audio embarqué. Un enregistrement qui a
         réellement capté le son peut pointer vers le fichier audio. Notez la différence entre les
@@ -1096,8 +1050,8 @@ if (docs) {
         lien, dites si elle a été <strong>prise à</strong> un instant de l'observation et si quelqu'un a
         fait un <strong>dessin par-dessus</strong>, et réglez son <strong>opacité</strong> de départ — le
         lecteur la fera glisser ensuite.</p>
-      <p>Une <strong>vidéo</strong> se pose de la même façon et suit la timeline : dites où elle <strong>débute</strong>, quelle partie de son fichier et à quelle vitesse (le ralenti d'une diffusion). La recaler au point de lecture écrit une clé, car sa caméra bouge ; <strong>Retirer le recalage de cet instant</strong> la reprend. Son adresse doit autoriser les autres sites à la lire : pas une page YouTube.</p>
-      <p>Tant que ce groupe est ouvert, le canvas appartient à la photo sélectionnée, son cadre en
+      <p>Une <strong>vidéo</strong> se pose de la même façon et suit la barre de lecture : dites où elle <strong>débute</strong>, quelle partie de son fichier et à quelle vitesse (le ralenti d'une diffusion). La recaler au point de lecture écrit une image clé, car sa caméra bouge ; <strong>Retirer le recalage de cet instant</strong> la reprend. Son adresse doit autoriser les autres sites à la lire : pas une page YouTube.</p>
+      <p>Tant que ce groupe est ouvert, le canevas appartient à la photo sélectionnée, son cadre en
         pointillés bleus : <strong>glissez</strong> dessus pour la tourner (glisser à côté tourne toujours
         le témoin), <strong>molette</strong> pour son
         champ, ou saisissez <strong>cap</strong>, <strong>assiette</strong>, <strong>roulis</strong> et
@@ -1136,7 +1090,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Fichiers</h3>
-      <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte en instantané à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>snapshots</code> dans le format). Le sélecteur ne nomme que ce que chacun contient ; où il est, son fichier le dit : son adresse, que remplace un fichier à vous ou une autre adresse. L'adresse de l'enregistrement lui-même le garde dans l'enregistrement, dont le texte s'affiche alors dessous avec sa section surlignée ; une autre adresse où il n'y a pas encore de fichier est celle où Sauver l'écrit. Une annexe dit quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON. La météo, le lieu, le ciel nocturne et le décor en sont aussi, dans l'enregistrement ou dans un fichier à eux. Quoi qu'on choisisse, <strong>Sauver</strong> en donne les données. Chaque source que l'éditeur ou la scène interrogerait (géocodeur du lieu, atlas du ciel nocturne, relief, imagerie, routes, eau, voies ferrées, haute atmosphère, météo) se choisit entre le service interrogé en direct et <strong>Fichier</strong> : dans son groupe (Lieu, Environnement, Météo), un type de données à la fois (<strong>Données</strong>, puis sa source),, qui la lit dans les fichiers de l'enregistrement et renvoie à son élément ici ; un fichier pas encore relevé l'est à la sauvegarde suivante.</p>
+      <p>Les fichiers dont l'enregistrement est fait, choisis un à un au-dessus de l'onglet : l'enregistrement lui-même, et chaque annexe qu'il porte en instantané à côté de lui (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère, photo de la carte ; voir <code>snapshots</code> dans le format). Le sélecteur ne désigne chaque fichier que par son contenu ; son emplacement est indiqué dans son champ de fichier : une adresse, que vous pouvez remplacer par un fichier à vous ou par une autre adresse. Donner à une annexe l'adresse de l'enregistrement lui-même la range dans l'enregistrement, dont le texte s'affiche alors dessous, la section de l'annexe surlignée ; une adresse où aucun fichier n'existe encore est celle où Sauver l'écrira. Une annexe dit quand et auprès de qui elle a été relevée, avec <strong>Rafraîchir</strong> pour la relever à nouveau, <strong>Sauver</strong> pour avoir son fichier, et son texte à modifier quand c'est du JSON. La météo, le lieu, le ciel nocturne et le décor en sont aussi, dans l'enregistrement ou dans un fichier à eux. Quoi qu'on choisisse, <strong>Sauver</strong> en donne les données. Chaque source que l'éditeur ou la scène interrogerait (géocodeur du lieu, atlas du ciel nocturne, relief, imagerie, routes, eau, voies ferrées, haute atmosphère, météo) se choisit dans son groupe (Lieu, Décor, Ciel), un type de données à la fois (<strong>Données</strong>, puis sa source), entre le service interrogé en direct et <strong>Fichier</strong>. <strong>Fichier</strong> lit ces données dans les fichiers de l'enregistrement et renvoie à leur élément ici ; un fichier pas encore relevé l'est à la sauvegarde suivante.</p>
       <p>L'enregistrement lui-même. <strong>Charger un fichier d'observation</strong> fait entrer un enregistrement existant, <em>depuis votre disque</em> ou, d'un clic sur ces mots, <em>depuis une adresse</em>, et <strong>Sauver</strong>
         vous remet le fichier. <strong>Exporter en KML</strong> vous remet à la place un fichier Google Earth, contenant ce que la reconstitution a de cartographiable : où se tenait le témoin, son trajet s'il s'est déplacé, la direction énoncée pour chaque phénomène à chaque image clé, où une lecture place ce qui aurait été vu, et les tracés importés, rendus tels qu'ils sont venus. Ouvrez-le dans Google Earth, dans SVH ou dans QGIS et superposez-le à votre propre géométrie. Une ligne de visée est une direction et rien d'autre : elle est donc tracée sur cinq kilomètres conventionnels, que sa propre description annonce comme tels — lisez son azimut, pas son extrémité. Les hauteurs sont comptées depuis le sol d'où le témoin est parti, ce que le fichier précise. <strong>Exporter en GeoJSON</strong> écrit la même chose dans le format que lit tout SIG : du WGS 84 sans membre <code>crs</code>, comme l'exige la RFC 7946, chaque figure disant à quel groupe elle appartient et depuis quoi ses hauteurs sont comptées, le GeoJSON n'ayant de mot ni pour l'un ni pour l'autre. Un point après cet onglet dit que l\'enregistrement contient des modifications non sauvées ; charger un autre fichier ou une autre adresse alors qu\'il en contient demande d\'abord confirmation. Dessous, le même enregistrement en texte JSON, tenu à jour dans les
         deux sens : ce que vous changez dans le formulaire ou sur le rendu y apparaît, et un texte
@@ -1149,12 +1103,60 @@ if (docs) {
         formulaire.</p>
       <p><strong>Modules</strong>, le dernier élément du sélecteur, ajoute ce que d'autres publient : imagerie, relief, modèles 3D, source météo, événement du ciel. Collez l'adresse d'un module et appuyez sur <strong>Ajouter</strong> : vos modules restent dans ce navigateur, peuvent être désactivés ou retirés, et enregistrés dans un fichier pour les charger ailleurs. <strong>Nommé par cet enregistrement</strong> dit que l'enregistrement en a besoin. <strong>Vérifier</strong> confronte un module à ce qu'UFO@home attend de lui et dit ce qui ne va pas et ce qui n'a pas pu être essayé, en interrogeant ses services avec le lieu et la date de l'enregistrement ; cela ne dit rien de l'exactitude de ses données ni de sa sûreté. Voir <a href="/docs/modules/">comment ajouter les vôtres</a>.</p>
     </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Survoler la scène nomme ce qu'on y voit</h2>
+    <p>Survoler la scène nomme ce qui est sous le curseur. Une étoile donne son nom, et <kbd>Alt</kbd> enfoncé sa
+      magnitude et sa hauteur — « Vénus, mag −4, 8° au-dessus de l'horizon » répond à lui seul à un signalement
+      de lumière vive près de l'horizon, là où un nom seul ne répondrait pas. Le Soleil, la Lune, les
+      planètes et toute comète levée cette nuit-là répondent de même, et tout le décor
+      aussi : un bâtiment, un arbre, un autre témoin. Avec <kbd>Alt</kbd> enfoncée, un élément du
+      décor dit aussi sa taille et sa distance à l'œil (« Arbre 19 — 2 × 2 × 11,8 m, à 540 m ») :
+      la mesure n'est prise qu'alors.</p>
+    <p>Ce que le sol cache ne répond pas. Une étoile derrière une colline est aussi invisible qu'une
+      étoile sous l'horizon : ni l'une ni l'autre n'est proposée — une reconstitution n'est pas la
+      liste de ce qu'il y a dans le ciel, c'est ce qui pouvait être vu d'où se tenait le témoin.</p>
   </div>
 </section>
 
 <section class="band">
   <div class="wrap">
-    <h2>Ce que Sauver vous remet</h2>
+    <h2>Quelques règles à connaître</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>Une image clé se maintient, sans fondu.</strong> Une forme absente d'une image clé
+          ultérieure reste dans son état ; une forme dont la première image clé est à cinq secondes est
+          déjà peinte, dans cet état, dès zéro. Pour qu'une chose cesse d'être visible, posez-lui une
+          image clé à transparence 1.</li>
+        <li><strong>L'énoncé l'emporte sur le déduit.</strong> « Il est entré dans un nuage » est
+          énoncé par le témoin, jamais calculé par la géométrie : ce format décrit une apparence
+          dans un champ de vision, pas une position dans l'espace, donc rien en lui <em>ne peut</em>
+          savoir si un nuage s'est interposé.</li>
+        <li><strong>En pause, tout est en pause.</strong> Pluie qui tombe, scintillement des étoiles,
+          éclairs, reflets d'objectif, ambiances sonores — tout s'arrête avec le lecteur. Une lecture
+          en pause est un instant d'observation ; une météo qui continuerait par-dessus serait votre
+          invention, pas la soirée du témoin.</li>
+        <li><strong>Hors de vue, rien ne tourne.</strong> Une scène qu'on a fait défiler, ou dans un
+          panneau fermé, ne dessine ni ne calcule rien, et une lecture en cours est mise en pause.
+          Elle est redessinée à son retour, et c'est le bouton de lecture qui relance la lecture.</li>
+        <li><strong>Rien n'est inventé.</strong> Là où le relevé n'existe pas — avant 1940 pour la
+          météo, avant 1957 pour les satellites, avant 2021 pour les éléments orbitaux —
+          le champ reste modifiable et l'interface dit lequel des deux cas s'applique.</li>
+              <li><strong>Le texte et l'image se suivent.</strong> Tant que le groupe Fichiers est ouvert, placer le curseur dans un objet de décor ou une forme du texte le sélectionne sur l'image, et le sélectionner sur l'image sélectionne ses lignes dans le texte (le groupe reste ouvert : le texte a la priorité sur le panneau de ce que vous cliquez). Les lignes modifiées depuis le chargement de l'enregistrement, ou depuis la dernière sauvegarde ou le dernier export, ont une barre bleue dans la marge et une teinte claire. <kbd>F7</kbd> va à la zone modifiée suivante, <kbd>Maj</kbd>+<kbd>F7</kbd> à la précédente. Ce que vous modifiez, ou annulez, sur le formulaire ou sur l'image est montré de la même façon dans le texte, qu'il ait le focus ou non. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) cherche dans le texte, et remplace.</li>
+              <li><strong>Tout peut se défaire.</strong> Les deux flèches au bout des onglets, ou <kbd>Ctrl</kbd>+<kbd>Z</kbd> et <kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>Z</kbd>, reviennent en arrière et en avant sur ce que vous avez changé, dans n'importe quel groupe et sur le rendu. L'historique est celui de l'éditeur de texte du groupe Fichiers, chargé la première fois que vous touchez à quelque chose, et oublié quand un autre enregistrement est chargé. Supprimer quelque chose (une forme, un élément de décor, un moment nommé), par sa poubelle ou avec <kbd>Suppr</kbd> ou <kbd>Retour arrière</kbd>, ne demande rien : annuler le remet.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Le fichier que vous remet Sauver</h2>
     <div class="prose-wide">
       <p><strong>Sauver</strong> vous remet un fichier JSON. Ce fichier <em>est</em>
         l'enregistrement complet : il n'y a ni compte, ni base de données, ni copie conservée ici.
@@ -1198,7 +1200,7 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2 id="case">Un caso, y sus observaciones</h2>
-    <p>La dirección puede ser el <code>case.json</code> de un caso. El editor muestra entonces <strong>el caso</strong> arriba y, dentro del mismo contenedor, la observación que se edita en un contenedor aparte. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
+    <p>La dirección puede ser el <code>case.json</code> de un caso. El editor muestra entonces <strong>el caso</strong> arriba y, debajo, en un marco aparte dentro del mismo editor, la observación que se edita. <code>&amp;track=</code> nombra la grabación en la que se abre.</p>
     <ul class="plain">
       <li><strong>El caso</strong> tiene un <em>identificador</em>, un <em>título</em> y una fecha — el mismo selector, el mismo calificativo y el mismo texto EDTF que el inicio de una observación — y <em>Guardar</em> arriba a la derecha.</li>
       <li><strong>Observaciones</strong>: un selector lista las grabaciones del caso, los relatos de los testigos y las lecturas que se hacen de ellos, cada una una grabación aparte. Elegir una la abre debajo, y lo que se cambió en las demás se conserva.</li>
@@ -1391,7 +1393,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Cielo</h3>
       <p>El único grupo que no es relato. El tiempo atmosférico es un hecho medible en un lugar y un
-        instante, y los dos grupos anteriores ya indican ambos; por eso se consulta en ERA5, el
+        instante, y los grupos Lugar y Fecha ya indican ambos; por eso se consulta en ERA5, el
         reanálisis del ECMWF, y se muestra <em>en solo lectura</em> sobre una línea que nombra el
         conjunto de datos y el instante UTC exacto descrito. Una zona horaria equivocada se nota ahí
         antes de notarse en el cielo.</p>
@@ -1399,7 +1401,7 @@ if (docs) {
       <p>Una consulta escribe un fotograma clave meteorológico al inicio, en cada hora en punto y al
         final del registro, cada uno allí donde está el testigo en ese momento; la pista se vuelve a
         disponer cuando cambia la duración del registro.</p>
-      <p>El grupo tiene tres pestañas propias, con una parte abierta a la vez como los propios grupos:
+      <p>El grupo tiene sus propias pestañas, con una sola abierta a la vez como los propios grupos. Las tres primeras son
         <strong>Precipitación</strong> (su tipo y su intensidad, y la casilla
         <strong>Tormenta</strong>, que es donde un código meteorológico indica una tormenta eléctrica,
         junto a la lluvia y el granizo, y que activa los rayos y el trueno con su retardo real),
@@ -1468,6 +1470,7 @@ if (docs) {
         de la magnitud 9, la línea indica que las estrellas solo se dibujan hasta donde llega el
         catálogo de este proyecto; y un arcoíris solo se menciona si se registró lluvia.
         Que algo de ello explique algo es la conclusión del lector, nunca la afirmación del archivo.</p>
+      <p><strong>Aviones</strong>, una pestaña de <strong>Cielo</strong>, dice qué aviones contiene un registro alrededor del testigo. adsb.lol no pide nada. Flightradar24 pide tu propia suscripción y su clave, escrita allí, que se queda en la memoria de la página hasta que la recargas. Cada petición gasta créditos de esa suscripción, normalmente de 400 a 550 y como mucho unos 900: se hace una al elegir su fuente, y otra cuando cambia el lugar o la hora. La línea bajo la clave dice cuántos vuelos se trazaron, en qué radio y a qué coste, o por qué la fuente no respondió. Solo los ocho más cercanos a la mitad de la grabación tienen traza, y hasta dónde puedes remontarte depende de tu plan (30 días para el más barato). La lista da el tipo, la matrícula, la distancia, la dirección, la altura en el cielo y la altitud de cada vuelo en el instante mostrado, del paso más cercano al más lejano: en un cielo claro, un avión mide uno o dos píxeles, o menos, y por eso es ella la que dice quién estaba allí. Elige uno para girar la vista hacia él y rodearlo en la imagen; si aún no está, la grabación va al momento en que está. Elígelo de nuevo para quitar el anillo, que no aparece en ninguna imagen sacada de la escena. Girar la vista no cambia nada en la grabación, y nada de esto se escribe en ella: son candidatos compatibles, nunca una identificación.</p>
     </div>
 
     <div class="group-doc">
@@ -1480,7 +1483,7 @@ if (docs) {
         su propio nombre, y agruparse, reordenarse o eliminarse desde el menú contextual del propio
         lienzo.</p>
       <p><strong>Anchura aparente</strong>, <strong>Anchura real</strong> y <strong>Distancia</strong>
-        son tres lecturas de una misma relación, que se mantienen acordes: edita una cualquiera y una de
+        son tres expresiones de una misma relación, que se mantienen acordes: edita una cualquiera y una de
         las otras dos la sigue; la que fija <strong>Mantener</strong> nunca se mueve. Solo el ángulo
         pertenece al registro; la anchura real se deriva, y la distancia es aquella a la que la escena
         dibuja la forma, una hipótesis que probar y no una afirmación. A través de un ojo con 60° sobre
@@ -1520,53 +1523,7 @@ if (docs) {
         movimiento de un cuerpo se indica en el archivo, y se muestra aquí. La imagen dibuja los
         cuerpos, con las formas a su lado como contornos para leerlos frente a ellas, sea cual sea el
         grupo abierto, salvo en la parte Formas, donde las formas se dibujan solas y enteras.</p>
-      <p><strong>Aviones</strong>, una pestaña de <strong>Cielo</strong>, dice qué aviones contiene un registro alrededor del testigo. adsb.lol no pide nada. Flightradar24 pide tu propia suscripción y su clave, escrita allí, que se queda en la memoria de la página hasta que la recargas. Cada petición gasta créditos de esa suscripción, normalmente de 400 a 550 y como mucho unos 900: se hace una al elegir su fuente, y otra cuando cambia el lugar o la hora. La línea bajo la clave dice cuántos vuelos se trazaron, en qué radio y a qué coste, o por qué la fuente no respondió. Solo los ocho más cercanos a la mitad de la grabación tienen traza, y hasta dónde puedes remontarte depende de tu plan (30 días para el más barato). La lista da el tipo, la matrícula, la distancia, la dirección, la altura en el cielo y la altitud de cada vuelo en el instante mostrado, del paso más cercano al más lejano: en un cielo claro, un avión mide uno o dos píxeles, o menos, y por eso es ella la que dice quién estaba allí. Elige uno para girar la vista hacia él y rodearlo en la imagen; si aún no está, la grabación va al momento en que está. Elígelo de nuevo para quitar el anillo, que no aparece en ninguna imagen sacada de la escena. Girar la vista no cambia nada en la grabación, y nada de esto se escribe en ella: son candidatos compatibles, nunca una identificación.</p>
       <p>Lo que ocurrió en el cielo durante la grabación, como hechos (un disparo láser, un lanzamiento de cohete), no está en el grupo Fenómeno sino en <strong>Cielo</strong>, junto al estado del cielo (precipitaciones, nubes, viento): no es la lectura del relato, ni el decorado, que dura más que la observación. Su parte <strong>Haces</strong> lista los haces de luz (un láser, un reflector): los puntos de su trayecto (donde sale del emisor, posibles espejos, donde termina), su longitud de onda, potencia, divergencia y cuándo está encendido; su brillo es lo que el aire difunde de él, calculado. Su parte <strong>Lanzamientos</strong> lista los lanzamientos de cohete, su trayectoria, motor y estela. Su parte <strong>Farolillos</strong>, al lado, es una lectura del relato más que un hecho: farolillos voladores soltados desde el suelo, lo que eran sus luces. Cada suelta indica desde dónde parten (en metros al este y al norte del lugar de la grabación), cuántos, entre qué segundos, cuánto arden y a qué calor, las formas que representan, el viento en el suelo y en altura, la temperatura del aire y sus ráfagas, y el propio farolillo: su luz, su forma (redondo en la base y cuadrado arriba, o en globo con la cima lobulada) y el color de su papel, que tiñe su luz; sus vuelos se calculan, cada farolillo subiendo, derivando y apagándose a su manera. Un campo vacío muestra, en gris, el valor usado. Se dibujan sea cual sea el grupo abierto.</p>
-    </div>
-    </div>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap prose-wide">
-    <h2>Señala cualquier cosa y dirá su nombre</h2>
-    <p>Pasar el puntero por la escena nombra lo que hay debajo. Una estrella da su nombre, y con <kbd>Alt</kbd> pulsado su
-      magnitud y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
-      de una luz brillante cerca del horizonte, donde un nombre a secas no lo haría. El Sol, la Luna,
-      los planetas y cualquier cometa visible aquella noche responden igual, y también todo lo del
-      entorno: un edificio, un árbol, otro testigo.</p>
-    <p>Lo que oculta el terreno no responde. Una estrella tras una colina es tan imposible de ver como
-      una bajo el horizonte, así que no se ofrece ninguna de las dos: una reconstrucción no es una lista
-      de lo que hay en el cielo, es lo que podía verse desde donde estaba el testigo.</p>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap">
-    <h2>Reglas que conviene conocer</h2>
-    <div class="prose-wide">
-      <ul class="plain">
-        <li><strong>Un fotograma clave se mantiene, no se funde.</strong> Una forma ausente de un
-          fotograma clave posterior sigue como estaba; una cuyo primer fotograma clave está a los cinco
-          segundos ya aparece pintada, en ese estado, desde cero. Para que algo deje de verse, ponle un
-          fotograma clave con transparencia 1.</li>
-        <li><strong>Lo declarado prevalece sobre lo deducido.</strong> «Entró en una nube» lo afirma el
-          testigo, nunca lo calcula la geometría: este formato describe una apariencia en un campo de
-          visión, no una posición en el espacio, así que nada en él <em>puede</em> saber si una nube se
-          interpuso entre ambos.</li>
-        <li><strong>En pausa es en pausa.</strong> La lluvia que cae, el centelleo de las estrellas, los
-          rayos, los destellos del objetivo, el sonido ambiente: todo se detiene con el reproductor. Una
-          reproducción en pausa es un instante de un avistamiento; un tiempo que siguiera corriendo
-          encima sería tu propia habitación, no la tarde del testigo.</li>
-        <li><strong>Fuera de la vista, nada funciona.</strong> Una escena que se ha dejado atrás, o en
-          un panel cerrado, no dibuja ni calcula nada, y una reproducción en curso se pone en pausa.
-          Se vuelve a dibujar cuando regresa, y el botón de reproducción reanuda la reproducción.</li>
-        <li><strong>Nada se inventa.</strong> Donde no existe registro (antes de 1940 para el tiempo,
-          antes de 1957 para los satélites, antes de 2021 para los elementos orbitales), el campo
-          sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
-              <li><strong>El texto y la imagen se siguen.</strong> Mientras el grupo Archivo está abierto, poner el cursor en un objeto del decorado o en una forma del texto lo selecciona en la imagen, y seleccionarlo en la imagen selecciona sus líneas en el texto (el grupo sigue abierto: el texto tiene prioridad sobre el panel de lo que pulsas). Las líneas modificadas desde la carga del registro, o desde el último guardado o exportación, llevan una barra azul en el margen y un tinte claro. <kbd>F7</kbd> va a la zona modificada siguiente, <kbd>Mayús</kbd>+<kbd>F7</kbd> a la anterior. Lo que modificas, o deshaces, en el formulario o en la imagen se muestra del mismo modo en el texto, tenga o no el foco. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) busca en el texto, y reemplaza.</li>
-              <li><strong>Todo se puede deshacer.</strong> Las dos flechas al final de las pestañas, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> y <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd>, retroceden y avanzan por lo que has cambiado, en cualquier grupo y en el render. El historial es el del editor de texto del grupo Archivo, que se carga la primera vez que tocas algo, y se olvida al cargar otro registro. Eliminar algo (una forma, un elemento del decorado, un momento con nombre), con su papelera o con <kbd>Supr</kbd> o <kbd>Retroceso</kbd>, no pregunta nada: deshacer lo devuelve.</li>
-      </ul>
     </div>
 
     <div class="group-doc">
@@ -1636,7 +1593,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>Archivos</h3>
-      <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva como instantánea junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>snapshots</code> en el formato). El selector solo nombra lo que contiene cada uno; dónde está lo dice su archivo: su dirección, que sustituye un archivo suyo u otra dirección. La dirección del propio registro lo guarda dentro del registro, cuyo texto se muestra entonces debajo con su sección resaltada; otra dirección donde aún no hay archivo es donde Guardar lo escribe. Un anexo dice cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON. El tiempo, el lugar, el cielo nocturno y el decorado también lo son, dentro del registro o en un archivo propio. Se elija lo que se elija, <strong>Guardar</strong> da sus datos. Cada fuente que el editor o la escena consultaría (geocodificador del lugar, atlas del cielo nocturno, relieve, imágenes, carreteras, agua, vías férreas, aire en altura, tiempo) se elige entre el servicio consultado en directo y <strong>Archivo</strong>: en su grupo (Lugar, Entorno, Meteorología), un tipo de datos cada vez (<strong>Datos</strong>, luego su fuente),, que la lee de los archivos del registro y remite a su elemento aquí; un archivo aún no tomado se toma al guardar.</p>
+      <p>Los archivos de los que está hecho el registro, elegidos uno a uno encima de la pestaña: el propio registro, y cada anexo que lleva como instantánea junto a él (relieve, foto del suelo, carreteras, agua, vías férreas, aire en altura, foto del mapa; véase <code>snapshots</code> en el formato). El selector nombra cada archivo solo por lo que contiene; dónde está lo indica su campo de archivo: una dirección, que puedes sustituir por un archivo tuyo o por otra dirección. Dar a un anexo la dirección del propio registro lo guarda dentro del registro, cuyo texto se muestra entonces debajo con la sección del anexo resaltada; una dirección donde aún no hay archivo es donde Guardar lo escribirá. Un anexo dice cuándo y de quién se tomó, con <strong>Actualizar</strong> para tomarlo de nuevo, <strong>Guardar</strong> para tener su archivo, y su texto para editar cuando es JSON. El tiempo, el lugar, el cielo nocturno y el decorado también lo son, dentro del registro o en un archivo propio. Se elija lo que se elija, <strong>Guardar</strong> da sus datos. Cada fuente que el editor o la escena consultaría (geocodificador del lugar, atlas del cielo nocturno, relieve, imágenes, carreteras, agua, vías férreas, aire en altura, tiempo) se elige en su grupo (Lugar, Entorno, Cielo), un tipo de datos cada vez (<strong>Datos</strong>, luego su fuente), entre el servicio consultado en directo y <strong>Archivo</strong>. <strong>Archivo</strong> lee esos datos de los archivos del registro y remite a su elemento aquí; un archivo aún no tomado se toma al guardar.</p>
       <p>El registro en sí. <strong>Cargar un archivo de observación</strong> trae un registro existente, <em>desde su disco</em> o, con un clic en estas palabras, <em>desde una dirección</em>, y <strong>Guardar</strong> te entrega el archivo. <strong>Exportar a KML</strong> te entrega en su lugar un archivo de Google Earth con lo que la reconstrucción tiene de cartografiable: dónde estaba el testigo, su recorrido si se desplazó, la dirección declarada para cada fenómeno en cada fotograma clave, dónde sitúa una lectura lo que se habría visto, y los trazados importados, devueltos tal como llegaron. Ábrelo en Google Earth, en SVH o en QGIS y superponlo a tu propia geometría. Una línea de visión es una dirección y nada más: se traza por cinco kilómetros convencionales que su propia descripción declara como tales — lee su azimut, no su extremo. Las alturas se cuentan desde el suelo del que partió el testigo, lo que el archivo indica. <strong>Exportar a GeoJSON</strong> escribe lo mismo en el formato que lee cualquier SIG: WGS 84 sin miembro <code>crs</code>, como exige la RFC 7946, y cada figura dice a qué grupo pertenece y desde dónde se cuentan sus alturas, pues GeoJSON no tiene palabra para ninguna de las dos cosas. Un punto tras esta pestaña indica que la grabación tiene cambios sin guardar; cargar otro archivo u otra dirección mientras los tenga pide confirmación antes.
         Debajo, el mismo registro como texto JSON, mantenido al día en los dos sentidos: lo que
         cambias en el formulario o en el render aparece en él, y un texto que se analiza pasa a ser
@@ -1648,6 +1605,52 @@ if (docs) {
         no sale del formulario.</p>
       <p><strong>Módulos</strong>, el último elemento del selector, añade lo que otros publican: imágenes, relieve, modelos 3D, una fuente meteorológica, un evento del cielo. Pegue la dirección de un módulo y pulse <strong>Añadir</strong>: sus módulos se quedan en este navegador, pueden desactivarse o quitarse, y guardarse en un archivo para cargarlos en otro lugar. <strong>Citado por esta grabación</strong> dice que la grabación lo necesita. <strong>Comprobar</strong> contrasta un módulo con lo que UFO@home espera de él y dice qué falla y qué no pudo probar, consultando sus servicios con el lugar y la fecha de la grabación; no dice nada de la exactitud de sus datos ni de su seguridad. Vea <a href="/docs/modules/">cómo añadir los suyos</a>.</p>
     </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Señala cualquier cosa y dirá su nombre</h2>
+    <p>Pasar el puntero por la escena nombra lo que hay debajo. Una estrella da su nombre, y con <kbd>Alt</kbd> pulsado su
+      magnitud y a qué altura estaba: «Venus, mag −4, 8° sobre el horizonte» responde por sí sola a un informe
+      de una luz brillante cerca del horizonte, donde un nombre a secas no lo haría. El Sol, la Luna,
+      los planetas y cualquier cometa visible aquella noche responden igual, y también todo lo del
+      entorno: un edificio, un árbol, otro testigo.</p>
+    <p>Lo que oculta el terreno no responde. Una estrella tras una colina es tan imposible de ver como
+      una bajo el horizonte, así que no se ofrece ninguna de las dos: una reconstrucción no es una lista
+      de lo que hay en el cielo, es lo que podía verse desde donde estaba el testigo.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Reglas que conviene conocer</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>Un fotograma clave se mantiene, no se funde.</strong> Una forma ausente de un
+          fotograma clave posterior sigue como estaba; una cuyo primer fotograma clave está a los cinco
+          segundos ya aparece pintada, en ese estado, desde cero. Para que algo deje de verse, ponle un
+          fotograma clave con transparencia 1.</li>
+        <li><strong>Lo declarado prevalece sobre lo deducido.</strong> «Entró en una nube» lo afirma el
+          testigo, nunca lo calcula la geometría: este formato describe una apariencia en un campo de
+          visión, no una posición en el espacio, así que nada en él <em>puede</em> saber si una nube se
+          interpuso entre ambos.</li>
+        <li><strong>En pausa es en pausa.</strong> La lluvia que cae, el centelleo de las estrellas, los
+          rayos, los destellos del objetivo, el sonido ambiente: todo se detiene con el reproductor. Una
+          reproducción en pausa es un instante de un avistamiento; un tiempo que siguiera corriendo
+          encima sería tu propia habitación, no la tarde del testigo.</li>
+        <li><strong>Fuera de la vista, nada funciona.</strong> Una escena que se ha dejado atrás, o en
+          un panel cerrado, no dibuja ni calcula nada, y una reproducción en curso se pone en pausa.
+          Se vuelve a dibujar cuando regresa, y el botón de reproducción reanuda la reproducción.</li>
+        <li><strong>Nada se inventa.</strong> Donde no existe registro (antes de 1940 para el tiempo,
+          antes de 1957 para los satélites, antes de 2021 para los elementos orbitales), el campo
+          sigue siendo editable y la interfaz dice cuál de los dos casos es.</li>
+              <li><strong>El texto y la imagen se siguen.</strong> Mientras el grupo Archivos está abierto, poner el cursor en un objeto del decorado o en una forma del texto lo selecciona en la imagen, y seleccionarlo en la imagen selecciona sus líneas en el texto (el grupo sigue abierto: el texto tiene prioridad sobre el panel de lo que pulsas). Las líneas modificadas desde la carga del registro, o desde el último guardado o exportación, llevan una barra azul en el margen y un tinte claro. <kbd>F7</kbd> va a la zona modificada siguiente, <kbd>Mayús</kbd>+<kbd>F7</kbd> a la anterior. Lo que modificas, o deshaces, en el formulario o en la imagen se muestra del mismo modo en el texto, tenga o no el foco. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) busca en el texto, y reemplaza.</li>
+              <li><strong>Todo se puede deshacer.</strong> Las dos flechas al final de las pestañas, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> y <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>Z</kbd>, retroceden y avanzan por lo que has cambiado, en cualquier grupo y en el render. El historial es el del editor de texto del grupo Archivos, que se carga la primera vez que tocas algo, y se olvida al cargar otro registro. Eliminar algo (una forma, un elemento del decorado, un momento con nombre), con su papelera o con <kbd>Supr</kbd> o <kbd>Retroceso</kbd>, no pregunta nada: deshacer lo devuelve.</li>
+      </ul>
+    </div>
+
   </div>
 </section>
 
@@ -1697,7 +1700,7 @@ if (docs) {
 <section class="band">
   <div class="wrap prose-wide">
     <h2 id="case">Un caso, e le sue osservazioni</h2>
-    <p>L'indirizzo può essere il <code>case.json</code> di un caso. L'editor mostra allora <strong>il caso</strong> in alto e, nello stesso contenitore, l'osservazione in modifica in un contenitore a parte. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
+    <p>L'indirizzo può essere il <code>case.json</code> di un caso. L'editor mostra allora <strong>il caso</strong> in alto e, sotto, in un riquadro a parte all'interno dello stesso editor, l'osservazione in modifica. <code>&amp;track=</code> indica la registrazione su cui si apre.</p>
     <ul class="plain">
       <li><strong>Il caso</strong> ha un <em>identificativo</em>, un <em>titolo</em> e una data — lo stesso selettore, lo stesso qualificatore e lo stesso testo EDTF dell'inizio di un'osservazione — e <em>Salva</em> in alto a destra.</li>
       <li><strong>Osservazioni</strong>: un selettore elenca le registrazioni del caso, i resoconti dei testimoni e le letture che se ne fanno, ciascuna una registrazione a sé. Sceglierne una la apre sotto, e ciò che è stato cambiato nelle altre viene conservato.</li>
@@ -1893,7 +1896,7 @@ if (docs) {
     <div class="group-doc">
       <h3>Cielo</h3>
       <p>L'unico gruppo che non è resoconto. Il meteo è un fatto misurabile in un luogo a un istante, e
-        i due gruppi precedenti indicano già entrambi; per questo viene ricavato da ERA5, la rianalisi
+        i gruppi Luogo e Data indicano già entrambi; per questo viene ricavato da ERA5, la rianalisi
         dell'ECMWF, e mostrato <em>in sola lettura</em> sopra una riga che nomina il set di dati e
         l'istante UTC esatto descritto. Un fuso orario sbagliato si vede lì prima di vedersi nel
         cielo.</p>
@@ -1901,7 +1904,7 @@ if (docs) {
       <p>Una consultazione scrive un fotogramma chiave meteorologico all'inizio, a ogni ora esatta e alla
         fine della registrazione, ciascuno dove si trova il testimone in quel momento; la traccia viene
         ridisposta quando la durata della registrazione cambia.</p>
-      <p>Il gruppo ha tre schede proprie, con una parte aperta alla volta come i gruppi stessi:
+      <p>Il gruppo ha schede proprie, con una sola aperta alla volta come i gruppi stessi. Le prime tre sono
         <strong>Precipitazioni</strong> (il loro tipo e la loro intensità, e la casella
         <strong>Temporale</strong>, che è dove un codice meteorologico segnala un temporale, accanto
         alla pioggia e alla grandine, e che accende i fulmini e il tuono con il loro ritardo reale),
@@ -1972,6 +1975,7 @@ if (docs) {
         questo progetto; e un arcobaleno viene citato solo se è stata segnalata pioggia.
         Che qualcosa di tutto ciò spieghi qualcosa è la conclusione del lettore, mai l'affermazione del
         file.</p>
+      <p><strong>Aerei</strong>, una scheda di <strong>Cielo</strong>, dice quali aerei un archivio contiene intorno al testimone. adsb.lol non chiede nulla. Flightradar24 chiede il tuo abbonamento e la sua chiave, digitata lì, che resta nella memoria della pagina finché non la ricarichi. Ogni richiesta consuma crediti di quell'abbonamento, di solito da 400 a 550 e al massimo circa 900: una è fatta quando si sceglie la fonte, poi quando cambia il luogo o l'ora. La riga sotto la chiave dice quanti voli sono stati tracciati, in quale raggio e a quale costo, o perché la fonte non ha risposto. Solo gli otto più vicini a metà della registrazione hanno una traccia, e fin dove puoi risalire dipende dal tuo piano (30 giorni per il meno caro). L'elenco dà il tipo, la marca di registrazione, la distanza, la direzione, l'altezza nel cielo e la quota di ogni volo all'istante mostrato, dal passaggio più vicino al più lontano: in un cielo chiaro un aereo è uno o due pixel, o meno, ed è quindi l'elenco a dire chi c'era. Scegline uno per girare la vista verso di lui e cerchiarlo sull'immagine; se non c'è ancora, la registrazione va al momento in cui c'è. Sceglilo di nuovo per togliere l'anello, che non figura in alcuna immagine tratta dalla scena. Girare la vista non cambia nulla nella registrazione, e nulla di tutto ciò vi è scritto: sono candidati compatibili, mai un'identificazione.</p>
     </div>
 
     <div class="group-doc">
@@ -1984,7 +1988,7 @@ if (docs) {
         oggetto), ciascuna con il proprio nome, e possono essere raggruppate, riordinate o eliminate dal
         menu contestuale della tela stessa.</p>
       <p><strong>Larghezza apparente</strong>, <strong>Larghezza reale</strong> e
-        <strong>Distanza</strong> sono tre letture di una stessa relazione, tenute in accordo:
+        <strong>Distanza</strong> sono tre espressioni di una stessa relazione, tenute in accordo:
         modificane una qualsiasi e una delle altre due la segue; quella fissata da
         <strong>Mantieni</strong> non si muove mai. Solo l'angolo appartiene alla registrazione; la
         larghezza reale ne deriva, e la distanza è quella a cui la scena disegna la forma, un'ipotesi da
@@ -2025,53 +2029,7 @@ if (docs) {
         di un corpo è indicato nel file, e mostrato qui. L'immagine disegna i corpi, con le forme
         accanto come contorni con cui confrontarli, qualunque sia il gruppo aperto, tranne nella parte
         Forme, dove le forme sono disegnate da sole e per intero.</p>
-      <p><strong>Aerei</strong>, una scheda di <strong>Cielo</strong>, dice quali aerei un archivio contiene intorno al testimone. adsb.lol non chiede nulla. Flightradar24 chiede il tuo abbonamento e la sua chiave, digitata lì, che resta nella memoria della pagina finché non la ricarichi. Ogni richiesta consuma crediti di quell'abbonamento, di solito da 400 a 550 e al massimo circa 900: una è fatta quando si sceglie la fonte, poi quando cambia il luogo o l'ora. La riga sotto la chiave dice quanti voli sono stati tracciati, in quale raggio e a quale costo, o perché la fonte non ha risposto. Solo gli otto più vicini a metà della registrazione hanno una traccia, e fin dove puoi risalire dipende dal tuo piano (30 giorni per il meno caro). L'elenco dà il tipo, la marca di registrazione, la distanza, la direzione, l'altezza nel cielo e la quota di ogni volo all'istante mostrato, dal passaggio più vicino al più lontano: in un cielo chiaro un aereo è uno o due pixel, o meno, ed è quindi l'elenco a dire chi c'era. Scegline uno per girare la vista verso di lui e cerchiarlo sull'immagine; se non c'è ancora, la registrazione va al momento in cui c'è. Sceglilo di nuovo per togliere l'anello, che non figura in alcuna immagine tratta dalla scena. Girare la vista non cambia nulla nella registrazione, e nulla di tutto ciò vi è scritto: sono candidati compatibili, mai un'identificazione.</p>
       <p>Ciò che è accaduto nel cielo durante la registrazione, come fatti (un tiro laser, un lancio di razzo), non è nel gruppo Fenomeno ma in <strong>Cielo</strong>, accanto allo stato del cielo (precipitazioni, nuvole, vento): non è la lettura del resoconto, né lo scenario, che dura più dell'osservazione. La sua parte <strong>Fasci</strong> elenca i fasci di luce (un laser, un proiettore): i punti del loro percorso (dove lasciano l'emettitore, eventuali specchi, dove finiscono), la lunghezza d'onda, la potenza, la divergenza e quando sono accesi; la loro luminosità è ciò che l'aria ne diffonde, calcolata. La sua parte <strong>Lanci</strong> elenca i lanci di razzo, il loro percorso, motore e scia. La sua parte <strong>Lanterne</strong>, accanto, è una lettura del resoconto più che un fatto: lanterne volanti lasciate andare da terra, ciò che erano le sue luci. Ogni lancio indica da dove partono (in metri a est e a nord del luogo della registrazione), quante, tra quali secondi, quanto bruciano e a quale calore, le forme che rappresentano, il vento al suolo e in quota, la temperatura dell'aria e le sue raffiche, e la lanterna stessa: la sua luce, la sua forma (rotonda alla base e quadrata in cima, o a mongolfiera con la cima a lobi) e il colore della sua carta, che ne tinge la luce; i loro voli sono calcolati, ogni lanterna salendo, derivando e spegnendosi a modo suo. Un campo vuoto mostra, in grigio, il valore usato. Sono disegnati qualunque sia il gruppo aperto.</p>
-    </div>
-    </div>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap prose-wide">
-    <h2>Indica qualsiasi cosa e dirà il suo nome</h2>
-    <p>Passare sopra la scena nomina ciò che sta sotto il puntatore. Una stella dà il suo nome, e con <kbd>Alt</kbd> premuto la sua
-      magnitudine e quanto era alta: «Venere, mag −4, 8° sopra l'orizzonte» risponde da sola a una
-      segnalazione di una luce brillante vicino all'orizzonte, dove un semplice nome non lo farebbe. Il
-      Sole, la Luna, i pianeti e qualsiasi cometa visibile quella notte rispondono allo stesso modo, e
-      così tutto ciò che è nell'ambiente: un edificio, un albero, un altro testimone.</p>
-    <p>Ciò che il terreno nasconde non risponde. Una stella dietro una collina è invisibile quanto una
-      sotto l'orizzonte, quindi nessuna delle due viene proposta: una ricostruzione non è un elenco di
-      ciò che c'è nel cielo, è ciò che poteva essere visto da dove si trovava il testimone.</p>
-  </div>
-</section>
-
-<section class="band">
-  <div class="wrap">
-    <h2>Regole da conoscere</h2>
-    <div class="prose-wide">
-      <ul class="plain">
-        <li><strong>Un fotogramma chiave si mantiene, non sfuma.</strong> Una forma assente da un
-          fotogramma chiave successivo resta com'era; una il cui primo fotogramma chiave è a cinque
-          secondi è già dipinta, in quello stato, da zero. Per far smettere di vedere qualcosa, dagli
-          un fotogramma chiave con trasparenza 1.</li>
-        <li><strong>Il dichiarato prevale sul dedotto.</strong> «È entrato in una nuvola» è affermato
-          dal testimone, mai calcolato dalla geometria: questo formato descrive un'apparenza in un
-          campo visivo, non una posizione nello spazio, quindi nulla in esso <em>può</em> sapere se una
-          nuvola si è frapposta.</li>
-        <li><strong>In pausa è in pausa.</strong> La pioggia che cade, lo scintillio delle stelle, i
-          fulmini, i riflessi dell'obiettivo, il suono ambientale: tutto si ferma con il lettore. Una
-          riproduzione in pausa è un istante di un avvistamento; un meteo che continuasse sopra di esso
-          sarebbe la tua stanza, non la serata del testimone.</li>
-        <li><strong>Fuori dalla vista, nulla gira.</strong> Una scena che è stata superata scorrendo, o
-          in un pannello chiuso, non disegna né calcola nulla, e una riproduzione in corso viene messa
-          in pausa. Viene ridisegnata al ritorno, e il pulsante di riproduzione riavvia la riproduzione.</li>
-        <li><strong>Nulla è inventato.</strong> Dove i dati non esistono (prima del 1940 per il meteo,
-          prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
-          resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>
-              <li><strong>Il testo e l'immagine si seguono.</strong> Finché il gruppo File è aperto, mettere il cursore in un oggetto dello scenario o in una forma del testo lo seleziona sull'immagine, e selezionarlo sull'immagine seleziona le sue righe nel testo (il gruppo resta aperto: il testo ha la priorità sul pannello di ciò che clicchi). Le righe modificate dal caricamento della registrazione, o dall'ultimo salvataggio o esportazione, hanno una barra blu nel margine e una tinta chiara. <kbd>F7</kbd> va alla zona modificata successiva, <kbd>Maiusc</kbd>+<kbd>F7</kbd> a quella precedente. Ciò che modifichi, o annulli, sul modulo o sull'immagine viene mostrato allo stesso modo nel testo, che abbia il focus o no. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) cerca nel testo, e sostituisce.</li>
-              <li><strong>Tutto si può annullare.</strong> Le due frecce in fondo alle schede, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> e <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>, tornano indietro e avanti su ciò che hai cambiato, in qualsiasi gruppo e sul render. La cronologia è quella dell'editor di testo del gruppo File, caricato la prima volta che tocchi qualcosa, e dimenticata quando si carica un'altra registrazione. Eliminare qualcosa (una forma, un elemento della scenografia, un momento con nome), con il suo cestino o con <kbd>Canc</kbd> o <kbd>Backspace</kbd>, non chiede nulla: annullare lo rimette.</li>
-      </ul>
     </div>
 
     <div class="group-doc">
@@ -2140,7 +2098,7 @@ if (docs) {
 
     <div class="group-doc">
       <h3>File</h3>
-      <p>I file di cui è fatta la registrazione, scelti uno alla volta sopra la scheda: la registrazione stessa, e ogni allegato che porta come istantanea accanto a sé (rilievo, foto del suolo, strade, acque, ferrovie, aria in quota, foto della mappa; vedi <code>snapshots</code> nel formato). Il selettore nomina solo ciò che ciascuno contiene; dov'è lo dice il suo file: il suo indirizzo, che un proprio file o un altro indirizzo sostituisce. L'indirizzo della registrazione stessa lo conserva dentro la registrazione, il cui testo è allora mostrato sotto con la sua sezione evidenziata; un altro indirizzo dove non c'è ancora un file è quello dove Salva lo scrive. Un allegato dice quando e da chi è stato rilevato, con <strong>Aggiorna</strong> per rilevarlo di nuovo, <strong>Salva</strong> per averne il file, e il suo testo da modificare quando è JSON. Anche il meteo, il luogo, il cielo notturno e la scenografia lo sono, dentro la registrazione o in un proprio file. Qualunque cosa si scelga, <strong>Salva</strong> ne dà i dati. Ogni fonte che l'editor o la scena interrogherebbe (geocodificatore del luogo, atlante del cielo notturno, rilievo, immagini, strade, acque, ferrovie, aria in quota, meteo) si sceglie tra il servizio interrogato in diretta e <strong>File</strong>: nel suo gruppo (Luogo, Ambiente, Meteo), un tipo di dati alla volta (<strong>Dati</strong>, poi la sua fonte),, che la legge dai file della registrazione e rimanda al suo elemento qui; un file non ancora rilevato lo è al salvataggio successivo.</p>
+      <p>I file di cui è fatta la registrazione, scelti uno alla volta sopra la scheda: la registrazione stessa, e ogni allegato che porta come istantanea accanto a sé (rilievo, foto del suolo, strade, acque, ferrovie, aria in quota, foto della mappa; vedi <code>snapshots</code> nel formato). Il selettore indica ogni file solo per ciò che contiene; dov'è lo dice il suo campo file: un indirizzo, che puoi sostituire con un tuo file o con un altro indirizzo. Dare a un allegato l'indirizzo della registrazione stessa lo conserva dentro la registrazione, il cui testo è allora mostrato sotto con la sezione dell'allegato evidenziata; un indirizzo dove non c'è ancora un file è quello dove Salva lo scriverà. Un allegato dice quando e da chi è stato rilevato, con <strong>Aggiorna</strong> per rilevarlo di nuovo, <strong>Salva</strong> per averne il file, e il suo testo da modificare quando è JSON. Anche il meteo, il luogo, il cielo notturno e la scenografia lo sono, dentro la registrazione o in un proprio file. Qualunque cosa si scelga, <strong>Salva</strong> ne dà i dati. Ogni fonte che l'editor o la scena interrogherebbe (geocodificatore del luogo, atlante del cielo notturno, rilievo, immagini, strade, acque, ferrovie, aria in quota, meteo) si sceglie nel suo gruppo (Luogo, Ambiente, Cielo), un tipo di dati alla volta (<strong>Dati</strong>, poi la sua fonte), tra il servizio interrogato in diretta e <strong>File</strong>. <strong>File</strong> legge quei dati dai file della registrazione e rimanda al suo elemento qui; un file non ancora rilevato lo è al salvataggio successivo.</p>
       <p>La registrazione stessa. <strong>Carica un file di osservazione</strong> porta dentro una registrazione esistente, <em>dal proprio disco</em> o, con un clic su queste parole, <em>da un indirizzo</em>, ed <strong>Salva</strong> ti
         consegna il file. <strong>Esporta in KML</strong> ti consegna invece un file Google Earth con ciò che la ricostruzione ha di cartografabile: dove stava il testimone, il suo percorso se si è spostato, la direzione dichiarata per ogni fenomeno a ogni fotogramma chiave, dove una lettura colloca ciò che si sarebbe visto, e i tracciati importati, restituiti come sono arrivati. Aprilo in Google Earth, in SVH o in QGIS e sovrapponilo alla tua geometria. Una linea di vista è una direzione e nient'altro: è tracciata su cinque chilometri convenzionali che la sua stessa descrizione dichiara tali — leggine l'azimut, non l'estremità. Le altezze sono contate dal suolo da cui il testimone è partito, come il file precisa. <strong>Esporta in GeoJSON</strong> scrive la stessa cosa nel formato che legge ogni GIS: WGS 84 senza membro <code>crs</code>, come la RFC 7946 esige, e ogni figura dice a quale gruppo appartiene e da che cosa sono contate le sue altezze, poiché il GeoJSON non ha parola né per l'uno né per l'altro. Un punto dopo questa scheda indica che la registrazione contiene modifiche non salvate; caricare un altro file o un altro indirizzo mentre ne contiene chiede prima conferma. Sotto, la stessa registrazione come testo JSON, tenuta allineata nei due
         sensi: ciò che cambi nel modulo o nel rendering vi compare, e un testo che si interpreta
@@ -2152,6 +2110,52 @@ if (docs) {
         chi non lascia il modulo.</p>
       <p><strong>Moduli</strong>, l'ultima voce del selettore, aggiunge ciò che altri pubblicano: immagini, rilievo, modelli 3D, una fonte meteo, un evento del cielo. Incolla l'indirizzo di un modulo e premi <strong>Aggiungi</strong>: i tuoi moduli restano in questo browser, possono essere disattivati o rimossi, e salvati in un file per caricarli altrove. <strong>Citato da questa registrazione</strong> dice che la registrazione ne ha bisogno. <strong>Verifica</strong> confronta un modulo con ciò che UFO@home si aspetta da esso e dice cosa non va e cosa non ha potuto provare, interrogando i suoi servizi con il luogo e la data della registrazione; non dice nulla sull'esattezza dei suoi dati né sulla sua sicurezza. Vedi <a href="/docs/modules/">come aggiungere i tuoi</a>.</p>
     </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap prose-wide">
+    <h2>Indica qualsiasi cosa e dirà il suo nome</h2>
+    <p>Passare sopra la scena nomina ciò che sta sotto il puntatore. Una stella dà il suo nome, e con <kbd>Alt</kbd> premuto la sua
+      magnitudine e quanto era alta: «Venere, mag −4, 8° sopra l'orizzonte» risponde da sola a una
+      segnalazione di una luce brillante vicino all'orizzonte, dove un semplice nome non lo farebbe. Il
+      Sole, la Luna, i pianeti e qualsiasi cometa visibile quella notte rispondono allo stesso modo, e
+      così tutto ciò che è nell'ambiente: un edificio, un albero, un altro testimone.</p>
+    <p>Ciò che il terreno nasconde non risponde. Una stella dietro una collina è invisibile quanto una
+      sotto l'orizzonte, quindi nessuna delle due viene proposta: una ricostruzione non è un elenco di
+      ciò che c'è nel cielo, è ciò che poteva essere visto da dove si trovava il testimone.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Regole da conoscere</h2>
+    <div class="prose-wide">
+      <ul class="plain">
+        <li><strong>Un fotogramma chiave si mantiene, non sfuma.</strong> Una forma assente da un
+          fotogramma chiave successivo resta com'era; una il cui primo fotogramma chiave è a cinque
+          secondi è già dipinta, in quello stato, da zero. Per far smettere di vedere qualcosa, dagli
+          un fotogramma chiave con trasparenza 1.</li>
+        <li><strong>Il dichiarato prevale sul dedotto.</strong> «È entrato in una nuvola» è affermato
+          dal testimone, mai calcolato dalla geometria: questo formato descrive un'apparenza in un
+          campo visivo, non una posizione nello spazio, quindi nulla in esso <em>può</em> sapere se una
+          nuvola si è frapposta.</li>
+        <li><strong>In pausa è in pausa.</strong> La pioggia che cade, lo scintillio delle stelle, i
+          fulmini, i riflessi dell'obiettivo, il suono ambientale: tutto si ferma con il lettore. Una
+          riproduzione in pausa è un istante di un avvistamento; un meteo che continuasse sopra di esso
+          sarebbe la tua stanza, non la serata del testimone.</li>
+        <li><strong>Fuori dalla vista, nulla gira.</strong> Una scena che è stata superata scorrendo, o
+          in un pannello chiuso, non disegna né calcola nulla, e una riproduzione in corso viene messa
+          in pausa. Viene ridisegnata al ritorno, e il pulsante di riproduzione riavvia la riproduzione.</li>
+        <li><strong>Nulla è inventato.</strong> Dove i dati non esistono (prima del 1940 per il meteo,
+          prima del 1957 per i satelliti, prima del 2021 per gli elementi orbitali), il campo
+          resta modificabile e l'interfaccia dice quale dei due casi si applica.</li>
+              <li><strong>Il testo e l'immagine si seguono.</strong> Finché il gruppo File è aperto, mettere il cursore in un oggetto dello scenario o in una forma del testo lo seleziona sull'immagine, e selezionarlo sull'immagine seleziona le sue righe nel testo (il gruppo resta aperto: il testo ha la priorità sul pannello di ciò che clicchi). Le righe modificate dal caricamento della registrazione, o dall'ultimo salvataggio o esportazione, hanno una barra blu nel margine e una tinta chiara. <kbd>F7</kbd> va alla zona modificata successiva, <kbd>Maiusc</kbd>+<kbd>F7</kbd> a quella precedente. Ciò che modifichi, o annulli, sul modulo o sull'immagine viene mostrato allo stesso modo nel testo, che abbia il focus o no. <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>Cmd</kbd>+<kbd>F</kbd>) cerca nel testo, e sostituisce.</li>
+              <li><strong>Tutto si può annullare.</strong> Le due frecce in fondo alle schede, o <kbd>Ctrl</kbd>+<kbd>Z</kbd> e <kbd>Ctrl</kbd>+<kbd>Maiusc</kbd>+<kbd>Z</kbd>, tornano indietro e avanti su ciò che hai cambiato, in qualsiasi gruppo e sul render. La cronologia è quella dell'editor di testo del gruppo File, caricato la prima volta che tocchi qualcosa, e dimenticata quando si carica un'altra registrazione. Eliminare qualcosa (una forma, un elemento della scenografia, un momento con nome), con il suo cestino o con <kbd>Canc</kbd> o <kbd>Backspace</kbd>, non chiede nulla: annullare lo rimette.</li>
+      </ul>
+    </div>
+
   </div>
 </section>
 

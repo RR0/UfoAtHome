@@ -18,7 +18,7 @@ export class DocsFormatComponentsPage extends DocsFormatSubpage {
   constructor() {
     super("docs/format/components", DocsFormatComponentsPage.TITLE, {
       en: "Three of the standard elements are about an observation: the scene it is replayed in, the player that shows it, and the editor that describes it. The editor of a case and the editor of an interview have their own sections, on the pages about those.",
-      fr: "Trois des éléments standards concernent une observation : la scène où elle est rejouée, le lecteur qui la montre, et l'éditeur qui la décrit. L'éditeur de dossier et l'éditeur d'interview ont leurs sections, sur les pages qui en parlent.",
+      fr: "Trois des éléments standards concernent une observation : la scène où elle est rejouée, le lecteur qui la montre, et l'éditeur qui la décrit. L'éditeur de dossier et l'éditeur d'interview sont décrits sur les pages consacrées aux dossiers et aux interviews.",
       es: "Tres de los elementos estándar tratan de una observación: la escena en que se reproduce, el reproductor que la muestra y el editor que la describe. El editor de casos y el editor de entrevistas tienen sus secciones en las páginas que hablan de ellos.",
       it: "Tre degli elementi standard riguardano un'osservazione: la scena in cui viene riprodotta, il lettore che la mostra e l'editor che la descrive. L'editor di casi e l'editor di interviste hanno le loro sezioni, nelle pagine che ne parlano."
     }, {

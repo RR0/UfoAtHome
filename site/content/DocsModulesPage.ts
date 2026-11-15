@@ -21,7 +21,7 @@ export class DocsModulesPage extends DocsSection {
   readonly meta: PageMeta = {
     slug: "docs/modules",
     navLabel: { en: "Modules", fr: "Modules", es: "Módulos", it: "Moduli" },
-    title: { en: "Add your own modules", fr: "Ajouter vos propres modules", es: "Añadir sus propios módulos", it: "Aggiungere i tuoi moduli" },
+    title: { en: "Add your own modules", fr: "Ajouter vos propres modules", es: "Añadir tus propios módulos", it: "Aggiungere i tuoi moduli" },
     description: {
       en: "How to add a weather source, draw a phenomenon in the sky or bring your own imagery, relief and 3D models, step by step and with code that works.",
       fr: "Comment ajouter une source météo, dessiner un phénomène dans le ciel ou apporter votre imagerie, votre relief et vos modèles 3D, pas à pas et avec du code qui marche.",
@@ -238,7 +238,7 @@ export default { title: "Ball lightning", name: "Ball lightning" }`
     { point: "surroundings", interfacePath: "src/render3d/terrain/SurroundingsProvider.ts", what: { en: "The trees, buildings and lines round a place", fr: "Les arbres, bâtiments et lignes autour d'un lieu", es: "Los árboles, edificios y líneas alrededor de un lugar", it: "Gli alberi, gli edifici e le linee intorno a un luogo" } },
     { point: "decorModels", interfacePath: "src/render3d/decor/DecorModelProvider.ts", what: { en: "A catalogue of 3D models", fr: "Un catalogue de modèles 3D", es: "Un catálogo de modelos 3D", it: "Un catalogo di modelli 3D" } },
     { point: "skyEvents", interfacePath: "src/modules/sky-events/SkyEventKind.ts", what: { en: "A type of event of the sky, drawn and edited", fr: "Un type d'événement du ciel, dessiné et édité", es: "Un tipo de evento del cielo, dibujado y editado", it: "Un tipo di evento del cielo, disegnato e modificato" } },
-    { point: "interpretations", interfacePath: "src/modules/interpretations/InterpretationKind.ts", what: { en: "A type of interpretation, computed into bodies", fr: "Un type d'interprétation, calculé en corps", es: "Un tipo de interpretación, calculado en cuerpos", it: "Un tipo di interpretazione, calcolato in corpi" } },
+    { point: "interpretations", interfacePath: "src/modules/interpretations/InterpretationKind.ts", what: { en: "A type of reading, computed into bodies", fr: "Un type de lecture, dont les corps sont calculés", es: "Un tipo de lectura, calculado en cuerpos", it: "Un tipo di lettura, calcolato in corpi" } },
     { point: "perception", interfacePath: "src/engine/observer/ObserverProvider.ts", what: { en: "What bends a witness's perception", fr: "Ce qui modifie la perception d'un témoin", es: "Lo que altera la percepción de un testigo", it: "Ciò che altera la percezione di un testimone" } },
     { point: "transcription", interfacePath: "src/engine/transcription/TranscriptionProvider.ts", what: { en: "What turns the recording of an interview into text", fr: "Ce qui transcrit l'enregistrement d'une interview", es: "Lo que transcribe la grabación de una entrevista", it: "Ciò che trascrive la registrazione di un'intervista" } }
   ]
@@ -392,7 +392,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<code>frame.lightFrom</code> and <code>frame.glareFrom</code>: light the ground and dazzle the eye. <code>frame</code> also gives the real instant, the true position of the witness, the wind, the ground under a point and the faintest magnitude seen.",
         "<code>inSky</code> on the simulation: drawn on the sky's shell round the eye, like the stars, rather than in the scene's metres."
       ],
-      reading: "All of it is in <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/sky-events/SkyEventKind.ts\"><code>SkyEventKind.ts</code></a>, and the beams, launches and fireballs of UFO@home are written this way: <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events/beams\"><code>sky-events/beams</code></a> makes a good model. If what you are drawing is not a fact but what somebody claims the witness saw (sky lanterns let go from a garden, flares dropped by an aircraft), it is rather an interpretation: see <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/interpretations/InterpretationKind.ts\"><code>InterpretationKind.ts</code></a>, stated under <code>interpretation.&lt;key&gt;</code>, whose <code>bodiesOf(item)</code> computes the bodies to show from a few parameters.",
+      reading: "All of it is in <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/sky-events/SkyEventKind.ts\"><code>SkyEventKind.ts</code></a>, and the beams, launches and fireballs of UFO@home are written this way: <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events/beams\"><code>sky-events/beams</code></a> makes a good model. If what you are drawing is not a fact but what somebody claims the witness saw (sky lanterns let go from a garden, flares dropped by an aircraft), it is rather a reading: see <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/interpretations/InterpretationKind.ts\"><code>InterpretationKind.ts</code></a>, stated under <code>interpretation.&lt;key&gt;</code>, whose <code>bodiesOf(item)</code> computes the bodies to show from a few parameters.",
       noCodeHeading: "Without code: imagery, relief, 3D models",
       noCode: "Tiles and models need nothing more than the manifest, under <code>contributes</code>. Its addresses can be relative to the manifest's own. The manifest below knows its format: put the caret inside an object and press <kbd>Ctrl</kbd>+<kbd>Space</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> on a Mac) to list every key that could go there, with what each means.",
       noCodeFields: [
@@ -407,7 +407,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Any module:</strong> a key that is not one of the places below, a field missing from an entry, an id given twice, a <code>create</code> that fails or already asks the network, a method the interface requires and yours lacks.",
         "<strong>A weather source:</strong> one sample per point, in order; values within their bounds; a <code>source</code> with the entry's <code>id</code>, a name and a request.",
         "<strong>An event of the sky:</strong> <code>key</code> the same as the <code>id</code>, its texts in English and French, an object made with the <code>three</code> given to the script, an <code>update</code> that works with no events, a <code>dispose</code> that takes its object out of the scene.",
-        "<strong>An interpretation:</strong> its texts, and a <code>bodiesOf</code> that returns a list at once, tried on what the open recording states."
+        "<strong>A reading:</strong> its texts, and a <code>bodiesOf</code> that returns a list at once, tried on what the open recording states."
       ],
       checkLimit: "It says what it could not try, and that matters: a service with no record for that date has not had its values looked at, and an <code>update</code> is only tried with no events, since UFO@home does not know what yours state. It proves neither that your data are right, nor the wind's direction (a wind in the wrong sense stays within its bounds), nor that the module is safe: its script has already run. Those are for your own tests.",
       shareHeading: "Sharing a recording that needs your module",
@@ -418,7 +418,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>An event of the sky</strong>: you write <code>modules</code> yourself, and the reader has to add your module to see it. Without it nothing is drawn, and the file keeps what it states. The editor shows them <strong>Add to my modules</strong> beside the module the recording names."
       ],
       pointsHeading: "Everything a module can add to",
-      points: "The weather and the sky are two of the fifteen places. The others work the same way: a key in what the script returns, the same entry (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), and a class that gives what the interface asks for.",
+      points: "The weather and the sky are two of the sixteen places. The others work the same way: a key in what the script returns, the same entry (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), and a class that gives what the interface asks for.",
       pointsKey: "Key",
       pointsWhat: "What it adds",
       pointsInterface: "What to give",
@@ -434,14 +434,14 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
     },
     fr: {
       howHeading: "Ce qu'il vous faut",
-      how: "Un module est un dossier que vous publiez sur le web. Il contient un petit fichier, <code>ufoathome-module.json</code>, qui dit ce qu'est le module, et, quand il faut du code, un fichier JavaScript. Quiconque colle l'adresse de ce fichier JSON dans l'éditeur reçoit ce qu'il apporte. Ce que vous écrivez dépend de ce que vous voulez ajouter :",
+      how: "Un module est un dossier que vous publiez sur le web. Il contient un petit fichier, <code>ufoathome-module.json</code>, qui dit ce qu'est le module, et, quand il faut du code, un fichier JavaScript. Quiconque colle l'adresse de ce fichier JSON dans l'éditeur obtient ce que le module apporte. Ce que vous écrivez dépend de ce que vous voulez ajouter :",
       wants: [
-        "<strong>Une source de données qui répond à sa façon</strong> (météo, noms de lieux, trafic aérien…) : un peu de code qui l'interroge et traduit ses réponses. <a href=\"#weather\">Voir l'exemple de la météo.</a>",
+        "<strong>Une source de données qui a son propre format de réponse</strong> (météo, noms de lieux, trafic aérien…) : un peu de code qui l'interroge et traduit ses réponses. <a href=\"#weather\">Voir l'exemple de la météo.</a>",
         "<strong>Quelque chose à dessiner dans le ciel</strong> : un peu de code avec three.js, que la scène appelle à chaque image. <a href=\"#sky\">Voir l'exemple de la boule de foudre.</a>",
         "<strong>Des tuiles de carte, un relief ou des modèles 3D</strong> : pas de code, le fichier JSON suffit. <a href=\"#no-code\">Voir plus bas.</a>"
       ],
       weatherHeading: "Exemple : ajouter une source météo",
-      weather: "Disons qu'un service nommé ACME connaît la météo du passé et répond à <code>https://api.acme.example/history?lat=…&amp;lon=…&amp;at=…</code> par <code>{ \"cloudPercent\": 70, \"rainMm\": 0, \"windKmh\": 36, \"windFromDeg\": 270, \"thunder\": false }</code>. Une fois ceci fait, il apparaîtra dans le sélecteur de météo de l'éditeur, à côté de celle qu'UFO@home propose.",
+      weather: "Disons qu'un service nommé ACME connaît la météo du passé et répond à <code>https://api.acme.example/history?lat=…&amp;lon=…&amp;at=…</code> par <code>{ \"cloudPercent\": 70, \"rainMm\": 0, \"windKmh\": 36, \"windFromDeg\": 270, \"thunder\": false }</code>. Une fois le module écrit, ce service apparaîtra dans le sélecteur de météo de l'éditeur, à côté de la source qu'UFO@home propose déjà.",
       manifestStep: "1. Décrire le module",
       manifest: "Dans un dossier vide, créez <code>ufoathome-module.json</code>. Choisissez un <code>id</code> à vous, en minuscules. <code>script</code> nomme le code, relativement à ce fichier.",
       codeStep: "2. Écrire le code",
@@ -451,7 +451,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Les unités.</strong> La couverture et l'intensité vont de 0 à 1, et le vent est en mètres par seconde.",
         "<strong>La direction du vent est inversée.</strong> <code>windDirectionDeg</code> dit vers où le vent souffle, en degrés depuis le nord dans le sens horaire, alors que la plupart des services disent d'où il vient. D'où les 180° ci-dessus.",
         "<strong>Un échantillon par point, dans le même ordre.</strong> Il y en a un par heure d'observation, jusqu'à 25. Si votre service peut répondre à plusieurs instants en une seule requête, utilisez cela plutôt que cette boucle.",
-        "<strong>Pas de relevé n'est pas un échec.</strong> Renvoyez <code>undefined</code> quand le service n'a rien pour ce lieu et cette date (l'éditeur le dit, et les champs restent modifiables), et levez une erreur quand il n'a pas pu être interrogé.",
+        "<strong>L'absence de relevé n'est pas un échec.</strong> Renvoyez <code>undefined</code> quand le service n'a rien pour ce lieu et cette date (l'éditeur le dit, et les champs restent modifiables), et levez une erreur quand il n'a pas pu être interrogé.",
         "<strong><code>source</code> est ce que l'enregistrement gardera.</strong> Son <code>id</code> est celui que vous avez déclaré, et son <code>url</code> la requête exacte, pour que la valeur reste vérifiable des années plus tard.",
         "<strong>Les autres champs sont facultatifs.</strong> Couches de nuages, base des nuages, humidité : voir <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/engine/model/Weather.ts\"><code>Weather.ts</code></a>."
       ],
@@ -462,15 +462,15 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "Dans le groupe <strong>Fichiers</strong>, choisissez <strong>Modules</strong>, collez <code>http://localhost:8000/ufoathome-module.json</code> et appuyez sur <strong>Ajouter</strong>. Votre module s'affiche avec ce qu'il apporte : « météo (1) ».",
         "Dans le groupe <strong>Ciel</strong>, ouvrez <strong>Sources des données</strong> par la roue dentée en haut à droite, et choisissez <strong>ACME Weather</strong> sur la ligne <strong>Météo</strong>. Les valeurs changent, et le lien à côté d'elles est votre requête."
       ],
-      tryTrouble: "Si ça ne marche pas : un module illisible dit pourquoi sur sa ligne de la liste, et pour le reste, la console du navigateur dit ce que votre code a levé. La cause habituelle est CORS : <strong>les requêtes sont faites par le navigateur du lecteur</strong>, donc votre service doit autoriser les autres sites à l'appeler. Pour la même raison, ne mettez jamais de clé privée dans <code>module.js</code> : tout le monde peut la lire.",
+      tryTrouble: "Si ça ne marche pas : quand le module ne peut pas être lu, sa ligne dans la liste dit pourquoi ; pour le reste, la console du navigateur montre les erreurs levées par votre code. La cause habituelle est CORS : <strong>les requêtes sont faites par le navigateur de l'utilisateur</strong>, donc votre service doit autoriser les autres sites à l'appeler. Pour la même raison, ne mettez jamais de clé privée dans <code>module.js</code> : tout le monde peut la lire.",
       publishStep: "4. Publier",
       publish: "Déposez le dossier chez n'importe quel hébergeur qui laisse les autres sites le lire (GitHub Pages le fait) et donnez l'adresse de son <code>ufoathome-module.json</code>. Ceux qui l'ajoutent le gardent dans leur navigateur, peuvent le désactiver ou le retirer, et peuvent enregistrer leur liste de modules dans un fichier pour la charger ailleurs. <strong>Un script s'exécute avec tous les droits de la page</strong>, aussi l'éditeur les prévient de n'ajouter que ce qui vient d'un auteur qu'ils connaissent : dites qui vous êtes.",
       skyHeading: "Exemple : dessiner un phénomène dans le ciel",
       sky: "Ici, une boule de lumière qui traverse le ciel. Ce qui était réellement là, que quelqu'un l'ait vu ou non (la foudre, une fusée, un laser), s'appelle dans UFO@home un <em>événement du ciel</em>, et un enregistrement l'énonce sous <code>skyEvents</code>. Vous donnez au type d'événement sa clé et le code qui le dessine.",
       skyCode: "Le manifeste est le même que précédemment. Dans <code>module.js</code>, la simulation est un objet qu'UFO@home construit une fois, la première fois qu'un enregistrement contient un tel événement, puis appelle à chaque image. <code>three</code> est donné au script : utilisez-le plutôt qu'une copie à vous de three.js, dont le moteur de rendu de la scène ne reconnaîtrait pas les objets.",
-      skyMessages: "Ses textes sont dans un fichier par langue, chargé seulement dans celle du lecteur : <code>title</code> est le nom de sa partie dans l'éditeur, <code>name</code> celui d'un événement sans titre.",
+      skyMessages: "Ses textes sont dans un fichier par langue, chargé seulement dans la langue de l'utilisateur : <code>title</code> est le titre de sa section dans l'éditeur, <code>name</code> celui d'un événement sans titre.",
       skyStateStep: "L'énoncer dans un enregistrement",
-      skyState: "Chaque événement a un <code>id</code>, puis ce que votre code lit : c'est vous qui décidez du reste. <code>modules</code> nomme le module, pour que l'enregistrement le trouve.",
+      skyState: "Chaque événement a un <code>id</code>, suivi des champs que lit votre code, que vous choisissez librement. <code>modules</code> nomme le module, pour que l'enregistrement le trouve.",
       trySky: [
         "Servez le dossier et ajoutez le module à l'éditeur, comme pour la météo.",
         "Ouvrez un enregistrement qui a un lieu et une date. Dans <strong>Fichiers</strong>, <strong>Enregistrement</strong>, ajoutez l'extrait ci-dessus à son texte, avec des coordonnées devant le témoin.",
@@ -479,39 +479,39 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       skyFurtherStep: "Aller plus loin",
       skyFurtherIntro: "Ce type d'événement est dessiné mais n'a pas de formulaire dans l'éditeur, et le pointeur ne le sélectionne pas. Tout cela est facultatif et s'ajoute au même objet :",
       skyFurther: [
-        "<code>editor</code> : une partie à lui dans le groupe <strong>Ciel</strong>, pour modifier les événements sans écrire de JSON.",
+        "<code>editor</code> : une section à lui dans le groupe <strong>Ciel</strong>, pour modifier les événements sans écrire de JSON.",
         "<code>pick</code> sur la simulation et <code>describe</code> sur le type : ce que dit l'infobulle quand le pointeur est dessus.",
-        "<code>reachM</code> : jusqu'où il va, pour un événement loin du témoin, afin que le sol et la scène soient construits jusque-là.",
-        "<code>frame.lightFrom</code> et <code>frame.glareFrom</code> : éclairer le sol et éblouir l'œil. <code>frame</code> donne aussi l'instant réel, la vraie position du témoin, le vent, le sol sous un point et la magnitude la plus faible vue.",
+        "<code>reachM</code> : la distance jusqu'où il s'étend, pour qu'un événement loin du témoin ait le sol et la scène construits jusque-là.",
+        "<code>frame.lightFrom</code> et <code>frame.glareFrom</code> : éclairer le sol et éblouir l'œil. <code>frame</code> donne aussi l'instant réel, la vraie position du témoin, le vent, le sol sous un point et la magnitude limite (celle des astres les plus faibles encore visibles).",
         "<code>inSky</code> sur la simulation : dessiné sur la sphère du ciel autour de l'œil, comme les étoiles, plutôt que dans les mètres de la scène."
       ],
-      reading: "Tout est dans <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/sky-events/SkyEventKind.ts\"><code>SkyEventKind.ts</code></a>, et les faisceaux, les lancements et les bolides d'UFO@home sont écrits ainsi : <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events/beams\"><code>sky-events/beams</code></a> fait un bon modèle. Si ce que vous dessinez n'est pas un fait mais ce que quelqu'un affirme que le témoin a vu (des lanternes célestes lâchées d'un jardin, des leurres largués par un avion), c'est plutôt une interprétation : voir <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/interpretations/InterpretationKind.ts\"><code>InterpretationKind.ts</code></a>, énoncée sous <code>interpretation.&lt;clé&gt;</code>, dont <code>bodiesOf(item)</code> calcule les corps à montrer d'après quelques paramètres.",
+      reading: "Tout est dans <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/sky-events/SkyEventKind.ts\"><code>SkyEventKind.ts</code></a>, et les faisceaux, les lancements et les bolides d'UFO@home sont écrits ainsi : <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules/sky-events/beams\"><code>sky-events/beams</code></a> fait un bon modèle. Si ce que vous dessinez n'est pas un fait mais ce que quelqu'un affirme que le témoin a vu (des lanternes célestes lâchées d'un jardin, des leurres largués par un avion), c'est plutôt une lecture : voir <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/interpretations/InterpretationKind.ts\"><code>InterpretationKind.ts</code></a>. Elle s'énonce sous <code>interpretation.&lt;clé&gt;</code>, et sa méthode <code>bodiesOf(item)</code> calcule, d'après quelques paramètres, les corps à montrer.",
       noCodeHeading: "Sans code : imagerie, relief, modèles 3D",
-      noCode: "Les tuiles et les modèles ne demandent rien de plus que le manifeste, sous <code>contributes</code>. Ses adresses peuvent être relatives à la sienne. Le manifeste ci-dessous connaît son format : placez le curseur dans un objet et faites <kbd>Ctrl</kbd>+<kbd>Espace</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> sur Mac) pour lister toutes les clés qui pourraient y figurer, avec ce que chacune veut dire.",
+      noCode: "Les tuiles et les modèles ne demandent rien de plus que le manifeste, sous <code>contributes</code>. Les adresses qu'il contient peuvent être relatives à la sienne. L'extrait ci-dessous connaît le format du manifeste : placez le curseur dans un objet et faites <kbd>Ctrl</kbd>+<kbd>Espace</kbd> (<kbd>⌥</kbd>+<kbd>I</kbd> sur Mac) pour lister toutes les clés qui pourraient y figurer, avec ce que chacune veut dire.",
       noCodeFields: [
         "<code>imagery</code> : des tuiles d'images ordinaires. L'adresse contient <code>{z}</code>, <code>{x}</code> et <code>{y}</code>, dans l'ordre que le service leur donne.",
         "<code>elevation</code> : des tuiles de relief en PNG Terrarium (hauteur = R × 256 + G + B / 256 − 32768 m).",
         "<code>models</code> : des fichiers glTF ou GLB, chacun avec son type (<code>vehicle</code>, <code>aircraft</code>, <code>building</code>, <code>entity</code>…), sa taille et son crédit.",
-        "Un <code>id</code> qu'UFO@home ou un autre module donne déjà au même endroit est refusé, pour tout le module : donnez aux vôtres un préfixe à vous."
+        "Si un <code>id</code> est déjà utilisé au même endroit par UFO@home ou par un autre module, c'est tout le module qui est refusé : donnez à vos ids un préfixe à vous."
       ],
       checkHeading: "Vérifier votre module",
-      check: "Dans l'élément <strong>Modules</strong> de l'éditeur, le bouton <strong>Vérifier</strong> de la ligne de votre module le confronte au contrat de ce à quoi il ajoute. Il s'exécute là où vos lecteurs l'utiliseront, dans le navigateur : un service qui refuse les autres sites s'y voit. Il envoie une vraie requête à votre service météo, avec le lieu et la date de l'enregistrement ouvert, c'est pourquoi il ne s'exécute que si vous le demandez.",
+      check: "Dans la partie <strong>Modules</strong> de l'éditeur, le bouton <strong>Vérifier</strong>, sur la ligne de votre module, contrôle que celui-ci respecte le contrat de chaque endroit auquel il ajoute quelque chose. La vérification s'exécute là où vos utilisateurs se serviront du module, dans le navigateur : un service qui refuse les autres sites s'y repère donc. Elle envoie une vraie requête à votre service météo, avec le lieu et la date de l'enregistrement ouvert, c'est pourquoi il ne s'exécute que si vous le demandez.",
       checkWhat: [
-        "<strong>Tout module :</strong> une clé qui n'est pas l'un des endroits ci-dessous, un champ manquant dans une entrée, un id donné deux fois, un <code>create</code> qui échoue ou interroge déjà le réseau, une méthode que l'interface exige et que le vôtre n'a pas.",
+        "<strong>Tout module :</strong> une clé qui n'est pas l'un des endroits ci-dessous, un champ manquant dans une entrée, un id donné deux fois, un <code>create</code> qui échoue ou interroge déjà le réseau, une méthode que l'interface exige et que votre module n'a pas.",
         "<strong>Une source météo :</strong> un échantillon par point, dans l'ordre ; des valeurs dans leurs limites ; une <code>source</code> avec l'<code>id</code> de l'entrée, un nom et une requête.",
         "<strong>Un événement du ciel :</strong> <code>key</code> identique à l'<code>id</code>, ses textes en anglais et en français, un objet construit avec le <code>three</code> que reçoit le script, un <code>update</code> qui marche sans événement, un <code>dispose</code> qui retire son objet de la scène.",
-        "<strong>Une interprétation :</strong> ses textes, et un <code>bodiesOf</code> qui renvoie une liste aussitôt, essayé sur ce qu'énonce l'enregistrement ouvert."
+        "<strong>Une lecture :</strong> ses textes, et un <code>bodiesOf</code> qui renvoie une liste aussitôt, essayé sur ce qu'énonce l'enregistrement ouvert."
       ],
-      checkLimit: "Il dit ce qu'il n'a pas pu essayer, et cela compte : un service sans relevé à cette date n'a pas vu ses valeurs contrôlées, et <code>update</code> n'est essayé que sans événement, puisqu'UFO@home ne sait pas ce que les vôtres énoncent. Il ne prouve ni que vos données sont justes, ni le sens du vent (un vent à l'envers reste dans ses limites), ni que le module est sûr : son script s'est déjà exécuté. Cela relève de vos propres tests.",
+      checkLimit: "La vérification dit ce qu'elle n'a pas pu essayer, et cela compte : un service sans relevé à cette date n'a pas vu ses valeurs contrôlées, et <code>update</code> n'est essayé que sans événement, puisqu'UFO@home ne sait pas ce que les vôtres énoncent. Elle ne prouve ni que vos données sont justes, ni que le vent souffle dans le bon sens (un vent à l'envers reste dans ses limites), ni que le module est sûr : son script s'est déjà exécuté. Cela relève de vos propres tests.",
       shareHeading: "Partager un enregistrement qui a besoin de votre module",
-      share: "Un enregistrement nomme les modules dont il a besoin sous <code>modules</code>, par leurs adresses. Ouvrir le fichier de quelqu'un ne doit pas exécuter le code de quelqu'un : un lecteur reçoit donc ce que le manifeste énonce, et <strong>le script seulement s'il a ajouté le module lui-même</strong>. Ce que cela veut dire selon ce que vous avez apporté :",
+      share: "Un enregistrement nomme les modules dont il a besoin sous <code>modules</code>, par leurs adresses. Ouvrir un fichier reçu ne doit pas exécuter du code venu d'ailleurs : un utilisateur reçoit donc ce que le manifeste énonce, et <strong>le script seulement s'il a ajouté le module lui-même</strong>. Ce que cela veut dire selon ce que vous avez apporté :",
       shareCases: [
         "<strong>Une source de données</strong> : rien à faire. Les valeurs sont écrites dans l'enregistrement, avec leur provenance.",
-        "<strong>Des tuiles et des modèles 3D</strong> : ils marchent pour tout le monde, puisqu'ils sont dans le manifeste. L'éditeur nomme le module dès qu'un de ses modèles est utilisé, relativement à l'enregistrement quand les deux sont sur le même site, et <strong>Nommé par cet enregistrement</strong> le retire.",
-        "<strong>Un événement du ciel</strong> : vous écrivez <code>modules</code> vous-même, et le lecteur doit ajouter votre module pour le voir. Sans lui rien n'est dessiné, et le fichier garde ce qu'il énonce. L'éditeur lui propose <strong>Ajouter à mes modules</strong> à côté du module que l'enregistrement nomme."
+        "<strong>Des tuiles et des modèles 3D</strong> : ils marchent pour tout le monde, puisqu'ils sont dans le manifeste. L'éditeur ajoute le module à <code>modules</code> dès qu'un de ses modèles est utilisé (par une adresse relative à l'enregistrement quand les deux sont sur le même site), et décocher <em>Nommé par cet enregistrement</em> l'en retire.",
+        "<strong>Un événement du ciel</strong> : vous écrivez <code>modules</code> vous-même, et l'utilisateur doit ajouter votre module pour voir l'événement. Sans le module, rien n'est dessiné, mais le fichier garde ce qu'il énonce. L'éditeur propose <em>Ajouter à mes modules</em> à côté du module que l'enregistrement nomme."
       ],
       pointsHeading: "Tout ce à quoi un module peut ajouter",
-      points: "La météo et le ciel sont deux des quinze endroits. Les autres marchent de la même façon : une clé dans ce que renvoie le script, la même entrée (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), et une classe qui donne ce que l'interface demande.",
+      points: "La météo et le ciel sont deux des seize endroits. Les autres marchent de la même façon : une clé dans l'objet que renvoie le script, une entrée de même forme (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), et une classe qui fournit ce que demande l'interface.",
       pointsKey: "Clé",
       pointsWhat: "Ce que ça ajoute",
       pointsInterface: "Ce qu'il faut donner",
@@ -520,10 +520,10 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
       prSteps: [
         "Placez la classe dans le dossier de son type sous <a href=\"https://github.com/RR0/UfoAtHome/tree/master/src/modules\"><code>src/modules</code></a>.",
         "Ajoutez son entrée au <code>*Sources.ts</code> de ce dossier, avec son crédit et le lien que sa licence demande.",
-        "Prenez ses textes dans un <code>MessageCatalog</code>, dans les quatre langues. Ajoutez une ligne à la page de confidentialité si elle envoie quoi que ce soit quelque part.",
+        "Mettez ses textes dans un <code>MessageCatalog</code>, dans les quatre langues. Ajoutez une ligne à la page de confidentialité si elle envoie quoi que ce soit quelque part.",
         "Lancez <code>npm test</code>, qui passe aussi chaque implémentation à la même vérification que le bouton <strong>Vérifier</strong>."
       ],
-      prEnd: "Le <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README de ce dossier</a> donne le détail. Les <a href=\"https://github.com/RR0/UfoAtHome/pulls\">pull requests</a> sont les bienvenues, et une question avant aussi si vous ne savez pas trop où mettre quelque chose."
+      prEnd: "Le <a href=\"https://github.com/RR0/UfoAtHome/blob/master/src/modules/README.md\">README de ce dossier</a> donne le détail. Les <a href=\"https://github.com/RR0/UfoAtHome/pulls\">pull requests</a> sont les bienvenues, et une question préalable aussi, si vous ne savez pas trop où mettre quelque chose."
     },
     es: {
       howHeading: "Lo que necesita",
@@ -593,7 +593,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Todo módulo:</strong> una clave que no es uno de los lugares de abajo, un campo que falta en una entrada, un id dado dos veces, un <code>create</code> que falla o ya consulta la red, un método que la interfaz exige y el suyo no tiene.",
         "<strong>Una fuente meteorológica:</strong> una muestra por punto, en orden; valores dentro de sus límites; una <code>source</code> con el <code>id</code> de la entrada, un nombre y una petición.",
         "<strong>Un evento del cielo:</strong> <code>key</code> igual al <code>id</code>, sus textos en inglés y en francés, un objeto construido con el <code>three</code> que recibe el script, un <code>update</code> que funciona sin eventos, un <code>dispose</code> que saca su objeto de la escena.",
-        "<strong>Una interpretación:</strong> sus textos, y un <code>bodiesOf</code> que devuelve una lista enseguida, probado con lo que declara la grabación abierta."
+        "<strong>Una lectura:</strong> sus textos, y un <code>bodiesOf</code> que devuelve una lista enseguida, probado con lo que declara la grabación abierta."
       ],
       checkLimit: "Dice lo que no pudo probar, y eso importa: un servicio sin registro para esa fecha no ha visto comprobados sus valores, y <code>update</code> solo se prueba sin eventos, ya que UFO@home no sabe lo que declaran los suyos. No demuestra ni que sus datos sean correctos, ni el sentido del viento (un viento al revés sigue dentro de sus límites), ni que el módulo sea seguro: su script ya se ha ejecutado. Eso corresponde a sus propias pruebas.",
       shareHeading: "Compartir una grabación que necesita su módulo",
@@ -604,7 +604,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Un evento del cielo</strong>: usted escribe <code>modules</code>, y el lector debe añadir su módulo para verlo. Sin él no se dibuja nada, y el archivo conserva lo que declara. El editor le propone <strong>Añadir a mis módulos</strong> junto al módulo que cita la grabación."
       ],
       pointsHeading: "Todo aquello a lo que un módulo puede añadir",
-      points: "El tiempo y el cielo son dos de los quince lugares. Los demás funcionan igual: una clave en lo que devuelve el script, la misma entrada (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), y una clase que da lo que pide la interfaz.",
+      points: "El tiempo y el cielo son dos de los dieciséis lugares. Los demás funcionan igual: una clave en lo que devuelve el script, la misma entrada (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), y una clase que da lo que pide la interfaz.",
       pointsKey: "Clave",
       pointsWhat: "Lo que añade",
       pointsInterface: "Lo que hay que dar",
@@ -686,7 +686,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Ogni modulo:</strong> una chiave che non è uno dei punti qui sotto, un campo mancante in una voce, un id dato due volte, un <code>create</code> che fallisce o interroga già la rete, un metodo che l'interfaccia esige e che il tuo non ha.",
         "<strong>Una fonte meteo:</strong> un campione per punto, in ordine; valori entro i loro limiti; una <code>source</code> con l'<code>id</code> della voce, un nome e una richiesta.",
         "<strong>Un evento del cielo:</strong> <code>key</code> uguale all'<code>id</code>, i suoi testi in inglese e in francese, un oggetto costruito con il <code>three</code> che lo script riceve, un <code>update</code> che funziona senza eventi, un <code>dispose</code> che toglie il suo oggetto dalla scena.",
-        "<strong>Un'interpretazione:</strong> i suoi testi, e un <code>bodiesOf</code> che restituisce subito un elenco, provato su ciò che la registrazione aperta dichiara."
+        "<strong>Una lettura:</strong> i suoi testi, e un <code>bodiesOf</code> che restituisce subito un elenco, provato su ciò che la registrazione aperta dichiara."
       ],
       checkLimit: "Dice ciò che non ha potuto provare, e questo conta: un servizio senza dati per quella data non ha visto verificati i suoi valori, e <code>update</code> è provato solo senza eventi, poiché UFO@home non sa cosa dichiarano i tuoi. Non dimostra né che i tuoi dati siano giusti, né il senso del vento (un vento al contrario resta nei suoi limiti), né che il modulo sia sicuro: il suo script è già stato eseguito. Questo spetta ai tuoi test.",
       shareHeading: "Condividere una registrazione che ha bisogno del tuo modulo",
@@ -697,7 +697,7 @@ ${DocsModulesPage.POINTS.map(row => `        <tr><td><code>${row.point}</code></
         "<strong>Un evento del cielo</strong>: scrivi <code>modules</code> tu stesso, e il lettore deve aggiungere il tuo modulo per vederlo. Senza di esso non viene disegnato nulla, e il file conserva ciò che dichiara. L'editor gli propone <strong>Aggiungi ai miei moduli</strong> accanto al modulo che la registrazione cita."
       ],
       pointsHeading: "Tutto ciò a cui un modulo può aggiungere",
-      points: "Il meteo e il cielo sono due dei quindici punti. Gli altri funzionano allo stesso modo: una chiave in ciò che lo script restituisce, la stessa voce (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), e una classe che dà ciò che l'interfaccia chiede.",
+      points: "Il meteo e il cielo sono due dei sedici punti. Gli altri funzionano allo stesso modo: una chiave in ciò che lo script restituisce, la stessa voce (<code>id</code>, <code>name</code>, <code>credit</code>, <code>creditUrl</code>, <code>create</code>), e una classe che dà ciò che l'interfaccia chiede.",
       pointsKey: "Chiave",
       pointsWhat: "Cosa aggiunge",
       pointsInterface: "Cosa bisogna dare",

@@ -113,7 +113,7 @@ export class DocsComponentsPage extends DocsSection {
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Standard, and that is the whole design</h2>
+    <h2 id="standard-and-that-is-the-whole-design">Standard Web Components</h2>
     <p>These are five <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — the browser's own standard for a
       custom element, not a component of anybody's framework. What follows from that is worth
       spelling out, because it is why the tool can be handed to you at all:</p>
@@ -223,8 +223,8 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     <h2>Language</h2>
     <p>Every label is translated by detection, with no picker: the page's own declared language
       first — the nearest <code>lang</code> attribute, so <code>&lt;html lang="fr"&gt;</code> gets
-      French labels — then the browser's own preferences, then English. A page that declares nothing
-      falls through to the browser exactly as before.</p>
+      French labels — then the browser's own preferences, then English. A page that declares no language
+      therefore follows the browser's preferences.</p>
   </div>
 </section>
 `
@@ -234,10 +234,10 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Standards, et c'est toute la conception</h2>
-    <p>Ce sont cinq <a href="https://developer.mozilla.org/fr/docs/Web/API/Web_components">composants web</a> — le standard du navigateur pour un
-      élément personnalisé, et non le composant du <i lang="en">framework</i> de quelqu'un. Ce qui
-      en découle mérite d'être dit, car c'est ce qui permet de vous le remettre :</p>
+    <h2 id="standard-and-that-is-the-whole-design">Des composants web standards</h2>
+    <p>Ce sont cinq <a href="https://developer.mozilla.org/fr/docs/Web/API/Web_components">composants web</a> : le standard du navigateur pour créer un
+      élément personnalisé, et non un composant propre à un <i lang="en">framework</i>. Ce qui
+      en découle mérite d'être détaillé, car c'est ce qui permet de vous confier l'outil :</p>
     <ul class="plain">
       <li><strong>Ils fonctionnent dans n'importe quelle page.</strong> Un site statique, WordPress,
         une application React ou Vue, un wiki, un fichier HTML écrit à la main. Ce sont des
@@ -245,38 +245,38 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
       <li><strong>Rien à construire.</strong> Ni <i lang="en">bundler</i>, ni étape de compilation,
         ni configuration dans votre projet. Le module enregistre son élément à l'import et le
         navigateur fait le reste.</li>
-      <li><strong>Rien à suivre.</strong> Il n'y a pas de version de <i lang="en">framework</i> à
-        faire correspondre : la version majeure de quelqu'un d'autre ne peut pas les périmer.</li>
-      <li><strong>Leur intérieur est à eux.</strong> Chacun porte son balisage et ses styles dans un
+      <li><strong>Rien à mettre à jour.</strong> Il n'y a pas de version de <i lang="en">framework</i> à
+        respecter : aucune nouvelle version majeure d'un outil tiers ne peut les rendre obsolètes.</li>
+      <li><strong>Leur contenu est isolé.</strong> Chacun porte son balisage et ses styles dans un
         <i lang="en">shadow root</i> : le CSS de votre page ne peut pas les casser, et eux ne
         peuvent pas casser votre page.</li>
     </ul>
-    <p>Ils se composent en ligne : <code>&lt;rr0-sighting&gt;</code> comme
+    <p>Leur imbrication tient en une phrase : <code>&lt;rr0-sighting&gt;</code> comme
       <code>&lt;rr0-sighting-editor&gt;</code> contiennent un <code>&lt;rr0-scene&gt;</code>, et la
-      scène contient la couche de lecture — la chronologie, les commandes, le canevas du pointeur.
-      Tout ce à quoi la scène répond est donc disponible dans les trois — via <code>.scene</code>
-      et <code>.scene.ufoElement</code> depuis le plus extérieur, la composition vivant dans un
-      <i lang="en">shadow root</i>.</p>
+      scène contient la couche de lecture (la chronologie, les commandes, le canevas du pointeur).
+      Tout ce à quoi la scène répond est donc accessible dans les trois : depuis l'élément le plus
+      extérieur, on y accède par <code>.scene</code> et <code>.scene.ufoElement</code>, car
+      l'imbrication est enfermée dans un <i lang="en">shadow root</i>.</p>
 
     <h2>À quoi sert chacun</h2>
     <ul class="plain">
       <li><strong><code>&lt;rr0-scene&gt;</code> — le phénomène dans le monde autour.</strong> La
-        forme dessinée par un témoin, sa couleur, son halo, son mouvement, debout dans le ciel,
-        l'horizon, la météo et le sol réels d'une date, d'une heure et d'un lieu énoncés — cachée par
-        ce qui se tenait devant. Utile seul aussi, pour un ciel où il n'y a rien du tout.</li>
+        forme dessinée par un témoin, sa couleur, son halo, son mouvement, placée dans le ciel,
+        l'horizon, la météo et le sol réels de la date, de l'heure et du lieu déclarés, et masquée
+        par ce qui se trouvait devant elle. Utile seul aussi, pour un ciel où il n'y a rien du tout.</li>
       <li><strong><code>&lt;rr0-sighting&gt;</code> — le compte rendu, à regarder.</strong> Une scène, plus
-        qui témoigne, les métadonnées de l'observation, ses crédits, et les lignes qui permettent à
-        un lecteur de l'emporter ailleurs. C'est à cela que ressemble une observation publiée.</li>
+        le choix du témoin, les métadonnées de l'observation, ses crédits, et le code qui permet de
+        l'intégrer dans une autre page. C'est à cela que ressemble une observation publiée.</li>
       <li><strong><code>&lt;rr0-sighting-editor&gt;</code> — le compte rendu, à reconstruire.</strong> Tout ce qui
         précède, plus la barre d'outils de saisie : décrire une observation, ou en corriger une.</li>
 
       <li><strong><code>&lt;rr0-case-editor&gt;</code> — un dossier, à assembler.</strong> Contient un
-        <code>&lt;rr0-sighting-editor&gt;</code> et lui présente un enregistrement d'un <code>case.json</code> à la fois :
+        <code>&lt;rr0-sighting-editor&gt;</code> et lui confie, un par un, les enregistrements d'un <code>case.json</code> :
         les comptes rendus des témoins et les lectures qu'on en fait. Il les ajoute, les sélectionne et les
         supprime, et exporte le dossier.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — une date, avec sa précision.</strong> Un sélecteur pour un instant
-        complet, un texte pour moins (EDTF), et le degré de certitude. Les éditeurs s'en servent pour le début et la fin d'une
+        complet, un champ texte pour une date moins précise (EDTF), et le degré de certitude. Les éditeurs s'en servent pour le début et la fin d'une
         observation et pour la date d'un dossier ; il dit ce qu'il contient par un événement <code>datechange</code>.</li>
     </ul>
 
@@ -288,7 +288,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
 
 &lt;rr0-sighting-editor&gt;    les huit panneaux de saisie
 └─ &lt;rr0-scene&gt;           une scène, pas une observation : un éditeur a sa propre barre d'outils</code></pre>
-    <p>C'est pourquoi une seule balise de script embarque ceux du dessous :</p>
+    <p>C'est pourquoi la balise de script d'un composant enregistre aussi ceux qu'il contient :</p>
     <div class="table-scroll">
     <table>
       <tr><th>Charger ceci</th><th>enregistre</th></tr>
@@ -299,19 +299,19 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
     </div>
     <p>Une page qui montre une observation puis, plus bas, un ciel seul, n'a donc besoin que d'un
       script et de deux balises : le second élément est déjà enregistré.</p>
-    <p>On peut entrer dans une composition, une propriété à la fois :</p>
+    <p>On atteint les éléments imbriqués de propriété en propriété :</p>
     <pre><code>const sighting = document.querySelector("rr0-sighting")
 sighting.scene                    // le &lt;rr0-scene&gt; qu'il compose
 sighting.scene.ufoElement         // et la couche de lecture en dessous
 sighting.scene.ufoElement.play()  // la lecture est donc à deux propriétés</code></pre>
-    <p><code>&lt;rr0-sighting-editor&gt;</code> garde sa composition pour lui : ce qu'il offre à une
+    <p><code>&lt;rr0-sighting-editor&gt;</code> garde ses éléments imbriqués pour lui : ce qu'il offre à une
       page, c'est l'enregistrement — <code>sightingData</code> — et l'événement qui dit qu'il a
       changé.</p>
 
     <h2>Celui qu'il vous faut</h2>
     <p>Ce ne sont pas des variantes d'un même <i lang="en">bundle</i> : chacun est autonome, ne
       chargez donc que celui dont vous avez besoin. Tous trois embarquent Three.js et un catalogue
-      d'étoiles — c'est ce que coûte un vrai ciel.</p>
+      d'étoiles : c'est le poids d'un vrai ciel.</p>
     <div class="table-scroll">
     <table>
       <tr><th>Ce que vous faites</th><th>Composant</th><th>Module</th><th>gzip</th></tr>
@@ -349,7 +349,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
     <p>Chaque libellé est traduit par détection, sans sélecteur : la langue déclarée par la page
       d'abord — l'attribut <code>lang</code> le plus proche, donc <code>&lt;html lang="fr"&gt;</code>
       donne des libellés français — puis les préférences du navigateur, puis l'anglais. Une page qui
-      ne déclare rien retombe sur le navigateur, exactement comme avant.</p>
+      ne déclare aucune langue suit donc les préférences du navigateur.</p>
   </div>
 </section>
 `
@@ -359,7 +359,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Estándar, y ese es todo el diseño</h2>
+    <h2 id="standard-and-that-is-the-whole-design">Web Components estándar</h2>
     <p>Son cinco <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Components</a> — el estándar del propio navegador para un
       elemento personalizado, no un componente del <i lang="en">framework</i> de nadie. Lo que de
       ello se deriva merece explicarse, porque es lo que permite ponerte la herramienta en las manos:</p>
@@ -474,7 +474,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
     <p>Cada etiqueta se traduce por detección, sin selector: primero el idioma declarado por la propia
       página — el atributo <code>lang</code> más cercano, así que <code>&lt;html lang="fr"&gt;</code>
       obtiene etiquetas en francés —, luego las preferencias del navegador y, por último, el inglés.
-      Una página que no declara nada recurre al navegador exactamente como antes.</p>
+      Una página que no declara ningún idioma sigue, por tanto, las preferencias del navegador.</p>
   </div>
 </section>
 `
@@ -484,7 +484,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Standard, ed è questo tutto il progetto</h2>
+    <h2 id="standard-and-that-is-the-whole-design">Web Component standard</h2>
     <p>Sono cinque <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components">Web Component</a> — lo standard del browser stesso per un
       elemento personalizzato, non un componente del <i lang="en">framework</i> di qualcuno. Ciò che
       ne consegue merita di essere detto, perché è ciò che permette di metterti in mano lo strumento:</p>
@@ -600,7 +600,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
     <p>Ogni etichetta è tradotta per rilevamento, senza selettore: prima la lingua dichiarata dalla
       pagina stessa — l'attributo <code>lang</code> più vicino, quindi <code>&lt;html lang="fr"&gt;</code>
       ottiene etichette in francese — poi le preferenze del browser, poi l'inglese. Una pagina che non
-      dichiara nulla ricade sul browser esattamente come prima.</p>
+      dichiara alcuna lingua segue quindi le preferenze del browser.</p>
   </div>
 </section>
 `

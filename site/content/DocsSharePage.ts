@@ -109,7 +109,7 @@ const startSeconds = () => {
 }
 const query = () => {
   const parts = []
-  if (startSeconds() !== undefined) parts.push("t=" + startSeconds())
+  if (startSeconds() !== undefined) parts.push("d=" + startSeconds())
   if (!option("labels").checked) parts.push("labels=0")
   if (option("map").checked) parts.push("map=1")
   if (!option("moments").checked) parts.push("moments=0")
@@ -234,8 +234,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>How it opens</h2>
-    <p>The player's <strong>Share</strong> button gives the same two things as this page, on one screen: the <strong>Link</strong> or the <strong>Embed</strong> code of the player. The editor shares itself, with the <strong>Share</strong> button of its own header: the link or the code of the editor opened on the same file, or on the same case. The options below are those it offers, each starting as the player is at that moment; they apply to the link and to the code of the sections that follow.</p>
+    <h2 id="how-it-opens">How the shared reconstruction opens</h2>
+    <p>The player's <strong>Share</strong> button gives the same two things as this page, on one screen: the <strong>Link</strong> or the <strong>Embed</strong> code of the player. The editor shares itself, with the <strong>Share</strong> button of its own header: the link or the code of the editor opened on the same file, or on the same case. The options below are those the player's Share button offers, each preset to the state of the player at that moment; they apply to the link and to the code of the sections that follow.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Start at
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Start at"> s</label>
@@ -244,7 +244,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <label><input id="share-opt-moments" type="checkbox" checked> Show moments</label>
       <label><input id="share-opt-compare" type="checkbox"> Compare account</label>
     </fieldset>
-    <h3>What each one writes</h3>
+    <h3 id="what-each-one-writes">What each option adds to the link or the code</h3>
     <div class="table-scroll"><table>
       <tr><th>Option</th><th>In the address</th><th>On the element</th></tr>
       <tr><td>Start <code>n</code> seconds in (or <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
@@ -261,7 +261,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. A link to ufoathome's player</h2>
-    <p>The simplest of the two, and the only one that needs nothing at all of the place you are
+    <p>The simplest of the three, and the only one that needs nothing at all of the place you are
       sending it to. Anybody who follows it sees the observation played in the real sky of the date
       and place it states, in their own language.</p>
 
@@ -333,7 +333,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   <div class="wrap prose-wide">
     <h2>3. As a video file</h2>
     <p>The player's <strong>Record a video of the observation</strong> button (the camera, among its controls) makes an MP4 of the
-      reconstruction, with its sound, to send or publish wherever a video goes. It opens what the video is made with:</p>
+      reconstruction, with its sound, to send or publish wherever a video goes. It opens the settings the video is made with:</p>
     <ul>
       <li><strong>Size</strong>: as on screen, or 720, 1080 or 2160 lines, in the picture's proportions;</li>
       <li><strong>Caption</strong>, <strong>Time</strong>, <strong>Map</strong>: what of the player's words and map is written over the picture;</li>
@@ -393,8 +393,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Comment elle s'ouvre</h2>
-    <p>Le bouton <strong>Partager</strong> du lecteur donne les mêmes deux choses que cette page, sur un seul écran : le <strong>lien</strong> ou le code d'<strong>intégration</strong> du lecteur. L'éditeur se partage lui-même, avec le bouton <strong>Partager</strong> de son propre en-tête : le lien ou le code de l'éditeur ouvert sur le même fichier, ou sur le même dossier. Les options ci-dessous sont celles qu'il propose, chacune partant de l'état du lecteur à cet instant ; elles s'appliquent au lien et au code des sections suivantes.</p>
+    <h2 id="how-it-opens">Comment s'ouvre la reconstitution partagée</h2>
+    <p>Le bouton <strong>Partager</strong> du lecteur donne, sur un seul écran, les deux mêmes choses que cette page : le lien vers le lecteur (<strong>Lien</strong>) ou son code d'intégration (<strong>Intégrer</strong>). L'éditeur a lui aussi un bouton <strong>Partager</strong>, dans son en-tête : il donne le lien ou le code de l'éditeur ouvert sur le même fichier, ou sur le même dossier. Les options ci-dessous sont celles que propose le bouton Partager du lecteur, chacune préréglée selon l'état du lecteur au moment du clic. Elles s'appliquent au lien et au code des sections suivantes.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Commencer à
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Commencer à"> s</label>
@@ -403,7 +403,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <label><input id="share-opt-moments" type="checkbox" checked> Afficher les moments</label>
       <label><input id="share-opt-compare" type="checkbox"> Comparer au compte rendu</label>
     </fieldset>
-    <h3>Ce que chacune écrit</h3>
+    <h3 id="what-each-one-writes">Ce que chaque option ajoute au lien ou au code</h3>
     <div class="table-scroll"><table>
       <tr><th>Option</th><th>Dans l'adresse</th><th>Sur l'élément</th></tr>
       <tr><td>Commencer <code>n</code> secondes après le début (ou <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
@@ -414,15 +414,15 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <tr><td>Comparer au compte rendu</td><td><code>compare=1</code></td><td><code>compare-account</code></td></tr>
       <tr><td>Ouvrir un dossier sur l'un de ses enregistrements</td><td><code>observer=IdObservateur</code> (ou un nom de fichier, ou son rang dans la liste)</td><td><code>observer="IdObservateur"</code></td></tr>
       </table></div>
-    <p class="small">Les chips de résumé sont le bandeau de ce que l'enregistrement énonce, sous l'image : la date dite en toutes lettres avec son jour de la semaine, la position, le témoin, la météo, et un chip <q>Description</q> qui montre les premiers mots du récit et ouvre le texte entier à la place des chips (une croix les rend). La page du lecteur les affiche sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. Le partage de l'éditeur ne prend aucune de ces options : il donne le fichier à son adresse, et le dit quand des modifications ne sont pas encore enregistrées.</p>
+    <p class="small">Les chips sont les petites étiquettes alignées sous l'image, qui résument ce que dit l'enregistrement : la date en toutes lettres avec son jour de la semaine, la position, le témoin, la météo, et une chip <q>Description</q> qui montre les premiers mots du récit ; un clic dessus affiche le texte entier à la place des chips (une croix les fait revenir). La page du lecteur les affiche, sauf avec <code>labels=0</code> ; l'élément lui-même ne les affiche qu'avec <code>show-labels</code>. Le bouton Partager de l'éditeur ne propose aucune de ces options : il donne le lien du fichier à son adresse, et prévient quand des modifications ne sont pas encore enregistrées.</p>
   </div>
 </section>
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. Un lien vers le lecteur d'ufoathome</h2>
-    <p>Le plus simple des deux, et le seul qui n'exige rien de l'endroit où vous l'envoyez. Qui le
-      suit voit l'observation jouée sous le ciel réel de la date et du lieu qu'elle énonce, dans sa
-      propre langue.</p>
+    <p>Le plus simple des trois, et le seul qui n'exige rien de l'endroit où vous l'envoyez. Quiconque
+      suit ce lien voit, dans sa propre langue, l'observation rejouée sous le ciel réel de la date et
+      du lieu qu'elle indique.</p>
 
     <div class="doc-try">
       <label for="share-link-url">L'adresse de votre enregistrement</label>
@@ -436,15 +436,15 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     </div>
 
     <p>Bon pour un courriel, un message, un commentaire, un forum qui n'accepte que du texte —
-      partout où l'on peut mettre une URL. Le champ ci-dessus part d'un enregistrement de ce site
-      pour que le bouton fasse quelque chose ; l'adresse que vous y mettez est la vôtre, sur votre
-      hébergement, et ce site n'en a jamais besoin d'une copie.</p>
-    <p>Là où le lien s'affiche en carte (réseau social, messagerie, forum qui déplie les liens), la
-      carte peut en dire plus que le logo du projet. Le serveur lit votre fichier quand le lien est consulté :
-      la carte montre le nom de l'observation, son <code>image</code> (une adresse, absolue ou relative au
+      partout où l'on peut mettre une URL. Le champ ci-dessus contient au départ un enregistrement de
+      ce site, pour que le bouton donne un résultat. Remplacez-le par l'adresse de votre propre
+      fichier, sur votre hébergement : ce site n'a jamais besoin d'en avoir une copie.</p>
+    <p>Là où le lien s'affiche sous forme d'aperçu (réseau social, messagerie, forum qui déplie les liens),
+      cet aperçu peut montrer plus que le logo du projet. Le serveur lit votre fichier quand le lien est consulté :
+      l'aperçu montre le nom de l'observation, son <code>image</code> (une adresse, absolue ou relative au
       fichier) et son <code>summary</code> (une phrase ou deux, en simple texte ou une par langue). Sans
-      <code>summary</code>, la carte dit qui l'a vue, dans quel dossier et quand, autant que le fichier et son
-      adresse le disent ; sans <code>image</code>, elle montre le logo. Un fichier de dossier prend les deux mêmes champs. <code>summaryTime</code> (secondes) dit à l'outil de capture du projet quel instant de la simulation photographier pour l'<code>image</code>, quand le premier ne montre pas le phénomène.</p>
+      <code>summary</code>, l'aperçu dit qui l'a vue, dans quel dossier et quand, pour autant que le fichier et son
+      adresse permettent de le savoir ; sans <code>image</code>, il montre le logo. Un fichier de dossier accepte les deux mêmes champs. <code>summaryTime</code> (secondes) dit à l'outil de capture du projet quel instant de la simulation photographier pour l'<code>image</code>, quand le premier instant ne montre pas le phénomène.</p>
   </div>
 </section>
 
@@ -452,7 +452,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   <div class="wrap prose-wide">
     <h2>2. Dans votre propre page</h2>
     <p>Deux lignes de HTML posent la reconstitution elle-même dans votre page, comme on y pose une
-      vidéo. Aucun <i lang="en">framework</i>, et rien à construire pour votre site.</p>
+      vidéo. Aucun <i lang="en">framework</i>, et aucune étape de compilation pour votre site.</p>
 
     <div class="doc-try">
       <label for="share-embed-url">L'adresse de votre enregistrement</label>
@@ -471,20 +471,20 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <rr0-sighting id="share-preview"></rr0-sighting>
     </div>
 
-    <p>C'est un élément vivant, pas une image — celui-là même que ces deux lignes vous donneraient.
-      Lequel des trois composants employer à la place, et tout ce qu'on peut leur dire, est sur
-      <a href="/docs/format/components/">la page des composants</a>.</p>
+    <p>C'est un élément interactif, pas une image : celui-là même que ces deux lignes vous donneraient.
+      <a href="/docs/format/components/">La page des composants</a> dit lequel des trois composants
+      employer selon le besoin, et tous les réglages qu'on peut leur donner.</p>
     <p class="small">L'adresse du script ne porte pas de version : votre page suit donc chaque
-      version sans être modifiée. Les navigateurs demandent à chaque visite s'il a changé, et la
-      réponse ne coûte rien tant qu'il n'a pas changé.</p>
+      nouvelle version sans que vous ayez à la modifier. À chaque visite, le navigateur vérifie si le
+      script a changé, et cette vérification ne coûte rien tant qu'il n'a pas changé.</p>
     <p class="small">Pour garder plutôt le rendu que vous avez vérifié, cochez <strong>Épingler la
-      version</strong> dans la boîte de partage : le script vient alors du paquet publié sur npm,
-      servi par jsDelivr, qui garde toutes les versions :
-      <code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>. Votre page ne reçoit plus les corrections ultérieures, mais lit les
+      version</strong> dans la boîte de partage. Le script vient alors du paquet publié sur npm,
+      servi par jsDelivr, qui garde toutes les versions
+      (<code>https://cdn.jsdelivr.net/npm/@rr0/ufoathome@<var>version</var>/dist-embed-sighting/rr0-sighting.mjs</code>). Votre page ne reçoit plus les corrections ultérieures, mais lit les
       enregistrements écrits pour des versions plus récentes tant que leur format n'a pas changé
-      (voir <a href="/docs/format/">les versions du format</a>). La case épingle aussi le lien : il se
-      termine alors par <code>&amp;v=<var>version</var></code>, et la page qu'il ouvre, celle du jour,
-      charge le lecteur ou l'éditeur de cette version au même endroit.</p>
+      (voir <a href="/docs/format/">les versions du format</a>). La case épingle aussi le lien, qui se
+      termine alors par <code>&amp;v=<var>version</var></code> : la page qu'il ouvre est celle d'aujourd'hui,
+      mais elle charge le lecteur ou l'éditeur de cette version, depuis jsDelivr lui aussi.</p>
   </div>
 </section>
 
@@ -492,36 +492,37 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   <div class="wrap prose-wide">
     <h2>3. En fichier vidéo</h2>
     <p>Le bouton <strong>Enregistrer une vidéo de l'observation</strong> du lecteur (la caméra, parmi ses commandes) fait un MP4 de
-      la reconstitution, avec son son, à envoyer ou publier partout où va une vidéo. Il ouvre ce avec quoi la vidéo est faite :</p>
+      la reconstitution, avec son son, à envoyer ou publier partout où va une vidéo. Il ouvre les réglages de la vidéo :</p>
     <ul>
       <li><strong>Taille</strong> : comme à l'écran, ou 720, 1080 ou 2160 lignes, dans les proportions de l'image ;</li>
-      <li><strong>Légende</strong>, <strong>Heure</strong>, <strong>Carte</strong> : ce qui, des textes et de la carte du lecteur, est écrit sur l'image ;</li>
-      <li><strong>Début</strong> et <strong>Fin</strong> : la partie de l'observation filmée, comme le compteur l'affiche (<strong>Ici</strong> prend l'endroit où en est la lecture) ; toute l'observation par défaut.</li>
+      <li><strong>Légende</strong>, <strong>Heure</strong>, <strong>Carte</strong> : lesquels des textes du lecteur, et sa carte, sont incrustés sur l'image ;</li>
+      <li><strong>Début</strong> et <strong>Fin</strong> : la partie de l'observation à filmer, telle que le compteur l'affiche (<strong>Ici</strong> reprend la position actuelle de la lecture) ; par défaut, toute l'observation.</li>
     </ul>
-    <p><strong>Enregistrer</strong> la fabrique. Chaque image est dessinée et attendue, quel que soit le temps qu'elle prend : la vidéo
-      tourne donc à 30 images par seconde quelle que soit la machine, et le même enregistrement fait toujours la même vidéo. Le bouton
-      affiche où elle en est, et un clic dessus l'arrête. Rien ne quitte votre navigateur. Le fichier dit ce qu'il est : un logo discret
+    <p><strong>Enregistrer</strong> lance la fabrication. Le lecteur attend que chaque image soit entièrement dessinée, quel que soit le
+      temps que cela prend : la vidéo tourne donc à 30 images par seconde quelle que soit la machine, et le même enregistrement donne
+      toujours la même vidéo. Le bouton affiche l'avancement, et un clic dessus arrête la fabrication. Rien ne quitte votre navigateur.
+      Le fichier indique lui-même ce qu'il est : un logo discret
       dans un coin et, dans ses métadonnées, l'observation, l'adresse de l'enregistrement et la mention <em>une simulation, pas un
-      enregistrement de l'observation</em>. Seulement dans les navigateurs qui savent encoder une vidéo (WebCodecs) : ailleurs, le bouton
-      n'apparaît pas.</p>
+      enregistrement de l'observation</em>. Cette fonction n'existe que dans les navigateurs qui savent encoder une vidéo (WebCodecs) :
+      ailleurs, le bouton n'apparaît pas.</p>
     <h3>Un kit pour générateur vidéo</h3>
-    <p>Le bouton <strong>Kit pour IA générative</strong> du même panneau fait, avec la même taille, le même début et la même fin, un zip
-      pour produire une version réaliste de la reconstitution avec le générateur vidéo de votre choix (Runway, Kling, Luma, Veo…), sur
+    <p>Le bouton <strong>Kit pour IA générative</strong>, dans le même panneau, fabrique un zip (avec la même taille, le même début et
+      la même fin) qui permet de produire une version réaliste de la reconstitution avec le générateur vidéo de votre choix (Runway, Kling, Luma, Veo…), sur
       votre propre compte, sans le laisser inventer le témoignage :</p>
     <ul>
       <li><code>reference.mp4</code> : la vidéo, avec son son, sans rien d'écrit dessus (ni légende, ni carte, ni logo, ni photo du lieu : un générateur les redessinerait comme faisant partie de la scène) ;</li>
-      <li><code>depth.mp4</code> : la distance de chaque pixel, blanc près, noir loin et pour le ciel, sur une même échelle logarithmique de 1 m à 20 km ;</li>
-      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code> : en blanc, la place du phénomène, et le ciel ;</li>
+      <li><code>depth.mp4</code> : la distance de chaque pixel, en blanc ce qui est proche, en noir ce qui est loin ainsi que le ciel, sur une même échelle logarithmique de 1 m à 20 km ;</li>
+      <li><code>phenomenon-mask.mp4</code>, <code>sky-mask.mp4</code> : en blanc, respectivement, l'emplacement du phénomène et celui du ciel ;</li>
       <li><code>first-frame.png</code>, pour les générateurs qui partent d'une image ;</li>
       <li><code>prompt.txt</code> et <code>negative-prompt.txt</code> : un prompt de 2 500 caractères au plus et un prompt négatif, écrits à partir des seuls énoncés de l'enregistrement (lieu, heure, phénomène tel que dessiné, ce qui se passe, météo), jamais à partir du texte du témoignage, dont un générateur dessinerait chaque mot ;</li>
       <li>un mode d'emploi dans votre langue, et <code>manifest.json</code>, la provenance.</li>
     </ul>
     <p>La vidéo de référence guide le générateur : sa géométrie, son horizon, son cadrage et son mouvement sont à garder, seules les
       textures sont rendues photographiques. Le phénomène est rendu par le générateur comme le reste, pour qu'il ait le même grain, le même
-      flou et la même lumière. Le masque sert à <strong>contrôler</strong> le résultat : une vidéo dont le phénomène en sort, change de
-      forme, de taille, de couleur ou de mouvement, ou gagne des détails (hublots, lumières, reflets) est rejetée. Il n'est jamais recollé
-      sur le résultat, où il aurait l'air rapporté.</p>
-    <p class="small">Une vidéo générée est une reconstitution, pas une preuve. Incrustez sur toute l'image qu'elle est générée, citez
+      flou et la même lumière. Le masque du phénomène sert à <strong>contrôler</strong> le résultat : une vidéo où le phénomène sort du masque, change de
+      forme, de taille, de couleur ou de mouvement, ou gagne des détails (hublots, lumières, reflets) est rejetée. Ce masque n'est jamais
+      recollé sur le résultat, où le phénomène aurait l'air rapporté.</p>
+    <p class="small">Une vidéo générée est une reconstitution, pas une preuve. Incrustez sur l'image, pendant toute la vidéo, la mention qu'elle est générée, citez
       l'enregistrement, et ne la montrez jamais à un témoin avant de l'avoir interrogé : une image réaliste peut modifier son souvenir.</p>
   </div>
 </section>
@@ -529,8 +530,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>Ce qu'il faut à un enregistrement pour être partageable</h2>
-    <p><strong>Une chose : une adresse publique.</strong> N'importe où un navigateur peut aller la
-      chercher — un site statique, un hébergeur de fichiers, les pages d'un dépôt. Un fichier sur
+    <p><strong>Une chose : une adresse publique.</strong> N'importe quel endroit où un navigateur peut
+      aller chercher le fichier : un site statique, un hébergeur de fichiers, les pages d'un dépôt. Un fichier sur
       votre disque n'a pas d'URL que quelqu'un d'autre puisse suivre, et c'est là la seule vraie
       exigence.</p>
     <p class="small">Si l'adresse est publique, s'ouvre bien dans votre propre navigateur, et que le
@@ -539,9 +540,9 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       remède est un en-tête de réponse, <code>Access-Control-Allow-Origin: *</code>, sur le JSON. La
       plupart des hébergements statiques — GitHub Pages, Netlify, S3 — l'envoient déjà ou permettent
       de l'ajouter en une ligne de configuration ; si le serveur n'est pas le vôtre, c'est la seule
-      chose à demander à son administrateur. Le lecteur et l'éditeur le disent quand ils le
-      détectent, vous ne devriez donc pas avoir à le deviner.</p>
-    <p>Nulle part où le poser encore ? <a href="/edit/">L'éditeur</a> accepte aussi un
+      chose à demander à son administrateur. Le lecteur et l'éditeur signalent ce problème
+      quand ils le détectent : vous ne devriez donc pas avoir à le deviner.</p>
+    <p>Pas encore d'endroit où le mettre en ligne ? <a href="/edit/">L'éditeur</a> accepte aussi un
       enregistrement collé directement, ce qui suffit à en vérifier un avant de le publier — mais un
       enregistrement collé ne se partage évidemment pas par lien.</p>
     <p>Pas d'enregistrement du tout ? <a href="/docs/create/">Créez-en un</a> ; ce que contient le
@@ -556,8 +557,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Cómo se abre</h2>
-    <p>El botón <strong>Compartir</strong> del reproductor da las mismas dos cosas que esta página, en una sola pantalla: el <strong>enlace</strong> o el código para <strong>insertar</strong> del reproductor. El editor se comparte a sí mismo, con el botón <strong>Compartir</strong> de su propia cabecera: el enlace o el código del editor abierto sobre el mismo archivo, o sobre el mismo caso. Las opciones de abajo son las que ofrece, cada una partiendo del estado del reproductor en ese momento; se aplican al enlace y al código de las secciones siguientes.</p>
+    <h2 id="how-it-opens">Cómo se abre la reconstrucción compartida</h2>
+    <p>El botón <strong>Compartir</strong> del reproductor da las mismas dos cosas que esta página, en una sola pantalla: el <strong>enlace</strong> o el código para <strong>insertar</strong> del reproductor. El editor se comparte a sí mismo, con el botón <strong>Compartir</strong> de su propia cabecera: el enlace o el código del editor abierto sobre el mismo archivo, o sobre el mismo caso. Las opciones de abajo son las que ofrece el botón Compartir del reproductor, cada una ajustada según el estado del reproductor en ese momento; se aplican al enlace y al código de las secciones siguientes.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Empezar en
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Empezar en"> s</label>
@@ -566,7 +567,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <label><input id="share-opt-moments" type="checkbox" checked> Mostrar los momentos</label>
       <label><input id="share-opt-compare" type="checkbox"> Comparar con el relato</label>
     </fieldset>
-    <h3>Lo que escribe cada una</h3>
+    <h3 id="what-each-one-writes">Lo que cada opción añade al enlace o al código</h3>
     <div class="table-scroll"><table>
       <tr><th>Opción</th><th>En la dirección</th><th>En el elemento</th></tr>
       <tr><td>Empezar <code>n</code> segundos después del inicio (o <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
@@ -583,7 +584,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. Un enlace al reproductor de ufoathome</h2>
-    <p>La más sencilla de las dos, y la única que no exige nada del lugar al que lo envías. Quien lo
+    <p>La más sencilla de las tres, y la única que no exige nada del lugar al que lo envías. Quien lo
       siga verá la observación reproducida bajo el cielo real de la fecha y el lugar que indica, en
       su propio idioma.</p>
 
@@ -655,7 +656,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   <div class="wrap prose-wide">
     <h2>3. Como archivo de vídeo</h2>
     <p>El botón <strong>Grabar un vídeo de la observación</strong> del reproductor (la cámara, entre sus controles) hace un MP4
-      de la reconstrucción, con su sonido, para enviarlo o publicarlo dondequiera que vaya un vídeo. Abre aquello con lo que se hace el vídeo:</p>
+      de la reconstrucción, con su sonido, para enviarlo o publicarlo dondequiera que vaya un vídeo. Abre los ajustes con los que se hace el vídeo:</p>
     <ul>
       <li><strong>Tamaño</strong>: como en pantalla, o 720, 1080 o 2160 líneas, en las proporciones de la imagen;</li>
       <li><strong>Leyenda</strong>, <strong>Hora</strong>, <strong>Mapa</strong>: lo que, de los textos y el mapa del reproductor, se escribe sobre la imagen;</li>
@@ -718,8 +719,8 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
     return `
 <section class="band">
   <div class="wrap prose-wide">
-    <h2>Come si apre</h2>
-    <p>Il pulsante <strong>Condividi</strong> del lettore dà le stesse due cose di questa pagina, in una sola schermata: il <strong>link</strong> o il codice da <strong>incorporare</strong> del lettore. L'editor condivide sé stesso, con il pulsante <strong>Condividi</strong> della sua intestazione: il link o il codice dell'editor aperto sullo stesso file, o sullo stesso caso. Le opzioni qui sotto sono quelle che offre, ciascuna a partire dallo stato del lettore in quel momento; valgono per il link e per il codice delle sezioni seguenti.</p>
+    <h2 id="how-it-opens">Come si apre la ricostruzione condivisa</h2>
+    <p>Il pulsante <strong>Condividi</strong> del lettore dà le stesse due cose di questa pagina, in una sola schermata: il <strong>link</strong> o il codice da <strong>incorporare</strong> del lettore. L'editor condivide sé stesso, con il pulsante <strong>Condividi</strong> della sua intestazione: il link o il codice dell'editor aperto sullo stesso file, o sullo stesso caso. Le opzioni qui sotto sono quelle che offre il pulsante Condividi del lettore, ciascuna impostata secondo lo stato del lettore in quel momento; valgono per il link e per il codice delle sezioni seguenti.</p>
     <fieldset class="doc-options">
       <label class="doc-option-start"><input id="share-opt-start-on" type="checkbox"> Inizia a
         <input id="share-opt-start" type="number" min="0" step="1" value="0" aria-label="Inizia a"> s</label>
@@ -728,7 +729,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
       <label><input id="share-opt-moments" type="checkbox" checked> Mostra i momenti</label>
       <label><input id="share-opt-compare" type="checkbox"> Confronta col resoconto</label>
     </fieldset>
-    <h3>Che cosa scrive ciascuna</h3>
+    <h3 id="what-each-one-writes">Che cosa aggiunge ciascuna opzione al link o al codice</h3>
     <div class="table-scroll"><table>
       <tr><th>Opzione</th><th>Nell'indirizzo</th><th>Sull'elemento</th></tr>
       <tr><td>Inizia <code>n</code> secondi dopo l'inizio (o <code>1:30</code>, <code>1m30s</code>, <code>PT1M30S</code>)</td><td><code>d=n</code></td><td><code>start-time="n"</code></td></tr>
@@ -745,7 +746,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
 <section class="band">
   <div class="wrap prose-wide">
     <h2>1. Un link al lettore di ufoathome</h2>
-    <p>Il più semplice dei due, e l'unico che non richiede nulla al luogo in cui lo invii. Chi lo
+    <p>Il più semplice dei tre, e l'unico che non richiede nulla al luogo in cui lo invii. Chi lo
       segue vede l'osservazione riprodotta sotto il cielo reale della data e del luogo che indica,
       nella propria lingua.</p>
 
@@ -817,7 +818,7 @@ embedCopy.addEventListener("click", () => copyFrom(embedCopy, embedMarkup(embedF
   <div class="wrap prose-wide">
     <h2>3. Come file video</h2>
     <p>Il pulsante <strong>Registrare un video dell'osservazione</strong> del lettore (la videocamera, tra i suoi comandi) fa un MP4
-      della ricostruzione, con il suo sonoro, da inviare o pubblicare ovunque vada un video. Apre ciò con cui il video è fatto:</p>
+      della ricostruzione, con il suo sonoro, da inviare o pubblicare ovunque vada un video. Apre le impostazioni con cui il video è fatto:</p>
     <ul>
       <li><strong>Dimensione</strong>: come sullo schermo, o 720, 1080 o 2160 righe, nelle proporzioni dell'immagine;</li>
       <li><strong>Didascalia</strong>, <strong>Ora</strong>, <strong>Mappa</strong>: ciò che, dei testi e della mappa del lettore, è scritto sull'immagine;</li>

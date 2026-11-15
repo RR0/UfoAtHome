@@ -70,8 +70,8 @@ export class DocsPage implements SitePage {
           "En el editor de casos, o en los archivos: quién participó, cómo, y la transcripción si la tienes."],
         ["/docs/share/", "Compartir una observación",
           "Un enlace para enviar, o dos líneas de HTML en tu propia página. Ambos con un ejemplo que funciona, para probar y copiar."],
-        ["/docs/modules/", "Añadir sus propios módulos",
-          "Una fuente meteorológica, un fenómeno dibujado en el cielo, sus imágenes, su relieve o sus modelos 3D: cómo hacerlo, paso a paso."],
+        ["/docs/modules/", "Añadir tus propios módulos",
+          "Una fuente meteorológica, un fenómeno dibujado en el cielo, tus imágenes, tu relieve o tus modelos 3D: cómo hacerlo, paso a paso."],
       ],
       it: [
         ["/docs/create/", "Creare un'osservazione",
@@ -129,7 +129,7 @@ export class DocsPage implements SitePage {
     return `
 <section class="band hero">
   <div class="wrap">
-    <p class="eyebrow">${({ en: "Seven pages", fr: "Sept pages", es: "Siete páginas", it: "Sette pagine" })[language]}</p>
+    <p class="eyebrow">${({ en: "Eight pages", fr: "Huit pages", es: "Ocho páginas", it: "Otto pagine" })[language]}</p>
     <h1>${({
       en: "UFO@home documentation",
       fr: "Documentation d'UFO@home",
@@ -138,7 +138,7 @@ export class DocsPage implements SitePage {
     })[language]}</h1>
     <p class="lede">${({
       en: "What a UFO case is and what it holds, how to create an observation, how to share or embed it, and where its data comes from. Arranged by the question being asked: take the one that is yours.",
-      fr: "Ce qu'est un dossier ufologique et ce qu'il contient, comment créer une observation, comment la partager ou l'intégrer, et d'où viennent ses données. Rangées par la question posée : prenez celle qui est la vôtre.",
+      fr: "Ce qu'est un dossier ufologique et ce qu'il contient, comment créer une observation, comment la partager ou l'intégrer, et d'où viennent ses données. Les pages sont rangées par question : choisissez celle que vous vous posez.",
       es: "Qué es un caso ovni y qué contiene, cómo crear una observación, cómo compartirla o integrarla y de dónde proceden sus datos. Ordenadas por la pregunta que se plantea: elige la tuya.",
       it: "Che cos'è un caso ufologico e cosa contiene, come creare un'osservazione, come condividerla o integrarla e da dove vengono i suoi dati. Ordinate secondo la domanda posta: scegli la tua."
     })[language]}</p>
@@ -202,10 +202,10 @@ npm run build:all    # ${({
       fr: `Les catalogues sont engendrés, pas saisis à la main : <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons), <code>npm run build:novae</code> (les
          courbes AAVSO et les supernovae historiques) et <code>npm run build:satellites</code>
-         (le SATCAT de CelesTrak) reconstruisent chacun le sien depuis sa source publique — la donnée
-         est donc reproductible autant que lisible. <code>npm run build:tle</code> réduit une copie
+         (le SATCAT de CelesTrak) reconstruisent chacun le sien depuis sa source publique : les données
+         sont donc reproductibles, et pas seulement lisibles. <code>npm run build:tle</code> transforme une copie
          locale de l'archive d'éléments orbitaux de Laurent Chabin
-         (<a href="https://ufowaves.org/gp/my_tles/">ufowaves.org</a>) aux fichiers hebdomadaires
+         (<a href="https://ufowaves.org/gp/my_tles/">ufowaves.org</a>) en fichiers hebdomadaires,
          servis sous <code>/tle/</code>.`,
       es: `Los catálogos se generan, no se escriben a mano: <code>npm run build:stars</code> (HYG),
          <code>npm run build:comets</code> (JPL Horizons), <code>npm run build:novae</code> (las
@@ -230,8 +230,8 @@ npm run build:all    # ${({
          the reasoning behind each choice is in the code comments. Everything is ${Licence.mit()} — see <a href="/faq/">the FAQ</a> for what that lets you do.`,
       fr: `Ces pages sont la référence. Le <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          dit ce qu'il faut pour contribuer : installer, reconstruire les données, tester, déboguer,
-         publier ; le raisonnement derrière chaque choix est dans les commentaires du code. Tout est en ${Licence.mit()} — voir <a href="/faq/">la FAQ</a> pour ce que cela vous
-         autorise.`,
+         publier ; le raisonnement derrière chaque choix est dans les commentaires du code. Tout est en ${Licence.mit()} : <a href="/faq/">la FAQ</a> dit ce que cela vous
+         permet de faire.`,
       es: `Estas páginas son la referencia. El <a href="https://github.com/RR0/UfoAtHome#readme">README</a>
          dice lo que hace falta para contribuir: instalar, reconstruir los datos, probar, depurar, publicar;
          el razonamiento detrás de cada decisión está en los comentarios del código. Todo está bajo ${Licence.mit()} — consulta <a href="/faq/">las preguntas frecuentes</a> para saber lo que eso te permite.`,
