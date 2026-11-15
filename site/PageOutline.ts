@@ -34,7 +34,8 @@ export class PageOutline {
    *   the first third of the window.
    * - A heading not shown (the panel of a tab not chosen, as the editor's ten groups) is neither listed nor read.
    * - Once the page's title has gone out of sight, the outline is headed by it instead of "On this page": the
-   *   reader deep in a long page still sees which page it is.
+   *   reader deep in a long page still sees which page it is. Either one is a way back to the top of the page, to
+   *   its title; on a narrow bar, the rest of the bar still opens the list.
    */
   static readonly SCRIPT = `<script>
   class PageOutlineReading {
@@ -63,6 +64,20 @@ export class PageOutline {
       })).filter(entry => entry.heading)
       this.fit()
       this.wide.addEventListener("change", () => this.fit())
+      this.label.addEventListener("click", event => {
+        event.preventDefault()
+        // A link in a summary does not toggle it; the narrow list, if open, is closed on the way up.
+        if (!this.wide.matches) {
+          this.details.open = false
+        }
+        scrollTo({top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"})
+      })
+      // On a wide screen the list stays open: its heading is a way up, not a way to fold it.
+      this.details.querySelector("summary").addEventListener("click", event => {
+        if (this.wide.matches) {
+          event.preventDefault()
+        }
+      })
       this.list.addEventListener("click", event => {
         if (event.target.closest("a") && !this.wide.matches) {
           this.details.open = false
@@ -176,7 +191,7 @@ export class PageOutline {
     return `<nav class="page-outline" aria-label="${label}">${way ? `
   <p class="page-outline-back">${way}</p>` : ""}
   <details>
-    <summary><span class="page-outline-label">${label}</span><span class="page-outline-current"></span></summary>
+    <summary><a class="page-outline-label" href="#">${label}</a><span class="page-outline-current"></span></summary>
     <ol>
       ${items.join("\n      ")}
     </ol>
