@@ -115,6 +115,8 @@ export interface FarRingOptions {
   /** The height above sea level the ring's zero stands for: the patch of the place's own (see TerrainBuildResult.originElevationM), not the ring's
    * own centre, which a grid hundreds of metres to the posting reads differently. */
   referenceElevationM?: number
+  /** The grid it asks for, vertices a side (odd): a finer one than a patch's for a ring that reaches far (see TerrainReach.farRingGridFor). */
+  gridSize?: number
 }
 
 /**
@@ -135,7 +137,8 @@ export async function buildTerrainMesh(
   const fadeEndM = radiusM
   const fullOpacityM = radiusM * FULL_OPACITY_FRACTION
   const bounds = boundsAroundObserver(observerLat, observerLng, fadeEndM)
-  const resolution = { width: ASKED_GRID_SIZE, height: ASKED_GRID_SIZE }
+  const asked = ring?.gridSize ?? ASKED_GRID_SIZE
+  const resolution = { width: asked, height: asked }
   // Asked at once, with the ground: a refusal is no water, and never a failed patch. Not for a patch past ROADS_MAX_RADIUS_M (someone flying):
   // at its tens of metres a pixel a bed is not worth pressing, and the scene's snapshots hold no water for it either (see TerrainSnapshotTaker).
   const waterAsked = ring || radiusM > TerrainReach.ROADS_MAX_RADIUS_M ? undefined : providers.water?.getWater(bounds).catch((error: unknown) => {
@@ -164,6 +167,7 @@ export async function buildTerrainMesh(
   const centreElevation = elevationGrid.heights[centerIndex * gridSize + centerIndex]
   const observerElevation = ring?.referenceElevationM ?? centreElevation
 
+  const curved = ring !== undefined || radiusM > TerrainReach.ROADS_MAX_RADIUS_M
   const positions = new Float32Array(gridSize * gridSize * 3)
   const uvs = new Float32Array(gridSize * gridSize * 2)
   const colors = new Float32Array(gridSize * gridSize * 4)
@@ -179,7 +183,10 @@ export async function buildTerrainMesh(
       const distance = Math.max(Math.abs(x), Math.abs(z))
       // A ring is open where the patch of the place is: nothing inside, all of it from the first posting outside.
       const alpha = ring && distance < ring.innerM ? 0 : 1 - clamp((distance - fullOpacityM) / (fadeEndM - fullOpacityM), 0, 1)
-      const y = TERRAIN_BASE_Y + TERRAIN_Y_OFFSET + (elevation - observerElevation)
+      // The ground curves away under the line of sight (see TerrainReach.curvatureDropM): the height of a mountain's shoulder at a far ring's
+      // ninety kilometres, ten metres at the edge of a patch of 12 km round someone flying, and left out of a patch on the ground, where it
+      // is six centimetres at 900 m.
+      const y = TERRAIN_BASE_Y + TERRAIN_Y_OFFSET + (elevation - observerElevation) - (curved ? TerrainReach.curvatureDropM(Math.hypot(x, z)) : 0)
 
       const i = row * gridSize + col
       positions[i * 3] = x

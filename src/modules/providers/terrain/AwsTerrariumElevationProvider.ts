@@ -1,10 +1,15 @@
 import type { GeoBounds } from "../../../render3d/terrain/GeoBounds.js"
 import type { ElevationGrid, ElevationProvider } from "../../../render3d/terrain/ElevationProvider.js"
-import { chooseZoomForTileEdge, lngLatToTileFraction, tileGridAround, type TileCoord } from "../../../render3d/terrain/TileMath.js"
+import { chooseZoomForPixelSize, chooseZoomForTileEdge, lngLatToTileFraction, tileEdgeM, tileGridAround, type TileCoord } from "../../../render3d/terrain/TileMath.js"
 import { geoToLocalMeters } from "../../../render3d/terrain/GeoProjection.js"
 
 const TILE_SIZE_PX = 256
 const GRID_SIZE = 3
+/** Past this many postings a side a grid is finer than a patch's 65 (a far ring's, see TerrainReach.farRingGridFor), and its tiles are chosen
+ * as fine as it is. */
+const FINE_GRID_FROM = 129
+/** The most tiles a fine grid fetches: 7 × 7, some forty kilobytes each. */
+const MAX_FINE_TILES_A_SIDE = 7
 // Terrarium PNG encoding (Mapzen convention, still what AWS's public elevation-tiles-prod serves):
 // height (meters) = (R * 256 + G + B / 256) - 32768
 const TERRARIUM_OFFSET = 32768
@@ -37,10 +42,23 @@ export class AwsTerrariumElevationProvider implements ElevationProvider {
     const centerLng = (bounds.west + bounds.east) / 2
     const widthM = Math.abs(geoToLocalMeters(centerLat, bounds.east, centerLat, bounds.west).x)
     const heightM = Math.abs(geoToLocalMeters(bounds.north, centerLng, bounds.south, centerLng).z)
-    const zoom = chooseZoomForTileEdge(centerLat, Math.max(widthM, heightM))
-    const { tiles } = tileGridAround(centerLng, centerLat, zoom, GRID_SIZE)
+    const spanM = Math.max(widthM, heightM)
+    let zoom = chooseZoomForTileEdge(centerLat, spanM)
+    let gridSize = GRID_SIZE
+    if (resolution.width >= FINE_GRID_FROM) {
+      // A pixel half a posting apart, so that a summit between postings is not shaved off by a pixel twice their spacing: a far ring of 120 km
+      // at the one zoom whose tile spans it all read Mount Rainier 600 m short. As many tiles as cover it, at most MAX_FINE_TILES_A_SIDE a side.
+      const sides = (z: number) => 2 * Math.ceil((spanM / tileEdgeM(centerLat, z) + 1) / 2) + 1
+      let fine = chooseZoomForPixelSize(centerLat, spanM / (resolution.width - 1) / 2)
+      while (fine > zoom && sides(fine) > MAX_FINE_TILES_A_SIDE) fine--
+      if (fine > zoom) {
+        zoom = fine
+        gridSize = sides(fine)
+      }
+    }
+    const { tiles } = tileGridAround(centerLng, centerLat, zoom, gridSize)
 
-    const rasterSize = GRID_SIZE * TILE_SIZE_PX
+    const rasterSize = gridSize * TILE_SIZE_PX
     const combined = new Float32Array(rasterSize * rasterSize)
     const originTile = tiles[0] // top-left of the grid (smallest x, smallest y)
     await Promise.all(tiles.map(tile => this.decodeTileInto(tile, originTile, combined, rasterSize)))

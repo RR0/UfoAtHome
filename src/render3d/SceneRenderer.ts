@@ -1947,11 +1947,12 @@ export class SceneRenderer {
     const lowestY = nearMesh.position.y + (nearMesh.geometry.boundingBox?.min.y ?? 0)
     const eyeAboveLowestM = this.camera.position.y - lowestY
     const beamReachM = this.skyEventReachM({ lat, lng })
-    if (!TerrainReach.needsFarRing(nearRadiusM, eyeAboveLowestM, beamReachM)) {
+    const wantedM = TerrainReach.farRingRadiusFor(this.weather.visibilityKm)
+    if (!TerrainReach.needsFarRing(nearRadiusM, eyeAboveLowestM, beamReachM, wantedM)) {
       this.dropFarRing()
       return
     }
-    if (this.farRing) {
+    if (this.farRing && this.farRingRadiusM === wantedM) {
       const { x, z } = geoToLocalMeters(lat, lng, this.farRing.origin.lat, this.farRing.origin.lng)
       if (Math.hypot(x, z) < nearRadiusM * SceneRenderer.FAR_RING_KEPT_SHARE) return
     }
@@ -1961,14 +1962,15 @@ export class SceneRenderer {
       this.dropFarRing()
       return
     }
-    const radiusM = snapshots?.radiusM ?? TerrainReach.FAR_RING_RADIUS_M
+    const radiusM = snapshots?.radiusM ?? wantedM
     const token = ++this.farRingToken
     const providers = this.terrainProviders
     // Waited for as the patch is (see awaitArrival): a scene shown before it came showed the band of blue the ring is there to cover, and its first
     // picture, the cover of a recording, kept it.
     void this.awaitArrival(buildTerrainMesh(lat, lng, { elevation: providers.elevation, imagery: providers.imagery }, radiusM, undefined, {
       innerM: nearRadiusM * SceneRenderer.FAR_RING_OPEN_SHARE,
-      referenceElevationM
+      referenceElevationM,
+      gridSize: TerrainReach.farRingGridFor(radiusM)
     }), SceneRenderer.TERRAIN_PATIENCE_MS).then(({ mesh }) => {
       if (token !== this.farRingToken || this.terrainProviders !== providers) {
         this.disposeMesh(mesh)
@@ -2572,6 +2574,11 @@ export class SceneRenderer {
     const precipitationKind = previous.precipitationType !== weather.precipitationType
     const precipitationAmount = previous.precipitationIntensity !== weather.precipitationIntensity
       || previous.precipitationAmount !== weather.precipitationAmount
+    // A day that lets one see farther, or less far, than the far ring reaches: the ring is built again to that reach (see buildFarRing).
+    if (previous.visibilityKm !== weather.visibilityKm && this.terrainMesh && this.terrainMeshOrigin
+      && TerrainReach.farRingRadiusFor(weather.visibilityKm) !== TerrainReach.farRingRadiusFor(previous.visibilityKm)) {
+      this.buildFarRing(this.terrainMeshOrigin.lat, this.terrainMeshOrigin.lng, this.terrainRadius, this.terrainMesh, this.siteElevationM)
+    }
     if (previous.relativeHumidity !== weather.relativeHumidity || previous.visibilityKm !== weather.visibilityKm || precipitationKind || precipitationAmount) {
       // The same haze that makes the sky milky makes the distance pale, and what is falling
       // thins it further: one air for both.
@@ -3508,8 +3515,6 @@ export class SceneRenderer {
   }
 
   private static readonly HORIZON_CLEARANCE_DEG = 1
-  /** The Earth's radius as a line of sight near the ground bends round it: 7/6 of the real one. */
-  private static readonly SIGHT_EARTH_RADIUS_M = 6_371_000 * 7 / 6
   private readonly horizonByBearing = new Float32Array(720).fill(Number.NaN)
   private horizonFor?: string
 
@@ -3532,8 +3537,8 @@ export class SceneRenderer {
       const groundY = d <= this.terrainRadius
         ? this.terrainYUnder(x, z)
         : far!.position.y + this.groundYOfPatch(far!, x - far!.position.x, z - far!.position.z)
-      const bulgeM = (d * d) / (2 * SceneRenderer.SIGHT_EARTH_RADIUS_M)
-      best = Math.max(best, Math.atan2(groundY - bulgeM - eye.y, d))
+      // The ground is built curving away already where it reaches far enough for it to matter (see TerrainReach.curvatureDropM).
+      best = Math.max(best, Math.atan2(groundY - eye.y, d))
     }
     return (best * 180) / Math.PI
   }

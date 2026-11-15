@@ -14,6 +14,34 @@ describe("The far ring of ground", () => {
   })
 })
 
+describe("the far ring on a clear day", () => {
+  it("reaches as far as the recording says the air lets anyone see, past the usual 30 km and up to 150 km", () => {
+    expect(TerrainReach.farRingRadiusFor(undefined)).toBe(30_000)
+    expect(TerrainReach.farRingRadiusFor(20)).toBe(30_000)
+    // Arnold's day, "clear as crystal": objects made out at fifty miles.
+    expect(TerrainReach.farRingRadiusFor(120)).toBe(120_000)
+    expect(TerrainReach.farRingRadiusFor(400)).toBe(150_000)
+  })
+
+  it("is built on such a day from a valley as from the air, and not otherwise on a plain", () => {
+    expect(TerrainReach.needsFarRing(900, 2, 0, 120_000)).toBe(true)
+    expect(TerrainReach.needsFarRing(900, 2, 0, 30_000)).toBe(false)
+  })
+
+  it("asks for a grid of a posting every half kilometre or so, the usual one when it reaches only the usual 30 km", () => {
+    expect(TerrainReach.farRingGridFor(30_000)).toBeUndefined()
+    expect(TerrainReach.farRingGridFor(120_000)).toBe(481)
+    expect(TerrainReach.farRingGridFor(150_000)! % 2).toBe(1)
+    expect(TerrainReach.farRingGridFor(150_000)).toBeLessThanOrEqual(513)
+  })
+
+  it("curves away under the line of sight, refraction included: half a kilometre at Mount Adams' 90 km", () => {
+    expect(TerrainReach.curvatureDropM(0)).toBe(0)
+    expect(TerrainReach.curvatureDropM(900)).toBeLessThan(0.1)
+    expect(TerrainReach.curvatureDropM(90_000)).toBeCloseTo(545, 0)
+  })
+})
+
 describe("ElevationGaps", () => {
   it("fills the postings a source had no ground for from those round them, from the edge of the gap in", () => {
     const heights = new Float32Array([

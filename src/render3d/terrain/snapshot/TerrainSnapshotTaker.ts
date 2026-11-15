@@ -82,8 +82,17 @@ export class TerrainSnapshotTaker {
       }
       if (t >= endMs) break
     }
-    // The far ring round a patch built round someone flying: the patch is only what they read sharply, the ring the rest of what they see.
-    for (const patch of flown) patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
+    // The far ring round a patch built round someone flying: the patch is only what they read sharply, the ring the rest of what they see,
+    // as far as the clearest air of the recording lets them (see TerrainReach.farRingRadiusFor).
+    const visibilities = sighting.weatherTrack.allKeyframes.map(key => key.weather.visibilityKm).filter((km): km is number => km !== undefined)
+    const farM = TerrainReach.farRingRadiusFor(visibilities.length > 0 ? Math.max(...visibilities) : undefined)
+    for (const patch of flown) patches.push({ lat: patch.lat, lng: patch.lng, radiusM: farM, far: true })
+    // And round the others, on a day clear enough to see past the usual ring.
+    if (farM > TerrainReach.FAR_RING_RADIUS_M) {
+      for (const patch of [...patches]) {
+        if (!patch.far && !flown.has(patch) && patch.radiusM < farM) patches.push({ lat: patch.lat, lng: patch.lng, radiusM: farM, far: true })
+      }
+    }
     // The far ring round a patch, where the beams the recording claims go past it (see SceneRenderer.buildFarRing). Not where the eye only overlooks
     // lower ground: that is known from the relief, which is what is being frozen; a frozen scene then has the patches and no ring.
     const kinds = SKY_EVENT_SOURCES.map(source => SkyEventKinds.of(source))
@@ -91,9 +100,9 @@ export class TerrainSnapshotTaker {
     if (kinds.length > 0) {
       const reachM = (centre: { lat: number, lng: number }) => Math.max(...kinds.map(kind => kind.reachM!(SkyEventKinds.eventsOf(sighting.skyEvents, kind), centre)))
       for (const patch of [...patches]) {
-        if (patch.far || flown.has(patch)) continue
+        if (patch.far || flown.has(patch) || patches.some(other => other.far && other.lat === patch.lat && other.lng === patch.lng)) continue
         if (TerrainReach.needsFarRing(patch.radiusM, 0, reachM(patch))) {
-          patches.push({ lat: patch.lat, lng: patch.lng, radiusM: TerrainReach.FAR_RING_RADIUS_M, far: true })
+          patches.push({ lat: patch.lat, lng: patch.lng, radiusM: farM, far: true })
         }
       }
     }

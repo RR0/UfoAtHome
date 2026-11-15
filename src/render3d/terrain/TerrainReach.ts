@@ -115,6 +115,43 @@ export class TerrainReach {
    */
   static readonly FAR_RING_RADIUS_M = TerrainReach.MAX_GROUND_VISIBILITY_M
   /**
+   * The farthest a far ring reaches, whatever the day: past 150 km a mountain three thousand metres high is under the horizon of anyone below
+   * two thousand, and the air of the clearest day has taken nearly all its contrast.
+   */
+  static readonly MAX_FAR_RING_RADIUS_M = 150_000
+  /** The spacing of a far ring's grid, at best: a summit a few kilometres across keeps its height (Mount Rainier is 15 km wide at its foot). */
+  private static readonly FAR_RING_SPACING_M = 500
+  /** The finest grid a far ring asks for, vertices a side: 257, past which a ring of 150 km would cost more than the scene round it. */
+  private static readonly FAR_RING_MAX_GRID = 513
+  /**
+   * The Earth's radius as a line of sight near the ground bends round it: 7/6 of the real one, standard refraction. What the ground drops by
+   * at a distance d from where it is built round, d² / 2R: 10 m at 12 km, 540 m at 90 km, where Mount Adams stood a third of a degree too high
+   * on a flat ground.
+   */
+  static readonly SIGHT_EARTH_RADIUS_M = 6_371_000 * 7 / 6
+
+  /**
+   * How far the far ring reaches on a day of `visibilityKm`: as far as the air lets anyone see, when the recording says so and it is more than
+   * the ring's usual 30 km (a day "clear as crystal", objects made out at fifty miles), up to MAX_FAR_RING_RADIUS_M. The usual 30 km when the
+   * recording says nothing of its visibility: a farther ring is asked for, not assumed.
+   */
+  static farRingRadiusFor(visibilityKm: number | undefined): number {
+    if (visibilityKm === undefined || !(visibilityKm * 1000 > TerrainReach.FAR_RING_RADIUS_M)) return TerrainReach.FAR_RING_RADIUS_M
+    return Math.min(TerrainReach.MAX_FAR_RING_RADIUS_M, visibilityKm * 1000)
+  }
+
+  /** The grid a far ring of `radiusM` asks for, vertices a side (odd): a vertex every kilometre or so, and the usual 65 for the usual ring. */
+  static farRingGridFor(radiusM: number): number | undefined {
+    if (radiusM <= TerrainReach.FAR_RING_RADIUS_M) return undefined
+    const half = Math.ceil(radiusM / TerrainReach.FAR_RING_SPACING_M)
+    return Math.min(TerrainReach.FAR_RING_MAX_GRID, 2 * half + 1)
+  }
+
+  /** How far the ground at `distanceM` from where it is built round lies under the plane through that point, metres (see SIGHT_EARTH_RADIUS_M). */
+  static curvatureDropM(distanceM: number): number {
+    return distanceM * distanceM / (2 * TerrainReach.SIGHT_EARTH_RADIUS_M)
+  }
+  /**
    * How far above the lowest ground of the patch of the place the eye has to be for the land beyond it to show: from a hill, a valley and the
    * plain past it are in view out to the horizon of that height (sqrt(2Rh): 16 km at 20 m), far past the patch, where the sky below the horizon
    * showed instead as a band of blue taken for a sea (the Seine valley from the terrace of Meudon, 100 m above it).
@@ -123,11 +160,13 @@ export class TerrainReach {
 
   /**
    * Whether a patch of the place `nearRadiusM` wide needs a far ring round it: the eye overlooks land lower than itself by OVERLOOK_M, so that
-   * the ground it sees goes on far past the patch, or a beam of light the recording claims goes past it (see beamReachFor).
+   * the ground it sees goes on far past the patch, a beam of light the recording claims goes past it (see beamReachFor), or the day is clear
+   * enough for the ring to reach past its usual 30 km (`farRadiusM`, see farRingRadiusFor).
    */
-  static needsFarRing(nearRadiusM: number, eyeAboveLowestM: number, beamReachM: number): boolean {
-    if (nearRadiusM >= TerrainReach.FAR_RING_RADIUS_M) return false
-    return eyeAboveLowestM >= TerrainReach.OVERLOOK_M || beamReachM > nearRadiusM
+  static needsFarRing(nearRadiusM: number, eyeAboveLowestM: number, beamReachM: number, farRadiusM = TerrainReach.FAR_RING_RADIUS_M): boolean {
+    if (nearRadiusM >= farRadiusM) return false
+    // A day clear enough to see past the usual ring shows the mountains far off, from a valley as from the air.
+    return eyeAboveLowestM >= TerrainReach.OVERLOOK_M || beamReachM > nearRadiusM || farRadiusM > TerrainReach.FAR_RING_RADIUS_M
   }
 
   /** How far from `centre` the beams of light a recording claims go (see BeamJson): the farthest point of their paths, metres, wherever they move. */
