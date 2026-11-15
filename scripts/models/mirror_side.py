@@ -1,7 +1,7 @@
 """
 Replaces what a model has on one side, in a box, by the mirror of what it has on the other: a door the model was made with open, on a
 fuselage whose other side is closed there. Every triangle of the given meshes lying wholly in the box on the +Y side is taken out, and every
-triangle lying wholly in the mirrored box on the -Y side is added again, turned over to +Y (its positions and normals mirrored across Y = 0,
+triangle of the -Y side reaching into the mirrored box is added again, turned over to +Y (its positions and normals mirrored across Y = 0,
 its winding reversed, its other attributes, texture coordinates among them, kept).
 
     python3 scripts/models/mirror_side.py <scene.gltf> <x low> <x high> <+Y from> <z low> <z high> <reach of the open door> <mesh index>...
@@ -74,7 +74,8 @@ for mesh in meshes:
         if all(right(p) for p in points):
             continue
         kept += triangle
-        if all(left(p) for p in points):
+        # Those that only reach into the box too, all on the side: the corner of the door's frame, which the open door had in its place.
+        if any(left(p) for p in points) and all(-p[1] > y_from for p in points):
             mirrored.append(triangle)
     # The mirrored triangles get vertices of their own, appended after the others.
     new = {name: list(values) for name, values in attributes.items()}
