@@ -38,10 +38,11 @@ export class InterviewPlayer {
 .recordings-window { max-width: min(36em, 94vw); padding: 18px 20px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--ground-raised); color: var(--ink); }
 .recordings-window::backdrop { background: rgba(7, 10, 18, .5); }
 .recordings-window h3 { margin: 0 0 12px; font: 600 19px/1.3 var(--serif); }
-.recording-row { display: grid; grid-template-columns: 8em minmax(0, 1fr) 6em auto; gap: 8px; align-items: end; margin-bottom: 10px; }
+.recording-row { display: grid; grid-template-columns: 8em minmax(0, 1fr) 7em auto; gap: 8px; align-items: end; margin-bottom: 10px; }
 .recording-row label { display: flex; flex-direction: column; gap: 4px; font: 600 12px/1.3 var(--sans); color: var(--ink-dim); }
 .recording-row input, .recording-row select { box-sizing: border-box; width: 100%; font-weight: 400; }
 .recording-file { display: flex; gap: 6px; }
+.recording-row .with-unit { display: flex; align-items: center; gap: 4px; font-weight: 400; color: var(--ink); }
 .recording-status { grid-column: 1 / -1; margin: -4px 0 0; font-size: 12px; color: var(--ink-faint); }
 .recording-status.error { color: var(--error); }
 `
@@ -318,8 +319,13 @@ export class InterviewPlayer {
     const label = document.createElement("label")
     const name = document.createElement("span")
     name.textContent = text
-    label.append(name, control)
-    if (unit) label.append(` ${unit}`)
+    if (unit) {
+      // On the control's line, not under it: the row's labels line up only if each holds its name above one line.
+      const line = document.createElement("span")
+      line.className = "with-unit"
+      line.append(control, unit)
+      label.append(name, line)
+    } else label.append(name, control)
     return label
   }
 

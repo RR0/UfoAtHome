@@ -510,6 +510,46 @@ describe("What the summary shows is what the file holds, and the other way round
       choose(element, "whisper-browser")
     })
 
+    it("can be pressed for a service only once its key is typed", async () => {
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element } = await make({ ...event(), url: "interview.json" })
+      tabs(element)[1].click()
+      await wait(100)
+      const start = part(element, "transcribe-start") as HTMLButtonElement
+      expect(start.disabled).toBe(false)
+      choose(element, "groq")
+      expect(start.disabled).toBe(true)
+      const key = part(element, "transcribe-key") as HTMLInputElement
+      key.value = "gsk_test"
+      key.dispatchEvent(new Event("input"))
+      expect(start.disabled).toBe(false)
+      key.value = ""
+      key.dispatchEvent(new Event("input"))
+      expect(start.disabled).toBe(true)
+      choose(element, "whisper-browser")
+      expect(start.disabled).toBe(false)
+    })
+
+    it("lets the selection be taken out only while words of the exchanges are selected", async () => {
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element } = await make({ ...event(), url: "interview.json" })
+      tabs(element)[1].click()
+      await wait(100)
+      const take = part(element, "redact-selection") as HTMLButtonElement
+      expect(take.disabled).toBe(true)
+      const said = element.shadowRoot!.querySelector("#exchanges .said")!
+      const range = document.createRange()
+      range.selectNodeContents(said)
+      // What Chromium gives of a selection within a shadow tree, which jsdom does not keep.
+      let selected: Range | undefined = range
+      ;(element.shadowRoot as ShadowRoot & { getSelection: () => unknown }).getSelection = () => ({ rangeCount: selected ? 1 : 0, getRangeAt: () => selected })
+      document.dispatchEvent(new Event("selectionchange"))
+      expect(take.disabled).toBe(false)
+      selected = undefined
+      document.dispatchEvent(new Event("selectionchange"))
+      expect(take.disabled).toBe(true)
+    })
+
     it("makes what was found the transcript, every turn a voice to attribute, which a turn's Who speaks gives to a speaker", async () => {
       const asked = fake()
       files["https://example.org/d/interview.json"] = withRecording

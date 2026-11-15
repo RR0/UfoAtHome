@@ -328,9 +328,10 @@ export class InterviewEditorElement extends HTMLElement {
       this.transcribeOutcome = undefined
       this.renderTranscribe()
     })
-    // Taken when the field is left, not at each letter.
-    this.shadow.getElementById("transcribe-key")!.addEventListener("change", event => {
+    // Taken at each letter, kept in memory only (see SourceCredentials): Transcribe can be pressed as soon as there is a key.
+    this.shadow.getElementById("transcribe-key")!.addEventListener("input", event => {
       SourceCredentials.set(InterviewEditorElement.transcriptionSourceId, (event.target as HTMLInputElement).value)
+      this.renderTranscribeStart()
     })
     this.shadow.getElementById("redact-selection")!.addEventListener("click", () => void this.redactSelection())
     // A press on a passage taken out puts it back, while its text is still known.
@@ -352,9 +353,24 @@ export class InterviewEditorElement extends HTMLElement {
 
   connectedCallback(): void {
     this.ready = this.loadLocale()
+    document.addEventListener("selectionchange", this.selectionMoved)
+  }
+
+  /** "Take out the selection" can be pressed only while words of the exchanges are selected. */
+  private readonly selectionMoved = (): void => {
+    const button = this.shadow.getElementById("redact-selection") as HTMLButtonElement | null
+    if (button) button.disabled = !this.exchangesSelected()
+  }
+
+  private exchangesSelected(): boolean {
+    const selection = (this.shadow as ShadowRoot & { getSelection?: () => Selection | null }).getSelection?.() ?? document.getSelection()
+    const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined
+    const exchanges = this.shadow.getElementById("exchanges")
+    return Boolean(range && !range.collapsed && exchanges?.contains(range.startContainer) && exchanges.contains(range.endContainer))
   }
 
   disconnectedCallback(): void {
+    document.removeEventListener("selectionchange", this.selectionMoved)
     // Moving the editor in the page disconnects it and connects it again within the same task: only an editor still out of the page after
     // that has gone, and its text editor must stop (its linter keeps a timer that dispatches on the view, which fails once the window it
     // measured against is closed). See SightingEditorElement's.
@@ -617,6 +633,7 @@ export class InterviewEditorElement extends HTMLElement {
     this.drawn = json
     this.player?.show(json, this.current ? this.transcriptUrl(this.current) : undefined)
     this.renderReview(json)
+    this.selectionMoved()
     this.decorateExchanges(json)
     this.renderTranscribe()
   }
@@ -997,8 +1014,7 @@ export class InterviewEditorElement extends HTMLElement {
     if (key !== this.shadow.activeElement) key.value = SourceCredentials.of(source.id) ?? ""
     if (this.transcribing) return
     const recording = this.player?.recordingUrl()
-    // Never greyed out for want of a recording: pressed then, it opens the window where one is added (see transcribe).
-    ;(this.shadow.getElementById("transcribe-start") as HTMLButtonElement).disabled = false
+    this.renderTranscribeStart()
     const note = this.shadow.getElementById("transcribe-note")!
     if (this.transcribeOutcome) {
       MessageStyle.show(note, this.transcribeOutcome.text, this.transcribeOutcome.kind)
@@ -1013,6 +1029,18 @@ export class InterviewEditorElement extends HTMLElement {
     if ((this.drawn?.segments?.length ?? 0) > 0) said.push(m.transcribeReplaces)
     // Sending a witness's words to someone else is said as a warning: everything else in the editor stays in the browser.
     MessageStyle.show(note, said.join(" "), provider.sendsAudio ? "warning" : "info")
+  }
+
+  /**
+   * Transcribe can be pressed unless the way chosen needs the reader's key and has none. Never greyed out for want of a recording: pressed
+   * then, it opens the window where one is added (see transcribe).
+   */
+  private renderTranscribeStart(): void {
+    if (this.transcribing || !this.messages) return
+    const source = dataSourceById(TRANSCRIPTION_SOURCES, InterviewEditorElement.transcriptionSourceId)
+    const start = this.shadow.getElementById("transcribe-start") as HTMLButtonElement
+    start.disabled = Boolean(source.keyUrl) && !SourceCredentials.of(source.id)
+    start.title = start.disabled ? this.messages.transcribeErrors.noKey : ""
   }
 
   /** While a transcription runs: only Stop can be pressed. */
