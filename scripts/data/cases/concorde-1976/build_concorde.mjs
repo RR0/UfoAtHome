@@ -225,13 +225,14 @@ const nearestStill = (() => {
 })()
 // What a reading claims stands still in the frame (a speck on the lens or in the gate, a reflection on a pane the camera is fixed to): at its
 // best where it stays nearest the orb all along, carried with the camera, frame by frame as the film's registration turns it. As bright as
-// the orb, which its claim does not say: the best case.
-const inFrameBody = ({ title, distanceM, luminanceCdM2 }) => ({
+// the orb, which its claim does not say: the best case. What is no surface the Sun lights (a reflection) states its albedo, nil, and how much of
+// the scene shows through it.
+const inFrameBody = ({ title, distanceM, luminanceCdM2, albedo, transparency }) => ({
   id: 'orb', title, explains: ['orb'], model: { id: 'sphere' },
   track: [
     ...keys.filter(key => key.t <= lastOrbMs).map((key, index) => ({
       t: key.t, ...(index === 0 ? { present: true, sizeM: { widthM: round(distanceM * orbDeg * D2R, 4), lengthM: round(distanceM * orbDeg * D2R, 4), heightM: round(distanceM * orbDeg * D2R, 4) },
-        appearance: { color: '#f4f6f5', luminanceCdM2 } } : {}),
+        appearance: { color: '#f4f6f5', luminanceCdM2, ...(albedo !== undefined ? { albedo } : {}), ...(transparency ? { transparency } : {}) } } : {}),
       ...aimOfPixel(nearestStill.x, nearestStill.y, key.t), distanceM
     })),
     { t: lastOrbMs + 40, present: false }

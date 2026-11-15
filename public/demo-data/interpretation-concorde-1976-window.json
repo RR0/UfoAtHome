@@ -1616,7 +1616,9 @@
       },
       "appearance": {
        "color": "#f4f6f5",
-       "luminanceCdM2": 30000
+       "luminanceCdM2": 10000,
+       "albedo": 0,
+       "transparency": 0.3
       },
       "azimuthDeg": 36.611,
       "altitudeDeg": -31.773,

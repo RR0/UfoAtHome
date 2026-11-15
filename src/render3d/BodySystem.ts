@@ -262,6 +262,9 @@ export class BodySystem {
   private readonly shapeShares = new Map<string, number>()
   /** How many pixels across a glowing body starts showing its shape, and shows it whole, the point it is drawn as below giving way to it. */
   private static readonly SHAPE_FROM_PIXELS = 1.5
+  /** Where a faded body is drawn among what is transparent (see fade): after the relief, its water and its roads, before a flame and the
+   * clouds; the decor's panes' own order (see DecorSystem), so that a pane and a faded body are drawn by distance, the farther first. */
+  static readonly FADED_RENDER_ORDER = 2
   private static readonly SHAPE_FULL_PIXELS = 3
   /**
    * Each body that glows whole, by its id: where it stands, its luminance and the solid angle it fills — what a device that sets its own
@@ -1017,11 +1020,18 @@ export class BodySystem {
    * How much of what is behind a body shows through it, on every surface it is made of — a primitive's and
    * a model's alike. What a material was before (a model's own glass, its own opacity) is kept the first time
    * it is touched, so that a body made opaque again is what its file said and not a flat 1.
+   *
+   * Faded, it is drawn with what is transparent, which three sorts by render order before distance, and it no longer writes the depth: the
+   * ground's patches, its water and its roads are transparent too (they cross-fade), at orders above 1, and were drawn after it and over
+   * it, whatever stood in front. A reflection on a pane at 30 % went from a white disc to nothing at all (the Concorde's). So it is drawn
+   * after them (see FADED_RENDER_ORDER), and back at its own order once opaque.
    */
   private static fade(holder: Object3D, transparency: number): void {
     const seen = 1 - Math.min(1, Math.max(0, transparency))
     holder.traverse(child => {
       if (!(child instanceof Mesh)) return
+      const order = (child.userData.bodyRenderOrder ??= child.renderOrder) as number
+      child.renderOrder = seen < 1 ? Math.max(order, BodySystem.FADED_RENDER_ORDER) : order
       for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
         if (!(material instanceof Material)) continue
         const own = (material.userData.bodyOpacity ??= { transparent: material.transparent, opacity: material.opacity, depthWrite: material.depthWrite }) as

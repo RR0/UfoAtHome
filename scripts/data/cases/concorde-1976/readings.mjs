@@ -100,7 +100,10 @@ export const READINGS = [
   {
     id: 'window',
     mechanism: { kind: 'fixed-in-frame', explains: 'orb' },
-    inFrame: { title: { fr: 'Le reflet sur la vitre (configuration la plus favorable)', en: 'The reflection on the pane (most favourable configuration)', es: 'El reflejo en el cristal (configuración más favorable)', it: 'Il riflesso sul vetro (configurazione più favorevole)' }, distanceM: 1000, luminanceCdM2: 3e4 },
+    inFrame: { title: { fr: 'Le reflet sur la vitre (configuration la plus favorable)', en: 'The reflection on the pane (most favourable configuration)', es: 'El reflejo en el cristal (configuración más favorable)', it: 'Il riflesso sul vetro (configurazione più favorevole)' }, distanceM: 1000, luminanceCdM2: 1e4, albedo: 0, transparency: 0.3 },
+    // A reflection is no surface the Sun lights: its albedo is nil (at 0.5 the sphere was lit as a white ball, whatever its luminance), and the
+    // ground shows through it. Its luminance is what makes it as bright as the film's orb, some +99 over its ground, measured on the render
+    // (+95 over 80); a reflection ADDS light, which a body cannot be drawn doing yet, so this is a mix that comes near it.
     by: [{ people: 'BeauJerome' }],
     time: '2026-11-08',
     lens: { glass: 'window' },
