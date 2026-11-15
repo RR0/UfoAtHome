@@ -43,21 +43,18 @@ export class PageOutline {
       this.list = outline.querySelector("ol")
       this.where = outline.querySelector(".page-outline-current")
       this.label = outline.querySelector(".page-outline-label")
-      const title = document.querySelector("main h1")
-      if (title) {
-        const onThisPage = this.label.textContent
-        const pageTitle = title.textContent.trim()
-        // Out of sight once it has gone up under the header, not before.
-        new IntersectionObserver(([entry]) => {
-          const gone = !entry.isIntersecting && entry.boundingClientRect.top < 0
-          this.label.textContent = gone ? pageTitle : onThisPage
-          this.label.classList.toggle("page-title", gone)
-        }, {rootMargin: "-80px 0px 0px 0px"}).observe(title)
-      }
-      // The bar is held right under the header, whose height depends on how its links wrap.
+      // The bar is held right under the header, whose height depends on how its links wrap; the title is out of
+      // sight once it has gone up under that header, so its watch follows the same height.
       const header = document.querySelector(".site-header")
+      this.title = document.querySelector("main h1")
+      this.onThisPage = this.label.textContent
       if (header) {
-        new ResizeObserver(() => document.documentElement.style.setProperty("--site-header-height", header.offsetHeight + "px")).observe(header)
+        new ResizeObserver(() => {
+          document.documentElement.style.setProperty("--site-header-height", header.offsetHeight + "px")
+          this.watchTitle(header.offsetHeight)
+        }).observe(header)
+      } else {
+        this.watchTitle(0)
       }
       this.wide = matchMedia("(min-width: 56rem)")
       this.native = CSS.supports("scroll-target-group: auto") && CSS.supports("selector(:target-current)")
@@ -81,6 +78,26 @@ export class PageOutline {
       addEventListener("scrollend", () => this.schedule())
       addEventListener("resize", () => this.schedule(), {passive: true})
       this.update()
+    }
+
+    /**
+     * Heads the outline with the page's title once the title has gone up under the header, "On this page" while it
+     * is in sight. Decided by where the title is against the edge of what is watched (rootBounds), never against a
+     * fixed line: the observer reports a crossing once, wherever a slow or fast scroll happens to have left the
+     * title at that moment.
+     */
+    watchTitle(headerHeight) {
+      if (!this.title) {
+        return
+      }
+      this.titleWatch?.disconnect()
+      const pageTitle = this.title.textContent.trim()
+      this.titleWatch = new IntersectionObserver(([entry]) => {
+        const gone = !entry.isIntersecting && entry.boundingClientRect.top < entry.rootBounds.top
+        this.label.textContent = gone ? pageTitle : this.onThisPage
+        this.label.classList.toggle("page-title", gone)
+      }, {rootMargin: \`-\${headerHeight}px 0px 0px 0px\`})
+      this.titleWatch.observe(this.title)
     }
 
     fit() {
