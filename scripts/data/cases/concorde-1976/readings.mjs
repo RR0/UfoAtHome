@@ -70,7 +70,10 @@ export const READINGS = [
     // At its most favourable: the Sun where the film's light allows it nearest the front of the camera (285° from where it looks, at the least
     // height the light allows), a periscope head taking light that far out, and the ghost that lays it on the orb at the first instant.
     sun: { fromViewDeg: 284.5, altitudeDeg: 15.5 },
-    periscope: { reachDeg: 90, share: 2e-3, blur: 0.009 },
+    // Its share is not stated by anyone: it is what lays a ghost as bright as the film's orb, some +99 levels over its ground, measured on the
+    // render (1.5e-5 adds +120 over a ground of 72, 1e-5 +80 over 74, 5e-6 +44). The 2e-3 first ASSUMED drew an opaque white disc, as the same assumption did for
+    // a phone's ghost of the Sun until Royan's photograph measured it (see LensGhosts).
+    periscope: { reachDeg: 90, share: 1.2e-5, blur: 0.009 },
     by: [{ firstNames: ['Alan'], lastName: 'Tanner' }],
     title: {
       fr: "Reflet interne dans le périscope Astrovision : le Soleil, hors champ à gauche, frappe l'élément frontal",
