@@ -26,8 +26,12 @@ export class PageOutline {
    *   header, at every width and every point of the page, naming the section being read; a tap opens the list below
    *   it, and the choice of a section or a tap elsewhere closes it. A button in a corner was there too, and was not
    *   seen.
-   * - The section being read is the last whose heading has gone above the first third of the window; the outline
-   *   scrolls itself (never the page) to keep it in sight.
+   * - The section being read is the browser's to say: the list is a `scroll-target-group`, so the link whose
+   *   section is being read matches `:target-current`, and the style sheet marks it with nothing from here. The
+   *   script only reads it back, for what CSS cannot do: name it in the narrow bar, say it to assistive technology
+   *   (`aria-current`), and scroll the outline itself (never the page) to keep it in sight. A browser without
+   *   them (Firefox and Safari in 2026) gets the same from a measure: the last section whose heading has gone above
+   *   the first third of the window.
    * - A heading not shown (the panel of a tab not chosen, as the editor's ten groups) is neither listed nor read.
    */
   static readonly SCRIPT = `<script>
@@ -42,6 +46,7 @@ export class PageOutline {
         new ResizeObserver(() => document.documentElement.style.setProperty("--site-header-height", header.offsetHeight + "px")).observe(header)
       }
       this.wide = matchMedia("(min-width: 56rem)")
+      this.native = CSS.supports("scroll-target-group: auto") && CSS.supports("selector(:target-current)")
       this.entries = Array.from(this.list.querySelectorAll("a"), link => ({
         link, heading: document.getElementById(decodeURIComponent(link.hash.substring(1)))
       })).filter(entry => entry.heading)
@@ -58,6 +63,8 @@ export class PageOutline {
         }
       })
       addEventListener("scroll", () => this.schedule(), {passive: true})
+      // The browser settles :target-current as the scroll goes; read once more where it stops.
+      addEventListener("scrollend", () => this.schedule())
       addEventListener("resize", () => this.schedule(), {passive: true})
       this.update()
     }
@@ -66,29 +73,27 @@ export class PageOutline {
       this.details.open = this.wide.matches
     }
 
+    /**
+     * Updates at most once per frame, however many scroll events come. On the frame AFTER the scroll: the browser
+     * settles :target-current as it renders the scroll, so read in the scroll's own frame it is still the previous
+     * section's.
+     */
     schedule() {
       if (!this.pending) {
-        this.pending = requestAnimationFrame(() => {
+        this.pending = requestAnimationFrame(() => requestAnimationFrame(() => {
           this.pending = 0
           this.update()
-        })
+        }))
       }
     }
 
     update() {
-      const line = innerHeight / 3
-      let reading
-      for (const entry of this.entries) {
-        const shown = entry.heading.getClientRects().length > 0
-        entry.link.parentElement.hidden = !shown
-        if (!shown) {
-          continue
-        }
-        if (entry.heading.getBoundingClientRect().top > line) {
-          break
-        }
-        reading = entry
-      }
+      const shown = this.entries.filter(entry => {
+        const visible = entry.heading.getClientRects().length > 0
+        entry.link.parentElement.hidden = !visible
+        return visible
+      })
+      const reading = this.native ? shown.find(entry => entry.link.matches(":target-current")) : this.measured(shown)
       if (reading === this.current) {
         return
       }
@@ -103,6 +108,19 @@ export class PageOutline {
           this.list.scrollTop = top - this.list.clientHeight / 3
         }
       }
+    }
+
+    /** Where :target-current is not known: the last section whose heading has gone above the first third of the window. */
+    measured(shown) {
+      const line = innerHeight / 3
+      let reading
+      for (const entry of shown) {
+        if (entry.heading.getBoundingClientRect().top > line) {
+          break
+        }
+        reading = entry
+      }
+      return reading
     }
   }
   for (const outline of document.querySelectorAll(".page-outline")) {

@@ -696,7 +696,12 @@ td { color: var(--ink-dim); }
   letter-spacing: 0.08em; text-transform: uppercase; list-style: none;
 }
 .page-outline summary::-webkit-details-marker { display: none; }
-.page-outline ol { list-style: none; margin: 0.6rem 0 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* The links are scroll markers of the sections they lead to: the browser says which one is being read
+   (:target-current), and the outline follows the reading without a script measuring anything. */
+.page-outline ol {
+  list-style: none; margin: 0.6rem 0 0; padding: 0; overflow-y: auto; overscroll-behavior: contain;
+  scroll-target-group: auto;
+}
 .page-outline li { margin: 0; }
 .page-outline a {
   display: block; padding: 0.3rem 0.6rem; line-height: 1.35; color: var(--ink-dim); text-decoration: none;
@@ -704,7 +709,12 @@ td { color: var(--ink-dim); }
 }
 .page-outline li.h3 a { padding-left: 1.5rem; font-size: 0.95em; color: var(--ink-faint); }
 .page-outline a:hover { color: var(--ink); border-left-color: var(--line-strong); }
-.page-outline a[aria-current] { color: var(--ink); border-left-color: var(--glow); background: var(--warn-bg); }
+/* The browser marks the section being read. Only where it cannot does the script's measure (aria-current) show:
+   both at once would mark two items for a frame, the script reading the browser's choice just after it. */
+.page-outline a:target-current { color: var(--ink); border-left-color: var(--glow); background: var(--warn-bg); }
+@supports not selector(:target-current) {
+  .page-outline a[aria-current] { color: var(--ink); border-left-color: var(--glow); background: var(--warn-bg); }
+}
 
 @media (min-width: 56rem) {
   .page-outline {
