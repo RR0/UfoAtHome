@@ -450,10 +450,9 @@ export class SceneElement extends HTMLElement {
   /** Identifies whatever's under the pointer (see pickAt) — a celestial body, a decor object, or (checked
    * first) a visible UFO shape — and shows/moves/hides a text label next to it — an on-demand
    * identification aid, not a rendering change (see pickBodyAt's own doc comment on why body
-   * hit-testing uses a bigger invisible area than the real, true-to-scale visible disc). Also
-   * reveals the compass labels (see setCompassHovered) for as long as the pointer stays over the
-   * canvas — same on-demand spirit, so neither overlay competes for attention with the scene
-   * itself the rest of the time. Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
+   * hit-testing uses a bigger invisible area than the real, true-to-scale visible disc). The
+   * compass labels (see show-compass) come with the pointer over the canvas too, unless
+   * compassOnHover is off, as the editor has it. Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
    * scene-canvas directly) since that transparent overlay always sits on top and would otherwise
    * swallow every pointer event before the 3D layer ever saw them.
    *
@@ -524,7 +523,7 @@ export class SceneElement extends HTMLElement {
   private tooltipOver: Element | null = null
 
   private hoverAt(event: { clientX: number, clientY: number, altKey: boolean }): void {
-    this.sceneRenderer.setCompassHovered(true)
+    this.showCompassFor({ hovered: true })
     if (this.holding) {
       this.hoverTooltip.hidden = true
       return
@@ -1010,7 +1009,7 @@ export class SceneElement extends HTMLElement {
     this.lastHover = undefined
     this.hoverTooltip.hidden = true
     this.ghostPath.toggleAttribute("hidden", true)
-    this.sceneRenderer.setCompassHovered(false)
+    this.showCompassFor({ hovered: false })
   }
 
   /**
@@ -1475,12 +1474,27 @@ export class SceneElement extends HTMLElement {
     }
   }
 
-  /** Forces the compass labels visible independent of pointer hover — see
-   * SceneRenderer.setCompassForced's own doc comment. `SightingEditorElement` calls this from the
-   * heading input's own focus/blur, a direct method rather than another observed attribute since
-   * it's meant to change far more often (every focus/blur) than `show-compass`'s one-time setup. */
+  /** Shows or hides the compass labels — see SceneRenderer.setCompassForced's own doc comment.
+   * `SightingEditorElement` calls this while a drag turns the view and from the heading input's
+   * focus/blur, a direct method rather than another observed attribute since it's meant to change
+   * far more often than `show-compass`'s one-time setup. */
   setCompassForced(forced: boolean): void {
-    this.sceneRenderer.setCompassForced(forced)
+    this.showCompassFor({ forced })
+  }
+
+  /**
+   * Whether the compass labels (see show-compass) come with the pointer over the scene, as they do for a page showing them to its
+   * readers. The editor has it off: it shows them while a drag turns the view, or the heading is typed (see setCompassForced), and
+   * not at every pass of the pointer over a scene that is only being looked at.
+   */
+  compassOnHover = true
+  private compassHovered = false
+  private compassForced = false
+
+  private showCompassFor(reason: { hovered?: boolean, forced?: boolean }): void {
+    this.compassHovered = reason.hovered ?? this.compassHovered
+    this.compassForced = reason.forced ?? this.compassForced
+    this.sceneRenderer.setCompassForced(this.compassForced || (this.compassOnHover && this.compassHovered))
   }
 
   /**

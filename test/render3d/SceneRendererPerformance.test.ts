@@ -17,7 +17,7 @@ function renderer() {
     cloudRendering: "surface", weather: { cloudCover: 0.3, cloudDarkness: 0.2, highCloudCover: 0.1 },
     observerElevationM: 0, cloudFieldOffset: new Vector3(), celestialGroup: new Group(),
     camera: new PerspectiveCamera(), scene: new Group(), decorGroups: new Map(), lampNudges: new Map(), decorPresence: new Map(), decorSunlight: new Map(), pendingTrafficModels: new Map(), skyEventLayers: new Map(), sceneSunBeam: [0, 0, 0], groundRadius: 1000,
-    compassHovered: false, compassForced: false,
+    compassForced: false,
     gaitOffset: { eastM: 0, northM: 0, upM: 0 }, poseCameraY: 1.6,
     // What the real constructor builds from the card — see AdaptiveResolution; nothing here has a card.
     resolution: { beginDrawing(): void {}, endDrawing(): void {}, update(): undefined { return undefined }, reset(): void {} },
@@ -123,21 +123,16 @@ describe("scene playback resource reuse", () => {
     expect(sprite.visible).toBe(true)
     expect(r.presentExposure).toHaveBeenCalledOnce()
   })
-  it("does not redraw on hover when no compass exists or another control keeps it visible", () => {
+  it("does not redraw when shown or hidden while no compass exists", () => {
     const r = renderer()
     r.compassSprites = []
     r.render = vi.fn()
-    r.setCompassHovered(true)
-    r.setCompassHovered(false)
-    expect(r.render).not.toHaveBeenCalled()
-    r.compassSprites = [new Sprite()]
-    r.compassForced = true
-    r.setCompassHovered(true)
-    r.setCompassHovered(false)
+    r.setCompassForced(true)
+    r.setCompassForced(false)
     expect(r.render).not.toHaveBeenCalled()
   })
 
-  it("redisplays the same exposure on compass hover without restarting or resampling it", () => {
+  it("redisplays the same exposure when the compass is shown without restarting or resampling it", () => {
     const r = renderer()
     const sprite = new Sprite()
     sprite.visible = false
@@ -151,11 +146,11 @@ describe("scene playback resource reuse", () => {
     r.exposureAccumulation = { develop }
     r.renderer = { autoClear: true, render: vi.fn() }
     r.screenPointOf = () => ({ ndcX: 0, ndcY: 0 })
-    r.setCompassHovered(true)
+    r.setCompassForced(true)
     expect(sprite.visible).toBe(true)
     expect(develop).toHaveBeenLastCalledWith(r.renderer, 2.5)
     expect(r.renderer.render).toHaveBeenCalledOnce()
-    r.setCompassHovered(false)
+    r.setCompassForced(false)
     expect(sprite.visible).toBe(false)
     expect(develop).toHaveBeenCalledTimes(2)
     expect(r.render).not.toHaveBeenCalled()

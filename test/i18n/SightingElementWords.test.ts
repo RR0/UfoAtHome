@@ -27,7 +27,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setAstronomy(): void {}
     setShowCompass(): void {}
     setCompassPoints(): void {}
-    setCompassHovered(): void {}
     setCompassForced(): void {}
     setWeather(): void {}
     setDecor(): void {}

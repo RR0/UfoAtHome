@@ -253,6 +253,7 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   keyframeHere: "A keyframe is here: editing it changes it",
   zoomHint: "Pinch or Ctrl + wheel: zoom · swipe sideways or Shift + wheel: scroll",
   overlayHorizon: "Horizon · tilt {deg}°",
+  overlayHeading: "Heading {deg}° · {point}",
   overlayFov: "Field of view {v}° × {h}°",
   overlayWind: "Blowing toward {point} · {speed} m/s",
   sectionIdentity: "Identity",

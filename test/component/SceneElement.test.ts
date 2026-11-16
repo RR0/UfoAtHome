@@ -72,7 +72,6 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     setAstronomy(): void { astronomySet() }
     setShowCompass(): void {}
     setCompassPoints(): void {}
-    setCompassHovered(): void {}
     setCompassForced(): void {}
     setIndoorLook(): void {}
     setWeather(): void {}
@@ -296,6 +295,27 @@ function mount(): SceneElement {
   meteorShowersSet.length = 0
   return element
 }
+
+it("shows the compass while the pointer is over the scene, unless told not to, as the editor does; shown when forced either way", async () => {
+  const element = mount()
+  const renderer = (element as unknown as { sceneRenderer: { setCompassForced(shown: boolean): void } }).sceneRenderer
+  const shown = vi.spyOn(renderer, "setCompassForced")
+  const canvas = element.ufoElement.canvasElement
+  canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 10, clientY: 10, bubbles: true, composed: true }))
+  expect(shown).toHaveBeenLastCalledWith(true)
+  canvas.dispatchEvent(new MouseEvent("pointerleave"))
+  expect(shown).toHaveBeenLastCalledWith(false)
+  element.compassOnHover = false
+  canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 20, clientY: 20, bubbles: true, composed: true }))
+  expect(shown).toHaveBeenLastCalledWith(false)
+  element.setCompassForced(true)
+  expect(shown).toHaveBeenLastCalledWith(true)
+  element.setCompassForced(false)
+  expect(shown).toHaveBeenLastCalledWith(false)
+  // What is under the pointer is asked again at the next frame (see handlePointerMove): let it be, before the page goes.
+  await new Promise(resolve => requestAnimationFrame(resolve))
+  element.remove()
+})
 
 it("does not rebuild astronomy for centimetres of observer motion, but follows a significant move", () => {
   const element = mount()

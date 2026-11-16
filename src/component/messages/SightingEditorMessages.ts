@@ -401,6 +401,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   collapseTracks: string
   /** What the scene says over itself while a field it shows is edited (see SceneFieldOverlay): the tilt's horizon, the field of view, the wind. */
   overlayHorizon: string
+  /** The way the view faces while a drag turns it: its degrees and the point of the compass. */
+  overlayHeading: string
   overlayFov: string
   overlayWind: string
   /** The title of each section of a panel, in capitals (see the form-section blocks of sightingEditorTemplate). */

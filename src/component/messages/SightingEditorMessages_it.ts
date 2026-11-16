@@ -253,6 +253,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   keyframeHere: "Qui c'è un fotogramma chiave: modificarlo lo cambia",
   zoomHint: "Pizzicare o Ctrl + rotella: ingrandire · scorrere di lato o Maiusc + rotella: spostare",
   overlayHorizon: "Orizzonte · inclinazione {deg}°",
+  overlayHeading: "Orientamento {deg}° · {point}",
   overlayFov: "Campo visivo {v}° × {h}°",
   overlayWind: "Soffia verso {point} · {speed} m/s",
   sectionIdentity: "Identità",

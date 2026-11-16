@@ -2,7 +2,7 @@
  * What the field being edited sets, drawn over the scene while it is the one edited (see the design handoff, §3.3): where the
  * horizon falls for the tilt, the frame and its angles for the field of view, a measuring circle round the shape for its sizes and
  * distance, an arrow for the wind. The scene shows the rest by itself as it changes (a colour, a halo, the clouds), and the heading
- * has its compass.
+ * has its compass. While a drag turns the view, the heading and the elevation it sets (see orientation).
  *
  * Laid exactly over the picture (the canvas the shapes are drawn on), in fractions of it, so it stays right whatever the picture's
  * size; and seen, never grabbed: the pointer goes through it to the scene. In the scene's own fixed colours, as the timeline over it.
@@ -23,6 +23,7 @@ export class SceneFieldOverlay {
 .sfo-measure { aspect-ratio: 1; border: 2px dashed #f5c451; border-radius: 50%; transform: translate(-50%, -50%); box-sizing: border-box; }
 .sfo-measure > .sfo-pill { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); }
 .sfo-wind { left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 6px; }
+.sfo-heading { left: 50%; top: 10px; transform: translateX(-50%); }
 .sfo-wind svg { transition: transform .15s ease; }
 `
 
@@ -67,6 +68,28 @@ export class SceneFieldOverlay {
     this.show(circle)
   }
 
+  /**
+   * Which way the view faces while a drag turns it: `heading`, the degrees round the compass said at the top, and `horizon`, where the
+   * horizon falls for the elevation, as horizon() draws it. Each only when the drag has changed it: a level drag says nothing of the
+   * elevation, a drag straight up nothing of the heading.
+   */
+  orientation(heading: string | undefined, horizon: { yFraction: number, label: string } | undefined): void {
+    const parts: HTMLElement[] = []
+    if (horizon) {
+      const line = this.element("sfo-horizon")
+      line.style.top = `${horizon.yFraction * 100}%`
+      line.append(this.pill(horizon.label))
+      parts.push(line)
+    }
+    if (heading) {
+      const pill = this.pill(heading)
+      pill.classList.add("sfo-heading")
+      parts.push(pill)
+    }
+    if (parts.length === 0) this.hide()
+    else this.show(...parts)
+  }
+
   /** The wind, as an arrow turned `bearingDeg` from straight ahead (clockwise), the way it blows, and what it says. */
   wind(bearingDeg: number, label: string): void {
     const pill = this.pill(label)
@@ -75,13 +98,13 @@ export class SceneFieldOverlay {
     this.show(pill)
   }
 
-  private show(content: HTMLElement): void {
+  private show(...content: HTMLElement[]): void {
     const card = this.card.getBoundingClientRect()
     const picture = this.picture().getBoundingClientRect()
     Object.assign(this.layer.style, {
       left: `${picture.left - card.left}px`, top: `${picture.top - card.top}px`, width: `${picture.width}px`, height: `${picture.height}px`
     })
-    this.layer.replaceChildren(content)
+    this.layer.replaceChildren(...content)
     this.layer.hidden = false
   }
 

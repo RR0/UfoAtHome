@@ -1164,7 +1164,6 @@ export class SceneRenderer {
   private observerHeadlights?: { setting: HeadlightMode | "auto", headingDeg: number }
   private compassSprites: Sprite[] = []
   private showCompass = false
-  private compassHovered = false
   /** See setCompassForced's own doc comment. */
   private compassForced = false
   private animationFrameId: number | null = null
@@ -2454,7 +2453,7 @@ export class SceneRenderer {
   /** Enables/disables the N/NE/E/SE/S/SO/O/NO horizon labels feature — a fixed compass reference,
    * unrelated to astronomy/time, so it's built once and left alone rather than rebuilt on every
    * setAstronomy() call the way the sky/stars are. Building them doesn't make them visible on its
-   * own — they start hidden until setCompassHovered(true), see its own doc comment. */
+   * own — they start hidden until setCompassForced(true), see its own doc comment. */
   setShowCompass(show: boolean): void {
     if (this.showCompass === show) return
     this.showCompass = show
@@ -2517,23 +2516,10 @@ export class SceneRenderer {
   private sunArriving: [number, number, number] = [0, 0, 0]
 
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
-   * rebuilds the sprites. A observer's heading matters while actively pointing at the canvas to set
-   * it, not as a permanent overlay competing with the scene the rest of the time — so the labels
-   * only appear while the pointer hovers the canvas (see SceneElement's pointermove/pointerleave
-   * handlers), same spirit as the body-identification tooltip's own hover-only visibility. See
-   * setCompassForced for the other way they can be shown. */
-  setCompassHovered(hovered: boolean): void {
-    if (this.compassHovered === hovered) return
-    this.compassHovered = hovered
-    this.updateCompassVisibility()
-  }
-
-  /** A second, independent reason to show the compass besides hovering the canvas: while the
-   * heading input itself is focused, the labels are exactly what the editor needs to read off a
-   * value against — requiring the mouse to ALSO be hovering the (possibly not even visible, e.g.
-   * scrolled off) canvas at the same time would defeat the point. `SightingEditorElement` calls this
-   * from the heading input's own focus/blur. Independent of setCompassHovered so leaving the field
-   * focused but moving the pointer away doesn't hide them, and vice versa. */
+   * rebuilds the sprites. A observer's heading matters while it is being set, not as an overlay
+   * competing with the scene the rest of the time: SceneElement shows them while the pointer is
+   * over the scene, or, in the editor, while a drag turns the view and while the heading input is
+   * focused (see SceneElement.compassOnHover). */
   setCompassForced(forced: boolean): void {
     if (this.compassForced === forced) return
     this.compassForced = forced
@@ -2541,7 +2527,7 @@ export class SceneRenderer {
   }
 
   private updateCompassVisibility(): void {
-    const visible = this.compassHovered || this.compassForced
+    const visible = this.compassForced
     if (!this.compassSprites.some(sprite => sprite.visible !== visible)) return
     for (const sprite of this.compassSprites) sprite.visible = visible
     // Hover changes a viewing aid, not the observation. Keep the film and its progress intact: but not while playing, when the film is not
@@ -9056,7 +9042,7 @@ export class SceneRenderer {
       sprite.scale.set(COMPASS_SPRITE_SIZE, COMPASS_SPRITE_SIZE, 1)
       sprite.renderOrder = COMPASS_RENDER_ORDER
       sprite.layers.set(HUD_LAYER)
-      sprite.visible = this.compassHovered || this.compassForced
+      sprite.visible = this.compassForced
       this.celestialGroup.add(sprite)
       return sprite
     })
