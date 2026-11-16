@@ -457,8 +457,13 @@ export class CaseEditorElement extends HTMLElement {
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
-    // A reading edited is set against its account again: what it took beyond what is known shows on the fields at once.
-    this.editor.addEventListener("sightingchange", () => this.checkReading())
+    // A reading edited is set against its account again: what it took beyond what is known shows on the fields once the changes stop.
+    // Not at each of them: the editor says "sightingchange" at every tick of its playback too, and the check, which searches the whole
+    // sky for the reading's best case, took 300 ms of every frame there (some 3 images a second on Mount Rainier).
+    this.editor.addEventListener("sightingchange", () => {
+      clearTimeout(this.checkReadingTimer)
+      this.checkReadingTimer = setTimeout(() => this.checkReading(), CaseEditorElement.CHECK_READING_AFTER_MS)
+    })
     // The case keeps the watch over what would be lost by leaving, for the recordings it holds: the editor does not.
     this.editor.guardsLeaving = false
     // Loading a recording or a case into the editor replaces what is open: asked first when changes were not exported.
@@ -1038,7 +1043,12 @@ export class CaseEditorElement extends HTMLElement {
    * place outside their ranges, and the hour for a Sun that does not light the scene as the picture does (the hour is what moving the
    * Sun usually means, though the place and the heading move it too, as the field's title says). Nothing on an account.
    */
+  /** See the "sightingchange" listener: how long the recording has to stay as it is before its reading is checked again. */
+  private static readonly CHECK_READING_AFTER_MS = 250
+  private checkReadingTimer?: ReturnType<typeof setTimeout>
+
   private checkReading(): void {
+    clearTimeout(this.checkReadingTimer)
     const track = this.current
     const account = track && this.session ? this.session.accountOf(track) : undefined
     if (!track || track.kind !== "reading" || !account?.recording) {

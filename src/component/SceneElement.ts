@@ -85,7 +85,7 @@ import { ImageProjection } from "../engine/instrument/ImageProjection.js"
 import { SightingShapes } from "../engine/persistence/SightingShapes.js"
 import { SkyDrift } from "../engine/astronomy/SkyDrift.js"
 import { ExposureSampling } from "../engine/model/ExposureSampling.js"
-import { ShapeDistance } from "../engine/shape/ShapeDistance.js"
+import { type ApproachEstimate, ShapeDistance } from "../engine/shape/ShapeDistance.js"
 import { PhenomenonDepth } from "../engine/shape/PhenomenonDepth.js"
 import type { ResolvedDepth } from "../engine/shape/PhenomenonDepth.js"
 import type { Shape } from "../engine/shape/Shape.js"
@@ -314,6 +314,13 @@ export class SceneElement extends HTMLElement {
    * UfoElement's own setter), and a stale estimate carried across recordings is worse than none:
    * bounds only ever tighten, so one wrong crossing from a previous case would poison the next. */
   private sizeEstimatesFor?: Sighting
+  /**
+   * What the observer's own approach establishes of each shape (see ShapeDistance.of), and what of the recording it was worked out from:
+   * the instants, the shapes' widths and directions there, and where the observer was. It reads the whole recording, every pair of its
+   * instants, and nothing of the instant on show: worked out at every frame, it was 45 ms of each on Mount Rainier (619 instants, nine
+   * shapes). An edit of any of that changes the key, and it is worked out again.
+   */
+  private approaches: { key: string, of: Map<string, ApproachEstimate | undefined> } = { key: "", of: new Map() }
   /** A distance a reader is trying a phenomenon at, by sourceId — see PhenomenonDepth's
    * "hypothesis" and setDistanceHypothesis. Never part of the recording; dropped with the
    * estimates when another recording is loaded. */
@@ -3404,6 +3411,12 @@ export class SceneElement extends HTMLElement {
    * stood in front of. That is the whole of what changed hands: the picture is the same, and who
    * decides what hides it is not.
    */
+  /** See approaches. */
+  private approachOf(sighting: Sighting, sourceId: string): ApproachEstimate | undefined {
+    if (!this.approaches.of.has(sourceId)) this.approaches.of.set(sourceId, ShapeDistance.of(sighting, sourceId))
+    return this.approaches.of.get(sourceId)
+  }
+
   private pushPhenomenaAt(t: number): void {
     const sighting = this.ufoElement.sighting
     if (sighting !== this.sizeEstimatesFor) {
@@ -3411,6 +3424,11 @@ export class SceneElement extends HTMLElement {
       this.distanceHypotheses.clear()
       this.sizeEstimatesFor = sighting
     }
+    const approachKey = JSON.stringify([
+      sighting.timeline.allKeyframes.map(keyframe => [keyframe.t, keyframe.shapes.map(state => [state.sourceId, state.shape.angular?.widthDeg, state.shape.aim?.azimuthDeg])]),
+      sighting.observerTrack.allKeyframes, sighting.event.place?.[0]
+    ])
+    if (approachKey !== this.approaches.key) this.approaches = { key: approachKey, of: new Map() }
     const timeline = sighting.timeline
     const canvas = this.ufoElement.canvasElement
     const shift = this.ufoElement.frameShiftPx
@@ -3448,7 +3466,7 @@ export class SceneElement extends HTMLElement {
       estimate.add(widthDeg, crossing)
       // What the observer's own walk establishes, read at this instant's apparent width — see
       // ShapeDistance, which says what it assumes.
-      const approach = ShapeDistance.of(sighting, sourceId)
+      const approach = this.approachOf(sighting, sourceId)
       depths.set(
         sourceId,
         PhenomenonDepth.resolve({

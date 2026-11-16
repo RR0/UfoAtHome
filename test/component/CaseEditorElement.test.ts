@@ -912,6 +912,30 @@ describe("CaseEditorElement's events", () => {
     expect([picker.min, picker.max]).toEqual(["1976-06-01T00:00", "1976-07-31T23:59"])
     editor.sightingData = { ...editor.sightingData, time: "1976-07-02T16:00" }
     editor.dispatchEvent(new CustomEvent("sightingchange"))
+    // Checked again once the changes stop, not at each: the editor says "sightingchange" at every tick of its playback too.
+    await new Promise(resolve => setTimeout(resolve, 300))
+    expect(field.hasAttribute("aria-invalid")).toBe(false)
+  })
+
+  it("does not check a reading again at every tick of its playback, only once its changes stop", async () => {
+    files["https://example.org/d/dated.json"] = { ...account, time: { value: "1976-06-15T16:00", basis: "assumed", range: "1976-06/1976-07" } }
+    files["https://example.org/d/late.json"] = { ...reading, time: "1976-09-01T16:00" }
+    const element = await open("late.json", {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1976", title: "An account", url: "dated.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", title: { en: "Late" }, url: "late.json" }
+      ]
+    })
+    await wait()
+    const editor = element.sightingEditor
+    const field = editor.shadowRoot!.getElementById("obs-time")!
+    editor.sightingData = { ...editor.sightingData, time: "1976-07-02T16:00" }
+    for (let tick = 0; tick < 5; tick++) {
+      editor.dispatchEvent(new CustomEvent("sightingchange"))
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+    expect(field.getAttribute("aria-invalid")).toBe("true")
+    await new Promise(resolve => setTimeout(resolve, 300))
     expect(field.hasAttribute("aria-invalid")).toBe(false)
   })
 
