@@ -7107,10 +7107,12 @@ export class SceneRenderer {
       const top = group.getWorldPosition(new Vector3())
       top.y = this.reliefYAt(top.x, top.z)
       const distanceM = top.distanceTo(eye)
-      const projected = top.clone().project(this.camera)
-      if (projected.z > 1 || projected.z < -1) continue
-      const dxPx = (ndcX - projected.x) * size.x / 2
-      const belowPx = (projected.y - ndcY) * size.y / 2
+      // Where the picture has it: an eye's picture is not a pinhole's (see screenPointOf), and off its middle the two part by the more
+      // the wider the field: at 75 degrees the tooltip came on well under the summit.
+      const projected = this.screenPointOf(top.clone().sub(eye).normalize())
+      if (!projected) continue
+      const dxPx = (ndcX - projected.ndcX) * size.x / 2
+      const belowPx = (projected.ndcY - ndcY) * size.y / 2
       const halfPx = Math.max(10, ((object.sizeM?.widthM ?? 2000) / 2 / Math.max(distanceM, 1)) / pixelRad)
       // Down to where its flanks reach at that width, and a little over its top.
       if (belowPx < -8 || belowPx > halfPx * 0.6) continue

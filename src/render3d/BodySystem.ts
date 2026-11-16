@@ -502,10 +502,12 @@ export class BodySystem {
   private readonly specksShown = new Set<string>()
   /** What the eye resolves, radians: a minute of arc (see PhenomenonSystem.legible, which draws the account's shapes the same way). */
   private static readonly ACUITY_RAD = Math.PI / 180 / 60
+  /** The width of the eye's area of complete summation by day (Riccò's law), radians: some six minutes of arc. */
+  private static readonly SUMMATION_RAD = 6 * Math.PI / 180 / 60
 
   /**
    * A body that gives out no light, under a pixel or two: drawn as a speck a pixel and a half wide of the colour it shows, lit, against what
-   * is behind it, at the contrast an eye gives what it cannot resolve: as much as it is narrower than a minute of arc one way and the other,
+   * is behind it, at the contrast an eye gives what it cannot resolve: its area against a minute of arc's square (Riccò's law, see below),
    * and what the air between takes of it. Dark against the snow, light against a forest: as a shape it was hit or missed by the rasteriser,
    * or not drawn at all, and as the point of the light it sends back (what a body that glows is drawn as, see shine) it could only lighten
    * what is behind it. Kenneth Arnold's craft, edge-on at twenty-six kilometres, and the pelicans of the other reading, were nothing.
@@ -531,8 +533,11 @@ export class BodySystem {
       eastM: eye.x - frame.originX, northM: frame.originZ - eye.z, upM: eye.y - frame.originGroundY
     })
     if (!projection) return
-    const resolved = (deg: number) => Math.min(1, deg * Math.PI / 180 / BodySystem.ACUITY_RAD)
-    const contrast = resolved(projection.angular.widthDeg) * resolved(projection.angular.heightDeg)
+    // Riccò's law: under the eye's area of complete summation (some six minutes across by day) what it sees of a thing is its contrast times
+    // its area, the same as a minute-wide speck's at that product. Arnold's craft, edge-on, a "black thin line" 2.4 minutes long and a tenth
+    // of one thick: as thick as it is narrower than a minute alone, and as long as it is not longer, it was drawn at a tenth of its contrast.
+    const summed = (deg: number) => Math.min(BodySystem.SUMMATION_RAD, deg * Math.PI / 180) / BodySystem.ACUITY_RAD
+    const contrast = Math.min(1, summed(projection.angular.widthDeg) * summed(projection.angular.heightDeg))
     const toEye = this.scratch.copy(eye).sub(holder.position).normalize()
     const alpha = Math.acos(Math.min(1, Math.max(-1, toEye.dot(daylight.towardSun))))
     const phase = (Math.sin(alpha) + (Math.PI - alpha) * Math.cos(alpha)) / Math.PI

@@ -283,6 +283,56 @@ const instantsOf = (times: number[]) => times.flatMap(f => [f - FLASH_S, f, f + 
 const flashInstants = instantsOf(flashes.flat())
 const ownFlashInstants = flashes.map(times => new Set(instantsOf(times)))
 
+/**
+ * The posts of the cabin's windscreen frame that stand across what is ahead and to the right of the pilot's eye, measured in the scene from
+ * his seat in the Piper (the stand-in's frame, not the CallAir's, of which nothing is known): the left one, by his shoulder, the middle post and the right one, each a
+ * vertical-ish bar `distanceM` from the eye, centred `azimuthDeg` right of the nose at the horizon and leaning `slantDegPerDeg` further right
+ * per degree above it, `halfDeg` wide each side.
+ */
+const CABIN_POSTS = [
+  { azimuthDeg: -32, slantDegPerDeg: 0.25, halfDeg: 5, distanceM: 0.36 },
+  { azimuthDeg: 19.6, slantDegPerDeg: 0.8, halfDeg: 2.2, distanceM: 0.82 },
+  { azimuthDeg: 65.4, slantDegPerDeg: 0.25, halfDeg: 1.3, distanceM: 0.82 }
+]
+/** How far a seated pilot leans his head aside, metres, and how far past a post's edge he keeps what he looks at, degrees: ASSUMED. */
+const LEAN_MAX_M = 0.15, LEAN_STEP_M = 0.01, POST_MARGIN_DEG = 0.6
+/** Over how many seconds each side his head goes from one lean to the next: ASSUMED. */
+const LEAN_SMOOTH_S = 2
+
+/**
+ * How far Arnold leans his head to his right (negative: to his left), metres, at `t`, to see the objects past his windscreen's posts: none
+ * if none is behind one, and the least that clears the most of them, the one he watches first.
+ */
+function leanAt(t: number, watched: number): { leanM: number } {
+  let best = 0, bestCost = hiddenCost(t, watched, 0)
+  for (let step = LEAN_STEP_M; step <= LEAN_MAX_M + 1e-9 && bestCost > 0; step += LEAN_STEP_M) {
+    for (const lean of [-step, step]) {
+      const cost = hiddenCost(t, watched, lean)
+      if (cost < bestCost) { best = lean; bestCost = cost }
+    }
+  }
+  return { leanM: best }
+}
+
+/** How many of the objects the posts hide from Arnold at `t` with his head leant `lean` metres to his right, the one he watches as ten. */
+function hiddenCost(t: number, watched: number, lean: number): number {
+  const { at } = arnoldAt(t)
+  const eye = { ...at, altM: ARNOLD_ALT_M }
+  const heading = lookAt(arnoldAt(t - 1).at, arnoldAt(t + 1).at).azimuthDeg
+  const seen = Array.from({ length: COUNT }, (_, k) => {
+    const look = lookAt(eye, objectAt(k, t))
+    return { k, rel: ((look.azimuthDeg - heading + 540) % 360) - 180, alt: look.altitudeDeg }
+  })
+  return seen.reduce((cost, { k, rel, alt }) => {
+    const behind = CABIN_POSTS.some(post => {
+      const c = (post.azimuthDeg + post.slantDegPerDeg * alt) * Math.PI / 180
+      const apparent = Math.atan2(post.distanceM * Math.sin(c) - lean, post.distanceM * Math.cos(c)) * 180 / Math.PI
+      return Math.abs(rel - apparent) < post.halfDeg + POST_MARGIN_DEG
+    })
+    return cost + (behind ? (k === watched ? 10 : 1) : 0)
+  }, 0)
+}
+
 async function main(): Promise<void> {
   const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
   // What the flashes are drawn at: every second, and the instants of each flash, so that a flash is as short as it is.
@@ -303,10 +353,31 @@ async function main(): Promise<void> {
   })
 
   // The witness, looking at the leader while it is in sight, at the last of them after.
-  const observerKeys = samples.map(t => {
-    const { at } = arnoldAt(t)
+  const watchedAt = (t: number) => t < T_ADAMS_S - 20 ? 0 : COUNT - 1
+  // His head, leant aside to see past the frame of his windscreen: a pilot whose view of what he watches is cut by a post moves his head
+  // the few centimetres it takes (see CABIN_POSTS). Straight ahead, the chain came along his nose with its leader behind the middle post,
+  // and the two after it: what he described could not be seen.
+  const leans = samples.map(t => leanAt(t, watchedAt(t)).leanM)
+  const smoothed = leans.map((_, i) => {
+    let sum = 0, n = 0
+    for (let j = Math.max(0, i - LEAN_SMOOTH_S); j <= Math.min(leans.length - 1, i + LEAN_SMOOTH_S); j++, n++) sum += leans[j]
+    return sum / n
+  })
+  // Smoothed, a head going from one side to the other went past the post with the chain behind it: where the smoothed lean hides more than
+  // the one found, the head is where that one has it.
+  const leanOf = (i: number) => {
+    const t = samples[i]
+    return hiddenCost(t, watchedAt(t), smoothed[i]) > hiddenCost(t, watchedAt(t), leans[i]) ? leans[i] : smoothed[i]
+  }
+  const stillHidden = samples.filter((t, i) => hiddenCost(t, watchedAt(t), leanOf(i)) > 0)
+  console.log(`head leant aside up to ${Math.max(...leans.map(Math.abs)).toFixed(2)} m; objects still behind a post at ${stillHidden.length} s of ${samples.length}`)
+  const observerKeys = samples.map((t, i) => {
+    const { at: route } = arnoldAt(t)
+    const h = lookAt(arnoldAt(t - 1).at, arnoldAt(t + 1).at).azimuthDeg * Math.PI / 180
+    const lean = leanOf(i)
+    const at = { ...offset(route, lean * Math.cos(h), -lean * Math.sin(h)), altM: route.altM }
     const eye = { ...at, altM: ARNOLD_ALT_M }
-    const watched = t < T_ADAMS_S - 20 ? 0 : COUNT - 1
+    const watched = watchedAt(t)
     const look = lookAt(eye, objectAt(watched, t))
     return {
       t: t * 1000,
