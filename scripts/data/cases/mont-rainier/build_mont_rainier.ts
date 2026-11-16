@@ -400,9 +400,27 @@ const flipOf = (k: number, f: number) => {
   const u = (x: number) => 0.5 * (1 + Math.tanh(x))
   return { tipS: 0.1 + 0.4 * u(a), holdS: 0.33 * u(b - 0.5) }
 }
+/**
+ * Each object's flips: "dip or change their course slightly", and "flip": now and then, a tilt of its own, in pitch and in roll, never aimed
+ * at anything. Whether one sends the Sun to Arnold is the geometry's to say (see glintAttitude): where the Sun, the object and he stand so
+ * that a small tilt does it, they flash often; where it would take a large one, seldom or never. How often and how far they tilt is not
+ * said: ASSUMED, one flip every FLIP_EVERY_S on average for each, its tilts drawn round none by FLIP_PITCH_SD_DEG and FLIP_ROLL_SD_DEG.
+ */
+const FLIP_EVERY_S = 3
+const FLIP_PITCH_SD_DEG = 15
+const FLIP_ROLL_SD_DEG = 35
+const flipRandom = mulberry(24061947)
+const flips: { t: number, pitchDeg: number, rollDeg: number }[][] = Array.from({ length: COUNT }, (_, k) => {
+  const list: { t: number, pitchDeg: number, rollDeg: number }[] = []
+  for (let t = flipRandom() * FLIP_EVERY_S; t < DURATION_S; t += -Math.log(1 - flipRandom()) * FLIP_EVERY_S) {
+    const [a, b] = Glint.gaussians(k * 104729 + Math.round(t * 1000))
+    list.push({ t, pitchDeg: a * FLIP_PITCH_SD_DEG, rollDeg: b * FLIP_ROLL_SD_DEG })
+  }
+  return list
+})
 /** Each object's own instants of its flips, sampled finely enough for a flash's rise and fall to be drawn. */
 const FLIP_SAMPLE_S = 0.04
-const ownFlipInstants = flashes.map((times, k) => new Set(times.flatMap(f => {
+const ownFlipInstants = flips.map((list, k) => new Set(list.map(flip => flip.t).flatMap(f => {
   const { tipS, holdS } = flipOf(k, f)
   const instants: number[] = []
   for (let t = f - tipS; t <= f + holdS + tipS + 1e-9; t += FLIP_SAMPLE_S) instants.push(Math.round(t * 1000) / 1000)
@@ -676,37 +694,26 @@ async function main(): Promise<void> {
     en: "\"I hadn't flown more than two or three minutes on my course when a bright flash reflected on my airplane. [...] I observed a chain of nine peculiar looking aircraft flying from north to south at approximately 9,500 foot elevation [...] They flew like many times I have observed geese to fly in a rather diagonal chain-like line as if they were linked together. [...] What kept bothering me as I watched them flip and flash in the sun right along their path was the fact that I couldn't make out any tail on them.\" (Report to the AAF, July 1947.)",
     fr: "« Je n'avais pas volé plus de deux ou trois minutes sur mon cap quand un éclair brillant se refléta sur mon avion. [...] J'observai une chaîne de neuf appareils d'aspect étrange volant du nord au sud à environ 9 500 pieds [...] Ils volaient comme j'ai souvent vu voler des oies, en une ligne plutôt diagonale, comme une chaîne dont ils seraient les maillons. [...] Ce qui continuait de me tracasser, tandis que je les regardais basculer et étinceler au soleil tout le long de leur trajet, c'était que je ne pouvais leur distinguer aucune queue. » (Rapport à l'AAF, juillet 1947.)"
   }
-  // Each flip's mirroring attitude, by object and instant: its normal halfway between the Sun and Arnold's eye then.
-  const mirroring = new Map<string, { pitchDeg: number, rollDeg: number, offDeg: number, halfway: Vector3 }>()
-  const mirroringAt = (k: number, f: number) => {
-    const key = `${k}/${f}`
-    let found = mirroring.get(key)
-    if (!found) {
-      const at = objectAt(k, f)
-      const toEye = lookAt(at, { ...arnoldAt(f).at, altM: ARNOLD_ALT_M })
-      const halfway = Glint.towards(toEye.azimuthDeg, toEye.altitudeDeg).add(Glint.sunAt(at, f)).normalize()
-      // How near each flip comes to mirroring the Sun to him is not said: as near as a few degrees either way (Glint.TILT_SPREAD_DEG),
-      // so that one flash is a blaze and the next a glint, as tilts that just happen to send the Sun one's way are.
-      const exact = Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfway)
-      const [a, b] = Glint.gaussians(k * 1000 + Math.round(f * 1000))
-      found = { ...exact, pitchDeg: exact.pitchDeg + a * Glint.TILT_SPREAD_DEG, rollDeg: exact.rollDeg + b * Glint.TILT_SPREAD_DEG, halfway }
-      mirroring.set(key, found)
-    }
-    return found
+  /** The normal that mirrors the Sun to Arnold from object `k` at `t`: halfway between the Sun and his eye, seen from it. */
+  const halfwayAt = (k: number, t: number) => {
+    const at = objectAt(k, t)
+    const toEye = lookAt(at, { ...arnoldAt(t).at, altM: ARNOLD_ALT_M })
+    return Glint.towards(toEye.azimuthDeg, toEye.altitudeDeg).add(Glint.sunAt(at, t)).normalize()
   }
-  /** How long a flip takes each way, seconds: from its weave to mirroring the Sun and back (ASSUMED). */
-  /** Its attitude at `t`: its weave, and towards mirroring the Sun to Arnold as it flips; and what it sends him of the Sun then. */
+  /** Its attitude at `t`: its weave, and its flip's own tilt as it flips; and what it sends him of the Sun at that attitude, whatever it is. */
   const glintAttitude = (k: number, t: number) => {
     const headingDeg = lookAt(chainStart, chainEnd).azimuthDeg
     const weave = weaveOf(k, t)
-    const flip = flashes[k].find(f => { const { tipS, holdS } = flipOf(k, f); return t > f - tipS && t < f + holdS + tipS })
-    if (flip === undefined) return { headingDeg, pitchDeg: 0, rollDeg: weave.roll, luminanceCdM2: 0 }
-    const target = mirroringAt(k, flip)
-    const { tipS, holdS } = flipOf(k, flip)
-    // Towards it, held, and back.
-    const w = t < flip ? 1 - (flip - t) / tipS : t <= flip + holdS ? 1 : 1 - (t - flip - holdS) / tipS
-    const pitchDeg = w * target.pitchDeg, rollDeg = weave.roll + w * (target.rollDeg - weave.roll)
-    const offDeg = Math.acos(Math.min(1, Glint.normalOf(headingDeg, pitchDeg, rollDeg).dot(target.halfway))) * 180 / Math.PI
+    const flip = flips[k].find(f => { const { tipS, holdS } = flipOf(k, f.t); return t > f.t - tipS && t < f.t + holdS + tipS })
+    let pitchDeg = 0, rollDeg = weave.roll
+    if (flip) {
+      const { tipS, holdS } = flipOf(k, flip.t)
+      // Towards its tilt, held, and back.
+      const w = t < flip.t ? 1 - (flip.t - t) / tipS : t <= flip.t + holdS ? 1 : 1 - (t - flip.t - holdS) / tipS
+      pitchDeg = w * flip.pitchDeg
+      rollDeg = weave.roll + w * flip.rollDeg
+    }
+    const offDeg = Math.acos(Math.min(1, Glint.normalOf(headingDeg, pitchDeg, rollDeg).dot(halfwayAt(k, t)))) * 180 / Math.PI
     return { headingDeg, pitchDeg, rollDeg, luminanceCdM2: Glint.luminanceAt(offDeg) }
   }
 
@@ -935,10 +942,14 @@ async function main(): Promise<void> {
     }
   }
   writeFileSync(path.join(demoData, "interpretation-mont-rainier-aaf.json"), JSON.stringify(aafReading) + "\n")
-  const flips = [...mirroring.values()]
-  const peaks = flips.map(f => Glint.luminanceAt(Math.acos(Math.min(1, Glint.normalOf(lookAt(chainStart, chainEnd).azimuthDeg, f.pitchDeg, f.rollDeg).dot(f.halfway))) * 180 / Math.PI)).sort((a, b) => a - b)
-  console.log(`flashes from ${Math.round(peaks[0])} to ${Math.round(peaks[peaks.length - 1])} cd/m², median ${Math.round(peaks[peaks.length >> 1])}`)
-  console.log(`flips: ${flips.length}, tipped ${(flips.reduce((a, f) => a + Math.abs(f.pitchDeg), 0) / flips.length).toFixed(1)}° in pitch and ${(flips.reduce((a, f) => a + Math.abs(f.rollDeg), 0) / flips.length).toFixed(1)}° in roll on average, peak ${Math.round(Glint.luminanceAt(0))} cd/m²`)
+  // What a flash would take, along the way, and how many the flips give: the geometry's say, against his "two or three every few seconds".
+  const need = [0, 30, 60, 90, 120, 150, 179].map(t => {
+    const tilt = Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfwayAt(4, t))
+    return `${t}s ${Math.round(Math.hypot(tilt.pitchDeg, tilt.rollDeg))}°`
+  })
+  console.log(`tilt a flash needs (middle object): ${need.join(", ")}`)
+  const flashCount = flips.reduce((n, list, k) => n + list.filter(f => glintAttitude(k, f.t + flipOf(k, f.t).holdS / 2).luminanceCdM2 > 1e5).length, 0)
+  console.log(`flips: ${flips.flat().length}, of which ${flashCount} flash (over 1e5 cd/m²) in ${DURATION_S} s; his account: two or three every few seconds`)
   console.log(`AAF reading: ${aafWidthM} m across at ${(leaderM / 1000).toFixed(1)} km, ${(AAF_ANGLE_RAD * 180 / Math.PI).toFixed(3)}°`)
 
   const caseJson = {
