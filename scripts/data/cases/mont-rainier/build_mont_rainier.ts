@@ -21,6 +21,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { inflateSync } from "node:zlib"
+import { Euler, Vector3 } from "three"
+import { computeSunPosition } from "../../../../src/engine/astronomy/SunPosition.js"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const demoData = path.join(here, "..", "..", "..", "..", "public", "demo-data")
@@ -269,10 +271,18 @@ const CHAIN_CLEARANCE_M = 150
  * swerve of 150 m and a dip of 60 m (a third and an eighth of a degree at twenty-five kilometres), every six seconds, one wave the length
  * of the chain.
  */
-const WEAVE = { acrossM: 150, upM: 60, periodS: 6, rollDeg: 25 }
+const WEAVE = { acrossM: 150, upM: 150, periodS: 6, rollDeg: 25 }
+/**
+ * Their formation: "They flew like many times I have observed geese to fly in a rather diagonal chain-like line" (his report to the AAF),
+ * "diagonally stepped-down, echelon formation" (Bloecher, quoting his account): each one aside of and below the one ahead. By how much is
+ * not said: ASSUMED, so that the nine stay within the thousand feet up or down he gives them (8 × 30 m).
+ */
+const ECHELON = { asideM: 250, downM: 30 }
 function weaveOf(k: number, t: number): { across: number, up: number, roll: number } {
-  const phase = 2 * Math.PI * (t / WEAVE.periodS - k / (COUNT - 1))
-  return { across: WEAVE.acrossM * Math.sin(phase), up: WEAVE.upM * Math.sin(2 * phase), roll: WEAVE.rollDeg * Math.cos(phase) }
+  // Half a wave along the whole chain, as down a kite's tail: a neighbour a sixteenth of a wave behind the one ahead of it. A whole wave, and
+  // the height at twice its rate, put neighbours a quarter of a wave apart in height: the line broke into a zigzag.
+  const phase = 2 * Math.PI * (t / WEAVE.periodS - k / (2 * (COUNT - 1)))
+  return { across: WEAVE.acrossM * Math.sin(phase), up: WEAVE.upM * Math.sin(phase), roll: WEAVE.rollDeg * Math.cos(phase) }
 }
 
 function objectAt(k: number, t: number): Geo {
@@ -282,7 +292,9 @@ function objectAt(k: number, t: number): Geo {
   // Across their way: to the right of the course from Rainier to Adams.
   const course = lookAt(chainStart, chainEnd).azimuthDeg * Math.PI / 180
   const weave = weaveOf(k, t)
-  return offset({ ...p, altM: OBJECTS_ALT_M }, weave.across * Math.cos(course), -weave.across * Math.sin(course), weave.up)
+  // "a diagonal chain-like line", "diagonally stepped-down": each a little aside of the one ahead of it, and a little lower (see ECHELON).
+  const aside = weave.across + k * ECHELON.asideM
+  return offset({ ...p, altM: OBJECTS_ALT_M }, aside * Math.cos(course), -aside * Math.sin(course), weave.up - k * ECHELON.downM)
 }
 
 // ---- Flashes: "two or three of them every few seconds would dip or change their course slightly, just enough for the sun to strike them" ----
@@ -305,6 +317,61 @@ for (let t = 1; t < DURATION_S; t += 3) {
 }
 /** A flash is a glint, not a glow: a tenth of a second or so at its brightest (ASSUMED), between keyframes of its own just before and after. */
 const FLASH_S = 0.1
+
+/**
+ * The Sun's glint off a flipping object, as Arnold says it came: "two or three of them every few seconds would dip or change their course
+ * slightly, just enough for the sun to strike them at an angle that reflected brightly on my plane". At each flip (when, the draw above
+ * says, at his rate), the object tips just so far that its face mirrors the Sun towards him: its normal halfway between the Sun and him.
+ * How bright follows from how far its face is then off that, as a polished plate spreads the Sun's disc over its own roughness.
+ */
+class Glint {
+  /** The Sun's disc's luminance, cd/m², its radius, and what a polished plate sends back of it and spreads it over (ASSUMED), degrees. */
+  static readonly SUN_CDM2 = 1.6e9
+  static readonly SUN_RADIUS_DEG = 0.267
+  static readonly REFLECTANCE = 0.85
+  static readonly SPREAD_DEG = 2
+
+  /** Towards the Sun at `t` seconds into the recording, east, up, north: 14:58:00 PDT is 13:58 of the local standard time SunPosition reads. */
+  static sunAt(at: Geo, t: number): Vector3 {
+    const seconds = 13 * 3600 + 58 * 60 + t
+    const sun = computeSunPosition({ lat: at.lat, lng: at.lng, year: 1947, month: 6, day: 24, hour: Math.floor(seconds / 3600), minute: Math.floor(seconds / 60) % 60, second: seconds % 60 })
+    return Glint.towards(sun.azimuthDeg, sun.altitudeDeg)
+  }
+
+  static towards(azimuthDeg: number, altitudeDeg: number): Vector3 {
+    const a = azimuthDeg * Math.PI / 180, e = altitudeDeg * Math.PI / 180
+    return new Vector3(Math.cos(e) * Math.sin(a), Math.sin(e), Math.cos(e) * Math.cos(a))
+  }
+
+  /** The normal of its face at this attitude, east, up, north: the body's up turned as the scene turns it (see BodySystem). */
+  static normalOf(headingDeg: number, pitchDeg: number, rollDeg: number): Vector3 {
+    const d = Math.PI / 180
+    // The scene's axes are east, up, south: z is the opposite of north.
+    const scene = new Vector3(0, 1, 0).applyEuler(new Euler(pitchDeg * d, -headingDeg * d, -rollDeg * d, "YXZ"))
+    return new Vector3(scene.x, scene.y, -scene.z)
+  }
+
+  /** The pitch and roll that turn its face to mirror the Sun to the eye, its heading kept: the least turn there is, by a search. */
+  static attitudeFor(headingDeg: number, halfway: Vector3): { pitchDeg: number, rollDeg: number, offDeg: number } {
+    let best = { pitchDeg: 0, rollDeg: 0, offDeg: 180 }
+    const off = (p: number, r: number) => Math.acos(Math.min(1, Glint.normalOf(headingDeg, p, r).dot(halfway))) * 180 / Math.PI
+    for (let p = -60; p <= 60; p += 1) for (let r = -90; r <= 90; r += 1) {
+      const o = off(p, r)
+      if (o < best.offDeg) best = { pitchDeg: p, rollDeg: r, offDeg: o }
+    }
+    for (let p = best.pitchDeg - 1; p <= best.pitchDeg + 1; p += 0.05) for (let r = best.rollDeg - 1; r <= best.rollDeg + 1; r += 0.05) {
+      const o = off(p, r)
+      if (o < best.offDeg) best = { pitchDeg: p, rollDeg: r, offDeg: o }
+    }
+    return best
+  }
+
+  /** What its face sends the eye of the Sun when it is `offDeg` off mirroring it, cd/m². */
+  static luminanceAt(offDeg: number): number {
+    const peak = Glint.REFLECTANCE * Glint.SUN_CDM2 * (Glint.SUN_RADIUS_DEG / Glint.SPREAD_DEG) ** 2
+    return peak * Math.exp(-(offDeg * offDeg) / (2 * Glint.SPREAD_DEG * Glint.SPREAD_DEG))
+  }
+}
 const flashingAt = (k: number, t: number) => flashes[k].some(f => Math.abs(t - f) < FLASH_S / 2)
 /** Every flash's own instants: just before it, its height and just after, ms-rounded, in seconds; and those of each object's own. */
 const instantsOf = (times: number[]) => times.flatMap(f => [f - FLASH_S, f, f + FLASH_S].map(t => Math.round(t * 1000) / 1000))
@@ -578,6 +645,35 @@ async function main(): Promise<void> {
     en: "\"I hadn't flown more than two or three minutes on my course when a bright flash reflected on my airplane. [...] I observed a chain of nine peculiar looking aircraft flying from north to south at approximately 9,500 foot elevation [...] They flew like many times I have observed geese to fly in a rather diagonal chain-like line as if they were linked together. [...] What kept bothering me as I watched them flip and flash in the sun right along their path was the fact that I couldn't make out any tail on them.\" (Report to the AAF, July 1947.)",
     fr: "« Je n'avais pas volé plus de deux ou trois minutes sur mon cap quand un éclair brillant se refléta sur mon avion. [...] J'observai une chaîne de neuf appareils d'aspect étrange volant du nord au sud à environ 9 500 pieds [...] Ils volaient comme j'ai souvent vu voler des oies, en une ligne plutôt diagonale, comme une chaîne dont ils seraient les maillons. [...] Ce qui continuait de me tracasser, tandis que je les regardais basculer et étinceler au soleil tout le long de leur trajet, c'était que je ne pouvais leur distinguer aucune queue. » (Rapport à l'AAF, juillet 1947.)"
   }
+  // Each flip's mirroring attitude, by object and instant: its normal halfway between the Sun and Arnold's eye then.
+  const mirroring = new Map<string, { pitchDeg: number, rollDeg: number, offDeg: number, halfway: Vector3 }>()
+  const mirroringAt = (k: number, f: number) => {
+    const key = `${k}/${f}`
+    let found = mirroring.get(key)
+    if (!found) {
+      const at = objectAt(k, f)
+      const toEye = lookAt(at, { ...arnoldAt(f).at, altM: ARNOLD_ALT_M })
+      const halfway = Glint.towards(toEye.azimuthDeg, toEye.altitudeDeg).add(Glint.sunAt(at, f)).normalize()
+      found = { ...Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfway), halfway }
+      mirroring.set(key, found)
+    }
+    return found
+  }
+  /** How long a flip takes each way, seconds: from its weave to mirroring the Sun and back (ASSUMED). */
+  const FLIP_S = 0.2
+  /** Its attitude at `t`: its weave, and towards mirroring the Sun to Arnold as it flips; and what it sends him of the Sun then. */
+  const glintAttitude = (k: number, t: number) => {
+    const headingDeg = lookAt(chainStart, chainEnd).azimuthDeg
+    const weave = weaveOf(k, t)
+    const flip = flashes[k].find(f => Math.abs(t - f) < FLIP_S)
+    if (flip === undefined) return { headingDeg, pitchDeg: 0, rollDeg: weave.roll, luminanceCdM2: 0 }
+    const target = mirroringAt(k, flip)
+    const w = 1 - Math.abs(t - flip) / FLIP_S
+    const pitchDeg = w * target.pitchDeg, rollDeg = weave.roll + w * (target.rollDeg - weave.roll)
+    const offDeg = Math.acos(Math.min(1, Glint.normalOf(headingDeg, pitchDeg, rollDeg).dot(target.halfway))) * 180 / Math.PI
+    return { headingDeg, pitchDeg, rollDeg, luminanceCdM2: Glint.luminanceAt(offDeg) }
+  }
+
   const witnessInterpretation = {
     title: { en: "Nine craft some fifteen metres across, flying from Rainier to Adams (his own reading)", fr: "Neuf engins d'une quinzaine de mètres, volant du Rainier à l'Adams (sa propre lecture)" },
     bodies: sourceIds.map((sourceId, k) => ({
@@ -588,7 +684,8 @@ async function main(): Promise<void> {
       track: [...new Set([...samples, ...[...ownFlashInstants[k]].filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b).map(t => ({
         t: Math.round(t * 1000),
         ...local(objectAt(k, t)),
-        altitudeM: r2(OBJECTS_ALT_M - originGround),
+        // Where it is, its weave and its step down the echelon with it: at a level altitude the body flew none of either.
+        altitudeM: r2(objectAt(k, t).altM - originGround),
         ...(t === 0 ? {
           // "longer than wide" by his drawing (1.26), "their thickness was about 1/20th of their width".
           sizeM: { widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(14 * 1.26 * FAVOURABLE_SIZE), heightM: r2(14 / 20 * FAVOURABLE_SIZE) },
@@ -600,8 +697,8 @@ async function main(): Promise<void> {
         } : {}),
         // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some
         // 10⁸ cd/m², ASSUMED from his comparison.
-        attitude: { headingDeg: r2(lookAt(chainStart, chainEnd).azimuthDeg), pitchDeg: 0, rollDeg: r2(flashingAt(k, t) ? 40 : weaveOf(k, t).roll) },
-        ...(t === 0 ? {} : { appearance: { luminanceCdM2: flashingAt(k, t) ? 1e8 : 0 } })
+        attitude: (() => { const a = glintAttitude(k, t); return { headingDeg: r2(a.headingDeg), pitchDeg: r2(a.pitchDeg), rollDeg: r2(a.rollDeg) } })(),
+        ...(t === 0 ? {} : { appearance: { luminanceCdM2: Math.round(glintAttitude(k, t).luminanceCdM2) } })
       }))
     }))
   }
@@ -802,6 +899,8 @@ async function main(): Promise<void> {
     }
   }
   writeFileSync(path.join(demoData, "interpretation-mont-rainier-aaf.json"), JSON.stringify(aafReading) + "\n")
+  const flips = [...mirroring.values()]
+  console.log(`flips: ${flips.length}, tipped ${(flips.reduce((a, f) => a + Math.abs(f.pitchDeg), 0) / flips.length).toFixed(1)}° in pitch and ${(flips.reduce((a, f) => a + Math.abs(f.rollDeg), 0) / flips.length).toFixed(1)}° in roll on average, peak ${Math.round(Glint.luminanceAt(0))} cd/m²`)
   console.log(`AAF reading: ${aafWidthM} m across at ${(leaderM / 1000).toFixed(1)} km, ${(AAF_ANGLE_RAD * 180 / Math.PI).toFixed(3)}°`)
 
   const caseJson = {
