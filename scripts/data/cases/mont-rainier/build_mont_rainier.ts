@@ -194,6 +194,12 @@ const COUNT = 9
  * analysts worked out from visual acuity at the 20 to 25 miles he gave, 140 to 280 feet (43 to 85 m).
  */
 const FAVOURABLE_SIZE = 1.2 * 1.5
+/**
+ * The size the Army Air Force's analysts worked out from visual acuity, for what he described to be seen at the distance he gave: 140 to
+ * 280 feet at 20 to 25 miles. As an angle (what acuity is about), the largest: 280 feet at 20 miles, 0.15 degree; laid at the distance the
+ * reconstruction has them, in front of Rainier's snow.
+ */
+const AAF_ANGLE_RAD = (280 * FT) / (20 * 1609.34)
 const DURATION_S = 180
 
 // ---- Arnold's flight ----
@@ -773,12 +779,35 @@ async function main(): Promise<void> {
   }
   writeFileSync(path.join(demoData, "interpretation-mont-rainier-pelicans.json"), JSON.stringify(pelicans) + "\n")
 
+  // ---- The Army Air Force's analysts' reading: his craft, as large as acuity needs them to be for what he described ----
+  const leaderM = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S)).distanceM
+  const aafScale = AAF_ANGLE_RAD * leaderM / (14 * FAVOURABLE_SIZE)
+  const aafWidthM = Math.round(14 * FAVOURABLE_SIZE * aafScale)
+  const aafReading = {
+    ...recording,
+    id: "1947-06-24-ArnoldKennethE-aaf",
+    interpretation: {
+      title: {
+        en: `Nine craft some ${aafWidthM} m across, as large as the Army Air Force's analysts worked out acuity needs (140 to 280 feet at 20 to 25 miles)`,
+        fr: `Neuf engins d'environ ${aafWidthM} m, aussi grands que l'acuité l'exige selon les analystes de l'Army Air Force (140 à 280 pieds à 20 à 25 miles)`
+      },
+      bodies: witnessInterpretation.bodies.map(body => ({
+        ...body,
+        track: body.track.map(key => "sizeM" in key && key.sizeM
+          ? { ...key, sizeM: { widthM: r2(key.sizeM.widthM * aafScale), lengthM: r2(key.sizeM.lengthM * aafScale), heightM: r2(key.sizeM.heightM * aafScale) } }
+          : key)
+      }))
+    }
+  }
+  writeFileSync(path.join(demoData, "interpretation-mont-rainier-aaf.json"), JSON.stringify(aafReading) + "\n")
+  console.log(`AAF reading: ${aafWidthM} m across at ${(leaderM / 1000).toFixed(1)} km, ${(AAF_ANGLE_RAD * 180 / Math.PI).toFixed(3)}°`)
+
   const caseJson = {
     id: "MontRainier1947",
     title: "Mount Rainier",
     summary: {
-      en: "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading and the pelican one solved from his timings.",
-      fr: "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture et celle des pélicans, résolue à partir de ses chronométrages."
+      en: "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading, the pelican one solved from his timings, and the craft as large as the Army Air Force's analysts worked out they had to be to be seen.",
+      fr: "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture, celle des pélicans résolue à partir de ses chronométrages, et des engins aussi grands que les analystes de l'Army Air Force les jugèrent nécessaires pour être vus."
     },
     time: "1947-06-24 14:59",
     events: [
@@ -788,7 +817,8 @@ async function main(): Promise<void> {
         type: "event", eventType: "sighting", interpretationOf: "arnold",
         title: pelicans.interpretation.title,
         url: "interpretation-mont-rainier-pelicans.json"
-      }
+      },
+      { type: "event", eventType: "sighting", interpretationOf: "arnold", title: aafReading.interpretation.title, url: "interpretation-mont-rainier-aaf.json" }
     ]
   }
   // The pelicans read against his later account too: the same birds, set against the crescents.

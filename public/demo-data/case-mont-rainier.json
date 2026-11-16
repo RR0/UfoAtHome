@@ -2,8 +2,8 @@
  "id": "MontRainier1947",
  "title": "Mount Rainier",
  "summary": {
-  "en": "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading and the pelican one solved from his timings.",
-  "fr": "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture et celle des pélicans, résolue à partir de ses chronométrages."
+  "en": "24 June 1947, 14:59. Flying east at 9,200 ft, Kenneth Arnold watches a chain of nine flashing objects cross from Mount Rainier to Mount Adams in 1 min 42 s. Replayed from his report, with his own reading, the pelican one solved from his timings, and the craft as large as the Army Air Force's analysts worked out they had to be to be seen.",
+  "fr": "24 juin 1947, 14 h 59. En vol vers l'est à 9 200 pieds, Kenneth Arnold voit une chaîne de neuf objets étincelants passer du mont Rainier au mont Adams en 1 min 42 s. Rejoué d'après son rapport, avec sa propre lecture, celle des pélicans résolue à partir de ses chronométrages, et des engins aussi grands que les analystes de l'Army Air Force les jugèrent nécessaires pour être vus."
  },
  "time": "1947-06-24 14:59",
  "events": [
@@ -35,6 +35,16 @@
     "fr": "Une chaîne de neuf pélicans d'Amérique, à 5630 m de lui, battant des ailes et planant"
    },
    "url": "interpretation-mont-rainier-pelicans.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "arnold",
+   "title": {
+    "en": "Nine craft some 59 m across, as large as the Army Air Force's analysts worked out acuity needs (140 to 280 feet at 20 to 25 miles)",
+    "fr": "Neuf engins d'environ 59 m, aussi grands que l'acuité l'exige selon les analystes de l'Army Air Force (140 à 280 pieds à 20 à 25 miles)"
+   },
+   "url": "interpretation-mont-rainier-aaf.json"
   },
   {
    "type": "event",
