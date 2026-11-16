@@ -1141,7 +1141,7 @@ export class SightingEditorElement extends HTMLElement {
     startHeadingDeg: number
     startPitchDeg: number
     /** Whether the drag has turned the heading, the elevation, since it began: what of them is said over the scene, for the rest of the
-     * drag (see showViewDragOrientation). */
+     * drag (see showOrientation). */
     headingTurned?: boolean
     pitchTurned?: boolean
     /** Whether this drag started while the observer is inside a decor object (see
@@ -1268,11 +1268,8 @@ export class SightingEditorElement extends HTMLElement {
     // happens later (when this recorder itself is inserted), so canvasElement/renderer/sighting
     // would still be undefined here.
     this.sceneElement = document.createElement(SCENE_ELEMENT_NAME) as SceneElement
-    // N/NE/E/SE/S/SO/O/NO reference labels on the horizon — useful while authoring a heading, not
-    // meaningful in the plain playback case, so this is opt-in on SceneElement rather than always on.
-    this.sceneElement.setAttribute("show-compass", "")
-    // Not at every pass of the pointer, though: only while a drag turns the view, or the heading is typed (see showViewDragOrientation).
-    this.sceneElement.compassOnHover = false
+    // No show-compass: the editor draws the points of the compass over the scene itself, while a drag turns the view or the heading is
+    // typed (see showOrientation), sharper than in the picture and never at every pass of the pointer.
     // The map of where the observer stood follows the RECORDING being edited, as it does in the player: open when the recording says so, or when
     // the observer went somewhere, closed otherwise. Opening or closing it here is the author stating it, and goes into the recording (see
     // observermapchange below), so that a reader is shown what the author left. Not forced open, as it once was for every recording: the one
@@ -2188,11 +2185,9 @@ export class SightingEditorElement extends HTMLElement {
     this.placeMatchSelect.addEventListener("change", () => this.applyPlaceMatch(this.placeMatchSelect.selectedIndex))
     // Retyping the name makes the previous candidates stale — they described a different search.
     this.placeNameInput.addEventListener("input", () => this.updatePlaceName())
-    // Reading the heading off the compass is the whole point of editing this field: the compass points are shown while it is focused, as
-    // while a drag turns the view (see showViewDragOrientation), and at no other time.
-    this.headingInput.addEventListener("focus", () => this.sceneElement.setCompassForced(true))
+    // Reading the heading off the compass is the whole point of editing this field: the compass points are shown while it is focused (see
+    // refreshSceneField), as while a drag turns the view.
     this.headingInput.addEventListener("input", () => this.refreshHeadingPoint())
-    this.headingInput.addEventListener("blur", () => this.sceneElement.setCompassForced(false))
     // A filter is a pose field like the aperture (see ObserverPose.filter): put on or taken off at
     // the playhead, and held until the next keyframe that says otherwise.
     this.filterSelect.addEventListener("change", () => this.updateObserver())
@@ -7210,36 +7205,42 @@ export class SightingEditorElement extends HTMLElement {
     this.refreshSceneField()
   }
 
-  /** Whether the heading is being typed, which shows the compass whatever the pointer does (see showViewDragOrientation). */
-  private get headingInputFocused(): boolean {
-    return this.shadow.activeElement === this.headingInput
-  }
-
-  /** How far down the picture the horizon falls, as a fraction of its height, for a view raised `pitchDeg` above it. */
-  private horizonFractionAt(pitchDeg: number): number {
-    const sighting = this.ufoElement.sighting
-    const canvas = this.ufoElement.canvasElement
-    const projection = ImageProjection.of(sighting.instrument, canvas.height, SightingShapes.fovOf(sighting, this.ufoElement.currentTime))
-    // Looking up puts the horizon below the middle of the picture, by as much as the projection says that angle is.
-    const offset = Math.sign(pitchDeg) * projection.angleDegToRadiusPx(Math.min(89, Math.abs(pitchDeg)))
-    return Math.min(1, Math.max(0, (canvas.height / 2 + offset) / canvas.height))
-  }
+  /** The points of the compass every this many degrees, drawn standing on the horizon (see showOrientation). */
+  private static readonly COMPASS_STEP_DEG = 45
+  /** How finely the horizon is drawn, in degrees of azimuth: a picture of a wide field curves it (see SceneElement.horizonPointAt). */
+  private static readonly HORIZON_STEP_DEG = 2
 
   /**
-   * Says over the scene what a drag of the view has changed of it, and only that: the heading in degrees, with the points of the compass on
-   * the horizon, once it has turned; the horizon and the elevation in degrees, once that has. Hovering the scene says neither: the compass
-   * points were drawn at every pass of the pointer, over a scene that was only being looked at.
+   * Says over the scene which way it faces, as it is now drawn: with `heading`, that heading in degrees and the points of the compass on
+   * the horizon; with `pitchDeg`, the horizon as the picture curves it and that elevation in degrees. What a drag of the view has changed,
+   * and only that (see onCameraDragPointerMove), or what the field being typed sets (see refreshSceneField). Hovering the scene says
+   * neither: the compass points were drawn at every pass of the pointer, over a scene that was only being looked at.
    */
-  private showViewDragOrientation(headingDeg: number, pitchDeg: number): void {
-    const drag = this.cameraDragState
-    if (!drag) return
+  private showOrientation(headingDeg: number | undefined, pitchDeg: number | undefined): void {
     const shown = (value: number) => this.rounded(value).toLocaleString(this.language, { maximumFractionDigits: 1 })
-    const heading = ((headingDeg % 360) + 360) % 360
-    this.sceneElement.setCompassForced(drag.headingTurned === true || this.headingInputFocused)
-    this.sceneFieldOverlay.orientation(
-      drag.headingTurned ? this.messages.overlayHeading.replaceAll("{deg}", shown(heading)).replaceAll("{point}", this.naming.point(heading)) : undefined,
-      drag.pitchTurned ? { yFraction: this.horizonFractionAt(pitchDeg), label: this.messages.overlayHorizon.replaceAll("{deg}", shown(pitchDeg)) } : undefined
-    )
+    const inPicture = (p: { x: number; y: number }) => p.x >= -0.05 && p.x <= 1.05 && p.y >= -0.05 && p.y <= 1.05
+    let heading: Parameters<SceneFieldOverlay["orientation"]>[0]
+    if (headingDeg !== undefined) {
+      const facing = ((headingDeg % 360) + 360) % 360
+      const compass: Array<{ x: number; y: number; label: string }> = []
+      for (let azimuth = 0; azimuth < 360; azimuth += SightingEditorElement.COMPASS_STEP_DEG) {
+        const point = this.sceneElement.horizonPointAt(azimuth)
+        if (point && inPicture(point)) compass.push({ ...point, label: this.naming.point(azimuth) })
+      }
+      heading = { label: this.messages.overlayHeading.replaceAll("{deg}", shown(facing)).replaceAll("{point}", this.naming.point(facing)), compass }
+    }
+    let horizon: Parameters<SceneFieldOverlay["orientation"]>[1]
+    if (pitchDeg !== undefined) {
+      // In runs of what is in the picture, so that the line does not cut across it from one edge to the other behind the eye.
+      const line: Array<Array<{ x: number; y: number }>> = [[]]
+      for (let azimuth = 0; azimuth <= 360; azimuth += SightingEditorElement.HORIZON_STEP_DEG) {
+        const point = this.sceneElement.horizonPointAt(azimuth)
+        if (point && Math.abs(point.x - 0.5) < 1.5 && Math.abs(point.y - 0.5) < 1.5) line[line.length - 1].push(point)
+        else if (line[line.length - 1].length > 0) line.push([])
+      }
+      horizon = { line, label: this.messages.overlayHorizon.replaceAll("{deg}", shown(pitchDeg)) }
+    }
+    this.sceneFieldOverlay.orientation(heading, horizon)
   }
 
   /** Draws over the scene what the active field sets, as it stands at the playhead. */
@@ -7254,8 +7255,9 @@ export class SightingEditorElement extends HTMLElement {
     const number = (input: HTMLInputElement) => this.numberOrUndefined(input.value)
     const shown = (value: number | undefined, digits = 1) => value === undefined ? "?" : value.toLocaleString(this.language, { maximumFractionDigits: digits })
     if (field === "pitch") {
-      const pitch = number(this.pitchInput) ?? 0
-      overlay.horizon(this.horizonFractionAt(pitch), m.overlayHorizon.replaceAll("{deg}", shown(pitch)))
+      this.showOrientation(undefined, number(this.pitchInput) ?? 0)
+    } else if (field === "heading") {
+      this.showOrientation(number(this.headingInput) ?? 0, undefined)
     } else if (field === "focalLength") {
       const fov = SightingShapes.fovOf(sighting, t)
       const projection = ImageProjection.of(sighting.instrument, canvas.height, fov)
@@ -12833,10 +12835,8 @@ export class SightingEditorElement extends HTMLElement {
   /** Starts dragging the "landscape" (empty canvas, no shape under the pointer) to set the
    * observer's own heading/pitch — the mouse-drag equivalent of typing into the Orientation/Tilt
    * fields, so it goes through the exact same wrap/write/guard logic as those (updateObserver),
-   * just fed computed values instead of parsing input.value strings. Also forces the compass
-   * visible for the duration, same reasoning as the heading input's own focus/blur (see
-   * SceneElement.setCompassForced): reading the heading off the compass is the point of dragging
-   * to set it. */
+   * just fed computed values instead of parsing input.value strings. Says the heading, with the
+   * compass, and the elevation over the scene as the drag changes them (see showOrientation). */
   /** Where a pointer event stands on the picture, in normalised device coordinates. */
   private ndcOf(event: MouseEvent): { x: number; y: number } | undefined {
     const rect = this.ufoElement.canvasElement.getBoundingClientRect()
@@ -13162,7 +13162,7 @@ export class SightingEditorElement extends HTMLElement {
       startPitchDeg: insideDecor ? this.indoorLookPitchDeg : (this.numberOrUndefined(this.pitchInput.value) ?? 0),
       insideDecor
     }
-    // The compass and the degrees come only once the drag turns the view (see showViewDragOrientation), and never from inside a decor
+    // The compass and the degrees come only once the drag turns the view (see showOrientation), and never from inside a decor
     // object, whose look around is not the observer's recorded heading (see SceneRenderer.setIndoorLook).
     // The only drag whose cursor differs from the hover cursor that led to it: hovering empty
     // canvas offers the landscape to grab ("pan"), pressing actually closes the hand on it.
@@ -13299,7 +13299,7 @@ export class SightingEditorElement extends HTMLElement {
     this.updateObserver()
     if (this.rounded(headingDeg) !== this.rounded(startHeadingDeg)) this.cameraDragState.headingTurned = true
     if (this.rounded(pitchDeg) !== this.rounded(startPitchDeg)) this.cameraDragState.pitchTurned = true
-    this.showViewDragOrientation(headingDeg, pitchDeg)
+    this.showOrientation(this.cameraDragState.headingTurned ? headingDeg : undefined, this.cameraDragState.pitchTurned ? pitchDeg : undefined)
     // Alt held: the view of this instant alone (see ObserverKeyframe.viewOnly), the camera's turn to and from it left out of the picture —
     // a pose drawn over a camera whipped round between keys a tenth of a second apart smeared the whole scene. Let go: a key like any other.
     this.showViewDragHint(event.altKey)
@@ -13336,10 +13336,7 @@ export class SightingEditorElement extends HTMLElement {
     this.dragState = undefined
     this.cameraDragState = undefined
     // Back to what the fields alone show: the compass while the heading is being typed, the horizon while the tilt is (see refreshSceneField).
-    if (viewTurned) {
-      this.sceneElement.setCompassForced(this.headingInputFocused)
-      this.refreshSceneField()
-    }
+    if (viewTurned) this.refreshSceneField()
     // Back to whatever the pointer was over before the drag started (see hoverCursor) — the next
     // real pointermove re-tests it properly, but a release with no move at all must not leave the
     // drag's own cursor behind (a grabbing hand over a landscape nobody is dragging any more).

@@ -451,8 +451,8 @@ export class SceneElement extends HTMLElement {
    * first) a visible UFO shape — and shows/moves/hides a text label next to it — an on-demand
    * identification aid, not a rendering change (see pickBodyAt's own doc comment on why body
    * hit-testing uses a bigger invisible area than the real, true-to-scale visible disc). The
-   * compass labels (see show-compass) come with the pointer over the canvas too, unless
-   * compassOnHover is off, as the editor has it. Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
+   * compass labels (see show-compass) come with the pointer over the canvas too; the editor
+   * draws its own instead (see SightingEditorElement.showOrientation). Listens on the nested `<rr0-ufo>`'s own canvas (not the 3D
    * scene-canvas directly) since that transparent overlay always sits on top and would otherwise
    * swallow every pointer event before the 3D layer ever saw them.
    *
@@ -1474,27 +1474,21 @@ export class SceneElement extends HTMLElement {
     }
   }
 
-  /** Shows or hides the compass labels — see SceneRenderer.setCompassForced's own doc comment.
-   * `SightingEditorElement` calls this while a drag turns the view and from the heading input's
-   * focus/blur, a direct method rather than another observed attribute since it's meant to change
-   * far more often than `show-compass`'s one-time setup. */
+  /** Shows the compass labels whether or not the pointer is over the scene — see
+   * SceneRenderer.setCompassForced's own doc comment. A direct method rather than another
+   * observed attribute since it's meant to change far more often than `show-compass`'s one-time setup. */
   setCompassForced(forced: boolean): void {
     this.showCompassFor({ forced })
   }
 
-  /**
-   * Whether the compass labels (see show-compass) come with the pointer over the scene, as they do for a page showing them to its
-   * readers. The editor has it off: it shows them while a drag turns the view, or the heading is typed (see setCompassForced), and
-   * not at every pass of the pointer over a scene that is only being looked at.
-   */
-  compassOnHover = true
+  /** Why the compass labels (see show-compass) are shown, if they are: the pointer over the scene, or setCompassForced. */
   private compassHovered = false
   private compassForced = false
 
   private showCompassFor(reason: { hovered?: boolean, forced?: boolean }): void {
     this.compassHovered = reason.hovered ?? this.compassHovered
     this.compassForced = reason.forced ?? this.compassForced
-    this.sceneRenderer.setCompassForced(this.compassForced || (this.compassOnHover && this.compassHovered))
+    this.sceneRenderer.setCompassForced(this.compassForced || this.compassHovered)
   }
 
   /**
@@ -1946,6 +1940,15 @@ export class SceneElement extends HTMLElement {
    * behind the camera — see SceneRenderer.screenPointOf. */
   screenPointOf(direction: Vector3): { ndcX: number; ndcY: number } | undefined {
     return this.sceneRenderer.screenPointOf(direction)
+  }
+
+  /** Where a point of the horizon, `azimuthDeg` clockwise from north, lands on the picture as it is now drawn, in fractions of it from its
+   * top left, or undefined behind the camera (see screenPointOf). What the editor draws the compass and the horizon over the scene with. */
+  horizonPointAt(azimuthDeg: number): { x: number; y: number } | undefined {
+    const azimuth = azimuthDeg * Math.PI / 180
+    // The scene's axes: x east, y up, z south.
+    const point = this.sceneRenderer.screenPointOf(new Vector3(Math.sin(azimuth), 0, -Math.cos(azimuth)))
+    return point && { x: (point.ndcX + 1) / 2, y: (1 - point.ndcY) / 2 }
   }
 
   /** The world direction a point of the picture names, in normalised device coordinates (-1..1,

@@ -296,7 +296,7 @@ function mount(): SceneElement {
   return element
 }
 
-it("shows the compass while the pointer is over the scene, unless told not to, as the editor does; shown when forced either way", async () => {
+it("shows the compass while the pointer is over the scene, or when forced", async () => {
   const element = mount()
   const renderer = (element as unknown as { sceneRenderer: { setCompassForced(shown: boolean): void } }).sceneRenderer
   const shown = vi.spyOn(renderer, "setCompassForced")
@@ -304,9 +304,6 @@ it("shows the compass while the pointer is over the scene, unless told not to, a
   canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 10, clientY: 10, bubbles: true, composed: true }))
   expect(shown).toHaveBeenLastCalledWith(true)
   canvas.dispatchEvent(new MouseEvent("pointerleave"))
-  expect(shown).toHaveBeenLastCalledWith(false)
-  element.compassOnHover = false
-  canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 20, clientY: 20, bubbles: true, composed: true }))
   expect(shown).toHaveBeenLastCalledWith(false)
   element.setCompassForced(true)
   expect(shown).toHaveBeenLastCalledWith(true)

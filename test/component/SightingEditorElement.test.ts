@@ -2327,33 +2327,37 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     expect(element.sightingData.observerTrack?.keyframes[0].pose.pitchDeg).toBe(90)
   })
 
-  it("hovering the scene shows no compass; a landscape drag says only what it turns, the heading or the elevation, in degrees", async () => {
+  it("hovering the scene shows no compass; a landscape drag says only what it turns, the heading with the compass or the elevation with the horizon", async () => {
     const element = await mount()
     element.sightingData = oneShapeJson()
     const canvas = nestedCanvas(element)
-    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { setCompassForced(forced: boolean): void }
-    const compass = vi.spyOn(scene, "setCompassForced")
+    const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { horizonPointAt(azimuthDeg: number): { x: number; y: number } | undefined }
+    // A picture showing the horizon from north-west to north-east, level across its middle.
+    vi.spyOn(scene, "horizonPointAt").mockImplementation(azimuth => {
+      const off = ((azimuth + 180) % 360) - 180
+      return Math.abs(off) <= 60 ? { x: 0.5 + off / 90, y: 0.5 } : undefined
+    })
     const overlay = element.shadowRoot!.querySelector(".scene-field-overlay") as HTMLElement
+    expect(element.shadowRoot!.querySelector("rr0-scene")!.hasAttribute("show-compass")).toBe(false)
     canvas.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 300 }))
-    expect(compass).not.toHaveBeenCalledWith(true)
+    expect(overlay.hidden).toBe(true)
     // Level: the heading and its compass, nothing of the elevation.
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 300, clientY: 300 }))
-    expect(compass).not.toHaveBeenCalledWith(true)
+    expect(overlay.hidden).toBe(true)
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: 400, clientY: 300 }))
-    expect(compass).toHaveBeenLastCalledWith(true)
     expect(overlay.hidden).toBe(false)
     expect(overlay.querySelector(".sfo-heading")?.textContent).toBe("Heading 20° · NNE")
-    expect(overlay.querySelector(".sfo-horizon")).toBeNull()
+    expect([...overlay.querySelectorAll(".sfo-compass")].map(mark => mark.textContent)).toEqual(["N", "NE", "NW"])
+    expect(overlay.querySelector(".sfo-curve")).toBeNull()
     document.dispatchEvent(new MouseEvent("pointerup", { clientX: 400, clientY: 300 }))
-    expect(compass).toHaveBeenLastCalledWith(false)
     expect(overlay.hidden).toBe(true)
     // Straight up: the horizon and the elevation, no compass.
-    compass.mockClear()
     canvas.dispatchEvent(new MouseEvent("pointerdown", { clientX: 300, clientY: 300 }))
     document.dispatchEvent(new MouseEvent("pointermove", { clientX: 300, clientY: 250 }))
-    expect(compass).not.toHaveBeenCalledWith(true)
     expect(overlay.querySelector(".sfo-heading")).toBeNull()
-    expect(overlay.querySelector(".sfo-horizon")?.textContent).toBe("Horizon · tilt 10°")
+    expect(overlay.querySelector(".sfo-compass")).toBeNull()
+    expect(overlay.querySelector(".sfo-curve path")?.getAttribute("d")).toMatch(/^M/)
+    expect(overlay.querySelector(".sfo-horizon-label")?.textContent).toBe("Horizon · tilt 10°")
     document.dispatchEvent(new MouseEvent("pointerup", { clientX: 300, clientY: 250 }))
     expect(overlay.hidden).toBe(true)
   })

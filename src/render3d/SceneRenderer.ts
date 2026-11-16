@@ -2518,8 +2518,8 @@ export class SceneRenderer {
   /** Shows/hides the compass labels built by setShowCompass — cheap visibility toggle, never
    * rebuilds the sprites. A observer's heading matters while it is being set, not as an overlay
    * competing with the scene the rest of the time: SceneElement shows them while the pointer is
-   * over the scene, or, in the editor, while a drag turns the view and while the heading input is
-   * focused (see SceneElement.compassOnHover). */
+   * over the scene, or when told to (see SceneElement.setCompassForced). The editor draws its own,
+   * over the picture (see SightingEditorElement.showOrientation). */
   setCompassForced(forced: boolean): void {
     if (this.compassForced === forced) return
     this.compassForced = forced

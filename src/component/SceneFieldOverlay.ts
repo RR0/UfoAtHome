@@ -7,6 +7,12 @@
  * Laid exactly over the picture (the canvas the shapes are drawn on), in fractions of it, so it stays right whatever the picture's
  * size; and seen, never grabbed: the pointer goes through it to the scene. In the scene's own fixed colours, as the timeline over it.
  */
+/** A point of the picture, in fractions of it from its top left. */
+export interface OverlayPoint {
+  x: number
+  y: number
+}
+
 export class SceneFieldOverlay {
   static readonly CSS = `
 .scene-field-overlay { position: absolute; z-index: 3; pointer-events: none; }
@@ -24,6 +30,13 @@ export class SceneFieldOverlay {
 .sfo-measure > .sfo-pill { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); }
 .sfo-wind { left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 6px; }
 .sfo-heading { left: 50%; top: 10px; transform: translateX(-50%); }
+.scene-field-overlay { overflow: hidden; }
+.sfo-curve { inset: 0; }
+.sfo-curve svg { width: 100%; height: 100%; overflow: visible; }
+.sfo-curve path { fill: none; stroke: #f5c451; stroke-width: 2px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+.sfo-horizon-label { left: 10px; margin-top: 4px; }
+/* Standing on the horizon, never across its line. */
+.sfo-compass { transform: translate(-50%, calc(-100% - 5px)); padding: 1px 7px; color: #fff; }
 .sfo-wind svg { transition: transform .15s ease; }
 `
 
@@ -69,20 +82,38 @@ export class SceneFieldOverlay {
   }
 
   /**
-   * Which way the view faces while a drag turns it: `heading`, the degrees round the compass said at the top, and `horizon`, where the
-   * horizon falls for the elevation, as horizon() draws it. Each only when the drag has changed it: a level drag says nothing of the
-   * elevation, a drag straight up nothing of the heading.
+   * Which way the view faces while a drag turns it, or while its heading is typed: `heading`, the degrees round the compass said at the
+   * top, with `compass`, the points of the compass standing on the horizon; and `horizon`, the horizon as the picture curves it, with the
+   * elevation it is said with. Each only when given: a level drag says nothing of the elevation, a drag straight up nothing of the
+   * heading. In the page and not in the picture, so as sharp as the page's own text, and the compass above the horizon's line.
    */
-  orientation(heading: string | undefined, horizon: { yFraction: number, label: string } | undefined): void {
+  orientation(heading: { label: string, compass: ReadonlyArray<OverlayPoint & { label: string }> } | undefined,
+              horizon: { line: ReadonlyArray<ReadonlyArray<OverlayPoint>>, label: string } | undefined): void {
     const parts: HTMLElement[] = []
     if (horizon) {
-      const line = this.element("sfo-horizon")
-      line.style.top = `${horizon.yFraction * 100}%`
-      line.append(this.pill(horizon.label))
-      parts.push(line)
+      const curve = this.element("sfo-curve")
+      const path = horizon.line.filter(run => run.length > 1)
+        .map(run => run.map((p, n) => `${n === 0 ? "M" : "L"}${(p.x * 100).toFixed(2)} ${(p.y * 100).toFixed(2)}`).join(" ")).join(" ")
+      curve.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${path}"/></svg>`
+      parts.push(curve)
+      // Its saying under the line, at the left of the picture.
+      const left = horizon.line.flat().filter(p => p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1).sort((a, b) => a.x - b.x)[0]
+      if (left) {
+        const pill = this.pill(horizon.label)
+        pill.classList.add("sfo-horizon-label")
+        pill.style.top = `${left.y * 100}%`
+        parts.push(pill)
+      }
     }
     if (heading) {
-      const pill = this.pill(heading)
+      for (const point of heading.compass) {
+        const mark = this.pill(point.label)
+        mark.classList.add("sfo-compass")
+        mark.style.left = `${point.x * 100}%`
+        mark.style.top = `${point.y * 100}%`
+        parts.push(mark)
+      }
+      const pill = this.pill(heading.label)
       pill.classList.add("sfo-heading")
       parts.push(pill)
     }
