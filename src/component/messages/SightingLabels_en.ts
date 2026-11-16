@@ -143,6 +143,7 @@ export const sightingLabels_en: SightingLabels = {
   decorWall: "Dry-stone wall",
   decorStreetlight: "Streetlight",
   decorTrafficLight: "Traffic light",
+  decorPeak: "Peak",
   decorCrossing: "Pedestrian crossing",
   decorRoadSign: "Road sign",
   decorVehicle: "Vehicle",

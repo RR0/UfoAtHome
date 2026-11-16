@@ -1745,7 +1745,7 @@ export class SightingEditorElement extends HTMLElement {
       { value: "building", label: "Building" }, { value: "tree", label: "Tree" }, { value: "shrub", label: "Shrub" }, { value: "bridge", label: "Bridge" },
       { value: "wire", label: "Overhead line" }, { value: "crop", label: "Crop row" }, { value: "terrace", label: "Terrace (restanque)" },
       { value: "mound", label: "Stone heap" }, { value: "wall", label: "Dry-stone wall" }, { value: "streetlight", label: "Streetlight" },
-      { value: "trafficlight", label: "Traffic light" }, { value: "crossing", label: "Pedestrian crossing" }, { value: "roadsign", label: "Road sign" },
+      { value: "trafficlight", label: "Traffic light" }, { value: "peak", label: "Peak" }, { value: "crossing", label: "Pedestrian crossing" }, { value: "roadsign", label: "Road sign" },
       { value: "vehicle", label: "Vehicle" }, { value: "aircraft", label: "Aircraft" }, { value: "entity", label: "Being" },
       { value: "observer", label: "Other observer", hidden: true }
     ])
@@ -4252,10 +4252,15 @@ export class SightingEditorElement extends HTMLElement {
     // that height isn't known the two coincide, which is exactly the behaviour this had before.
     // Never negative: a observer cannot be underneath the ground they are standing on.
     const altitudeM = this.numberOrUndefined(this.elevationInput.value) ?? this.groundElevationM ?? 0
-    const elevationM = Math.max(0, altitudeM - (this.groundElevationM ?? 0))
     const event = this.ufoElement.sighting.event
     const observerTrack = this.ufoElement.sighting.observerTrack
     const t = this.ufoElement.currentTime
+    // Someone flying at an altitude above the sea (see ObserverPose.altitudeM) keeps it: the field is that altitude, and the height
+    // over the ground their cabin was stated against stays as it was. Written as a height over the ground under the place, a turn of
+    // the view in the editor dropped a pilot at 9,200 feet onto the mountains under him.
+    const flying = observerTrack.getInterpolatedPoseAt(t)
+    const statedAltitudeM = flying?.altitudeM !== undefined ? altitudeM : undefined
+    const elevationM = statedAltitudeM !== undefined ? flying!.elevationM : Math.max(0, altitudeM - (this.groundElevationM ?? 0))
 
 
     const instrument = this.ufoElement.sighting.instrument
@@ -4302,6 +4307,7 @@ export class SightingEditorElement extends HTMLElement {
         lat,
         lng,
         elevationM,
+        ...(statedAltitudeM !== undefined ? { altitudeM: statedAltitudeM } : {}),
         headingDeg,
         pitchDeg,
         // Written only when there IS one. Absent already means upright (see ObserverPose.rollDeg),
@@ -6537,7 +6543,9 @@ export class SightingEditorElement extends HTMLElement {
     this.groundElevationFor = { lat, lng }
     const heightAboveGround = Math.max(0, (this.numberOrUndefined(this.elevationInput.value) ?? 0) - (this.groundElevationM ?? 0))
     this.groundElevationM = Math.round(ground)
-    this.syncElevationField(heightAboveGround)
+    // A stated altitude above the sea does not move with the ground found under it: added to it, Arnold's 2,804 m became 3,335.
+    const altitudeM = this.ufoElement.sighting.observerTrack.getInterpolatedPoseAt(this.ufoElement.currentTime)?.altitudeM
+    this.syncElevationField(heightAboveGround, altitudeM)
     // The pose is unchanged, and not written again: it keeps a height above the ground, which the field now shows measured from
     // the sea, the same height. Written back through updateObserver, the whole pose was read off the fields at the playhead, rounded,
     // as a keyframe nobody typed — and after an undo, a change of the recording that the history did not hold.
@@ -6545,9 +6553,10 @@ export class SightingEditorElement extends HTMLElement {
 
   /** Shows `heightAboveGroundM` as what it is in the world: an altitude above sea level, floored at
    * the ground the observer is standing on. */
-  private syncElevationField(heightAboveGroundM: number): void {
+  private syncElevationField(heightAboveGroundM: number, altitudeM?: number): void {
     const ground = this.groundElevationM
-    this.elevationInput.value = String(Math.round((ground ?? 0) + heightAboveGroundM))
+    // A stated altitude above the sea is shown as it is (see ObserverPose.altitudeM).
+    this.elevationInput.value = String(Math.round(altitudeM ?? (ground ?? 0) + heightAboveGroundM))
     this.elevationInput.min = ground === undefined ? "" : String(ground)
     this.elevationInput.title = ground === undefined ? "" : this.messages.altitudeAboveSeaLevel
     // Where the ground is, said only when the observer stands above it: at ground level, the altitude says it already.
@@ -6563,7 +6572,8 @@ export class SightingEditorElement extends HTMLElement {
     clearTimeout(this.groundElevationTimer)
     this.groundElevationM = undefined
     this.groundElevationFor = undefined
-    this.syncElevationField(resolveObserverPoseAt(this.ufoElement.sighting, 0)?.elevationM ?? 0)
+    const start = resolveObserverPoseAt(this.ufoElement.sighting, 0)
+    this.syncElevationField(start?.elevationM ?? 0, start?.altitudeM)
     this.scheduleGroundElevation()
   }
 
@@ -6693,7 +6703,7 @@ export class SightingEditorElement extends HTMLElement {
     if (active !== this.elevationInput) {
       // The pose stores a height above the local ground; the field shows an altitude above sea
       // level — see syncElevationField.
-      this.syncElevationField(pose?.elevationM ?? 0)
+      this.syncElevationField(pose?.elevationM ?? 0, pose?.altitudeM)
     }
   }
 
@@ -12006,7 +12016,7 @@ export class SightingEditorElement extends HTMLElement {
       { value: "building", label: messages.decorBuilding }, { value: "tree", label: messages.decorTree }, { value: "shrub", label: messages.decorShrub },
       { value: "bridge", label: messages.decorBridge }, { value: "wire", label: messages.decorWire }, { value: "crop", label: messages.decorCrop },
       { value: "terrace", label: messages.decorTerrace }, { value: "mound", label: messages.decorMound }, { value: "wall", label: messages.decorWall },
-      { value: "streetlight", label: messages.decorStreetlight }, { value: "trafficlight", label: messages.decorTrafficLight },
+      { value: "streetlight", label: messages.decorStreetlight }, { value: "trafficlight", label: messages.decorTrafficLight }, { value: "peak", label: messages.decorPeak },
       { value: "crossing", label: messages.decorCrossing }, { value: "roadsign", label: messages.decorRoadSign }, { value: "vehicle", label: messages.decorVehicle },
       { value: "aircraft", label: messages.decorAircraft }, { value: "entity", label: messages.decorEntity },
       // Added from its own button (the Observer group's): not offered here, but still named, for the label of one that is there.

@@ -1274,6 +1274,12 @@ export class DecorSystem {
   }
 
   static build(object: DecorObject, lit: boolean): Group {
+    // A summit is the relief's (see DecorKind "peak"): nothing to draw, only a place to name.
+    if (object.kind === "peak") {
+      const group = new Group()
+      group.name = DecorSystem.BODY_NAME
+      return group
+    }
     const body =
       DecorSystem.hasFacade(object)
         ? DecorSystem.buildFacade(object)

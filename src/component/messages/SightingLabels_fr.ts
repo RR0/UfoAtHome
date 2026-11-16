@@ -143,6 +143,7 @@ export const sightingLabels_fr: SightingLabels = {
   decorWall: "Muret de pierres sèches",
   decorStreetlight: "Lampadaire",
   decorTrafficLight: "Feu de circulation",
+  decorPeak: "Sommet",
   decorCrossing: "Passage piéton",
   decorRoadSign: "Panneau de signalisation",
   decorVehicle: "Véhicule",

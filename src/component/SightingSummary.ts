@@ -513,6 +513,7 @@ export class SightingSummary {
       case "wall": return this.labels.decorWall
       case "streetlight": return this.labels.decorStreetlight
       case "trafficlight": return this.labels.decorTrafficLight
+      case "peak": return this.labels.decorPeak
       case "crossing": return this.labels.decorCrossing
       case "roadsign": return this.labels.decorRoadSign
       case "vehicle": return this.labels.decorVehicle

@@ -465,6 +465,15 @@ async function main(): Promise<void> {
       // Everything he saw, he saw out of it: its frame hides them, and where they overlap it on the picture they are beyond it, not in front.
       occludesSourceIds: sourceIds
     },
+    // The summits he timed them by: named where the pointer finds them (see DecorKind "peak"); the relief is the mountain.
+    {
+      id: "mount-rainier", kind: "peak", title: { en: "Mount Rainier (4,392 m)", fr: "Mont Rainier (4 392 m)" },
+      ...decorLocal({ lat: 46.8529, lng: -121.7604, altM: 0 }), sizeM: { widthM: 16000, lengthM: 16000, heightM: 1 }
+    },
+    {
+      id: "mount-adams", kind: "peak", title: { en: "Mount Adams (3,743 m)", fr: "Mont Adams (3 743 m)" },
+      ...decorLocal({ lat: 46.2024, lng: -121.4906, altM: 0 }), sizeM: { widthM: 14000, lengthM: 14000, heightM: 1 }
+    },
     {
       id: "dc4", kind: "aircraft",
       title: { en: "DC-4 \"to the left and to the rear of me approximately fifteen miles\"", fr: "DC-4 « à ma gauche et en arrière, à environ quinze miles »" },

@@ -219,6 +219,8 @@ export interface SightingLabels {
   decorStreetlight: string
   /** A traffic light, the traffic's or a pedestrian's — see DecorKind's own "trafficlight". */
   decorTrafficLight: string
+  /** A named summit of the relief — see DecorKind's own "peak". */
+  decorPeak: string
   /** The white bands of a pedestrian crossing — see DecorKind's own "crossing". */
   decorCrossing: string
   /** A road sign on its post — see DecorKind's own "roadsign". */

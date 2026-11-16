@@ -116,6 +116,10 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     pickOpticsAt(): undefined {
       return undefined
     }
+    pickPeakAt(): undefined {
+      return undefined
+    }
+
     pickRailwayAt(): undefined {
       return undefined
     }
@@ -2284,6 +2288,21 @@ describe("SightingEditorElement drag-to-move/resize/rotate", () => {
     // Again without Alt: a key like any other.
     dragFromTo(canvas, { x: 300, y: 300 }, { x: 320, y: 300 })
     expect(element.sightingData.observerTrack?.keyframes[0].viewOnly).toBeUndefined()
+  })
+
+  it("a landscape drag keeps a flying witness's altitude above the sea, and the height their cabin was stated against", async () => {
+    const element = await mount()
+    element.sightingData = {
+      version: 4,
+      observerTrack: { keyframes: [{ t: 0, pose: { lat: undefined, lng: undefined, elevationM: 2267, altitudeM: 2804, headingDeg: 10, pitchDeg: 0, fovDeg: 60 } }] },
+      timeline: { keyframes: [] }
+    }
+    const canvas = nestedCanvas(element)
+
+    dragFromTo(canvas, { x: 300, y: 300 }, { x: 400, y: 300 })
+
+    const pose = element.sightingData.observerTrack?.keyframes[0].pose
+    expect(pose).toMatchObject({ elevationM: 2267, altitudeM: 2804, headingDeg: 30 })
   })
 
   it("a landscape drag wraps heading past 360 back to 0, same as typing it", async () => {

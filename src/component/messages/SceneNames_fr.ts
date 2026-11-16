@@ -144,6 +144,7 @@ export const sceneNames_fr: SceneNames = {
     wall: "Muret de pierres sèches",
     streetlight: "Lampadaire",
     trafficlight: "Feu de circulation",
+    peak: "Sommet",
     crossing: "Passage piéton",
     roadsign: "Panneau de signalisation",
     vehicle: "Véhicule",

@@ -50,6 +50,7 @@ export const sceneNames_en = {
   wall: "Dry-stone wall",
   streetlight: "Streetlight",
   trafficlight: "Traffic light",
+  peak: "Peak",
   crossing: "Pedestrian crossing",
   roadsign: "Road sign",
   vehicle: "Vehicle",

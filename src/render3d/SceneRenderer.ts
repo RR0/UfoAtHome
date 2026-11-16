@@ -7090,6 +7090,46 @@ export class SceneRenderer {
   /** Below this opacity a surface is looked through, and a pointer goes through it with the eye. */
   private static readonly SEE_THROUGH_BELOW = 0.9
 
+  /**
+   * The named summit (see DecorKind "peak") whose mountain is under a point of the picture: the pointer on its top, or on the mountain
+   * below it, as broad at its foot as `sizeM.widthM` says and rising some thirty degrees, as a volcano's flanks do. Its top stands where
+   * the relief has it, the far ring's included: the summits a witness names are far off.
+   */
+  pickPeakAt(ndcX: number, ndcY: number): string | undefined {
+    const size = this.renderer.getDrawingBufferSize(new Vector2())
+    const pixelRad = (this.camera.fov * DEG_TO_RAD) / Math.max(1, size.y)
+    const eye = this.camera.getWorldPosition(new Vector3())
+    let best: { id: string, score: number } | undefined
+    for (const object of this.decorObjects) {
+      if (object.kind !== "peak") continue
+      const group = this.decorGroups.get(object.id)
+      if (!group) continue
+      const top = group.getWorldPosition(new Vector3())
+      top.y = this.reliefYAt(top.x, top.z)
+      const distanceM = top.distanceTo(eye)
+      const projected = top.clone().project(this.camera)
+      if (projected.z > 1 || projected.z < -1) continue
+      const dxPx = (ndcX - projected.x) * size.x / 2
+      const belowPx = (projected.y - ndcY) * size.y / 2
+      const halfPx = Math.max(10, ((object.sizeM?.widthM ?? 2000) / 2 / Math.max(distanceM, 1)) / pixelRad)
+      // Down to where its flanks reach at that width, and a little over its top.
+      if (belowPx < -8 || belowPx > halfPx * 0.6) continue
+      const reach = halfPx * Math.max(0.15, belowPx / (halfPx * 0.6))
+      if (Math.abs(dxPx) > Math.max(10, reach)) continue
+      const score = Math.abs(dxPx) + Math.abs(belowPx)
+      if (!best || score < best.score) best = { id: object.id, score }
+    }
+    return best?.id
+  }
+
+  /** The relief's height at a point of the scene: the patch of the place within its reach, the far ring past it. */
+  private reliefYAt(x: number, z: number): number {
+    const near = this.terrainMesh
+    if (near && Math.hypot(x - near.position.x, z - near.position.z) <= this.terrainRadius) return this.terrainYUnder(x, z)
+    const far = this.farRing?.mesh
+    return far ? far.position.y + this.groundYOfPatch(far, x - far.position.x, z - far.position.z) : 0
+  }
+
   pickDecorAt(ndcX: number, ndcY: number): string | undefined {
     this.aimAtScreenPoint(this.raycaster, ndcX, ndcY)
     const entries = [...this.decorGroups.entries()]

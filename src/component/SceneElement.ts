@@ -622,7 +622,7 @@ export class SceneElement extends HTMLElement {
       const texts = this.naming.names.afterimageTooltip
       return { kind: "afterimage", name: texts.name, detail: () => texts.detail.replace("{name}", texts.name) }
     }
-    const decorId = this.pickDecorAt(ndcX, ndcY)
+    const decorId = this.pickDecorAt(ndcX, ndcY) ?? this.sceneRenderer.pickPeakAt(ndcX, ndcY)
     const decor = decorId ? this.ufoElement.sighting.decor.find(d => d.id === decorId) : undefined
     if (decor) {
       const name = this.said.read(decor.title) || naming.decorKind(decor.kind)

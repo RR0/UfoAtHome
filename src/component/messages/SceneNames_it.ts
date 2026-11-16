@@ -142,6 +142,7 @@ export const sceneNames_it: SceneNames = {
     wall: "Muretto a secco",
     streetlight: "Lampione",
     trafficlight: "Semaforo",
+    peak: "Vetta",
     crossing: "Attraversamento pedonale",
     roadsign: "Segnale stradale",
     vehicle: "Veicolo",

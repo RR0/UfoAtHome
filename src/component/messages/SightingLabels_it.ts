@@ -143,6 +143,7 @@ export const sightingLabels_it: SightingLabels = {
   decorWall: "Muretto a secco",
   decorStreetlight: "Lampione",
   decorTrafficLight: "Semaforo",
+  decorPeak: "Vetta",
   decorCrossing: "Attraversamento pedonale",
   decorRoadSign: "Segnale stradale",
   decorVehicle: "Veicolo",

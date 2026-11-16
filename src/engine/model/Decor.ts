@@ -56,6 +56,13 @@ export type DecorKind =
    */
   | "trafficlight"
   /**
+   * A named summit of the relief, or any landmark of it a witness names (a ridge, a crest): `eastM`/`northM` its top, `sizeM.widthM` how
+   * broad the mountain is at its foot, and `title` its name. Nothing is drawn: the relief is the mountain, its height is the relief's. It is
+   * what the pointer names when it is on that mountain (Mount Rainier and Mount Adams, the landmarks Kenneth Arnold timed his objects
+   * by), what the relief alone could not say.
+   */
+  | "peak"
+  /**
    * A pedestrian crossing: the white bands painted across a carriageway, each `sizeM.lengthM` long along the road and half a metre wide, side by
    * side over `sizeM.widthM`, the width of the road. `headingDeg` is the direction of the road, which the bands run along. Laid on the ground under
    * it like the road's own paint (see RoadMarkings).
