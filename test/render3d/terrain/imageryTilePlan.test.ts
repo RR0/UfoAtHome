@@ -21,7 +21,7 @@ describe("imageryTilePlan", () => {
     for (const span of [200, 900, 1800, 5000, 30000, 60000]) {
       const plan = imageryTilePlan(LAT, span, 2048)
       expect(plan.gridSize).toBeGreaterThanOrEqual(3)
-      expect(plan.gridSize).toBeLessThanOrEqual(7)
+      expect(plan.gridSize).toBeLessThanOrEqual(5)
       expect(plan.gridSize % 2).toBe(1)
     }
   })
