@@ -25,9 +25,6 @@ export default defineConfig({
     testTimeout: 30_000,
     // The same for the hooks, whose default (10 s) a test that blocks the worker carries over: the schema's first validation of a
     // recording with thousands of keyframes takes 13 s of V8 compiling ajv's validator (see SightingJsonSchema.test.ts).
-    hookTimeout: 30_000,
-    // Without V8's Maglev: a recording with thousands of keyframes (Mount Rainier's readings) made it compile ajv's whole schema
-    // validator on the spot, 13 s alone and 34 s under the suite's load, past any timeout (see SightingJsonSchema.test.ts); 0.8 s without.
-    poolOptions: { forks: { execArgv: ["--no-maglev"] }, threads: { execArgv: ["--no-maglev"] } }
+    hookTimeout: 30_000
   }
 })

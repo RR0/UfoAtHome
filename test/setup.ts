@@ -20,6 +20,15 @@ const { setImmediate } = globalThis as unknown as { setImmediate(callback: () =>
 afterEach(() => new Promise<void>((resolve) => setImmediate(resolve)))
 
 /**
+ * Without V8's Maglev: a recording with thousands of keyframes (Mount Rainier's readings) made it compile ajv's whole schema validator on
+ * the spot, 13 s alone and 34 s under the suite's load, past any timeout (see SightingJsonSchema.test.ts); 0.8 s without. Set from here
+ * rather than as the workers' execArgv, which worker threads refuse for a V8 flag (ERR_WORKER_INVALID_EXEC_ARGV: the CI runs them).
+ */
+const v8 = (globalThis as unknown as { process?: { getBuiltinModule?(id: string): unknown } }).process?.getBuiltinModule?.("node:v8") as
+  { setFlagsFromString(flags: string): void } | undefined
+v8?.setFlagsFromString("--no-maglev")
+
+/**
  * What a test file leaves in the page is taken out at its end, so that what it built (a text editor's
  * linter has a timer, for one) is stopped while its window still exists instead of failing after it closed.
  * Files that run under Node have no page.
