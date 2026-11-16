@@ -6262,8 +6262,37 @@ export class SceneRenderer {
     this.render()
   }
 
+  /**
+   * The eye as a lens, when it looks through a field narrow enough for a pinhole to draw it (see eyeAsLens): focused on what it watches,
+   * far off, its pupil as wide as the light it is adapted to makes it, so that what is near (a cockpit's frame) is out of focus as it is
+   * to an eye looking out past it. Moon & Spencer (1944): D = 4.9 − 3 tanh(0.4 log₁₀ L) mm; the reduced eye's 17 mm.
+   */
+  private eyeOptics(): { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number } | undefined {
+    if (!this.eyeAsLens) return undefined
+    const adapted = Math.max(1e-6, this.scatteredSky?.sceneAdaptation ?? 1000)
+    const pupilMm = 4.9 - 3 * Math.tanh(0.4 * Math.log10(adapted))
+    const focalLengthMm = SceneRenderer.EYE_FOCAL_MM
+    return {
+      focalLengthMm,
+      fNumber: focalLengthMm / pupilMm,
+      focusDistance: 0,
+      frameHeightMm: 2 * focalLengthMm * Math.tan(this.camera.fov * DEG_TO_RAD / 2)
+    }
+  }
+
+  /** The reduced eye's focal length, mm. */
+  private static readonly EYE_FOCAL_MM = 17
+  /** Up to this vertical field an eye's picture is drawn through a pinhole and its lens (see eyeOptics): the equidistant projection it
+   * would otherwise be drawn in parts from it by under 0.3 % at the corners of 16:9. */
+  private static readonly EYE_LENS_MAX_FOV_DEG = 20
+
+  /** Whether the eye is drawn through its lens rather than resampled to an equidistant picture: a narrow field. */
+  private get eyeAsLens(): boolean {
+    return this.projectionKind === "equidistant" && !this.lensOptics && this.camera.fov <= SceneRenderer.EYE_LENS_MAX_FOV_DEG
+  }
+
   private usableDepthOfFieldPass(): DepthOfFieldPass | undefined {
-    const optics = this.lensOptics
+    const optics = this.lensOptics ?? this.eyeOptics()
     if (!optics) return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     const width = Math.max(1, Math.round(size.x))
@@ -6273,6 +6302,7 @@ export class SceneRenderer {
     }
     this.depthOfFieldPass.resize(width, height)
     this.depthOfFieldPass.setLens(optics.focalLengthMm, optics.fNumber, optics.focusDistance, optics.frameHeightMm)
+    this.depthOfFieldPass.setAir(this.weather.visibilityKm !== undefined ? this.weather.visibilityKm * 1000 : undefined, this.camera.fov)
     return this.depthOfFieldPass
   }
 
@@ -6329,7 +6359,7 @@ export class SceneRenderer {
     return this.finishPass
   }
   private usableEquidistantPass(): EquidistantProjectionPass | undefined {
-    if (this.projectionKind !== "equidistant") return undefined
+    if (this.projectionKind !== "equidistant" || this.eyeAsLens) return undefined
     const size = this.renderer.getDrawingBufferSize(new Vector2())
     if (!this.equidistantPass) this.equidistantPass = new EquidistantProjectionPass(size.x, size.y)
     else this.equidistantPass.resize(size.x, size.y)
@@ -6359,7 +6389,7 @@ export class SceneRenderer {
   }
 
   private aimStraightAtScreenPoint(raycaster: Raycaster, ndcX: number, ndcY: number): void {
-    const pass = this.projectionKind === "equidistant" ? this.equidistantPass : undefined
+    const pass = this.projectionKind === "equidistant" && !this.eyeAsLens ? this.equidistantPass : undefined
     if (!pass) {
       raycaster.setFromCamera(new Vector2(ndcX, ndcY), this.camera)
       return
@@ -6413,7 +6443,7 @@ export class SceneRenderer {
 
   /** Where a direction in the camera's own frame lands on the picture, for a vertical field of `fovDeg` (see screenPointOf). */
   private screenPointIn(local: Vector3, fovDeg: number, aspect: number): { ndcX: number; ndcY: number } | undefined {
-    if (this.projectionKind === "equidistant" && this.equidistantPass) {
+    if (this.projectionKind === "equidistant" && !this.eyeAsLens && this.equidistantPass) {
       return EquidistantProjectionPass.ndcFor(local, fovDeg, aspect)
     }
     if (local.z >= 0) return undefined

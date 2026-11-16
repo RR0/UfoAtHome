@@ -271,7 +271,9 @@ const CHAIN_CLEARANCE_M = 150
  * swerve of 150 m and a dip of 60 m (a third and an eighth of a degree at twenty-five kilometres), every six seconds, one wave the length
  * of the chain.
  */
-const WEAVE = { acrossM: 150, upM: 150, periodS: 6, rollDeg: 25 }
+// "These objects were holding an almost constant elevation; they did not seem to be going up or coming down" (his report to the AAF):
+// their weave is across their way and in their rocking, hardly up and down.
+const WEAVE = { acrossM: 150, upM: 20, periodS: 6, rollDeg: 25 }
 /**
  * Their formation: "They flew like many times I have observed geese to fly in a rather diagonal chain-like line" (his report to the AAF),
  * "diagonally stepped-down, echelon formation" (Bloecher, quoting his account): each one aside of and below the one ahead. By how much is
@@ -330,6 +332,16 @@ class Glint {
   static readonly SUN_RADIUS_DEG = 0.267
   static readonly REFLECTANCE = 0.85
   static readonly SPREAD_DEG = 2
+  /** How far off mirroring the Sun to him a flip comes, each way, degrees (ASSUMED). */
+  static readonly TILT_SPREAD_DEG = 2.5
+
+  /** Two standard normal draws, the same for the same seed (Box–Muller over a hash): each flip's own. */
+  static gaussians(seed: number): [number, number] {
+    const hash = (n: number) => { let x = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b); x ^= x >>> 13; x = Math.imul(x, 0xc2b2ae35); x ^= x >>> 16; return ((x >>> 0) + 0.5) / 4294967296 }
+    const u = hash(seed), v = hash(seed + 7919)
+    const r = Math.sqrt(-2 * Math.log(u))
+    return [r * Math.cos(2 * Math.PI * v), r * Math.sin(2 * Math.PI * v)]
+  }
 
   /** Towards the Sun at `t` seconds into the recording, east, up, north: 14:58:00 PDT is 13:58 of the local standard time SunPosition reads. */
   static sunAt(at: Geo, t: number): Vector3 {
@@ -654,7 +666,11 @@ async function main(): Promise<void> {
       const at = objectAt(k, f)
       const toEye = lookAt(at, { ...arnoldAt(f).at, altM: ARNOLD_ALT_M })
       const halfway = Glint.towards(toEye.azimuthDeg, toEye.altitudeDeg).add(Glint.sunAt(at, f)).normalize()
-      found = { ...Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfway), halfway }
+      // How near each flip comes to mirroring the Sun to him is not said: as near as a few degrees either way (Glint.TILT_SPREAD_DEG),
+      // so that one flash is a blaze and the next a glint, as tilts that just happen to send the Sun one's way are.
+      const exact = Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfway)
+      const [a, b] = Glint.gaussians(k * 1000 + Math.round(f * 1000))
+      found = { ...exact, pitchDeg: exact.pitchDeg + a * Glint.TILT_SPREAD_DEG, rollDeg: exact.rollDeg + b * Glint.TILT_SPREAD_DEG, halfway }
       mirroring.set(key, found)
     }
     return found
@@ -900,6 +916,8 @@ async function main(): Promise<void> {
   }
   writeFileSync(path.join(demoData, "interpretation-mont-rainier-aaf.json"), JSON.stringify(aafReading) + "\n")
   const flips = [...mirroring.values()]
+  const peaks = flips.map(f => Glint.luminanceAt(Math.acos(Math.min(1, Glint.normalOf(lookAt(chainStart, chainEnd).azimuthDeg, f.pitchDeg, f.rollDeg).dot(f.halfway))) * 180 / Math.PI)).sort((a, b) => a - b)
+  console.log(`flashes from ${Math.round(peaks[0])} to ${Math.round(peaks[peaks.length - 1])} cd/m², median ${Math.round(peaks[peaks.length >> 1])}`)
   console.log(`flips: ${flips.length}, tipped ${(flips.reduce((a, f) => a + Math.abs(f.pitchDeg), 0) / flips.length).toFixed(1)}° in pitch and ${(flips.reduce((a, f) => a + Math.abs(f.rollDeg), 0) / flips.length).toFixed(1)}° in roll on average, peak ${Math.round(Glint.luminanceAt(0))} cd/m²`)
   console.log(`AAF reading: ${aafWidthM} m across at ${(leaderM / 1000).toFixed(1)} km, ${(AAF_ANGLE_RAD * 180 / Math.PI).toFixed(3)}°`)
 

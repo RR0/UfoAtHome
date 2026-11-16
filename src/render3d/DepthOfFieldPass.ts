@@ -91,6 +91,9 @@ export class DepthOfFieldPass {
         /** Pixels per millimetre of frame, which is what turns a circle of confusion into a blur. */
         uPixelsPerMm: { value: 0 },
         uMaxRadius: { value: DepthOfFieldPass.MAX_RADIUS_PX },
+        /** The air's blur at full optical depth, pixels of radius, and the distance over which the light is taken out of a ray (see setAir). */
+        uAirBlurPx: { value: 0 },
+        uAirRange: { value: 1 },
         uOverlay: { value: this.overlayTarget.texture },
         uOverlayDepth: { value: overlayDepth },
         /** See FinishMode. */
@@ -120,6 +123,8 @@ export class DepthOfFieldPass {
         uniform float uPixelsPerMm;
         uniform float uMaxRadius;
         uniform float uMode;
+        uniform float uAirBlurPx;
+        uniform float uAirRange;
 
         /** How far away, in the scene's own units, whatever was drawn at this pixel stands. */
         float distanceAt(sampler2D depthMap, vec2 uv) {
@@ -139,7 +144,10 @@ export class DepthOfFieldPass {
             float focusMm = uFocusDistance * 1000.0;
             circleMm = uApertureMm2 * abs(subjectMm - focusMm) / (subjectMm * (focusMm - uFocalLengthMm));
           }
-          return min(uMaxRadius, circleMm * uPixelsPerMm * 0.5);
+          float lens = circleMm * uPixelsPerMm * 0.5;
+          // The air's own: what it scatters forward stays near the ray, spread over the more the more of the light it has taken.
+          float air = uAirBlurPx * (1.0 - exp(-distanceUnits / uAirRange));
+          return min(uMaxRadius, sqrt(lens * lens + air * air));
         }
 
         /** One layer through the lens: every channel, coverage included, averaged over the disc of
@@ -217,6 +225,21 @@ export class DepthOfFieldPass {
     uniforms.uFocalLengthMm.value = focalLengthMm
     uniforms.uPixelsPerMm.value = this.height / Math.max(0.1, frameHeightMm)
   }
+
+  /**
+   * States the blur of the air between: the light the haze scatters forward stays within a few minutes of arc of its way (ASSUMED,
+   * AIR_BLUR_RAD at full optical depth), on the share of it the air has taken over its distance, Koschmieder's visibility being 3.912 of
+   * its extinction length. What made the far country as sharp as the near, its contrast only taken.
+   */
+  setAir(visibilityM: number | undefined, verticalFovDeg: number): void {
+    const uniforms = this.material.uniforms
+    const pixelsPerRad = this.height / (verticalFovDeg * Math.PI / 180)
+    uniforms.uAirBlurPx.value = visibilityM && visibilityM > 0 ? DepthOfFieldPass.AIR_BLUR_RAD * pixelsPerRad : 0
+    uniforms.uAirRange.value = visibilityM && visibilityM > 0 ? visibilityM / 3.912 : 1
+  }
+
+  /** The radius the haze spreads a far point over, at full optical depth: two minutes of arc (ASSUMED). */
+  static readonly AIR_BLUR_RAD = 2 / 60 * Math.PI / 180
 
   /** Renders the scene through the camera and blurs what the lens would not have held sharp. */
   /** Whether the frame this pass produces is finished, or is one instant of a longer exposure —
