@@ -5274,6 +5274,23 @@ export class SceneRenderer {
     return this.cabinGroups
   }
 
+  /**
+   * The aircraft and vehicles whose box holds the eye as they stand now, whatever the last tick found (see findCabin): what the eye's
+   * photograph of its surroundings must leave out even before the first tick has placed the scene. Photographed with the eye inside it, a
+   * cabin is lit by the photograph and lights the next: behind the loader, where the photographs follow one another with no delay, the
+   * light round Arnold ran away to a hundred times the sky's, and his windscreen mirrored it in white veils over the country.
+   */
+  private enclosingDecor(): Object3D[] {
+    const eye = this.camera.getWorldPosition(this.enclosingEye)
+    return this.decorObjects
+      .filter(object => object.kind === "aircraft" || object.kind === "vehicle")
+      .map(object => this.decorGroups.get(object.id))
+      .filter((group): group is Group => group !== undefined && this.enclosingBox.setFromObject(group).containsPoint(eye))
+  }
+
+  private readonly enclosingEye = new Vector3()
+  private readonly enclosingBox = new Box3()
+
   private cabinGroups: Object3D[] = []
 
   /**
@@ -5318,8 +5335,11 @@ export class SceneRenderer {
   private refreshReflections(holding = false): void {
     this.reflections ??= new Reflections(this.renderer)
     // The veils are in the eye, not in the world: nothing mirrors them.
+    // Nor the specks a body under a pixel is drawn as (see BodySystem.shineReflected): a pixel and a half of the picture, not a thing of
+    // the world. Photographed, the pelicans' lit the light round Arnold three times over, and his windscreen mirrored it in a pale veil.
     const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []),
-      ...[...this.glareSprites.values()].map(veil => veil.mesh)]
+      ...[...this.glareSprites.values()].map(veil => veil.mesh),
+      ...this.bodySystem.group.children.filter(child => child.name.startsWith("body-speck:"))]
     // The points the eye resolves stars and planets to carry more light than they send (see
     // PointSources): kept out of the photograph the eye's surroundings are measured on.
     // Nor what is falling: in a probe of a hundred and twenty-eight pixels a side, the drops within
@@ -5335,7 +5355,7 @@ export class SceneRenderer {
     const eyeHidden: Object3D[] = [...this.starTiers.map(tier => tier.points),
       ...[...this.bodyMeshes.values()].filter(mesh => mesh instanceof Points),
       ...[this.rainSystem?.points, this.precipitationPoints, this.rainSplashSystem?.points].filter((object): object is Points => object !== undefined),
-      ...this.cabinDecor(), ...this.decorLamps, ...this.bodySystem.group.children.filter(holder => holder.name.startsWith("body:")),
+      ...this.cabinDecor(), ...this.enclosingDecor(), ...this.decorLamps, ...this.bodySystem.group.children.filter(holder => holder.name.startsWith("body:")),
       ...([this.meteorSystem?.object] as (Object3D | undefined)[]).filter((object): object is Object3D => object !== undefined),
       ...[...this.skyEventLayers.values()].filter(layer => layer.simulation?.hiddenFromEye).map(layer => layer.simulation!.object)]
     const scale = this.relativeScale
