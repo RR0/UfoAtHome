@@ -29,7 +29,25 @@ const demoData = path.join(here, "..", "..", "..", "..", "public", "demo-data")
 const tileCache = path.join(here, "tiles")
 
 type Text = Record<"en" | "fr", string>
-const said = (value: unknown, basis: string, en: string, fr: string) => ({ value, basis, rationale: { en, fr } })
+/** A value with its provenance: its basis, why, and, where it rests on one of his accounts, which (see ValueSource). */
+const said = (value: unknown, basis: string, en: string, fr: string, source?: ValueSourceJson) => ({ value, basis, rationale: { en, fr }, ...(source ? { source } : {}) })
+
+interface ValueSourceJson { document: { en: string, fr: string }, at?: string, url: string }
+/**
+ * His accounts, as rr0.org holds them, each value citing the one it was first said in: the radio interview the day after, the press of
+ * the days after, the report he wrote to the Army Air Forces two weeks later, the book of 1952, and the case file's map and drawings.
+ * Which account says what is the record of what he said and when (see SaidIn): the gap in the chain, say, is first in the book.
+ */
+const ACCOUNTS = {
+  radio: { document: { en: "Radio interview with Kenneth Arnold (1947-06-25)", fr: "Interview radio de Kenneth Arnold (25 juin 1947)" }, url: "https://rr0.org/time/1/9/4/7/06/25/Arnold_Interview/" },
+  eastOregonian: { document: { en: "Bill Bequette, East Oregonian (1947-06-26)", fr: "Bill Bequette, East Oregonian (26 juin 1947)" }, url: "https://rr0.org/time/1/9/4/7/06/26/Bequette_BoiseFlyerMaintainsHeSawEm_EastOregonian/" },
+  oregonJournal: { document: { en: "Oregon Journal (1947-06-27)", fr: "Oregon Journal (27 juin 1947)" }, url: "https://rr0.org/time/1/9/4/7/06/27/ArnoldInsistsTaleOfFlyingObjectsOK_OregonJournal/" },
+  aaf: { document: { en: "Kenneth Arnold's report to the Army Air Forces (July 1947)", fr: "Rapport de Kenneth Arnold aux Army Air Forces (juillet 1947)" }, url: "https://rr0.org/time/1/9/4/7/07/12/Arnold_Report_AAF/" },
+  book: { document: { en: "Kenneth Arnold and Ray Palmer, The Coming of the Saucers (1952)", fr: "Kenneth Arnold et Ray Palmer, The Coming of the Saucers (1952)" }, url: "https://rr0.org/time/1/9/5/2/Arnold_TheComingOfTheSaucers/" },
+  map: { document: { en: "Mount Rainier case file, map of his flight and of the objects (Carte.kml)", fr: "Dossier Mont Rainier, carte de son vol et des objets (Carte.kml)" }, at: "Carte.kml", url: "https://rr0.org/science/crypto/ufo/enquete/dossier/MontRainier/" },
+  crescent: { document: { en: "Mount Rainier case file, his crescent drawing (1960s)", fr: "Dossier Mont Rainier, son dessin en croissant (années 1960)" }, at: "CrescentShape.jpg", url: "https://rr0.org/science/crypto/ufo/enquete/dossier/MontRainier/" },
+  analysts: { document: { en: "Kenneth Arnold UFO sighting (Wikipedia), on the Army Air Force analysts' sizes", fr: "Kenneth Arnold UFO sighting (Wikipédia), sur les tailles des analystes de l'Army Air Force" }, url: "https://en.wikipedia.org/wiki/Kenneth_Arnold_UFO_sighting" }
+} satisfies Record<string, ValueSourceJson>
 
 // ---- Ground heights, from the same AWS Terrarium tiles the scene reads (zoom 12, some 25 m a pixel) ----
 
@@ -597,10 +615,10 @@ async function main(): Promise<void> {
         // Stated against the ground where the recording starts, the same all along: the scene puts him at `altitudeM` over whatever relief it
         // draws, and his cabin is stated against this (see ObserverPose.altitudeM).
         elevationM: t === 0
-          ? said(r2(ARNOLD_ALT_M - originGround), "derived", "\"approximately 9,200 feet\" above the sea, less the ground where the recording starts (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol où commence l'enregistrement (tuiles AWS Terrarium)")
+          ? said(r2(ARNOLD_ALT_M - originGround), "derived", "\"approximately 9,200 feet\" above the sea, less the ground where the recording starts (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol où commence l'enregistrement (tuiles AWS Terrarium)", ACCOUNTS.aaf)
           : r2(ARNOLD_ALT_M - originGround),
         altitudeM: t === 0
-          ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »")
+          ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »", ACCOUNTS.aaf)
           : r2(ARNOLD_ALT_M),
         headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg),
         fovDeg: r2(fieldAt(t))
@@ -660,11 +678,11 @@ async function main(): Promise<void> {
           aim: t === T_RAINIER_S && k === 0
             ? said({ azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) }, "derived",
               "\"one minute to 3 P.M. as the first object of this formation passed the southern edge of Mt. Rainier\": the direction of that edge as the dossier's map places it, from where he is assumed to be",
-              "« une minute avant 15 h, quand le premier objet de cette formation passa le bord sud du mont Rainier » : la direction de ce bord tel que la carte du dossier le place, depuis là où on le suppose")
+              "« une minute avant 15 h, quand le premier objet de cette formation passa le bord sud du mont Rainier » : la direction de ce bord tel que la carte du dossier le place, depuis là où on le suppose", ACCOUNTS.map)
             : t === T_ADAMS_S && k === COUNT - 1
               ? said({ azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) }, "derived",
                 "\"As the last unit of this formation passed the southern most high snow-covered crest of Mt. Adams [...] one minute and forty-two seconds\"",
-                "« Quand le dernier de cette formation passa la crête enneigée la plus au sud du mont Adams [...] une minute et quarante-deux secondes »")
+                "« Quand le dernier de cette formation passa la crête enneigée la plus au sud du mont Adams [...] une minute et quarante-deux secondes »", ACCOUNTS.map)
               : { azimuthDeg: r3(look.azimuthDeg), altitudeDeg: r3(look.altitudeDeg) },
           angular: { widthDeg: r3(widthDeg), heightDeg: r3(flash ? widthDeg : widthDeg / 20) },
           // "They looked like they were rocking": the outline tilts as the object rocks (see WEAVE).
@@ -691,10 +709,10 @@ async function main(): Promise<void> {
           }
         }
         if (t === 0 && k === 0) {
-          shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »")
+          shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »", ACCOUNTS.aaf)
           shape.angular = said({ widthDeg: r3(widthDeg), heightDeg: r3(widthDeg / 20) }, "stated",
             "\"their span would have been as wide as the furtherest engines on each side of the fuselage of the DC-4\" (some 17 m apart, fifteen miles off), measured against a cowling tool held up; \"their thickness was about 1/20th their width\"",
-            "« leur envergure aurait été aussi large que les moteurs les plus éloignés de chaque côté du fuselage du DC-4 » (quelque 17 m, à quinze miles), mesuré contre un outil de capot tenu à bout de bras ; « leur épaisseur était d'environ 1/20 de leur largeur »")
+            "« leur envergure aurait été aussi large que les moteurs les plus éloignés de chaque côté du fuselage du DC-4 » (quelque 17 m, à quinze miles), mesuré contre un outil de capot tenu à bout de bras ; « leur épaisseur était d'environ 1/20 de leur largeur »", ACCOUNTS.aaf)
         }
         return { sourceId, shape }
       })
@@ -752,7 +770,10 @@ async function main(): Promise<void> {
         altitudeM: r2(objectAt(k, t).altM - originGround),
         ...(t === 0 ? {
           // "longer than wide" by his drawing (1.26), "their thickness was about 1/20th of their width".
-          sizeM: { widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(14 * 1.26 * FAVOURABLE_SIZE), heightM: r2(14 / 20 * FAVOURABLE_SIZE) },
+          sizeM: said({ widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(14 * 1.26 * FAVOURABLE_SIZE), heightM: r2(14 / 20 * FAVOURABLE_SIZE) }, "derived",
+            "As wide as the DC-4's furthest engines at fifteen miles, laid at the distance the reconstruction has them, at the most the laws of a gauge's error and of the confrontation allow (×1.8); \"They seemed longer than wide, their thickness was about 1/20th of their width\"",
+            "Aussi large que les moteurs les plus éloignés du DC-4 à quinze miles, à la distance où la reconstitution les place, au plus que permettent les lois d'erreur d'une jauge et de la confrontation (×1,8) ; « Ils semblaient plus longs que larges, leur épaisseur était d'environ 1/20 de leur largeur »",
+            ACCOUNTS.aaf),
           // "just a black thin line" when level, "Mirror Bright" when they flipped: a dark plate seen from a little below, its underside in
           // its own shade, and the Sun's glint off it when it tilted, given as light (see the keyframes' luminanceCdM2). Polished, its
           // underside would mirror the sunlit forest under it, as bright as the sky behind: no black line.
@@ -768,10 +789,10 @@ async function main(): Promise<void> {
   }
 
   const weather = {
-    cloudCover: said(0, "stated", "\"The sky and air was clear as crystal\"", "« Le ciel et l'air étaient clairs comme du cristal »"),
-    visibilityKm: said(120, "assumed", "\"the air was so clear that it was very easy to see objects and determine their approximate shape and size at almost fifty miles\"; he followed the flashes to Mt Adams, some 90 km off", "« l'air était si clair qu'il était très facile de voir des objets et d'en juger la forme et la taille à près de cinquante miles » ; il suivit les éclats jusqu'au mont Adams, à quelque 90 km"),
+    cloudCover: said(0, "stated", "\"The sky and air was clear as crystal\"", "« Le ciel et l'air étaient clairs comme du cristal »", ACCOUNTS.aaf),
+    visibilityKm: said(120, "assumed", "\"the air was so clear that it was very easy to see objects and determine their approximate shape and size at almost fifty miles\"; he followed the flashes to Mt Adams, some 90 km off", "« l'air était si clair qu'il était très facile de voir des objets et d'en juger la forme et la taille à près de cinquante miles » ; il suivit les éclats jusqu'au mont Adams, à quelque 90 km", ACCOUNTS.aaf),
     cloudDarkness: 0, lowerCloudCover: 0, highCloudCover: 0, precipitationType: "none", precipitationIntensity: 0,
-    windSpeed: said(2, "assumed", "\"The air was so smooth that day\"", "« L'air était si calme ce jour-là »"), windDirectionDeg: 270, storm: false
+    windSpeed: said(2, "assumed", "\"The air was so smooth that day\"", "« L'air était si calme ce jour-là »", ACCOUNTS.aaf), windDirectionDeg: 270, storm: false
   }
 
   const decor = [
@@ -813,11 +834,17 @@ async function main(): Promise<void> {
     observer: { id: "ArnoldKennethE", title: "Kenneth Arnold" },
     account: {
       observerOccupation: { en: "businessman and private pilot", fr: "homme d'affaires et pilote privé" },
-      source: said("letter", "stated", "his written report to the AAF, sent in July 1947, two weeks after", "son rapport écrit à l'AAF, envoyé en juillet 1947, deux semaines après")
+      source: said("letter", "stated", "his written report to the AAF, sent in July 1947, two weeks after", "son rapport écrit à l'AAF, envoyé en juillet 1947, deux semaines après", ACCOUNTS.aaf)
     },
     description,
     tags: ["pilot", "daylight disc", "formation"],
-    sources: [{ title: "Sighting report (to the AAF)", authors: ["Kenneth Arnold"], url: "https://rr0.org/time/1/9/4/7/07/12/Arnold_Report_AAF/", publication: { time: "1947-07-12" } }],
+    sources: [
+      { title: "Radio interview with Kenneth Arnold", authors: ["Kenneth Arnold"], url: ACCOUNTS.radio.url, publication: { time: "1947-06-25" } },
+      { title: "Boise Flyer Maintains He Saw 'Em", authors: ["Bill Bequette"], url: ACCOUNTS.eastOregonian.url, publication: { publisher: "East Oregonian", time: "1947-06-26" } },
+      { title: "Arnold Insists Tale of Flying Objects OK", url: ACCOUNTS.oregonJournal.url, publication: { publisher: "Oregon Journal", time: "1947-06-27" } },
+      { title: "Sighting report (to the AAF)", authors: ["Kenneth Arnold"], url: ACCOUNTS.aaf.url, publication: { time: "1947-07-12" } },
+      { title: "The Coming of the Saucers", authors: ["Kenneth Arnold", "Ray Palmer"], url: ACCOUNTS.book.url, publication: { time: "1952" } }
+    ],
     instrument: "eye",
     observerTrack: { keyframes: observerKeys },
     timeline: { keyframes, order: sourceIds, groups: [{ id: "chain", members: sourceIds }] },
@@ -851,7 +878,7 @@ async function main(): Promise<void> {
   later.account = {
     observerOccupation: recording.account.observerOccupation,
     source: said("letter", "stated", "the crescent he drew and showed in the 1960s (the photograph and the sketch of the rr0.org dossier); its exact date is not known",
-      "le croissant qu'il dessina et montra dans les années 1960 (la photographie et le croquis du dossier rr0.org) ; sa date exacte n'est pas connue")
+      "le croissant qu'il dessina et montra dans les années 1960 (la photographie et le croquis du dossier rr0.org) ; sa date exacte n'est pas connue", ACCOUNTS.crescent)
   }
   later.description = {
     en: "The same flight as he told it later: the nine objects drawn as crescents, \"bat-like\", rather than as the rounded fans of his 1947 report.",
@@ -957,7 +984,13 @@ async function main(): Promise<void> {
       bodies: witnessInterpretation.bodies.map(body => ({
         ...body,
         track: body.track.map(key => "sizeM" in key && key.sizeM
-          ? { ...key, sizeM: { widthM: r2(key.sizeM.widthM * aafScale), lengthM: r2(key.sizeM.lengthM * aafScale), heightM: r2(key.sizeM.heightM * aafScale) } }
+          ? {
+              ...key,
+              sizeM: said({ widthM: r2(key.sizeM.value.widthM * aafScale), lengthM: r2(key.sizeM.value.lengthM * aafScale), heightM: r2(key.sizeM.value.heightM * aafScale) }, "derived",
+                "As wide as the Army Air Force's analysts worked out acuity needs, 280 feet at 20 miles (0.15°), laid at the distance the reconstruction has them",
+                "Aussi large que l'acuité l'exige selon les analystes de l'Army Air Force, 280 pieds à 20 miles (0,15°), à la distance où la reconstitution les place",
+                ACCOUNTS.analysts)
+            }
           : key)
       }))
     }

@@ -2,7 +2,7 @@
  * Writes public/models/ufoathome-arnold-craft/craft.gltf: one of the nine objects Kenneth Arnold saw on 1947-06-24, as he drew and said it.
  *
  * Its plan is his drawing kept by the FBI (FBIShape.jpg in rr0.org's dossier): a round front and a "convex triangle in the rear" (his
- * radio interview of 1947-06-26, "something like a pie plate that was cut in half with a sort of a convex triangle in the rear"), some
+ * radio interview of 1947-06-25, "something like a pie plate that was cut in half with a sort of a convex triangle in the rear"), some
  * 1.26 times as long as it is wide; "They seemed longer than wide" (his letter to the Air Force, July 1947). Its side view is that letter's
  * and the "Side view" of the case's sketches: flat under, domed over, "their thickness was about 1/20th of their width".
  *
