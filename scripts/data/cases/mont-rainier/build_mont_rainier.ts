@@ -333,6 +333,31 @@ function hiddenCost(t: number, watched: number, lean: number): number {
   }, 0)
 }
 
+/** A pilot's field, wider than a lens's: what keeps the frame of his windscreen in sight as he looks ahead (ASSUMED). */
+const WIDE_FIELD_DEG = 75
+/**
+ * The field while he watches them, vertical: the eye resolves a minute of arc, and a screen of six hundred pixels shows one a pixel only
+ * at ten degrees. At 75 a pixel was 4.4 minutes: the objects, "a black thin line" 2.4 minutes long, were half a pixel, and what Arnold
+ * saw and described could not be seen. The field of what he looked at, not of his eye: what was round it he saw no sharper than the
+ * picture at 75 shows it.
+ */
+const ACUITY_FIELD_DEG = 10
+/** When his eye settles on them, and when it lets go once the last is past Adams, seconds; and how long each takes: ASSUMED. */
+const FOCUS_FROM_S = 3, FOCUS_UNTIL_S = T_ADAMS_S + 6, FOCUS_TAKES_S = 3
+
+/** The field he sees at `t`, vertical degrees: wide, and as narrow as his eye's acuity while he watches them. */
+function fieldAt(t: number): number {
+  const ease = (x: number) => { const c = Math.min(1, Math.max(0, x)); return c * c * (3 - 2 * c) }
+  const focus = ease((t - FOCUS_FROM_S) / FOCUS_TAKES_S) * (1 - ease((t - FOCUS_UNTIL_S) / FOCUS_TAKES_S))
+  return WIDE_FIELD_DEG + (ACUITY_FIELD_DEG - WIDE_FIELD_DEG) * focus
+}
+
+/** Halfway between the first object and the last at `t`. */
+function chainMiddleAt(t: number): Geo {
+  const first = objectAt(0, t), last = objectAt(COUNT - 1, t)
+  return { lat: (first.lat + last.lat) / 2, lng: (first.lng + last.lng) / 2, altM: (first.altM + last.altM) / 2 }
+}
+
 async function main(): Promise<void> {
   const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
   // What the flashes are drawn at: every second, and the instants of each flash, so that a flash is as short as it is.
@@ -378,7 +403,9 @@ async function main(): Promise<void> {
     const at = { ...offset(route, lean * Math.cos(h), -lean * Math.sin(h)), altM: route.altM }
     const eye = { ...at, altM: ARNOLD_ALT_M }
     const watched = watchedAt(t)
-    const look = lookAt(eye, objectAt(watched, t))
+    // Once his eye is on them, the middle of the chain: the whole of it in a field as narrow as his eye's acuity (see fieldAt).
+    const narrow = fieldAt(t) < WIDE_FIELD_DEG
+    const look = narrow ? lookAt(eye, chainMiddleAt(t)) : lookAt(eye, objectAt(watched, t))
     return {
       t: t * 1000,
       pose: {
@@ -392,8 +419,7 @@ async function main(): Promise<void> {
           ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »")
           : r2(ARNOLD_ALT_M),
         headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg),
-        // A pilot's field, wider than a lens's: what keeps the frame of his windscreen in sight as he looks ahead (ASSUMED).
-        fovDeg: 75
+        fovDeg: r2(fieldAt(t))
       }
     }
   })
