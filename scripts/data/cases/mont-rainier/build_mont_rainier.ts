@@ -30,9 +30,32 @@ const tileCache = path.join(here, "tiles")
 
 type Text = Record<"en" | "fr", string>
 /** A value with its provenance: its basis, why, and, where it rests on one of his accounts, which (see ValueSource). */
-const said = (value: unknown, basis: string, en: string, fr: string, source?: ValueSourceJson) => ({ value, basis, rationale: { en, fr }, ...(source ? { source } : {}) })
+const said = (value: unknown, basis: string, en: string, fr: string, source?: object) => ({ value, basis, rationale: { en, fr }, ...(source ? { source } : {}) })
 
 interface ValueSourceJson { document: { en: string, fr: string }, at?: string, url: string }
+
+/** His accounts as interviews of the case, their transcripts written by build_arnold_interviews.ts from the pages rr0.org holds. */
+const INTERVIEWS = {
+  radio: "interview-arnold-radio-1947-06-25",
+  eastOregonian: "interview-arnold-east-oregonian-1947-06-26",
+  oregonJournal: "interview-arnold-oregon-journal-1947-06-27",
+  aaf: "interview-arnold-aaf-1947-07",
+  book: "interview-arnold-book-1952"
+} as const
+
+/**
+ * Where in his accounts a value was said: the interview, the segment and the characters of `quote` in it (see SaidIn). Found by the
+ * words themselves, so that a transcript rebuilt with a segment more or less still gives the right passage; a quote not found is an
+ * error, not a silent citation of nothing.
+ */
+function cite(account: keyof typeof INTERVIEWS, quote: string): { said: { interview: string, segment: number, range: [number, number] } } {
+  const interview = JSON.parse(readFileSync(path.join(demoData, `${INTERVIEWS[account]}.json`), "utf8")) as { segments: { text: string }[] }
+  for (let segment = 0; segment < interview.segments.length; segment++) {
+    const from = interview.segments[segment].text.toLowerCase().indexOf(quote.toLowerCase())
+    if (from >= 0) return { said: { interview: INTERVIEWS[account], segment, range: [from, from + quote.length] } }
+  }
+  throw new Error(`"${quote}" is nowhere in ${INTERVIEWS[account]}`)
+}
 /**
  * His accounts, as rr0.org holds them, each value citing the one it was first said in: the radio interview the day after, the press of
  * the days after, the report he wrote to the Army Air Forces two weeks later, the book of 1952, and the case file's map and drawings.
@@ -615,10 +638,10 @@ async function main(): Promise<void> {
         // Stated against the ground where the recording starts, the same all along: the scene puts him at `altitudeM` over whatever relief it
         // draws, and his cabin is stated against this (see ObserverPose.altitudeM).
         elevationM: t === 0
-          ? said(r2(ARNOLD_ALT_M - originGround), "derived", "\"approximately 9,200 feet\" above the sea, less the ground where the recording starts (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol où commence l'enregistrement (tuiles AWS Terrarium)", ACCOUNTS.aaf)
+          ? said(r2(ARNOLD_ALT_M - originGround), "derived", "\"approximately 9,200 feet\" above the sea, less the ground where the recording starts (AWS Terrarium tiles)", "« environ 9 200 pieds » au-dessus de la mer, moins le sol où commence l'enregistrement (tuiles AWS Terrarium)", cite("aaf", "approximately 9,200 feet"))
           : r2(ARNOLD_ALT_M - originGround),
         altitudeM: t === 0
-          ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »", ACCOUNTS.aaf)
+          ? said(r2(ARNOLD_ALT_M), "stated", "\"I climbed back up to an altitude of approximately 9,200 feet\"", "« je remontai à une altitude d'environ 9 200 pieds »", cite("aaf", "approximately 9,200 feet"))
           : r2(ARNOLD_ALT_M),
         headingDeg: r2(look.azimuthDeg), pitchDeg: r2(look.altitudeDeg),
         fovDeg: r2(fieldAt(t))
@@ -709,10 +732,10 @@ async function main(): Promise<void> {
           }
         }
         if (t === 0 && k === 0) {
-          shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »", ACCOUNTS.aaf)
+          shape.color = said("#1c1c1c", "stated", "\"When these objects were flying approximately straight and level, they were just a black thin line\"", "« Quand ces objets volaient à peu près droit et à plat, ce n'était qu'un mince trait noir »", cite("aaf", "just a black thin line"))
           shape.angular = said({ widthDeg: r3(widthDeg), heightDeg: r3(widthDeg / 20) }, "stated",
             "\"their span would have been as wide as the furtherest engines on each side of the fuselage of the DC-4\" (some 17 m apart, fifteen miles off), measured against a cowling tool held up; \"their thickness was about 1/20th their width\"",
-            "« leur envergure aurait été aussi large que les moteurs les plus éloignés de chaque côté du fuselage du DC-4 » (quelque 17 m, à quinze miles), mesuré contre un outil de capot tenu à bout de bras ; « leur épaisseur était d'environ 1/20 de leur largeur »", ACCOUNTS.aaf)
+            "« leur envergure aurait été aussi large que les moteurs les plus éloignés de chaque côté du fuselage du DC-4 » (quelque 17 m, à quinze miles), mesuré contre un outil de capot tenu à bout de bras ; « leur épaisseur était d'environ 1/20 de leur largeur »", cite("aaf", "furtherest engines"))
         }
         return { sourceId, shape }
       })
@@ -773,7 +796,7 @@ async function main(): Promise<void> {
           sizeM: said({ widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(14 * 1.26 * FAVOURABLE_SIZE), heightM: r2(14 / 20 * FAVOURABLE_SIZE) }, "derived",
             "As wide as the DC-4's furthest engines at fifteen miles, laid at the distance the reconstruction has them, at the most the laws of a gauge's error and of the confrontation allow (×1.8); \"They seemed longer than wide, their thickness was about 1/20th of their width\"",
             "Aussi large que les moteurs les plus éloignés du DC-4 à quinze miles, à la distance où la reconstitution les place, au plus que permettent les lois d'erreur d'une jauge et de la confrontation (×1,8) ; « Ils semblaient plus longs que larges, leur épaisseur était d'environ 1/20 de leur largeur »",
-            ACCOUNTS.aaf),
+            cite("aaf", "furtherest engines")),
           // "just a black thin line" when level, "Mirror Bright" when they flipped: a dark plate seen from a little below, its underside in
           // its own shade, and the Sun's glint off it when it tilted, given as light (see the keyframes' luminanceCdM2). Polished, its
           // underside would mirror the sunlit forest under it, as bright as the sky behind: no black line.
@@ -789,10 +812,10 @@ async function main(): Promise<void> {
   }
 
   const weather = {
-    cloudCover: said(0, "stated", "\"The sky and air was clear as crystal\"", "« Le ciel et l'air étaient clairs comme du cristal »", ACCOUNTS.aaf),
-    visibilityKm: said(120, "assumed", "\"the air was so clear that it was very easy to see objects and determine their approximate shape and size at almost fifty miles\"; he followed the flashes to Mt Adams, some 90 km off", "« l'air était si clair qu'il était très facile de voir des objets et d'en juger la forme et la taille à près de cinquante miles » ; il suivit les éclats jusqu'au mont Adams, à quelque 90 km", ACCOUNTS.aaf),
+    cloudCover: said(0, "stated", "\"The sky and air was clear as crystal\"", "« Le ciel et l'air étaient clairs comme du cristal »", cite("aaf", "clear as crystal")),
+    visibilityKm: said(120, "assumed", "\"the air was so clear that it was very easy to see objects and determine their approximate shape and size at almost fifty miles\"; he followed the flashes to Mt Adams, some 90 km off", "« l'air était si clair qu'il était très facile de voir des objets et d'en juger la forme et la taille à près de cinquante miles » ; il suivit les éclats jusqu'au mont Adams, à quelque 90 km", cite("aaf", "almost fifty miles")),
     cloudDarkness: 0, lowerCloudCover: 0, highCloudCover: 0, precipitationType: "none", precipitationIntensity: 0,
-    windSpeed: said(2, "assumed", "\"The air was so smooth that day\"", "« L'air était si calme ce jour-là »", ACCOUNTS.aaf), windDirectionDeg: 270, storm: false
+    windSpeed: said(2, "assumed", "\"The air was so smooth that day\"", "« L'air était si calme ce jour-là »", cite("aaf", "so smooth")), windDirectionDeg: 270, storm: false
   }
 
   const decor = [
@@ -1022,7 +1045,12 @@ async function main(): Promise<void> {
         title: pelicans.interpretation.title,
         url: "interpretation-mont-rainier-pelicans.json"
       },
-      { type: "event", eventType: "sighting", interpretationOf: "arnold", title: aafReading.interpretation.title, url: "interpretation-mont-rainier-aaf.json" }
+      { type: "event", eventType: "sighting", interpretationOf: "arnold", title: aafReading.interpretation.title, url: "interpretation-mont-rainier-aaf.json" },
+      // His accounts, each an interview of the case (see build_arnold_interviews.ts): what the values of his recording cite.
+      ...Object.values(INTERVIEWS).map(id => {
+        const interview = JSON.parse(readFileSync(path.join(demoData, `${id}.json`), "utf8")) as { title: object, time: string, medium: string, summary: object }
+        return { type: "event", eventType: "interview", id, interviewOf: "arnold", time: interview.time, medium: interview.medium, title: interview.title, summary: interview.summary, url: `${id}.json` }
+      })
     ]
   }
   // The pelicans read against his later account too: the same birds, set against the crescents.

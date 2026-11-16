@@ -717,6 +717,15 @@ describe("CaseEditorElement's events", () => {
     expect([...parts(element).select.options].map(option => option.textContent)).toEqual(["Observation of An account", "Interview of An account"])
   })
 
+  it("tells apart the interviews of a witness heard more than once, by their own titles", async () => {
+    const twice = interviewed()
+    twice.events.push({ type: "event", eventType: "interview", id: "interview-w-2", interviewOf: "w", time: "2026-11-02 10:00", title: { en: "Letter" }, summary: { en: "It wrote it down." } })
+    const element = await open(undefined, twice)
+    await wait()
+    expect([...parts(element).select.options].map(option => option.textContent))
+      .toEqual(["Observation of An account", "Interview of An account (Video interview)", "Interview of An account (Letter)"])
+  })
+
   const withPassages = () => {
     files["https://example.org/d/interview.json"] = {
       version: 1, interviewOf: "w", speakers: { witness: { role: "witness", title: "A. W." } },

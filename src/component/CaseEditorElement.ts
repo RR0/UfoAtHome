@@ -1153,7 +1153,13 @@ export class CaseEditorElement extends HTMLElement {
     if (item.interview) {
       const witnesses = session.intervieweesOf(item.interview)
       const name = witnesses.length > 0 ? witnesses.map(witness => this.labelOf(witness, session.tracks.indexOf(witness))).join(", ") : this.said.read(item.interview.title as never)
-      return name ? `${this.messages.interviewOf} ${name}` : this.messages.untitledInterview.replace("{n}", String(session.interviews.indexOf(item.interview) + 1))
+      if (!name) return this.messages.untitledInterview.replace("{n}", String(session.interviews.indexOf(item.interview) + 1))
+      // Whom it was held with, and, where they were heard more than once, which time: one witness's accounts (a radio interview, a
+      // newspaper's, a letter, a book) were all "Interview of" them, and could not be told apart.
+      const own = item.interview.title ? this.said.read(item.interview.title as never) : ""
+      const several = witnesses.length > 0 && session.interviews.some(other => other !== item.interview
+        && session.intervieweesOf(other).some(witness => witnesses.includes(witness)))
+      return several && own ? `${this.messages.interviewOf} ${name} (${own})` : `${this.messages.interviewOf} ${name}`
     }
     const track = item.track!
     const label = this.labelOf(track, index)
