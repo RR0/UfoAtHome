@@ -1529,8 +1529,13 @@ export class SceneRenderer {
     this.renderer.setSize(width, height, false)
     this.camera.aspect = width / Math.max(height, 1)
     this.camera.updateProjectionMatrix()
+    // The bodies are sized in pixels of the picture (see setBodies): stood while the element was still
+    // hidden, one pixel tall, a speck "2.5 pixels wide" was a pale disc over half the sky until the next tick.
+    if (this.lastBodies) this.setBodies(...this.lastBodies)
     this.render()
   }
+  /** What setBodies was last given, to stand them again at a new size of the picture — see resize. */
+  private lastBodies?: Parameters<SceneRenderer["setBodies"]>
 
   /** Move the sampled cloud field, in world metres, without rebuilding either deck. */
   setCloudRendering(mode: CloudRendering): void {
@@ -2994,6 +2999,7 @@ export class SceneRenderer {
    * BodySystem. Called every tick after updateDecorAnchoring, whose origin it shares.
    */
   setBodies(states: BodyState[], seconds = 0, ids: readonly string[] = states.map(state => state.id), smoke: readonly SmokeSource[] = [], wind?: { x: number, z: number }): void {
+    this.lastBodies = [states, seconds, ids, smoke, wind]
     const { x, z } = this.bodyOrigin
     const sky = this.scatteredSky
     const eastScale = this.bodyEastScale
