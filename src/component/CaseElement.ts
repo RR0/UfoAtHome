@@ -541,6 +541,8 @@ export class CaseElement extends HTMLElement {
   /** The door a page uses, the same the player offers: fetch this case and show it. */
   async loadFromSrc(url: string): Promise<void> {
     await this.load(url)
+    // Its first player read too, as a player's own loadFromSrc is: the page plays it next, and a player with no recording yet does not.
+    await this.player?.loaded
   }
 
   /** The scene of the first player open, for a page that starts the replay itself. */

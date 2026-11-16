@@ -527,7 +527,21 @@ export class SightingElement extends HTMLElement {
    * whose sighting events name the recordings to show, or one observer's recording directly: told
    * apart by shape (see CaseFile.isCase). A bare JSON array, the observer list this element read
    * before cases, is refused by name rather than misread. */
-  async loadFromSrc(url: string): Promise<void> {
+  /** Settles once the recording last asked for (see loadFromSrc) is read: what a page waits for before asking it to play. */
+  get loaded(): Promise<void> {
+    return this.loading ?? Promise.resolve()
+  }
+  private loading?: Promise<void>
+
+  loadFromSrc(url: string): Promise<void> {
+    // Kept, whoever asked: a case opens its players by their `src`, and the page around it asks to play only once they are read, play
+    // being nothing to a player with no recording yet (a link to a case never started).
+    const loading = this.readFromSrc(url)
+    this.loading = loading.catch(() => undefined)
+    return loading
+  }
+
+  private async readFromSrc(url: string): Promise<void> {
     this.startPending = true
     const fetching = SightingFetch.recording(url)
     // The loader from the moment a recording is asked for — see SceneElement.holdForNewScene.

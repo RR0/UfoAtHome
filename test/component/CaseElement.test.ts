@@ -317,6 +317,16 @@ describe("<rr0-case>, a case read", () => {
     expect(await opened("nothing-here", 1)).toEqual(["0"])
   })
 
+  it("is read, its first player with it, when a page that plays it next is told so", async () => {
+    await mount()
+    const element = document.createElement(CASE_ELEMENT_NAME) as CaseElement
+    document.body.appendChild(element)
+    await element.loadFromSrc("case.json")
+    // A player with no recording yet plays nothing: the player's page asked it to, and a link to a case never started.
+    expect((element.sightingData as { observer?: unknown } | undefined)?.observer).toEqual(account.observer)
+    element.remove()
+  })
+
   it("leaves its observations to be shared one at a time by their players", async () => {
     const element = await mount()
     const root = element.shadowRoot!
