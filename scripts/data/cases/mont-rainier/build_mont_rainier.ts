@@ -188,10 +188,12 @@ const T_ADAMS_S = 162
 const CHAIN_M = 5 * 1609.34
 const COUNT = 9
 /**
- * The most his size can be taken to be by the law of its error, as the hypothesis the most favourable to his seeing them: measured against
- * a gauge held up (his cowling tool, against the DC-4's engines), a size is within 20 % of what it was (WitnessError, "sizeGauge").
+ * The most his size can be taken to be, as the hypothesis the most favourable to his seeing them (asked for): measured against a gauge held
+ * up (his cowling tool, against the DC-4's engines), a size is within 20 % of what it was (WitnessError, "sizeGauge"), and a reading is not
+ * contradicted by a size half as large again as what is said (BodyConfrontation.SIZE_TOLERANCE). Still under what the Army Air Force's
+ * analysts worked out from visual acuity at the 20 to 25 miles he gave, 140 to 280 feet (43 to 85 m).
  */
-const FAVOURABLE_SIZE = 1.2
+const FAVOURABLE_SIZE = 1.2 * 1.5
 const DURATION_S = 180
 
 // ---- Arnold's flight ----
