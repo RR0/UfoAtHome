@@ -882,7 +882,8 @@ export class SceneElement extends HTMLElement {
     const far = distance === undefined ? "" : this.distanceText(distance)
     const template = this.naming.names.decorTooltip
     const text = template.replace("{name}", name).replace("{size}", `${metres(size.widthM)} × ${metres(size.lengthM)} × ${metres(size.heightM)} m`)
-    return text.replace("{distance}", far)
+    const note = this.said.read(decor.note)
+    return note ? `${text.replace("{distance}", far)}. ${note}` : text.replace("{distance}", far)
   }
 
   /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are

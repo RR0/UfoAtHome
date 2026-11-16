@@ -42,6 +42,12 @@ export class PlayerPage implements SitePage {
         es: "No se ha podido cargar nada desde ese enlace. Comprueba la dirección, y que tienes conexión.",
         it: "Non è stato possibile caricare nulla da quel link. Controlla l'indirizzo, e di essere connesso."
       })[language],
+      notAbsolute: ({
+        en: "Give the whole address, starting with https://.",
+        fr: "Donnez l'adresse complète, commençant par https://.",
+        es: "Indica la dirección completa, que empiece por https://.",
+        it: "Indica l'indirizzo completo, che inizi con https://."
+      })[language],
       cors: ({
         en: "That address answers, but the browser is not allowed to read it from this page. The file is fine — its server needs to send the header \"Access-Control-Allow-Origin: *\" with it.",
         fr: "Cette adresse répond, mais le navigateur n'a pas le droit de la lire depuis cette page. Le fichier est bon : c'est son serveur qui doit envoyer l'en-tête « Access-Control-Allow-Origin: * » avec.",
@@ -242,7 +248,14 @@ const openUrl = async requested => {
 urlForm.addEventListener("submit", event => {
   event.preventDefault()
   const value = urlField.value.trim()
-  if (value) void openUrl(value)
+  if (!value) return
+  // What is typed here is a link, whole: a bare name, read as one of this site's demos or an rr0.org case, is left to the older links
+  // that still carry one (see resolve).
+  if (!/^https?:[/][/]/i.test(value)) {
+    say(messages.notAbsolute, "error")
+    return
+  }
+  void openUrl(value)
 })
 
 /* Addresses made for the files last opened from disk, released when others are opened. */
@@ -326,15 +339,15 @@ if (asked) {
       <form class="player-form" id="player-url-form">
         <label for="player-url">${({ en: "From a link", fr: "Depuis un lien", es: "Desde un enlace", it: "Da un link" })[language]}</label>
         <div class="player-row">
-          <input id="player-url" type="text" inputmode="url" spellcheck="false"
+          <input id="player-url" type="url" spellcheck="false"
                  placeholder="https://…/sighting.json">
           <button class="btn btn-primary" type="submit">${({ en: "Play", fr: "Jouer", es: "Reproducir", it: "Riproduci" })[language]}</button>
         </div>
         <p class="small">${({
-          en: "A full address, or the name of one of <a href=\"/demos/\">the demos</a> — <code>Socorro</code>, for instance.",
-          fr: "Une adresse complète, ou le nom d'une <a href=\"/demos/\">démo</a> — par exemple <code>Socorro</code>.",
-          es: "Una dirección completa, o el nombre de una de <a href=\"/demos/\">las demos</a> — <code>Socorro</code>, por ejemplo.",
-          it: "Un indirizzo completo, o il nome di una delle <a href=\"/demos/\">demo</a> — <code>Socorro</code>, per esempio."
+          en: "The full address of a recording or a case (.json), starting with https://.",
+          fr: "L'adresse complète d'un enregistrement ou d'un dossier (.json), commençant par https://.",
+          es: "La dirección completa de una grabación o de un caso (.json), que empiece por https://.",
+          it: "L'indirizzo completo di una registrazione o di un caso (.json), che inizi con https://."
         })[language]}</p>
       </form>
 

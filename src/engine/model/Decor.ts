@@ -500,6 +500,9 @@ export interface DecorObject {
    * label (see SightingEditorElement.decorLabel) when absent. Translatable — see SaidText: "the
    * shack" and "la cabane" are the same shack. */
   title?: SaidText
+  /** What else is to be known of it, said only when asked (with Alt over it, see SceneElement.decorTooltip): what stands in for what was
+   * there when no model of it is to be had, say. Translatable — see SaidText. */
+  note?: SaidText
   /**
    * Meters from the observer's own position — eastM positive = east, northM positive = north.
    * Deliberately a flat local offset, not a lat/lng: decor is scenery for a single sighting, not

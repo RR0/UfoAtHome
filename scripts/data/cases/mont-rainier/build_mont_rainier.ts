@@ -459,7 +459,8 @@ async function main(): Promise<void> {
   const decor = [
     {
       id: "callair", kind: "aircraft",
-      title: { en: "His aircraft (a Piper PA-28 stands in for his CallAir A-3)", fr: "Son avion (un Piper PA-28 tient lieu de son CallAir A-3)" },
+      title: { en: "His aircraft", fr: "Son avion" },
+      note: { en: "A Piper PA-28 stands in for his CallAir A-3.", fr: "Un Piper PA-28 tient lieu de son CallAir A-3." },
       eastM: cabinTrack[0].eastM, northM: cabinTrack[0].northM, headingDeg: cabinTrack[0].headingDeg, sizeM: { widthM: 10.55, lengthM: 7.15, heightM: 2.73 },
       model: { id: "helijah-piper-pa28-cadet" }, track: cabinTrack,
       // Everything he saw, he saw out of it: its frame hides them, and where they overlap it on the picture they are beyond it, not in front.
