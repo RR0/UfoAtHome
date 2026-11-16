@@ -5,7 +5,11 @@ import { geoToLocalMeters } from "../../../render3d/terrain/GeoProjection.js"
 
 const TILE_SIZE_PX = 256
 /**
- * At most this many tiles on a side, so 25 fetches from somebody else's service for one patch.
+ * At most this many tiles on a side, so 49 fetches from somebody else's service for one patch (cached by the browser after).
+ *
+ * It was five, 25 fetches: enough for a patch of the place, and once the far ring reached the day's visibility (some 240 km across) it
+ * stepped back to the zoom where five tiles covered it, 420 m to the texel, and the country seen from the air came out in blocks and
+ * streaks under the horizon. Seven halves that (asked, 2026-11-16).
  *
  * It used to be exactly three, at whatever zoom covered the span — which over Socorro meant six
  * metres to the texel, and a road is six metres wide. The ground under the scene was therefore a
@@ -14,7 +18,7 @@ const TILE_SIZE_PX = 256
  * at zoom 18, looked at over Socorro before this was changed); the limit is what it is fair to
  * fetch and to hold, not what has been surveyed.
  */
-const MAX_GRID_SIZE = 5
+const MAX_GRID_SIZE = 7
 
 /** Shared by ImageryProvider implementations that fetch a Z/Y/X (or Z/X/Y) tile grid of ordinary
  * images (as opposed to AwsTerrariumElevationProvider's numeric PNG decode) and stitch/resize them
