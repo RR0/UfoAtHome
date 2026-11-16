@@ -853,7 +853,8 @@ async function main(): Promise<void> {
     utcOffsetHours: -7,
     timeZone: "America/Los_Angeles",
     durationSeconds: DURATION_S,
-    summaryTime: T_RAINIER_S + 20,
+    // The cover (see scripts/share-cards/ShareCards.ts): 1:08, chosen by looking.
+    summaryTime: 68,
     place: { name: "Cascade Range, between Mount Rainier and Mount Adams, Washington", locations: [{ lat: r6(origin.lat), lng: r6(origin.lng) }] },
     observer: { id: "ArnoldKennethE", title: "Kenneth Arnold" },
     account: {
