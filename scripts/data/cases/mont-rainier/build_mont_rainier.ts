@@ -389,6 +389,24 @@ const flashingAt = (k: number, t: number) => flashes[k].some(f => Math.abs(t - f
 const instantsOf = (times: number[]) => times.flatMap(f => [f - FLASH_S, f, f + FLASH_S].map(t => Math.round(t * 1000) / 1000))
 const flashInstants = instantsOf(flashes.flat())
 const ownFlashInstants = flashes.map(times => new Set(instantsOf(times)))
+/**
+ * How long each flip takes to tip towards mirroring the Sun and back, and how long it holds there, seconds: not said, and not the same
+ * twice (ASSUMED, a tenth to half a second each way, up to a third of one held). A flash lasts as long as its face stays within the Sun's
+ * spread of mirroring it to him: a quick flip a glint, a held one a blaze.
+ */
+const flipOf = (k: number, f: number) => {
+  const [a, b] = Glint.gaussians(k * 7919 + Math.round(f * 1000) + 1)
+  const u = (x: number) => 0.5 * (1 + Math.tanh(x))
+  return { tipS: 0.1 + 0.4 * u(a), holdS: 0.33 * u(b - 0.5) }
+}
+/** Each object's own instants of its flips, sampled finely enough for a flash's rise and fall to be drawn. */
+const FLIP_SAMPLE_S = 0.04
+const ownFlipInstants = flashes.map((times, k) => new Set(times.flatMap(f => {
+  const { tipS, holdS } = flipOf(k, f)
+  const instants: number[] = []
+  for (let t = f - tipS; t <= f + holdS + tipS + 1e-9; t += FLIP_SAMPLE_S) instants.push(Math.round(t * 1000) / 1000)
+  return instants
+})))
 
 /**
  * The posts of the cabin's windscreen frame that stand across what is ahead and to the right of the pilot's eye, measured in the scene from
@@ -676,15 +694,16 @@ async function main(): Promise<void> {
     return found
   }
   /** How long a flip takes each way, seconds: from its weave to mirroring the Sun and back (ASSUMED). */
-  const FLIP_S = 0.2
   /** Its attitude at `t`: its weave, and towards mirroring the Sun to Arnold as it flips; and what it sends him of the Sun then. */
   const glintAttitude = (k: number, t: number) => {
     const headingDeg = lookAt(chainStart, chainEnd).azimuthDeg
     const weave = weaveOf(k, t)
-    const flip = flashes[k].find(f => Math.abs(t - f) < FLIP_S)
+    const flip = flashes[k].find(f => { const { tipS, holdS } = flipOf(k, f); return t > f - tipS && t < f + holdS + tipS })
     if (flip === undefined) return { headingDeg, pitchDeg: 0, rollDeg: weave.roll, luminanceCdM2: 0 }
     const target = mirroringAt(k, flip)
-    const w = 1 - Math.abs(t - flip) / FLIP_S
+    const { tipS, holdS } = flipOf(k, flip)
+    // Towards it, held, and back.
+    const w = t < flip ? 1 - (flip - t) / tipS : t <= flip + holdS ? 1 : 1 - (t - flip - holdS) / tipS
     const pitchDeg = w * target.pitchDeg, rollDeg = weave.roll + w * (target.rollDeg - weave.roll)
     const offDeg = Math.acos(Math.min(1, Glint.normalOf(headingDeg, pitchDeg, rollDeg).dot(target.halfway))) * 180 / Math.PI
     return { headingDeg, pitchDeg, rollDeg, luminanceCdM2: Glint.luminanceAt(offDeg) }
@@ -697,7 +716,7 @@ async function main(): Promise<void> {
       explains: [sourceId],
       // As he drew them: a round front and "a sort of a convex triangle in the rear", flat under and domed over (see build-arnold-craft.ts).
       model: { id: "ufoathome-arnold-craft" },
-      track: [...new Set([...samples, ...[...ownFlashInstants[k]].filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b).map(t => ({
+      track: [...new Set([...samples, ...[...ownFlipInstants[k]].filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b).map(t => ({
         t: Math.round(t * 1000),
         ...local(objectAt(k, t)),
         // Where it is, its weave and its step down the echelon with it: at a level altitude the body flew none of either.
