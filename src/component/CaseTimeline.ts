@@ -86,13 +86,14 @@ export class CaseTimeline {
 .event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
 .event-card { --dot-y: 50%; position: relative; border: 1px solid var(--tl-line); border-radius: 10px; background: var(--tl-ground); color: var(--tl-ink); }
 .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); top: calc(-1px - var(--gap) / 2);
-  bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--tl-line); }
+  bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--tl-line); pointer-events: none; }
 .event-card:first-child::after { top: calc(var(--dot-y) - 1px); }
 .event-card:last-child::after { bottom: calc(100% - var(--dot-y) - 1px); }
 .event-card:only-child::after { display: none; }
 /* On the rail, in the colour of its kind: what kind of event it is, rather than a dot that says only that there is one. */
 .event-mark { position: absolute; z-index: 1; left: calc(var(--rail) - 24px - 1px); top: calc(var(--dot-y) - 1px); display: grid; place-items: center;
-  width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--tl-disc); color: var(--kind); }
+  width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--tl-disc); color: var(--kind);
+  pointer-events: none; }
 .event-mark svg { width: 14px; height: 14px; }
 /* What the card is linked to goes UNDER what it says, across the card: beside the title it had a third of the width and wrapped on every
    reference, below it has the whole of it. */
@@ -101,9 +102,10 @@ export class CaseTimeline {
 .kind-pill { grid-area: pill; justify-self: start; padding: 2px 10px; border-radius: 999px; background: var(--kind-bg); color: var(--tl-ink);
   font: 700 12px/1.5 var(--tl-sans); white-space: nowrap; }
 .event-main { grid-area: main; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-/* The title opens the event, and the whole card with it: its hit area is stretched over the card. */
+/* The title opens the event, and the whole card with it: its hit area is stretched over the card, and left over the rail beside it, the
+   whole height of the card: the mark there is the card's too (see .event-list's padding, which the rail stands in). */
 .event-open { min-height: 0; padding: 0; border: 0; background: none; color: var(--tl-ink); font: 600 15px/1.35 var(--tl-sans); text-align: left; cursor: pointer; }
-.event-open::after { content: ""; position: absolute; inset: 0; border-radius: 10px; }
+.event-open::after { content: ""; position: absolute; inset: 0 0 0 calc(-24px - 1px); border-radius: 0 10px 10px 0; }
 .event-open:hover:not(:disabled) { background: none; }
 .event-open:focus-visible { outline: none; }
 .event-card:has(.event-open:hover) { background: var(--tl-hover); }
