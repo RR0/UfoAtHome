@@ -287,8 +287,17 @@ function weaveOf(k: number, t: number): { across: number, up: number, roll: numb
   return { across: WEAVE.acrossM * Math.sin(phase), up: WEAVE.upM * Math.sin(phase), roll: WEAVE.rollDeg * Math.cos(phase) }
 }
 
+/**
+ * How far behind the leader each one flies, metres: evenly, but for "a larger gap in their echelon between the first four and the last
+ * five" (The Coming of the Saucers, 1952), the whole within the five miles of the chain. How much larger is not said: ASSUMED,
+ * GAP_SPACINGS of the others' spacing.
+ */
+const GAP_SPACINGS = 3
+const SPACING_M = CHAIN_M / (COUNT - 2 + GAP_SPACINGS)
+const behindOf = (k: number) => k * SPACING_M + (k >= 4 ? (GAP_SPACINGS - 1) * SPACING_M : 0)
+
 function objectAt(k: number, t: number): Geo {
-  const behindM = k * CHAIN_M / (COUNT - 1)
+  const behindM = behindOf(k)
   const alongM = (t - T_RAINIER_S) * objectSpeed - behindM
   const p = between(chainStart, chainEnd, alongM / lineM)
   // Across their way: to the right of the course from Rainier to Adams.
