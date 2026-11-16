@@ -287,6 +287,12 @@ describe("<rr0-case>, a case read", () => {
     const link = new URL((dialog.getElementById("link") as HTMLTextAreaElement).value)
     expect(link.searchParams.get("events")).toBe("reading")
     expect((dialog.getElementById("embed-markup") as HTMLTextAreaElement).value).toContain(` open-events="reading"`)
+    // The history on show, the link says nothing of it; put away, it is put away for whoever follows the link too.
+    expect(link.searchParams.has("timeline")).toBe(false)
+    root.getElementById("timeline-button")!.click()
+    root.getElementById("share")!.click()
+    expect(new URL((dialog.getElementById("link") as HTMLTextAreaElement).value).searchParams.get("timeline")).toBe("0")
+    expect((dialog.getElementById("embed-markup") as HTMLTextAreaElement).value).toContain(` show-timeline="false"`)
   })
 
   it("opens on the events a link names, by their event's id or by their file's name", async () => {

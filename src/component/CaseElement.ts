@@ -147,11 +147,18 @@ export class CaseElement extends HTMLElement {
     link: () => {
       const open = this.openKeys()
       return `${AppLocation.home()}/play/?file=${encodeURIComponent(this.url ?? "")}${open ? `&events=${encodeURIComponent(open)}` : ""}`
+        + (this.timelineShown() ? "" : "&timeline=0")
     },
     element: () => {
       const open = this.openKeys()
-      return `<${CASE_ELEMENT_NAME} src="${this.url ?? ""}"${open ? ` ${OPEN_EVENTS_ATTRIBUTE}="${open}"` : ""}></${CASE_ELEMENT_NAME}>`
+      return `<${CASE_ELEMENT_NAME} src="${this.url ?? ""}"${open ? ` ${OPEN_EVENTS_ATTRIBUTE}="${open}"` : ""}`
+        + `${this.timelineShown() ? "" : ` ${SHOW_TIMELINE_ATTRIBUTE}="false"`}></${CASE_ELEMENT_NAME}>`
     }
+  }
+
+  /** Whether the history is on show: a case shared with it put away opens with it put away, on what is open alone. */
+  private timelineShown(): boolean {
+    return !this.byId("case-events").parentElement!.hidden
   }
 
   /**
