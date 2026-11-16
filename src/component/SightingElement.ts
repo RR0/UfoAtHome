@@ -214,6 +214,8 @@ export class SightingElement extends HTMLElement {
   private interpretationLoaders = new Map<string, () => Promise<InterpretationJson | undefined>>()
   /** Bumped on every choice, so an interpretation that arrives after another was chosen is dropped. */
   private interpretationToken = 0
+  /** The menu's value whose interpretation the scene shows: what offerInterpretations checks the asked one against. */
+  private shownInterpretation?: string
   /** The recording the choice was last built for — see offerInterpretations. */
   private offeredFor?: SightingRecordingJson
   private currentSrc?: string
@@ -908,7 +910,10 @@ export class SightingElement extends HTMLElement {
     // being read again (see SceneElement.sightingData) while the choice stayed the same.
     if (value === ACCOUNT_OPTION) {
       if (this.sceneElement.interpretation !== own) this.sceneElement.interpretation = own
-    } else if (!this.sceneElement.interpretation) {
+      this.shownInterpretation = ACCOUNT_OPTION
+    } else if (!this.sceneElement.interpretation || this.shownInterpretation !== value) {
+      // Not only when the scene shows none: an account with an interpretation of its own (Kenneth Arnold's) shows it, and the reading a
+      // link asked for was named in the menu while the scene went on replaying the account's.
       void this.chooseInterpretation(value)
     }
     this.interpretationChoice.hidden = this.interpretationSelect.options.length < 2 || this.hasAttribute(HIDE_PICKERS_ATTRIBUTE)
@@ -1059,8 +1064,17 @@ export class SightingElement extends HTMLElement {
       ? { ...reading, timeline: reading.timeline.keyframes?.length ? reading.timeline : entry.sighting.timeline } : undefined
     if (scene && readingUrl) this.showScene(scene, readingUrl)
     else if (this.readingScene && entry) this.showScene(entry.sighting, entry.src, true)
+    else if (entry) {
+      // In the account's scene, its cover too: the reading's own picture for a reading (none when it has none, rather than the account's,
+      // where a link to Mount Rainier's analysts' craft showed Arnold's empty sky), the account's back for the account.
+      const up = !this.sceneElement.ufoElement.playRequested
+      if (readingUrl) this.sceneElement.showPoster(fetched?.image, readingUrl, up)
+      else if (entry.sighting.image) this.sceneElement.showPoster(entry.sighting.image, entry.src ? new URL(entry.src, location.href).href : undefined, up)
+      else this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url, up)
+    }
     this.readingScene = scene !== undefined
     this.sceneElement.interpretation = interpretation
+    this.shownInterpretation = value
     this.showReadingFindings(entry, reading)
     this.editLink.href = this.editorUrl()
     this.dispatchEvent(new CustomEvent("interpretationchange", { detail: { track: this.shownTrackUrl() } }))

@@ -87,6 +87,26 @@ export class PlayShareCard {
   }
 
   /**
+   * The picture of what a link to a case opens on (`events=`, as the case's own Share writes it: the id of an event, else its file's name,
+   * several separated by commas): the first of them with a picture of its own. A link to a reading shows the reading, not the account it
+   * reads (Mount Rainier's analysts' craft, not Arnold's empty sky). Nothing for `all`, or for names that say nothing pictured.
+   */
+  static async openedImage(caseJson: Record<string, unknown>, caseUrl: string, opened: string): Promise<string | undefined> {
+    const keys = opened.split(",").map(key => key.trim().replace(/[.]json$/i, "")).filter(key => key !== "" && key !== "all")
+    const events = Array.isArray(caseJson.events) ? caseJson.events as Array<Record<string, unknown>> : []
+    const fileName = (event: Record<string, unknown>) => String(event.url).split("/").pop()!.replace(/[.]json$/i, "")
+    for (const key of keys) {
+      const event = events.find(candidate => candidate?.eventType === "sighting" && typeof candidate.url === "string"
+        && (candidate.id === key || fileName(candidate) === key))
+      if (!event) continue
+      const recording = await PlayShareCard.fetchJson(new URL(event.url as string, caseUrl).href)
+      const image = recording ? PlayShareCard.imageOf(recording.json.image, recording.url) : undefined
+      if (image) return image
+    }
+    return undefined
+  }
+
+  /**
    * The picture of a case that states none: the one of its first account, the first `sighting` event that is not a reading
    * of another (an interpretation), since that is the observation the case is about.
    */
@@ -252,8 +272,15 @@ export class PlayShareCard {
     const language = /index_([a-z]{2})\.html$/.exec(url.pathname)?.[1] ?? "en"
     const html = await response.text()
     const card = PlayShareCard.cardOf(found.json, found.url, language)
-    if (!card.image && PlayShareCard.isCase(found.json)) card.image = await PlayShareCard.firstAccountImage(found.json, found.url)
+    const opened = url.searchParams.get("events")
+    if (PlayShareCard.isCase(found.json)) {
+      card.image = (opened ? await PlayShareCard.openedImage(found.json, found.url, opened) : undefined)
+        ?? card.image ?? await PlayShareCard.firstAccountImage(found.json, found.url)
+    }
+    // What the link opens on, kept in the address a card links to: without it, a link to a reading led to the case's first account.
+    const kept = ["events", "timeline"].map(name => [name, url.searchParams.get(name)] as const).filter(([, value]) => value !== null)
     const address = `${url.origin}${url.pathname}?file=${encodeURIComponent(requested)}`
+      + kept.map(([name, value]) => `&${name}=${encodeURIComponent(value!)}`).join("")
     const headers = new Headers(response.headers)
     headers.delete("content-length")
     return new Response(PlayShareCard.apply(html, card, address), {

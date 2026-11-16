@@ -484,6 +484,29 @@ describe("SightingElement", () => {
     expect(element.scene.interpretation?.title).toBe("Own")
   })
 
+  it("plays the reading a page asks for, over an account that has an interpretation of its own, with the reading's own cover", async () => {
+    const body = { id: "craft", explains: ["ufo"], model: { id: "sphere" }, track: [{ t: 0, eastM: 0, northM: 10, onGround: true }] }
+    const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: { locations: [{ lat: 32.4, lng: -86.3 }] }, image: "account.jpg",
+      interpretation: { title: "Own", bodies: [body] } }
+    const johnUrl = new URL("john.json", location.href).href
+    const readingUrl = new URL("reading.json", location.href).href
+    // The account's scene, its bodies alone another: Mount Rainier's analysts' craft over Arnold's own.
+    const reading = { ...withId, id: "reading", image: "reading.jpg", interpretation: { title: "Analysts", bodies: [body] } }
+    stubFetch({
+      "case.json": { events: [{ ...sightingEvent("john.json"), id: "chiles" }, { type: "event", eventType: "sighting", interpretationOf: "chiles", title: "Analysts", url: "reading.json" }] },
+      [johnUrl]: withId, [readingUrl]: reading
+    })
+    const element = document.createElement(SIGHTING_ELEMENT_NAME) as SightingElement
+    element.setAttribute("src", "case.json")
+    element.setAttribute("interpretation", readingUrl)
+    document.body.appendChild(element)
+    for (let left = 200; left > 0 && element.scene.interpretation?.title !== "Analysts"; left--) await new Promise(resolve => setTimeout(resolve, 5))
+    expect((element.shadowRoot!.getElementById("interpretation") as HTMLSelectElement).value).toBe("case-0")
+    // Named in the menu, and played: it was only named, the account's own going on being played.
+    expect(element.scene.interpretation?.title).toBe("Analysts")
+    expect((element.scene.shadowRoot!.getElementById("scene-poster") as HTMLImageElement).src).toBe(new URL("reading.jpg", location.href).href)
+  })
+
   it("shows a reading of the case whole, in its own recording, with what it was tested against, and the account again after", async () => {
     const withId = { ...johnSighting, id: "1948-07-24-ChilesClarence", place: { locations: [{ lat: 32.4, lng: -86.3 }] } }
     const johnUrl = new URL("john.json", location.href).href

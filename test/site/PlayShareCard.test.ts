@@ -89,6 +89,30 @@ describe("PlayShareCard", () => {
     expect(await PlayShareCard.firstAccountImage({ events: [] }, "https://a.org/x/case.json")).toBeUndefined()
   })
 
+  it("gives a link to a case opened on a reading the reading's picture, and keeps what it opens on in its address", async () => {
+    const recordings: Record<string, unknown> = {
+      "https://ufoathome.org/demo-data/case.json": { title: "C", events: [
+        { eventType: "sighting", id: "a", url: "account.json" },
+        { eventType: "sighting", interpretationOf: "a", url: "interpretation-x-aaf.json" },
+        { eventType: "sighting", interpretationOf: "a", url: "interpretation-x-bare.json" }
+      ] },
+      "https://ufoathome.org/demo-data/account.json": { image: "share/account.jpg", timeline: {} },
+      "https://ufoathome.org/demo-data/interpretation-x-aaf.json": { image: "share/aaf.jpg", timeline: {} },
+      "https://ufoathome.org/demo-data/interpretation-x-bare.json": { timeline: {} }
+    }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => recordings[url] ? reply(recordings[url]) : new Response("", { status: 404 })))
+    const aCase = recordings["https://ufoathome.org/demo-data/case.json"] as Record<string, unknown>
+    const at = "https://ufoathome.org/demo-data/case.json"
+    expect(await PlayShareCard.openedImage(aCase, at, "interpretation-x-aaf")).toBe("https://ufoathome.org/demo-data/share/aaf.jpg")
+    // A reading without a picture says nothing, and the case falls back on its first account's; so does `all`.
+    expect(await PlayShareCard.openedImage(aCase, at, "interpretation-x-bare.json")).toBeUndefined()
+    expect(await PlayShareCard.openedImage(aCase, at, "all")).toBeUndefined()
+    const result = await (await PlayShareCard.handle(
+      new Request(`https://ufoathome.org/play/?file=${encodeURIComponent(at)}&events=interpretation-x-aaf&timeline=0`), { next: async () => page() })).text()
+    expect(result).toContain("https://ufoathome.org/demo-data/share/aaf.jpg")
+    expect(result).toContain("events=interpretation-x-aaf&amp;timeline=0")
+  })
+
   it("refuses a picture that is not a web address, and cuts a long description at a word", () => {
     const card = PlayShareCard.cardOf({ id: "x", summary: "word ".repeat(100), image: "javascript:alert(1)" }, "https://a.org/x.json", "en")
     expect(card.image).toBeUndefined()

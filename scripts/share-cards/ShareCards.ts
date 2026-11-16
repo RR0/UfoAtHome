@@ -46,12 +46,16 @@ class ShareCards {
   private readonly root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
   private readonly demoData = path.join(this.root, "public", "demo-data")
 
-  /** The accounts a case replays (not the readings of it), and the sky and instrument demos: what a card, and the player's poster, is a picture of. */
+  /**
+   * The accounts a case replays, and the sky and instrument demos: what a card, and the player's poster, is a picture of. A reading
+   * (interpretation-*) only when named: its picture is the card of a link to a case opened on it, and the poster of the player showing it.
+   */
   recordings(names: string[]): string[] {
     // Not the files a recording keeps beside it (its .roads.json, .railways.json, .water.json): they are not recordings, and photographed
     // as such each took the time of one, and had an `image` written into it.
-    const all = readdirSync(this.demoData).filter(file => /^(observer|sky-test|instrument)-[^.]*\.json$/.test(file)).map(file => file.replace(/\.json$/, ""))
-    return names.length > 0 ? all.filter(name => names.includes(name)) : all
+    const of = (pattern: RegExp) => readdirSync(this.demoData).filter(file => pattern.test(file)).map(file => file.replace(/\.json$/, ""))
+    if (names.length === 0) return of(/^(observer|sky-test|instrument)-[^.]*\.json$/)
+    return of(/^(observer|sky-test|instrument|interpretation)-[^.]*\.json$/).filter(name => names.includes(name))
   }
 
   /** The instant the recording asks to be photographed at, in seconds, if it says. */
