@@ -960,6 +960,8 @@ export class CaseEditorElement extends HTMLElement {
     this.commit()
     this.currentInterview = undefined
     this.editor.passages = undefined
+    // Behind the loader until it is whole, as the player shows a recording (see SightingEditorElement.holdForNewScene).
+    this.editor.holdForNewScene()
     try {
       const fresh = !track.recording
       await this.loadTrack(track)

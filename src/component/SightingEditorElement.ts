@@ -3164,8 +3164,18 @@ export class SightingEditorElement extends HTMLElement {
     await this.loadUrl(url)
   }
 
+  /**
+   * Holds the picture behind the loader until the recording about to be shown is whole, as the player does (see SceneElement.loadFromSrc):
+   * its relief, its models, and the eye adapted to it. Shown as it came in, a reading opened in the case editor was first a sky washed out
+   * to cream (the eye still adapted to the first guess, some 2.3 times too dark) and a relief in strips, for a second or two.
+   */
+  holdForNewScene(arrival?: Promise<unknown>): void {
+    this.sceneElement.holdForNewScene(arrival)
+  }
+
   private async loadUrl(url: string): Promise<void> {
     this.showLoadError(undefined)
+    this.holdForNewScene()
     try {
       const fetched = await SightingFetch.recording(url)
       // A case is not a recording: whoever edits cases takes it (see offerCase).
