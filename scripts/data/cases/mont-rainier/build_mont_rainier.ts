@@ -458,7 +458,8 @@ const flipOf = (k: number, f: number) => {
  */
 const FLIP_EVERY_S = 3
 /** The flashes his account states (see STATED_FLASHES' use): the one on his airplane at the start, and the next two as he found them. */
-const STATED_FLASHES = [{ k: 0, t: 0.5 }, { k: 2, t: 5 }, { k: 5, t: 9 }]
+// The next two when he found them, "the next twenty to thirty seconds" after the first (The Coming of the Saucers).
+const STATED_FLASHES = [{ k: 0, t: 0.5 }, { k: 2, t: 25 }, { k: 5, t: 28 }]
 const FLIP_PITCH_SD_DEG = 15
 const FLIP_ROLL_SD_DEG = 35
 const flipRandom = mulberry(24061947)

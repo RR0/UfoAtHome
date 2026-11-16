@@ -44,7 +44,17 @@
   },
   {
    "speaker": "bequette",
-   "text": "Army and civilian air experts either expressed polite incredulity or scoffed openly at Mr. Arnold's story, but the 32-year-old one time Minot, N.D. football star, clung to his story of shiny, flat objects racing over the Cascade mountains with a peculiar weaving motion \"like the tail of a Chinese kite.\""
+   "text": "Army and civilian air experts either expressed polite incredulity or scoffed openly at Mr. Arnold's story, but the 32-year-old one time Minot, N.D. football star, clung to his story of shiny, flat objects racing over the Cascade mountains with a peculiar weaving motion \"like the tail of a Chinese kite.\"",
+   "refs": [
+    {
+     "sighting": "arnold",
+     "at": 70,
+     "range": [
+      290,
+      302
+     ]
+    }
+   ]
   },
   {
    "speaker": "bequette",
@@ -64,7 +74,17 @@
   },
   {
    "speaker": "bequette",
-   "text": "He said the reflection was so brilliant that it blinded him \"as if someone had started an arc light in front of my eyes.\""
+   "text": "He said the reflection was so brilliant that it blinded him \"as if someone had started an arc light in front of my eyes.\"",
+   "refs": [
+    {
+     "sighting": "arnold",
+     "at": 0,
+     "range": [
+      61,
+      99
+     ]
+    }
+   ]
   },
   {
    "speaker": "bequette",

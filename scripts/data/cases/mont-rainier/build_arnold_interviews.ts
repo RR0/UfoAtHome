@@ -59,6 +59,38 @@ class Rr0Page {
 
 const ARNOLD = { role: "witness", by: { people: "ArnoldKennethE" }, title: { en: "Kenneth Arnold", fr: "Kenneth Arnold" }, of: "arnold" }
 
+/**
+ * The passages of each account that tell of a moment of the observation, and that moment, seconds after 14:58:00 (the recording's start,
+ * see build_mont_rainier.ts): the flash on his airplane at once, the chain found twenty to thirty seconds after ("I spent the next twenty
+ * to thirty seconds urgently searching the sky", the book), the first passing Rainier's edge "one minute to 3", the last passing Adams
+ * 1 min 42 s later. What he says of their look all along is set where they are best seen, just past Rainier (70 to 80 s).
+ */
+const MOMENTS: Record<string, { quote: string, at: number }[]> = {
+  "interview-arnold-radio-1947-06-25": [
+    { quote: "I noticed to the left of me a chain", at: 25 }, { quote: "flip and flash in the sun", at: 30 },
+    { quote: "one minute to three when I started clocking", at: 60 }, { quote: "pie plate that was cut in half", at: 70 },
+    { quote: "one minute and 42 seconds", at: 162 }
+  ],
+  "interview-arnold-east-oregonian-1947-06-26": [
+    { quote: "as if someone had started an arc light", at: 0 }, { quote: "Chinese kite", at: 70 }
+  ],
+  "interview-arnold-oregon-journal-1947-06-27": [
+    { quote: "weaving and ducking", at: 80 }, { quote: "rocking", at: 80 }
+  ],
+  "interview-arnold-aaf-1947-07": [
+    { quote: "a bright flash reflected on my airplane", at: 0 }, { quote: "I observed a chain of nine", at: 25 },
+    { quote: "two or three of them every few seconds", at: 30 }, { quote: "outline against the snow", at: 60 },
+    { quote: "read one minute to 3", at: 60 }, { quote: "just a black thin line", at: 70 },
+    { quote: "one minute and forty-two seconds", at: 162 }, { quote: "follow by their flashes", at: 162 }
+  ],
+  "interview-arnold-book-1952": [
+    { quote: "a tremendously bright flash lit up the surfaces of my aircraft", at: 0 }, { quote: "next twenty to thirty seconds", at: 25 },
+    { quote: "a larger gap in their echelon", at: 30 }, { quote: "jetted to the southward", at: 60 },
+    { quote: "elevation of the first craft was greater", at: 70 }, { quote: "tipping their wings alternately", at: 80 },
+    { quote: "beyond the southernmost crest of Mount Adams", at: 162 }
+  ]
+}
+
 interface Account {
   id: string
   file: string
@@ -131,6 +163,14 @@ for (const account of ACCOUNTS) {
   for (const paragraph of Rr0Page.paragraphs(account.file)) {
     speaker = account.speakerOf(paragraph.lead, speaker)
     segments.push({ speaker, text: paragraph.text })
+  }
+  // Each moment told, on the segment and the characters that tell it: an error if the words are not there, never a link to nothing.
+  for (const { quote, at } of MOMENTS[account.id] ?? []) {
+    const index = segments.findIndex(segment => segment.text.toLowerCase().includes(quote.toLowerCase()))
+    if (index < 0) throw new Error(`"${quote}" is nowhere in ${account.id}`)
+    const from = segments[index].text.toLowerCase().indexOf(quote.toLowerCase())
+    const segment = segments[index] as Segment & { refs?: object[] }
+    ;(segment.refs ??= []).push({ sighting: "arnold", at, range: [from, from + quote.length] })
   }
   const interview = {
     version: 1,
