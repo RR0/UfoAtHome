@@ -551,6 +551,9 @@ export class BodySystem {
     if (!speck) {
       speck = new Sprite(new SpriteMaterial({ transparent: true, depthWrite: false, sizeAttenuation: false, fog: false }))
       speck.name = `body-speck:${state.id}`
+      // After the relief, which is drawn among what is transparent (the far ring's fading edge): drawn before it, a speck writing no depth
+      // was painted over by the mountain behind it, and Arnold's chain went out wherever it crossed Rainier's snow.
+      speck.renderOrder = BodySystem.FADED_RENDER_ORDER
       this.specks.set(state.id, speck)
       this.group.add(speck)
     }

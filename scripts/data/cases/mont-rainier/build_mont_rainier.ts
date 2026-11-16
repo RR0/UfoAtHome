@@ -231,8 +231,23 @@ function onRoute(t: number): { at: Geo, headingDeg: number } {
 // ---- The objects, as Arnold places them ----
 
 /** The leader passes Rainier's southern edge at 60 s; the last, CHAIN_M behind it, passes Adams' crest at 162 s. */
-const lineM = lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).distanceM
-const objectSpeed = (lineM + CHAIN_M) / (T_ADAMS_S - T_RAINIER_S)
+/**
+ * Where the first is as it passes Rainier's southern edge and the last as it passes Adams' crest: on Arnold's line of sight to the points the
+ * map gives, as near him as keeps the whole chain over the relief (see fitChainToRelief). The map's points are on the mountains themselves,
+ * where the ground at Rainier is some 4,000 m: at the 9,500 feet he gives them the chain flew through Rainier, which hid it, where he says "I
+ * observed their outline against the snow quite plainly". In front of the snow, they were between him and it.
+ */
+let chainStart: Geo = FIRST_AT_RAINIER, chainEnd: Geo = LAST_AT_ADAMS
+let lineM = lookAt(chainStart, chainEnd).distanceM
+let objectSpeed = (lineM + CHAIN_M) / (T_ADAMS_S - T_RAINIER_S)
+const setChain = (start: Geo, end: Geo) => {
+  chainStart = start
+  chainEnd = end
+  lineM = lookAt(chainStart, chainEnd).distanceM
+  objectSpeed = (lineM + CHAIN_M) / (T_ADAMS_S - T_RAINIER_S)
+}
+/** How far over the relief the chain keeps everywhere, metres: ASSUMED. */
+const CHAIN_CLEARANCE_M = 150
 /**
  * How they moved along their way: "a peculiar weaving motion 'like the tail of a Chinese kite'" (Bequette, East Oregonian, 1947-06-26),
  * "weaving and ducking in and out [...] They looked like they were rocking" (Oregon Journal, 1947-06-27), "swerved in and out of the high
@@ -250,9 +265,9 @@ function weaveOf(k: number, t: number): { across: number, up: number, roll: numb
 function objectAt(k: number, t: number): Geo {
   const behindM = k * CHAIN_M / (COUNT - 1)
   const alongM = (t - T_RAINIER_S) * objectSpeed - behindM
-  const p = between(FIRST_AT_RAINIER, LAST_AT_ADAMS, alongM / lineM)
+  const p = between(chainStart, chainEnd, alongM / lineM)
   // Across their way: to the right of the course from Rainier to Adams.
-  const course = lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg * Math.PI / 180
+  const course = lookAt(chainStart, chainEnd).azimuthDeg * Math.PI / 180
   const weave = weaveOf(k, t)
   return offset({ ...p, altM: OBJECTS_ALT_M }, weave.across * Math.cos(course), -weave.across * Math.sin(course), weave.up)
 }
@@ -358,12 +373,41 @@ function chainMiddleAt(t: number): Geo {
   return { lat: (first.lat + last.lat) / 2, lng: (first.lng + last.lng) / 2, altM: (first.altM + last.altM) / 2 }
 }
 
+/**
+ * Brings each end of the chain along Arnold's line of sight towards him, by hundredths of the way, the least that keeps every object over the
+ * relief by CHAIN_CLEARANCE_M all through the recording: what he saw of them, their directions, is the same; only how far along it changes.
+ */
+function fitChainToRelief(terrarium: Terrarium, samples: number[]): { start: number, end: number } {
+  const clear = () => samples.every(t => Array.from({ length: COUNT }, (_, k) => objectAt(k, t))
+    .every(p => p.altM - terrarium.heightAt(p.lat, p.lng) >= CHAIN_CLEARANCE_M))
+  const along = (from: Geo, to: Geo, f: number) => ({ ...between(from, to, f), altM: OBJECTS_ALT_M })
+  const fromRainier = arnoldAt(T_RAINIER_S).at, fromAdams = arnoldAt(T_ADAMS_S).at
+  let best: { start: number, end: number, sum: number } | undefined
+  for (let i = 0; i <= 50; i++) {
+    for (let j = 0; j <= 50; j++) {
+      const start = 1 - i / 100, end = 1 - j / 100
+      if (best && start + end <= best.sum) continue
+      setChain(along(fromRainier, FIRST_AT_RAINIER, start), along(fromAdams, LAST_AT_ADAMS, end))
+      if (clear()) best = { start, end, sum: start + end }
+    }
+  }
+  if (!best) throw new Error("No chain over the relief within half of the way")
+  setChain(along(fromRainier, FIRST_AT_RAINIER, best.start), along(fromAdams, LAST_AT_ADAMS, best.end))
+  return best
+}
+
 async function main(): Promise<void> {
   const samples = Array.from({ length: DURATION_S + 1 }, (_, t) => t)
   // What the flashes are drawn at: every second, and the instants of each flash, so that a flash is as short as it is.
   const flashSamples = [...new Set([...samples, ...flashInstants.filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b)
   const terrarium = new Terrarium()
   await terrarium.load(samples.map(t => arnoldAt(t).at))
+  // The ground under the chain, all the way from Rainier to Adams and between them and him.
+  const box: { lat: number, lng: number }[] = []
+  for (let lat = 46.0; lat <= 47.6; lat += 0.02) for (let lng = -122.4; lng <= -121.3; lng += 0.02) box.push({ lat, lng })
+  await terrarium.load(box)
+  const fit = fitChainToRelief(terrarium, samples)
+  console.log(`chain brought ${Math.round((1 - fit.start) * 100)} % nearer at Rainier and ${Math.round((1 - fit.end) * 100)} % at Adams, to keep ${CHAIN_CLEARANCE_M} m over the relief`)
   const origin = arnoldAt(0).at
   const originGround = terrarium.heightAt(origin.lat, origin.lng)
   const local = (p: Geo) => ({
@@ -536,11 +580,11 @@ async function main(): Promise<void> {
           // "just a black thin line" when level, a mirror's flash when they flipped: a dark polished surface (it mirrors the forest below),
           // whose flash this renderer, which knows no mirror's glint, is given as light (see the keyframes' luminanceCdM2).
           appearance: { color: "#2a2c30", albedo: 0.08, haloScale: 0.3 },
-          attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
+          attitude: { headingDeg: r2(lookAt(chainStart, chainEnd).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
         } : {}),
         // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some
         // 10⁸ cd/m², ASSUMED from his comparison.
-        attitude: { headingDeg: r2(lookAt(FIRST_AT_RAINIER, LAST_AT_ADAMS).azimuthDeg), pitchDeg: 0, rollDeg: r2(flashingAt(k, t) ? 40 : weaveOf(k, t).roll) },
+        attitude: { headingDeg: r2(lookAt(chainStart, chainEnd).azimuthDeg), pitchDeg: 0, rollDeg: r2(flashingAt(k, t) ? 40 : weaveOf(k, t).roll) },
         ...(t === 0 ? {} : { appearance: { luminanceCdM2: flashingAt(k, t) ? 1e8 : 0 } })
       }))
     }))
