@@ -148,8 +148,8 @@ ${sections}
       account's place, time and pose, and an event for it), one to delete it, and one to export the case and every
       recording added or changed as a zip. Try it with
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?file=/demo-data/case-mcminnville.json">play it</a>,
-      <a href="/edit/?file=/demo-data/case-mcminnville.json">edit it</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-mcminnville.json">play it</a>,
+      <a href="/edit/?file=https://ufoathome.org/demo-data/case-mcminnville.json">edit it</a>).</p>
 `
   }
 
@@ -272,8 +272,8 @@ ${sections}
       rendu, et un événement pour lui), un pour la supprimer, et un pour exporter le dossier et chaque enregistrement
       ajouté ou modifié en zip. Essayez avec
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?file=/demo-data/case-mcminnville.json">le jouer</a>,
-      <a href="/edit/?file=/demo-data/case-mcminnville.json">l'éditer</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-mcminnville.json">le jouer</a>,
+      <a href="/edit/?file=https://ufoathome.org/demo-data/case-mcminnville.json">l'éditer</a>).</p>
 `
   }
 
@@ -390,8 +390,8 @@ ${sections}
       grabación nueva que comparte el lugar, la hora y la pose del relato, y un evento para ella), otro para eliminarla,
       y otro para exportar el caso y cada grabación añadida o modificada en un zip. Pruébalo con
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?file=/demo-data/case-mcminnville.json">reproducirlo</a>,
-      <a href="/edit/?file=/demo-data/case-mcminnville.json">editarlo</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-mcminnville.json">reproducirlo</a>,
+      <a href="/edit/?file=https://ufoathome.org/demo-data/case-mcminnville.json">editarlo</a>).</p>
 `
   }
 
@@ -509,8 +509,8 @@ ${sections}
       registrazione che condivide luogo, ora e posa del resoconto, e un evento per essa), uno per eliminarla, e uno per
       esportare il caso e ogni registrazione aggiunta o modificata in uno zip. Provalo con
       <a href="/demo-data/case-mcminnville.json"><code>case-mcminnville.json</code></a>
-      (<a href="/play/?file=/demo-data/case-mcminnville.json">riprodurlo</a>,
-      <a href="/edit/?file=/demo-data/case-mcminnville.json">modificarlo</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-mcminnville.json">riprodurlo</a>,
+      <a href="/edit/?file=https://ufoathome.org/demo-data/case-mcminnville.json">modificarlo</a>).</p>
 `
   }
 }

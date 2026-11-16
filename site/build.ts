@@ -512,14 +512,6 @@ ${Layout.ICON_LINKS}
   </div>
 </section>
 </main>
-<script type="module">
-// ufoathome.org/<name> used to open that observation. Keep the promise those links made, without a
-// redirect rule that would sit ahead of every future page of this site.
-const path = decodeURIComponent(location.pathname.replace(/^\\/+|\\/+$/g, ""))
-if (path && !path.includes("..")) {
-  location.replace("${player}?file=" + encodeURIComponent(path))
-}
-</script>
 </body>
 </html>
 `, "utf8")

@@ -30,11 +30,8 @@ export class EditorPage implements SitePage {
    * `?file=` opens the editor on an existing recording — the parameter every "edit this
    * observation" link in a published reconstruction carries.
    *
-   * A bare name with no slash is resolved against this site's own demo recordings first, then
-   * against rr0.org's case directories, which is where the `ufoathome.org/Socorro` links that
-   * predate this site pointed. Anything else is taken as a URL and loaded as given: this is a tool
-   * meant to open recordings hosted anywhere, and the editor's own "load from URL" field would do
-   * exactly the same thing by hand.
+   * It is always a whole address (https://…), loaded as given: this is a tool meant to open recordings hosted anywhere. A bare name or a
+   * path of this site is not opened: a link that only works on one site cannot be handed on.
    */
   script(language: SiteLanguage): string {
     const demoTitles = JSON.stringify(RecordingTitle.demoTitles(language))
@@ -83,6 +80,8 @@ const announceWhenLoaded = src => {
    the link that replays it beside it: the one a reader wants to hand on once they are done. Socorro
    until then. It follows a recording loaded from the editor's own address field too, which sets
    the same src; one read from a file has no address, and leaves the example as it was. */
+const EXAMPLE = "https://ufoathome.org/demo-data/observer-socorro.json"
+const isWhole = value => /^https?:[/][/]/i.test(value)
 const showExample = value => {
   for (const [id, path] of [["sighting-edit", "/edit/"], ["sighting-play", "/play/"]]) {
     const link = document.getElementById(id)
@@ -91,34 +90,24 @@ const showExample = value => {
     link.querySelector("code").textContent = path + "?file=" + value
   }
 }
-showExample(requested || "Socorro")
+showExample(requested && isWhole(requested) ? requested : EXAMPLE)
 if (editor) {
   new MutationObserver(() => {
     const src = editor.getAttribute("src")
     if (!src) return
     announceWhenLoaded(src)
-    // A demo's own file is named back by its name, as it was asked for.
-    const prefix = "/demo-data/observer-"
-    const demo = src.startsWith(prefix) && src.endsWith(".json") ? src.slice(prefix.length, -".json".length) : undefined
-    showExample(demo && requested && requested.toLowerCase() === demo ? requested : src)
+    showExample(new URL(src, location.href).href)
   }).observe(editor, { attributes: true, attributeFilter: ["src"] })
 }
 if (editor && requested) {
-  const url = requested.includes("/")
-    ? requested
-    : \`/demo-data/observer-\${requested.toLowerCase()}.json\`
-  const fallback = \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`
-  const load = async () => {
+  if (isWhole(requested)) {
     if (requestedTrack) editor.setAttribute("track", requestedTrack)
-    if (!requested.includes("/")) {
-      const local = await fetch(url, { method: "HEAD" }).catch(() => null)
-      editor.setAttribute("src", local && local.ok ? url : fallback)
-    } else {
-      editor.setAttribute("src", url)
-    }
+    editor.setAttribute("src", requested)
     editor.scrollIntoView({ block: "start" })
+  } else {
+    const refused = document.getElementById("file-refused")
+    if (refused) refused.hidden = false
   }
-  load()
 }
 
 /* The manual for a strip of eight panels is itself a strip of eight panels: the section below
@@ -194,11 +183,10 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Opening it on an existing recording or case: add <code>?file=</code> and a URL (<code>?sighting=</code>, its former name, still works), or
-      the name of one of <a href="/demos/">the demos</a> (a name that is none of them is looked for as an
-      rr0.org case, by its <code>sighting.json</code>) — for instance
-      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
-      which replays at <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
+    <p class="small">Opening it on an existing recording or case: add <code>?file=</code> and its full address, starting with https:// (<code>?sighting=</code>, its former name, still works) — for instance
+      <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
+      which replays at <a id="sighting-play" href="/play/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/play/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>.</p>
+    <p class="small player-status is-error" id="file-refused" hidden>Only a full address, starting with https://, is opened here.</p>
       </div>
 </section>
 
@@ -674,11 +662,10 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Pour l'ouvrir sur un enregistrement ou un dossier existant : ajoutez <code>?file=</code> (<code>?sighting=</code>, son ancien nom, fonctionne toujours)
-      suivi d'une URL, ou du nom d'une <a href="/demos/">démo</a> (un nom qui n'en est pas une est
-      cherché comme dossier de rr0.org, par son <code>sighting.json</code>) — par exemple
-      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
-      qui se rejoue à <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
+    <p class="small">Pour l'ouvrir sur un enregistrement ou un dossier existant : ajoutez <code>?file=</code> suivi de son adresse complète, commençant par https:// (<code>?sighting=</code>, son ancien nom, fonctionne toujours) — par exemple
+      <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
+      qui se rejoue à <a id="sighting-play" href="/play/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/play/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>.</p>
+    <p class="small player-status is-error" id="file-refused" hidden>Seule une adresse complète, commençant par https://, est ouverte ici.</p>
       </div>
 </section>
 
@@ -1189,11 +1176,10 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Para abrirlo sobre un registro o un caso existente: añade <code>?file=</code> (<code>?sighting=</code>, su nombre anterior, sigue funcionando) y una URL, o
-      el nombre de una de <a href="/demos/">las demos</a> (un nombre que no sea ninguna de ellas se busca
-      como caso de rr0.org, por su <code>sighting.json</code>); por ejemplo
-      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
-      que se reproduce en <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
+    <p class="small">Para abrirlo sobre un registro o un caso existente: añade <code>?file=</code> y su dirección completa, que empiece por https:// (<code>?sighting=</code>, su nombre anterior, sigue funcionando); por ejemplo
+      <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
+      que se reproduce en <a id="sighting-play" href="/play/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/play/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>.</p>
+    <p class="small player-status is-error" id="file-refused" hidden>Aquí solo se abre una dirección completa, que empiece por https://.</p>
       </div>
 </section>
 
@@ -1689,11 +1675,10 @@ if (docs) {
     <div class="stage stage-padded">
       <rr0-case-editor id="editor"></rr0-case-editor>
     </div>
-    <p class="small">Per aprirlo su una registrazione o un caso esistente: aggiungi <code>?file=</code> (<code>?sighting=</code>, il suo vecchio nome, funziona ancora) e un
-      URL, oppure il nome di una delle <a href="/demos/">demo</a> (un nome che non corrisponde a nessuna
-      di esse viene cercato come caso di rr0.org, tramite il suo <code>sighting.json</code>); per esempio
-      <a id="sighting-edit" href="/edit/?file=Socorro"><code>/edit/?file=Socorro</code></a>,
-      che si riproduce in <a id="sighting-play" href="/play/?file=Socorro"><code>/play/?file=Socorro</code></a>.</p>
+    <p class="small">Per aprirlo su una registrazione o un caso esistente: aggiungi <code>?file=</code> e il suo indirizzo completo, che inizi con https:// (<code>?sighting=</code>, il suo vecchio nome, funziona ancora); per esempio
+      <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
+      che si riproduce in <a id="sighting-play" href="/play/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/play/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>.</p>
+    <p class="small player-status is-error" id="file-refused" hidden>Qui si apre solo un indirizzo completo, che inizi con https://.</p>
       </div>
 </section>
 

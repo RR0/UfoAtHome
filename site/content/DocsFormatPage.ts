@@ -225,7 +225,7 @@ if (movedTo) {
       picked from a list. One recording can be given directly, with no case, but a case with one
       sighting works the same way and names what it shows. Try it with
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">play it</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-chiles-whitted.json">play it</a>).</p>
 
     <h2>Saying it in more than one language</h2>
     <p>A recording is handed from one reader to another, so every field an author writes can hold
@@ -396,7 +396,7 @@ if (movedTo) {
       says what the model says about it.</p>
     <p>It is <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       on this site, so you can fetch it, and
-      <a href="/play/?file=/demo-data/example-minimal.json">play it</a> before changing
+      <a href="/play/?file=https://ufoathome.org/demo-data/example-minimal.json">play it</a> before changing
       anything. Note that <code>angular</code> and <code>bounds</code> both appear: the angle is what
       the file MEANS, and the pixels are re-derived from it on load — write the angle, and let a
       wrong guess at the pixels be corrected for you.</p>
@@ -513,7 +513,7 @@ if (movedTo) {
       dans une liste. Un enregistrement peut être donné directement, sans dossier, mais un dossier à
       un seul compte rendu marche de la même façon et nomme ce qu'il montre. Essayez avec
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-chiles-whitted.json">le jouer</a>).</p>
 
     <h2>Un texte en plusieurs langues</h2>
     <p>Un enregistrement se transmet d'un lecteur à un autre : chaque champ écrit par un auteur peut
@@ -691,7 +691,7 @@ if (movedTo) {
       ce que le modèle en dit.</p>
     <p>C'est <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       sur ce site : vous pouvez le récupérer, et
-      <a href="/play/?file=/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
+      <a href="/play/?file=https://ufoathome.org/demo-data/example-minimal.json">le jouer</a> avant d'y toucher.
       Remarquez que <code>angular</code> et <code>bounds</code> y figurent tous deux : l'angle est ce
       que le fichier SIGNIFIE, et les pixels en sont recalculés au chargement : écrivez l'angle, et
       une estimation erronée des pixels sera corrigée pour vous.</p>
@@ -806,7 +806,7 @@ if (movedTo) {
       elegirse de una lista. Una grabación puede darse directamente, sin caso, pero un caso con un solo
       avistamiento funciona igual y nombra lo que muestra. Pruébalo con
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">reproducirlo</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-chiles-whitted.json">reproducirlo</a>).</p>
 
     <h2>Decirlo en más de un idioma</h2>
     <p>Una grabación pasa de un lector a otro, así que cada campo que escribe un autor puede contener
@@ -981,7 +981,7 @@ if (movedTo) {
       dice lo que el modelo dice de ella.</p>
     <p>Es <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       en este sitio, así que puedes descargarlo, y
-      <a href="/play/?file=/demo-data/example-minimal.json">reproducirlo</a> antes de cambiar
+      <a href="/play/?file=https://ufoathome.org/demo-data/example-minimal.json">reproducirlo</a> antes de cambiar
       nada. Observa que aparecen tanto <code>angular</code> como <code>bounds</code>: el ángulo es lo que
       el archivo SIGNIFICA, y los píxeles se vuelven a derivar de él al cargar — escribe el ángulo, y deja
       que se te corrija una estimación errónea de los píxeles.</p>
@@ -1096,7 +1096,7 @@ if (movedTo) {
       scelto da un elenco. Una registrazione può essere data direttamente, senza caso, ma un caso con un solo
       avvistamento funziona allo stesso modo e nomina ciò che mostra. Provalo con
       <a href="/demo-data/case-chiles-whitted.json"><code>case-chiles-whitted.json</code></a>
-      (<a href="/play/?file=/demo-data/case-chiles-whitted.json">riproducilo</a>).</p>
+      (<a href="/play/?file=https://ufoathome.org/demo-data/case-chiles-whitted.json">riproducilo</a>).</p>
 
     <h2>Dirlo in più di una lingua</h2>
     <p>Una registrazione passa da un lettore all'altro, quindi ogni campo scritto da un autore può contenere
@@ -1271,7 +1271,7 @@ if (movedTo) {
       dice ciò che il modello ne dice.</p>
     <p>È <a href="/demo-data/example-minimal.json"><code>/demo-data/example-minimal.json</code></a>
       su questo sito, quindi puoi scaricarlo, e
-      <a href="/play/?file=/demo-data/example-minimal.json">riprodurlo</a> prima di cambiare
+      <a href="/play/?file=https://ufoathome.org/demo-data/example-minimal.json">riprodurlo</a> prima di cambiare
       qualsiasi cosa. Nota che compaiono sia <code>angular</code> sia <code>bounds</code>: l'angolo è ciò che
       il file SIGNIFICA, e i pixel ne vengono ricavati di nuovo al caricamento — scrivi l'angolo, e lascia
       che una stima errata dei pixel venga corretta per te.</p>

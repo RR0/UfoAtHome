@@ -175,18 +175,6 @@ const reveal = (source, sighting, fallbackTitle) => {
   describe()
 }
 
-/** A bare name with no slash is one of this site's own demos first, then an rr0.org case
- * directory — the shape the links that predate this site were written in. A dossier is read
- * through its case.json, whose sighting events name the recordings beside it, so it works read
- * from here exactly as it does from the dossier's own page; its sighting.json after that, for a
- * dossier whose case does not list it yet. */
-const resolve = requested => requested.includes("/")
-  ? [requested]
-  : [\`/demo-data/observer-\${requested.toLowerCase()}.json\`,
-     \`/demo-data/sky-test-\${requested.toLowerCase()}.json\`,
-     \`/demo-data/\${requested.toLowerCase()}.json\`,
-     \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/case.json\`,
-     \`https://rr0.org/science/crypto/ufo/enquete/dossier/\${requested}/sighting.json\`]
 
 /**
  * Whether a cross-origin address answered at all.
@@ -220,7 +208,12 @@ const startPlaying = () => {
 
 const openUrl = async requested => {
   say(messages.loading)
-  const candidates = resolve(requested)
+  // Always a whole address (https://…): a bare name or a path of this site makes a link that works here only.
+  if (!/^https?:[/][/]/i.test(requested)) {
+    say(messages.notAbsolute, "error")
+    return
+  }
+  const candidates = [requested]
   let refused = false
   for (const candidate of candidates) {
     try {
@@ -237,9 +230,7 @@ const openUrl = async requested => {
       history.replaceState(null, "", next)
       return
     } catch {
-      // Only the address the reader actually gave is worth diagnosing: the others are this site's
-      // own guesses at what a bare name might mean, and a 404 on one of those explains nothing.
-      if (candidate === requested) refused = await answeredButUnreadable(candidate)
+      refused = await answeredButUnreadable(candidate)
     }
   }
   say(refused ? messages.cors : messages.notFound, "error")
@@ -248,14 +239,7 @@ const openUrl = async requested => {
 urlForm.addEventListener("submit", event => {
   event.preventDefault()
   const value = urlField.value.trim()
-  if (!value) return
-  // What is typed here is a link, whole: a bare name, read as one of this site's demos or an rr0.org case, is left to the older links
-  // that still carry one (see resolve).
-  if (!/^https?:[/][/]/i.test(value)) {
-    say(messages.notAbsolute, "error")
-    return
-  }
-  void openUrl(value)
+  if (value) void openUrl(value)
 })
 
 /* Addresses made for the files last opened from disk, released when others are opened. */
@@ -396,10 +380,8 @@ ${this.form("en")}
       That is the link to hand someone when you want them to see an account rather than read it —
       in an email, a post, a forum that allows nothing but text.
       Add <code>&amp;d=125</code> (or <code>1:30</code>, <code>1m30s</code>) to open it 125 seconds in, <code>&amp;t=02:33:15</code> to open it at a time said during the observation, <code>&amp;labels=0</code> to hide the summary chips, <code>&amp;map=1</code> to open the witness's map, <code>&amp;moments=0</code> to hide the named moments or <code>&amp;compare=1</code> to compare the account with a reading; <a href="/docs/share/">the sharing page</a> writes them for you.</p>
-    <p>It is also what every published reconstruction's own <q>i</q> panel hands out, and what the
-      older <code>ufoathome.org/&lt;name&gt;</code> links resolve to. A name with no slash is looked
-      for among this site's demos first, then as an rr0.org case, read through its
-      <code>case.json</code> or else its <code>sighting.json</code>.</p>
+    <p>It is also what every published reconstruction's own <q>i</q> panel hands out. The address is
+      always a whole one, starting with https://: a bare name, or a path of this site alone, is not opened.</p>
     <p>To change what you are looking at rather than only watch it, <a href="/edit/">the
       editor</a> takes the same parameter. To put a reconstruction on a page of your own, see
       <a href="/docs/">the documentation</a>.</p>
@@ -439,10 +421,8 @@ ${this.form("fr")}
       C'est le lien à donner à quelqu'un quand on veut qu'il voie un récit plutôt qu'il le lise —
       dans un courriel, un message, un forum qui n'accepte que du texte.
       Ajoutez <code>&amp;d=125</code> (ou <code>1:30</code>, <code>1m30s</code>) pour l'ouvrir à 125 secondes, <code>&amp;t=02:33:15</code> pour l'ouvrir à une heure dite pendant l'observation, <code>&amp;labels=0</code> pour masquer les chips de résumé, <code>&amp;map=1</code> pour ouvrir la carte du témoin, <code>&amp;moments=0</code> pour masquer les moments nommés ou <code>&amp;compare=1</code> pour comparer le récit à une lecture ; <a href="/docs/share/">la page de partage</a> les écrit pour vous.</p>
-    <p>C'est aussi ce que distribue le panneau <q>i</q> de chaque reconstitution publiée, et ce vers
-      quoi aboutissent les anciens liens <code>ufoathome.org/&lt;nom&gt;</code>. Un nom sans barre oblique est cherché
-      d'abord parmi les démos de ce site, puis comme dossier de rr0.org, lu par son
-      <code>case.json</code> ou à défaut son <code>sighting.json</code>.</p>
+    <p>C'est aussi ce que distribue le panneau <q>i</q> de chaque reconstitution publiée. L'adresse est
+      toujours complète, commençant par https:// : un nom seul, ou un chemin de ce seul site, n'est pas ouvert.</p>
     <p>Pour modifier ce que vous regardez au lieu de seulement le regarder,
       <a href="/edit/">l'éditeur</a> prend le même paramètre. Pour poser une reconstitution
       sur une page à vous, voyez <a href="/docs/">la documentation</a>.</p>
@@ -482,10 +462,8 @@ ${this.form("es")}
       Ese es el enlace que hay que dar a alguien cuando quieres que vea un relato en lugar de leerlo —
       en un correo, una publicación, un foro que no admite más que texto.
       Añade <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) para abrirlo en el segundo 125, <code>&amp;t=02:33:15</code> para abrirlo a una hora dicha durante la observación, <code>&amp;labels=0</code> para ocultar los chips del resumen, <code>&amp;map=1</code> para abrir el mapa del testigo, <code>&amp;moments=0</code> para ocultar los momentos con nombre o <code>&amp;compare=1</code> para comparar el relato con una lectura; <a href="/docs/share/">la página de compartir</a> los escribe por ti.</p>
-    <p>Es también lo que reparte el panel <q>i</q> de cada reconstrucción publicada, y a lo que
-      llevan los antiguos enlaces <code>ufoathome.org/&lt;nombre&gt;</code>. Un nombre sin barra se
-      busca primero entre las demos de este sitio, y después como caso de rr0.org, leído a través de
-      su <code>case.json</code> o, en su defecto, de su <code>sighting.json</code>.</p>
+    <p>Es también lo que reparte el panel <q>i</q> de cada reconstrucción publicada. La dirección es
+      siempre completa, y empieza por https://: un nombre solo, o una ruta de este sitio únicamente, no se abre.</p>
     <p>Para cambiar lo que estás viendo en lugar de solo mirarlo, <a href="/edit/">el
       editor</a> admite el mismo parámetro. Para poner una reconstrucción en una página propia,
       consulta <a href="/docs/">la documentación</a>.</p>
@@ -525,10 +503,8 @@ ${this.form("it")}
       È il link da dare a qualcuno quando vuoi che veda un resoconto invece di leggerlo —
       in un'email, un post, un forum che accetta solo testo.
       Aggiungi <code>&amp;d=125</code> (o <code>1:30</code>, <code>1m30s</code>) per aprirlo al secondo 125, <code>&amp;t=02:33:15</code> per aprirlo a un'ora detta durante l'osservazione, <code>&amp;labels=0</code> per nascondere i chip del riepilogo, <code>&amp;map=1</code> per aprire la mappa del testimone, <code>&amp;moments=0</code> per nascondere i momenti nominati o <code>&amp;compare=1</code> per confrontare il resoconto con una lettura; <a href="/docs/share/">la pagina di condivisione</a> li scrive per te.</p>
-    <p>È anche ciò che distribuisce il pannello <q>i</q> di ogni ricostruzione pubblicata, e ciò a
-      cui rimandano i vecchi link <code>ufoathome.org/&lt;nome&gt;</code>. Un nome senza barra viene
-      cercato prima tra le demo di questo sito, poi come caso di rr0.org, letto tramite il suo
-      <code>case.json</code> o, in mancanza, il suo <code>sighting.json</code>.</p>
+    <p>È anche ciò che distribuisce il pannello <q>i</q> di ogni ricostruzione pubblicata. L'indirizzo è
+      sempre completo, e inizia con https://: un nome da solo, o un percorso di questo solo sito, non viene aperto.</p>
     <p>Per modificare ciò che stai guardando invece di limitarti a guardarlo, <a href="/edit/">l'editor</a>
       accetta lo stesso parametro. Per mettere una ricostruzione su una tua pagina, consulta
       <a href="/docs/">la documentazione</a>.</p>

@@ -761,7 +761,7 @@ export class SightingElement extends HTMLElement {
     const absolute = (src: string) => src ? new URL(src, location.href).href : ""
     if (this.sharesCase) {
       const opening = this.entries.find(entry => entry.src === this.shareOpens.value) ?? this.entries.find(entry => entry.src === this.currentSrc)
-      return { src: this.caseSource!.url, observer: opening ? this.observerKeyOf(opening) : undefined }
+      return { src: absolute(this.caseSource!.url), observer: opening ? this.observerKeyOf(opening) : undefined }
     }
     return { src: absolute(this.sharedEntry()?.src ?? this.currentSrc ?? "") }
   }

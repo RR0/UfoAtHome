@@ -6,7 +6,8 @@ import type { Said } from "../SitePage.js"
  * the rest brings the history back from its own button. A demo of a lone observation just keeps the chips on, the player's own default.
  */
 export function demoPlayUrl(demo: Demo, playerPath = "/play/"): string {
-  const file = demo.playSrc ?? demo.editSrc ?? demo.src
+  // A whole address, as every link that opens a recording carries one (see PlayerPage): a path of this site would open here only.
+  const file = new URL(demo.playSrc ?? demo.editSrc ?? demo.src, "https://ufoathome.org").href
   const asked = demo.playSrc ? "&info=1&timeline=0" : ""
   return `${playerPath}?file=${encodeURIComponent(file)}${asked}`
 }
