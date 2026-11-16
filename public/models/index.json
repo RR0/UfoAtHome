@@ -1581,6 +1581,44 @@
       }
     },
     {
+      "id": "ufoathome-arnold-craft",
+      "kind": "entity",
+      "name": "Kenneth Arnold's craft, after his 1947 drawings",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "upperColor",
+            "fallback": "#2a2c30",
+            "label": { "en": "Upper side", "fr": "Dessus", "es": "Parte superior", "it": "Parte superiore" },
+            "hint": { "en": "The dome over it.", "fr": "Le dôme du dessus.", "es": "La cúpula de encima.", "it": "La cupola di sopra." }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#2a2c30",
+            "label": { "en": "Under side", "fr": "Dessous", "es": "Parte inferior", "it": "Parte inferiore" },
+            "hint": { "en": "The flat underside.", "fr": "Le dessous plat.", "es": "La cara inferior plana.", "it": "La parte inferiore piatta." }
+          }
+        ],
+        "bindings": {
+          "upperColor": { "materials": ["^upper$"] },
+          "underColor": { "materials": ["^under$"] }
+        }
+      },
+      "file": "ufoathome-arnold-craft/craft.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": { "widthM": 1, "lengthM": 1.26, "heightM": 0.05 },
+      "credit": {
+        "title": "Kenneth Arnold's craft, after his drawings for the FBI and the Air Force (1947)",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-arnold-craft.ts"
+      }
+    },
+    {
       "id": "ufoathome-bird-gull",
       "kind": "entity",
       "name": "Gull in flight (herring gull build)",

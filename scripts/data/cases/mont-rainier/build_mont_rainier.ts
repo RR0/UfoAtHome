@@ -583,13 +583,15 @@ async function main(): Promise<void> {
     bodies: sourceIds.map((sourceId, k) => ({
       id: `craft-${k + 1}`,
       explains: [sourceId],
-      model: { id: "ellipsoid" },
+      // As he drew them: a round front and "a sort of a convex triangle in the rear", flat under and domed over (see build-arnold-craft.ts).
+      model: { id: "ufoathome-arnold-craft" },
       track: [...new Set([...samples, ...[...ownFlashInstants[k]].filter(t => t > 0 && t < DURATION_S)])].sort((a, b) => a - b).map(t => ({
         t: Math.round(t * 1000),
         ...local(objectAt(k, t)),
         altitudeM: r2(OBJECTS_ALT_M - originGround),
         ...(t === 0 ? {
-          sizeM: { widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(15 * FAVOURABLE_SIZE), heightM: r2(0.7 * FAVOURABLE_SIZE) },
+          // "longer than wide" by his drawing (1.26), "their thickness was about 1/20th of their width".
+          sizeM: { widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(14 * 1.26 * FAVOURABLE_SIZE), heightM: r2(14 / 20 * FAVOURABLE_SIZE) },
           // "just a black thin line" when level, "Mirror Bright" when they flipped: a dark plate seen from a little below, its underside in
           // its own shade, and the Sun's glint off it when it tilted, given as light (see the keyframes' luminanceCdM2). Polished, its
           // underside would mirror the sunlit forest under it, as bright as the sky behind: no black line.
