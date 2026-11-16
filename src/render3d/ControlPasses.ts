@@ -16,6 +16,7 @@ import {
   type WebGLRenderer
 } from "three"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { PixelRead } from "./PixelRead.js"
 
 /** What a scene lends to the drawing of its control passes (see ControlPasses.draw). */
 export interface ControlPassHost {
@@ -189,12 +190,7 @@ export class ControlPasses {
     try {
       draw()
       const pixels = new Float32Array(target.width * target.height * 4)
-      // An asynchronous read-back elsewhere (the eye's meter, the sky's tables) can leave its pixel-pack buffer bound, and a synchronous
-      // read then fails with nothing but a console warning, handing back zeros: the kit's depth and masks came back black (see
-      // AtmosphereTables.readSkyViewNow, which met it first).
-      const gl = renderer.getContext() as WebGL2RenderingContext
-      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
-      renderer.readRenderTargetPixels(target, 0, 0, target.width, target.height, pixels)
+      PixelRead.now(renderer, target, 0, 0, target.width, target.height, pixels)
       return pixels
     } finally {
       renderer.autoClear = autoClear

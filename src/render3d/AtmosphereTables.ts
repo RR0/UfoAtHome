@@ -19,6 +19,7 @@ import {
 } from "three"
 import { AtmosphereProfile } from "../engine/atmosphere/AtmosphereProfile.js"
 import { VisibleSpectrum } from "../engine/atmosphere/Spectrum.js"
+import { PixelRead } from "./PixelRead.js"
 
 /**
  * The tables a physically scattered sky is drawn from, computed on the GPU — the same formulas as
@@ -407,12 +408,7 @@ export class AtmosphereTables {
   readSkyViewNow(source: SkyViewSource): Float32Array {
     const target = this.viewOf(source)
     const buffer = new Float32Array(target.width * target.height * 4)
-    // An asynchronous read-back (the tables being shared, above) can leave its pixel-pack buffer bound,
-    // and a synchronous read then fails with nothing but a console warning, handing back zeros: the
-    // Moon's sky came back black, and the eye adapted to a moonless night under a 91 % Moon.
-    const gl = this.renderer.getContext() as WebGL2RenderingContext
-    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
-    this.renderer.readRenderTargetPixels(target, 0, 0, target.width, target.height, buffer)
+    PixelRead.now(this.renderer, target, 0, 0, target.width, target.height, buffer)
     return buffer
   }
 

@@ -5,6 +5,7 @@ import {
 import { GlassWetting, LensGhosts, type LensGhost, type LensOptics } from "../engine/instrument/LensGhost.js"
 import { EYE_UNIFORMS, FINISH_GLSL, type UnfinishedFrame } from "./colorSpace.js"
 import { FilmPrints, type FilmFrame, type FilmPrint } from "../engine/instrument/FilmPrint.js"
+import { PixelRead } from "./PixelRead.js"
 
 /**
  * A light brighter than the picture can hold: a half float holds 65 504, and a pixel is given at most a little less (the Sun's disc is
@@ -721,7 +722,7 @@ export class GhostPass {
     const x = Math.round((ndcX + 1) / 2 * this.ghostLayer.width), y = Math.round((ndcY + 1) / 2 * this.ghostLayer.height)
     if (x < 0 || y < 0 || x >= this.ghostLayer.width || y >= this.ghostLayer.height) return 0
     const texel = new Uint16Array(4)
-    renderer.readRenderTargetPixels(this.ghostLayer, x, y, 1, 1, texel)
+    PixelRead.now(renderer, this.ghostLayer, x, y, 1, 1, texel)
     return GhostPass.half(texel[3])
   }
 
@@ -736,7 +737,7 @@ export class GhostPass {
     // In one read: each is a wait for the picture being drawn to be done, and reading a row at a time made a hover of a few ghosts dozens
     // of them, which froze a playing scene.
     const texels = new Uint16Array(w * h * 4)
-    renderer.readRenderTargetPixels(this.mips, from.x, from.y, w, h, texels)
+    PixelRead.now(renderer, this.mips, from.x, from.y, w, h, texels)
     let sum = 0, count = 0, peak = -1
     let brightest = { x, y }
     for (let j = from.y; j <= to.y; j += step) {

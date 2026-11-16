@@ -1,5 +1,6 @@
 import { Color, DoubleSide, Material, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderTarget, WebGLRenderer } from "three"
 import { GlassMaterial } from "./GlassMaterial.js"
+import { PixelRead } from "./PixelRead.js"
 
 /**
  * Which directions the cabin the eye is in (a van, a flight deck) hides, as seen from the eye: its silhouette, photographed once.
@@ -133,7 +134,7 @@ export class CabinMask {
       renderer.setRenderTarget(this.target)
       renderer.clear()
       renderer.render(this.scene, camera)
-      renderer.readRenderTargetPixels(this.target, 0, 0, CabinMask.SIZE, CabinMask.SIZE, this.faces[face])
+      PixelRead.now(renderer, this.target, 0, 0, CabinMask.SIZE, CabinMask.SIZE, this.faces[face])
     }
     renderer.setRenderTarget(previous)
     renderer.shadowMap.autoUpdate = shadows
