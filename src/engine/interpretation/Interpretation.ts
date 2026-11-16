@@ -421,6 +421,13 @@ export interface BodyAppearance {
   /** How much of the light falling on it it sends back, 0-1: aluminium ~0.7, a matt dark hull ~0.1. */
   albedo?: number
   /**
+   * How it sends that light back: "matt" (the default), the same all round; "mirror", polished, as what it faces sends it: the sky when it
+   * faces the sky, the ground when it faces the ground, the Sun's glint when it faces the Sun (a flash, which `luminanceCdM2` states).
+   * Kenneth Arnold's "Mirror Bright", which in level flight were "just a black thin line": a polished plate seen from below shows the
+   * ground under it, and a matt one, whatever its albedo, is lit by the Sun to about the brightness of the sky behind it.
+   */
+  finish?: "matt" | "mirror"
+  /**
    * What it gives out of itself, candela per square metre — read through the scene's own photometry
    * exactly as a flame's is (see BodyFlame), so that the same figure is a lamp at night and nothing
    * at all against a noon sky.

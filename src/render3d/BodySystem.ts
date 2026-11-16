@@ -82,7 +82,11 @@ export interface BodyFrame {
    * to it, and the sky's and the ground's, averaged round. What a body that does not glow sends back is drawn from, as a point, when it is
    * under a pixel (see shineReflected).
    */
-  daylight?: { towardSun: Vector3, sun: readonly [number, number, number], round: readonly [number, number, number] }
+  daylight?: {
+    towardSun: Vector3, sun: readonly [number, number, number], round: readonly [number, number, number]
+    /** The irradiance the sky gives a surface facing up, and the ground one facing down: what a mirror shows of each is this over π. */
+    sky: readonly [number, number, number], ground: readonly [number, number, number]
+  }
 }
 
 /**
@@ -543,7 +547,9 @@ export class BodySystem {
     const phase = (Math.sin(alpha) + (Math.PI - alpha) * Math.cos(alpha)) / Math.PI
     const hue = BodySystem.rgbOf(state.appearance.color)
     const luminance = 0.2126 * hue[0] + 0.7152 * hue[1] + 0.0722 * hue[2] || 1
-    const radiance = [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
+    const radiance = state.appearance.finish === "mirror"
+      ? this.mirrored(state, holder, toEye, daylight, hue, luminance)
+      : [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
     // The air takes the contrast it has with what is behind it as it takes its light: by its transmittance.
     const through = this.frame?.transmittance?.(holder.position.x, holder.position.y, holder.position.z) ?? [1, 1, 1]
     const air = (through[0] + through[1] + through[2]) / 3
@@ -564,6 +570,23 @@ export class BodySystem {
     speck.material.opacity = Math.min(1, contrast * air * clear * (1 - shape) * (1 - state.appearance.transparency))
     speck.visible = speck.material.opacity > 0
     this.specksShown.add(state.id)
+  }
+
+  /**
+   * What a polished body under a pixel shows the eye: the sky or the ground, as its face turned to the eye reflects the eye's line to one
+   * or the other, by its albedo and colour. Its face is the plane across its smallest axis (a plate, a disc, a wing); the Sun's glint is
+   * no part of this, being a flash that its luminance states.
+   */
+  private mirrored(state: BodyState, holder: Group, toEye: Vector3, daylight: NonNullable<BodyFrame["daylight"]>, hue: number[], luminance: number): number[] {
+    const { widthM, lengthM, heightM } = state.sizeM
+    const axis = heightM <= widthM && heightM <= lengthM ? new Vector3(0, 1, 0) : widthM <= lengthM ? new Vector3(1, 0, 0) : new Vector3(0, 0, 1)
+    const normal = axis.applyQuaternion(holder.quaternion).normalize()
+    if (normal.dot(toEye) < 0) normal.negate()
+    // The eye's line, from the eye to it, turned back off its face.
+    const line = toEye.clone().negate()
+    const reflected = line.sub(normal.multiplyScalar(2 * line.dot(normal)))
+    const source = reflected.y >= 0 ? daylight.sky : daylight.ground
+    return [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * source[c])
   }
 
   /** How wide a speck is drawn, pixels (see shineReflected). */

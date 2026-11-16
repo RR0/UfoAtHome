@@ -577,9 +577,10 @@ async function main(): Promise<void> {
         altitudeM: r2(OBJECTS_ALT_M - originGround),
         ...(t === 0 ? {
           sizeM: { widthM: 14, lengthM: 15, heightM: 0.7 },
-          // "just a black thin line" when level, a mirror's flash when they flipped: a dark polished surface (it mirrors the forest below),
-          // whose flash this renderer, which knows no mirror's glint, is given as light (see the keyframes' luminanceCdM2).
-          appearance: { color: "#2a2c30", albedo: 0.08, haloScale: 0.3 },
+          // "Mirror Bright", and "just a black thin line" when level: a polished metal seen from a little below, which mirrors the forest
+          // under it, and the Sun when they flipped. Its glint, which a mirror finish does not draw, is given as light (see the keyframes'
+          // luminanceCdM2). Aluminium polished: 0.85 of what it mirrors (ASSUMED).
+          appearance: { color: "#d4d8dc", albedo: 0.85, finish: "mirror", haloScale: 0.3 },
           attitude: { headingDeg: r2(lookAt(chainStart, chainEnd).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
         } : {}),
         // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some

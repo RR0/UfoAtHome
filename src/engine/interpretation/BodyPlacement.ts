@@ -108,7 +108,7 @@ export class BodyPlacement {
   /** What a body that never states a size is drawn at: one metre, a size nobody could take for a
    * claim. */
   static readonly DEFAULT_SIZE: BodySize = { widthM: 1, lengthM: 1, heightM: 1 }
-  static readonly DEFAULT_APPEARANCE: BodyState["appearance"] = { color: "#c8c8c8", albedo: 0.5, luminanceCdM2: 0, transparency: 0, haloScale: 1 }
+  static readonly DEFAULT_APPEARANCE: BodyState["appearance"] = { color: "#c8c8c8", albedo: 0.5, finish: "matt", luminanceCdM2: 0, transparency: 0, haloScale: 1 }
 
   private readonly keys: PlacedKey[]
 
@@ -310,6 +310,8 @@ export class BodyPlacement {
       appearance: {
         color: BodyPlacement.lerpColor(from.appearance.color, to.appearance.color, fraction),
         albedo: BodyPlacement.lerp(from.appearance.albedo, to.appearance.albedo, fraction),
+        // A surface is polished or not: as the keyframe before says, until the next.
+        finish: fraction < 1 ? from.appearance.finish : to.appearance.finish,
         // Blended like a size: a thing that brightens does it over the interval that says so.
         luminanceCdM2: BodyPlacement.lerp(from.appearance.luminanceCdM2, to.appearance.luminanceCdM2, fraction),
         transparency: BodyPlacement.lerp(from.appearance.transparency, to.appearance.transparency, fraction),
@@ -387,6 +389,7 @@ export class BodyPlacement {
       const appearance = {
         color: key.appearance?.color ?? previous?.appearance.color ?? BodyPlacement.DEFAULT_APPEARANCE.color,
         albedo: key.appearance?.albedo ?? previous?.appearance.albedo ?? BodyPlacement.DEFAULT_APPEARANCE.albedo,
+        finish: key.appearance?.finish ?? previous?.appearance.finish ?? BodyPlacement.DEFAULT_APPEARANCE.finish,
         luminanceCdM2: key.appearance?.luminanceCdM2 ?? previous?.appearance.luminanceCdM2 ?? BodyPlacement.DEFAULT_APPEARANCE.luminanceCdM2,
         transparency: key.appearance?.transparency ?? previous?.appearance.transparency ?? BodyPlacement.DEFAULT_APPEARANCE.transparency,
         haloScale: key.appearance?.haloScale ?? previous?.appearance.haloScale ?? BodyPlacement.DEFAULT_APPEARANCE.haloScale

@@ -3031,7 +3031,9 @@ export class SceneRenderer {
     return {
       towardSun: this.lightDirection,
       sun: [sun.r * sunI, sun.g * sunI, sun.b * sunI],
-      round: [(sky.r + ground.r) / 2 * skyI, (sky.g + ground.g) / 2 * skyI, (sky.b + ground.b) / 2 * skyI]
+      round: [(sky.r + ground.r) / 2 * skyI, (sky.g + ground.g) / 2 * skyI, (sky.b + ground.b) / 2 * skyI],
+      sky: [sky.r * skyI, sky.g * skyI, sky.b * skyI],
+      ground: [ground.r * skyI, ground.g * skyI, ground.b * skyI]
     }
   }
 
