@@ -12,6 +12,7 @@ import {
   Vector2,
   HalfFloatType,
   LinearFilter,
+  NoBlending,
   Texture,
   WebGLCubeRenderTarget,
   WebGLRenderTarget,
@@ -415,6 +416,11 @@ export class EquidistantProjectionPass {
       this.cubeTarget.setSize(face, face)
       this.overlayCubeTarget.setSize(face, face)
     }
+    // Each face drawn through a multisampled target of its own and copied in: a cube's faces cannot be multisampled, and drawn straight
+    // into them the picture of every field over some 65° had no antialiasing at all. Far country seen from the air, its ridges and the
+    // haze between them far finer than a pixel, came out in speckles under the horizon.
+    if (!this.faceTarget) this.faceTarget = new WebGLRenderTarget(face, face, { type: HalfFloatType, samples: EquidistantProjectionPass.SAMPLES })
+    else if (this.faceTarget.width !== face) this.faceTarget.setSize(face, face)
     const cube = this.cubeCamera
     camera.updateMatrixWorld()
     cube.position.setFromMatrixPosition(camera.matrixWorld)
@@ -453,8 +459,11 @@ export class EquidistantProjectionPass {
         target.scissor.set(region.x, region.y, region.width, region.height)
         target.scissorTest = true
       }
-      renderer.setRenderTarget(this.cubeTarget!, index)
+      this.faceTarget!.scissor.set(region.x, region.y, region.width, region.height)
+      this.faceTarget!.scissorTest = true
+      renderer.setRenderTarget(this.faceTarget!)
       renderer.render(scene, faceCamera)
+      this.copyFace(renderer, index)
       if (overlays) {
         EquidistantProjectionPass.clearTransparent(renderer, this.overlayCubeTarget!, index)
         overlays(faceCamera)
@@ -481,6 +490,44 @@ export class EquidistantProjectionPass {
   }
 
   private copy?: ShaderMaterial
+  /** Where a face of the cube is drawn, multisampled, before it is copied into it (see renderCube). */
+  private faceTarget?: WebGLRenderTarget
+  private faceCopy?: ShaderMaterial
+
+  /** Copies the face just drawn into the cube's `index`th face, within the same scissor: as it is, its alpha (a lamp's mark) included. */
+  private copyFace(renderer: WebGLRenderer, index: number): void {
+    this.faceCopy ??= new ShaderMaterial({
+      uniforms: { uSource: { value: null as Texture | null } },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = position.xy * 0.5 + 0.5;
+          gl_Position = vec4(position.xy, 0.0, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision highp float;
+        uniform sampler2D uSource;
+        varying vec2 vUv;
+        void main() {
+          gl_FragColor = texture2D(uSource, vUv);
+        }
+      `,
+      blending: NoBlending,
+      depthTest: false,
+      depthWrite: false
+    })
+    this.faceCopy.uniforms.uSource.value = this.faceTarget!.texture
+    const quad = this.quadScene.children[0] as Mesh
+    const material = quad.material
+    quad.material = this.faceCopy
+    renderer.setRenderTarget(this.cubeTarget!, index)
+    const autoClear = renderer.autoClear
+    renderer.autoClear = false
+    renderer.render(this.quadScene, this.quadCamera)
+    renderer.autoClear = autoClear
+    quad.material = material
+  }
 
   /** Copies the two targets to wherever is being drawn: finished for the canvas, or as they are. */
   private copyMaterial(): ShaderMaterial {
@@ -700,6 +747,8 @@ export class EquidistantProjectionPass {
     this.overlayCubeTarget?.dispose()
     this.cubeMaterial?.dispose()
     this.copy?.dispose()
+    this.faceTarget?.dispose()
+    this.faceCopy?.dispose()
     this.quadScene.clear()
   }
 }
