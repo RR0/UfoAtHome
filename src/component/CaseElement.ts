@@ -25,7 +25,11 @@ import { CaseTimeline, type CaseTimelineCard } from "./CaseTimeline.js"
 export const CASE_ELEMENT_NAME = "rr0-case"
 /** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
 export const SHOW_TIMELINE_ATTRIBUTE = "show-timeline"
-/** What a page wants open from the start: `all`, every event the case holds. Absent, the case opens on its first observation. */
+/**
+ * What a page wants open from the start: `all`, every event the case holds, or some of them, by the id of their event in the case, else by
+ * their file's name (`interpretation-mont-rainier-aaf`, with or without `.json`: most of a case's readings have no id), separated by commas.
+ * Absent, or naming nothing the case holds, the case opens on its first observation. What a shared link says is open (see shareSubject).
+ */
 export const OPEN_EVENTS_ATTRIBUTE = "open-events"
 
 /** One event of the case, as the reader shows it: what the case says of it, and nothing fetched. */
@@ -140,8 +144,50 @@ export class CaseElement extends HTMLElement {
    */
   private readonly shareSubject: ShareSubject = {
     module: "rr0-sighting",
-    link: () => `${AppLocation.home()}/play/?file=${encodeURIComponent(this.url ?? "")}`,
-    element: () => `<${CASE_ELEMENT_NAME} src="${this.url ?? ""}"></${CASE_ELEMENT_NAME}>`
+    link: () => {
+      const open = this.openKeys()
+      return `${AppLocation.home()}/play/?file=${encodeURIComponent(this.url ?? "")}${open ? `&events=${encodeURIComponent(open)}` : ""}`
+    },
+    element: () => {
+      const open = this.openKeys()
+      return `<${CASE_ELEMENT_NAME} src="${this.url ?? ""}"${open ? ` ${OPEN_EVENTS_ATTRIBUTE}="${open}"` : ""}></${CASE_ELEMENT_NAME}>`
+    }
+  }
+
+  /**
+   * What is open, as OPEN_EVENTS_ATTRIBUTE says it, for a link to open the case as it is looked at: a reading chosen, an interview beside
+   * its observation. Nothing when it is what the case opens on anyway (its first observation alone), so that the plain case keeps its
+   * plain address.
+   */
+  private openKeys(): string {
+    const open = [...this.shown.keys()].sort((a, b) => a - b)
+    if (open.length === 1 && open[0] === this.firstObservation()) return ""
+    return open.map(at => CaseElement.keyOf(this.entries[at])).join(",")
+  }
+
+  /** How a link names an event of the case: the id of its event, else its file's name (see OPEN_EVENTS_ATTRIBUTE). */
+  private static keyOf(entry: CaseEntry): string {
+    return entry.event.id ?? CaseElement.fileNameOf(entry)
+  }
+
+  /** Its file's name, without `.json`: what a link may name it by whether it has an id or not. */
+  private static fileNameOf(entry: CaseEntry): string {
+    return (entry.url ?? "").split("/").pop()!.replace(/[.]json$/i, "")
+  }
+
+  /** The events OPEN_EVENTS_ATTRIBUTE names, in the order of time: every one for `all`, none for an attribute naming nothing. */
+  private asked(value: string | null): number[] {
+    if (value === null) return []
+    if (value.trim() === "all") return this.entries.map((_, at) => at)
+    const keys = value.split(",").map(key => key.trim().replace(/[.]json$/i, "")).filter(key => key !== "")
+    return this.entries.map((entry, at) => ({ entry, at }))
+      .filter(({ entry }) => keys.some(key => key === entry.event.id || key === CaseElement.fileNameOf(entry)))
+      .map(({ at }) => at)
+  }
+
+  /** Where the case opens when nothing is asked: its first observation, or reading. */
+  private firstObservation(): number {
+    return this.entries.findIndex(entry => entry.kind !== "interview")
   }
 
   private byId(id: string): HTMLElement {
@@ -180,7 +226,7 @@ export class CaseElement extends HTMLElement {
     if (name === "src" && value) void this.load(value)
     else if (name === SHOW_TIMELINE_ATTRIBUTE) this.showTimeline(value !== "false")
     else if (name === OPEN_EVENTS_ATTRIBUTE) {
-      if (value === "all") for (let at = 0; at < this.entries.length; at++) void this.open(at)
+      for (const at of this.asked(value)) void this.open(at)
     }
     // Passed on to every player open, and to the next one opened (see open): the host says it of the case, not of one recording.
     else for (const player of this.players()) {
@@ -211,11 +257,12 @@ export class CaseElement extends HTMLElement {
     this.compareReadings()
     // Everything at once where the page asked for it (a demo of a case shows all of it), else the first observation, as the editor opens
     // on one: a case shown with nothing in it says nothing.
-    if (this.getAttribute(OPEN_EVENTS_ATTRIBUTE) === "all") {
-      for (let at = 0; at < this.entries.length; at++) await this.open(at)
+    const asked = this.asked(this.getAttribute(OPEN_EVENTS_ATTRIBUTE))
+    if (asked.length > 0) {
+      for (const at of asked) await this.open(at)
       return
     }
-    const first = this.entries.findIndex(entry => entry.kind !== "interview")
+    const first = this.firstObservation()
     if (first >= 0) void this.open(first)
   }
 

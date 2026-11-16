@@ -274,6 +274,43 @@ describe("<rr0-case>, a case read", () => {
     expect(markup).not.toContain("<rr0-sighting")
   })
 
+  it("shares the case as it is looked at: the reading chosen, by its event's id, in the link and on the element", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
+    // The reading chosen, the observation it reads shut: what is looked at is the reading alone.
+    cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
+    for (let left = 200; left > 0 && root.querySelectorAll(".open-event").length < 2; left--) await new Promise(resolve => setTimeout(resolve, 5))
+    cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    root.getElementById("share")!.click()
+    const dialog = root.getElementById("share-dialog")!.shadowRoot!
+    const link = new URL((dialog.getElementById("link") as HTMLTextAreaElement).value)
+    expect(link.searchParams.get("events")).toBe("reading")
+    expect((dialog.getElementById("embed-markup") as HTMLTextAreaElement).value).toContain(` open-events="reading"`)
+  })
+
+  it("opens on the events a link names, by their event's id or by their file's name", async () => {
+    const opened = async (asked: string, count: number) => {
+      files[new URL("case.json", location.href).href] = caseJson
+      const element = document.createElement(CASE_ELEMENT_NAME) as CaseElement
+      element.setAttribute("src", "case.json")
+      element.setAttribute("open-events", asked)
+      document.body.appendChild(element)
+      const root = element.shadowRoot!
+      for (let left = 400; left > 0 && root.querySelectorAll(".open-event").length < count; left--) await new Promise(resolve => setTimeout(resolve, 5))
+      const open = [...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)
+      element.remove()
+      return open
+    }
+    await mount()
+    // A reading alone: it is what the link is about, not the account it reads.
+    expect(await opened("reading", 1)).toEqual(["1"])
+    // By its file's name, with or without its extension; several, in the order of time whatever the order asked.
+    expect(await opened("interview.json, qb", 2)).toEqual(["0", "2"])
+    // Naming nothing the case holds, it opens as it would unasked: on its first observation.
+    expect(await opened("nothing-here", 1)).toEqual(["0"])
+  })
+
   it("leaves its observations to be shared one at a time by their players", async () => {
     const element = await mount()
     const root = element.shadowRoot!

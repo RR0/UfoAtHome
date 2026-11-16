@@ -14,6 +14,9 @@
  *   the interpretation;
  * - `info=1` opens what the recording — or the case — says of itself; on a case, `timeline=0` hides its history and `events=all` opens every
  *   event it holds, which is how this site's own demos of a case are linked: everything the case has, in the order of time, no list to pick from.
+ *   `events=` also takes the events to open by name, separated by commas: the id of their event in the case, else their file's name
+ *   (`events=1947-06-24-ArnoldKennethE-aaf`, `events=interpretation-mont-rainier-pelicans`), which is what the case's share dialog writes for a
+ *   reading chosen (see CaseElement's open-events).
  *
  * Whether a value is a length or a time of day that can be read is the element's to say (see PlaybackPosition): this only tells a time of day
  * from a length by its shape, to put it in the right attribute, and passes the text on as it was written.
