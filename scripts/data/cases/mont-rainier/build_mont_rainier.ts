@@ -407,6 +407,8 @@ const flipOf = (k: number, f: number) => {
  * said: ASSUMED, one flip every FLIP_EVERY_S on average for each, its tilts drawn round none by FLIP_PITCH_SD_DEG and FLIP_ROLL_SD_DEG.
  */
 const FLIP_EVERY_S = 3
+/** The flashes his account states (see STATED_FLASHES' use): the one on his airplane at the start, and the next two as he found them. */
+const STATED_FLASHES = [{ k: 0, t: 0.5 }, { k: 2, t: 5 }, { k: 5, t: 9 }]
 const FLIP_PITCH_SD_DEG = 15
 const FLIP_ROLL_SD_DEG = 35
 const flipRandom = mulberry(24061947)
@@ -699,6 +701,16 @@ async function main(): Promise<void> {
     const at = objectAt(k, t)
     const toEye = lookAt(at, { ...arnoldAt(t).at, altM: ARNOLD_ALT_M })
     return Glint.towards(toEye.azimuthDeg, toEye.altitudeDeg).add(Glint.sunAt(at, t)).normalize()
+  }
+  // The flashes his account states, not left to chance: "a bright flash reflected on my airplane", which made him look for where it came
+  // from, and the first of "two or three of them every few seconds" as he found them to his left. Those flips tip just so far that they
+  // send him the Sun; which object, and when after the first, ASSUMED.
+  for (const { k, t } of STATED_FLASHES) {
+    const exact = Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfwayAt(k, t))
+    flips[k].push({ t, pitchDeg: exact.pitchDeg, rollDeg: exact.rollDeg - weaveOf(k, t).roll })
+    flips[k].sort((a, b) => a.t - b.t)
+    const { tipS, holdS } = flipOf(k, t)
+    for (let at = t - tipS; at <= t + holdS + tipS + 1e-9; at += FLIP_SAMPLE_S) ownFlipInstants[k].add(Math.round(at * 1000) / 1000)
   }
   /** Its attitude at `t`: its weave, and its flip's own tilt as it flips; and what it sends him of the Sun at that attitude, whatever it is. */
   const glintAttitude = (k: number, t: number) => {
