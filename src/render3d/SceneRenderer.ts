@@ -1993,6 +1993,7 @@ export class SceneRenderer {
       material.alphaTest = 0.5
       this.farRing = { mesh, origin: { lat, lng } }
       this.farRingRadiusM = radiusM
+      this.applyGroundDepthWrite()
       this.scene.add(mesh)
       // Built round the patch's own centre: where the patch stands now is where the ring stands (and placeTerrain moves both from here on).
       mesh.position.x = nearMesh.position.x
@@ -7543,6 +7544,18 @@ export class SceneRenderer {
         lowest = Math.min(lowest, position.getY(i) + terrain.position.y)
       }
       lowest = Number.isFinite(lowest) ? Math.min(0, lowest) - 1 : 0
+    }
+    // And under the far ring within its own reach: the ring curves away with the Earth (see TerrainReach.curvatureDropM), forty metres at
+    // 25 km, and its valleys went under the disc, which was drawn over them in dark streaks across the country seen from the air.
+    const ring = this.farRing?.mesh
+    if (ring) {
+      const position = ring.geometry.getAttribute("position")
+      let under = Infinity
+      for (let i = 0; i < position.count; i++) {
+        if (Math.hypot(position.getX(i) + ring.position.x, position.getZ(i) + ring.position.z) > this.groundRadius) continue
+        under = Math.min(under, position.getY(i) + ring.position.y)
+      }
+      if (Number.isFinite(under)) lowest = Math.min(lowest, under - 1)
     }
     this.groundMesh!.position.y = lowest
     this.groundMesh!.renderOrder = 0
