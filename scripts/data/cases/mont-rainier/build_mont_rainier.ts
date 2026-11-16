@@ -187,6 +187,11 @@ const T_ADAMS_S = 162
 /** "the chain of these saucer like objects were at least five miles long" */
 const CHAIN_M = 5 * 1609.34
 const COUNT = 9
+/**
+ * The most his size can be taken to be by the law of its error, as the hypothesis the most favourable to his seeing them: measured against
+ * a gauge held up (his cowling tool, against the DC-4's engines), a size is within 20 % of what it was (WitnessError, "sizeGauge").
+ */
+const FAVOURABLE_SIZE = 1.2
 const DURATION_S = 180
 
 // ---- Arnold's flight ----
@@ -576,11 +581,11 @@ async function main(): Promise<void> {
         ...local(objectAt(k, t)),
         altitudeM: r2(OBJECTS_ALT_M - originGround),
         ...(t === 0 ? {
-          sizeM: { widthM: 14, lengthM: 15, heightM: 0.7 },
-          // "Mirror Bright", and "just a black thin line" when level: a polished metal seen from a little below, which mirrors the forest
-          // under it, and the Sun when they flipped. Its glint, which a mirror finish does not draw, is given as light (see the keyframes'
-          // luminanceCdM2). Aluminium polished: 0.85 of what it mirrors (ASSUMED).
-          appearance: { color: "#d4d8dc", albedo: 0.85, finish: "mirror", haloScale: 0.3 },
+          sizeM: { widthM: r2(14 * FAVOURABLE_SIZE), lengthM: r2(15 * FAVOURABLE_SIZE), heightM: r2(0.7 * FAVOURABLE_SIZE) },
+          // "just a black thin line" when level, "Mirror Bright" when they flipped: a dark plate seen from a little below, its underside in
+          // its own shade, and the Sun's glint off it when it tilted, given as light (see the keyframes' luminanceCdM2). Polished, its
+          // underside would mirror the sunlit forest under it, as bright as the sky behind: no black line.
+          appearance: { color: "#2a2c30", albedo: 0.08, haloScale: 0.3 },
           attitude: { headingDeg: r2(lookAt(chainStart, chainEnd).azimuthDeg), pitchDeg: 0, rollDeg: 0 }
         } : {}),
         // "flip and flash in the sun": banked for an instant, and as bright then as "if someone had started an arc light" (Bequette): some

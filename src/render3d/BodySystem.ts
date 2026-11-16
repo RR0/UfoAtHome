@@ -547,15 +547,18 @@ export class BodySystem {
     const phase = (Math.sin(alpha) + (Math.PI - alpha) * Math.cos(alpha)) / Math.PI
     const hue = BodySystem.rgbOf(state.appearance.color)
     const luminance = 0.2126 * hue[0] + 0.7152 * hue[1] + 0.0722 * hue[2] || 1
+    const plate = BodySystem.faceOf(state, holder)
     const radiance = state.appearance.finish === "mirror"
       ? this.mirrored(state, holder, toEye, daylight, hue, luminance)
-      : [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
+      : plate
+        ? this.plateLit(plate, toEye, daylight, state.appearance.albedo, hue, luminance)
+        : [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
     // The air takes the contrast it has with what is behind it as it takes its light: by its transmittance.
     const through = this.frame?.transmittance?.(holder.position.x, holder.position.y, holder.position.z) ?? [1, 1, 1]
     const air = (through[0] + through[1] + through[2]) / 3
     let speck = this.specks.get(state.id)
     if (!speck) {
-      speck = new Sprite(new SpriteMaterial({ transparent: true, depthWrite: false, sizeAttenuation: false, fog: false }))
+      speck = new Sprite(new SpriteMaterial({ transparent: true, depthWrite: false, sizeAttenuation: true, fog: false }))
       speck.name = `body-speck:${state.id}`
       // After the relief, which is drawn among what is transparent (the far ring's fading edge): drawn before it, a speck writing no depth
       // was painted over by the mountain behind it, and Arnold's chain went out wherever it crossed Rainier's snow.
@@ -564,8 +567,10 @@ export class BodySystem {
       this.group.add(speck)
     }
     speck.position.copy(holder.position)
-    // Without attenuation a sprite's scale is the tangent of the angle it spans.
-    speck.scale.setScalar(frame.pixelRad * BodySystem.LEGIBLE_PIXELS)
+    // In metres at its distance, the angle of a pixel and a half of the picture: a size in the camera's own terms (no attenuation) was one
+    // in the terms of whichever camera drew it, and the eye's picture is drawn through a wider one and resampled (see
+    // EquidistantProjectionPass): Arnold's specks came out a quarter of the size, and a black one darkened its pixel by a sixth.
+    speck.scale.setScalar(distanceM * frame.pixelRad * BodySystem.LEGIBLE_PIXELS)
     speck.material.color.setRGB(radiance[0], radiance[1], radiance[2])
     speck.material.opacity = Math.min(1, contrast * air * clear * (1 - shape) * (1 - state.appearance.transparency))
     speck.visible = speck.material.opacity > 0
@@ -578,9 +583,7 @@ export class BodySystem {
    * no part of this, being a flash that its luminance states.
    */
   private mirrored(state: BodyState, holder: Group, toEye: Vector3, daylight: NonNullable<BodyFrame["daylight"]>, hue: number[], luminance: number): number[] {
-    const { widthM, lengthM, heightM } = state.sizeM
-    const axis = heightM <= widthM && heightM <= lengthM ? new Vector3(0, 1, 0) : widthM <= lengthM ? new Vector3(1, 0, 0) : new Vector3(0, 0, 1)
-    const normal = axis.applyQuaternion(holder.quaternion).normalize()
+    const normal = BodySystem.axisOf(state, holder)
     if (normal.dot(toEye) < 0) normal.negate()
     // The eye's line, from the eye to it, turned back off its face.
     const line = toEye.clone().negate()
@@ -589,8 +592,44 @@ export class BodySystem {
     return [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * source[c])
   }
 
-  /** How wide a speck is drawn, pixels (see shineReflected). */
-  private static readonly LEGIBLE_PIXELS = 1.5
+  /** The direction of a body's smallest axis, in the scene: across the face of a plate, a disc, a wing. */
+  private static axisOf(state: BodyState, holder: Group): Vector3 {
+    const { widthM, lengthM, heightM } = state.sizeM
+    const axis = heightM <= widthM && heightM <= lengthM ? new Vector3(0, 1, 0) : widthM <= lengthM ? new Vector3(1, 0, 0) : new Vector3(0, 0, 1)
+    return axis.applyQuaternion(holder.quaternion).normalize()
+  }
+
+  /** How much thinner than its other two axes a body is to be lit as a plate rather than as a ball (see plateLit). */
+  private static readonly PLATE_SHARE = 0.25
+
+  /** The axis across its face when a body is flat enough to be a plate, else nothing. */
+  private static faceOf(state: BodyState, holder: Group): Vector3 | undefined {
+    const sizes = [state.sizeM.widthM, state.sizeM.lengthM, state.sizeM.heightM].sort((a, b) => a - b)
+    return sizes[0] <= BodySystem.PLATE_SHARE * sizes[1] ? BodySystem.axisOf(state, holder) : undefined
+  }
+
+  /**
+   * A matt plate under a pixel: the face the eye sees, lit by the Sun only if it faces the Sun, and by the sky and the ground as it faces
+   * them. A ball shows the eye its sunlit side by its phase; a plate seen from below with the Sun above shows its shaded underside, lit by
+   * the ground alone. Arnold's craft, ninety metres above him, edge-on, were drawn as balls lit to the sky's own brightness and could not be
+   * seen; he saw "just a black thin line".
+   */
+  private plateLit(axis: Vector3, toEye: Vector3, daylight: NonNullable<BodyFrame["daylight"]>, albedo: number, hue: number[], luminance: number): number[] {
+    const normal = axis.clone()
+    if (normal.dot(toEye) < 0) normal.negate()
+    const sunlit = Math.max(0, normal.dot(daylight.towardSun))
+    // A hemisphere's light on a face: the sky's when it faces up, the ground's when down, as three.js lights it.
+    const up = 0.5 + 0.5 * normal.y
+    return [0, 1, 2].map(c => albedo * hue[c] / luminance / Math.PI
+      * (daylight.sun[c] * sunlit + daylight.ground[c] + (daylight.sky[c] - daylight.ground[c]) * up))
+  }
+
+  /**
+   * How wide a speck is drawn, pixels (see shineReflected): wide enough to cover a whole pixel wherever it falls. At a pixel and a half it
+   * straddled two to four and covered none, and what it took off each, through the eye's response and the screen's encoding, showed a
+   * fraction of its contrast: a black speck at full opacity darkened the sky by a sixth.
+   */
+  private static readonly LEGIBLE_PIXELS = 2.5
 
   private throughAir(rgb: readonly [number, number, number], at: Vector3): [number, number, number] {
     const transmittance = this.frame?.transmittance?.(at.x, at.y, at.z) ?? [1, 1, 1]
