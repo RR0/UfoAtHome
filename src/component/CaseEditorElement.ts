@@ -987,6 +987,8 @@ export class CaseEditorElement extends HTMLElement {
       this.editor.readings = readings.filter(reading => reading.recording?.interpretation?.bodies.length || InterpretationKinds.computes(reading.recording?.interpretation, InterpretationRegistry.kinds()))
         .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: reading.recording!.interpretation! }))
       this.editor.sightingData = structuredClone(track.recording!)
+      // Loaded again, the editor's fields hold no marks: checked whatever was checked before.
+      this.checked = undefined
       this.checkReading()
       // What the editor holds right after loading is what "changed" is measured from: it does not
       // write a recording back byte for byte, and a track only looked at is not one to write.
@@ -1046,16 +1048,25 @@ export class CaseEditorElement extends HTMLElement {
   /** See the "sightingchange" listener: how long the recording has to stay as it is before its reading is checked again. */
   private static readonly CHECK_READING_AFTER_MS = 250
   private checkReadingTimer?: ReturnType<typeof setTimeout>
+  /** The reading last checked, as it was then (see checkReading): a pause after playing changed nothing, and the check is not run again. */
+  private checked?: { track: CaseTrack, account: unknown, text: string }
 
   private checkReading(): void {
     clearTimeout(this.checkReadingTimer)
     const track = this.current
     const account = track && this.session ? this.session.accountOf(track) : undefined
     if (!track || track.kind !== "reading" || !account?.recording) {
+      this.checked = undefined
       this.editor.markBeyondKnown([])
       this.editor.setReadingBounds({})
       return
     }
+    // Not again for a reading that has not changed: each check searches the whole sky for its best case, 300 to 600 ms that froze the
+    // editor at every pause of Mount Rainier's playback. Its text is some 25 ms of it.
+    const reading = this.editor.sightingData
+    const text = JSON.stringify(reading)
+    if (this.checked && this.checked.track === track && this.checked.account === account.recording && this.checked.text === text) return
+    this.checked = { track, account: account.recording, text }
     // What the bounds of the account's values say, the fields themselves keep to; the rest (the Sun) is marked below.
     const known = Provenance.strip(account.recording).provenance
     const rangeOf = (path: string) => known.at(path)?.range
@@ -1069,7 +1080,7 @@ export class CaseEditorElement extends HTMLElement {
       ...(Array.isArray(lat) ? { lat } : {}),
       ...(Array.isArray(lng) ? { lng } : {})
     })
-    const failed = (this.readingCheck?.findingsOf(account.recording, this.editor.sightingData) ?? []).filter(finding => finding.outcome === "fails" && finding.path)
+    const failed = (this.readingCheck?.findingsOf(account.recording, reading) ?? []).filter(finding => finding.outcome === "fails" && finding.path)
     this.editor.markBeyondKnown(failed.map(finding => ({
       path: finding.path === "lighting" ? "time" : finding.path!,
       why: this.said.read(finding.text as never) ?? ""
