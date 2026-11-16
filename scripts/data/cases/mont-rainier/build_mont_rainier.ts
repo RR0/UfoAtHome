@@ -331,9 +331,10 @@ class Glint {
   static readonly SUN_CDM2 = 1.6e9
   static readonly SUN_RADIUS_DEG = 0.267
   static readonly REFLECTANCE = 0.85
-  static readonly SPREAD_DEG = 2
+  /** Six degrees, a satin rather than a mirror: lighter, longer and softer flashes than a mirror's (asked, 2026-11-16). */
+  static readonly SPREAD_DEG = 6
   /** How far off mirroring the Sun to him a flip comes, each way, degrees (ASSUMED). */
-  static readonly TILT_SPREAD_DEG = 2.5
+  static readonly TILT_SPREAD_DEG = 5
 
   /** Two standard normal draws, the same for the same seed (Box–Muller over a hash): each flip's own. */
   static gaussians(seed: number): [number, number] {
