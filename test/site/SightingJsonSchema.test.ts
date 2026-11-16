@@ -8,6 +8,10 @@ import schema from "../../src/generated/sighting.schema.json"
  * it, or the schema would be telling authors that files the player plays are wrong.
  */
 const validate = new Ajv2020({ allErrors: true, strict: false }).compile(schema)
+// The first recording with thousands of a body's keyframes (Mount Rainier's readings: nine craft, 1171 each) makes V8's Maglev compile
+// ajv's whole generated validator on the spot: 13 s once, then 40 ms a file (0.8 s with node --no-maglev). Nothing the recording is
+// wrong for, and nothing a reader pays (the player never validates): only the first file to make that loop hot waits for it, and the
+// hook after it (see test/setup.ts) with it, hence the suite's hookTimeout (vite.config.ts).
 // Read through Vite rather than node:fs, which the tests' own types do not include.
 const files = (import.meta as unknown as { glob: (pattern: string, options: object) => Record<string, Record<string, unknown>> })
   .glob("../../public/demo-data/*.json", { eager: true, import: "default" })

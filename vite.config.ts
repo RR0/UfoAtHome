@@ -22,6 +22,9 @@ export default defineConfig({
     setupFiles: ["test/setup.ts"],
     // Only bounds how long a FAILING test takes. The suite runs every file at once, and under that
     // load an editor test that takes one second alone has taken more than five, the default.
-    testTimeout: 30_000
+    testTimeout: 30_000,
+    // The same for the hooks, whose default (10 s) a test that blocks the worker carries over: the schema's first validation of a
+    // recording with thousands of keyframes takes 13 s of V8 compiling ajv's validator (see SightingJsonSchema.test.ts).
+    hookTimeout: 30_000
   }
 })
