@@ -11,6 +11,7 @@ import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import type { NearEmitter } from "./EmitterLights.js"
 import { LightFromBelow } from "./LightFromBelow.js"
+import { Translucency } from "./Translucency.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { LitFromWithin } from "./LitFromWithin.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
@@ -1113,6 +1114,7 @@ export class BodySystem {
       DecorSystem.applyModelParameters(loaded.scene, state.modelParameters, loaded.bindings)
       LitFromWithin.apply(loaded.scene)
       if (state.lightFromBelow) LightFromBelow.apply(loaded.scene)
+      if (state.translucency) Translucency.apply(loaded.scene, state.translucency)
       BodySystem.glaze(loaded.scene)
       holder.add(BodySystem.fit(loaded.scene, loaded.headingOffsetDeg ?? state.model.headingOffsetDeg ?? 0, state.shadow !== false))
       BodySystem.overlay(holder)
@@ -1352,7 +1354,7 @@ export class BodySystem {
 
   /** What the body is built from: its model and the settings applied to it once, as it arrives. */
   private static signatureOf(state: BodyState): string {
-    return `${state.model.id ?? ""}|${state.model.url ?? ""}|${state.modelParameters ? JSON.stringify(state.modelParameters) : ""}|${state.lightFromBelow ? "below" : ""}|${state.shadow === false ? "unshadowed" : ""}`
+    return `${state.model.id ?? ""}|${state.model.url ?? ""}|${state.modelParameters ? JSON.stringify(state.modelParameters) : ""}|${state.lightFromBelow ? "below" : ""}|${state.translucency ?? ""}|${state.shadow === false ? "unshadowed" : ""}`
   }
 
   /** A primitive, one metre along each axis and centred on the origin. */

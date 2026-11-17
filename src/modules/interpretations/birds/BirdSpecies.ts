@@ -115,6 +115,14 @@ export class BirdSpecies {
     }
   ]
 
+  /** How much of the light falling on the far side of its wings a feather lets through: ESTIMATED, the paler the plumage, the more. */
+  static readonly TRANSLUCENCY_PER_ALBEDO = 0.3
+
+  /** The share of the light its wings let through (see BodyJson.translucency): a white gull's some 0.2, a dark goose's under 0.1. */
+  static translucencyOf(species: BirdSpecies): number {
+    return Math.round(species.plumage.albedo * BirdSpecies.TRANSLUCENCY_PER_ALBEDO * 100) / 100
+  }
+
   static byId(id: string): BirdSpecies | undefined {
     return BirdSpecies.ALL.find(species => species.id === id)
   }

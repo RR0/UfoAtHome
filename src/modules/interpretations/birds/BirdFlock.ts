@@ -174,6 +174,7 @@ export class BirdFlock {
         shadow: false,
         ...(Object.keys(colours).length > 0 ? { modelParameters: colours } : {}),
         ...(flock.lightFromBelow ? { lightFromBelow: flock.lightFromBelow } : {}),
+        translucency: BirdSpecies.translucencyOf(species),
         track: keys
       }
       return body

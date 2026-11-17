@@ -107,12 +107,12 @@ function recording(id: string, options: { time: string, utcOffsetHours: number, 
   }
 }
 
-// Gulls over a harbour at sunset, the Sun under a degree up in the west behind them, lighting them from behind, when a low light makes the
+// Gulls over a harbour as the Sun sets, 5° up in the west behind them, lighting them from behind (lower, it only grazed their wings), when a low light makes the
 // most of what is seen in the sky: a V of herring gulls crossing, then one gull alone passing the other way, skimming the water, as a phone
 // at 1/60 s films it, following the V and then the one gull. The place is a real quay, the end of the Quai Eric Tabarly in Lorient's
 // harbour: its scenery is the IGN's survey of it. The flights are laid out as if towards the north, then turned (TOWARDS_SUN_DEG) to face
 // the setting Sun.
-const TOWARDS_SUN_DEG = -82
+const TOWARDS_SUN_DEG = -43
 const turned = (flock: BirdFlockJson): BirdFlockJson => {
   const a = TOWARDS_SUN_DEG * Math.PI / 180
   return { ...flock, path: flock.path.map(point => "eastM" in point ? {
@@ -124,25 +124,27 @@ const turned = (flock: BirdFlockJson): BirdFlockJson => {
 const GULL_V = turned({ id: "gull-v", species: "herring-gull", count: 9, formation: { kind: "v", angleDeg: 80 }, seed: 3,
   path: [{ t: 0, eastM: -120, northM: 110, altitudeM: 26 }, { t: 12000, eastM: 0, northM: 100, altitudeM: 30 }, { t: 24000, eastM: 130, northM: 80, altitudeM: 26 }] })
 // The gull alone flies as a gull does when it is not travelling: up on its beats, down on its glides, dropping to skim the water and
-// pulling up again (see BirdFlightStyle "path"), its reflection under it.
+// pulling up again (see BirdFlightStyle "path"), its reflection under it. It comes from behind the phone, on its right, and flies into
+// the picture while the phone is still on the V.
 const GULL_ALONE = turned({ id: "gull-alone", species: "herring-gull", formation: { kind: "single" }, seed: 7,
   flight: { kind: "path", beats: 4, glideS: 1.2 },
   path: [
+    { t: 9000, eastM: 170, northM: -60, altitudeM: 16 }, { t: 13500, eastM: 110, northM: 10, altitudeM: 12 },
     { t: 18000, eastM: 60, northM: 48, altitudeM: 10 }, { t: 20500, eastM: 45, northM: 42, altitudeM: 14 }, { t: 23000, eastM: 30, northM: 38, altitudeM: 15 },
     { t: 25000, eastM: 16, northM: 36, altitudeM: 5 }, { t: 26800, eastM: 2, northM: 37, altitudeM: 2 }, { t: 29000, eastM: -12, northM: 40, altitudeM: 10 },
     { t: 31500, eastM: -27, northM: 43, altitudeM: 12 }, { t: 33500, eastM: -40, northM: 42, altitudeM: 4 }, { t: 35000, eastM: -50, northM: 43, altitudeM: 2 },
     { t: 37000, eastM: -62, northM: 47, altitudeM: 9 }, { t: 39000, eastM: -78, northM: 52, altitudeM: 12 }
   ] })
 DemoFile.write("sky-test-birds-gulls.json", recording("sky-test-birds-gulls", {
-  time: "2025-09-14T20:20:00", utcOffsetHours: 2, durationSeconds: 40, place: { name: "Quai Éric Tabarly, Lorient harbour", lat: 47.73993, lng: -3.34987 },
+  time: "2025-09-14T19:55:00", utcOffsetHours: 2, durationSeconds: 40, place: { name: "Quai Éric Tabarly, Lorient harbour", lat: 47.73993, lng: -3.34987 },
   heading: 0, pitch: 12, fov: 50, instrument: "phone-landscape", exposureSeconds: 1 / 60,
   poses: Following.poses(GULL_V, GULL_ALONE, 18000, 3000, 40000),
   title: { en: "Gulls", fr: "Goélands", es: "Gaviotas", it: "Gabbiani" },
   description: {
-    en: "Herring gulls over Lorient's harbour at sunset, lit from behind by the Sun on the horizon: the phone follows a V of nine crossing in front, then one alone, beating, gliding, dropping to skim the water and climbing, the other way.",
-    fr: "Des goélands argentés au-dessus du port de Lorient au coucher du soleil, éclairés par l'arrière par le soleil sur l'horizon : le téléphone suit un V de neuf qui passe devant, puis un seul qui bat des ailes, plane, pique jusqu'à raser l'eau et remonte, dans l'autre sens.",
-    es: "Gaviotas argénteas sobre el puerto de Lorient al atardecer, iluminadas por detrás por el sol en el horizonte: el teléfono sigue una V de nueve que cruza delante, y luego una sola que aletea, planea, pica hasta rozar el agua y remonta, en sentido contrario.",
-    it: "Gabbiani reali sopra il porto di Lorient al tramonto, illuminati da dietro dal sole sull'orizzonte: il telefono segue una V di nove che passa davanti, poi uno solo che batte le ali, plana, picchia fino a sfiorare l'acqua e risale, nell'altro senso."
+    en: "Herring gulls over Lorient's harbour at sunset, lit from behind by the setting Sun: the phone follows a V of nine crossing in front, then one alone, beating, gliding, dropping to skim the water and climbing, the other way.",
+    fr: "Des goélands argentés au-dessus du port de Lorient au coucher du soleil, éclairés par l'arrière par le soleil couchant : le téléphone suit un V de neuf qui passe devant, puis un seul qui bat des ailes, plane, pique jusqu'à raser l'eau et remonte, dans l'autre sens.",
+    es: "Gaviotas argénteas sobre el puerto de Lorient al atardecer, iluminadas por detrás por el sol poniente: el teléfono sigue una V de nueve que cruza delante, y luego una sola que aletea, planea, pica hasta rozar el agua y remonta, en sentido contrario.",
+    it: "Gabbiani reali sopra il porto di Lorient al tramonto, illuminati da dietro dal sole calante: il telefono segue una V di nove che passa davanti, poi uno solo che batte le ali, plana, picchia fino a sfiorare l'acqua e risale, nell'altro senso."
   },
   birds: [GULL_V, GULL_ALONE]
 }))

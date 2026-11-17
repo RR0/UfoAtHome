@@ -248,6 +248,11 @@ export interface BodyJson {
    */
   lightFromBelow?: { lux: number, color?: string }
   /**
+   * The share of the light falling on one side of its thin parts that comes out of the other, scattered (0 to 1): a bird's wing seen against
+   * the Sun glows with what its feathers let through, where an opaque body is only a silhouette. Opaque when absent (see Translucency).
+   */
+  translucency?: number
+  /**
    * Whether the observer carries it: its keyframes, stated FROM THE OBSERVER, are offsets from their eye that go with the eye, instead
    * of points of the world fixed where the eye was at each keyframe's instant. What a thing that is part of the place they stand in
    * needs — a spot of light on the glass of a flight deck, half a metre from an airline pilot's eye, which the relief under an

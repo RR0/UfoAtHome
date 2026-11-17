@@ -6,12 +6,12 @@
     "misidentification"
   ],
   "description": {
-    "en": "Herring gulls over Lorient's harbour at sunset, lit from behind by the Sun on the horizon: the phone follows a V of nine crossing in front, then one alone, beating, gliding, dropping to skim the water and climbing, the other way.",
-    "fr": "Des goélands argentés au-dessus du port de Lorient au coucher du soleil, éclairés par l'arrière par le soleil sur l'horizon : le téléphone suit un V de neuf qui passe devant, puis un seul qui bat des ailes, plane, pique jusqu'à raser l'eau et remonte, dans l'autre sens.",
-    "es": "Gaviotas argénteas sobre el puerto de Lorient al atardecer, iluminadas por detrás por el sol en el horizonte: el teléfono sigue una V de nueve que cruza delante, y luego una sola que aletea, planea, pica hasta rozar el agua y remonta, en sentido contrario.",
-    "it": "Gabbiani reali sopra il porto di Lorient al tramonto, illuminati da dietro dal sole sull'orizzonte: il telefono segue una V di nove che passa davanti, poi uno solo che batte le ali, plana, picchia fino a sfiorare l'acqua e risale, nell'altro senso."
+    "en": "Herring gulls over Lorient's harbour at sunset, lit from behind by the setting Sun: the phone follows a V of nine crossing in front, then one alone, beating, gliding, dropping to skim the water and climbing, the other way.",
+    "fr": "Des goélands argentés au-dessus du port de Lorient au coucher du soleil, éclairés par l'arrière par le soleil couchant : le téléphone suit un V de neuf qui passe devant, puis un seul qui bat des ailes, plane, pique jusqu'à raser l'eau et remonte, dans l'autre sens.",
+    "es": "Gaviotas argénteas sobre el puerto de Lorient al atardecer, iluminadas por detrás por el sol poniente: el teléfono sigue una V de nueve que cruza delante, y luego una sola que aletea, planea, pica hasta rozar el agua y remonta, en sentido contrario.",
+    "it": "Gabbiani reali sopra il porto di Lorient al tramonto, illuminati da dietro dal sole calante: il telefono segue una V di nove che passa davanti, poi uno solo che batte le ali, plana, picchia fino a sfiorare l'acqua e risale, nell'altro senso."
   },
-  "time": "2025-09-14T20:20:00",
+  "time": "2025-09-14T19:55:00",
   "utcOffsetHours": 2,
   "durationSeconds": 40,
   "place": {
@@ -66,7 +66,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -130.2,
+          "headingDeg": -91.3,
           "pitchDeg": 8.3,
           "fovDeg": 50
         }
@@ -77,7 +77,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -128.1,
+          "headingDeg": -89.1,
           "pitchDeg": 8.8,
           "fovDeg": 50
         }
@@ -88,7 +88,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -125.6,
+          "headingDeg": -86.6,
           "pitchDeg": 9.4,
           "fovDeg": 50
         }
@@ -99,7 +99,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -123,
+          "headingDeg": -84,
           "pitchDeg": 10,
           "fovDeg": 50
         }
@@ -110,7 +110,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -120,
+          "headingDeg": -81,
           "pitchDeg": 10.7,
           "fovDeg": 50
         }
@@ -121,7 +121,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -116.8,
+          "headingDeg": -77.8,
           "pitchDeg": 11.4,
           "fovDeg": 50
         }
@@ -132,7 +132,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -113.2,
+          "headingDeg": -74.2,
           "pitchDeg": 12.1,
           "fovDeg": 50
         }
@@ -143,7 +143,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -109.3,
+          "headingDeg": -70.3,
           "pitchDeg": 12.9,
           "fovDeg": 50
         }
@@ -154,7 +154,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -105,
+          "headingDeg": -66,
           "pitchDeg": 13.6,
           "fovDeg": 50
         }
@@ -165,7 +165,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -100.3,
+          "headingDeg": -61.3,
           "pitchDeg": 14.3,
           "fovDeg": 50
         }
@@ -176,7 +176,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -95.2,
+          "headingDeg": -56.3,
           "pitchDeg": 14.9,
           "fovDeg": 50
         }
@@ -187,7 +187,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -89.8,
+          "headingDeg": -50.8,
           "pitchDeg": 15.4,
           "fovDeg": 50
         }
@@ -198,7 +198,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -84.1,
+          "headingDeg": -45.1,
           "pitchDeg": 15.7,
           "fovDeg": 50
         }
@@ -209,7 +209,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -78.1,
+          "headingDeg": -39.1,
           "pitchDeg": 15.9,
           "fovDeg": 50
         }
@@ -220,7 +220,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -71.9,
+          "headingDeg": -33,
           "pitchDeg": 15.8,
           "fovDeg": 50
         }
@@ -231,7 +231,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -65.8,
+          "headingDeg": -26.8,
           "pitchDeg": 15.6,
           "fovDeg": 50
         }
@@ -242,7 +242,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -59.7,
+          "headingDeg": -20.7,
           "pitchDeg": 15.1,
           "fovDeg": 50
         }
@@ -253,7 +253,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -53.9,
+          "headingDeg": -14.9,
           "pitchDeg": 14.5,
           "fovDeg": 50
         }
@@ -264,7 +264,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -48.4,
+          "headingDeg": -9.5,
           "pitchDeg": 13.8,
           "fovDeg": 50
         }
@@ -275,8 +275,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -39.7,
-          "pitchDeg": 11.4,
+          "headingDeg": -1.3,
+          "pitchDeg": 11.2,
           "fovDeg": 50
         }
       },
@@ -286,8 +286,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -35.4,
-          "pitchDeg": 10.8,
+          "headingDeg": 3.2,
+          "pitchDeg": 10.9,
           "fovDeg": 50
         }
       },
@@ -297,8 +297,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -36.1,
-          "pitchDeg": 12.3,
+          "headingDeg": 2.7,
+          "pitchDeg": 12.4,
           "fovDeg": 50
         }
       },
@@ -308,7 +308,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -39.5,
+          "headingDeg": -0.8,
           "pitchDeg": 14.7,
           "fovDeg": 50
         }
@@ -319,8 +319,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -43.6,
-          "pitchDeg": 15.5,
+          "headingDeg": -4.7,
+          "pitchDeg": 15.4,
           "fovDeg": 50
         }
       },
@@ -330,7 +330,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -50,
+          "headingDeg": -10.7,
           "pitchDeg": 11.4,
           "fovDeg": 50
         }
@@ -341,8 +341,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -58.5,
-          "pitchDeg": 4.9,
+          "headingDeg": -19.4,
+          "pitchDeg": 5,
           "fovDeg": 50
         }
       },
@@ -352,8 +352,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -69,
-          "pitchDeg": 0.8,
+          "headingDeg": -30,
+          "pitchDeg": 1,
           "fovDeg": 50
         }
       },
@@ -363,8 +363,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -80.8,
-          "pitchDeg": 0.9,
+          "headingDeg": -41.6,
+          "pitchDeg": 1,
           "fovDeg": 50
         }
       },
@@ -374,8 +374,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -90.8,
-          "pitchDeg": 6.6,
+          "headingDeg": -51.9,
+          "pitchDeg": 6.4,
           "fovDeg": 50
         }
       },
@@ -385,8 +385,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -98.4,
-          "pitchDeg": 11.4,
+          "headingDeg": -59.7,
+          "pitchDeg": 11.2,
           "fovDeg": 50
         }
       },
@@ -396,8 +396,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -105.5,
-          "pitchDeg": 12.6,
+          "headingDeg": -66.6,
+          "pitchDeg": 12.7,
           "fovDeg": 50
         }
       },
@@ -407,8 +407,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -111.7,
-          "pitchDeg": 12.3,
+          "headingDeg": -72.9,
+          "pitchDeg": 12.5,
           "fovDeg": 50
         }
       },
@@ -418,8 +418,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -117.1,
-          "pitchDeg": 9.7,
+          "headingDeg": -78.2,
+          "pitchDeg": 9.8,
           "fovDeg": 50
         }
       },
@@ -429,8 +429,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -123,
-          "pitchDeg": 4.4,
+          "headingDeg": -83.7,
+          "pitchDeg": 4.3,
           "fovDeg": 50
         }
       },
@@ -440,8 +440,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -128,
-          "pitchDeg": 1,
+          "headingDeg": -88.8,
+          "pitchDeg": 0.9,
           "fovDeg": 50
         }
       },
@@ -451,8 +451,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -131.2,
-          "pitchDeg": 0.3,
+          "headingDeg": -92.2,
+          "pitchDeg": 0.2,
           "fovDeg": 50
         }
       },
@@ -462,8 +462,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -133.1,
-          "pitchDeg": 2.8,
+          "headingDeg": -94.3,
+          "pitchDeg": 2.9,
           "fovDeg": 50
         }
       },
@@ -473,8 +473,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -134.8,
-          "pitchDeg": 5.3,
+          "headingDeg": -96.1,
+          "pitchDeg": 5.4,
           "fovDeg": 50
         }
       },
@@ -484,8 +484,8 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -136.7,
-          "pitchDeg": 6,
+          "headingDeg": -97.8,
+          "pitchDeg": 6.1,
           "fovDeg": 50
         }
       },
@@ -495,7 +495,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -138.4,
+          "headingDeg": -99.3,
           "pitchDeg": 6.3,
           "fovDeg": 50
         }
@@ -506,7 +506,7 @@
           "lat": 47.73993,
           "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": -138.4,
+          "headingDeg": -99.3,
           "pitchDeg": 6.3,
           "fovDeg": 50
         }
@@ -537,20 +537,20 @@
         "path": [
           {
             "t": 0,
-            "eastM": -125.6,
-            "northM": -103.5,
+            "eastM": -162.8,
+            "northM": -1.4,
             "altitudeM": 26
           },
           {
             "t": 12000,
-            "eastM": -99,
-            "northM": 13.9,
+            "eastM": -68.2,
+            "northM": 73.1,
             "altitudeM": 30
           },
           {
             "t": 24000,
-            "eastM": -61.1,
-            "northM": 139.9,
+            "eastM": 40.5,
+            "northM": 147.2,
             "altitudeM": 26
           }
         ]
@@ -569,69 +569,81 @@
         },
         "path": [
           {
+            "t": 9000,
+            "eastM": 165.3,
+            "northM": 72.1,
+            "altitudeM": 16
+          },
+          {
+            "t": 13500,
+            "eastM": 73.6,
+            "northM": 82.3,
+            "altitudeM": 12
+          },
+          {
             "t": 18000,
-            "eastM": -39.2,
-            "northM": 66.1,
+            "eastM": 11.1,
+            "northM": 76,
             "altitudeM": 10
           },
           {
             "t": 20500,
-            "eastM": -35.3,
-            "northM": 50.4,
+            "eastM": 4.3,
+            "northM": 61.4,
             "altitudeM": 14
           },
           {
             "t": 23000,
-            "eastM": -33.5,
-            "northM": 35,
+            "eastM": -4,
+            "northM": 48.3,
             "altitudeM": 15
           },
           {
             "t": 25000,
-            "eastM": -33.4,
-            "northM": 20.9,
+            "eastM": -12.9,
+            "northM": 37.2,
             "altitudeM": 5
           },
           {
             "t": 26800,
-            "eastM": -36.4,
-            "northM": 7.1,
+            "eastM": -23.8,
+            "northM": 28.4,
             "altitudeM": 2
           },
           {
             "t": 29000,
-            "eastM": -41.3,
-            "northM": -6.3,
+            "eastM": -36.1,
+            "northM": 21.1,
             "altitudeM": 10
           },
           {
             "t": 31500,
-            "eastM": -46.3,
-            "northM": -20.8,
+            "eastM": -49.1,
+            "northM": 13,
             "altitudeM": 12
           },
           {
             "t": 33500,
-            "eastM": -47.2,
-            "northM": -33.8,
+            "eastM": -57.9,
+            "northM": 3.4,
             "altitudeM": 4
           },
           {
             "t": 35000,
-            "eastM": -49.5,
-            "northM": -43.5,
+            "eastM": -65.9,
+            "northM": -2.7,
             "altitudeM": 2
           },
           {
             "t": 37000,
-            "eastM": -55.2,
-            "northM": -54.9,
+            "eastM": -77.4,
+            "northM": -7.9,
             "altitudeM": 9
           },
           {
             "t": 39000,
-            "eastM": -62.3,
-            "northM": -70,
+            "eastM": -92.5,
+            "northM": -15.2,
             "altitudeM": 12
           }
         ]
