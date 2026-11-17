@@ -40,7 +40,7 @@ export class GlassMaterial extends ShaderMaterial {
   constructor(indexOfRefraction = 1.5) {
     super({
       uniforms: {
-        ...GlassMaterial.SUN,
+        ...GlassMaterial.DISCS,
         uSurroundings: { value: null },
         uIndex: { value: indexOfRefraction },
         uAbsorption: { value: GlassMaterial.ABSORPTION }
@@ -60,9 +60,9 @@ export class GlassMaterial extends ShaderMaterial {
       fragmentShader: `
         precision highp float;
         uniform samplerCube uSurroundings;
-        uniform vec3 uSunDirection;
-        uniform float uSunCosRadius;
-        uniform vec3 uSunRadiance;
+        uniform vec3 uDiscDirection[2];
+        uniform float uDiscCosRadius[2];
+        uniform vec3 uDiscRadiance[2];
         uniform float uIndex;
         uniform float uAbsorption;
         varying vec3 vWorldPosition;
@@ -86,8 +86,8 @@ export class GlassMaterial extends ShaderMaterial {
           float wall = 2.0 * once / (1.0 + once);
           vec3 mirrored = reflect(view, normal);
           vec3 around = textureCube(uSurroundings, mirrored).rgb;
-          // The Sun's disc, which the probe leaves out (see GlassMaterial.setSun).
-          if (dot(normalize(mirrored), uSunDirection) >= uSunCosRadius) around += uSunRadiance;
+          // The Sun's and the Moon's discs, which the probe leaves out (see GlassMaterial.setDisc).
+          for (int i = 0; i < 2; i++) if (dot(normalize(mirrored), uDiscDirection[i]) >= uDiscCosRadius[i]) around += uDiscRadiance[i];
           gl_FragColor = vec4(around * wall, wall + (1.0 - wall) * uAbsorption);
         }
       `,
@@ -109,26 +109,31 @@ export class GlassMaterial extends ShaderMaterial {
   }
 
   /**
-   * The Sun's disc, shared by every glass: where it is (a unit direction in the scene's frame), how wide, and its radiance as the sky draws
-   * it. The probe leaves the disc out, since every other glossy surface has it from the Sun's light (see SceneRenderer.refreshReflections),
-   * and glass, which mirrors the photograph sharp, would have lost the windscreen's glint of the Sun.
+   * The discs of the Sun and the Moon, shared by every glass: where each is (a unit direction in the scene's frame), how wide, and its
+   * radiance as the sky draws it (the Moon's averaged over its whole disc, its phase taken as the share lit: half a degree in a windscreen
+   * does not show a crescent). The probe leaves the discs out, since every other glossy surface has them from their lights (see
+   * SceneRenderer.refreshReflections), and glass, which mirrors the photograph sharp, would have lost the windscreen's glint of the Sun.
    */
-  private static readonly SUN = {
-    uSunDirection: { value: new Vector3(0, 1, 0) },
-    uSunCosRadius: { value: 2 },
-    uSunRadiance: { value: new Vector3() }
+  private static readonly DISCS = {
+    uDiscDirection: { value: [new Vector3(0, 1, 0), new Vector3(0, 1, 0)] },
+    uDiscCosRadius: { value: [2, 2] },
+    uDiscRadiance: { value: [new Vector3(), new Vector3()] }
   }
 
-  /** Where the Sun's disc is and how bright, or undefined when none is drawn (see SUN). */
-  static setSun(sun: { direction: [number, number, number], radiusRad: number, radiance: [number, number, number] } | undefined): void {
-    if (!sun) {
-      GlassMaterial.SUN.uSunCosRadius.value = 2
-      GlassMaterial.SUN.uSunRadiance.value.set(0, 0, 0)
+  private static readonly DISC_INDEX = { sun: 0, moon: 1 } as const
+
+  /** Where the Sun's or the Moon's disc is and how bright, or undefined when none is drawn (see DISCS). */
+  static setDisc(key: "sun" | "moon", disc: { direction: [number, number, number], radiusRad: number, radiance: [number, number, number] } | undefined): void {
+    const i = GlassMaterial.DISC_INDEX[key]
+    const discs = GlassMaterial.DISCS
+    if (!disc) {
+      discs.uDiscCosRadius.value[i] = 2
+      discs.uDiscRadiance.value[i].set(0, 0, 0)
       return
     }
-    GlassMaterial.SUN.uSunDirection.value.set(...sun.direction).normalize()
-    GlassMaterial.SUN.uSunCosRadius.value = Math.cos(sun.radiusRad)
-    GlassMaterial.SUN.uSunRadiance.value.set(...sun.radiance)
+    discs.uDiscDirection.value[i].set(...disc.direction).normalize()
+    discs.uDiscCosRadius.value[i] = Math.cos(disc.radiusRad)
+    discs.uDiscRadiance.value[i].set(...disc.radiance)
   }
 
   /** What stands round this glass, as a probe photographed it — see ReflectionProbe. */

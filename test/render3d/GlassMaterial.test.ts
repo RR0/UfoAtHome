@@ -29,17 +29,19 @@ describe("a thin wall of glass", () => {
   })
 })
 
-describe("GlassMaterial's Sun", () => {
-  it("is the same disc for every glass, which the probe no longer holds", () => {
-    const Glass = GlassMaterial
-    const a = new Glass(), b = new Glass()
-    Glass.setSun({ direction: [0, 0.1, -1], radiusRad: 0.00465, radiance: [5, 4, 3] })
-    expect(a.uniforms.uSunRadiance.value.toArray()).toEqual([5, 4, 3])
-    expect(b.uniforms.uSunCosRadius.value).toBeCloseTo(Math.cos(0.00465), 9)
-    expect(a.uniforms.uSunDirection.value.length()).toBeCloseTo(1, 9)
-    expect(a.fragmentShader).toContain("uSunCosRadius")
-    Glass.setSun(undefined)
-    expect(b.uniforms.uSunRadiance.value.toArray()).toEqual([0, 0, 0])
-    expect(a.uniforms.uSunCosRadius.value).toBeGreaterThan(1)
+describe("GlassMaterial's discs", () => {
+  it("are the same Sun and Moon for every glass, which the probe no longer holds", () => {
+    const a = new GlassMaterial(), b = new GlassMaterial()
+    GlassMaterial.setDisc("sun", { direction: [0, 0.1, -1], radiusRad: 0.00465, radiance: [5, 4, 3] })
+    GlassMaterial.setDisc("moon", { direction: [1, 0.2, 0], radiusRad: 0.0045, radiance: [0.5, 0.5, 0.6] })
+    expect(a.uniforms.uDiscRadiance.value[0].toArray()).toEqual([5, 4, 3])
+    expect(b.uniforms.uDiscRadiance.value[1].toArray()).toEqual([0.5, 0.5, 0.6])
+    expect(b.uniforms.uDiscCosRadius.value[0]).toBeCloseTo(Math.cos(0.00465), 9)
+    expect(a.uniforms.uDiscDirection.value[1].length()).toBeCloseTo(1, 9)
+    expect(a.fragmentShader).toContain("uDiscCosRadius")
+    GlassMaterial.setDisc("sun", undefined)
+    expect(b.uniforms.uDiscRadiance.value[0].toArray()).toEqual([0, 0, 0])
+    expect(a.uniforms.uDiscCosRadius.value[0]).toBeGreaterThan(1)
+    expect(a.uniforms.uDiscRadiance.value[1].toArray()).toEqual([0.5, 0.5, 0.6])
   })
 })

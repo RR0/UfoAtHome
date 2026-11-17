@@ -5343,11 +5343,12 @@ export class SceneRenderer {
     // The veils are in the eye, not in the world: nothing mirrors them.
     // Nor the specks a body under a pixel is drawn as (see BodySystem.shineReflected): a pixel and a half of the picture, not a thing of
     // the world. Photographed, the pelicans' lit the light round Arnold three times over, and his windscreen mirrored it in a pale veil.
-    // Nor the Sun's disc: it is a light of the scene, whose glint three draws on every glossy surface (the column of light on water); in the
-    // probe as well, it was counted twice, and the blurred photograph of a hundred and twenty-eight pixels made of it a bright square in the
-    // water under the column. Glass, which mirrors the photograph sharp, is given the disc itself (see GlassMaterial.setSun).
-    const sunDisc = this.bodyMeshes.get("sun")
-    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []), ...(sunDisc ? [sunDisc] : []),
+    // Nor the discs of the Sun and the Moon: each is a light of the scene, whose glint three draws on every glossy surface (the column of
+    // light on water); in the probe as well, it was counted twice, and the blurred photograph of a hundred and twenty-eight pixels made of
+    // it a bright square in the water under the column. Glass, which mirrors the photograph sharp, is given the discs themselves (see
+    // GlassMaterial.setDisc).
+    const discs: Object3D[] = (["sun", "moon"] as const).flatMap(key => this.bodyMeshes.get(key) ?? [])
+    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []), ...discs,
       ...[...this.glareSprites.values()].map(veil => veil.mesh),
       ...this.bodySystem.group.children.filter(child => child.name.startsWith("body-speck:"))]
     // The points the eye resolves stars and planets to carry more light than they send (see
@@ -7694,7 +7695,7 @@ export class SceneRenderer {
       this.disposeGlare(key)
       if (key === "sun") {
         this.sunVisible = false
-        GlassMaterial.setSun(undefined)
+        GlassMaterial.setDisc("sun", undefined)
       }
       return
     }
@@ -7728,7 +7729,7 @@ export class SceneRenderer {
       ;(mesh.material as MeshBasicMaterial).color.setRGB(shown[0], shown[1], shown[2])
       mesh.scale.setScalar(visualRadius)
       // Glass mirrors the disc itself, sharp, where the probe no longer has it (see refreshReflections).
-      GlassMaterial.setSun({ direction: [x / BODY_PLACEMENT_RADIUS, y / BODY_PLACEMENT_RADIUS, z / BODY_PLACEMENT_RADIUS],
+      GlassMaterial.setDisc("sun", { direction: [x / BODY_PLACEMENT_RADIUS, y / BODY_PLACEMENT_RADIUS, z / BODY_PLACEMENT_RADIUS],
         radiusRad: Math.atan(visualRadius / BODY_PLACEMENT_RADIUS), radiance: shown as [number, number, number] })
     } else {
       // Everything else is a point to the eye, drawn from its illuminance (see PointSources).
@@ -7804,6 +7805,7 @@ export class SceneRenderer {
       this.bodyMeshes.delete(key)
       this.disposeHitArea(key)
       this.disposeGlare(key)
+      GlassMaterial.setDisc("moon", undefined)
       return
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
@@ -7817,6 +7819,10 @@ export class SceneRenderer {
     const radius = BODY_PLACEMENT_RADIUS * Math.tan(radiusDeg * DEG_TO_RAD)
     const lit = Math.max(clamp(position.phase.illuminatedFraction, 0, 1), 0.01) * Math.PI * (radius / BODY_PLACEMENT_RADIUS) ** 2
     const tintColor = new Color(...arriving.map(value => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, value / lit)) as [number, number, number])
+    // Glass mirrors it from here, the probe leaving it out (see refreshReflections): its light over its whole disc.
+    const wholeDisc = Math.PI * (radius / BODY_PLACEMENT_RADIUS) ** 2
+    GlassMaterial.setDisc("moon", { direction: [x / BODY_PLACEMENT_RADIUS, y / BODY_PLACEMENT_RADIUS, z / BODY_PLACEMENT_RADIUS],
+      radiusRad: radiusDeg * DEG_TO_RAD, radiance: arriving.map(value => Math.min(SceneRenderer.BRIGHTEST_RELATIVE, value / wholeDisc)) as [number, number, number] })
     // The disc is drawn again only once its lit part has moved by a fifth of a percent of its
     // width, a quarter of a pixel of the 128 px texture: the phase turns a thirtieth per day, so a
     // recording of minutes keeps one drawing where it used to draw and upload one per restatement.
