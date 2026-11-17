@@ -172,6 +172,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     frame(): void {}
     compileNextFrameOffThread(): void {}
     holdForNewScene(): void {}
+    holdUntil(): void {}
     suspend(): void {
       sightCalls.push("suspend")
     }

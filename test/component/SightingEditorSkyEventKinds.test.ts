@@ -159,6 +159,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     frame(): void {}
     compileNextFrameOffThread(): void {}
     holdForNewScene(): void {}
+    holdUntil(): void {}
     releaseContext(): void {}
     restoreContext(): void {}
     stopTwinkle(): void {}
@@ -292,7 +293,7 @@ describe("a kind of event of the sky a module brings", () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: {
       skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }],
       interpretations: [{ id: "balloons", name: "Balloons", credit: "©", creditUrl: "https://example.org", create: () => ({
-        key: "balloons", messages: Messages.catalog({ en: async () => ({ title: "Balloons" }), fr: async () => ({ title: "Ballons" }), es: async () => ({ title: "Globos" }), it: async () => ({ title: "Palloni" }) }), bodiesOf: () => [],
+        key: "balloons", messages: Messages.catalog({ en: async () => ({ title: "Balloons" }), fr: async () => ({ title: "Ballons" }), es: async () => ({ title: "Globos" }), it: async () => ({ title: "Palloni" }) }), compute: async () => () => [],
         editor: async () => () => ({ sync: () => undefined, refresh: () => undefined, setLanguage: async () => undefined })
       }) }]
     } })

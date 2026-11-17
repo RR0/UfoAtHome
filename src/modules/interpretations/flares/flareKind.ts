@@ -1,6 +1,5 @@
 import { FLARE_KIND_MESSAGES } from "./messages/FlareKindMessages.js"
 import type { InterpretationKind } from "../InterpretationKind.js"
-import { DecoyFlare } from "./DecoyFlare.js"
 import type { FlareSalvoJson } from "./DecoyFlare.js"
 
 /** Salvoes of decoy flares an aircraft dispensed, computed into the aircraft and one body per flare (see FlareSalvoJson, DecoyFlare). Edited
@@ -8,5 +7,5 @@ import type { FlareSalvoJson } from "./DecoyFlare.js"
 export const FLARE_KIND: InterpretationKind<FlareSalvoJson> = {
   key: "flares",
   messages: FLARE_KIND_MESSAGES,
-  bodiesOf: salvo => DecoyFlare.bodiesOf(salvo)
+  compute: () => import("./DecoyFlare.js").then(({ DecoyFlare }) => salvo => DecoyFlare.bodiesOf(salvo))
 }

@@ -54,9 +54,9 @@ export const modulesPanelMessages_es: ModulesPanelMessages = {
     drawnWithoutEvents: "drawnCount vale {detail} sin ningún evento.",
     disposeThrew: "dispose ha fallado: {detail}",
     disposeLeft: "dispose deja su objeto en la escena.",
-    readingNotTried: "bodiesOf no se probó: la grabación abierta no declara ninguna.",
-    readingThrew: "bodiesOf ha fallado: {detail}",
-    readingNotAList: "bodiesOf no devuelve una lista, aunque se llama de forma síncrona."
+    readingNotTried: "compute no se probó: la grabación abierta no declara ninguna.",
+    readingThrew: "compute, o lo que da, ha fallado: {detail}",
+    readingNotAList: "Lo que da compute no devuelve una lista, aunque se llama de forma síncrona."
   },
   points: {
     weather: "meteorología", place: "lugares", timeZone: "husos horarios", narrative: "redacción", assessment: "evaluaciones",

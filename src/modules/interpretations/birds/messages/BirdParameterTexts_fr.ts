@@ -23,6 +23,8 @@ export const birdParameterTexts_fr = {
   abreast: "De front",
   aLooseCrowd: "Une foule lâche",
   aFlockThatFliesItself: "Une nuée qui vole d'elle-même",
+  informed: "Informés",
+  aFewKnowWhereTheFlockIsGoing: "La part des oiseaux qui savent le mieux où va la nuée, et la mènent par leurs voisins ; les autres ne le sentent que faiblement. Un virage commence par eux.",
   angleBetweenTheArms: "Angle entre les branches",
   aGooseVMeasures: "Un V d'oies mesure 34° en photographie, 70° au radar.",
   onTheRightArm: "Sur la branche droite",

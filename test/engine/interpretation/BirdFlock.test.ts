@@ -141,6 +141,62 @@ describe("BirdFlock", () => {
     expect(east).toBeGreaterThan(200)
   })
 
+  describe("a flock that flies itself", () => {
+    /** East, then a right-angle turn to the south, level: what a flock has to take whole. */
+    const turning: BirdFlockJson["path"] = [
+      { t: 0, eastM: -300, northM: 500, altitudeM: 80 }, { t: 15000, eastM: 0, northM: 500, altitudeM: 80 },
+      { t: 22000, eastM: 60, northM: 430, altitudeM: 80 }, { t: 40000, eastM: 60, northM: 200, altitudeM: 80 }
+    ]
+    const flockOf = (count: number, extra: Partial<BirdFlockJson> = {}) =>
+      BirdFlock.bodiesOf({ id: "f", species: "american-golden-plover", count, formation: { kind: "flock" }, path: turning, seed: 3, ...extra })
+    const nearestKey = (track: { t: number }[], t: number) => track.reduce((best, key) => Math.abs(key.t - t) < Math.abs(best.t - t) ? key : best)
+    const at = (bodies: ReturnType<typeof flockOf>, t: number) => bodies.map(body => nearestKey(body.track, t) as unknown as { eastM: number, northM: number, altitudeM: number })
+    const centre = (keys: { eastM: number, northM: number, altitudeM: number }[]) => ({
+      eastM: keys.reduce((sum, key) => sum + key.eastM, 0) / keys.length,
+      northM: keys.reduce((sum, key) => sum + key.northM, 0) / keys.length,
+      altitudeM: keys.reduce((sum, key) => sum + key.altitudeM, 0) / keys.length
+    })
+
+    test("takes a right-angle turn whole, every bird turning, none left behind", () => {
+      const bodies = flockOf(300)
+      for (const t of [10000, 25000, 40000]) {
+        const keys = at(bodies, t)
+        const middle = centre(keys)
+        expect(Math.max(...keys.map(key => Math.hypot(key.eastM - middle.eastM, key.northM - middle.northM)))).toBeLessThan(30)
+      }
+      // At the end, on the path's last leg, heading south.
+      const end = centre(at(bodies, 40000))
+      expect(Math.hypot(end.eastM - 60, end.northM - 200)).toBeLessThan(40)
+    })
+
+    test("is a few birds thick, flatter up and down than across", () => {
+      const keys = at(flockOf(300), 35000)
+      const middle = centre(keys)
+      const spread = (pick: (key: typeof keys[number]) => number, mean: number) => Math.sqrt(keys.reduce((sum, key) => sum + (pick(key) - mean) ** 2, 0) / keys.length)
+      const vertical = spread(key => key.altitudeM, middle.altitudeM)
+      const across = Math.hypot(spread(key => key.eastM, middle.eastM), spread(key => key.northM, middle.northM))
+      expect(across / vertical).toBeGreaterThan(2)
+    })
+
+    test("climbs as its path climbs", () => {
+      const climbing: BirdFlockJson["path"] = [{ t: 0, eastM: 0, northM: 0, altitudeM: 50 }, { t: 20000, eastM: 300, northM: 0, altitudeM: 150 }]
+      const keys = at(BirdFlock.bodiesOf({ id: "c", species: "american-golden-plover", count: 100, formation: { kind: "flock" }, path: climbing, seed: 1 }), 20000)
+      expect(centre(keys).altitudeM).toBeGreaterThan(130)
+    })
+
+    test("follows the share of informed birds it states, the same for the same seed", () => {
+      expect(JSON.stringify(flockOf(60, { formation: { kind: "flock", informed: 0.5 } }))).toBe(JSON.stringify(flockOf(60, { formation: { kind: "flock", informed: 0.5 } })))
+      expect(JSON.stringify(flockOf(60, { formation: { kind: "flock", informed: 0.5 }, seed: 4 }))).not.toBe(JSON.stringify(flockOf(60, { formation: { kind: "flock", informed: 0.05 }, seed: 4 })))
+    })
+
+    test("computes a thousand birds in a time that grows as their number, not its square", () => {
+      const started = performance.now()
+      expect(flockOf(1000)).toHaveLength(1000)
+      // Some 2.4 s on a laptop, where the square took 12.
+      expect(performance.now() - started).toBeLessThan(8000)
+    }, 20000)
+  })
+
   test("a waypoint given as a direction from the origin is put where that line reaches", () => {
     const [point] = BirdFlock.pathOf({ id: "", species: "", path: [{ t: 0, azimuthDeg: 90, altitudeDeg: 30, distanceM: 200, eyeHeightM: 0 }] })
     expect(point.eastM).toBeCloseTo(200 * Math.cos(Math.PI / 6), 6)
@@ -148,9 +204,11 @@ describe("BirdFlock", () => {
     expect(point.upM).toBeCloseTo(100, 6)
   })
 
-  test("is a kind of interpretation, under `birds`", () => {
+  test("is a kind of interpretation, under `birds`", async () => {
     const kinds = InterpretationRegistry.kinds()
-    const expanded = InterpretationKinds.expand({ bodies: [], birds: [{ id: "g", species: "herring-gull", count: 3, path }] } as never, kinds)
+    const stated = { bodies: [], birds: [{ id: "g", species: "herring-gull", count: 3, path }] } as never
+    await InterpretationKinds.load(stated, kinds)
+    const expanded = InterpretationKinds.expand(stated, kinds)
     expect(expanded.bodies).toHaveLength(3)
   })
 })

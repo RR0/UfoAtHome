@@ -1,4 +1,6 @@
 import { describe, expect, it, afterEach, beforeAll, vi } from "vitest"
+import { InterpretationRegistry } from "../../src/modules/interpretations/interpretationSources.js"
+import { InterpretationKinds } from "../../src/modules/interpretations/InterpretationKind.js"
 import { SourceCredentials } from "../../src/engine/source/SourceCredentials.js"
 import { sightingLabels_en } from "../../src/component/messages/SightingLabels_en.js"
 import { Vector3 } from "three"
@@ -168,6 +170,7 @@ vi.mock("../../src/render3d/SceneRenderer.js", () => ({
     frame(): void {}
     compileNextFrameOffThread(): void {}
     holdForNewScene(): void {}
+    holdUntil(): void {}
     releaseContext(): void {}
     restoreContext(): void {}
     stopTwinkle(): void {}
@@ -3143,6 +3146,8 @@ describe("SightingEditorElement canvas mode", () => {
   it("keeps a reading's lanterns in the scene while the shapes are edited, without its bodies", async () => {
     const element = await mount()
     const lanterns = [{ id: "l", site: { eastM: 0, northM: 1500 }, group: { count: 3, fromT: 0, untilT: 10000 } }]
+    // The lanterns' code is loaded the first time a reading has some (see InterpretationKind.compute): here, before.
+    await InterpretationKinds.load({ bodies: [], lanterns } as never, InterpretationRegistry.kinds())
     element.sightingData = { ...withPicture(), interpretation: { bodies: [{ id: "b", model: { id: "sphere" }, track: [] }], lanterns } }
     open(element, "group-shape")
     // What the scene holds is computed: the lanterns as bodies of their own, and none of the reading's.

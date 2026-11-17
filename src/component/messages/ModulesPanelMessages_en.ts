@@ -54,9 +54,9 @@ export const modulesPanelMessages_en: ModulesPanelMessages = {
     drawnWithoutEvents: "drawnCount is {detail} with no events.",
     disposeThrew: "dispose failed: {detail}",
     disposeLeft: "dispose leaves its object in the scene.",
-    readingNotTried: "bodiesOf was not tried: the open recording states none.",
-    readingThrew: "bodiesOf failed: {detail}",
-    readingNotAList: "bodiesOf does not return a list, though it is called synchronously."
+    readingNotTried: "compute was not tried: the open recording states none.",
+    readingThrew: "compute, or what it gives, failed: {detail}",
+    readingNotAList: "What compute gives does not return a list, though it is called synchronously."
   },
   points: {
     weather: "weather", place: "places", timeZone: "time zones", narrative: "drafting", assessment: "assessments",

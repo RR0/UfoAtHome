@@ -214,7 +214,7 @@ describe("ModuleConformance", () => {
   })
 
   describe("for a kind of interpretation", () => {
-    const reading = (bodiesOf: (item: unknown) => unknown) => ({ key: "lights", messages: { load: async () => ({ title: "Lights" }) }, bodiesOf })
+    const reading = (bodiesOf: (item: unknown) => unknown) => ({ key: "lights", messages: { load: async () => ({ title: "Lights" }) }, compute: async () => bodiesOf })
     const readingOf = (kind: unknown, context?: ConformanceContext) => check({ interpretations: [entry("lights", kind)] }, context)
 
     it("says it was not tried when the recording on show states none", async () => {

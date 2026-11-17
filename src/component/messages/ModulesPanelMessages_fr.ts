@@ -54,9 +54,9 @@ export const modulesPanelMessages_fr: ModulesPanelMessages = {
     drawnWithoutEvents: "drawnCount vaut {detail} sans aucun événement.",
     disposeThrew: "dispose a échoué : {detail}",
     disposeLeft: "dispose laisse son objet dans la scène.",
-    readingNotTried: "bodiesOf n'a pas été essayé : l'enregistrement ouvert n'en énonce aucune.",
-    readingThrew: "bodiesOf a échoué : {detail}",
-    readingNotAList: "bodiesOf ne renvoie pas une liste, alors qu'il est appelé de façon synchrone."
+    readingNotTried: "compute n'a pas été essayé : l'enregistrement ouvert n'en énonce aucune.",
+    readingThrew: "compute, ou ce qu'il donne, a échoué : {detail}",
+    readingNotAList: "Ce que donne compute ne renvoie pas une liste, alors qu'il est appelé de façon synchrone."
   },
   points: {
     weather: "météo", place: "lieux", timeZone: "fuseaux horaires", narrative: "rédaction", assessment: "évaluations",

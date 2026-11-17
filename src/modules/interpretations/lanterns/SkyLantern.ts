@@ -1,4 +1,5 @@
 import type { SaidPosition } from "../../../engine/model/SaidPosition.js"
+import { Obstacles } from "../Obstacles.js"
 import type { SaidText } from "../../../engine/model/SaidText.js"
 import type { BodyJson, BodyKeyframe, InterpretationJson } from "../../../engine/interpretation/Interpretation.js"
 
@@ -241,9 +242,9 @@ export class SkyLantern {
     return { ...interpretation, bodies: [...interpretation.bodies, ...launches.flatMap(launch => SkyLantern.bodiesOf(launch))] }
   }
 
-  /** The bodies of one launch: one per lantern let go. */
-  static bodiesOf(launch: LanternLaunchJson): BodyJson[] {
-    return SkyLantern.releasesOf(launch).map((release, index) => SkyLantern.lanternBody(launch, release, index))
+  /** The bodies of one launch: one per lantern let go, each kept out of the solid decor it meets (see trajectory). */
+  static bodiesOf(launch: LanternLaunchJson, obstacles: Obstacles = Obstacles.NONE): BodyJson[] {
+    return SkyLantern.releasesOf(launch).map((release, index) => SkyLantern.lanternBody(launch, release, index, obstacles))
   }
 
   /** Every lantern of a launch: those stated one by one, then those its group draws. */
@@ -318,7 +319,7 @@ export class SkyLantern {
    * air, its weight (lightening as its fuel burns), and a quadratic drag relative to the wind, in air thinning and cooling with height; what
    * it carries along (its own air, and the air it pushes aside) is part of what the forces move.
    */
-  static trajectory(launch: LanternLaunchJson, release: LanternRelease, sampleMs = SkyLantern.SAMPLE_MS): LanternSample[] {
+  static trajectory(launch: LanternLaunchJson, release: LanternRelease, sampleMs = SkyLantern.SAMPLE_MS, obstacles: Obstacles = Obstacles.NONE): LanternSample[] {
     const type = SkyLantern.typeOf(launch, release)
     const site = launch.site
     const ground = site.altitudeM ?? 0
@@ -361,9 +362,11 @@ export class SkyLantern {
         state.vy = 0
         state.vz = 0
       }
+      const wasZ = state.z
       state.x += state.vx * step
       state.y += state.vy * step
       state.z = Math.max(ground, state.z + state.vz * step)
+      if (!obstacles.empty) SkyLantern.keptOut(state, wasZ, type.widthM / 2, obstacles)
       if (i % perSample === 0 || i === steps) {
         // The air going past pushes on its paper while its weight hangs from its ring: it leans the way the air goes, as far as that push
         // is to its weight (a pendulum held aside), a few degrees in a gust it has not caught up with.
@@ -376,6 +379,32 @@ export class SkyLantern {
       }
     }
     return samples
+  }
+
+  /**
+   * A lantern that has moved into a solid thing of the decor (see Obstacles) is put back out: on its roof when it came down onto it from
+   * above (or was let go from it), where it then rests until its lift takes it up again; else against the side it went through, its speed into that side gone, so
+   * that the wind slides it along the wall while it goes on rising. A building used to be a thing a lantern went through.
+   */
+  private static keptOut(state: LanternState, wasZ: number, radiusM: number, obstacles: Obstacles): void {
+    const inside = obstacles.inside(state.x, state.y, state.z, radiusM)
+    if (!inside) return
+    const top = inside.box.topM
+    // Above its roof, or on it (let go from a roof terrace): over it, it stands on it.
+    if (wasZ >= top - 1e-6 || state.z >= top - 1e-6) {
+      if (state.z < top) {
+        state.z = top
+        if (state.vz < 0) state.vz = 0
+      }
+      return
+    }
+    state.x += inside.nx * inside.depthM
+    state.y += inside.ny * inside.depthM
+    const into = state.vx * inside.nx + state.vy * inside.ny
+    if (into < 0) {
+      state.vx -= into * inside.nx
+      state.vy -= into * inside.ny
+    }
   }
 
   /** A lantern's own seed: the one it was given, or one drawn from when and where it is let go. */
@@ -411,11 +440,11 @@ export class SkyLantern {
   }
 
   /** One lantern as a body: a glowing ellipsoid along its computed path, gone once it is out. */
-  private static lanternBody(launch: LanternLaunchJson, release: LanternRelease, index: number): BodyJson {
+  private static lanternBody(launch: LanternLaunchJson, release: LanternRelease, index: number, obstacles: Obstacles): BodyJson {
     const type = SkyLantern.typeOf(launch, release)
     // The light of its whole envelope, spread over what the observer sees of it: an ellipse its width by its height.
     const fullLuminance = type.luminousIntensityCd / (Math.PI * type.widthM / 2 * type.heightM / 2)
-    const path = SkyLantern.trajectory(launch, release)
+    const path = SkyLantern.trajectory(launch, release, SkyLantern.SAMPLE_MS, obstacles)
     const size = { widthM: type.widthM, lengthM: type.widthM, heightM: type.heightM }
     // Its light is its flame's through its paper: the paper's colour takes from it what it does not let through.
     const color = SkyLantern.through(type.color, type.paperColor)

@@ -3,6 +3,7 @@ import type { BodyJson, BodyKeyframe } from "../../../engine/interpretation/Inte
 import { BirdSpecies } from "./BirdSpecies.js"
 import type { BirdColourKey, BirdFlightStyle } from "./BirdSpecies.js"
 import { FlockSimulation } from "./FlockSimulation.js"
+import { Obstacles } from "../Obstacles.js"
 
 /**
  * Birds an interpretation claims were what the observer saw: a gull close to a camera that its shutter smeared into a saucer, a skein of
@@ -89,6 +90,11 @@ export interface BirdFormation {
   spacing?: number
   /** How much each bird strays from its place, in wingspans, over a few seconds. 0.15 in a line, 0.4 in a crowd when absent. */
   wander?: number
+  /**
+   * For a flock that flies itself, the share of its birds that know where it is going (see FlockSimulation): the others follow them by
+   * following their neighbours. 0.2 when absent.
+   */
+  informed?: number
 }
 
 /** A bird's place in its flock: metres ahead (negative: behind) of the path's point, to its right and above it. */
@@ -116,12 +122,15 @@ export class BirdFlock {
   static readonly MAX_KEYFRAMES = 60_000
   private static readonly computed = new Map<string, BodyJson[]>()
 
-  /** The bodies of one flock, one per bird; computed once for the same statement. */
-  static bodiesOf(flock: BirdFlockJson): BodyJson[] {
-    const key = JSON.stringify(flock)
+  /**
+   * The bodies of one flock, one per bird; computed once for the same statement among the same decor. A flock that flies itself goes round
+   * or over the solid decor it meets (see Obstacles); one in a set arrangement flies its path as stated.
+   */
+  static bodiesOf(flock: BirdFlockJson, obstacles: Obstacles = Obstacles.NONE): BodyJson[] {
+    const key = JSON.stringify(flock) + obstacles.signature
     let bodies = BirdFlock.computed.get(key)
     if (!bodies) {
-      bodies = BirdFlock.compute(flock)
+      bodies = BirdFlock.compute(flock, obstacles)
       BirdFlock.computed.set(key, bodies)
       if (BirdFlock.computed.size > 16) BirdFlock.computed.delete(BirdFlock.computed.keys().next().value!)
     }
@@ -132,7 +141,7 @@ export class BirdFlock {
     return BirdSpecies.byId(flock.species) ?? BirdSpecies.ALL[0]
   }
 
-  private static compute(flock: BirdFlockJson): BodyJson[] {
+  private static compute(flock: BirdFlockJson, obstacles: Obstacles): BodyJson[] {
     const path = BirdFlock.pathOf(flock)
     if (path.length === 0) return []
     const species = BirdFlock.speciesOf(flock)
@@ -144,7 +153,7 @@ export class BirdFlock {
     const endT = path[path.length - 1].t
     const sampleMs = BirdFlock.sampleMs(count, endT - startT)
     const tracks = flock.formation?.kind === "flock"
-      ? FlockSimulation.run({ path, count, species, spacing: flock.formation.spacing ?? 1.5, random, sampleMs })
+      ? FlockSimulation.run({ path, count, species, spacing: flock.formation.spacing ?? 1.5, informedShare: flock.formation.informed, obstacles, random, sampleMs })
       : BirdFlock.arranged(flock, path, species, count, random, sampleMs)
     const size = BirdSpecies.sizeOf(species)
     const colours = { ...species.colours, ...flock.colours }

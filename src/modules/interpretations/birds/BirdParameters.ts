@@ -3,6 +3,7 @@ import type { ParameterHolder, ParameterSet, ParameterSpec } from "../../../engi
 import { BirdFlock } from "./BirdFlock.js"
 import type { BirdFlockJson, BirdWaypoint } from "./BirdFlock.js"
 import { BirdSpecies } from "./BirdSpecies.js"
+import { FlockSimulation } from "./FlockSimulation.js"
 import type { BirdColourKey } from "./BirdSpecies.js"
 
 /** What the form of a flock needs of the editor: the shapes the birds may stand for. */
@@ -33,10 +34,14 @@ export class BirdParameters {
     return id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
   }
 
-  /** The arrangement in force: a crowd for several birds, one bird alone otherwise (see BirdFlock.arranged). */
+  /** The arrangement in force: the one stated, else the one a flock that states none flies in (see formationUnstated). */
   private static formationOf(element: ParameterHolder): string {
     const stated = Parameters.read(element, "formation.kind")
-    if (typeof stated === "string") return stated
+    return typeof stated === "string" ? stated : BirdParameters.formationUnstated(element)
+  }
+
+  /** What a flock that states no arrangement flies in: a crowd for several birds, one bird alone otherwise (see BirdFlock.arranged). */
+  private static formationUnstated(element: ParameterHolder): string {
     return ((Parameters.read(element, "count") as number | undefined) ?? 1) > 1 ? "cluster" : "single"
   }
 
@@ -90,7 +95,8 @@ export class BirdParameters {
       },
       {
         type: "choice", key: "formation.kind", group: BirdParameters.FORMATION, label: "pattern",
-        effective: element => BirdParameters.formationOf(element),
+        // What the empty choice says: what is flown when none is chosen, not the choice made (it was listed twice).
+        effective: element => BirdParameters.formationUnstated(element),
         choices: [
           { value: "single", label: "oneBird" },
           { value: "v", label: "inAV" },
@@ -123,6 +129,11 @@ export class BirdParameters {
         effective: element => ["v", "j", "echelon", "column"].includes(BirdParameters.formationOf(element)) ? 0.15 : 0.4,
         label: "strayInWingspans", hint: "howMuchEachBirdStrays",
         visibleWhen: element => !["single", "flock"].includes(BirdParameters.formationOf(element))
+      },
+      {
+        type: "number", key: "formation.informed", min: 0, max: 100, step: 1, unit: "%", scale: 100, group: BirdParameters.FORMATION,
+        effective: () => FlockSimulation.INFORMED_SHARE, label: "informed", hint: "aFewKnowWhereTheFlockIsGoing",
+        visibleWhen: element => BirdParameters.formationOf(element) === "flock"
       },
       {
         type: "number", key: "wingbeatHz", min: 0.5, max: 30, step: 0.01, unit: "Hz", group: BirdParameters.FLIGHT,

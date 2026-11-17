@@ -23,6 +23,8 @@ export const birdParameterTexts_en = {
   abreast: "Abreast",
   aLooseCrowd: "A loose crowd",
   aFlockThatFliesItself: "A flock that flies itself",
+  informed: "Informed",
+  aFewKnowWhereTheFlockIsGoing: "The share of the birds that know best where the flock is going, and steer it through their neighbours; the others feel it only faintly. A turn starts with them.",
   angleBetweenTheArms: "Angle between the arms",
   aGooseVMeasures: "A V of geese measures 34° in photographs, 70° by radar.",
   onTheRightArm: "On the right arm",

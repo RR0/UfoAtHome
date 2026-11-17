@@ -27,6 +27,8 @@ export interface BirdParameterTexts {
   abreast: string
   aLooseCrowd: string
   aFlockThatFliesItself: string
+  informed: string
+  aFewKnowWhereTheFlockIsGoing: string
   angleBetweenTheArms: string
   aGooseVMeasures: string
   onTheRightArm: string

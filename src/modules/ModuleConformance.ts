@@ -26,7 +26,7 @@ export interface ConformanceFinding {
 export interface ConformanceContext {
   /** What to ask a weather source: a real request to its service, which is why a check is run only when somebody asks. */
   weatherQuery?: WeatherQuery
-  /** The readings stated by the recording on show, by kind's key: what `bodiesOf` can be tried on. */
+  /** The readings stated by the recording on show, by kind's key: what the code `compute` loads can be tried on. */
   interpretation?: Readonly<Record<string, unknown>>
   /** How long an answer is waited for. */
   timeoutMs?: number
@@ -63,7 +63,7 @@ export class ModuleConformance {
     surroundings: ["id", "name", "attribution", "creditUrl", "contemporary", "covers", "getSurroundings"],
     decorModels: ["attribution", "entries", "entry"],
     skyEvents: ["key", "messages", "simulation"],
-    interpretations: ["key", "messages", "bodiesOf"],
+    interpretations: ["key", "messages", "compute"],
     perception: ["id", "messages", "sources", "settings", "perceive"],
     transcription: ["sendsAudio", "engine", "transcribe"]
   }
@@ -236,9 +236,20 @@ export class ModuleConformance {
       say("readingNotTried", undefined, "note")
       return
     }
+    let compute: (item: unknown) => BodyJson[]
+    try {
+      compute = await ModuleConformance.within(kind.compute(), context) as (item: unknown) => BodyJson[]
+      if (typeof compute !== "function") {
+        say("readingThrew", "compute")
+        return
+      }
+    } catch (error) {
+      say("readingThrew", ModuleConformance.told(error))
+      return
+    }
     for (const item of items) {
       try {
-        const bodies: BodyJson[] = kind.bodiesOf(item)
+        const bodies: BodyJson[] = compute(item)
         if (!Array.isArray(bodies)) say("readingNotAList")
       } catch (error) {
         say("readingThrew", ModuleConformance.told(error))

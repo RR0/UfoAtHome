@@ -23,6 +23,8 @@ export const birdParameterTexts_it = {
   abreast: "Di fronte",
   aLooseCrowd: "Un gruppo sparso",
   aFlockThatFliesItself: "Uno stormo che vola da sé",
+  informed: "Informati",
+  aFewKnowWhereTheFlockIsGoing: "La parte degli uccelli che sanno meglio dove va lo stormo, e lo guidano attraverso i vicini; gli altri lo sentono solo debolmente. Una virata comincia da loro.",
   angleBetweenTheArms: "Angolo tra i bracci",
   aGooseVMeasures: "Una V di oche misura 34° in fotografia, 70° al radar.",
   onTheRightArm: "Sul braccio destro",

@@ -115,6 +115,7 @@ import { TrafficIds } from "../engine/traffic/TrafficIds.js"
 import type { TrafficDecorSet } from "../engine/traffic/TrafficDecor.js"
 import type { DecorObject } from "../engine/model/Decor.js"
 import { DecorSystem } from "../render3d/DecorSystem.js"
+import { Obstacles } from "../modules/interpretations/Obstacles.js"
 import { DecorAircraft, resolveDecorSeatAt } from "../engine/model/Decor.js"
 import { ObserverRide } from "../engine/place/ObserverRide.js"
 import type { DataSource } from "../engine/source/DataSource.js"
@@ -902,10 +903,50 @@ export class SceneElement extends HTMLElement {
 
   /** Puts `interpretation` on show, its computed bodies with it, and asks for what names its bodies under the pointer. */
   private showInterpretation(interpretation: InterpretationJson | undefined): void {
-    const { interpretation: expanded, kindOf } = InterpretationKinds.expandWithKinds(interpretation, InterpretationRegistry.kinds())
+    const kinds = InterpretationRegistry.kinds()
+    const obstacles = this.obstaclesOf(this.ufoElement.sighting.decor)
+    this.interpretationObstacles = obstacles
+    const { interpretation: expanded, kindOf } = InterpretationKinds.expandWithKinds(interpretation, kinds, { obstacles })
+    this.interpretationAsked = interpretation
     this.interpretationShown = expanded
     this.computedKinds = kindOf
     this.loadComputedKindTexts()
+    if (InterpretationKinds.loaded(interpretation, kinds)) return
+    // The code of a kind it states comes the first time one is shown (see InterpretationKind.compute); the first frame waits for it, as
+    // it waits for a model, and then shows its bodies — unless another interpretation was asked for meanwhile.
+    const loading = InterpretationKinds.load(interpretation, kinds)
+    this.sceneRenderer.holdUntil(loading)
+    void loading.then(() => {
+      if (this.interpretationAsked !== interpretation || !InterpretationKinds.loaded(interpretation, kinds)) return
+      this.showInterpretation(interpretation)
+      this.ufoElement.refreshSoundControls()
+      this.updateAstronomy(this.lastTimeMs)
+      this.ufoElement.repaintChrome()
+    })
+  }
+
+  /** The interpretation last asked to be shown, before its computed bodies are added (see showInterpretation). */
+  private interpretationAsked?: InterpretationJson
+  /** The solid decor the computed bodies on show were computed among, and the decor list it was made from (see obstaclesOf). */
+  private interpretationObstacles = Obstacles.NONE
+  private obstaclesMadeOf?: { decor: readonly DecorObject[], obstacles: Obstacles }
+
+  /** The solid decor of `decor` (see Obstacles), made again only when the list itself is another (decor is replaced wholesale on edit). */
+  private obstaclesOf(decor: readonly DecorObject[]): Obstacles {
+    if (this.obstaclesMadeOf?.decor !== decor) this.obstaclesMadeOf = { decor, obstacles: Obstacles.of(decor, object => DecorSystem.sizeOf(object)) }
+    return this.obstaclesMadeOf.obstacles
+  }
+
+  /**
+   * What the reading on show computes is computed again when the decor it moves among is no longer the same: a survey of the place come
+   * after it was shown, a building added in the editor. Asked at every tick; a comparison of the decor list, most of the time.
+   */
+  private recomputeAmongNewDecor(): void {
+    const asked = this.interpretationAsked
+    if (!asked || !InterpretationKinds.computes(asked, InterpretationRegistry.kinds())) return
+    if (this.obstaclesOf(this.ufoElement.sighting.decor).signature === this.interpretationObstacles.signature) return
+    this.showInterpretation(asked)
+    this.ufoElement.refreshSoundControls()
   }
 
   /** The texts of the kinds that computed bodies on show, in the language of the scene's names: asked again when that language comes. */
@@ -2364,6 +2405,7 @@ export class SceneElement extends HTMLElement {
     this.updateMeteorShower(sighting, t)
     this.updateLightning(sighting, t, instant !== undefined)
     this.sceneRenderer.setDecor(this.seatedDecor(this.decorWithTraffic(sighting), t))
+    this.recomputeAmongNewDecor()
     this.sceneRenderer.setDecorPresence(this.traffic?.set?.presence ?? SceneElement.NO_PRESENCE)
     this.sceneRenderer.setDecorSunlight(this.trafficSunlight(t))
     this.sceneRenderer.setContrails(this.traffic?.contrails ?? SceneElement.NO_CONTRAILS)

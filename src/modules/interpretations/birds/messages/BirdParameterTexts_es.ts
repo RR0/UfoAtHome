@@ -23,6 +23,8 @@ export const birdParameterTexts_es = {
   abreast: "De frente",
   aLooseCrowd: "Un grupo suelto",
   aFlockThatFliesItself: "Una bandada que vuela por sí sola",
+  informed: "Informadas",
+  aFewKnowWhereTheFlockIsGoing: "La parte de las aves que mejor saben adónde va la bandada, y la guían a través de sus vecinas; las demás solo lo sienten débilmente. Un giro empieza por ellas.",
   angleBetweenTheArms: "Ángulo entre los brazos",
   aGooseVMeasures: "Una V de gansos mide 34° en fotografía, 70° por radar.",
   onTheRightArm: "En el brazo derecho",
