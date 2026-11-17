@@ -72,6 +72,7 @@ import { Veil } from "./Veil.js"
 import { ProbeIrradiance } from "./ProbeIrradiance.js"
 import { FrameMeter } from "./FrameMeter.js"
 import { CutoutCoverage } from "./CutoutCoverage.js"
+import { FiniteLight } from "./FiniteLight.js"
 import { RetinalBleaching, type BleachingSource } from "./RetinalBleaching.js"
 import { EmitterLights, type FarEmitter } from "./EmitterLights.js"
 import { PhoneDevelopment } from "../engine/instrument/PhoneDevelopment.js"
@@ -1444,6 +1445,8 @@ export class SceneRenderer {
   ) {
     // Before any material is compiled: the leaves of a tree stay as covered afar as up close.
     CutoutCoverage.install()
+    // And no material writes more than the picture holds, nor "not a number" (see FiniteLight).
+    FiniteLight.install()
     // Lines of sight through the decor at every frame: through a tree of its triangles, not each of them (see MeshRaycast).
     MeshRaycast.install()
     this.renderer = new WebGLRenderer({ canvas, antialias: true })
@@ -5422,6 +5425,12 @@ export class SceneRenderer {
       .map(body => horizontalToCartesian(body.altitudeDeg, body.azimuthDeg, 1))
     this.probeIrradiance.measure(this.renderer, photograph, sources, light => {
       const physical = (rgb: readonly number[]) => rgb.map(value => value / scale) as [number, number, number]
+      // A photograph holding something that is not a number gives no light to adapt to: the eye stays as it was (see FiniteLight).
+      if (![...light.up, ...light.down, light.logAverage].every(Number.isFinite)) {
+        this.eyeSettledVersion = version
+        if (this.skyHoldUntilMs) this.redrawHeld()
+        return
+      }
       const before = this.surroundings
       const next = { up: physical(light.up), down: physical(light.down) }
       // Redrawn only for a change an eye would see: a redraw is a new photograph, and a photograph
@@ -5474,6 +5483,8 @@ export class SceneRenderer {
     const followMs = this.medium.exposureFollowMs ?? SceneRenderer.EXPOSURE_FOLLOW_MS
     this.frameMeter.measure(this.renderer, photograph.texture, this.camera, source, light => {
       const read = { mean: light.mean / photograph.scale, brightest: light.brightest / photograph.scale }
+      // A reading that is not a number is no reading: kept, it would hold the exposure there for good.
+      if (!Number.isFinite(read.mean) || !Number.isFinite(read.brightest)) return
       const before = this.frameLight
       const at = photograph.atMs
       // Followed as a device's exposure follows its meter, not jumped to: by a share of the way in the ratio for the recording's time since
