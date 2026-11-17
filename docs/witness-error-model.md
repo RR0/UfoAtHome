@@ -1,6 +1,6 @@
 # Witness error model and variants under a hypothesis
 
-Technical note. It describes how a recording carries what is known about the errors in each value a
+Technical note ([version française](witness-error-model_fr.md)). It describes how a recording carries what is known about the errors in each value a
 witness gives, and how that knowledge is used: not to blur the recording, but to ask whether a
 candidate explanation is reachable from it, and how robust a reading of it is.
 
