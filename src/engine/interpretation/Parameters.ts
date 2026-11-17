@@ -128,6 +128,8 @@ export interface ColourParameter extends ParameterBase {
   type: "colour"
   /** The swatch a value the field cannot hold is shown as (a colour name, or no colour): a mid grey when absent. */
   fallback?: string
+  /** The colour in force when the element states none, when it depends on the element (a bird's species): shown instead of `fallback`. */
+  effective?: (element: ParameterHolder, context?: unknown) => string | undefined
 }
 
 /**

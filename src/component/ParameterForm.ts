@@ -174,7 +174,7 @@ export class ParameterForm {
         input.checked = stated === true
       } else if (spec.type === "colour") {
         const input = field as HTMLInputElement
-        if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.fallback ?? "#808080")
+        if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.effective?.(element, context) ?? spec.fallback ?? "#808080")
       } else if (spec.type === "set") {
         this.syncSet(spec, field, element, context)
       } else if (spec.type === "position") {

@@ -9322,6 +9322,9 @@ export class SightingEditorElement extends HTMLElement {
         writingLanguage: () => this.writingLanguage,
         positionPlace: () => this.framePlace(),
         shapes: () => this.bodyShapeIds().map(id => ({ id, label: this.shapeLabel(id) })),
+        currentTime: () => this.ufoElement.currentTime,
+        duration: () => this.ufoElement.seekableDuration,
+        seekTo: t => this.goToMark(t),
         // Its edits are of the interpretation, which the scene computes the bodies from again when given another one (see syncBodiesShown).
         changed: () => {
           this.ufoElement.refresh()

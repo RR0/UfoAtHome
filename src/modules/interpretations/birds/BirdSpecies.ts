@@ -56,6 +56,8 @@ export interface BirdBuild {
   wingspanM: number
   /** The model's own size at rest, metres: wingspan, height and length (with its bill). What a body stretches. */
   restM: { widthM: number, heightM: number, lengthM: number }
+  /** Its own colours, as the catalogue's settings state them (public/models/index.json, a test holds the two together). */
+  colours: Readonly<Record<BirdColourKey, string>>
 }
 
 export class BirdSpecies {
@@ -63,11 +65,16 @@ export class BirdSpecies {
 
   /** As scripts/build-birds.ts writes them (a test holds the two together). */
   static readonly BUILDS: Readonly<Record<BirdBuildId, BirdBuild>> = {
-    gull: { lengthM: 0.6, wingspanM: 1.4, restM: { widthM: 1.4, heightM: 0.14, lengthM: 0.653 } },
-    pelican: { lengthM: 1.2, wingspanM: 2.1, restM: { widthM: 2.147, heightM: 0.281, lengthM: 1.299 } },
-    goose: { lengthM: 0.95, wingspanM: 1.6, restM: { widthM: 1.6, heightM: 0.22, lengthM: 1.003 } },
-    duck: { lengthM: 0.58, wingspanM: 0.9, restM: { widthM: 0.9, heightM: 0.15, lengthM: 0.633 } },
-    plover: { lengthM: 0.27, wingspanM: 0.68, restM: { widthM: 0.68, heightM: 0.07, lengthM: 0.291 } }
+    gull: { lengthM: 0.6, wingspanM: 1.4, restM: { widthM: 1.4, heightM: 0.14, lengthM: 0.653 },
+      colours: { upperColor: "#a9b1b9", underColor: "#f3f2ec", tipColor: "#1b1c1f", headColor: "#f3f2ec", neckColor: "#f3f2ec", billColor: "#e6bd35" } },
+    pelican: { lengthM: 1.2, wingspanM: 2.1, restM: { widthM: 2.147, heightM: 0.281, lengthM: 1.299 },
+      colours: { upperColor: "#7d7468", underColor: "#4f4840", tipColor: "#3b3631", headColor: "#e9dfb5", neckColor: "#5a3a2a", billColor: "#8d8778" } },
+    goose: { lengthM: 0.95, wingspanM: 1.6, restM: { widthM: 1.6, heightM: 0.22, lengthM: 1.003 },
+      colours: { upperColor: "#6b5d4f", underColor: "#cfc6b8", tipColor: "#3a332c", headColor: "#1d1c1b", neckColor: "#1d1c1b", billColor: "#1d1c1b" } },
+    duck: { lengthM: 0.58, wingspanM: 0.9, restM: { widthM: 0.9, heightM: 0.15, lengthM: 0.633 },
+      colours: { upperColor: "#6d6457", underColor: "#b9b2a6", tipColor: "#4d463d", headColor: "#1f5a35", neckColor: "#ece9e1", billColor: "#d9b23a" } },
+    plover: { lengthM: 0.27, wingspanM: 0.68, restM: { widthM: 0.68, heightM: 0.07, lengthM: 0.291 },
+      colours: { upperColor: "#6f6650", underColor: "#e8e4da", tipColor: "#3b362c", headColor: "#6f6650", neckColor: "#e8e4da", billColor: "#1d1c1b" } }
   }
 
   static readonly ALL: readonly BirdSpecies[] = [
@@ -128,6 +135,11 @@ export class BirdSpecies {
   static airDensityAt(elevationM: number): number {
     const kelvin = 288.15 - 0.0065 * elevationM
     return 1.225 * (kelvin / 288.15) ** 4.2559
+  }
+
+  /** The colour `species` is drawn with at `key`: its own, else its build's. */
+  static colourOf(species: BirdSpecies, key: BirdColourKey): string {
+    return species.colours?.[key] ?? BirdSpecies.BUILDS[species.build].colours[key]
   }
 
   /** The size of a body drawn as `species`: its build's model at rest stretched to its own wingspan and length. */

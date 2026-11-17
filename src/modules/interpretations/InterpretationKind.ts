@@ -14,6 +14,10 @@ export interface InterpretationEditorHost {
   shapes(): { id: string, label: string }[]
   /** What a place is said from, and in what words (see PositionPlace). */
   positionPlace?(): PositionPlace
+  /** Where the playhead is, ms, how long the recording lasts, and putting the playhead elsewhere: for a part with a timeline of its own. */
+  currentTime?(): number
+  duration?(): number
+  seekTo?(t: number): void
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -24,6 +28,8 @@ export interface InterpretationEditor {
   sync(): void
   /** Shows the recording again after an edit made elsewhere (the text of the file, an undo). */
   refresh(): void
+  /** The playhead moved. */
+  setTime?(t: number): void
   setLanguage(language: string): Promise<void>
 }
 

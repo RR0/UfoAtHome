@@ -5,7 +5,7 @@ import type { BirdBuildId } from "../../src/modules/interpretations/birds/BirdSp
 
 /** What scripts/build-birds.ts wrote is what the species stretch, and what the catalogue states. */
 describe("bird models", () => {
-  const catalogue = JSON.parse(readFileSync("public/models/index.json", "utf8")) as { models: { id: string, sizeM: { widthM: number, lengthM: number, heightM: number } }[] }
+  const catalogue = JSON.parse(readFileSync("public/models/index.json", "utf8")) as { models: { id: string, sizeM: { widthM: number, lengthM: number, heightM: number }, parameters: { parameters: { key: string, fallback?: string }[] } }[] }
 
   for (const build of Object.keys(BirdSpecies.BUILDS) as BirdBuildId[]) {
     test(`${build}: one wingbeat named "flap", its rest size the catalogue's`, () => {
@@ -17,6 +17,8 @@ describe("bird models", () => {
       expect(entry.sizeM.widthM).toBeCloseTo(rest.widthM, 2)
       expect(entry.sizeM.heightM).toBeCloseTo(rest.heightM, 2)
       expect(entry.sizeM.lengthM).toBeCloseTo(rest.lengthM, 2)
+      // What the editor shows a bird drawn with when its species does not say a colour of its own.
+      expect(Object.fromEntries(entry.parameters.parameters.map(parameter => [parameter.key, parameter.fallback]))).toEqual(BirdSpecies.BUILDS[build].colours)
     })
   }
 })

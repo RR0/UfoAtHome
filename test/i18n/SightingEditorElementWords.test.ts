@@ -105,6 +105,21 @@ vi.mock("../../src/modules/interpretations/lanterns/messages/LanternParameterTex
   const actual = await original<typeof import("../../src/modules/interpretations/lanterns/messages/LanternParameterTexts_en.js")>()
   return { ...actual, lanternParameterTexts_en: WordsAudit.pseudo(actual.lanternParameterTexts_en) }
 })
+vi.mock("../../src/modules/interpretations/birds/messages/BirdEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/birds/messages/BirdEditorMessages_en.js")>()
+  return { ...actual, birdEditorMessages_en: WordsAudit.pseudo(actual.birdEditorMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/birds/messages/BirdKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/birds/messages/BirdKindMessages_en.js")>()
+  return { ...actual, birdKindMessages_en: WordsAudit.pseudo(actual.birdKindMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/birds/messages/BirdParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/birds/messages/BirdParameterTexts_en.js")>()
+  return { ...actual, birdParameterTexts_en: WordsAudit.pseudo(actual.birdParameterTexts_en) }
+})
 vi.mock("../../src/modules/perception/messages/PerceptionMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/modules/perception/messages/PerceptionMessages_en.js")>()
