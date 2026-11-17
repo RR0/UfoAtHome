@@ -28,6 +28,24 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const demoData = path.join(here, "..", "..", "..", "..", "public", "demo-data")
 const tileCache = path.join(here, "tiles")
 
+/**
+ * A recording written over the one already there, keeping what was added to it by hand or by another tool: its cover (`image`, see
+ * ShareCards) and the third-party data taken beside it (`snapshots`, see scripts/snapshot), which this build cannot make.
+ */
+class RecordingFile {
+  static readonly KEPT = ["image", "snapshots"] as const
+
+  static write(name: string, recording: object): void {
+    const file = path.join(demoData, name)
+    const kept: Record<string, unknown> = {}
+    if (existsSync(file)) {
+      const before = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>
+      for (const key of RecordingFile.KEPT) if (before[key] !== undefined) kept[key] = before[key]
+    }
+    writeFileSync(file, JSON.stringify({ ...recording, ...kept }) + "\n")
+  }
+}
+
 type Text = Record<"en" | "fr", string>
 /** A value with its provenance: its basis, why, and, where it rests on one of his accounts, which (see ValueSource). */
 const said = (value: unknown, basis: string, en: string, fr: string, source?: object) => ({ value, basis, rationale: { en, fr }, ...(source ? { source } : {}) })
@@ -883,7 +901,7 @@ async function main(): Promise<void> {
     weatherTrack: { keyframes: [{ t: 0, weather }] },
     interpretation: witnessInterpretation
   }
-  writeFileSync(path.join(demoData, "observer-arnold.json"), JSON.stringify(recording) + "\n")
+  RecordingFile.write("observer-arnold.json", recording)
   // ---- His later account: the same flight, the objects drawn as the crescent he showed in the 1960s ----
   // The dossier's sketch of how his drawing changed (Shapes.jpg: 1947 round, 1950 round in front and pointed behind, "196x" a crescent,
   // "bat-like") and the drawing itself (CrescentShape.jpg), its dark round spot left out (an outline has no hole). Its exact date is not
@@ -912,7 +930,7 @@ async function main(): Promise<void> {
   for (const keyframe of later.timeline.keyframes as { shapes: { shape: Record<string, unknown> }[] }[]) {
     for (const { shape } of keyframe.shapes) if (shape.points) shape.points = crescent
   }
-  writeFileSync(path.join(demoData, "observer-arnold-1960s.json"), JSON.stringify(later) + "\n")
+  RecordingFile.write("observer-arnold-1960s.json", later)
 
 
   // ---- The pelicans: solved ----
@@ -992,7 +1010,7 @@ async function main(): Promise<void> {
       }]
     }
   }
-  writeFileSync(path.join(demoData, "interpretation-mont-rainier-pelicans.json"), JSON.stringify(pelicans) + "\n")
+  RecordingFile.write("interpretation-mont-rainier-pelicans.json", pelicans)
 
   // ---- The Army Air Force's analysts' reading: his craft, as large as acuity needs them to be for what he described ----
   const leaderM = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S)).distanceM
@@ -1020,7 +1038,7 @@ async function main(): Promise<void> {
       }))
     }
   }
-  writeFileSync(path.join(demoData, "interpretation-mont-rainier-aaf.json"), JSON.stringify(aafReading) + "\n")
+  RecordingFile.write("interpretation-mont-rainier-aaf.json", aafReading)
   // What a flash would take, along the way, and how many the flips give: the geometry's say, against his "two or three every few seconds".
   const need = [0, 30, 60, 90, 120, 150, 179].map(t => {
     const tilt = Glint.attitudeFor(lookAt(chainStart, chainEnd).azimuthDeg, halfwayAt(4, t))
@@ -1057,7 +1075,7 @@ async function main(): Promise<void> {
   }
   // The pelicans read against his later account too: the same birds, set against the crescents.
   const laterPelicans = { ...JSON.parse(JSON.stringify(later)), id: "1947-06-24-ArnoldKennethE-1960s-pelicans", interpretation: pelicans.interpretation }
-  writeFileSync(path.join(demoData, "interpretation-mont-rainier-1960s-pelicans.json"), JSON.stringify(laterPelicans) + "\n")
+  RecordingFile.write("interpretation-mont-rainier-1960s-pelicans.json", laterPelicans)
   caseJson.events.push({ type: "event", eventType: "sighting", interpretationOf: "arnold-1960s", title: pelicans.interpretation.title, url: "interpretation-mont-rainier-1960s-pelicans.json" } as never)
   writeFileSync(path.join(demoData, "case-mont-rainier.json"), JSON.stringify(caseJson, null, 1) + "\n")
   const first = lookAt(eyeAt(T_RAINIER_S), objectAt(0, T_RAINIER_S))
