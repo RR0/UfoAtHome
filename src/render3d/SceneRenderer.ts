@@ -5343,7 +5343,11 @@ export class SceneRenderer {
     // The veils are in the eye, not in the world: nothing mirrors them.
     // Nor the specks a body under a pixel is drawn as (see BodySystem.shineReflected): a pixel and a half of the picture, not a thing of
     // the world. Photographed, the pelicans' lit the light round Arnold three times over, and his windscreen mirrored it in a pale veil.
-    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []),
+    // Nor the Sun's disc: it is a light of the scene, whose glint three draws on every glossy surface (the column of light on water); in the
+    // probe as well, it was counted twice, and the blurred photograph of a hundred and twenty-eight pixels made of it a bright square in the
+    // water under the column. Glass, which mirrors the photograph sharp, is given the disc itself (see GlassMaterial.setSun).
+    const sunDisc = this.bodyMeshes.get("sun")
+    const screenOnly: Object3D[] = [...this.compassSprites, ...(this.lensFlare ? [this.lensFlare.mesh] : []), ...(sunDisc ? [sunDisc] : []),
       ...[...this.glareSprites.values()].map(veil => veil.mesh),
       ...this.bodySystem.group.children.filter(child => child.name.startsWith("body-speck:"))]
     // The points the eye resolves stars and planets to carry more light than they send (see
@@ -7688,7 +7692,10 @@ export class SceneRenderer {
       this.bodyMeshes.delete(key)
       this.disposeHitArea(key)
       this.disposeGlare(key)
-      if (key === "sun") this.sunVisible = false
+      if (key === "sun") {
+        this.sunVisible = false
+        GlassMaterial.setSun(undefined)
+      }
       return
     }
     const { x, y, z } = horizontalToCartesian(position.altitudeDeg, position.azimuthDeg, BODY_PLACEMENT_RADIUS)
@@ -7720,6 +7727,9 @@ export class SceneRenderer {
       }
       ;(mesh.material as MeshBasicMaterial).color.setRGB(shown[0], shown[1], shown[2])
       mesh.scale.setScalar(visualRadius)
+      // Glass mirrors the disc itself, sharp, where the probe no longer has it (see refreshReflections).
+      GlassMaterial.setSun({ direction: [x / BODY_PLACEMENT_RADIUS, y / BODY_PLACEMENT_RADIUS, z / BODY_PLACEMENT_RADIUS],
+        radiusRad: Math.atan(visualRadius / BODY_PLACEMENT_RADIUS), radiance: shown as [number, number, number] })
     } else {
       // Everything else is a point to the eye, drawn from its illuminance (see PointSources).
       if (!(mesh instanceof Points)) {

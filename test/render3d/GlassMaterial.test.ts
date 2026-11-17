@@ -28,3 +28,18 @@ describe("a thin wall of glass", () => {
     expect(GlassMaterial.reflectedResponse(0.42, 1)).toBeCloseTo(0.42, 6)
   })
 })
+
+describe("GlassMaterial's Sun", () => {
+  it("is the same disc for every glass, which the probe no longer holds", () => {
+    const Glass = GlassMaterial
+    const a = new Glass(), b = new Glass()
+    Glass.setSun({ direction: [0, 0.1, -1], radiusRad: 0.00465, radiance: [5, 4, 3] })
+    expect(a.uniforms.uSunRadiance.value.toArray()).toEqual([5, 4, 3])
+    expect(b.uniforms.uSunCosRadius.value).toBeCloseTo(Math.cos(0.00465), 9)
+    expect(a.uniforms.uSunDirection.value.length()).toBeCloseTo(1, 9)
+    expect(a.fragmentShader).toContain("uSunCosRadius")
+    Glass.setSun(undefined)
+    expect(b.uniforms.uSunRadiance.value.toArray()).toEqual([0, 0, 0])
+    expect(a.uniforms.uSunCosRadius.value).toBeGreaterThan(1)
+  })
+})

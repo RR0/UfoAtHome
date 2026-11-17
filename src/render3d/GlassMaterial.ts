@@ -1,4 +1,4 @@
-import { CustomBlending, DoubleSide, OneFactor, OneMinusSrcAlphaFactor, ShaderMaterial, Texture } from "three"
+import { CustomBlending, DoubleSide, OneFactor, OneMinusSrcAlphaFactor, ShaderMaterial, Texture, Vector3 } from "three"
 import { EyeAdaptation } from "../engine/atmosphere/EyeAdaptation.js"
 
 /**
@@ -40,6 +40,7 @@ export class GlassMaterial extends ShaderMaterial {
   constructor(indexOfRefraction = 1.5) {
     super({
       uniforms: {
+        ...GlassMaterial.SUN,
         uSurroundings: { value: null },
         uIndex: { value: indexOfRefraction },
         uAbsorption: { value: GlassMaterial.ABSORPTION }
@@ -59,6 +60,9 @@ export class GlassMaterial extends ShaderMaterial {
       fragmentShader: `
         precision highp float;
         uniform samplerCube uSurroundings;
+        uniform vec3 uSunDirection;
+        uniform float uSunCosRadius;
+        uniform vec3 uSunRadiance;
         uniform float uIndex;
         uniform float uAbsorption;
         varying vec3 vWorldPosition;
@@ -80,7 +84,10 @@ export class GlassMaterial extends ShaderMaterial {
           float cosIn = clamp(-dot(view, normal), 0.0, 1.0);
           float once = face(cosIn, uIndex);
           float wall = 2.0 * once / (1.0 + once);
-          vec3 around = textureCube(uSurroundings, reflect(view, normal)).rgb;
+          vec3 mirrored = reflect(view, normal);
+          vec3 around = textureCube(uSurroundings, mirrored).rgb;
+          // The Sun's disc, which the probe leaves out (see GlassMaterial.setSun).
+          if (dot(normalize(mirrored), uSunDirection) >= uSunCosRadius) around += uSunRadiance;
           gl_FragColor = vec4(around * wall, wall + (1.0 - wall) * uAbsorption);
         }
       `,
@@ -99,6 +106,29 @@ export class GlassMaterial extends ShaderMaterial {
   static wallReflectance(cosIncident: number, index: number, faceReflectance: (cos: number, from: number, to: number) => number): number {
     const once = faceReflectance(cosIncident, 1, index)
     return (2 * once) / (1 + once)
+  }
+
+  /**
+   * The Sun's disc, shared by every glass: where it is (a unit direction in the scene's frame), how wide, and its radiance as the sky draws
+   * it. The probe leaves the disc out, since every other glossy surface has it from the Sun's light (see SceneRenderer.refreshReflections),
+   * and glass, which mirrors the photograph sharp, would have lost the windscreen's glint of the Sun.
+   */
+  private static readonly SUN = {
+    uSunDirection: { value: new Vector3(0, 1, 0) },
+    uSunCosRadius: { value: 2 },
+    uSunRadiance: { value: new Vector3() }
+  }
+
+  /** Where the Sun's disc is and how bright, or undefined when none is drawn (see SUN). */
+  static setSun(sun: { direction: [number, number, number], radiusRad: number, radiance: [number, number, number] } | undefined): void {
+    if (!sun) {
+      GlassMaterial.SUN.uSunCosRadius.value = 2
+      GlassMaterial.SUN.uSunRadiance.value.set(0, 0, 0)
+      return
+    }
+    GlassMaterial.SUN.uSunDirection.value.set(...sun.direction).normalize()
+    GlassMaterial.SUN.uSunCosRadius.value = Math.cos(sun.radiusRad)
+    GlassMaterial.SUN.uSunRadiance.value.set(...sun.radiance)
   }
 
   /** What stands round this glass, as a probe photographed it — see ReflectionProbe. */
