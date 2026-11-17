@@ -560,10 +560,10 @@ export class DemoCatalogue {
           src: "/demo-data/sky-test-birds-gulls.json",
           title: { en: "Gulls", fr: "Des goélands", es: "Gaviotas", it: "Gabbiani" },
           blurb: {
-            en: "A V of herring gulls crossing a harbour, then one alone passing close to a phone at a sixtieth of a second: its wingbeat and its flight smeared into the blurred \"saucer\" of so many photographs. Place and date assumed.",
-            fr: "Un V de goélands argentés qui traverse un port, puis un seul qui passe tout près d'un téléphone au soixantième de seconde : son battement et son vol étalés en la « soucoupe » floue de tant de photos. Lieu et date supposés.",
-            es: "Una V de gaviotas argénteas que cruza un puerto, y luego una sola que pasa muy cerca de un teléfono a un sesentavo de segundo: su aleteo y su vuelo difuminados en el «platillo» borroso de tantas fotos. Lugar y fecha supuestos.",
-            it: "Una V di gabbiani reali che attraversa un porto, poi uno solo che passa vicinissimo a un telefono a un sessantesimo di secondo: il battito e il volo sfumati nel «disco» sfocato di tante foto. Luogo e data ipotizzati."
+            en: "A phone follows a V of herring gulls crossing Lorient's harbour, then one alone passing close the other way, at a sixtieth of a second: its wingbeat and its flight smeared into the blurred \"saucer\" of so many photographs. The quay is real; the date and the gulls are assumed.",
+            fr: "Un téléphone suit un V de goélands argentés qui traverse le port de Lorient, puis un seul qui passe tout près dans l'autre sens, au soixantième de seconde : son battement et son vol étalés en la « soucoupe » floue de tant de photos. Le quai est réel ; la date et les goélands sont supposés.",
+            es: "Un teléfono sigue una V de gaviotas argénteas que cruza el puerto de Lorient, y luego una sola que pasa muy cerca en sentido contrario, a un sesentavo de segundo: su aleteo y su vuelo difuminados en el «platillo» borroso de tantas fotos. El muelle es real; la fecha y las gaviotas son supuestas.",
+            it: "Un telefono segue una V di gabbiani reali che attraversa il porto di Lorient, poi uno solo che passa vicinissimo nell'altro senso, a un sessantesimo di secondo: il battito e il volo sfumati nel «disco» sfocato di tante foto. Il molo è reale; la data e i gabbiani sono ipotizzati."
           }
         },
         {

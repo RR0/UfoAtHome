@@ -6,20 +6,20 @@
     "misidentification"
   ],
   "description": {
-    "en": "Herring gulls over a harbour in the afternoon: a V of nine crossing in front, then one alone passing close to the phone.",
-    "fr": "Des goélands argentés au-dessus d'un port l'après-midi : un V de neuf qui passe devant, puis un seul tout près du téléphone.",
-    "es": "Gaviotas argénteas sobre un puerto por la tarde: una V de nueve que cruza delante, y luego una sola que pasa cerca del teléfono.",
-    "it": "Gabbiani reali sopra un porto nel pomeriggio: una V di nove che passa davanti, poi uno solo vicino al telefono."
+    "en": "Herring gulls over Lorient's harbour in the afternoon: the phone follows a V of nine crossing in front, then one alone passing close the other way.",
+    "fr": "Des goélands argentés au-dessus du port de Lorient l'après-midi : le téléphone suit un V de neuf qui passe devant, puis un seul qui passe tout près dans l'autre sens.",
+    "es": "Gaviotas argénteas sobre el puerto de Lorient por la tarde: el teléfono sigue una V de nueve que cruza delante, y luego una sola que pasa muy cerca en sentido contrario.",
+    "it": "Gabbiani reali sopra il porto di Lorient nel pomeriggio: il telefono segue una V di nove che passa davanti, poi uno solo che passa vicinissimo nell'altro senso."
   },
   "time": "2025-09-14T16:30:00",
   "utcOffsetHours": 2,
   "durationSeconds": 40,
   "place": {
-    "name": "Harbour, Brittany coast (assumed)",
+    "name": "Quai Éric Tabarly, Lorient harbour",
     "locations": [
       {
-        "lat": 47.75,
-        "lng": -3.37
+        "lat": 47.73993,
+        "lng": -3.34987
       }
     ]
   },
@@ -63,11 +63,451 @@
       {
         "t": 0,
         "pose": {
-          "lat": 47.75,
-          "lng": -3.37,
+          "lat": 47.73993,
+          "lng": -3.34987,
           "elevationM": 0,
-          "headingDeg": 0,
+          "headingDeg": -53.8,
+          "pitchDeg": 10.4,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 1000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -51.8,
+          "pitchDeg": 11.2,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 2000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -49.4,
           "pitchDeg": 12,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 3000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -46.8,
+          "pitchDeg": 12.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 4000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -43.9,
+          "pitchDeg": 13.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 5000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -40.5,
+          "pitchDeg": 14.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 6000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -36.7,
+          "pitchDeg": 15.9,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 7000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -32.5,
+          "pitchDeg": 17.1,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 8000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -27.7,
+          "pitchDeg": 18.2,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 9000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -22.3,
+          "pitchDeg": 19.4,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 10000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -16.3,
+          "pitchDeg": 20.4,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 11000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -9.7,
+          "pitchDeg": 21.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 12000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -2.6,
+          "pitchDeg": 21.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 13000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 4.9,
+          "pitchDeg": 22.1,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 14000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 12.6,
+          "pitchDeg": 22,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 15000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 20.2,
+          "pitchDeg": 21.4,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 16000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 27.4,
+          "pitchDeg": 20.6,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 17000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 34.2,
+          "pitchDeg": 19.5,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 18000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 40.3,
+          "pitchDeg": 18.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 19000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 49,
+          "pitchDeg": 14.2,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 20000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 52.2,
+          "pitchDeg": 11.7,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 21000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 49.4,
+          "pitchDeg": 11.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 22000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 44.4,
+          "pitchDeg": 13.6,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 23000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 38,
+          "pitchDeg": 16,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 24000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 28,
+          "pitchDeg": 18.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 25000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 14.8,
+          "pitchDeg": 20.9,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 26000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": 0.9,
+          "pitchDeg": 21.9,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 27000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -16.2,
+          "pitchDeg": 21.2,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 28000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -31.2,
+          "pitchDeg": 18.8,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 29000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -41.1,
+          "pitchDeg": 16.1,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 30000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -48.9,
+          "pitchDeg": 13.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 31000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -54.6,
+          "pitchDeg": 11,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 32000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -58.3,
+          "pitchDeg": 9.5,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 33000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -61.5,
+          "pitchDeg": 8.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 34000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 35000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 36000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 37000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 38000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 39000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
+          "fovDeg": 50
+        }
+      },
+      {
+        "t": 40000,
+        "pose": {
+          "lat": 47.73993,
+          "lng": -3.34987,
+          "elevationM": 0,
+          "headingDeg": -64.1,
+          "pitchDeg": 7.3,
           "fovDeg": 50
         }
       }
@@ -76,7 +516,6 @@
   "soundTrack": {
     "keyframes": []
   },
-  "decor": [],
   "interpretation": {
     "title": {
       "en": "Gulls",
@@ -145,5 +584,68 @@
         ]
       }
     ]
-  }
+  },
+  "snapshots": {
+    "decor": {
+      "src": "sky-test-birds-gulls.decor.json",
+      "takenOn": "2026-11-17",
+      "attribution": "Canopy © IGN, LiDAR HD; buildings, bridges and lines © IGN, BD TOPO (Licence Ouverte 2.0), as surveyed on days the services do not give"
+    },
+    "relief": {
+      "src": "sky-test-birds-gulls.relief.zip",
+      "takenOn": "2026-11-17",
+      "attribution": "Relief © IGN, LiDAR HD and RGE ALTI (Licence Ouverte 2.0) in France; © AWS Open Data (SRTM, ETOPO1) elsewhere"
+    },
+    "imagery": {
+      "src": "sky-test-birds-gulls.imagery.zip",
+      "takenOn": "2026-11-17",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    },
+    "roads": {
+      "src": "sky-test-birds-gulls.roads.json",
+      "takenOn": "2026-11-17",
+      "attribution": "Roads © IGN, BD TOPO, in France; © OpenStreetMap contributors elsewhere, as drawn today"
+    },
+    "water": {
+      "src": "sky-test-birds-gulls.water.json",
+      "takenOn": "2026-11-17",
+      "attribution": "Water © IGN, BD TOPO, in France; © OpenStreetMap contributors elsewhere"
+    },
+    "railways": {
+      "src": "sky-test-birds-gulls.railways.json",
+      "takenOn": "2026-11-17",
+      "attribution": "Railways © IGN, BD TOPO, in France; © OpenStreetMap contributors elsewhere, as drawn today"
+    },
+    "map": {
+      "src": "sky-test-birds-gulls.map.zip",
+      "takenOn": "2026-11-17",
+      "attribution": "Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    }
+  },
+  "sources": [
+    {
+      "title": "LiDAR HD, canopy height model and classification (the trees, the heights and the roofs of what stands round the spot), flown 2025-03-02",
+      "url": "https://geoservices.ign.fr/lidarhd",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2025-03-02"
+      }
+    },
+    {
+      "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2022-07-19",
+      "url": "https://geoservices.ign.fr/bdtopo",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2022-07-19"
+      }
+    },
+    {
+      "title": "Aerial photograph of the IGN (the colour of the roofs), flown 2024-09-15",
+      "url": "https://geoservices.ign.fr/bdortho",
+      "publication": {
+        "publisher": "IGN",
+        "time": "2024-09-15"
+      }
+    }
+  ]
 }
