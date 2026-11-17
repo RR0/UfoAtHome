@@ -1,5 +1,9 @@
 // Named imports only — see SceneRenderer.ts's own top-of-file comment on why (tree-shaking).
-import { BufferGeometry, Color, Float32BufferAttribute, Group, Mesh, MeshPhysicalMaterial, ShapeUtils, Vector2 } from "three"
+import {
+  BufferGeometry, Color, Float32BufferAttribute, Group, HalfFloatType, LinearFilter, Matrix4, Mesh, MeshPhysicalMaterial, PerspectiveCamera, Plane,
+  ShapeUtils, Vector2, Vector3, Vector4, WebGLRenderTarget
+} from "three"
+import type { Object3D, Scene, WebGLRenderer } from "three"
 import type { WaterSurface } from "./terrain/WaterProvider.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import type { GroundYAt } from "./RoadSystem.js"
@@ -23,6 +27,9 @@ type Flat = { x: number, z: number }
  * back: the body of the water is dark (a few per cent, greenish, as a river carrying silt is). The reflection is the eye's probe of the whole scene,
  * as for every glossy thing (see Reflections), and the Sun's glint is the Sun's light on a smooth surface, which three draws.
  *
+ * WHAT FLIES OVER IT is mirrored by a plane of its own (see reflectBodies): the probe is photographed from the eye, 128 pixels a face and
+ * blurred, so a gull fifty metres off was two pixels in it, at the wrong place (a probe has no parallax), and its reflection was nowhere.
+ *
  * Loaded on demand (see SceneRenderer.buildWater): most scenes have no water near them.
  */
 export class WaterSystem {
@@ -41,14 +48,61 @@ export class WaterSystem {
   /** The most samples of the ground an outline is read at, a side: enough for a pond, few enough for the Seine across a patch. */
   private static readonly MAX_SAMPLES = 48
 
+  /** The share of the picture's pixels, a side, the bodies' reflection is drawn at: it is blurred by the ripple anyway. */
+  static readonly REFLECTION_SCALE = 0.5
+
   readonly group = new Group()
   private readonly material = new MeshPhysicalMaterial({
     color: new Color(...WaterSystem.BODY_ALBEDO), roughness: WaterSystem.ROUGHNESS, metalness: 0, ior: WaterSystem.IOR,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
   })
+  /** The level of each surface laid, in the group's frame, and how large it is: the largest is the plane the bodies are mirrored in. */
+  private readonly levels = new Map<Mesh, { y: number, areaM2: number }>()
+  private reflectionTarget?: WebGLRenderTarget
+  private readonly reflectionUniforms = {
+    uWaterReflection: { value: null as WebGLRenderTarget["texture"] | null },
+    uWaterReflectionMatrix: { value: new Matrix4() },
+    uWaterReflectionOn: { value: 0 }
+  }
+  private readonly mirrorCamera = new PerspectiveCamera()
+  private readonly eye = new Vector3()
+  private readonly ahead = new Vector3()
+  private readonly up = new Vector3()
+  private readonly plane = new Plane()
+  private readonly clip = new Vector4()
+  private readonly q = new Vector4()
+  private readonly size = new Vector2()
+  private readonly bias = new Matrix4().set(0.5, 0, 0, 0.5, 0, 0.5, 0, 0.5, 0, 0, 0.5, 0.5, 0, 0, 0, 1)
 
   constructor() {
     this.group.name = "water"
+    // The bodies' reflection (see reflectBodies) laid on what the material computes: the probe's reflection where a body is mirrored is
+    // replaced by the body's, in the share Fresnel's law gives at that pixel (Schlick's, 2 % head-on for an index of 1.33).
+    this.material.onBeforeCompile = shader => {
+      Object.assign(shader.uniforms, this.reflectionUniforms)
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec3 vWaterWorld;")
+        .replace("#include <project_vertex>", "#include <project_vertex>\nvWaterWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;")
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>
+          varying vec3 vWaterWorld;
+          uniform sampler2D uWaterReflection;
+          uniform mat4 uWaterReflectionMatrix;
+          uniform float uWaterReflectionOn;`)
+        .replace("#include <opaque_fragment>", `
+          if (uWaterReflectionOn > 0.5) {
+            vec4 at = uWaterReflectionMatrix * vec4(vWaterWorld, 1.0);
+            vec2 uv = at.xy / at.w;
+            if (at.w > 0.0 && uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0) {
+              vec4 mirrored = texture2D(uWaterReflection, uv);
+              float facing = clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0);
+              float fresnel = 0.02 + 0.98 * pow(1.0 - facing, 5.0);
+              // Premultiplied: drawn over a picture cleared to nothing, an edge's colour is already its coverage's share.
+              outgoingLight = outgoingLight * (1.0 - mirrored.a * fresnel) + mirrored.rgb * fresnel;
+            }
+          }
+          #include <opaque_fragment>`)
+    }
   }
 
   /**
@@ -73,6 +127,7 @@ export class WaterSystem {
       mesh.renderOrder = WaterSystem.RENDER_ORDER
       mesh.receiveShadow = true
       this.group.add(mesh)
+      this.levels.set(mesh, { y: level + WaterSystem.LIFT_M, areaM2: Math.abs(ShapeUtils.area(outline.map(point => new Vector2(point.x, point.z)))) })
     }
   }
 
@@ -86,11 +141,97 @@ export class WaterSystem {
       ;(child as Mesh).geometry.dispose()
       this.group.remove(child)
     }
+    this.levels.clear()
   }
 
   dispose(): void {
     this.clear()
     this.material.dispose()
+    this.reflectionTarget?.dispose()
+  }
+
+  /**
+   * Draws what of `layer` (the bodies of the interpretation on show, see BodySystem) the water mirrors, as `camera` sees it: the scene's
+   * objects on that layer, lit by its lights, seen from the eye's image under the plane of the largest surface, into a picture the water
+   * then lays where each of its points projects (see the material). Only what stands above that plane is in it (Lengyel's oblique near
+   * plane, as MirrorSystem's). Nothing is drawn, and the water shows only its probe, when no surface is laid or the eye is under it.
+   *
+   * @param wide The field to draw it over, when the picture is drawn wider than `camera` and resampled (see EquidistantPass), degrees.
+   */
+  reflectBodies(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, layer: number, any: boolean, wide?: number): void {
+    const uniforms = this.reflectionUniforms
+    uniforms.uWaterReflectionOn.value = 0
+    let largest: { y: number, areaM2: number } | undefined
+    for (const [mesh, level] of this.levels) if (mesh.visible && (!largest || level.areaM2 > largest.areaM2)) largest = level
+    if (!any || !largest) return
+    this.group.updateWorldMatrix(true, false)
+    const levelY = largest.y + this.group.position.y
+    camera.updateMatrixWorld()
+    this.eye.setFromMatrixPosition(camera.matrixWorld)
+    if (this.eye.y <= levelY) return
+    renderer.getDrawingBufferSize(this.size)
+    const width = Math.max(16, Math.round(this.size.x * WaterSystem.REFLECTION_SCALE))
+    const height = Math.max(16, Math.round(this.size.y * WaterSystem.REFLECTION_SCALE))
+    if (!this.reflectionTarget || this.reflectionTarget.width !== width || this.reflectionTarget.height !== height) {
+      this.reflectionTarget?.dispose()
+      this.reflectionTarget = new WebGLRenderTarget(width, height, { type: HalfFloatType, minFilter: LinearFilter, magFilter: LinearFilter })
+    }
+    // The eye's image through the water, looking where the eye's image looks.
+    const view = this.mirrorCamera
+    const mirror = (point: Vector3) => point.setY(2 * levelY - point.y)
+    view.position.copy(mirror(this.eye.clone()))
+    camera.getWorldDirection(this.ahead)
+    const target = mirror(this.eye.clone().add(this.ahead))
+    this.up.set(0, 1, 0).applyQuaternion(camera.quaternion)
+    view.up.set(this.up.x, -this.up.y, this.up.z)
+    view.lookAt(target)
+    view.fov = wide ?? camera.fov
+    view.aspect = camera.aspect
+    view.near = camera.near
+    view.far = camera.far
+    view.updateProjectionMatrix()
+    view.updateMatrixWorld()
+    this.clipAtLevel(view, levelY)
+    uniforms.uWaterReflectionMatrix.value.copy(this.bias).multiply(view.projectionMatrix).multiply(view.matrixWorldInverse)
+    // Lit as the scene is: its lights are put on the layer too (a light is drawn with a view only when it is on one of its layers).
+    scene.traverseVisible(object => {
+      if ((object as Object3D & { isLight?: boolean }).isLight) object.layers.enable(layer)
+    })
+    const previousTarget = renderer.getRenderTarget()
+    const autoClear = renderer.autoClear
+    const shadows = renderer.shadowMap.autoUpdate
+    const background = scene.background
+    const clearAlpha = renderer.getClearAlpha()
+    renderer.getClearColor(WaterSystem.clearColor)
+    scene.background = null
+    renderer.shadowMap.autoUpdate = false
+    renderer.setRenderTarget(this.reflectionTarget)
+    renderer.setClearColor(0x000000, 0)
+    renderer.autoClear = true
+    view.layers.set(layer)
+    renderer.render(scene, view)
+    renderer.setRenderTarget(previousTarget)
+    renderer.setClearColor(WaterSystem.clearColor, clearAlpha)
+    renderer.autoClear = autoClear
+    renderer.shadowMap.autoUpdate = shadows
+    scene.background = background
+    uniforms.uWaterReflection.value = this.reflectionTarget.texture
+    uniforms.uWaterReflectionOn.value = 1
+  }
+
+  private static readonly clearColor = new Color()
+
+  /** Moves the near plane of `view` onto the water (Lengyel's oblique near plane): what is under it is not mirrored. */
+  private clipAtLevel(view: PerspectiveCamera, levelY: number): void {
+    this.plane.setFromNormalAndCoplanarPoint(new Vector3(0, 1, 0), new Vector3(0, levelY, 0)).applyMatrix4(view.matrixWorldInverse)
+    this.clip.set(this.plane.normal.x, this.plane.normal.y, this.plane.normal.z, this.plane.constant)
+    const m = view.projectionMatrix.elements
+    this.q.set((Math.sign(this.clip.x) + m[8]) / m[0], (Math.sign(this.clip.y) + m[9]) / m[5], -1, (1 + m[10]) / m[14])
+    this.clip.multiplyScalar(2 / this.clip.dot(this.q))
+    m[2] = this.clip.x
+    m[6] = this.clip.y
+    m[10] = this.clip.z + 1
+    m[14] = this.clip.w
   }
 
   /**

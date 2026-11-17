@@ -154,3 +154,41 @@ describe("BirdFlock", () => {
     expect(expanded.bodies).toHaveLength(3)
   })
 })
+
+describe("a bird flying as its path asks", () => {
+  /** Samples every 100 ms of a bird climbing for 2 s, level for 4 s, then diving for 2 s. */
+  const samples = Array.from({ length: 81 }, (_, k) => {
+    const t = k * 100
+    const upM = t <= 2000 ? 10 + t / 200 : t <= 6000 ? 20 : 20 - (t - 6000) / 200
+    return { t, upM }
+  })
+  const flaps = BirdFlock.flapsAlong(samples, 3, { beats: 2, glideS: 1 }, 0)
+  const rising = (from: number, to: number) => flaps[to / 100] - flaps[from / 100]
+
+  test("beats its wings all the way up", () => {
+    expect(rising(0, 2000)).toBeCloseTo(6, 0)
+  })
+
+  test("goes in bursts and glides on the level, gliding with a whole number of beats", () => {
+    const level = rising(2000, 6000)
+    expect(level).toBeGreaterThan(2)
+    expect(level).toBeLessThan(12)
+    const held = samples.filter((sample, k) => sample.t > 2000 && sample.t < 6000 && k > 0 && flaps[k] === flaps[k - 1])
+    expect(held.length).toBeGreaterThan(5)
+    expect(held.every(sample => Number.isInteger(flaps[sample.t / 100]))).toBe(true)
+  })
+
+  test("glides all the way down, once its beat under way is finished", () => {
+    expect(rising(6500, 8000)).toBe(0)
+    expect(Number.isInteger(flaps[80])).toBe(true)
+  })
+
+  test("is computed so by a flock that states it", () => {
+    const flock: BirdFlockJson = { id: "gull", species: "herring-gull", formation: { kind: "single" }, flight: { kind: "path", beats: 4, glideS: 1.2 },
+      path: [{ t: 0, eastM: 0, northM: 40, altitudeM: 10 }, { t: 3000, eastM: 10, northM: 40, altitudeM: 20 }, { t: 6000, eastM: 20, northM: 40, altitudeM: 4 }] }
+    const track = BirdFlock.bodiesOf(flock)[0].track as { t: number, motions: { flap: number } }[]
+    const at = (t: number) => track.find(key => key.t >= t)!.motions.flap
+    expect(at(2500) - at(500)).toBeGreaterThan(2)
+    expect(at(5800) - at(4500)).toBe(0)
+  })
+})

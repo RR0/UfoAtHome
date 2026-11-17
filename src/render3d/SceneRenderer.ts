@@ -5728,6 +5728,8 @@ export class SceneRenderer {
     this.meterFrame()
     this.applyMedium()
     this.bleachRetina()
+    // What flies over the water, mirrored in it (see WaterSystem.reflectBodies), from the eye as the pass will draw it.
+    this.waterSystem?.reflectBodies(this.renderer, this.scene, this.camera, BODY_OVER_LAYER, this.bodySystem.any, pass && EquidistantProjectionPass.supports(this.camera.fov, this.camera.aspect) ? pass.sourceFovDeg(this.camera.fov, this.camera.aspect) : undefined)
     const overlaid = !!this.references?.any || this.phenomena.any || this.compassSprites.some(sprite => sprite.visible)
     EYE_UNIFORMS.uHasOverlay.value = overlaid ? 1 : 0
     const overlays = overlaid ? (camera?: PerspectiveCamera) => this.renderOverlayPasses(camera) : undefined

@@ -154,6 +154,7 @@ export class BirdFlock {
       const ownHz = hz * (1 + (random() - 0.5) * 0.06)
       const phase = random()
       const delayS = track.delayS
+      const flaps = flight.kind === "path" ? BirdFlock.flapsAlong(track.samples, ownHz, flight, phase) : undefined
       const keys: BodyKeyframe[] = track.samples.map((sample, k) => ({
         t: Math.round(sample.t),
         eastM: BirdFlock.round(sample.eastM),
@@ -161,7 +162,7 @@ export class BirdFlock {
         altitudeM: BirdFlock.round(sample.upM - size.heightM / 2),
         ...(k === 0 ? { sizeM: size, appearance: { color: species.plumage.color, albedo: species.plumage.albedo } } : {}),
         attitude: { headingDeg: BirdFlock.round(sample.headingDeg), pitchDeg: BirdFlock.round(sample.pitchDeg), rollDeg: BirdFlock.round(sample.rollDeg) },
-        motions: { flap: BirdFlock.round(BirdFlock.beatsAt((sample.t - startT) / 1000 - delayS, ownHz, flight, phase), 1000) }
+        motions: { flap: BirdFlock.round(flaps ? flaps[k] : BirdFlock.beatsAt((sample.t - startT) / 1000 - delayS, ownHz, flight, phase), 1000) }
       }))
       const body: BodyJson = {
         id: count > 1 ? `${flock.id}-${index + 1}` : flock.id,
@@ -192,6 +193,43 @@ export class BirdFlock {
     const cycles = Math.floor(t / cycleS)
     const into = t - cycles * cycleS
     return cycles * flight.beats + Math.min(flight.beats, into * hz)
+  }
+
+  /** Climbing faster than this, m/s, a bird beats its wings; coming down faster than this, it glides (see flapsAlong). */
+  static readonly CLIMB_FLAPS_MS = 0.3
+  static readonly DESCENT_GLIDES_MS = -0.8
+
+  /**
+   * How many wingbeats a bird flying "path" (see BirdFlightStyle) has made at each of its samples: its wings beat while it climbs and stop
+   * while it comes down, and on the level beat in bursts of `beats` with glides of `glideS` between. A beat under way is finished before a
+   * glide, so that the bird glides in the gliding pose (a whole number of beats, see scripts/build-birds.ts), never with its wings half up.
+   */
+  static flapsAlong(samples: readonly { t: number, upM: number }[], hz: number, flight: { beats: number, glideS: number }, phase: number): number[] {
+    let beats = phase
+    let flapping = true
+    let burstStart = Math.floor(beats)
+    let glideSince = 0
+    return samples.map((sample, k) => {
+      if (k === 0) return beats
+      const before = samples[k - 1]
+      const dt = (sample.t - before.t) / 1000
+      if (dt <= 0) return beats
+      const climb = (sample.upM - before.upM) / dt
+      const level = flapping ? beats - burstStart < flight.beats : (sample.t - glideSince) / 1000 >= flight.glideS
+      const wantsToFlap = climb > BirdFlock.CLIMB_FLAPS_MS ? true : climb < BirdFlock.DESCENT_GLIDES_MS ? false : level
+      if (flapping) {
+        const next = beats + hz * dt
+        if (!wantsToFlap && Math.floor(next) > Math.floor(beats)) {
+          beats = Math.floor(next)
+          flapping = false
+          glideSince = sample.t
+        } else beats = next
+      } else if (wantsToFlap) {
+        flapping = true
+        burstStart = beats
+      }
+      return beats
+    })
   }
 
   /** Every 100 ms, or more sparsely for a flock that would otherwise have more than MAX_KEYFRAMES. */

@@ -41,7 +41,14 @@ export interface BirdSpecies {
 
 export type BirdBuildId = "gull" | "pelican" | "goose" | "duck" | "plover"
 export type BirdColourKey = "upperColor" | "underColor" | "tipColor" | "headColor" | "neckColor" | "billColor"
-export type BirdFlightStyle = { kind: "flapping" } | { kind: "bursts", beats: number, glideS: number }
+/**
+ * How a bird flies (see the kinds):
+ * - "flapping": its wings beat all the time;
+ * - "bursts": bursts of `beats` wingbeats, each followed by a glide of `glideS` seconds, as a pelican travels;
+ * - "path": as its path asks, as a gull flies when it is not travelling: it beats its wings to climb, glides to come down (see
+ *   BirdFlock.flapsAlong), and on the level goes in bursts of `beats` with glides of `glideS` between.
+ */
+export type BirdFlightStyle = { kind: "flapping" } | { kind: "bursts", beats: number, glideS: number } | { kind: "path", beats: number, glideS: number }
 
 /** What a build of bird is as written by scripts/build-birds.ts: the bird it was made for, and the size of its model at rest. */
 export interface BirdBuild {
