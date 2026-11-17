@@ -48,3 +48,14 @@ describe("DemosPage", () => {
     expect(page.script("fr")).toContain('"cussac":"/demos/sightings/#cussac"')
   })
 })
+
+describe("demoPlayUrl", () => {
+  it("opens Mount Rainier on the Army Air Force's 60 m craft, not on the witness's specks", async () => {
+    const { demoPlayUrl } = await import("../../site/content/DemoCatalogue.js")
+    const rainier = new DemoCatalogue().groups.flatMap(group => group.demos).find(demo => demo.id === "mont-rainier")!
+    const url = new URL(demoPlayUrl(rainier), "https://ufoathome.org")
+    expect(url.searchParams.get("file")).toBe("https://ufoathome.org/demo-data/case-mont-rainier.json")
+    expect(url.searchParams.get("events")).toBe("interpretation-mont-rainier-aaf")
+    expect(url.searchParams.get("timeline")).toBe("0")
+  })
+})

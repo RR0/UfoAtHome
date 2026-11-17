@@ -9,7 +9,8 @@ export function demoPlayUrl(demo: Demo, playerPath = "/play/"): string {
   // A whole address, as every link that opens a recording carries one (see PlayerPage): a path of this site would open here only.
   const file = new URL(demo.playSrc ?? demo.editSrc ?? demo.src, "https://ufoathome.org").href
   const asked = demo.playSrc ? "&info=1&timeline=0" : ""
-  return `${playerPath}?file=${encodeURIComponent(file)}${asked}`
+  const opened = demo.openEvents ? `&events=${encodeURIComponent(demo.openEvents)}` : ""
+  return `${playerPath}?file=${encodeURIComponent(file)}${asked}${opened}`
 }
 
 export interface Demo {
@@ -25,6 +26,11 @@ export interface Demo {
    * for. The editor still opens one recording (`editSrc`, or `src`).
    */
   readonly playSrc?: string
+  /**
+   * The case's event the Player opens instead of its first one (see PlayUrl's `events=`): the reading that shows the case best, when the
+   * witness's own account shows little (Mount Rainier's nine flashes are specks at 20 miles; the Army Air Force's 60 m craft are not).
+   */
+  readonly openEvents?: string
   readonly title: Said<string>
   /**
    * Whether the title is a NAME — a place, people — whose capital stays wherever the title goes.
@@ -223,6 +229,7 @@ export class DemoCatalogue {
           src: "/demo-data/observer-arnold.json",
           // The case, for the player: his own reading and the pelicans, solved from his two timings.
           playSrc: "/demo-data/case-mont-rainier.json",
+          openEvents: "interpretation-mont-rainier-aaf",
           title: { en: "Mount Rainier, 1947", fr: "Mont Rainier, 1947", es: "Monte Rainier, 1947", it: "Monte Rainier, 1947" },
           titleIsName: true,
           blurb: {
