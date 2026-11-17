@@ -42,8 +42,9 @@ export interface InterpretationEditor {
 export interface InterpretationKind<J = unknown> {
   /** Where the interpretation states them: `interpretation.<key>`. Unique among the kinds. */
   key: string
-  /** Its texts in the reader's language (see MessageCatalog): what its part of the editor is called. */
-  messages: MessageCatalog<{ title: string }>
+  /** Its texts in the reader's language (see MessageCatalog): what its part of the editor is called, and what one of the bodies it
+   * computes is called under the pointer when neither it nor what it explains has a name. */
+  messages: MessageCatalog<{ title: string, name?: string }>
   /** The bodies one of them is, as drawn. */
   bodiesOf(item: J): BodyJson[]
   /** The code of the editor's part; a kind without one is drawn and not edited. */
@@ -79,9 +80,21 @@ export class InterpretationKinds {
   static expand(interpretation: InterpretationJson, kinds: readonly InterpretationKind[]): InterpretationJson
   static expand(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[]): InterpretationJson | undefined
   static expand(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[]): InterpretationJson | undefined {
-    if (!interpretation || !InterpretationKinds.computes(interpretation, kinds)) return interpretation
-    const computed = kinds.flatMap(kind => InterpretationKinds.itemsOf(interpretation, kind.key).flatMap(item => kind.bodiesOf(item)))
-    return { ...interpretation, bodies: [...interpretation.bodies, ...computed] }
+    return InterpretationKinds.expandWithKinds(interpretation, kinds).interpretation
+  }
+
+  /** As expand, with the kind that computed each of the bodies it added, by the body's id: what names one under the pointer. */
+  static expandWithKinds(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[]): {
+    interpretation: InterpretationJson | undefined, kindOf: Map<string, InterpretationKind>
+  } {
+    const kindOf = new Map<string, InterpretationKind>()
+    if (!interpretation || !InterpretationKinds.computes(interpretation, kinds)) return { interpretation, kindOf }
+    const computed = kinds.flatMap(kind => InterpretationKinds.itemsOf(interpretation, kind.key).flatMap(item => {
+      const bodies = kind.bodiesOf(item)
+      for (const body of bodies) kindOf.set(body.id, kind)
+      return bodies
+    }))
+    return { interpretation: { ...interpretation, bodies: [...interpretation.bodies, ...computed] }, kindOf }
   }
 
   /** What `interpretation` states under the keys of `kinds`, alone: what is computed rather than stated as bodies. */

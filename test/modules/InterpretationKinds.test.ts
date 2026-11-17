@@ -38,6 +38,17 @@ describe("kinds of interpretation", () => {
     expect(InterpretationKinds.expand(plain, InterpretationRegistry.kinds())).toBe(plain)
   })
 
+  it("say which kind computed each body they add, so that one with no name is called by its kind under the pointer", async () => {
+    install()
+    const { interpretation, kindOf } = InterpretationKinds.expandWithKinds({ bodies: [{ id: "craft" } as unknown as BodyJson], balloons: [{ id: "b", burstM: 1 }] },
+      InterpretationRegistry.kinds())
+    expect(interpretation?.bodies.map(body => body.id)).toEqual(["craft", "b"])
+    expect([...kindOf.keys()]).toEqual(["b"])
+    expect(kindOf.get("b")?.key).toBe("balloons")
+    const birds = InterpretationRegistry.kinds().find(kind => kind.key === "birds")!
+    expect((await birds.messages.load("fr")).name).toBe("Oiseau")
+  })
+
   it("keep an interpretation that states only what a kind computes", () => {
     install()
     expect(InterpretationKinds.saysNothing({ bodies: [], balloons: [{ id: "b", burstM: 1 }] }, InterpretationRegistry.kinds())).toBe(false)

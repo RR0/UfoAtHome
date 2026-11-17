@@ -4,6 +4,8 @@ import { Messages } from "../../../../i18n/MessageCatalog.js"
 export interface FlareKindMessages {
   /** What they are called. */
   title: string
+  /** What one of them is called under the pointer, when it has no name of its own (see InterpretationKind.messages). */
+  name: string
 }
 
 /** One chunk per language (see MessageCatalog). */

@@ -1,5 +1,6 @@
 import type { BirdKindMessages } from "./BirdKindMessages.js"
 
 export const birdKindMessages_it: BirdKindMessages = {
-  title: "Uccelli"
+  title: "Uccelli",
+  name: "Uccello"
 } satisfies BirdKindMessages

@@ -1,5 +1,6 @@
 import type { FlareKindMessages } from "./FlareKindMessages.js"
 
 export const flareKindMessages_en: FlareKindMessages = {
-  title: "Decoy flares"
+  title: "Decoy flares",
+  name: "Decoy flare"
 } satisfies FlareKindMessages

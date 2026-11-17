@@ -130,6 +130,7 @@ registerUfo()
 /** Fired by a scene when the element sets of its recording have arrived, or turned out not to exist. */import { Headlights } from "../engine/model/Headlights.js"
 import type { HeadlightMode } from "../engine/model/Headlights.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
+import type { InterpretationKind } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
 
 export const SATELLITES_CHANGE_EVENT = "satellites-change"
@@ -613,8 +614,7 @@ export class SceneElement extends HTMLElement {
     const standing = this.interpretationShown ? this.sceneRenderer.pickInterpretationBodyAt(ndcX, ndcY) : undefined
     const standingBody = standing ? this.interpretationShown?.bodies.find(body => body.id === standing) : undefined
     const standingName = standingBody
-      ? this.said.read(standingBody.title) || this.explainedName(standingBody.explains)
-        || (standingBody.model.id === "figure" ? naming.decorKind("entity") : undefined)
+      ? this.said.read(standingBody.title) || this.explainedName(standingBody.explains) || this.kindName(standingBody)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
     // An event of the sky that stands in the scene (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin, and
@@ -893,6 +893,54 @@ export class SceneElement extends HTMLElement {
     return note ? `${text.replace("{distance}", far)}. ${note}` : text.replace("{distance}", far)
   }
 
+  /** The kind that computed each body of the interpretation on show that one did (birds, flares, lanterns), by the body's id. */
+  private computedKinds = new Map<string, InterpretationKind>()
+  /** Each kind's texts in the reader's language, once come: what one of its bodies with no name is called. */
+  private readonly computedKindTexts = new Map<InterpretationKind, { name?: string }>()
+  /** What the catalogue says each model of a body pointed at is (an entity, a vehicle...), once it has been asked (see kindName). */
+  private readonly bodyModelKinds = new Map<string, string | undefined>()
+
+  /** Puts `interpretation` on show, its computed bodies with it, and asks for what names its bodies under the pointer. */
+  private showInterpretation(interpretation: InterpretationJson | undefined): void {
+    const { interpretation: expanded, kindOf } = InterpretationKinds.expandWithKinds(interpretation, InterpretationRegistry.kinds())
+    this.interpretationShown = expanded
+    this.computedKinds = kindOf
+    this.loadComputedKindTexts()
+  }
+
+  /** The texts of the kinds that computed bodies on show, in the language of the scene's names: asked again when that language comes. */
+  private loadComputedKindTexts(): void {
+    const language = this.namesLanguage
+    if (!language) return
+    for (const kind of new Set(this.computedKinds.values())) {
+      if (this.computedKindTexts.has(kind)) continue
+      void kind.messages.load(language).then(texts => {
+        if (language === this.namesLanguage) this.computedKindTexts.set(kind, texts)
+      }).catch(() => undefined)
+    }
+  }
+
+  /**
+   * What a body of the reading is called when neither it nor what it explains has a name: what computed it (a bird, a decoy flare), else
+   * what the catalogue says its model is (Cussac's beings are an entity), else nothing.
+   */
+  private kindName(body: BodyJson): string | undefined {
+    const computed = this.computedKinds.get(body.id)
+    const texts = computed ? this.computedKindTexts.get(computed) : undefined
+    if (texts?.name) return texts.name
+    const id = body.model.id
+    if (id === "figure") return this.naming.decorKind("entity")
+    if (!id || body.model.url !== undefined) return undefined
+    // Asked of the catalogue the first time one is pointed at: named on the next move.
+    if (!this.bodyModelKinds.has(id)) {
+      this.bodyModelKinds.set(id, undefined)
+      void this.sceneRenderer.entryOfDecorModel(id).then(entry => this.bodyModelKinds.set(id, [entry?.kind].flat()[0])).catch(() => undefined)
+      return undefined
+    }
+    const kind = this.bodyModelKinds.get(id)
+    return kind ? this.naming.decorKind(kind as Parameters<SceneNaming["decorKind"]>[0]) || undefined : undefined
+  }
+
   /**
    * What a body of the reading is called when the reading gives it no name: the phenomena it explains, by the names the account gives them.
    * Mount Rainier's nine craft are each one of the witness's nine objects, and were named nothing under the pointer.
@@ -950,6 +998,8 @@ export class SceneElement extends HTMLElement {
     const names = await loadSceneNames(language)
     if (language !== this.namesLanguage) return
     this.applySceneNaming(new SceneNaming(names))
+    this.computedKindTexts.clear()
+    this.loadComputedKindTexts()
   }
 
   /**
@@ -1719,7 +1769,7 @@ export class SceneElement extends HTMLElement {
     // An interpretation is OF one recording: another one's bodies have nothing to stand for here.
     // What the new one starts as is its observer's own account of what it was, if they gave one.
     // Its salvoes of flares and its lanterns, if it states any, are computed into bodies here (see DecoyFlare, SkyLantern).
-    this.interpretationShown = this.inTheRound ? InterpretationKinds.expand(this.ufoElement.sighting.interpretation, InterpretationRegistry.kinds()) : undefined
+    this.showInterpretation(this.inTheRound ? this.ufoElement.sighting.interpretation : undefined)
     this.syncAccountHidden()
     // A loaded recording may have been made through something with a format of its own.
     this.applyFrameFormat()
@@ -3572,7 +3622,7 @@ export class SceneElement extends HTMLElement {
   }
 
   set interpretation(interpretation: InterpretationJson | undefined) {
-    this.interpretationShown = InterpretationKinds.expand(interpretation, InterpretationRegistry.kinds())
+    this.showInterpretation(interpretation)
     // What is played is then the interpretation, and is called so.
     this.ufoElement.playerTitle = interpretation?.title
     // A reading whose bodies are heard brings its own sound, which the player's button answers for (see ambientSound).
