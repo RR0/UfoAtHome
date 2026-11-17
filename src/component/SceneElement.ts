@@ -613,7 +613,8 @@ export class SceneElement extends HTMLElement {
     const standing = this.interpretationShown ? this.sceneRenderer.pickInterpretationBodyAt(ndcX, ndcY) : undefined
     const standingBody = standing ? this.interpretationShown?.bodies.find(body => body.id === standing) : undefined
     const standingName = standingBody
-      ? this.said.read(standingBody.title) || (standingBody.model.id === "figure" ? naming.decorKind("entity") : undefined)
+      ? this.said.read(standingBody.title) || this.explainedName(standingBody.explains)
+        || (standingBody.model.id === "figure" ? naming.decorKind("entity") : undefined)
       : undefined
     if (standing !== undefined && standingName) return { kind: "body", id: standing, name: standingName }
     // An event of the sky that stands in the scene (a beam of light, see SkyEventsJson), before the decor it passes in front of: thin, and
@@ -890,6 +891,23 @@ export class SceneElement extends HTMLElement {
     const text = template.replace("{name}", name).replace("{size}", `${metres(size.widthM)} × ${metres(size.lengthM)} × ${metres(size.heightM)} m`)
     const note = this.said.read(decor.note)
     return note ? `${text.replace("{distance}", far)}. ${note}` : text.replace("{distance}", far)
+  }
+
+  /**
+   * What a body of the reading is called when the reading gives it no name: the phenomena it explains, by the names the account gives them.
+   * Mount Rainier's nine craft are each one of the witness's nine objects, and were named nothing under the pointer.
+   */
+  private explainedName(explains: readonly string[] | undefined): string | undefined {
+    if (!explains?.length) return undefined
+    const keyframes = this.ufoElement.sighting.timeline.allKeyframes
+    const names = explains.map(sourceId => {
+      for (const keyframe of keyframes) {
+        const title = this.said.read(keyframe.shapes.find(state => state.sourceId === sourceId)?.shape.title)
+        if (title) return title
+      }
+      return undefined
+    }).filter((name): name is string => !!name)
+    return names.length ? names.join(", ") : undefined
   }
 
   /** What to call the thing under the pointer. The comets are not in BODY_NAMES because there are

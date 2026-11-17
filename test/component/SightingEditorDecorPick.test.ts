@@ -283,6 +283,27 @@ async function twoBuildings(): Promise<SightingEditorElement> {
   return element
 }
 
+describe("naming a body of the reading under the pointer", () => {
+  it("names a body the reading leaves unnamed after the phenomenon it explains: Mount Rainier's craft were named nothing", async () => {
+    pickedBody = "craft"
+    try {
+      const element = await mount()
+      const json = element.sightingData as unknown as { timeline: { keyframes: { shapes: { sourceId: string, shape: { title?: unknown } }[] }[] } }
+      const shape = json.timeline.keyframes[0].shapes[0]
+      shape.shape.title = { en: "Object 1", fr: "Objet 1" }
+      element.sightingData = { ...json, interpretation: { bodies: [{ id: "craft", explains: [shape.sourceId], model: { id: "x" }, track: [{ t: 0, eastM: 10, northM: -20 }] }] } } as unknown as typeof element.sightingData
+      const view = element.shadowRoot!.getElementById("account-view") as HTMLSelectElement
+      view.value = "bodies"
+      view.dispatchEvent(new Event("change", { bubbles: true }))
+      const scene = element.shadowRoot!.querySelector("rr0-scene") as unknown as { pickAt(x: number, y: number): { kind: string, name: string } | undefined }
+
+      expect(scene.pickAt(0, 0)).toMatchObject({ kind: "body", name: "Object 1" })
+    } finally {
+      pickedBody = undefined
+    }
+  })
+})
+
 describe("picking scenery on the picture", () => {
   it("selects it with a plain click, and opens the Environment group where it is framed, without the author going there first", async () => {
     pickedDecor = "decor-1"
