@@ -43,8 +43,6 @@ export interface BodyState {
   shadow?: boolean
   /** See BodyJson.lightFromBelow. */
   lightFromBelow?: { lux: number, color?: string }
-  /** See BodyJson.translucency. */
-  translucency?: number
   /** See BodyJson.outlineNode. */
   outlineNode?: string
   eastM: number
@@ -303,7 +301,6 @@ export class BodyPlacement {
       ...(this.body.ensemble ? { ensemble: this.body.ensemble } : {}),
       ...(this.body.shadow === false ? { shadow: false } : {}),
       ...(this.body.lightFromBelow ? { lightFromBelow: this.body.lightFromBelow } : {}),
-      ...(this.body.translucency ? { translucency: this.body.translucency } : {}),
       outlineNode: this.body.outlineNode,
       eastM,
       northM,
