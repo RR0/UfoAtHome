@@ -20,6 +20,8 @@ import { ReentryTypes } from "./types/ReentryTypes.js"
 import { ReentryEvidence } from "./ReentryEvidence.js"
 import type { ReentryFinding } from "./ReentryEvidence.js"
 import { sightingTimeToDate } from "../../../engine/astronomy/CelestialPositions.js"
+import { loadSceneNames } from "../../../component/messages/index.js"
+import type { SceneNames } from "../../../component/messages/SceneNames.js"
 import type { TimelineTrack } from "../../../component/TimelineTracks.js"
 
 /** What the Re-entries part needs of the editor it stands in, read at every use. */
@@ -88,8 +90,10 @@ export class ReentryEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const [messages, parameterTexts] = await Promise.all([REENTRY_EDITOR_MESSAGES.load(language), REENTRY_PARAMETER_TEXTS.load(language), ReentryTypes.load(language)])
+    const [messages, parameterTexts, , sceneNames] = await Promise.all([REENTRY_EDITOR_MESSAGES.load(language), REENTRY_PARAMETER_TEXTS.load(language), ReentryTypes.load(language),
+      loadSceneNames(language as Parameters<typeof loadSceneNames>[0]).catch(() => undefined)])
     if (token !== this.languageToken) return
+    this.sceneNames = sceneNames
     this.messages = messages
     this.parameterTexts = parameterTexts
     this.render()
@@ -238,6 +242,8 @@ export class ReentryEditor {
 
   // What the sources say of it.
 
+  /** The names of the showers in the part's language (see SceneNames). */
+  private sceneNames?: SceneNames
   private evidenceTimer?: ReturnType<typeof setTimeout>
   private evidenceFor?: unknown
 
@@ -315,6 +321,10 @@ export class ReentryEditor {
         if (finding.source === "none") return m.typeUnknown
         return finding.reason === "faint" ? m.faintFireball : finding.reason === "beforeArchive" ? m.beforeGmn
           : finding.reason === "daylight" ? m.daylightGmn : fill(m.unwatchedGmn, { km: ReentryEvidence.WATCHED_KM })
+      case "compatible":
+        return fill(m.compatibleShower, { shower: this.sceneNames?.showers[finding.showerId] ?? finding.showerId, off: finding.offDeg, zhr: finding.zhr, margin: ReentryEvidence.SHOWER_MARGIN_DEG })
+      case "sporadic":
+        return finding.active === 0 ? m.sporadicNoShower : fill(m.sporadicShower, { count: finding.active })
       case "unchecked":
         return finding.reason === "noDateOrPlace" ? m.noDateOrPlace : finding.source === "gmn" ? m.unreachableGmn : m.unreachableCatalogue
     }

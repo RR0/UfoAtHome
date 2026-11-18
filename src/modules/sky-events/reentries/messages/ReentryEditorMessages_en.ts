@@ -40,5 +40,8 @@ export const reentryEditorMessages_en: ReentryEditorMessages = {
   unreachableGmn: "Not checked: the Global Meteor Network's records could not be reached.",
   unreachableCatalogue: "Not checked: the satellite catalogue could not be reached.",
   noDateOrPlace: "Not checked: the recording needs a date and a place.",
+  compatibleShower: "Compatible with the {shower}: traced back, its path passes {off}° from their radiant (within {margin}°), a shower then at some {zhr} meteors an hour at best. One of its meteors perhaps, never surely: a sporadic may cross the same way.",
+  sporadicShower: "Sporadic, as most meteors are: traced back, its path comes from none of the {count} showers active then.",
+  sporadicNoShower: "Sporadic, as most meteors are: no shower was active then.",
   margins: "Within a witness's errors: ±{minutes} min, heading ±{heading}°, elevation overestimated, duration ×/÷{factor}."
 }

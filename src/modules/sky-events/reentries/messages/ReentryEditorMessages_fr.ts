@@ -40,5 +40,8 @@ export const reentryEditorMessages_fr: ReentryEditorMessages = {
   unreachableGmn: "Non vérifié : les enregistrements du Global Meteor Network sont injoignables.",
   unreachableCatalogue: "Non vérifié : le catalogue des satellites est injoignable.",
   noDateOrPlace: "Non vérifié : l'enregistrement doit avoir une date et un lieu.",
+  compatibleShower: "Compatible avec les {shower} : prolongé vers l'arrière, son trajet passe à {off}° de leur radiant (à {margin}° près), un essaim alors à quelque {zhr} météores par heure au mieux. Un de ses météores peut-être, jamais sûrement : un sporadique peut passer de même.",
+  sporadicShower: "Sporadique, comme la plupart des météores : prolongé vers l'arrière, son trajet ne vient d'aucun des {count} essaims actifs alors.",
+  sporadicNoShower: "Sporadique, comme la plupart des météores : aucun essaim n'était actif alors.",
   margins: "Dans les marges d'erreur d'un témoin : ±{minutes} min, cap ±{heading}°, hauteur surestimée, durée ×/÷{factor}."
 }

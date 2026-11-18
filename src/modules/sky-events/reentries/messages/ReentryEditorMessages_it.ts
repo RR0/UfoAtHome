@@ -40,5 +40,8 @@ export const reentryEditorMessages_it: ReentryEditorMessages = {
   unreachableGmn: "Non verificato: le registrazioni della Global Meteor Network non sono raggiungibili.",
   unreachableCatalogue: "Non verificato: il catalogo dei satelliti non è raggiungibile.",
   noDateOrPlace: "Non verificato: la registrazione deve avere una data e un luogo.",
+  compatibleShower: "Compatibile con le {shower}: prolungato all'indietro, il suo percorso passa a {off}° dal loro radiante (entro {margin}°), uno sciame allora di circa {zhr} meteore l'ora al massimo. Forse una delle sue meteore, mai con certezza: una sporadica può passare allo stesso modo.",
+  sporadicShower: "Sporadica, come la maggior parte delle meteore: prolungato all'indietro, il suo percorso non viene da nessuno dei {count} sciami attivi allora.",
+  sporadicNoShower: "Sporadica, come la maggior parte delle meteore: nessuno sciame era attivo allora.",
   margins: "Entro gli errori di un testimone: ±{minutes} min, direzione ±{heading}°, altezza sovrastimata, durata ×/÷{factor}."
 }

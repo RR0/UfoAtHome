@@ -40,5 +40,8 @@ export const reentryEditorMessages_es: ReentryEditorMessages = {
   unreachableGmn: "No comprobado: no se pudo acceder a los registros de la Global Meteor Network.",
   unreachableCatalogue: "No comprobado: no se pudo acceder al catálogo de satélites.",
   noDateOrPlace: "No comprobado: la grabación necesita una fecha y un lugar.",
+  compatibleShower: "Compatible con las {shower}: prolongado hacia atrás, su camino pasa a {off}° de su radiante (con {margin}° de margen), una lluvia entonces de unos {zhr} meteoros por hora como mucho. Uno de sus meteoros quizá, nunca con certeza: un esporádico puede cruzar igual.",
+  sporadicShower: "Esporádico, como la mayoría de los meteoros: prolongado hacia atrás, su camino no viene de ninguna de las {count} lluvias activas entonces.",
+  sporadicNoShower: "Esporádico, como la mayoría de los meteoros: ninguna lluvia estaba activa entonces.",
   margins: "Dentro de los errores de un testigo: ±{minutes} min, rumbo ±{heading}°, altura sobreestimada, duración ×/÷{factor}."
 }

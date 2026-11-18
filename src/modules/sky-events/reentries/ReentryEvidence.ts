@@ -6,6 +6,7 @@ import type { FireballRecord } from "../../../engine/astronomy/FireballArchive.j
 import { ReentryArchive } from "../../../engine/astronomy/ReentryArchive.js"
 import type { ReentryCandidate } from "../../../engine/astronomy/ReentryArchive.js"
 import { computeBodyPosition } from "../../../engine/astronomy/CelestialPositions.js"
+import { MeteorShowers } from "../../../engine/astronomy/MeteorShowers.js"
 
 /** What a re-entry stated looked like from where the witness stood: where it appeared and went out, when, for how long, how bright. */
 export interface StatedView {
@@ -34,6 +35,8 @@ export interface FireballMatch {
  * - `impossible`: nothing of its type could be there then (an object in orbit before the first one).
  * - `uninformative`: no source would have it whether or not it was there, and why.
  * - `unchecked`: the sources could not be asked.
+ * - `compatible`: a meteor whose path, traced back, comes from the radiant of a shower active that night: one of its meteors, perhaps,
+ *   never surely, as a sporadic may cross the same way. `sporadic`: no active shower's radiant is behind it, as for most meteors.
  */
 export type ReentryFinding =
   | { verdict: "known", source: "gmn", match: FireballMatch }
@@ -45,6 +48,8 @@ export type ReentryFinding =
   | { verdict: "uninformative", source: "gmn", reason: "faint" | "beforeArchive" | "unwatched" | "daylight" }
   | { verdict: "uninformative", source: "none", reason: "typeUnknown" }
   | { verdict: "unchecked", source: "gmn" | "catalogue" | "none", reason: "unreachable" | "noDateOrPlace" }
+  | { verdict: "compatible", source: "showers", showerId: string, offDeg: number, zhr: number }
+  | { verdict: "sporadic", source: "showers", active: number }
 
 /** The archives asked, given to `check` so that a test gives its own. */
 export interface EvidenceArchives {
@@ -75,6 +80,13 @@ export class ReentryEvidence {
   static readonly WATCHED_COUNT = 5
   /** The Sun below this, degrees, and the cameras of the network are running. */
   static readonly NIGHT_SUN_DEG = -12
+  /**
+   * How far from the great circle of a meteor's path, traced back, a radiant may be for the meteor to be of its shower, degrees. Twice
+   * what a single camera's association allows (some 10°): a witness's ends of a path are off by the errors above.
+   */
+  static readonly SHOWER_MARGIN_DEG = 20
+  /** A radiant this far under the horizon still sends meteors grazing the top of the air. */
+  static readonly RADIANT_BELOW_DEG = -10
   /** Sputnik 1: nothing came down from orbit before. */
   static readonly FIRST_ORBIT_MS = Date.UTC(1957, 9, 4)
 
@@ -133,11 +145,56 @@ export class ReentryEvidence {
     const nature = ReentryTypes.of(reentry.type)?.nature
     const findings: ReentryFinding[] = []
     if (nature !== "artificial") findings.push(...await ReentryEvidence.checkFireballs(view, observer, nature === "natural", archives))
+    if (nature !== "artificial") {
+      const shower = ReentryEvidence.showerOf(view, observer)
+      if (shower && (shower.verdict === "compatible" || nature === "natural")) findings.push(shower)
+    }
     if (nature !== "natural") findings.push(...await ReentryEvidence.checkCatalogue(reentry, view, observer, nature === "artificial", archives))
-    if (nature === undefined && !findings.some(finding => finding.verdict === "known" || finding.verdict === "possible")) {
+    if (nature === undefined && !findings.some(finding => finding.verdict === "known" || finding.verdict === "possible" || finding.verdict === "compatible")) {
       return [...findings.filter(finding => finding.verdict === "unchecked"), { verdict: "uninformative", source: "none", reason: "typeUnknown" }]
     }
     return findings
+  }
+
+  /** A direction of the sky as a unit vector: east, north, up. */
+  private static vectorOf(azimuthDeg: number, altitudeDeg: number): [number, number, number] {
+    const rad = Math.PI / 180
+    const a = altitudeDeg * rad
+    const z = azimuthDeg * rad
+    return [Math.cos(a) * Math.sin(z), Math.cos(a) * Math.cos(z), Math.sin(a)]
+  }
+
+  private static angleDeg(u: readonly number[], v: readonly number[]): number {
+    return Math.acos(Math.max(-1, Math.min(1, u[0] * v[0] + u[1] * v[1] + u[2] * v[2]))) * 180 / Math.PI
+  }
+
+  /**
+   * Whether a shower's radiant lies behind the meteor, on its path traced back: near the great circle through where it appeared and
+   * where it went out, on the side it appeared from. The radiant nearest that circle among the showers active at its date, or none.
+   * Undefined when its path is too short to have a direction.
+   */
+  static showerOf(view: StatedView, observer: GeoPoint): ReentryFinding | undefined {
+    const from = ReentryEvidence.vectorOf(view.from.azimuthDeg, view.from.altitudeDeg)
+    const to = ReentryEvidence.vectorOf(view.to.azimuthDeg, view.to.altitudeDeg)
+    const length = ReentryEvidence.angleDeg(from, to)
+    if (length < 1) return undefined
+    const normal = [from[1] * to[2] - from[2] * to[1], from[2] * to[0] - from[0] * to[2], from[0] * to[1] - from[1] * to[0]]
+    const n = Math.hypot(normal[0], normal[1], normal[2])
+    const date = new Date(view.startMs)
+    const active = MeteorShowers.activeAt(date)
+    let best: { showerId: string, offDeg: number, zhr: number } | undefined
+    for (const { shower, zhr } of active) {
+      const radiant = MeteorShowers.radiantPosition(shower, date, { lat: observer.lat, lng: observer.lng, elevationM: observer.heightM })
+      if (radiant.altitudeDeg < ReentryEvidence.RADIANT_BELOW_DEG) continue
+      const r = ReentryEvidence.vectorOf(radiant.azimuthDeg, radiant.altitudeDeg)
+      const offDeg = Math.asin(Math.min(1, Math.abs((r[0] * normal[0] + r[1] * normal[1] + r[2] * normal[2]) / n))) * 180 / Math.PI
+      // Behind it: nearer where it appeared than where it went out, and not between them.
+      const toFrom = ReentryEvidence.angleDeg(r, from)
+      const toTo = ReentryEvidence.angleDeg(r, to)
+      if (toFrom >= toTo || toTo <= length) continue
+      if (offDeg <= ReentryEvidence.SHOWER_MARGIN_DEG && (!best || offDeg < best.offDeg)) best = { showerId: shower.id, offDeg: Math.round(offDeg), zhr: Math.round(zhr) }
+    }
+    return best ? { verdict: "compatible", source: "showers", ...best } : { verdict: "sporadic", source: "showers", active: active.length }
   }
 
   private static async checkFireballs(view: StatedView, observer: GeoPoint, natural: boolean, archives: EvidenceArchives): Promise<ReentryFinding[]> {

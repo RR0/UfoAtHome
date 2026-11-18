@@ -41,6 +41,9 @@ export interface ReentryEditorMessages {
   unreachableGmn: string
   unreachableCatalogue: string
   noDateOrPlace: string
+  compatibleShower: string
+  sporadicShower: string
+  sporadicNoShower: string
   margins: string
 }
 
