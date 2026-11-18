@@ -407,7 +407,7 @@ export class SceneElement extends HTMLElement {
     SceneElement.trafficRuntimeLoading.catch(() => { SceneElement.trafficRuntimeLoading = undefined })
     return SceneElement.trafficRuntimeLoading
   }
-  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; nearestPassKm?: Map<string, number>; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
+  private traffic?: { key: string; status: "loading" | "ready" | "outside" | "unavailable" | "byHand"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; nearestPassKm?: Map<string, number>; set?: TrafficDecorSet; startMs?: number; observer?: { lat: number; lng: number }; tracks?: AircraftTrack[]; models?: Map<string, AircraftModel>; descriptions?: Map<string, AircraftDescription>; audible?: Set<string>; air?: UpperAirSample[]; airSource?: UpperAirSource; contrails?: ContrailTrail[]; trailSet?: TrafficDecorSet }
   /** Where the Sun stood at the last restatement of the sky, from the observer: what the aircraft are lit by, each from its own place. */
   private lastSun?: { altitudeDeg: number; azimuthDeg: number }
 
@@ -2778,6 +2778,14 @@ export class SceneElement extends HTMLElement {
     const startMs = startDate?.getTime()
     const key = startMs === undefined || pose?.lat === undefined || pose.lng === undefined ? ""
       : `${this.aircraftSource.id}|${startMs}+${spanMs}|${pose.lat.toFixed(3)},${pose.lng.toFixed(3)}|${Math.round(pose.elevationM ?? 0)}|${Math.round(this.sceneRenderer.groundAltitudeM)}`
+    // A sky entered by hand has no aircraft a record gives (see Sighting.skySources): those the witness saw are in its decor.
+    if (sighting.skySources === false) {
+      if (this.traffic?.status !== "byHand") {
+        this.traffic = { key: "byHand", status: "byHand" }
+        this.upperAirHeardLive = undefined
+      }
+      return undefined
+    }
     if (this.traffic?.key === key) return this.traffic.set
     // What was heard of the air aloft was heard for other aircraft, at another place or time: an editor that loaded another recording would
     // otherwise freeze the last one's air into this one.
@@ -3355,7 +3363,7 @@ export class SceneElement extends HTMLElement {
    * aircraft the record gave and how many are drawn (a record of an hour near a big airport holds
    * more than is worth drawing).
    */
-  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; total: number; shown: number; credit: string; creditUrl: string; trailCredit?: { credit: string; creditUrl: string } } {
+  get aircraftState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable" | "byHand"; problem?: AircraftProblem; partial?: AircraftTrafficPart; creditsSpent?: number; total: number; shown: number; credit: string; creditUrl: string; trailCredit?: { credit: string; creditUrl: string } } {
     // Where the air the trails were worked out from comes from, once there are trails.
     const trailSource = this.traffic?.contrails?.length ? this.upperAirSource ?? SceneElement.trafficRuntime?.UPPER_AIR_SOURCES[0] : undefined
     return {

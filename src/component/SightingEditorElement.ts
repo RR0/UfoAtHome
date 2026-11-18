@@ -2002,6 +2002,7 @@ export class SightingEditorElement extends HTMLElement {
       this.ufoElement.sighting.skySources = this.skySourcesInput.checked ? undefined : false
       this.ufoElement.refresh()
       this.refreshSkyCandidates()
+      this.showAircraftStatus()
     })
     // A value of the place, not of a pose: the towns do not move during an observation. Blank is a
     // natural sky.
@@ -3871,6 +3872,7 @@ export class SightingEditorElement extends HTMLElement {
     const said: string[] = []
     if (status === "loading") said.push(this.messages.aircraftLoading)
     if (status === "outside") said.push(this.messages.aircraftOutside)
+    if (status === "byHand") said.push(this.messages.aircraftByHand)
     if (status === "unavailable" && !problem) said.push(this.messages.aircraftProblems.network)
     if (status === "ready" && total === 0) said.push(this.messages.aircraftNone)
     if (partial) {

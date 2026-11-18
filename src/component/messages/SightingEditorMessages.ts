@@ -296,6 +296,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** How the search stands. */
   aircraftLoading: string
   aircraftOutside: string
+  /** The Aircraft part's line when the sky is entered by hand (see Sighting.skySources). */
+  aircraftByHand: string
   aircraftNone: string
   /** Before the field of the reader's own key, for a source that needs one. */
   sourceKey: string

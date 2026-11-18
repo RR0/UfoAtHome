@@ -478,8 +478,9 @@ export class Sighting {
 
   /**
    * Whether the sky holds, beside what the recording states, what the sources know of that date and place: the meteors of the
-   * showers and the sporadic background, the fireballs a camera network recorded, the re-entries on record, the satellites tracked.
-   * Absent is true. False is a sky entered by hand: only the events the recording states (see skyEvents) are in it.
+   * showers and the sporadic background, the fireballs a camera network recorded, the re-entries on record, the satellites tracked, the
+   * aircraft a record of air traffic gives. Absent is true. False is a sky entered by hand: only what the recording states is in it (its
+   * skyEvents, and the aircraft of its decor). Never exclusive: what the recording states is in the sky either way, beside the sources'.
    */
   skySources?: boolean
 
