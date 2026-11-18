@@ -9353,6 +9353,11 @@ export class SightingEditorElement extends HTMLElement {
         currentTime: () => this.ufoElement.currentTime,
         duration: () => this.ufoElement.seekableDuration,
         seekTo: t => this.goToMark(t),
+        pointAt: (azimuthDeg, altitudeDeg) => {
+          this.headingInput.value = String(this.rounded(azimuthDeg))
+          this.pitchInput.value = String(this.rounded(altitudeDeg))
+          this.updateObserver()
+        },
         changed: () => {
           this.ufoElement.refresh()
           this.refreshParamSummary()

@@ -5,6 +5,8 @@ import type { ParameterSet } from "../../../engine/interpretation/Parameters.js"
 import { SkyEventEditorStyle } from "../SkyEventEditorStyle.js"
 import { ReentryParameters } from "./ReentryParameters.js"
 import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
+import { ReentrySighting } from "./Reentry.js"
+import { resolveObserverPoseAt } from "../../../engine/model/Sighting.js"
 import type { ParameterHolder } from "../../../engine/interpretation/Parameters.js"
 import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
@@ -35,6 +37,8 @@ export interface ReentryEditorHost {
   currentTime(): number
   duration(): number
   seekTo(t: number): void
+  /** Turns the observer's view towards a direction of their sky, degrees from true north and above the horizon. */
+  pointAt?(azimuthDeg: number, altitudeDeg: number): void
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -218,9 +222,10 @@ export class ReentryEditor {
       ids: { list: "reentry-select", remove: "reentry-delete", add: "reentry-add", kinds: "reentry-add-kind", kind: kind => `reentry-add-${kind}` },
       onSelect: id => this.show(id),
       onAdd: kind => { if (kind) this.addReentry(kind) },
-      onRemove: () => this.deleteCurrent()
+      onRemove: () => this.deleteCurrent(),
+      actions: this.host.pointAt ? [{ id: "reentry-point", glyph: "🎯", onClick: () => this.pointAtCurrent() }] : []
     })
-    this.list.setLabels({ list: m.reentry, remove: m.deleteReentry, add: m.addReentry, empty: m.none })
+    this.list.setLabels({ list: m.reentry, remove: m.deleteReentry, add: m.addReentry, empty: m.none, actions: { "reentry-point": m.pointAtReentry } })
     this.timeline = new TimelineTracks(this.element("reentry-timeline"), t => this.host.seekTo(t), { addKeyframeHere: m.addPointHere, keyframeHere: m.pointHere, zoomHint: m.zoomHint })
     this.element("reentry-place-delete").addEventListener("click", () => this.removePlace())
     this.element("reentry-curve-delete").addEventListener("click", () => this.removeCurvePoint())
@@ -627,6 +632,31 @@ export class ReentryEditor {
     apply(edited)
     this.writeReentries(this.reentries.map(other => other === reentry ? edited : other))
     this.host.changed()
+  }
+
+  /**
+   * Turns the view towards the re-entry shown: where its leading point is at the playhead, seen from where the observer is then. When the
+   * playhead is outside its path, it is put a second into it first (its first second fades in), so that what is pointed at is drawn.
+   */
+  pointAtCurrent(): void {
+    const reentry = this.current
+    const track = reentry?.track
+    if (!reentry || !track || track.length < 2 || !this.host.pointAt) return
+    const first = track[0].t, last = track[track.length - 1].t
+    let t = this.host.currentTime()
+    if (t < first || t > last) {
+      t = Math.round(first + Math.min(1000, (last - first) / 2))
+      this.host.seekTo(t)
+    }
+    const sighting = this.host.sighting()
+    const pose = resolveObserverPoseAt(sighting, t)
+    // A pose of the track may say only where the observer looks: they then stand at the recording's place.
+    const place = sighting.event?.place?.[0]
+    const lat = pose?.lat ?? place?.lat, lng = pose?.lng ?? place?.lng
+    const lead = ReentrySighting.leadAt(reentry, t)
+    if (lat === undefined || lng === undefined || !lead) return
+    const seen = ReentrySighting.seenFrom({ lat, lng, heightM: pose?.elevationM ?? 0 }, lead)
+    this.host.pointAt(seen.azimuthDeg, seen.altitudeDeg)
   }
 
   /** Where the recording is, and the direction the observer faces at its start; undefined where it has no place. */

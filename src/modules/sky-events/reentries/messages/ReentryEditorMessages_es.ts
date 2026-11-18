@@ -5,6 +5,7 @@ export const reentryEditorMessages_es: ReentryEditorMessages = {
   none: "Ninguna reentrada en esta grabación",
   reentry: "Reentrada",
   deleteReentry: "Eliminarlo",
+  pointAtReentry: "Apuntarlo",
   addReentry: "Añadir una reentrada",
   path: "Trayecto",
   deletePlace: "Quitar este punto",

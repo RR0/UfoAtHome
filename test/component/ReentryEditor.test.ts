@@ -16,13 +16,14 @@ describe("ReentryEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = async (skyEvents?: SkyEventsJson, at = 0) => {
+  const build = async (skyEvents?: SkyEventsJson, at = 0, pointed?: { azimuthDeg: number, altitudeDeg: number }[]) => {
     const sighting = { skyEvents, event: { place: [{ lat: 48, lng: 2 }] }, observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90 }) } } as unknown as Sighting
     let changes = 0
     const time = { now: at, seeks: [] as number[] }
     const editor = new ReentryEditor(container, {
       sighting: () => sighting, said: () => new SaidTexts(["en"]), writingLanguage: () => "en",
-      currentTime: () => time.now, duration: () => 20000, seekTo: t => { time.seeks.push(t); time.now = t }, changed: () => changes++
+      currentTime: () => time.now, duration: () => 20000, seekTo: t => { time.seeks.push(t); time.now = t }, changed: () => changes++,
+      ...(pointed ? { pointAt: (azimuthDeg: number, altitudeDeg: number) => pointed.push({ azimuthDeg, altitudeDeg }) } : {})
     }, "en")
     await editor.ready
     editor.sync()
@@ -54,6 +55,27 @@ describe("ReentryEditor", () => {
     expect(reentries[0].track[0].lng).toBeGreaterThan(2)
     expect(reentries[0].fragments[0].absoluteMagnitude).toBeLessThanOrEqual(-4)
     expect(changes()).toBeGreaterThan(0)
+  })
+
+  test("points the view at the re-entry shown, where it is at the playhead, or a second into its path", async () => {
+    const pointed: { azimuthDeg: number, altitudeDeg: number }[] = []
+    const { time } = await build({ reentries: [chelyabinsk()] }, 4000, pointed)
+    const button = container.querySelector<HTMLButtonElement>("[title='Point at it']")!
+    button.click()
+    expect(time.seeks).toEqual([])
+    // From Paris, Chelyabinsk is far east, and under the horizon.
+    expect(pointed[0].azimuthDeg).toBeGreaterThan(45)
+    expect(pointed[0].azimuthDeg).toBeLessThan(90)
+    expect(pointed[0].altitudeDeg).toBeLessThan(0)
+    time.now = 15000
+    button.click()
+    expect(time.seeks).toEqual([-1000])
+    expect(pointed).toHaveLength(2)
+  })
+
+  test("has no button to point with when the editor cannot turn the view", async () => {
+    await build({ reentries: [chelyabinsk()] })
+    expect(container.querySelector("[title='Point at it']")).toBeNull()
   })
 
   test("lays the path and each piece out on a timeline of its own, in place of lists of instants", async () => {

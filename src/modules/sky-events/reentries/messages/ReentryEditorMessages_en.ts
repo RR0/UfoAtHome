@@ -5,6 +5,7 @@ export const reentryEditorMessages_en: ReentryEditorMessages = {
   none: "No re-entry in this recording",
   reentry: "Re-entry",
   deleteReentry: "Delete it",
+  pointAtReentry: "Point at it",
   addReentry: "Add a re-entry",
   path: "Path",
   deletePlace: "Remove this point",

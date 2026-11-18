@@ -107,6 +107,8 @@ export interface SkyEventEditorHost {
   currentTime(): number
   duration(): number
   seekTo(t: number): void
+  /** Turns the observer's view towards a direction of their sky, degrees from true north and above the horizon (a 🎯 button). */
+  pointAt?(azimuthDeg: number, altitudeDeg: number): void
   /** An edit was written onto the recording. */
   changed(): void
 }

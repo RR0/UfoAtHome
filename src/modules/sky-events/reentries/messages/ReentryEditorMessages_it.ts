@@ -5,6 +5,7 @@ export const reentryEditorMessages_it: ReentryEditorMessages = {
   none: "Nessun rientro in questa registrazione",
   reentry: "Rientro",
   deleteReentry: "Eliminarlo",
+  pointAtReentry: "Puntarlo",
   addReentry: "Aggiungi un rientro",
   path: "Percorso",
   deletePlace: "Togliere questo punto",

@@ -5,6 +5,7 @@ export interface ReentryEditorMessages {
   none: string
   reentry: string
   deleteReentry: string
+  pointAtReentry: string
   addReentry: string
   path: string
   deletePlace: string

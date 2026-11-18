@@ -5,6 +5,7 @@ export const reentryEditorMessages_fr: ReentryEditorMessages = {
   none: "Aucune rentrée dans cet enregistrement",
   reentry: "Rentrée",
   deleteReentry: "Le supprimer",
+  pointAtReentry: "Le pointer",
   addReentry: "Ajouter une rentrée",
   path: "Trajet",
   deletePlace: "Retirer ce point",
