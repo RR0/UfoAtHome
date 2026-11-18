@@ -5,6 +5,7 @@ import type { AircraftKind } from "./AircraftModels.js"
 import { AircraftHearing } from "./AircraftHearing.js"
 import type { AircraftHearingOptions, AircraftNoise, AircraftSoundCharacter } from "./AircraftHearing.js"
 import type { AircraftDescription, AircraftTrack } from "./AircraftProvider.js"
+import { GroundReflection, type GroundEcho } from "./GroundReflection.js"
 import { SoundInAir } from "./SoundInAir.js"
 
 /** One aircraft to be heard at an instant: what a sound that is played needs, worked out by AircraftHearing. */
@@ -26,6 +27,8 @@ export interface AircraftVoice {
   /** Around the ear rather than somewhere in the scene: the cabin the observer rides in (see CabinHearing), neither placed nor shifted. */
   inside?: boolean
   character?: AircraftSoundCharacter
+  /** Its echo off the ground under the listener, when it comes from high enough to be heard as one (see GroundReflection.echo). */
+  groundEcho?: GroundEcho
 }
 
 export interface TrafficSoundOptions extends AircraftHearingOptions {
@@ -124,7 +127,8 @@ export class TrafficSound {
         azimuthDeg: heard.sound.azimuthDeg,
         elevationDeg: heard.sound.altitudeDeg,
         // As it sounded at the thrust it was at: an approaching jet's fan sings lower and stronger.
-        character: heard.noise.character
+        character: heard.noise.character,
+        groundEcho: options.ground === null ? undefined : GroundReflection.echo(heard.sound.altitudeDeg, options.ground, SoundInAir.speedOfSound((options.air ?? SoundInAir.STANDARD).temperatureC))
       })
     }
     return voices.sort((a, b) => b.levelDbA - a.levelDbA).slice(0, options.maxVoices ?? TrafficSound.DEFAULT_MAX_VOICES)

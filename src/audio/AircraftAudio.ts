@@ -44,6 +44,13 @@ const MIN_PITCH = 0.7
 const MAX_PITCH = 1.5
 const MIN_NOISE_SHIFT = 0.8
 const MAX_NOISE_SHIFT = 1.3
+/**
+ * The echo off the ground (see GroundReflection): the longest delay it can take, s (2 h / c for ears at 3 m, which no one standing has), the
+ * frequency over which the ground's taking of the highs is laid, Hz, and the most it takes of them, dB.
+ */
+const ECHO_MAX_DELAY_S = 0.02
+const ECHO_SHELF_HZ = 700
+const ECHO_FLOOR_DB = -30
 /** How far to one side a sound is placed: all the way would be a sound in one ear. */
 const MAX_PAN = 0.9
 /**
@@ -104,6 +111,8 @@ interface Voice {
   panner?: StereoPannerNode
   /** How much of the voice is sent to the reverberation. */
   send?: GainNode
+  /** Its echo off the ground: a copy, later by a wavering delay, darker as the ground takes its highs, and as strong as its gain says. */
+  echo?: { delay: DelayNode; jitter: GainNode; shelf: BiquadFilterNode; gain: GainNode }
 }
 
 /**
@@ -294,11 +303,35 @@ export class AircraftAudio {
       output.connect(send).connect(reverb)
     }
 
-    const sources = [source, rough, crackle, lfo, ...tones.map(tone => tone.oscillator), ...wander]
+    // Its echo off the ground under the listener, from where the voice is placed: a delay, wavering as the air does, a shelf that takes its highs
+    // as the ground does, and its strength. Silent until a voice says it has one (see GroundReflection.echo); none in a cabin.
+    let echo: Voice["echo"]
+    let jitterSource: AudioBufferSourceNode | undefined
+    if (!voice.inside && typeof context.createDelay === "function") {
+      const delay = context.createDelay(ECHO_MAX_DELAY_S)
+      delay.delayTime.value = 0
+      const shelf = context.createBiquadFilter()
+      shelf.type = "highshelf"
+      shelf.frequency.value = ECHO_SHELF_HZ
+      shelf.gain.value = 0
+      const gain = context.createGain()
+      gain.gain.value = 0
+      output.connect(delay).connect(shelf).connect(gain).connect(panner ?? bus)
+      const jitter = context.createGain()
+      jitter.gain.value = 0
+      jitterSource = context.createBufferSource()
+      jitterSource.buffer = this.roughTable(context, CRACKLE_VALUES_PER_SECOND)
+      jitterSource.loop = true
+      jitterSource.loopStart = Math.random() * ROUGH_SECONDS * 0.5
+      jitterSource.connect(jitter).connect(delay.delayTime)
+      echo = { delay, jitter, shelf, gain }
+    }
+
+    const sources = [source, rough, crackle, lfo, ...tones.map(tone => tone.oscillator), ...wander, ...(jitterSource ? [jitterSource] : [])]
     for (const node of sources) node.start()
     const built: Voice = {
-      nodes: [output, beat, lfoDepth, roughDepth, crackleDepth, wanderDepth, ...tones.map(tone => tone.gain), ...filters, ...seconds, ...gains, ...(send ? [send] : []), ...(panner ? [panner] : []), ...sources],
-      sources, filters, seconds, gains, tones, lfo, lfoDepth, wander, wanderDepth, roughDepth, crackleDepth, beat, output, panner, send
+      nodes: [output, beat, lfoDepth, roughDepth, crackleDepth, wanderDepth, ...(echo ? [echo.delay, echo.jitter, echo.shelf, echo.gain] : []), ...tones.map(tone => tone.gain), ...filters, ...seconds, ...gains, ...(send ? [send] : []), ...(panner ? [panner] : []), ...sources],
+      sources, filters, seconds, gains, tones, lfo, lfoDepth, wander, wanderDepth, roughDepth, crackleDepth, beat, output, panner, send, echo
     }
     this.voices.set(voice.id, built)
     return built
@@ -340,6 +373,16 @@ export class AircraftAudio {
     set(built.output.gain, master * (1 - FAR_QUIETING * far))
     set(built.wanderDepth.gain, master * FAR_WANDER * far / WANDER_RATES_HZ.length)
     if (built.send) set(built.send.gain, REVERB_SEND * far)
+    if (built.echo) {
+      const echo = voice.groundEcho
+      set(built.echo.gain.gain, echo?.lowGain ?? 0)
+      if (echo) {
+        set(built.echo.delay.delayTime, Math.min(ECHO_MAX_DELAY_S, echo.delayS))
+        // The table reads between -1 and 1, mostly near nothing (see roughTable): its swing is the jitter's.
+        set(built.echo.jitter.gain, echo.jitterS)
+        set(built.echo.shelf.gain, echo.lowGain > 0 ? Math.max(ECHO_FLOOR_DB, 20 * Math.log10(Math.max(echo.highGain, 1e-6) / echo.lowGain)) : 0)
+      }
+    }
     if (built.panner) {
       // The cabin the listener sits in is all round them: it comes from no bearing, so it is not placed to either side.
       const toward = ((voice.azimuthDeg - this.headingDeg) * Math.PI) / 180

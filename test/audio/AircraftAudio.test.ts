@@ -55,6 +55,14 @@ class FakeFilter extends FakeNode {
   type = ""
   frequency = new FakeParam()
   Q = new FakeParam()
+  gain = new FakeParam()
+}
+
+class FakeDelay extends FakeNode {
+  delayTime = new FakeParam()
+  constructor(readonly maxDelay: number) {
+    super()
+  }
 }
 
 class FakeOscillator extends FakeNode {
@@ -85,7 +93,7 @@ class FakePanner extends FakeNode {
 }
 
 /** What the last context made, for a test to look at. */
-const made = { masters: [] as FakeGain[], gains: [] as FakeGain[], filters: [] as FakeFilter[], oscillators: [] as FakeOscillator[], sources: [] as FakeSource[], panners: [] as FakePanner[], compressors: [] as FakeCompressor[], convolvers: [] as FakeConvolver[], contexts: [] as FakeContext[] }
+const made = { masters: [] as FakeGain[], gains: [] as FakeGain[], filters: [] as FakeFilter[], oscillators: [] as FakeOscillator[], sources: [] as FakeSource[], panners: [] as FakePanner[], compressors: [] as FakeCompressor[], convolvers: [] as FakeConvolver[], delays: [] as FakeDelay[], contexts: [] as FakeContext[] }
 
 class FakeContext {
   state = "running"
@@ -125,6 +133,8 @@ class FakeContext {
   }
   /** Absent unless a test gives the context a room: not every context has one. */
   createConvolver?(): FakeConvolver
+  /** Absent unless a test gives the context a ground to echo off. */
+  createDelay?(max: number): FakeDelay
 
   createDynamicsCompressor(): FakeCompressor {
     const node = new FakeCompressor()
@@ -562,5 +572,58 @@ describe("AircraftAudio", () => {
       audio.setPaused(false)
       audio.setVoices([voice()])
     }).not.toThrow()
+  })
+
+  describe("with an echo off the ground", () => {
+    beforeEach(() => {
+      FakeContext.prototype.createDelay = (max: number) => {
+        const node = new FakeDelay(max)
+        made.delays.push(node)
+        return node
+      }
+    })
+    afterEach(() => {
+      delete FakeContext.prototype.createDelay
+    })
+
+    const echo = { delayS: 0.006, lowGain: 0.36, highGain: 0.18, jitterS: 0.0001 }
+
+    test("plays a copy of the voice later by the extra path, as strong as the ground gives back, darker as it takes the highs", () => {
+      const audio = playing()
+      audio.setVoices([voice({ groundEcho: echo })])
+      expect(made.delays).toHaveLength(1)
+      expect(made.delays[0].delayTime.target).toBeCloseTo(0.006, 9)
+      const shelf = made.filters.find(filter => filter.type === "highshelf")!
+      // Half as strong in the highs: 6 dB under.
+      expect(shelf.gain.target).toBeCloseTo(-6.02, 1)
+      // The echo's gain is wired after the shelf: as strong as the ground gives back the lows.
+      const gain = made.gains.find(candidate => shelf.connections.includes(candidate))!
+      expect(gain.gain.target).toBeCloseTo(0.36, 9)
+      // Out of the voice's own output, which carries its loudness, and to where the voice is placed.
+      expect(gain.connections).toContain(made.panners[0])
+    })
+
+    test("its delay wavers, by a random table read round and round, as the air between does", () => {
+      const audio = playing()
+      audio.setVoices([voice({ groundEcho: echo })])
+      const jitter = made.gains.find(gain => gain.connections.includes(made.delays[0].delayTime))!
+      expect(jitter.gain.target).toBeCloseTo(0.0001, 9)
+      expect(made.sources.some(source => source.connections.includes(jitter) && source.loop && source.started)).toBe(true)
+    })
+
+    test("a voice with no echo has none, and one that loses its echo is silenced in it", () => {
+      const audio = playing()
+      audio.setVoices([voice({ groundEcho: echo })])
+      const shelf = made.filters.find(filter => filter.type === "highshelf")!
+      const gain = made.gains.find(candidate => shelf.connections.includes(candidate))!
+      audio.setVoices([voice({ groundEcho: undefined })])
+      expect(gain.gain.target).toBe(0)
+    })
+
+    test("in a cabin there is no ground under the ear: no echo is built", () => {
+      const audio = playing()
+      audio.setVoices([voice({ inside: true, groundEcho: echo })])
+      expect(made.delays).toHaveLength(0)
+    })
   })
 })

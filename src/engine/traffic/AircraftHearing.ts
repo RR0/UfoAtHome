@@ -4,6 +4,7 @@ import type { AircraftKind } from "./AircraftModels.js"
 import type { AircraftTrack } from "./AircraftProvider.js"
 import { AircraftSighting } from "./AircraftSighting.js"
 import { EngineDirectivity } from "./EngineDirectivity.js"
+import { GroundReflection, type Ground } from "./GroundReflection.js"
 import type { AirConditions } from "./SoundInAir.js"
 import { SoundInAir } from "./SoundInAir.js"
 
@@ -203,6 +204,8 @@ export interface AircraftHearingOptions {
   /** The noise of the place, dB(A): about 30 for a quiet rural night, 40 by day, 55 in a town. */
   ambientDbA?: number
   noise?: AircraftNoise
+  /** What the listener stands on, and how high their ears are: grass and a standing listener by default (see GroundReflection); null for none, the air alone. */
+  ground?: Ground | null
 }
 
 /**
@@ -224,8 +227,7 @@ export interface AircraftHearingOptions {
  *
  * NOT MODELLED, and each makes it worse for audibility, never better, except where said: the shadow the
  * wind and the temperature gradient cast on a sound from aloft (it can silence an aircraft that
- * should be heard); the attenuation of the ground at low angles (an aircraft near the horizon is
- * heard less than computed); the directivity of the engines (an aircraft is louder behind than ahead);
+ * should be heard); the directivity of the engines (an aircraft is louder behind than ahead);
  * the sound a type makes at the thrust it was really at, which is its class's at the regime its track says (see FlightRegime), for a turbofan. A level is an estimate of the order of a few
  * dB at best, and a verdict of "audible" is true within the same margin.
  */
@@ -320,7 +322,9 @@ export class AircraftHearing {
     const ambient = AircraftHearing.ambientBands(ambientDbA)
     const emissionAngleDeg = AircraftHearing.emissionAngle(track, observer, emitted)
     const radiated = noise.directivity === "turbofan" ? EngineDirectivity.bandsDb(emissionAngleDeg, regime, speed) : undefined
-    const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air).map((level, band) => level + (radiated?.[band] ?? 0))
+    // And off the ground under the listener, which takes the lows from a sound that comes from near the horizon.
+    const grounded = options.ground === null ? SoundInAir.OCTAVES.map(() => 0) : GroundReflection.excessDb(sound.altitudeDeg, options.ground, speed)
+    const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air).map((level, band) => level + (radiated?.[band] ?? 0) + grounded[band])
     const audibleBands = bandsDbA.map((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A))
     const loudest = bandsDbA.indexOf(Math.max(...bandsDbA))
     const highest = audibleBands.lastIndexOf(true)

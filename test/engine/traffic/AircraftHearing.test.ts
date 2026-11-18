@@ -115,10 +115,11 @@ describe("AircraftHearing", () => {
   })
 
   test("a close aircraft is a broad sound, a far one a rumble: the air takes the highs away", () => {
-    // The same all round, so that only the air makes the difference: the far one is heard from ahead, where a fan's highs are stronger.
+    // The same all round and over no ground, so that only the air makes the difference: the far one is heard from ahead, where a fan's highs are
+    // stronger, and from near the horizon, where the ground gives some of them back.
     const noise = { ...AIRCRAFT_NOISES[0], directivity: undefined, regimes: undefined }
-    const near = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200), observer, T0 + 200_000, { ambientDbA: 30, noise })!
-    const far = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200, -400, 600, 20), observer, T0 + 200_000, { ambientDbA: 30, noise })!
+    const near = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200), observer, T0 + 200_000, { ambientDbA: 30, noise, ground: null })!
+    const far = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200, -400, 600, 20), observer, T0 + 200_000, { ambientDbA: 30, noise, ground: null })!
     expect(near.cutoffHz).toBeGreaterThanOrEqual(4000)
     expect(far.cutoffHz!).toBeLessThan(near.cutoffHz!)
     expect(far.bandsDbA[7] - far.bandsDbA[3]).toBeLessThan(near.bandsDbA[7] - near.bandsDbA[3])
@@ -286,8 +287,21 @@ describe("AircraftHearing", () => {
     test("what is not a turbofan radiates the same all round", () => {
       const piston = AircraftHearing.noiseOfKind("light-piston")
       expect(piston.directivity).toBeUndefined()
-      const heard = AircraftHearing.heardAt(Flights.eastbound(1500, 90, 200), observer, T0 + 230_000, { noise: piston, ambientDbA: 30 })!
+      const heard = AircraftHearing.heardAt(Flights.eastbound(1500, 90, 200), observer, T0 + 230_000, { noise: piston, ambientDbA: 30, ground: null })!
       expect(heard.bandsDbA).toEqual(AircraftHearing.bandsAt(piston, heard.sound.distanceKm))
+    })
+  })
+
+  describe("over the ground under the listener", () => {
+    test("an aircraft near the horizon has its lows taken by grass, against the same over no ground; one overhead keeps them", () => {
+      const low = Flights.eastbound(3300, 250, 200, -400, 600, 20)
+      const over = (ground?: null) => AircraftHearing.heardAt(low, observer, T0 + 200_000, { ambientDbA: 30, ground })!
+      expect(over().sound.altitudeDeg).toBeLessThan(5)
+      expect(over().bandsDbA[2]).toBeLessThan(over(null).bandsDbA[2] - 2)
+      const overhead = Flights.eastbound(3300, 250, 200)
+      const above = (ground?: null) => AircraftHearing.heardAt(overhead, observer, T0 + 200_000, { ambientDbA: 30, ground })!
+      // Within a decibel: the sound that arrives at the pass left the aircraft a little before it was overhead.
+      above().bandsDbA.forEach((level, band) => expect(Math.abs(level - above(null).bandsDbA[band])).toBeLessThan(1))
     })
   })
 })
