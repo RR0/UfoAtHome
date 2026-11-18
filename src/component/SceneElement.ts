@@ -3796,6 +3796,11 @@ export class SceneElement extends HTMLElement {
    * when it is not there at `t` — where to turn to look at it. Undefined for a body with no
    * keyframe, or one the eye stands inside.
    */
+  /** Where a decor object stands in the observer's sky as the scene draws it now (see SceneRenderer.directionToDecor). */
+  directionToDecor(id: string): { azimuthDeg: number, altitudeDeg: number } | undefined {
+    return this.sceneRenderer.directionToDecor(id)
+  }
+
   directionToBody(body: BodyJson, t: number): { azimuthDeg: number, altitudeDeg: number } | undefined {
     const ground = this.sceneRenderer.bodyGround
     const sighting = this.ufoElement.sighting

@@ -11724,12 +11724,21 @@ export class SightingEditorElement extends HTMLElement {
   private lookAtDecor(): void {
     const decor = this.ufoElement.sighting.decor.find(object => object.id === this.currentDecorId)
     if (!decor) return
+    // Where the scene draws it, from the eye it draws: on the relief, from as high as the observer stands, at the middle of its height.
+    const drawn = this.sceneElement.directionToDecor(decor.id)
+    if (drawn) {
+      this.headingInput.value = String(Math.round(drawn.azimuthDeg * 10) / 10)
+      this.pitchInput.value = String(Math.round(drawn.altitudeDeg * 10) / 10)
+      this.updateObserver()
+      return
+    }
+    // Not drawn (yet): from the recording alone, on flat ground, from the observer's own height above it.
     const { eastM, northM, altitudeM } = resolveDecorPlacementAt(decor, this.ufoElement.currentTime)
     const horizontalM = Math.hypot(eastM, northM)
     // Nothing to aim at: the object is exactly where the observer stands.
     if (horizontalM === 0 && altitudeM === 0) return
     const headingDeg = (Math.atan2(eastM, northM) * 180) / Math.PI
-    const pitchDeg = (Math.atan2(altitudeM - EYE_HEIGHT_M, horizontalM) * 180) / Math.PI
+    const pitchDeg = (Math.atan2(altitudeM - EYE_HEIGHT_M - (resolveObserverPoseAt(this.ufoElement.sighting, this.ufoElement.currentTime)?.elevationM ?? 0), horizontalM) * 180) / Math.PI
     this.headingInput.value = String(Math.round(headingDeg * 10) / 10)
     this.pitchInput.value = String(Math.round(pitchDeg * 10) / 10)
     this.updateObserver()

@@ -2964,6 +2964,29 @@ export class SceneRenderer {
    * recording's t=0 position, up from the ground there. Read off the same patch the decor stands
    * on, as it stands this tick — so call it after updateDecorAnchoring.
    */
+  /**
+   * Where a decor object stands in the sky of the eye as drawn now: the middle of what is drawn of it, seen from the camera, degrees from
+   * true north and above the horizon. Read off the scene rather than worked out again from the recording, so that it is wherever the
+   * relief, the observer's height above the ground and the object's own size put it. Undefined when it is not drawn (not built yet, or
+   * outside its span), or where the eye is.
+   */
+  directionToDecor(id: string): { azimuthDeg: number, altitudeDeg: number } | undefined {
+    const group = this.decorGroups.get(id)
+    if (!group || !group.visible) return undefined
+    group.updateWorldMatrix(true, true)
+    const box = new Box3().setFromObject(group)
+    if (box.isEmpty()) return undefined
+    const centre = box.getCenter(new Vector3())
+    const eye = this.camera.getWorldPosition(new Vector3())
+    const eastM = centre.x - eye.x, northM = eye.z - centre.z, upM = centre.y - eye.y
+    const horizontalM = Math.hypot(eastM, northM)
+    if (horizontalM === 0 && upM === 0) return undefined
+    return {
+      azimuthDeg: ((Math.atan2(eastM, northM) * 180) / Math.PI + 360) % 360,
+      altitudeDeg: (Math.atan2(upM, horizontalM) * 180) / Math.PI
+    }
+  }
+
   get bodyGround(): Ground {
     const { x, z } = this.bodyOrigin
     const originY = this.groundYUnder(x, z)
