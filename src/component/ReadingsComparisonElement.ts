@@ -20,6 +20,18 @@ export interface ComparedReading {
   open?: () => void
 }
 
+/** What the table is ordered by: the case's own order, the readings' standing (the default, best first), or one of its columns. */
+type SortKey = "case" | "reproduced" | "gap" | "robustness" | "supposed"
+
+/** What a row is ordered by, once its recordings are loaded and it could be set against the account. */
+interface RowStanding {
+  agreement: number
+  /** 0 sufficient, 1 no law to judge it on, 2 fine-tuned, 3 too little reproduced to measure. */
+  robustness: number
+  gapDeg?: number
+  supposed: number
+}
+
 /**
  * A case's readings side by side, as the GEIPAN asked to compare hypotheses (A. Cousyn, November 2026): for each, how many of the
  * witness's indications it reproduces, how far from them it is, whether that rests on a fine-tuning, and how many values it supposed
@@ -43,6 +55,8 @@ td.number { text-align: right; white-space: nowrap; font-variant-numeric: tabula
 td[data-robustness="sufficient"] { color: var(--ok, #2e8b3e); }
 td[data-robustness="fine-tuned"], td[data-robustness="too-few"] { color: var(--warn, #d9822b); }
 td[data-robustness="none"] { opacity: .6; }
+th button.sort { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; white-space: nowrap; }
+th button.sort:hover, th[aria-sort] button.sort { text-decoration: underline; text-underline-offset: 2px; }
 button.link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 ${HintElement.CSS}
 `
@@ -53,6 +67,8 @@ ${HintElement.CSS}
   private load?: () => Promise<ComparedReading[]>
   private loaded = false
   private opened = false
+  /** Best first by default: what reproduces the most of the account, and the most robustly, at the top. */
+  private sort: { key: SortKey, descending: boolean } = { key: "reproduced", descending: true }
 
   static register(): void {
     if (!customElements.get(ReadingsComparisonElement.TAG)) customElements.define(ReadingsComparisonElement.TAG, ReadingsComparisonElement)
@@ -118,20 +134,41 @@ ${HintElement.CSS}
     summary.append(c.heading.replace("{n}", String(this.rows.length)), HintElement.of(c.hint))
     const table = document.createElement("table")
     const head = table.createTHead().insertRow()
-    for (const label of [c.reading, c.witness, c.reproduced, c.gap, c.robustness, c.supposed]) {
+    const columns: [string, SortKey | undefined][] = [[c.reading, "case"], [c.witness, undefined], [c.reproduced, "reproduced"], [c.gap, "gap"],
+      [c.robustness, "robustness"], [c.supposed, "supposed"]]
+    for (const [label, key] of columns) {
       const cell = document.createElement("th")
       cell.scope = "col"
-      cell.textContent = label
+      if (!key) {
+        cell.textContent = label
+      } else {
+        const sorted = this.sort.key === key
+        if (sorted && key !== "case") cell.setAttribute("aria-sort", this.sort.descending ? "descending" : "ascending")
+        if (sorted && key === "case") cell.setAttribute("aria-sort", "other")
+        const button = document.createElement("button")
+        button.type = "button"
+        button.className = "sort"
+        button.title = c.sortBy.replace("{column}", label)
+        button.textContent = sorted && key !== "case" ? `${label} ${this.sort.descending ? "▾" : "▴"}` : label
+        button.addEventListener("click", () => {
+          // The same column again turns it round; another one starts from what is best in it.
+          this.sort = sorted ? { key, descending: !this.sort.descending } : { key, descending: key !== "gap" && key !== "supposed" ? true : false }
+          this.draw()
+        })
+        cell.append(button)
+      }
       head.append(cell)
     }
     const body = table.createTBody()
-    // One hypothesis read for each witness is one title on several rows: grouped, it is compared across witnesses at a glance, in the
-    // order the case first gives each.
-    const titles = [...new Set(this.rows.map(row => row.title))]
-    const grouped = titles.flatMap(title => this.rows.filter(row => row.title === title))
+    const ordered = this.ordered()
+    // One hypothesis read for each witness is one title on several rows: grouped, it is compared across witnesses at a glance. Grouped when
+    // the order is the case's or the readings' standing (a group where its best row stands); one row each when it is a single column's.
+    const grouping = this.sort.key === "case" || this.sort.key === "reproduced"
+    const titles = [...new Set(ordered.map(row => row.title))]
+    const grouped = grouping ? titles.flatMap(title => ordered.filter(row => row.title === title)) : ordered
     grouped.forEach((row, index) => {
-      const first = index === 0 || grouped[index - 1].title !== row.title
-      const span = first ? grouped.filter(other => other.title === row.title).length : 0
+      const first = !grouping || index === 0 || grouped[index - 1].title !== row.title
+      const span = !first ? 0 : grouping ? grouped.filter(other => other.title === row.title).length : 1
       this.drawRow(body.insertRow(), row, m, span)
     })
     const scroll = document.createElement("div")
@@ -139,6 +176,39 @@ ${HintElement.CSS}
     scroll.append(table)
     details.append(summary, scroll)
     this.shadowRoot!.replaceChildren(style, details)
+  }
+
+  /** The rows in the order asked: the case's, or by a column, the rows that cannot be set against their account last whatever the way. */
+  private ordered(): ComparedReading[] {
+    const { key, descending } = this.sort
+    if (key === "case") return [...this.rows]
+    const standings = new Map(this.rows.map(row => [row, this.standingOf(row)]))
+    const way = descending ? -1 : 1
+    const compare = {
+      reproduced: (a: RowStanding, b: RowStanding) => way * (a.agreement - b.agreement)
+        || (b.robustness - a.robustness) * way || ((a.gapDeg ?? Infinity) - (b.gapDeg ?? Infinity)) * -way || (a.supposed - b.supposed) * -way,
+      gap: (a: RowStanding, b: RowStanding) => (a.gapDeg === undefined ? 1 : 0) - (b.gapDeg === undefined ? 1 : 0) || way * ((a.gapDeg ?? 0) - (b.gapDeg ?? 0)),
+      robustness: (a: RowStanding, b: RowStanding) => -way * (a.robustness - b.robustness),
+      supposed: (a: RowStanding, b: RowStanding) => way * (a.supposed - b.supposed)
+    }[key]
+    // Sorted stably: rows that stand alike keep the case's order.
+    return this.rows.map((row, index) => ({ row, index })).sort((a, b) => {
+      const sa = standings.get(a.row)
+      const sb = standings.get(b.row)
+      if (!sa || !sb) return (sa ? 0 : 1) - (sb ? 0 : 1) || a.index - b.index
+      return compare(sa, sb) || a.index - b.index
+    }).map(entry => entry.row)
+  }
+
+  /** What a row stands by, as its cells show it; undefined for one not loaded yet or with nothing to set against its account. */
+  private standingOf(row: ComparedReading): RowStanding | undefined {
+    if (!row.account || !row.reading) return undefined
+    const result = ReadingSensitivityElement.resultOf(row.account, row.reading)
+    if (!result || result.compared === 0) return undefined
+    const { provenance } = Provenance.strip(row.reading)
+    const supposed = provenance.paths().filter(path => path.startsWith("interpretation") && Provenance.free(provenance.at(path))).length
+    const robustness = !ReadingSensitivity.measurable(result) ? 3 : result.sufficient === true ? 0 : result.sufficient === false ? 2 : 1
+    return { agreement: result.agreement, robustness, ...(result.medianSeparationDeg === undefined ? {} : { gapDeg: result.medianSeparationDeg }), supposed }
   }
 
   /** The title of a hypothesis, over the `span` rows of the witnesses it is read for. */

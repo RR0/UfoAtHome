@@ -53,6 +53,8 @@ export interface ReadingSensitivityMessages {
     gap: string
     robustness: string
     supposed: string
+    /** What a column head does when pressed: orders the table by `{column}`, again the other way. */
+    sortBy: string
     /** A reading whose recordings are still on their way. */
     loading: string
     /** A reading that cannot be set against what the witness said. */

@@ -29,6 +29,7 @@ export const readingSensitivityMessages_fr = {
     gap: "Écart médian",
     robustness: "Robustesse",
     supposed: "Valeurs supposées",
+    sortBy: "Trier par « {column} » ; à nouveau pour inverser",
     loading: "…",
     nothing: "rien à confronter",
     sufficient: "suffisante",

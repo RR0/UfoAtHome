@@ -29,6 +29,7 @@ export const readingSensitivityMessages_en = {
     gap: "Median gap",
     robustness: "Robustness",
     supposed: "Supposed values",
+    sortBy: "Sort by “{column}”; again to reverse",
     loading: "…",
     nothing: "nothing to compare",
     sufficient: "sufficient",

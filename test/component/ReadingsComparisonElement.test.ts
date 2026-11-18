@@ -87,6 +87,27 @@ describe("A case's readings side by side, as its player and its editor show them
     expect(open).toHaveBeenCalledOnce()
   })
 
+  it("puts the best readings first, and orders by a column when its head is pressed, again the other way", async () => {
+    const shared = account()
+    const element = await table([
+      { title: "Far", witness: "A", account: shared, reading: reading(44) },
+      { title: "Bird", witness: "A", account: shared, reading: reading(0, []) },
+      { title: "Near", witness: "A", account: shared, reading: reading(0) }
+    ])
+    const titles = () => cells(element).map(row => row[0])
+    expect(titles()).toEqual(["Near", "Far", "Bird"])
+    const head = (n: number) => element.shadowRoot!.querySelectorAll<HTMLButtonElement>("th button.sort")[n]
+    // By the median gap: the nearest first; pressed again, the farthest; what has none is last either way.
+    head(2).click()
+    expect(titles()).toEqual(["Near", "Far", "Bird"])
+    head(2).click()
+    expect(titles()).toEqual(["Far", "Near", "Bird"])
+    expect(element.shadowRoot!.querySelector("th[aria-sort]")!.textContent).toMatch(/▴|▾/)
+    // The reading's head: the case's own order.
+    head(0).click()
+    expect(titles()).toEqual(["Far", "Bird", "Near"])
+  })
+
   it("is hidden for a case without readings", async () => {
     const element = ReadingsComparisonElement.create()
     document.body.append(element)
