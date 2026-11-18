@@ -32,6 +32,8 @@ import { AircraftTile } from "../../../../src/modules/providers/traffic/Aircraft
 import { AircraftModels } from "../../../../src/engine/traffic/AircraftModels.js"
 import { TrafficDecor } from "../../../../src/engine/traffic/TrafficDecor.js"
 import { TrafficModels } from "../../../../src/engine/traffic/TrafficModels.js"
+import { TrafficLights } from "../../../../src/engine/traffic/TrafficLights.js"
+import { DroneAirframes } from "../../../../src/modules/interpretations/drones/DroneAirframe.js"
 import type { AircraftDescription, AircraftPoint } from "../../../../src/engine/traffic/AircraftProvider.js"
 import { TopoBuildings } from "../../../../src/render3d/terrain/TopoBuildings.js"
 import { SurveyedDecor } from "../../../../src/render3d/terrain/SurveyedDecor.js"
@@ -243,6 +245,85 @@ function hisReading(look: Look, startS: number, endS: number) {
   }
 }
 
+// ---- What would look as large: the size comparisons ----
+
+/** The full Moon's half degree, which is what he said the light looked: the angle every comparison is made at. */
+const MOON_RAD = 0.52 * Math.PI / 180
+const APPROACH_MS = 75
+
+/** East, north and up from his eye of a point `distanceM` off towards `azimuthDeg`, `altitudeDeg`. */
+function towards(azimuthDeg: number, altitudeDeg: number, distanceM: number): { eastM: number, northM: number, upM: number } {
+  const a = azimuthDeg * Math.PI / 180, e = altitudeDeg * Math.PI / 180
+  return { eastM: distanceM * Math.cos(e) * Math.sin(a), northM: distanceM * Math.cos(e) * Math.cos(a), upM: distanceM * Math.sin(e) }
+}
+
+/**
+ * An airliner of `type` as large as the light looked, half a degree across its span, where he first saw it, flying level straight at him at an
+ * approach speed with its landing lights on, over him and on: what an aircraft that size has to be that near for, and how soon it would be on him.
+ * Drawn as the scene draws a recorded aircraft (a decor object with the lights of its type, see TrafficLights), with the body that claims the light.
+ */
+function airlinerAsLarge(look: Look, night: Night, type: string, name: Text) {
+  const model = AircraftModels.of({ type })
+  const size = TrafficDecor.sizeOf(model)
+  const distanceM = size.widthM / MOON_RAD
+  const seenAt = towards(look.azimuthDeg, look.horizonDeg, distanceM)
+  const headingDeg = (look.azimuthDeg + 180) % 360
+  const along = (t: number) => {
+    const run = APPROACH_MS * (t - night.lightAtS)
+    const h = headingDeg * Math.PI / 180
+    return { eastM: r1(seenAt.eastM + run * Math.sin(h)), northM: r1(seenAt.northM + run * Math.cos(h)) }
+  }
+  const altitudeM = r1(seenAt.upM + 1.6)
+  const times = [0, night.lightAtS, night.durationS]
+  const modelId = TrafficModels.idOf(model.code) ?? "poly-google-airliner"
+  const lights = [
+    ...TrafficLights.lights(model, -30),
+    ...TrafficLights.landingLights(model, -30, [{ t: 0, altitudeFt: altitudeM / 0.3048 }, { t: night.durationS * 1000, altitudeFt: altitudeM / 0.3048 }])
+  ]
+  const decor = {
+    id: `${type.toLowerCase()}-as-large`, kind: "aircraft", title: name, ...along(0), headingDeg, sizeM: size, model: { id: modelId },
+    color: TrafficLights.bodyColor(model), lights, aircraftSound: model.kind,
+    track: times.map(t => ({ t: t * 1000, ...along(t), altitudeM, headingDeg }))
+  }
+  const km = (distanceM / 1000).toFixed(1)
+  const meetS = Math.round(distanceM / APPROACH_MS)
+  const title = {
+    en: `Size comparison: an ${name.en} (${size.widthM} m span) as large as he said the light looked, half a degree, is ${km} km off and ${Math.round(seenAt.upM)} m up; flying at him at ${APPROACH_MS} m/s, it is over him ${meetS} s later`,
+    fr: `Comparaison de taille : un ${name.fr} (${String(size.widthM).replace(".", ",")} m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${km.replace(".", ",")} km et ${Math.round(seenAt.upM)} m de haut ; volant vers lui à ${APPROACH_MS} m/s, il est au-dessus de lui ${meetS} s plus tard`
+  }
+  const body = {
+    id: `${type.toLowerCase()}-as-large`, title: name, explains: [LIGHT], model: { id: modelId },
+    track: times.map((t, i) => ({
+      t: t * 1000, ...along(t), altitudeM: r1(altitudeM - size.heightM / 2), attitude: { headingDeg },
+      ...(i === 0 ? { sizeM: size, appearance: { color: "#dde0e4", albedo: 0.6 } } : {})
+    }))
+  }
+  return { title, decor, bodies: [body] }
+}
+
+/**
+ * A consumer quadcopter (a DJI Mavic 3, see DroneAirframes) as large as the light looked: where it has to be for its 51 cm to fill half a degree,
+ * hovering there, then drifting left and nearer as the light did: the drone the wave was about, at the distance his words put it.
+ */
+function quadcopterAsLarge(look: Look, night: Night) {
+  const airframe = DroneAirframes.byId("quadcopter")
+  const distanceM = airframe.sizeM.widthM / MOON_RAD
+  const point = (azimuthDeg: number, altitudeDeg: number, d: number, t: number) => {
+    const at = towards(azimuthDeg, altitudeDeg, d)
+    return { t: t * 1000, eastM: r1(at.eastM), northM: r1(at.northM), altitudeM: r1(at.upM + 1.6) }
+  }
+  const first = point(look.azimuthDeg, look.horizonDeg, distanceM, night.lightAtS)
+  const last = point(look.azimuthDeg - 8, look.horizonDeg + 4, distanceM * 0.52 / 0.8, night.durationS)
+  const title = {
+    en: `Size comparison: a consumer quadcopter (a Mavic 3, 51 cm) as large as he said the light looked, half a degree, is ${Math.round(distanceM)} m from him and ${Math.round(first.altitudeM)} m up, its lights a few points`,
+    fr: `Comparaison de taille : un quadricoptère grand public (un Mavic 3, 51 cm) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${Math.round(distanceM)} m de lui et ${Math.round(first.altitudeM)} m de haut, ses feux quelques points`
+  }
+  return {
+    title,
+    drones: [{ id: "mavic", title: { en: "A Mavic 3", fr: "Un Mavic 3" }, airframe: "quadcopter", explains: [LIGHT], seed: 3, path: [{ ...first, t: 0 }, first, last] }]
+  }
+}
+
 // ---- The nights ----
 
 interface Night { day: string, id: string, start: string, durationS: number, lightAtS: number, title: Text, summary: Text }
@@ -370,6 +451,21 @@ function main(): void {
     fr: "L'A321neo CS-TXJ de TAP Air Portugal, parti de Newark à 0 h 28 et tournant vers lui en montant, ce qui le rend brillant et immobile un moment (TEEJ, Mick West)"
   }, startMs => [bodyOf(tap, "cs-txj", { en: "TAP Air Portugal A321neo CS-TXJ", fr: "A321neo CS-TXJ de TAP Air Portugal" }, startMs, friday.durationS, [LIGHT])])
 
+  // The size comparisons, on the night the Spirit reading is about, each direction: what is as large as he said at once, and how near it then is.
+  const comparison = (file: string, id: string, made: (look: Look) => { title: Text, decor?: object, bodies?: unknown[], drones?: unknown[] }) =>
+    sat.map(account => {
+      const { title, decor, ...rest } = made(account.look)
+      const named = `${file}-${account.look.id}.json`
+      const stated = decor ? { decor: [decor] } : {}
+      write(named, { ...account.json, ...stated, id: `${account.json.id}-${id}`, interpretation: { title, bodies: [], ...rest } })
+      return { type: "event", eventType: "sighting", interpretationOf: account.event.id, title, url: named }
+    })
+  const asQuadcopter = comparison("interpretation-montclair-size-quadcopter", "size-quadcopter", look => quadcopterAsLarge(look, saturday))
+  const asA320 = comparison("interpretation-montclair-size-a320", "size-a320", look => airlinerAsLarge(look, saturday, "A320", { en: "Airbus A320", fr: "Airbus A320" }))
+  const asA350 = comparison("interpretation-montclair-size-a350", "size-a350", look => airlinerAsLarge(look, saturday, "A359", { en: "Airbus A350-900", fr: "Airbus A350-900" }))
+  console.log(asA320[0].title.en)
+  console.log(asQuadcopter[0].title.en)
+
   const caseJson = {
     id: "Montclair2024",
     title: "Montclair",
@@ -381,6 +477,9 @@ function main(): void {
     events: [
       ...sat.map(account => account.event),
       ...spiritReading,
+      ...asQuadcopter,
+      ...asA320,
+      ...asA350,
       ...fri.map(account => account.event),
       ...turkishReading,
       ...tapReading

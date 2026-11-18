@@ -52,6 +52,66 @@
   {
    "type": "event",
    "eventType": "sighting",
+   "interpretationOf": "cutler-30-road",
+   "title": {
+    "en": "Size comparison: a consumer quadcopter (a Mavic 3, 51 cm) as large as he said the light looked, half a degree, is 56 m from him and 5 m up, its lights a few points",
+    "fr": "Comparaison de taille : un quadricoptère grand public (un Mavic 3, 51 cm) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 56 m de lui et 5 m de haut, ses feux quelques points"
+   },
+   "url": "interpretation-montclair-size-quadcopter-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-photo",
+   "title": {
+    "en": "Size comparison: a consumer quadcopter (a Mavic 3, 51 cm) as large as he said the light looked, half a degree, is 56 m from him and 4 m up, its lights a few points",
+    "fr": "Comparaison de taille : un quadricoptère grand public (un Mavic 3, 51 cm) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 56 m de lui et 4 m de haut, ses feux quelques points"
+   },
+   "url": "interpretation-montclair-size-quadcopter-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-road",
+   "title": {
+    "en": "Size comparison: an Airbus A320 (34.1 m span) as large as he said the light looked, half a degree, is 3.8 km off and 229 m up; flying at him at 75 m/s, it is over him 50 s later",
+    "fr": "Comparaison de taille : un Airbus A320 (34,1 m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 3,8 km et 229 m de haut ; volant vers lui à 75 m/s, il est au-dessus de lui 50 s plus tard"
+   },
+   "url": "interpretation-montclair-size-a320-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-photo",
+   "title": {
+    "en": "Size comparison: an Airbus A320 (34.1 m span) as large as he said the light looked, half a degree, is 3.8 km off and 164 m up; flying at him at 75 m/s, it is over him 50 s later",
+    "fr": "Comparaison de taille : un Airbus A320 (34,1 m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 3,8 km et 164 m de haut ; volant vers lui à 75 m/s, il est au-dessus de lui 50 s plus tard"
+   },
+   "url": "interpretation-montclair-size-a320-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-road",
+   "title": {
+    "en": "Size comparison: an Airbus A350-900 (64.8 m span) as large as he said the light looked, half a degree, is 7.1 km off and 436 m up; flying at him at 75 m/s, it is over him 95 s later",
+    "fr": "Comparaison de taille : un Airbus A350-900 (64,8 m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 7,1 km et 436 m de haut ; volant vers lui à 75 m/s, il est au-dessus de lui 95 s plus tard"
+   },
+   "url": "interpretation-montclair-size-a350-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-photo",
+   "title": {
+    "en": "Size comparison: an Airbus A350-900 (64.8 m span) as large as he said the light looked, half a degree, is 7.1 km off and 311 m up; flying at him at 75 m/s, it is over him 95 s later",
+    "fr": "Comparaison de taille : un Airbus A350-900 (64,8 m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à 7,1 km et 311 m de haut ; volant vers lui à 75 m/s, il est au-dessus de lui 95 s plus tard"
+   },
+   "url": "interpretation-montclair-size-a350-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
    "id": "cutler-29-road",
    "time": "2024-11-29 00:27",
    "title": {
