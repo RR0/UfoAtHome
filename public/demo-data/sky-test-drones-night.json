@@ -1,0 +1,202 @@
+{
+  "version": 4,
+  "id": "sky-test-drones-night",
+  "tags": [
+    "drones",
+    "misidentification"
+  ],
+  "description": {
+    "en": "Drones over a New Jersey suburb on a clear December night: a quadcopter hovering across the road, then going off; a far cluster of six; a saucer-shaped \"drufo\" ringed with LEDs, low and near; a fixed-wing drone crossing high. Place, date and drones assumed.",
+    "fr": "Des drones au-dessus d'une banlieue du New Jersey par une nuit claire de décembre : un quadricoptère en vol stationnaire de l'autre côté de la route, qui repart ; un groupe lointain de six ; un « drufo » en forme de soucoupe cerclé de LED, bas et proche ; un drone à voilure fixe qui passe haut. Lieu, date et drones supposés.",
+    "es": "Drones sobre un suburbio de Nueva Jersey en una noche clara de diciembre: un cuadricóptero suspendido al otro lado de la carretera, que luego se va; un grupo lejano de seis; un «drufo» en forma de platillo rodeado de LED, bajo y cercano; un dron de ala fija que pasa alto. Lugar, fecha y drones supuestos.",
+    "it": "Droni sopra un sobborgo del New Jersey in una notte limpida di dicembre: un quadricottero in volo stazionario dall'altra parte della strada, che poi riparte; un gruppo lontano di sei; un «drufo» a forma di disco cerchiato di LED, basso e vicino; un drone ad ala fissa che passa alto. Luogo, data e droni ipotizzati."
+  },
+  "time": "2024-12-12T21:00:00",
+  "utcOffsetHours": -5,
+  "durationSeconds": 90,
+  "place": {
+    "name": "Suburb of Somerset County, New Jersey (assumed)",
+    "locations": [
+      {
+        "lat": 40.5925,
+        "lng": -74.6235
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 19.5,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 2500,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 300,
+          "windSpeed": 3,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 40.5925,
+          "lng": -74.6235,
+          "elevationM": 0,
+          "headingDeg": 0,
+          "pitchDeg": 12,
+          "fovDeg": 75
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Drones",
+      "fr": "Drones",
+      "es": "Drones",
+      "it": "Droni"
+    },
+    "bodies": [],
+    "drones": [
+      {
+        "id": "hovering",
+        "airframe": "quadcopter",
+        "seed": 2,
+        "path": [
+          {
+            "t": 0,
+            "eastM": 20,
+            "northM": 150,
+            "altitudeM": 60
+          },
+          {
+            "t": 25000,
+            "eastM": 20,
+            "northM": 150,
+            "altitudeM": 60
+          },
+          {
+            "t": 45000,
+            "eastM": -150,
+            "northM": 400,
+            "altitudeM": 90
+          },
+          {
+            "t": 55000,
+            "eastM": -150,
+            "northM": 400,
+            "altitudeM": 90
+          },
+          {
+            "t": 85000,
+            "eastM": -600,
+            "northM": 900,
+            "altitudeM": 110
+          }
+        ]
+      },
+      {
+        "id": "cluster",
+        "airframe": "quadcopter",
+        "count": 6,
+        "formation": {
+          "kind": "cluster",
+          "spacingM": 25
+        },
+        "seed": 5,
+        "path": [
+          {
+            "t": 0,
+            "eastM": 450,
+            "northM": 1500,
+            "altitudeM": 150
+          },
+          {
+            "t": 90000,
+            "eastM": 50,
+            "northM": 1450,
+            "altitudeM": 160
+          }
+        ]
+      },
+      {
+        "id": "drufo",
+        "airframe": "saucer",
+        "seed": 3,
+        "path": [
+          {
+            "t": 0,
+            "eastM": -40,
+            "northM": 70,
+            "altitudeM": 25
+          },
+          {
+            "t": 15000,
+            "eastM": -40,
+            "northM": 70,
+            "altitudeM": 25
+          },
+          {
+            "t": 60000,
+            "eastM": 45,
+            "northM": 80,
+            "altitudeM": 30
+          },
+          {
+            "t": 90000,
+            "eastM": 45,
+            "northM": 80,
+            "altitudeM": 30
+          }
+        ]
+      },
+      {
+        "id": "wing",
+        "airframe": "fixed-wing",
+        "seed": 1,
+        "path": [
+          {
+            "t": 0,
+            "eastM": -1500,
+            "northM": 1200,
+            "altitudeM": 400
+          },
+          {
+            "t": 100000,
+            "eastM": 1500,
+            "northM": 1200,
+            "altitudeM": 400
+          }
+        ]
+      }
+    ]
+  }
+}

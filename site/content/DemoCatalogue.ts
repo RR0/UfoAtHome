@@ -578,6 +578,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "drones-night",
+          src: "/demo-data/sky-test-drones-night.json",
+          title: { en: "Drones at night", fr: "Des drones la nuit", es: "Drones de noche", it: "Droni di notte" },
+          blurb: {
+            en: "A clear December night over a New Jersey suburb, as in the 2024 wave of drone reports: a quadcopter hovering across the road, its strobe flashing white over its steady red and blinking green, then flying off; far off, a \"cluster of lights\" of six; a saucer-shaped \"drufo\" ringed with cyan LEDs, low and near; a fixed-wing drone crossing high with an aeroplane's lights. Each leans into where it goes and buzzes. Place, date and drones assumed.",
+            fr: "Une nuit claire de décembre au-dessus d'une banlieue du New Jersey, comme lors de la vague de signalements de drones de 2024 : un quadricoptère en vol stationnaire de l'autre côté de la route, son feu à éclats blanc par-dessus son rouge fixe et son vert clignotant, qui repart ; au loin, un « groupe de lumières » de six ; un « drufo » en forme de soucoupe cerclé de LED cyan, bas et proche ; un drone à voilure fixe qui passe haut avec des feux d'avion. Chacun s'incline vers où il va et bourdonne. Lieu, date et drones supposés.",
+            es: "Una noche clara de diciembre sobre un suburbio de Nueva Jersey, como en la oleada de avistamientos de drones de 2024: un cuadricóptero suspendido al otro lado de la carretera, su luz estroboscópica blanca sobre su rojo fijo y su verde intermitente, que luego se va; a lo lejos, un «grupo de luces» de seis; un «drufo» en forma de platillo rodeado de LED cian, bajo y cercano; un dron de ala fija que pasa alto con luces de avión. Cada uno se inclina hacia donde va y zumba. Lugar, fecha y drones supuestos.",
+            it: "Una notte limpida di dicembre sopra un sobborgo del New Jersey, come nell'ondata di segnalazioni di droni del 2024: un quadricottero in volo stazionario dall'altra parte della strada, la luce stroboscopica bianca sopra il rosso fisso e il verde lampeggiante, che poi riparte; in lontananza, un «gruppo di luci» di sei; un «drufo» a forma di disco cerchiato di LED ciano, basso e vicino; un drone ad ala fissa che passa alto con luci da aereo. Ognuno si inclina verso dove va e ronza. Luogo, data e droni ipotizzati."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

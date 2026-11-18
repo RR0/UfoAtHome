@@ -7,14 +7,14 @@
  *   size (347 × 283 × 107 mm unfolded without its rotors, 0.51 × 0.49 m with them), its top speed 21 m/s and its tilt at most 35° (DJI's published figures). It holds a point in the
  *   air to ±0.5 m by satellite positioning (DJI: ±0.5 m vertical, ±0.5 m horizontal with GNSS), turns on the spot, and leans into where
  *   it goes and into the wind. Its lights are those of the type: two red at the front arms, a status light at the back that blinks green,
- *   and a white anti-collision strobe on top, which the FAA has required to fly at night since 2021 (14 CFR 107.29: visible for at least
+ *   and a white anti-collision strobe strapped under it, where it is seen from the ground (one on top is hidden by the hull from anyone below), which the FAA has required to fly at night since 2021 (14 CFR 107.29: visible for at least
  *   3 statute miles).
  * - "saucer": a multirotor in a disc, the "drufo" hobbyists build or buy to be taken for a flying saucer (an umbrella pair round a quad, a
  *   foam disc with its rotors inside): 0.8 m across, 0.2 m tall, ringed with coloured LEDs and lit under. Its size, colours and speed are
  *   SUPPOSED, from photographs of such builds; it flies as a multirotor does.
  * - "fixed-wing": a small military or survey drone with a wing and a pusher propeller, 3.6 m of span and 1.9 m long (a WB Electronics
  *   FlyEye's, the Polish army's), cruising at 20 m/s: it cannot hover, and banks to turn as an aeroplane does. Its navigation lights are
- *   an aeroplane's (red on the left wingtip, green on the right, white at the tail) and its strobe white; a military one may fly dark,
+ *   an aeroplane's (red on the left wingtip, green on the right, white at the tail) and its strobe white, under its fuselage; a military one may fly dark,
  *   which its interpretation says by putting them out.
  *
  * The brightness of every light is SUPPOSED, as an intensity, candela (see DroneLight): a 5 mm LED gives some 0.5 to 5 cd; a strobe the
@@ -74,7 +74,7 @@ export class DroneAirframes {
     {
       id: "quadcopter",
       modelId: "ufoathome-drone-quadcopter",
-      sizeM: { widthM: 0.508, lengthM: 0.493, heightM: 0.111 },
+      sizeM: { widthM: 0.508, lengthM: 0.493, heightM: 0.093 },
       hovers: true,
       maxSpeedMS: 21,
       maxTiltDeg: 35,
@@ -84,7 +84,7 @@ export class DroneAirframes {
       lights: {
         front: { color: "#ff2a1a", candela: 1, leds: [{ at: [-0.125, -0.03, -0.14], radiusM: 0.004 }, { at: [0.125, -0.03, -0.14], radiusM: 0.004 }] },
         rear: { color: "#2aff5a", candela: 1, hz: 0.5, leds: [{ at: [0, 0.005, 0.135], radiusM: 0.004 }] },
-        strobe: { color: "#ffffff", candela: 40, hz: 1.25, flashS: 0.06, leds: [{ at: [0, 0.055, 0.02], radiusM: 0.006 }] }
+        strobe: { color: "#ffffff", candela: 40, hz: 1.25, flashS: 0.06, leds: [{ at: [0, -0.034, 0.05], radiusM: 0.006 }] }
       }
     },
     {
@@ -117,7 +117,7 @@ export class DroneAirframes {
         "nav-left": { color: "#ff2a1a", candela: 2, leds: [{ at: [-1.79, 0.02, 0.05], radiusM: 0.008 }] },
         "nav-right": { color: "#2aff5a", candela: 2, leds: [{ at: [1.79, 0.02, 0.05], radiusM: 0.008 }] },
         tail: { color: "#ffffff", candela: 1, leds: [{ at: [0, 0.05, 0.94], radiusM: 0.008 }] },
-        strobe: { color: "#ffffff", candela: 40, hz: 1, flashS: 0.06, leds: [{ at: [0, 0.16, -0.1], radiusM: 0.008 }] }
+        strobe: { color: "#ffffff", candela: 40, hz: 1, flashS: 0.06, leds: [{ at: [0, -0.1, 0.1], radiusM: 0.008 }] }
       }
     }
   ]

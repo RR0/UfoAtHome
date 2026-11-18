@@ -852,7 +852,10 @@ export class BodySystem {
       emitters.push({ position: centre.clone(), candela: luminanceCdM2 * Math.PI * radiusM * radiusM, colour: glow.hue })
       const distanceM = Math.max(centre.distanceTo(eye), radiusM * 1.01, 1e-3)
       occluders ??= [holder, ...(frame.occluders ?? [])].map(object => ({ object, box: new Box3().setFromObject(object) }))
-      const clear = this.clearShare(eye, box, centre, glow.meshes, occluders)
+      const angularRadius = Math.asin(Math.min(1, radiusM / distanceM))
+      // A light under a pixel is looked at through its middle alone: its five points all fall in the same pixel, and looking along each
+      // through a drone's own hull cost 5.7 ms an image for the 46 LEDs of nine drones.
+      const clear = this.clearShare(eye, box, centre, glow.meshes, occluders, frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad)
       if (clear <= 0) {
         veil?.hide()
         continue
@@ -862,7 +865,6 @@ export class BodySystem {
         this.lightVeils.set(key, veil)
         this.group.add(veil.mesh)
       }
-      const angularRadius = Math.asin(Math.min(1, radiusM / distanceM))
       const solidAngle = 2 * Math.PI * (1 - Math.cos(angularRadius)) * clear
       // The illuminance it gives at the eye, in lux, in the scene's own units, as a star's is (see
       // SceneRenderer.arrivingIlluminance) — never from its colour as shown: the screen's response
@@ -880,10 +882,10 @@ export class BodySystem {
   }
 
   /** The share of five points of a light — its middle and its box's corners, drawn a little in —
-   * that the eye sees: nothing but the light itself between. */
-  private clearShare(eye: Vector3, box: Box3, centre: Vector3, own: readonly Mesh[], occluders: readonly { object: Object3D, box: Box3 }[]): number {
+   * that the eye sees: nothing but the light itself between. Its middle alone when `middleOnly`. */
+  private clearShare(eye: Vector3, box: Box3, centre: Vector3, own: readonly Mesh[], occluders: readonly { object: Object3D, box: Box3 }[], middleOnly = false): number {
     const points = [centre]
-    for (const [fx, fz] of [[0.2, 0.2], [0.8, 0.2], [0.2, 0.8], [0.8, 0.8]]) {
+    if (!middleOnly) for (const [fx, fz] of [[0.2, 0.2], [0.8, 0.2], [0.2, 0.8], [0.8, 0.8]]) {
       points.push(new Vector3(
         box.min.x + (box.max.x - box.min.x) * fx,
         centre.y + (fx < 0.5 ? -1 : 1) * (box.max.y - box.min.y) * 0.3,
