@@ -2428,6 +2428,370 @@
         "license": "CC BY 4.0",
         "sourceUrl": "https://sketchfab.com/3d-models/piper-pa-28-cadet-ba310f1e1ba349c7a54ab9db92e48970"
       }
+    },
+    {
+      "id": "ufoathome-drone-quadcopter",
+      "kind": "aircraft",
+      "name": "Consumer quadcopter drone (DJI Mavic size)",
+      "parameters": {
+        "sound": "unmanned",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "bodyColor",
+            "fallback": "#5b5f63",
+            "label": {
+              "en": "Hull",
+              "fr": "Coque",
+              "es": "Casco",
+              "it": "Scafo"
+            },
+            "hint": {
+              "en": "The colour of its body.",
+              "fr": "La couleur de son corps.",
+              "es": "El color de su cuerpo.",
+              "it": "Il colore del suo corpo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "frontColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Front lights",
+              "fr": "Feux avant",
+              "es": "Luces delanteras",
+              "it": "Luci anteriori"
+            },
+            "hint": {
+              "en": "The two LEDs under its front arms.",
+              "fr": "Les deux LED sous ses bras avant.",
+              "es": "Los dos LED bajo sus brazos delanteros.",
+              "it": "I due LED sotto i bracci anteriori."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "rearColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Status light",
+              "fr": "Voyant d'état",
+              "es": "Luz de estado",
+              "it": "Spia di stato"
+            },
+            "hint": {
+              "en": "The light at its back that tells its state, blinking.",
+              "fr": "Le voyant à l'arrière qui indique son état, clignotant.",
+              "es": "La luz trasera que indica su estado, parpadeando.",
+              "it": "La spia posteriore che ne indica lo stato, lampeggiante."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "strobeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Strobe",
+              "fr": "Feu à éclats",
+              "es": "Luz estroboscópica",
+              "it": "Luce stroboscopica"
+            },
+            "hint": {
+              "en": "Its anti-collision strobe, on top.",
+              "fr": "Son feu anticollision à éclats, sur le dessus.",
+              "es": "Su luz anticolisión, arriba.",
+              "it": "La sua luce anticollisione, sopra."
+            }
+          }
+        ],
+        "bindings": {
+          "bodyColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "frontColor": {
+            "materials": [
+              "^light-front(-\\d+)?$"
+            ]
+          },
+          "rearColor": {
+            "materials": [
+              "^light-rear(-\\d+)?$"
+            ]
+          },
+          "strobeColor": {
+            "materials": [
+              "^light-strobe(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-drone-quadcopter/drone.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.508,
+        "lengthM": 0.493,
+        "heightM": 0.111
+      },
+      "credit": {
+        "title": "Drone quadcopter (DJI Mavic 3 size), after DJI's published dimensions",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-drones.ts"
+      }
+    },
+    {
+      "id": "ufoathome-drone-saucer",
+      "kind": "aircraft",
+      "name": "Saucer-shaped drone (\"drufo\"), LED-ringed",
+      "parameters": {
+        "sound": "unmanned",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "bodyColor",
+            "fallback": "#c9ccd0",
+            "label": {
+              "en": "Hull",
+              "fr": "Coque",
+              "es": "Casco",
+              "it": "Scafo"
+            },
+            "hint": {
+              "en": "The colour of its body.",
+              "fr": "La couleur de son corps.",
+              "es": "El color de su cuerpo.",
+              "it": "Il colore del suo corpo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "rimColor",
+            "fallback": "#4fd2ff",
+            "label": {
+              "en": "Rim LEDs",
+              "fr": "LED du pourtour",
+              "es": "LED del borde",
+              "it": "LED del bordo"
+            },
+            "hint": {
+              "en": "The ring of LEDs round its edge.",
+              "fr": "L'anneau de LED sur son pourtour.",
+              "es": "El anillo de LED de su borde.",
+              "it": "L'anello di LED sul bordo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "underColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Light under it",
+              "fr": "Lumière dessous",
+              "es": "Luz inferior",
+              "it": "Luce inferiore"
+            },
+            "hint": {
+              "en": "The light in the middle of its underside.",
+              "fr": "La lumière au milieu de son dessous.",
+              "es": "La luz en el centro de su parte inferior.",
+              "it": "La luce al centro della parte inferiore."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "strobeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Strobe",
+              "fr": "Feu à éclats",
+              "es": "Luz estroboscópica",
+              "it": "Luce stroboscopica"
+            },
+            "hint": {
+              "en": "Its anti-collision strobe, on top.",
+              "fr": "Son feu anticollision à éclats, sur le dessus.",
+              "es": "Su luz anticolisión, arriba.",
+              "it": "La sua luce anticollisione, sopra."
+            }
+          }
+        ],
+        "bindings": {
+          "bodyColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "rimColor": {
+            "materials": [
+              "^light-rim(-\\d+)?$"
+            ]
+          },
+          "underColor": {
+            "materials": [
+              "^light-under(-\\d+)?$"
+            ]
+          },
+          "strobeColor": {
+            "materials": [
+              "^light-strobe(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-drone-saucer/drone.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.8,
+        "lengthM": 0.8,
+        "heightM": 0.206
+      },
+      "credit": {
+        "title": "Saucer-shaped drone (\"drufo\"), after photographs of hobbyists' builds",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-drones.ts"
+      }
+    },
+    {
+      "id": "ufoathome-drone-fixed-wing",
+      "kind": "aircraft",
+      "name": "Small fixed-wing military drone, pusher propeller",
+      "parameters": {
+        "sound": "unmanned",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "bodyColor",
+            "fallback": "#6f7568",
+            "label": {
+              "en": "Hull",
+              "fr": "Coque",
+              "es": "Casco",
+              "it": "Scafo"
+            },
+            "hint": {
+              "en": "The colour of its body.",
+              "fr": "La couleur de son corps.",
+              "es": "El color de su cuerpo.",
+              "it": "Il colore del suo corpo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navLeftColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Left wingtip light",
+              "fr": "Feu de saumon gauche",
+              "es": "Luz del ala izquierda",
+              "it": "Luce dell'ala sinistra"
+            },
+            "hint": {
+              "en": "Red, as an aeroplane's.",
+              "fr": "Rouge, comme celui d'un avion.",
+              "es": "Roja, como la de un avión.",
+              "it": "Rossa, come quella di un aereo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navRightColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Right wingtip light",
+              "fr": "Feu de saumon droit",
+              "es": "Luz del ala derecha",
+              "it": "Luce dell'ala destra"
+            },
+            "hint": {
+              "en": "Green, as an aeroplane's.",
+              "fr": "Vert, comme celui d'un avion.",
+              "es": "Verde, como la de un avión.",
+              "it": "Verde, come quella di un aereo."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tailColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Tail light",
+              "fr": "Feu de queue",
+              "es": "Luz de cola",
+              "it": "Luce di coda"
+            },
+            "hint": {
+              "en": "White, at its tail.",
+              "fr": "Blanc, à sa queue.",
+              "es": "Blanca, en su cola.",
+              "it": "Bianca, in coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "strobeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Strobe",
+              "fr": "Feu à éclats",
+              "es": "Luz estroboscópica",
+              "it": "Luce stroboscopica"
+            },
+            "hint": {
+              "en": "Its anti-collision strobe, on top.",
+              "fr": "Son feu anticollision à éclats, sur le dessus.",
+              "es": "Su luz anticolisión, arriba.",
+              "it": "La sua luce anticollisione, sopra."
+            }
+          }
+        ],
+        "bindings": {
+          "bodyColor": {
+            "materials": [
+              "^hull$"
+            ]
+          },
+          "navLeftColor": {
+            "materials": [
+              "^light-nav-left(-\\d+)?$"
+            ]
+          },
+          "navRightColor": {
+            "materials": [
+              "^light-nav-right(-\\d+)?$"
+            ]
+          },
+          "tailColor": {
+            "materials": [
+              "^light-tail(-\\d+)?$"
+            ]
+          },
+          "strobeColor": {
+            "materials": [
+              "^light-strobe(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-drone-fixed-wing/drone.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 3.596,
+        "lengthM": 1.848,
+        "heightM": 0.53
+      },
+      "credit": {
+        "title": "Small fixed-wing drone (WB Electronics FlyEye size), after published figures",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-drones.ts"
+      }
     }
   ]
 }
