@@ -1,0 +1,115 @@
+{
+ "id": "Montclair2024",
+ "title": "Montclair",
+ "summary": {
+  "en": "Night of 29 to 30 November 2024, New Jersey's drone wave. Driving into Montclair, Evan Cutler sees a light \"like the full Moon\" right over the horizon, which comes towards him, and takes it for a drone the size of a school bus. Replayed on both nights \"Friday night\" may mean, looking either ahead down the street or where his photograph looks, with every aircraft of the ADS-B record and the readings of the Metabunk thread: the Spirit A320neo lined up with him at 00:40 on the 30th, the Newark departures of the 29th, and his own drone.",
+  "fr": "Nuit du 29 au 30 novembre 2024, vague de drones du New Jersey. En entrant dans Montclair, Evan Cutler voit une lumière « comme la pleine Lune » juste au-dessus de l'horizon, qui vient vers lui, et la prend pour un drone de la taille d'un bus scolaire. Rejoué sur les deux nuits que « vendredi soir » peut désigner, regardant soit devant lui dans la rue, soit où regarde sa photo, avec tous les avions du relevé ADS-B et les lectures du fil Metabunk : l'A320neo de Spirit aligné sur lui à 0 h 40 le 30, les départs de Newark du 29, et son propre drone."
+ },
+ "time": "2024-11-30 00:40",
+ "events": [
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "cutler-30-road",
+   "time": "2024-11-30 00:38",
+   "title": {
+    "en": "Evan Cutler, the night of Friday to Saturday 30 November, looking ahead down Grove Street",
+    "fr": "Evan Cutler, la nuit du vendredi au samedi 30 novembre, regardant devant lui dans Grove Street"
+   },
+   "url": "observer-montclair-2024-11-30-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "cutler-30-photo",
+   "time": "2024-11-30 00:38",
+   "title": {
+    "en": "Evan Cutler, the night of Friday to Saturday 30 November, looking where his photograph does",
+    "fr": "Evan Cutler, la nuit du vendredi au samedi 30 novembre, regardant où regarde sa photo"
+   },
+   "url": "observer-montclair-2024-11-30-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-road",
+   "title": {
+    "en": "Spirit NKS1862, an A320neo (N923NK) coming down to Newark at 3650 ft, flying straight at him at 00:40 with its landing lights on, and passing 1.5 km from him three minutes later (Trailblazer)",
+    "fr": "Spirit NKS1862, un A320neo (N923NK) qui descend vers Newark à 3650 ft, volant droit sur lui à 0 h 40 phares d'atterrissage allumés, et passant à 1,5 km de lui trois minutes plus tard (Trailblazer)"
+   },
+   "url": "interpretation-montclair-spirit-nks1862-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-30-photo",
+   "title": {
+    "en": "Spirit NKS1862, an A320neo (N923NK) coming down to Newark at 3650 ft, flying straight at him at 00:40 with its landing lights on, and passing 1.5 km from him three minutes later (Trailblazer)",
+    "fr": "Spirit NKS1862, un A320neo (N923NK) qui descend vers Newark à 3650 ft, volant droit sur lui à 0 h 40 phares d'atterrissage allumés, et passant à 1,5 km de lui trois minutes plus tard (Trailblazer)"
+   },
+   "url": "interpretation-montclair-spirit-nks1862-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "cutler-29-road",
+   "time": "2024-11-29 00:27",
+   "title": {
+    "en": "Evan Cutler, the small hours of Friday 29 November, looking ahead down Grove Street",
+    "fr": "Evan Cutler, au petit matin du vendredi 29 novembre, regardant devant lui dans Grove Street"
+   },
+   "url": "observer-montclair-2024-11-29-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "id": "cutler-29-photo",
+   "time": "2024-11-29 00:27",
+   "title": {
+    "en": "Evan Cutler, the small hours of Friday 29 November, looking where his photograph does",
+    "fr": "Evan Cutler, au petit matin du vendredi 29 novembre, regardant où regarde sa photo"
+   },
+   "url": "observer-montclair-2024-11-29-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-29-road",
+   "title": {
+    "en": "Turkish Airlines' A350-900 TC-LGB, off Newark at 00:39 and climbing east past him, 11.6 km off at its nearest (TEEJ)",
+    "fr": "L'A350-900 TC-LGB de Turkish Airlines, parti de Newark à 0 h 39 et montant vers l'est en le dépassant, à 11,6 km au plus près (TEEJ)"
+   },
+   "url": "interpretation-montclair-turkish-tc-lgb-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-29-photo",
+   "title": {
+    "en": "Turkish Airlines' A350-900 TC-LGB, off Newark at 00:39 and climbing east past him, 11.6 km off at its nearest (TEEJ)",
+    "fr": "L'A350-900 TC-LGB de Turkish Airlines, parti de Newark à 0 h 39 et montant vers l'est en le dépassant, à 11,6 km au plus près (TEEJ)"
+   },
+   "url": "interpretation-montclair-turkish-tc-lgb-photo.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-29-road",
+   "title": {
+    "en": "TAP Air Portugal's A321neo CS-TXJ, off Newark at 00:28 and turning towards him as it climbs, which makes it bright and still for a while (TEEJ, Mick West)",
+    "fr": "L'A321neo CS-TXJ de TAP Air Portugal, parti de Newark à 0 h 28 et tournant vers lui en montant, ce qui le rend brillant et immobile un moment (TEEJ, Mick West)"
+   },
+   "url": "interpretation-montclair-tap-cs-txj-road.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "cutler-29-photo",
+   "title": {
+    "en": "TAP Air Portugal's A321neo CS-TXJ, off Newark at 00:28 and turning towards him as it climbs, which makes it bright and still for a while (TEEJ, Mick West)",
+    "fr": "L'A321neo CS-TXJ de TAP Air Portugal, parti de Newark à 0 h 28 et tournant vers lui en montant, ce qui le rend brillant et immobile un moment (TEEJ, Mick West)"
+   },
+   "url": "interpretation-montclair-tap-cs-txj-photo.json"
+  }
+ ]
+}

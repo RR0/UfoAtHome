@@ -3,7 +3,9 @@
  * radius of the place, turns each tree, building, bridge and span of line into the decor object the editor would have taken from the same survey
  * (see SurveyedDecor), and writes them with where they came from.
  *
- *   node --import tsx scripts/fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>] [--wood <azimuthDeg>,<distanceM>]...
+ *   node --import tsx scripts/fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>] [--wood <azimuthDeg>,<distanceM>]... [--osm]
+ *
+ * With `--osm`, the buildings are the volunteers' map's (see OsmBuildingsSurroundingsProvider), for a place the IGN does not survey: no trees, no lines.
  *
  * The laser's trees are asked for within 150 m of a place only (a square of half a kilometre holds thousands, and a scene draws a few hundred). A wood
  * further than that, the one an account stands before, is asked for with `--wood`: one more window of laser, centred that far from the place towards that
@@ -29,6 +31,7 @@ import { dirname } from "node:path"
 import { promisify } from "node:util"
 import { IgnLidarSurroundingsProvider } from "../src/modules/providers/terrain/IgnLidarSurroundingsProvider.js"
 import { IgnLidarTopoSurroundingsProvider } from "../src/modules/providers/terrain/IgnLidarTopoSurroundingsProvider.js"
+import { OsmBuildingsSurroundingsProvider } from "../src/modules/providers/terrain/OsmBuildingsSurroundingsProvider.js"
 import { OsmStreetFurniture } from "../src/modules/providers/terrain/OsmStreetFurniture.js"
 import { SurroundingsSources } from "../src/modules/providers/terrain/surroundingsSources.js"
 import { readFile } from "node:fs/promises"
@@ -85,7 +88,8 @@ class SurroundingsFetch {
     const recording = along >= 0 ? args[along + 1] : undefined
     const woods = args.flatMap((arg, i) => arg === "--wood" ? [args[i + 1].split(",").map(Number)] : [])
     const lamps = args.includes("--lamps")
-    const rest = args.filter((arg, i) => arg !== "--wood" && args[i - 1] !== "--wood" && arg !== "--lamps")
+    const osm = args.includes("--osm")
+    const rest = args.filter((arg, i) => arg !== "--wood" && args[i - 1] !== "--wood" && arg !== "--lamps" && arg !== "--osm")
     const alongAt = rest.indexOf("--along")
     const [out, lat, lng, radius] = alongAt >= 0 ? rest.filter((_, i) => i !== alongAt && i !== alongAt + 1) : rest
     if (!out || !lat || !lng) throw new Error("usage: fetch-surroundings.ts <out.json> <lat> <lng> [radiusM] [--along <recording.json>]")
@@ -93,7 +97,9 @@ class SurroundingsFetch {
     const radiusM = radius ? Number(radius) : 100
     // The French instance of the map's server refuses scripts (a list of allowed callers): the general one is asked.
     const furniture = lamps ? new OsmStreetFurniture({ fetchImpl: SurroundingsFetch.curlFetch, endpoints: ["https://overpass-api.de/api/interpreter"] }, SurroundingsSources.TOWN_LAMPS, SurroundingsSources.TOWN_SIGNALS) : undefined
-    const provider = new IgnLidarTopoSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch }, furniture)
+    const provider = osm
+      ? new OsmBuildingsSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch, endpoints: ["https://overpass-api.de/api/interpreter"] }, furniture)
+      : new IgnLidarTopoSurroundingsProvider({ fetchImpl: SurroundingsFetch.curlFetch }, furniture)
     let found
     if (recording) {
       const track = JSON.parse(await readFile(recording, "utf8")).observerTrack?.keyframes ?? []
