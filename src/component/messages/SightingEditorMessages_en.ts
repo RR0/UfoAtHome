@@ -172,6 +172,8 @@ export const sightingEditorMessages_en: SightingEditorMessages = {
   sourceElevation: "Relief",
   sourceImagery: "Imagery",
   sourceAircraft: "Air traffic",
+  aircraftOwnHint: "An aircraft no record gives (a witness's, a hypothesis) is entered in the Environment, where it is given its path.",
+  addOwnAircraft: "Add an aircraft",
   sourceFile: "File",
   aircraftGroup: "Aircraft",
   aircraftFlightsColumns: { flight: "Flight", distance: "Distance", direction: "Direction", height: "Height", altitude: "Altitude" },

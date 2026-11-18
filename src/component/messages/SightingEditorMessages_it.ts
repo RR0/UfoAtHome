@@ -172,6 +172,8 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   sourceElevation: "Rilievo",
   sourceImagery: "Immagini",
   sourceAircraft: "Traffico aereo",
+  aircraftOwnHint: "Un velivolo che nessun registro riporta (quello di un testimone, un'ipotesi) si inserisce nell'Ambiente, dove riceve la sua traiettoria.",
+  addOwnAircraft: "Aggiungere un velivolo",
   sourceFile: "File",
   aircraftGroup: "Aerei",
   aircraftFlightsColumns: { flight: "Volo", distance: "Distanza", direction: "Direzione", height: "Altezza", altitude: "Quota" },

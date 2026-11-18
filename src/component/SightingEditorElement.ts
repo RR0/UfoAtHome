@@ -2084,6 +2084,7 @@ export class SightingEditorElement extends HTMLElement {
       input.addEventListener("input", () => this.updateMilestone())
     }
     this.showMeteorButton.addEventListener("click", () => this.showNextMeteor())
+    this.shadow.getElementById("add-own-aircraft")!.addEventListener("click", () => this.addOwnAircraft())
     this.showCometButton.addEventListener("click", () => this.lookAtComet())
     this.showNovaButton.addEventListener("click", () => this.lookAtNova())
     this.showSatelliteButton.addEventListener("click", () => this.showNextSatellite())
@@ -3716,6 +3717,8 @@ export class SightingEditorElement extends HTMLElement {
       ["railways", this.messages.snapshotRailways, this.sourcePicker("railways", [SightingEditorElement.LIVE_RAILWAYS], () => undefined, this.groupChoice(["railways"]))],
     ])
     this.shadow.getElementById("label-aircraft-source")!.textContent = this.messages.sourceAircraft
+    this.shadow.getElementById("aircraft-own-hint")!.textContent = this.messages.aircraftOwnHint
+    this.shadow.getElementById("add-own-aircraft")!.textContent = this.messages.addOwnAircraft
     this.shadow.getElementById("aircraft-source-row")!.replaceChildren(this.aircraftPicker())
     this.sourcePickers(this.shadow.getElementById("decor-source-rows")!, "decor-source-kind", "decor", [
       ["scenery", this.messages.fileItemDecor, this.shadow.getElementById("scenery-picker")!],
@@ -9771,6 +9774,15 @@ export class SightingEditorElement extends HTMLElement {
    * Always reassigns sighting.decor to a new array (never mutates the existing one in place) —
    * see SceneRenderer.setDecor's own doc comment on why that reference-equality check depends on
    * it. */
+  /**
+   * An aircraft nobody recorded, added from the Sky's Aircraft part: it is a decor object (see DecorAircraft), there with its path like
+   * any other thing of the witness's surroundings, so it is added there, and the Decor group opened on it to be given its path.
+   */
+  private addOwnAircraft(): void {
+    this.addDecor("aircraft")
+    this.revealDecorPanel()
+  }
+
   private addDecor(kind: DecorObject["kind"] = (this.decorList.pickedKind ?? "building") as DecorObject["kind"]): void {
     this.observerAdded = kind === "observer"
     const sighting = this.ufoElement.sighting

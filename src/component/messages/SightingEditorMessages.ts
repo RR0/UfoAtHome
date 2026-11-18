@@ -271,6 +271,9 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   sourceImagery: string
   /** The label of the air traffic source picker: where the aircraft around the observer are read from. */
   sourceAircraft: string
+  /** Under the flights a record gives: an aircraft nobody recorded is put in the decor, where it has its path (see addOwnAircraft). */
+  aircraftOwnHint: string
+  addOwnAircraft: string
   /** The choice, in a source picker, of the recording's own file rather than a source asked live (see Snapshots). */
   sourceFile: string
   /** The Sky group's tab of the aircraft a record says were around the witness. */

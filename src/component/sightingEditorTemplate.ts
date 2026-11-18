@@ -567,6 +567,7 @@ export const html = `
     <div class="toolbar">
       <div class="aircraft-source"><label for="aircraftSource" id="label-aircraft-source"></label> <span id="aircraft-source-row" class="source-picker"></span></div>
       <div id="aircraft-flights"></div>
+      <p class="aircraft-own"><span id="aircraft-own-hint"></span> <button id="add-own-aircraft" type="button"></button></p>
     </div>
   </section>
   <!-- What happened in that sky as facts (see SkyEventsJson), beside the state it was in: neither the decor, which outlasts the
@@ -1118,6 +1119,10 @@ input.invalid {
 .source-credit {
   color: inherit;
   text-decoration: underline dotted;
+}
+.aircraft-own {
+  flex-basis: 100%;
+  margin: 0;
 }
 #aircraft-flights, .aircraft-source {
   flex-basis: 100%;

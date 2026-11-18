@@ -172,6 +172,8 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   sourceElevation: "Relieve",
   sourceImagery: "Imágenes",
   sourceAircraft: "Tráfico aéreo",
+  aircraftOwnHint: "Una aeronave que ningún registro da (la de un testigo, una hipótesis) se introduce en el Entorno, donde recibe su trayectoria.",
+  addOwnAircraft: "Añadir una aeronave",
   sourceFile: "Archivo",
   aircraftGroup: "Aviones",
   aircraftFlightsColumns: { flight: "Vuelo", distance: "Distancia", direction: "Dirección", height: "Altura", altitude: "Altitud" },

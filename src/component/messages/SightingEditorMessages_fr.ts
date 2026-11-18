@@ -172,6 +172,8 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   sourceElevation: "Relief",
   sourceImagery: "Imagerie",
   sourceAircraft: "Trafic aérien",
+  aircraftOwnHint: "Un aéronef qu'aucun relevé ne donne (celui d'un témoin, une hypothèse) se saisit dans le Décor, où il reçoit sa trajectoire.",
+  addOwnAircraft: "Ajouter un aéronef",
   sourceFile: "Fichier",
   aircraftGroup: "Avions",
   aircraftFlightsColumns: { flight: "Vol", distance: "Distance", direction: "Direction", height: "Hauteur", altitude: "Altitude" },
