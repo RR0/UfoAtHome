@@ -98,7 +98,7 @@ describe("the excerpts of the guide to modules", () => {
     const points: Record<ExtensionPointId, true> = {
       weather: true, place: true, timeZone: true, narrative: true, assessment: true, lightPollution: true, aircraft: true, upperAir: true,
       elevation: true, imagery: true, surroundings: true, decorModels: true, skyEvents: true, interpretations: true, perception: true,
-      transcription: true
+      transcription: true, reentryTypes: true
     }
     expect(DocsModulesPage.POINTS.map(row => row.point).sort()).toEqual(Object.keys(points).sort())
     const sources = import.meta.glob("/src/**/*.ts")

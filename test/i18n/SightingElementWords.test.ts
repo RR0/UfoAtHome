@@ -281,6 +281,11 @@ vi.mock("../../src/modules/sky-events/reentries/messages/ReentryKindMessages_en.
   const actual = await original<typeof import("../../src/modules/sky-events/reentries/messages/ReentryKindMessages_en.js")>()
   return { ...actual, reentryKindMessages_en: WordsAudit.pseudo(actual.reentryKindMessages_en) }
 })
+vi.mock("../../src/modules/sky-events/reentries/types/messages/ReentryTypeNames_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/reentries/types/messages/ReentryTypeNames_en.js")>()
+  return { ...actual, reentryTypeNames_en: WordsAudit.pseudo(actual.reentryTypeNames_en) }
+})
 vi.mock("../../src/modules/sky-events/reentries/messages/ReentryParameterTexts_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/modules/sky-events/reentries/messages/ReentryParameterTexts_en.js")>()

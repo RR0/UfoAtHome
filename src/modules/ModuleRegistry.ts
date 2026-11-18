@@ -15,6 +15,7 @@ import type { SkyEventKind } from "./sky-events/SkyEventKind.js"
 import type { InterpretationKind } from "./interpretations/InterpretationKind.js"
 import type { ObserverProvider } from "../engine/observer/ObserverProvider.js"
 import type { TranscriptionProvider } from "../engine/transcription/TranscriptionProvider.js"
+import type { ReentryType } from "./sky-events/reentries/types/ReentryType.js"
 
 /**
  * What each extension point of UFO@home is a list of: the interface an implementation of that point gives.
@@ -57,6 +58,8 @@ export interface ExtensionPointTypes {
   perception: ObserverProvider
   /** What turns the recording of an interview into text: a model in the reader's browser, or a service on the reader's key (see TranscriptionProvider). */
   transcription: TranscriptionProvider
+  /** The types of re-entry an author picks from, a meteor or a rocket stage, each with its nature and what a new one is (see ReentryType): its `id` is the type's key. */
+  reentryTypes: ReentryType
 }
 
 export type ExtensionPointId = keyof ExtensionPointTypes

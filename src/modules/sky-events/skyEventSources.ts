@@ -28,7 +28,7 @@ export const SKY_EVENT_SOURCES: DataSource<SkyEventKind>[] = ModuleRegistry.poin
   },
   {
     id: REENTRY_KIND.key,
-    name: "Fireballs",
+    name: "Re-entries",
     credit: "UFO@home",
     creditUrl: "https://ufoathome.org/docs/format/",
     create: () => REENTRY_KIND as unknown as SkyEventKind

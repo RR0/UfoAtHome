@@ -16,9 +16,10 @@ import { Icons } from "../../../component/Icons.js"
 import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm.js"
 import type { PositionPlace } from "../../../component/ParameterForm.js"
 import { TimelineTracks } from "../../../component/TimelineTracks.js"
+import { ReentryTypes } from "./types/ReentryTypes.js"
 import type { TimelineTrack } from "../../../component/TimelineTracks.js"
 
-/** What the Fireballs part needs of the editor it stands in, read at every use. */
+/** What the Re-entries part needs of the editor it stands in, read at every use. */
 export interface ReentryEditorHost {
   sighting(): Sighting
   said(): SaidTexts
@@ -33,11 +34,10 @@ export interface ReentryEditorHost {
   changed(): void
 }
 
-type Kind = "fireball" | "reentry"
-
 /**
- * The fireballs and re-entries of the recording, edited: facts of its sky (see SkyEventsJson, ReentryJson), each with its name and object,
- * the points of its path, and its burning pieces, each with its light curve (see ReentryParameters).
+ * The re-entries of the recording, edited: facts of its sky (see SkyEventsJson, ReentryJson), each with its name, its type (a meteor, a
+ * satellite: see ReentryType, which a module may add to) and, when it was put in orbit, its object, the points of its path, and its
+ * burning pieces, each with its light curve (see ReentryParameters). A new one is of the type picked from the menu of the "+".
  *
  * What happens when is laid out on a timeline of its own, beside the recording's playhead (see TimelineTracks): a row for the path, its
  * points as diamonds, and a row for each piece, its life as a bar and the points of its light curve as diamonds. A diamond pressed is the
@@ -85,7 +85,7 @@ export class ReentryEditor {
   async setLanguage(language: string): Promise<void> {
     const token = ++this.languageToken
     this.language = language
-    const [messages, parameterTexts] = await Promise.all([REENTRY_EDITOR_MESSAGES.load(language), REENTRY_PARAMETER_TEXTS.load(language)])
+    const [messages, parameterTexts] = await Promise.all([REENTRY_EDITOR_MESSAGES.load(language), REENTRY_PARAMETER_TEXTS.load(language), ReentryTypes.load(language)])
     if (token !== this.languageToken) return
     this.messages = messages
     this.parameterTexts = parameterTexts
@@ -100,6 +100,8 @@ export class ReentryEditor {
     this.shown = [...reentries]
     if (!reentries.some(reentry => reentry.id === this.currentId)) this.currentId = reentries[0]?.id
     this.list?.setItems(reentries.map(reentry => ({ id: reentry.id, label: this.labelOf(reentry) })), this.currentId)
+    // The registry's types now, a module's among them.
+    this.list?.setKinds(ReentryTypes.all().map(type => ({ value: type.key, label: ReentryTypes.nameOf(type.key) })))
     this.syncAddState()
     const reentry = this.current
     this.element("reentry-fields").hidden = reentry === undefined
@@ -137,7 +139,7 @@ export class ReentryEditor {
     this.timeline?.setTime(t)
   }
 
-  /** A fireball is put in front of the observer: it can be added once the recording has a place. */
+  /** A re-entry is put in front of the observer: it can be added once the recording has a place. */
   private syncAddState(): void {
     const placed = this.origin() !== undefined
     this.list?.setAddState(placed, placed ? undefined : this.messages.addNowhere)
@@ -199,11 +201,10 @@ export class ReentryEditor {
       header: this.element("reentry-list"), body: this.element("reentry-fields"),
       ids: { list: "reentry-select", remove: "reentry-delete", add: "reentry-add", kinds: "reentry-add-kind", kind: kind => `reentry-add-${kind}` },
       onSelect: id => this.show(id),
-      onAdd: kind => this.addReentry(kind === "reentry" ? "reentry" : "fireball"),
+      onAdd: kind => { if (kind) this.addReentry(kind) },
       onRemove: () => this.deleteCurrent()
     })
     this.list.setLabels({ list: m.reentry, remove: m.deleteReentry, add: m.addReentry, empty: m.none })
-    this.list.setKinds([{ value: "fireball", label: m.kindFireball }, { value: "reentry", label: m.kindReentry }])
     this.timeline = new TimelineTracks(this.element("reentry-timeline"), t => this.host.seekTo(t), { addKeyframeHere: m.addPointHere, keyframeHere: m.pointHere, zoomHint: m.zoomHint })
     this.element("reentry-place-delete").addEventListener("click", () => this.removePlace())
     this.element("reentry-curve-delete").addEventListener("click", () => this.removeCurvePoint())
@@ -528,13 +529,14 @@ export class ReentryEditor {
   }
 
   /**
-   * A new one, in front of the observer and crossing their view from left to right, from the playhead on, a placeholder to be given its
-   * real path: a fireball 150 km off, 30 km/s for three seconds from 100 down to 60 km, as bright as a fireball is at least; a re-entry
-   * 300 km off, 7.5 km/s for a minute at 80 km, a leading piece and two behind it, the formation observers report.
+   * A new one of the type `key`, in front of the observer and crossing their view from left to right, from the playhead on, a placeholder
+   * to be given its real path: the order of magnitude of its type (see ReentryTemplate), its distance, speed, duration, heights and pieces.
    */
-  private newOf(kind: Kind): Omit<ReentryJson, "id"> | undefined {
+  private newOf(key: string): Omit<ReentryJson, "id"> | undefined {
     const origin = this.origin()
-    if (!origin) return undefined
+    const type = ReentryTypes.of(key)
+    if (!origin || !type) return undefined
+    const { distanceKm, speedKmS, durationS, fromAltitudeKm, toAltitudeKm, fragments } = type.template
     const start = Math.round(this.host.currentTime())
     const cosLat = Math.max(0.05, Math.cos(origin.lat * Math.PI / 180))
     const at = (aheadKm: number, acrossKm: number) => {
@@ -542,24 +544,20 @@ export class ReentryEditor {
       const east = aheadKm * Math.sin(origin.headingRad) + acrossKm * Math.cos(origin.headingRad)
       return { lat: origin.lat + north / 111.32, lng: origin.lng + east / (111.32 * cosLat) }
     }
-    if (kind === "fireball") {
-      return {
-        track: [{ t: start, ...at(150, -45), altitudeKm: 100 }, { t: start + 3000, ...at(150, 45), altitudeKm: 60 }],
-        fragments: [{ id: "main", absoluteMagnitude: -6 }]
-      }
-    }
+    const halfKm = speedKmS * durationS / 2
     return {
-      track: [{ t: start, ...at(300, -225), altitudeKm: 82 }, { t: start + 60000, ...at(300, 225), altitudeKm: 72 }],
-      fragments: [{ id: "main", absoluteMagnitude: -4 }, { id: "piece-2", lagS: 1.5, absoluteMagnitude: -2.5 }, { id: "piece-3", lagS: 3, absoluteMagnitude: -1.5 }]
+      type: key,
+      track: [{ t: start, ...at(distanceKm, -halfKm), altitudeKm: fromAltitudeKm }, { t: start + durationS * 1000, ...at(distanceKm, halfKm), altitudeKm: toAltitudeKm }],
+      fragments: fragments.map(fragment => ({ ...fragment, ...(fragment.sheds ? { sheds: [...fragment.sheds] } : {}) }))
     }
   }
 
-  private addReentry(kind: Kind): void {
-    const stated = this.newOf(kind)
+  private addReentry(key: string): void {
+    const stated = this.newOf(key)
     if (!stated) return
     let n = this.reentries.length + 1
-    while (this.reentries.some(reentry => reentry.id === `${kind}-${n}`)) n++
-    const reentry: ReentryJson = { id: `${kind}-${n}`, ...stated }
+    while (this.reentries.some(reentry => reentry.id === `${key}-${n}`)) n++
+    const reentry: ReentryJson = { id: `${key}-${n}`, ...stated }
     this.writeReentries([...this.reentries, reentry])
     this.host.changed()
     this.show(reentry.id)
@@ -580,7 +578,7 @@ export class ReentryEditor {
   }
 
   private labelOf(reentry: ReentryJson): string {
-    const title = this.host.said().read(reentry.title) || reentry.object?.name
+    const title = this.host.said().read(reentry.title) || reentry.object?.name || (reentry.type === undefined ? "" : ReentryTypes.nameOf(reentry.type))
     return title ? `${title} (${reentry.id})` : reentry.id
   }
 

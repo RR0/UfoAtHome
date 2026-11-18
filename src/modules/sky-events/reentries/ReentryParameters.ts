@@ -1,6 +1,7 @@
 import { ReentrySighting } from "./Reentry.js"
 import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
 import type { ParameterHolder, ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
+import { ReentryTypes } from "./types/ReentryTypes.js"
 
 /**
  * What a fireball or a re-entry lets its author set (see ReentryJson): its name and the object that came down, the points of its path,
@@ -52,19 +53,34 @@ export class ReentryParameters {
     return { type: "number", key, min: -3600, max: 36000, step: 0.1, unit: "s", scale: 0.001, label, hint, ...extra } as ParameterSpec
   }
 
+  /** Only what was put in orbit is in the satellite catalogue: a meteor or a fireball names no object. Unknown, it may. */
+  private static mayBeCatalogued(element: ParameterHolder): boolean {
+    return ReentryTypes.of((element as unknown as ReentryJson).type)?.nature !== "natural"
+  }
+
   static readonly SET: ParameterSet = {
     kind: "reentry",
     title: "fireballOrReEntry",
     parameters: ([
       { type: "said", key: "title", label: ReentryParameters.NAME },
       {
-        type: "text", key: "object.name", group: ReentryParameters.OBJECT,
+        // The registry's types, a module's among them, named in the language last loaded (see ReentryTypes.load); one the registry no longer
+        // has is still listed by its key, since dropping it would be an edit nobody made.
+        type: "choice", key: "type", label: "type", hint: "whatCameInNaturalOrPut", empty: "notKnown", choices: [],
+        optionsOf: element => {
+          const stated = (element as unknown as ReentryJson).type
+          const types = ReentryTypes.all().map(type => ({ value: type.key, label: ReentryTypes.nameOf(type.key) }))
+          return stated === undefined || types.some(type => type.value === stated) ? types : [...types, { value: stated, label: stated }]
+        }
+      },
+      {
+        type: "text", key: "object.name", group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued,
         label: "catalogueName",
         hint: "forAReEntryThePiece"
       },
-      { type: "text", key: "object.cosparId", group: ReentryParameters.OBJECT, label: "cosparId",
+      { type: "text", key: "object.cosparId", group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued, label: "cosparId",
         placeholder: "t1968013c" },
-      { type: "number", key: "object.norad", min: 1, max: 999999, step: 1, group: ReentryParameters.OBJECT, label: "noradNumber" }
+      { type: "number", key: "object.norad", min: 1, max: 999999, step: 1, group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued, label: "noradNumber" }
     ] satisfies ParameterSpec[])
   }
 

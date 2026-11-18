@@ -162,4 +162,35 @@ describe("ReentryEditor", () => {
     container.querySelector<HTMLButtonElement>("#reentry-delete")!.click()
     expect(sighting.skyEvents).toBeUndefined()
   })
+
+  test("offers every type of re-entry the registry has, each new one as its type usually is", async () => {
+    const { sighting } = await build(undefined, 1000)
+    container.querySelector<HTMLButtonElement>("#reentry-add")!.click()
+    const offered = [...container.querySelectorAll<HTMLElement>("[id^='reentry-add-']")].map(item => item.id).filter(id => id !== "reentry-add-kind")
+    expect(offered).toEqual(expect.arrayContaining(["reentry-add-meteor", "reentry-add-fireball", "reentry-add-satellite", "reentry-add-rocket-stage", "reentry-add-capsule"]))
+    container.querySelector<HTMLElement>("#reentry-add-rocket-stage")!.click()
+    const stage = sighting.skyEvents!.reentries![0]
+    expect(stage.id).toBe("rocket-stage-1")
+    expect(stage.type).toBe("rocket-stage")
+    // 7.5 km/s for a minute, in a train of pieces.
+    expect(stage.track.map(place => place.t)).toEqual([1000, 61000])
+    expect(stage.fragments.length).toBeGreaterThan(1)
+    container.querySelector<HTMLButtonElement>("#reentry-add")!.click()
+    container.querySelector<HTMLElement>("#reentry-add-meteor")!.click()
+    const meteor = sighting.skyEvents!.reentries![1]
+    expect(meteor.type).toBe("meteor")
+    expect(meteor.track[1].t - meteor.track[0].t).toBeLessThanOrEqual(2000)
+  })
+
+  test("names an object of the catalogue only for what may have been put in orbit", async () => {
+    const { sighting } = await build({ reentries: [{ ...chelyabinsk(), type: "fireball" }] })
+    const objectShown = () => !container.querySelector('#reentry-parameters [data-key="object.name"]')!.closest("[hidden]")
+    expect(objectShown()).toBe(false)
+    const type = container.querySelector<HTMLSelectElement>('#reentry-parameters [data-key="type"]')!
+    expect([...type.options].map(option => option.value)).toEqual(expect.arrayContaining(["", "meteor", "fireball", "satellite", "rocket-stage", "capsule"]))
+    type.value = "satellite"
+    type.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(sighting.skyEvents!.reentries![0].type).toBe("satellite")
+    expect(objectShown()).toBe(true)
+  })
 })

@@ -27,6 +27,11 @@ export interface ReentryJson {
   title?: SaidText
   /** The phenomena of the account (their `sourceId`s) this re-entry claims to be — see BodyJson.explains. */
   explains?: string[]
+  /**
+   * What came in, a key of the types of re-entry (see ReentryType): "meteor", "fireball", "satellite", "rocket-stage", "capsule", or a
+   * module's. Its nature follows from it, natural or artificial. Not known when absent: often what an account leaves in question.
+   */
+  type?: string
   /** The object that came down, when it is known — the catalogue says which piece it was. */
   object?: ReentryObject
   /** Where the leading point of the break-up was, at instants of the recording. At least two. */

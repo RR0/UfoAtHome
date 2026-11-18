@@ -65,7 +65,8 @@ export class ModuleConformance {
     skyEvents: ["key", "messages", "simulation"],
     interpretations: ["key", "messages", "compute"],
     perception: ["id", "messages", "sources", "settings", "perceive"],
-    transcription: ["sendsAudio", "engine", "transcribe"]
+    transcription: ["sendsAudio", "engine", "transcribe"],
+    reentryTypes: ["key", "nature", "messages", "template"]
   }
 
   /** The fields of a weather that go from 0 to 1, when they are there. */

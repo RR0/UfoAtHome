@@ -17,6 +17,7 @@ Every implementation UFO@home can be given a choice of lives here, one folder pe
 | `interpretations/<kind>/` | `interpretations` | `interpretations/InterpretationKind.ts` |
 | `perception/` | `perception` | `engine/observer/ObserverProvider.ts` |
 | `providers/transcription/` | `transcription` | `engine/transcription/TranscriptionProvider.ts` |
+| `sky-events/reentries/types/` | `reentryTypes` | `sky-events/reentries/types/ReentryType.ts` |
 
 Each folder has a `*Sources.ts` that lists its built-in implementations as `DataSource` entries (an id, a name, the credit its
 licence requires, and a `create()` that builds it on demand), given to the extension point through

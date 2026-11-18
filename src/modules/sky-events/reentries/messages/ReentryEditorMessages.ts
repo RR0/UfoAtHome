@@ -1,13 +1,11 @@
 import { Messages } from "../../../../i18n/MessageCatalog.js"
-/** What the Fireballs part of the Sky group says — see ReentryEditor. */
+/** What the Re-entries part of the Sky group says — see ReentryEditor. */
 export interface ReentryEditorMessages {
   intro: string
   none: string
   reentry: string
   deleteReentry: string
   addReentry: string
-  kindFireball: string
-  kindReentry: string
   path: string
   deletePlace: string
   fragments: string

@@ -295,7 +295,7 @@
   "skyEvents": {
     "reentries": [
       {
-        "id": "zond-iv",
+        "id": "zond-iv", "type": "rocket-stage",
         "title": {
           "en": "Re-entry of a piece of Zond 4's launcher",
           "fr": "Rentrée d'une pièce du lanceur de Zond 4",

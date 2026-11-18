@@ -10,6 +10,9 @@ export interface ReentryParameterTexts {
   light: string
   when: string
   fireballOrReEntry: string
+  type: string
+  whatCameInNaturalOrPut: string
+  notKnown: string
   catalogueName: string
   forAReEntryThePiece: string
   cosparId: string

@@ -743,7 +743,7 @@
   "skyEvents": {
     "reentries": [
       {
-        "id": "chelyabinsk",
+        "id": "chelyabinsk", "type": "fireball",
         "title": {
           "en": "Chelyabinsk superbolide",
           "fr": "Superbolide de Tcheliabinsk",
