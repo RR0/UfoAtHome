@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { AircraftAudio } from "../../../src/audio/AircraftAudio.js"
-import { AIRCRAFT_NOISES, AircraftHearing } from "../../../src/engine/traffic/AircraftHearing.js"
+import { AIRCRAFT_NOISES, AircraftHearing, type AircraftNoise, type FlightRegime } from "../../../src/engine/traffic/AircraftHearing.js"
 import { SoundInAir } from "../../../src/engine/traffic/SoundInAir.js"
 import { TrafficSound } from "../../../src/engine/traffic/TrafficSound.js"
 import reference from "./aircraft-sound-reference.json"
@@ -21,9 +21,13 @@ const FLOOR_DB = -40
 /** The lowest band counts half: a microphone's own response falls there. */
 const LOWEST_BAND_WEIGHT = 0.5
 
-/** What AircraftAudio plays of a class at `distanceKm`, band by band, dB under the whole: carried by the air, A-weighted, then unweighted to be played. */
-function playedShapeDb(noiseClass: string, distanceKm: number): number[] {
-  const noise = AIRCRAFT_NOISES.find(candidate => candidate.id === noiseClass)!
+/** A class's noise, at its own thrust or at another's. */
+function noiseOf(noiseClass: string, regime: FlightRegime = "overflight"): AircraftNoise {
+  return AircraftHearing.inRegime(AIRCRAFT_NOISES.find(candidate => candidate.id === noiseClass)!, regime)
+}
+
+/** What AircraftAudio plays of a noise at `distanceKm`, band by band, dB under the whole: carried by the air, A-weighted, then unweighted to be played. */
+function playedShapeDb(noise: AircraftNoise, distanceKm: number): number[] {
   // In a silence, so that nothing is masked and the shape is the sound's own.
   const amplitudes = TrafficSound.bandAmplitudes(AircraftHearing.bandsAt(noise, distanceKm), -100)
   const played = amplitudes.map((amplitude, band) => 20 * Math.log10(amplitude * AircraftAudio.unweighting(SoundInAir.OCTAVES[band])))
@@ -32,10 +36,10 @@ function playedShapeDb(noiseClass: string, distanceKm: number): number[] {
 }
 
 /** How far a recording is from what is played of its class at the distance that fits it best (which nobody wrote down), dB root mean square. */
-function bestFit(recording: Reference): { distanceKm: number; rmsDb: number } {
+function bestFit(recording: Reference, noise = noiseOf(recording.noiseClass!)): { distanceKm: number; rmsDb: number } {
   let best = { distanceKm: 0, rmsDb: Infinity }
   for (let distanceKm = 0.05; distanceKm < 30; distanceKm *= 1.05) {
-    const played = playedShapeDb(recording.noiseClass!, distanceKm)
+    const played = playedShapeDb(noise, distanceKm)
     let squares = 0
     let weights = 0
     recording.octaveShapeDb.forEach((measured, band) => {
@@ -52,7 +56,10 @@ function bestFit(recording: Reference): { distanceKm: number; rmsDb: number } {
 }
 
 const outdoor = recordings.filter(recording => !recording.inside)
-const jetsPassing = outdoor.filter(recording => recording.regime === "overflight" && recording.noiseClass?.startsWith("turbofan"))
+const jets = outdoor.filter(recording => recording.noiseClass?.startsWith("turbofan"))
+const jetsPassing = jets.filter(recording => recording.regime === "overflight")
+const jetsTakingOff = jets.filter(recording => recording.regime === "takeoff")
+const jetsComingIn = jets.filter(recording => recording.regime === "approach")
 
 describe("what is played of an aircraft, held to recordings of aircraft", () => {
   test("there are recordings of jets passing over to be held to", () => {
@@ -63,9 +70,22 @@ describe("what is played of an aircraft, held to recordings of aircraft", () => 
     expect(bestFit(recording).rmsDb).toBeLessThan(2)
   })
 
+  test.each([...jetsTakingOff, ...jetsComingIn].map(recording => [recording.regime!, recording.title, recording] as const))("a jet at the thrust of a %s (%s) sounds as recorded within 4 dB, and nearer than its class at a climb's", (regime, _, recording) => {
+    const atItsThrust = bestFit(recording, noiseOf(recording.noiseClass!, regime as FlightRegime)).rmsDb
+    expect(atItsThrust).toBeLessThan(4)
+    expect(atItsThrust).toBeLessThan(bestFit(recording).rmsDb)
+  })
+
+  test("a take-off's shape is not a jet passing over's: each regime fits its own recordings better than the other's", () => {
+    const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length
+    const fit = (recordings: Reference[], regime: FlightRegime) => mean(recordings.map(recording => bestFit(recording, noiseOf(recording.noiseClass!, regime)).rmsDb))
+    expect(fit(jetsPassing, "overflight")).toBeLessThan(fit(jetsPassing, "takeoff"))
+    expect(fit(jetsTakingOff, "takeoff")).toBeLessThan(fit(jetsTakingOff, "overflight"))
+  })
+
   test("the lows are what the recordings have: a jet is a rumble under a roar, not a hiss", () => {
     // Played as the air carries it to a kilometre, 63 and 125 Hz are within a few dB of the loudest band, as in every recording of a jet passing.
-    const played = playedShapeDb("turbofan-narrow-body", 1)
+    const played = playedShapeDb(noiseOf("turbofan-narrow-body"), 1)
     const loudest = Math.max(...played)
     expect(played[0]).toBeGreaterThan(loudest - 12)
     expect(played[1]).toBeGreaterThan(loudest - 4)

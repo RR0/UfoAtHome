@@ -123,7 +123,8 @@ export class TrafficSound {
         dopplerRatio: heard.dopplerRatio,
         azimuthDeg: heard.sound.azimuthDeg,
         elevationDeg: heard.sound.altitudeDeg,
-        character: noise.character
+        // As it sounded at the thrust it was at: an approaching jet's fan sings lower and stronger.
+        character: heard.noise.character
       })
     }
     return voices.sort((a, b) => b.levelDbA - a.levelDbA).slice(0, options.maxVoices ?? TrafficSound.DEFAULT_MAX_VOICES)

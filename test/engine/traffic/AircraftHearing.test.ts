@@ -20,6 +20,13 @@ class Flights {
     }
     return { icao: 1, nonIcao: false, points }
   }
+
+  /** The same, climbing (or, below zero, coming down) at `feetPerMinute` from `altitudeFt` at the pass. */
+  static sloping(altitudeFt: number, feetPerMinute: number, knots: number, passAtS: number): AircraftTrack {
+    const track = Flights.eastbound(altitudeFt, knots, passAtS)
+    for (const point of track.points) point.altitudeFt = altitudeFt + (feetPerMinute * ((point.t - T0) / 1000 - passAtS)) / 60
+    return track
+  }
 }
 
 describe("AircraftHearing", () => {
@@ -193,5 +200,63 @@ describe("AircraftHearing", () => {
 
   test("the ambient noise's bands add up to the figure it was given", () => {
     expect(SoundInAir.sumDb(AircraftHearing.ambientBands(40))).toBeCloseTo(40, 3)
+  })
+
+  describe("at the thrust it was at", () => {
+    test("tells from its track whether it takes off, comes in to land or passes over", () => {
+      const at = T0 + 200_000
+      expect(AircraftHearing.regimeAt(Flights.sloping(2000, 2500, 160, 200), at, observer)).toBe("takeoff")
+      expect(AircraftHearing.regimeAt(Flights.sloping(1500, -700, 140, 200), at, observer)).toBe("approach")
+      expect(AircraftHearing.regimeAt(Flights.eastbound(3000, 250, 200), at, observer)).toBe("overflight")
+      // High up, a climb is at a climb's thrust and a descent is not an approach yet.
+      expect(AircraftHearing.regimeAt(Flights.sloping(25000, 2000, 400, 200), at, observer)).toBe("overflight")
+      expect(AircraftHearing.regimeAt(Flights.sloping(25000, -2000, 400, 200), at, observer)).toBe("overflight")
+      // Low over a listener on a height: within 3 000 m of THEM.
+      expect(AircraftHearing.regimeAt(Flights.sloping(12000, 2500, 200, 200), at, { ...observer, heightM: 2000 })).toBe("takeoff")
+    })
+
+    test("a jet taking off is heard as its class at full thrust, the lows stronger; one that comes in to land is quieter, and brighter", () => {
+      const at = T0 + 200_000
+      const takeoff = AircraftHearing.heardAt(Flights.sloping(1500, 2500, 160, 200), observer, at, { ambientDbA: 30 })!
+      const approach = AircraftHearing.heardAt(Flights.sloping(1500, -700, 160, 200), observer, at, { ambientDbA: 30 })!
+      const passing = AircraftHearing.heardAt(Flights.eastbound(1500, 160, 200), observer, at, { ambientDbA: 30 })!
+      expect(takeoff.regime).toBe("takeoff")
+      expect(takeoff.noise.id).toBe("turbofan-narrow-body-takeoff")
+      expect(approach.regime).toBe("approach")
+      expect(passing.noise.id).toBe("turbofan-narrow-body")
+      // The same total at the source as the class's own, and some 8 dB under it on approach.
+      expect(SoundInAir.sumDb(takeoff.noise.soundPowerA)).toBeCloseTo(148, 5)
+      expect(SoundInAir.sumDb(approach.noise.soundPowerA)).toBeCloseTo(140, 5)
+      // Where the energy is: the lowest band against the 2 kHz one.
+      const tilt = (heard: typeof passing) => heard.noise.soundPowerA[0] - heard.noise.soundPowerA[5]
+      expect(tilt(takeoff)).toBeGreaterThan(tilt(passing) + 10)
+      expect(tilt(approach)).toBeLessThan(tilt(passing) - 15)
+    })
+
+    test("an approaching jet's fan sings lower, as it turns slower, and stands out more", () => {
+      const own = AircraftHearing.noiseOfKind("airliner-narrow")
+      const approach = AircraftHearing.inRegime(own, "approach")
+      expect(approach.character?.toneHz).toBeCloseTo(1008, 0)
+      expect(approach.character?.toneShare).toBeCloseTo(0.6, 6)
+      expect(approach.character?.humHz).toBeLessThan(own.character!.humHz!)
+    })
+
+    test("what has no regimes of its own is itself at every thrust", () => {
+      const piston = AircraftHearing.noiseOfKind("light-piston")
+      expect(AircraftHearing.inRegime(piston, "takeoff")).toBe(piston)
+      const heard = AircraftHearing.heardAt(Flights.sloping(1500, 800, 90, 200), observer, T0 + 200_000, { noise: piston, ambientDbA: 30 })!
+      expect(heard.regime).toBe("takeoff")
+      expect(heard.noise).toBe(piston)
+    })
+
+    test("a take-off can be heard where its class at a climb's shape could not: its lows carry", () => {
+      const own = AircraftHearing.noiseOfKind("airliner-narrow")
+      const takeoff = AircraftHearing.inRegime(own, "takeoff")
+      // Far enough that only the lows are left, against a quiet night.
+      let km = 1
+      while (AircraftHearing.bandsAt(own, km).some((level, i) => level >= AircraftHearing.ambientBands(25)[i] + AircraftHearing.DETECTION_MARGIN_DB)) km *= 1.1
+      expect(AircraftHearing.bandsAt(takeoff, km).some((level, i) => level >= AircraftHearing.ambientBands(25)[i] + AircraftHearing.DETECTION_MARGIN_DB)).toBe(true)
+      expect(AircraftHearing.couldBeHeard(own, km, 25)).toBe(true)
+    })
   })
 })

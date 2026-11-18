@@ -23,6 +23,50 @@ export interface AircraftNoise {
   soundPowerA: number[]
   /** What makes it more than a hiss when it is played: see AircraftSoundCharacter. */
   character?: AircraftSoundCharacter
+  /** The same aircraft at another thrust, when its class says how it sounds then (see FlightRegime): itself otherwise. */
+  regimes?: Partial<Record<FlightRegime, AircraftNoise>>
+}
+
+/**
+ * What an aircraft is doing, as far as its sound goes: its thrust. A jet passing over at the thrust of a climb or a cruise ("overflight", which is
+ * what a class's own noise is), taking off and climbing out at full thrust ("takeoff"), or coming down at a low one ("approach"). Told from its
+ * track by AircraftHearing.regimeAt.
+ */
+export type FlightRegime = "overflight" | "takeoff" | "approach"
+
+/** How a class sounds at another thrust than its own: what is added to each octave of its shape, to its whole level, and how its tones move. */
+interface RegimeChange {
+  /** dB, band by band, before the whole is brought to its level. */
+  shapeDb: number[]
+  /** dB added to the class's total. */
+  levelDb: number
+  /** What the tones' frequencies are multiplied by: a fan and a shaft that turn slower sing lower. */
+  toneRatio?: number
+  /** What the tones' strengths are multiplied by. */
+  toneGain?: number
+}
+
+/**
+ * How a turbofan sounds at full thrust and at a low one, against its class's own (a climb's). Its SHAPES are measured, on Pixabay recordings
+ * (test/engine/traffic/aircraft-sound-reference.json, held to in AircraftSoundCalibration.test.ts): the band by band difference between three take-offs
+ * and what the class plays at the distance that fits each best, and between the one approach and the same. A take-off is the jet's roar, low and
+ * strong, with the crackle of its shocks above; an approach has little of the jet and much of the fan and of the airframe, gear and flaps out: bright.
+ * The approach rests on one recording, whose title says "landing" and which the ear takes for a take-off: its spectrum, its fan line and the 30 dB
+ * it loses in 8 s once past, with no roar behind, are those of a low thrust. Its 8 kHz is held to its 4 kHz's, since it is the band a recording made
+ * nearer than any distance fitted (50 m) overstates most.
+ *
+ * Their LEVELS cannot be measured on recordings made at no known distance, and are from the certification of an A320-216 (CFM56-5B6/P, ICAO noise
+ * database, Annex 16 chapter 3): 90.7 EPNdB lateral, at full thrust some 540 m from the aircraft, and 95.2 at approach, 120 m under it; brought to the
+ * same distance (20 log 540/120 = 13 dB), an approach is some 8 dB under full thrust. Full thrust is taken as the class's own, which is a climb's:
+ * the difference between the two, a cutback of a few decibels, is not established.
+ *
+ * Its FAN sings lower at approach, as it turns slower: the line of the approach recording is at 1 013 Hz once its Doppler shift is taken out (1 184 Hz
+ * coming, 886 going), 0.56 of the narrow-body's 1 800; and it stands out of the noise by 15 to 17 dB, where no recording of a jet passing at a
+ * climb's thrust has a line that does: twice as strong.
+ */
+const TURBOFAN_REGIMES: Partial<Record<FlightRegime, RegimeChange>> = {
+  takeoff: { shapeDb: [10, 3, -3, -2, -2, -2, 5, 4], levelDb: 0 },
+  approach: { shapeDb: [-14, -10, -4, -1, 2, 4, 9, 9], levelDb: -8, toneRatio: 0.56, toneGain: 2 }
 }
 
 /**
@@ -54,11 +98,11 @@ export interface AircraftSoundCharacter {
  * The noises of the classes of aircraft: a total sound power, dB(A), and the way it falls over the octaves, dB under the total.
  * The totals and the shapes are representative of each class and not measured on any one machine (see AircraftNoise).
  */
-const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA: number; shapeDb: number[]; character?: AircraftSoundCharacter }[] = [
-  { id: "turbofan-narrow-body", name: "Turbofan airliner, narrow-body", kinds: ["airliner-narrow"], totalDbA: 148, shapeDb: [-32, -17, -9, -6, -5, -7, -12, -22], character: { toneHz: 1800, toneShare: 0.3, humHz: 90, humShare: 0.7 } },
-  { id: "turbofan-wide-body", name: "Turbofan airliner, wide-body", kinds: ["airliner-wide"], totalDbA: 151, shapeDb: [-28, -14, -7, -4, -3, -6, -12, -22], character: { toneHz: 1200, toneShare: 0.3, humHz: 70, humShare: 0.7 } },
-  { id: "regional-jet", name: "Regional jet", kinds: ["regional-jet"], totalDbA: 144, shapeDb: [-32, -17, -9, -5, -4, -6, -11, -21], character: { toneHz: 1900, toneShare: 0.3, humHz: 95, humShare: 0.7 } },
-  { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19], character: { toneHz: 2500, toneShare: 0.25, humHz: 110, humShare: 0.7 } },
+const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA: number; shapeDb: number[]; character?: AircraftSoundCharacter; regimes?: Partial<Record<FlightRegime, RegimeChange>> }[] = [
+  { id: "turbofan-narrow-body", name: "Turbofan airliner, narrow-body", kinds: ["airliner-narrow"], totalDbA: 148, shapeDb: [-32, -17, -9, -6, -5, -7, -12, -22], character: { toneHz: 1800, toneShare: 0.3, humHz: 90, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
+  { id: "turbofan-wide-body", name: "Turbofan airliner, wide-body", kinds: ["airliner-wide"], totalDbA: 151, shapeDb: [-28, -14, -7, -4, -3, -6, -12, -22], character: { toneHz: 1200, toneShare: 0.3, humHz: 70, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
+  { id: "regional-jet", name: "Regional jet", kinds: ["regional-jet"], totalDbA: 144, shapeDb: [-32, -17, -9, -5, -4, -6, -11, -21], character: { toneHz: 1900, toneShare: 0.3, humHz: 95, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
+  { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19], character: { toneHz: 2500, toneShare: 0.25, humHz: 110, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
   // A propeller's blade-passing tone, a few tens of hertz, carries most of what a turboprop sends.
   { id: "turboprop", name: "Turboprop", kinds: ["regional-turboprop", "turboprop-light"], totalDbA: 138, shapeDb: [-14, -9, -8, -6, -8, -13, -20, -28], character: { toneHz: 80, toneShare: 0.5 } },
   { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-18, -9, -5, -4, -8, -14, -22, -30], character: { toneHz: 80, toneShare: 0.4 } },
@@ -74,14 +118,35 @@ const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA
   { id: "unmanned", name: "Unmanned aircraft", kinds: ["unmanned"], totalDbA: 88, shapeDb: [-40, -30, -20, -12, -6, -3, -3, -8], character: { toneHz: 450, toneShare: 1 } }
 ]
 
-export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => ({
-  id: noise.id,
-  name: noise.name,
-  // The shape, brought to the total: energies add, so what is added to every band is the difference between the
-  // total wanted and the total the shape makes.
-  soundPowerA: noise.shapeDb.map(level => level + noise.totalDbA - SoundInAir.sumDb(noise.shapeDb)),
-  character: noise.character
-}))
+/** A shape brought to a total: energies add, so what is added to every band is the difference between the total wanted and the total the shape makes. */
+const toTotal = (shapeDb: number[], totalDbA: number) => shapeDb.map(level => level + totalDbA - SoundInAir.sumDb(shapeDb))
+
+/** A class's character at another thrust: its tones moved and strengthened as the change says. */
+function characterIn(character: AircraftSoundCharacter | undefined, change: RegimeChange): AircraftSoundCharacter | undefined {
+  if (!character) return undefined
+  const ratio = change.toneRatio ?? 1
+  const gain = change.toneGain ?? 1
+  return {
+    ...character,
+    ...(character.toneHz !== undefined ? { toneHz: character.toneHz * ratio, toneShare: Math.min(1, (character.toneShare ?? 0) * gain) } : {}),
+    ...(character.humHz !== undefined ? { humHz: character.humHz * ratio, humShare: Math.min(1, (character.humShare ?? 0) * gain) } : {})
+  }
+}
+
+export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => {
+  const own: AircraftNoise = { id: noise.id, name: noise.name, soundPowerA: toTotal(noise.shapeDb, noise.totalDbA), character: noise.character }
+  if (!noise.regimes) return own
+  const regimes: Partial<Record<FlightRegime, AircraftNoise>> = { overflight: own }
+  for (const [regime, change] of Object.entries(noise.regimes) as [FlightRegime, RegimeChange][]) {
+    regimes[regime] = {
+      id: `${noise.id}-${regime}`,
+      name: `${noise.name}, ${regime}`,
+      soundPowerA: toTotal(noise.shapeDb.map((level, band) => level + change.shapeDb[band]), noise.totalDbA + change.levelDb),
+      character: characterIn(noise.character, change)
+    }
+  }
+  return { ...own, regimes }
+})
 
 /** What a listener would hear of one aircraft at one instant. */
 export interface HeardAircraft {
@@ -109,6 +174,9 @@ export interface HeardAircraft {
   dominantHz: number
   /** The highest band still above the ambient, Hz: the sound has nothing above it. Low for a distant aircraft, which is a rumble. */
   cutoffHz?: number
+  /** What it was doing when it made the sound, and the noise it made then: its class's own, or that of its class at that thrust. */
+  regime: FlightRegime
+  noise: AircraftNoise
 }
 
 /** When an aircraft can be heard over a span, and at its loudest. */
@@ -150,7 +218,7 @@ export interface AircraftHearingOptions {
  * wind and the temperature gradient cast on a sound from aloft (it can silence an aircraft that
  * should be heard); the attenuation of the ground at low angles (an aircraft near the horizon is
  * heard less than computed); the directivity of the engines (an aircraft is louder behind than ahead);
- * the sound a type makes at the thrust it was really at. A level is an estimate of the order of a few
+ * the sound a type makes at the thrust it was really at, which is its class's at the regime its track says (see FlightRegime), for a turbofan. A level is an estimate of the order of a few
  * dB at best, and a verdict of "audible" is true within the same margin.
  */
 export class AircraftHearing {
@@ -167,6 +235,15 @@ export class AircraftHearing {
   private static readonly ITERATIONS = 30
   private static readonly CONVERGED_MS = 0.5
   private static readonly VELOCITY_STEP_MS = 500
+  /**
+   * What tells a regime: a climb of more than 500 ft/min (an airliner climbs out at 2 000 to 3 000) or a descent of more than 300 (it comes down a
+   * 3° slope at some 700), measured over half a minute either side, within 3 000 m (10 000 ft) of the ground, under which a climb is still at
+   * the thrust of a take-off and a descent is an approach.
+   */
+  static readonly CLIMB_MPS = 2.5
+  static readonly DESCENT_MPS = 1.5
+  static readonly LOW_M = 3000
+  private static readonly CLIMB_SPAN_MS = 30_000
 
   /** The noise of a kind of aircraft; the narrow-body airliner's, which is most of the sky, for what is not known. */
   static noiseOfKind(kind: AircraftKind): AircraftNoise {
@@ -190,7 +267,8 @@ export class AircraftHearing {
    */
   static couldBeHeard(noise: AircraftNoise, distanceKm: number, ambientDbA = AircraftHearing.DEFAULT_AMBIENT_DB_A, air: AirConditions = SoundInAir.STANDARD): boolean {
     const ambient = AircraftHearing.ambientBands(ambientDbA)
-    return AircraftHearing.bandsAt(noise, distanceKm, air).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A))
+    // At any of its thrusts: a take-off has more in the lows, which carry farthest.
+    return [noise, ...Object.values(noise.regimes ?? {})].some(variant => AircraftHearing.bandsAt(variant, distanceKm, air).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A)))
   }
 
   /** The ambient noise in each band, dB(A), for a total of `ambientDbA`. */
@@ -226,7 +304,9 @@ export class AircraftHearing {
     }
     const now = AircraftSighting.positionAt(track, t)
     const seen = now ? ReentrySighting.seenFrom(observer, now.geo) : sound
-    const noise = options.noise ?? AIRCRAFT_NOISES[0]
+    // The noise it made then, at the thrust it was at then.
+    const regime = AircraftHearing.regimeAt(track, emitted, observer)
+    const noise = AircraftHearing.inRegime(options.noise ?? AIRCRAFT_NOISES[0], regime)
     const ambientDbA = options.ambientDbA ?? AircraftHearing.DEFAULT_AMBIENT_DB_A
     const ambient = AircraftHearing.ambientBands(ambientDbA)
     const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air)
@@ -246,8 +326,36 @@ export class AircraftHearing {
       lagDeg: AircraftHearing.angleBetween(sound, seen),
       dopplerRatio: AircraftHearing.doppler(track, observer, emitted, speed),
       dominantHz: SoundInAir.OCTAVES[loudest],
-      cutoffHz: highest < 0 ? undefined : SoundInAir.OCTAVES[highest]
+      cutoffHz: highest < 0 ? undefined : SoundInAir.OCTAVES[highest],
+      regime,
+      noise
     }
+  }
+
+  /**
+   * What an aircraft was doing at `t`, as far as its thrust goes (see FlightRegime): climbing faster than CLIMB_MPS within LOW_M of the
+   * listener's height is taking off, coming down faster than DESCENT_MPS within it is coming in to land, and anything else is passing over.
+   * From its height over the observer, since a track's altitude is barometric and nobody knows the ground under it: right within a few hundred
+   * feet, which is nothing beside the thresholds. A descent from a cruise is at a low thrust too, but heard only once it is low.
+   */
+  static regimeAt(track: AircraftTrack, t: number, observer: GeoPoint): FlightRegime {
+    const span = AircraftHearing.CLIMB_SPAN_MS
+    const before = AircraftSighting.positionAt(track, t - span) ?? AircraftSighting.positionAt(track, t)
+    const after = AircraftSighting.positionAt(track, t + span) ?? AircraftSighting.positionAt(track, t)
+    const at = AircraftSighting.positionAt(track, t)
+    if (!before || !after || !at) return "overflight"
+    const seconds = (Math.min(t + span, track.points[track.points.length - 1].t) - Math.max(t - span, track.points[0].t)) / 1000
+    if (seconds <= 0) return "overflight"
+    const verticalMps = ((after.altitudeFt - before.altitudeFt) * 0.3048) / seconds
+    if (at.altitudeFt * 0.3048 - observer.heightM > AircraftHearing.LOW_M) return "overflight"
+    if (verticalMps > AircraftHearing.CLIMB_MPS) return "takeoff"
+    if (verticalMps < -AircraftHearing.DESCENT_MPS) return "approach"
+    return "overflight"
+  }
+
+  /** A noise at the thrust of `regime`, when its class says how it sounds then: itself otherwise. */
+  static inRegime(noise: AircraftNoise, regime: FlightRegime): AircraftNoise {
+    return noise.regimes?.[regime] ?? noise
   }
 
   /**
