@@ -17,6 +17,9 @@ import { ParameterForm, ParameterTarget } from "../../../component/ParameterForm
 import type { PositionPlace } from "../../../component/ParameterForm.js"
 import { TimelineTracks } from "../../../component/TimelineTracks.js"
 import { ReentryTypes } from "./types/ReentryTypes.js"
+import { ReentryEvidence } from "./ReentryEvidence.js"
+import type { ReentryFinding } from "./ReentryEvidence.js"
+import { sightingTimeToDate } from "../../../engine/astronomy/CelestialPositions.js"
 import type { TimelineTrack } from "../../../component/TimelineTracks.js"
 
 /** What the Re-entries part needs of the editor it stands in, read at every use. */
@@ -73,7 +76,7 @@ export class ReentryEditor {
   private shown: readonly ReentryJson[] = []
 
   /** The part's layout, given with it (see SkyEventKind.editor). */
-  private static readonly STYLE = `.reentry-editor-part { flex-basis: 100%; min-width: 0; } .reentry-editor-part #reentry-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } .reentry-editor-part #reentry-path > .icon-btn, .reentry-editor-part #reentry-curve > .icon-btn { align-self: flex-end; } .reentry-editor-part #reentry-list, .reentry-editor-part #reentry-places, .reentry-editor-part #reentry-fragment-list, .reentry-editor-part #reentry-curve-list { flex-basis: 100%; min-width: 0; } .reentry-editor-part .launch-editor, .reentry-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .reentry-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .reentry-editor-part [hidden] { display: none !important; } .reentry-editor-part select { min-width: 0; width: 100%; } .reentry-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-track { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .reentry-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .reentry-editor-part input, .reentry-editor-part select { max-width: 100%; box-sizing: border-box; } .reentry-editor-part input[type="text"] { width: 12em; } .reentry-editor-part input[data-key="title"] { width: 18em; } .reentry-editor-part label { min-width: 0; max-width: 100%; } .reentry-editor-part input.parameter-derived::placeholder { opacity: .65; } .reentry-editor-part .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }`
+  private static readonly STYLE = `.reentry-editor-part { flex-basis: 100%; min-width: 0; } .reentry-editor-part #reentry-timeline { flex-basis: 100%; min-width: 0; padding: 4px 0; } .reentry-editor-part #reentry-path > .icon-btn, .reentry-editor-part #reentry-curve > .icon-btn { align-self: flex-end; } .reentry-editor-part #reentry-list, .reentry-editor-part #reentry-places, .reentry-editor-part #reentry-fragment-list, .reentry-editor-part #reentry-curve-list { flex-basis: 100%; min-width: 0; } .reentry-editor-part .launch-editor, .reentry-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .reentry-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .reentry-editor-part [hidden] { display: none !important; } .reentry-editor-part .reentry-evidence { flex-basis: 100%; } .reentry-editor-part .evidence-known, .reentry-editor-part .evidence-impossible, .reentry-editor-part .evidence-expectedAbsent { font-weight: 600; } .reentry-editor-part select { min-width: 0; width: 100%; } .reentry-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-track { flex-basis: 100%; margin: 0; } .reentry-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .reentry-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .reentry-editor-part input, .reentry-editor-part select { max-width: 100%; box-sizing: border-box; } .reentry-editor-part input[type="text"] { width: 12em; } .reentry-editor-part input[data-key="title"] { width: 18em; } .reentry-editor-part label { min-width: 0; max-width: 100%; } .reentry-editor-part input.parameter-derived::placeholder { opacity: .65; } .reentry-editor-part .launch-path { flex: 1 1 100%; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; }`
 
   constructor(private readonly container: HTMLElement, private readonly host: ReentryEditorHost, language: string) {
     SkyEventEditorStyle.attach(container, "reentry-editor-part", ReentryEditor.STYLE)
@@ -108,6 +111,7 @@ export class ReentryEditor {
     if (!reentry) return
     this.syncPlace(true)
     this.syncFragments(reentry, true)
+    this.syncEvidence()
     this.form ??= new ParameterForm(this.element("reentry-parameters"), this.language, "reentry.", { said: () => this.host.said(), writingLanguage: () => this.host.writingLanguage() })
     this.form.show(this.resolved(ReentryParameters.SET), new ParameterTarget(
       () => this.current as unknown as ParameterHolder | undefined,
@@ -175,11 +179,14 @@ export class ReentryEditor {
     if (!this.messages) return
     const m = this.messages
     this.form = undefined
+    // Its box is drawn again empty: what the sources say is to be said again in it.
+    this.evidenceFor = undefined
     this.container.innerHTML = `<div class="launch-editor">
       <p class="launch-intro">${m.intro}</p>
       <div id="reentry-list"></div>
       <div id="reentry-fields" class="launch-fields">
         <div id="reentry-parameters" class="launch-parameters"></div>
+        <div id="reentry-evidence" class="launch-intro reentry-evidence" aria-live="polite"></div>
         <div id="reentry-timeline"></div>
         <button id="reentry-fragment-add" type="button" title="${m.addFragment}">${Icons.PLUS} ${m.fragment}</button>
         <p class="launch-intro">${m.timelineNote}</p>
@@ -226,6 +233,91 @@ export class ReentryEditor {
     if (reentry) this.list?.rename(reentry.id, this.labelOf(reentry))
     // Its path may have been worked out again from what the witness saw.
     if (reentry?.seen) this.syncPlace(true)
+    this.syncEvidence()
+  }
+
+  // What the sources say of it.
+
+  private evidenceTimer?: ReturnType<typeof setTimeout>
+  private evidenceFor?: unknown
+
+  /**
+   * What the sources say of the re-entry on show (see ReentryEvidence): whether what is entered is in fact known, and when it is not,
+   * whether its absence tells. Asked again a little after its last edit, and shown only if it is still the one on show.
+   */
+  private syncEvidence(): void {
+    const reentry = this.current
+    const box = this.element("reentry-evidence")
+    clearTimeout(this.evidenceTimer)
+    if (!reentry) return
+    const sighting = this.host.sighting()
+    const place = sighting.event?.place?.[0]
+    const start = place?.lng !== undefined && sighting.event?.time ? sightingTimeToDate(sighting.event.time, place.lng, sighting.event.utcOffsetHours) : undefined
+    const observer = place?.lat !== undefined && place.lng !== undefined ? { lat: place.lat, lng: place.lng, heightM: 0 } : undefined
+    const key = { reentry, at: start?.getTime(), lat: observer?.lat, lng: observer?.lng }
+    const same = this.evidenceFor as typeof key | undefined
+    if (same && same.reentry === key.reentry && same.at === key.at && same.lat === key.lat && same.lng === key.lng) return
+    this.evidenceFor = key
+    box.textContent = `${this.messages.evidence} — ${this.messages.evidenceChecking}`
+    this.evidenceTimer = setTimeout(() => {
+      void ReentryEvidence.check(reentry, start, observer).then(findings => {
+        if (this.evidenceFor !== key) return
+        const m = this.messages
+        const margins = m.margins.replace("{minutes}", String(ReentryEvidence.TIME_MARGIN_MIN)).replace("{heading}", String(ReentryEvidence.HEADING_MARGIN_DEG))
+          .replace("{factor}", String(ReentryEvidence.DURATION_FACTOR))
+        const title = document.createElement("strong")
+        title.textContent = m.evidence
+        const lines = findings.map(finding => {
+          const line = document.createElement("span")
+          line.className = `evidence-${finding.verdict}`
+          line.textContent = this.findingText(finding)
+          return line
+        })
+        const note = document.createElement("small")
+        note.textContent = margins
+        box.replaceChildren(title, ...lines.flatMap(line => [document.createElement("br"), line]), document.createElement("br"), note)
+      }, () => {
+        if (this.evidenceFor === key) box.textContent = ""
+      })
+    }, 400)
+  }
+
+  private findingText(finding: ReentryFinding): string {
+    const m = this.messages
+    const language = this.language
+    const time = (ms: number) => new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(ms) + " UTC"
+    const day = (ms: number) => new Intl.DateTimeFormat(language, { dateStyle: "long", timeZone: "UTC" }).format(ms)
+    const number = (n: number) => n.toLocaleString(language, { maximumFractionDigits: 1 })
+    const fill = (text: string, values: Record<string, string | number | undefined>) =>
+      Object.entries(values).reduce((said, [k, v]) => said.replaceAll(`{${k}}`, v === undefined ? "?" : String(v)), text)
+    switch (finding.verdict) {
+      case "known":
+        if (finding.source === "gmn") {
+          const { record, offsetMinutes, headingOffDeg } = finding.match
+          return fill(m.knownFireball, { id: record.id, time: time(record.t), offset: offsetMinutes, stations: record.stations, mag: number(record.peakMagnitude), heading: headingOffDeg })
+        } else {
+          const { record, timeMs, seenKm } = finding.candidate
+          const values = { name: record.name, cospar: record.cosparId ?? record.norad, time: time(timeMs), when: record.precision === "day" ? day(timeMs) : time(timeMs), place: record.seenFrom, km: seenKm === undefined ? undefined : Math.round(seenKm) }
+          return fill(finding.by === "object" ? m.knownObject : m.knownSeen, values)
+        }
+      case "possible": {
+        const { record, timeMs, seenKm, offsetMinutes } = finding.candidate
+        const values = { name: record.name, cospar: record.cosparId ?? record.norad, time: time(timeMs), day: day(timeMs), hours: record.uncertaintyHours, place: record.seenFrom, km: seenKm === undefined ? undefined : Math.round(seenKm), offset: offsetMinutes }
+        return fill(record.precision === "minute" ? m.possibleSeen : record.precision === "hours" ? m.possibleWindow : m.possibleDay, values)
+      }
+      case "expectedAbsent":
+        return finding.source === "gmn"
+          ? fill(m.expectedFireball, { mag: number(finding.absoluteMagnitude), count: finding.watchedCount, km: ReentryEvidence.WATCHED_KM })
+          : m.expectedCatalogue
+      case "impossible":
+        return m.impossibleOrbit
+      case "uninformative":
+        if (finding.source === "none") return m.typeUnknown
+        return finding.reason === "faint" ? m.faintFireball : finding.reason === "beforeArchive" ? m.beforeGmn
+          : finding.reason === "daylight" ? m.daylightGmn : fill(m.unwatchedGmn, { km: ReentryEvidence.WATCHED_KM })
+      case "unchecked":
+        return finding.reason === "noDateOrPlace" ? m.noDateOrPlace : finding.source === "gmn" ? m.unreachableGmn : m.unreachableCatalogue
+    }
   }
 
   // The timeline.

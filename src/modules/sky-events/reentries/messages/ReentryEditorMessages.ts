@@ -21,6 +21,27 @@ export interface ReentryEditorMessages {
   addPointHere: string
   pointHere: string
   zoomHint: string
+  /** What the sources say of the re-entry on show (see ReentryEvidence): {placeholders} as each says. */
+  evidence: string
+  evidenceChecking: string
+  knownFireball: string
+  knownObject: string
+  knownSeen: string
+  possibleSeen: string
+  possibleWindow: string
+  possibleDay: string
+  expectedFireball: string
+  expectedCatalogue: string
+  impossibleOrbit: string
+  faintFireball: string
+  beforeGmn: string
+  unwatchedGmn: string
+  daylightGmn: string
+  typeUnknown: string
+  unreachableGmn: string
+  unreachableCatalogue: string
+  noDateOrPlace: string
+  margins: string
 }
 
 /** The texts of the part, one chunk per language (see MessageCatalog). */
