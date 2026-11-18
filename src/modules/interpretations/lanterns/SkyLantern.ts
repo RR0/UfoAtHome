@@ -221,6 +221,9 @@ export class SkyLantern {
   private static readonly STEP_S = 0.05
   /** How long the air in the envelope takes to follow the flame, s: it is renewed through the opening at the bottom within tens of seconds. */
   static readonly COOLING_S = 20
+  /** How far above the ground a gust's up and down reaches its full strength, metres: it is none at the ground, which no air goes through.
+   * ASSUMED linear over that height, the size of the eddies next to the ground. */
+  static readonly GUST_GROUND_M = 2
   /**
    * The air's own stirring when nothing is stated, ASSUMED: a light breeze's, its speed straying by some 0.8 m/s about the mean and rising
    * and sinking by 0.3 m/s, each gust holding some 30 s — what turns a dozen lanterns let go together into the loose, shifting, stretching
@@ -347,7 +350,10 @@ export class SkyLantern {
       const inertia = mass + insideRho * type.envelopeVolumeM3 + 0.5 * rho * type.envelopeVolumeM3
       // The mean wind of that height, and the gust it is meeting there.
       const mean = SkyLantern.windAt(launch, above), stray = gust()
-      const wind = { x: mean.x + stray.x, y: mean.y + stray.y, z: stray.z }
+      // Air does not go through the ground: what goes up or down in a gust dies away towards it (see GUST_GROUND_M). A lantern barely
+      // lighter than the air it displaces was held on the ground for half a minute by a downdraught that was not there.
+      const near = Math.max(0, Math.min(1, above / SkyLantern.GUST_GROUND_M))
+      const wind = { x: mean.x + stray.x, y: mean.y + stray.y, z: stray.z * near }
       const rx = state.vx - wind.x, ry = state.vy - wind.y, rz = state.vz - wind.z
       const k = 0.5 * rho * type.dragAreaM2 * Math.hypot(rx, ry, rz) / inertia
       // Semi-implicit, as the drag is what sets its speed and an explicit step would overshoot it.

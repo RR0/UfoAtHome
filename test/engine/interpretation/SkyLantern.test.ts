@@ -160,4 +160,13 @@ describe("SkyLantern", () => {
     const interpretation = { bodies: [] }
     expect(SkyLantern.expand(interpretation)).toBe(interpretation)
   })
+
+  it("leaves the ground soon after it is let go, however the air goes up and down above it: a gust has no up or down at the ground", () => {
+    // Sixty common lanterns let go over 40 s in a 3 m/s wind: one was held on the ground 38 s by a downdraught that was not there.
+    const sixty: LanternLaunchJson = { id: "g", site: { eastM: 0, northM: 0 }, group: { count: 60, fromT: 0, untilT: 40000, seed: 1 }, wind: { towardDeg: 70, speedMS: 3 } }
+    for (const release of SkyLantern.releasesOf(sixty)) {
+      const airborne = SkyLantern.trajectory(sixty, release).find(sample => sample.z > 1)
+      expect(airborne!.t - release.t).toBeLessThan(5000)
+    }
+  })
 })
