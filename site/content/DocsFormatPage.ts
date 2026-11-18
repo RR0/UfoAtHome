@@ -349,6 +349,13 @@ if (movedTo) {
       opposite: the more of them a reconstruction holds, the easier a likeness is to obtain, so
       nothing is ever tested against one. Moving it is no contradiction and agreeing with it is no
       finding: it was put there to be moved.</p>
+    <p><code>how</code> says how the witness came by a value, which decides how far off a witness's value of that kind may be: a time or a
+      duration by the <code>clock</code>, <code>anchored</code> to an event or <code>estimated</code>; a size <code>shown-on-the-spot</code>,
+      through an <code>arm-length-gauge</code> or a <code>recalled-object</code> ("like the full Moon": compared with a thing they know, not
+      estimated at arm's length, which a witness overstates three to four times); an elevation or a heading by <code>instrument</code>, by
+      <code>landmark</code> or <code>estimated</code>; a distance by <code>occlusion</code>, a <code>known-size</code>,
+      <code>triangulation</code> or <code>estimated</code>. <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
+
     <p><code>range</code> says how far what is known lets a value be, when that is more than the value: a number's least and greatest
       (<code>[50, 52]</code>), or a time's EDTF interval (<code>"1976-06/1976-07"</code>). The value is the one chosen within it to draw the
       scene. A reading of the observation may move it anywhere within its range, and contradicts what is known beyond it; a stated or
@@ -641,6 +648,15 @@ if (movedTo) {
       est facile à obtenir, aussi rien n'est jamais confronté à une telle valeur. La déplacer n'est
       pas une contradiction et s'y accorder n'est pas un résultat : elle est là pour être
       déplacée.</p>
+    <p><code>how</code> dit comment le témoin est arrivé à une valeur, ce qui décide de combien une valeur de ce genre peut s'écarter du
+      vrai : un instant ou une durée à la montre (<code>clock</code>), rattaché à un événement (<code>anchored</code>) ou estimé
+      (<code>estimated</code>) ; une taille montrée sur place (<code>shown-on-the-spot</code>), à bout de bras avec une jauge
+      (<code>arm-length-gauge</code>) ou comparée à un objet connu (<code>recalled-object</code> : « comme la pleine Lune », que la loi ne
+      réduit pas comme une estimation à bout de bras, qu'un témoin surestime de trois à quatre fois) ; une hauteur ou une direction à
+      l'instrument (<code>instrument</code>), d'après un repère (<code>landmark</code>) ou estimée ; une distance par une occultation
+      (<code>occlusion</code>), une taille connue (<code>known-size</code>), une triangulation (<code>triangulation</code>) ou estimée.
+      <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
+
     <p><code>range</code> dit jusqu'où ce qu'on sait permet d'aller pour une valeur, quand ce qu'on sait ne se réduit pas à cette valeur : le plus petit et le plus
       grand d'un nombre (<code>[50, 52]</code>), ou l'intervalle EDTF d'une date (<code>"1976-06/1976-07"</code>). La valeur est celle choisie
       dedans pour dessiner la scène. Une lecture de l'observation peut la déplacer n'importe où dans cette plage ; au-delà, elle contredit ce qu'on sait.
@@ -931,6 +947,15 @@ if (movedTo) {
       lo contrario: cuantos más tiene una reconstrucción, más fácil es obtener un parecido, así que
       nada se confronta nunca con uno de ellos. Moverlo no es una contradicción y coincidir con él no
       es un resultado: está ahí para ser movido.</p>
+    <p><code>how</code> dice cómo llegó el testigo a un valor, lo que decide cuánto puede alejarse un valor de ese tipo: un instante o una
+      duración con el reloj (<code>clock</code>), anclado a un suceso (<code>anchored</code>) o estimado (<code>estimated</code>); un tamaño
+      mostrado en el lugar (<code>shown-on-the-spot</code>), con un calibre a la distancia del brazo (<code>arm-length-gauge</code>) o
+      comparado con un objeto conocido (<code>recalled-object</code>: «como la luna llena», que la ley no reduce como una estimación a la
+      distancia del brazo, que un testigo exagera de tres a cuatro veces); una altura o una dirección con instrumento
+      (<code>instrument</code>), por un punto de referencia (<code>landmark</code>) o estimada; una distancia por ocultación
+      (<code>occlusion</code>), un tamaño conocido (<code>known-size</code>), triangulación (<code>triangulation</code>) o estimada.
+      <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
+
     <p><code>range</code> dice hasta dónde lo que se sabe deja ir un valor, cuando es más que el valor: el menor y el mayor de un número
       (<code>[50, 52]</code>), o el intervalo EDTF de una fecha (<code>"1976-06/1976-07"</code>). El valor es el elegido dentro para dibujar
       la escena. Una lectura de la observación puede desplazarlo a cualquier punto de su intervalo, y contradice lo que se sabe más allá;
@@ -1221,6 +1246,15 @@ if (movedTo) {
       valore <code>fitted</code> è l'opposto: più una ricostruzione ne contiene, più è facile
       ottenere una somiglianza, quindi nulla viene mai confrontato con uno di essi. Spostarlo non è
       una contraddizione e concordare con esso non è un risultato: è lì per essere spostato.</p>
+    <p><code>how</code> dice come il testimone è arrivato a un valore, il che decide di quanto un valore di quel tipo può discostarsi: un
+      istante o una durata con l'orologio (<code>clock</code>), ancorato a un evento (<code>anchored</code>) o stimato
+      (<code>estimated</code>); una dimensione mostrata sul posto (<code>shown-on-the-spot</code>), con un calibro a braccio teso
+      (<code>arm-length-gauge</code>) o confrontata con un oggetto noto (<code>recalled-object</code>: «come la luna piena», che la legge non
+      riduce come una stima a braccio teso, che un testimone esagera da tre a quattro volte); un'altezza o una direzione con uno strumento
+      (<code>instrument</code>), da un punto di riferimento (<code>landmark</code>) o stimata; una distanza per occultazione
+      (<code>occlusion</code>), una dimensione nota (<code>known-size</code>), una triangolazione (<code>triangulation</code>) o stimata.
+      <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
+
     <p><code>range</code> dice fin dove ciò che si sa lascia andare un valore, quando è più del valore: il minimo e il massimo di un
       numero (<code>[50, 52]</code>), o l'intervallo EDTF di una data (<code>"1976-06/1976-07"</code>). Il valore è quello scelto al suo
       interno per disegnare la scena. Una lettura dell'osservazione può spostarlo ovunque nel suo intervallo, e contraddice ciò che si sa
