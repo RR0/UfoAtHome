@@ -171,7 +171,7 @@ export class ParameterForm {
         // A box is never being typed in: the focus it keeps after a click is no reason to leave it showing what another element said
         // (a lamp switched off, then another one picked, kept the first one's box, and took three clicks to switch).
         const input = field as HTMLInputElement
-        input.checked = stated === true
+        input.checked = typeof stated === "boolean" ? stated : spec.effective?.(element, context) === true
       } else if (spec.type === "colour") {
         const input = field as HTMLInputElement
         if (input !== active) input.value = ParameterForm.swatchOf(stated, spec.effective?.(element, context) ?? spec.fallback ?? "#808080")
@@ -230,7 +230,14 @@ export class ParameterForm {
       const input = document.createElement("input")
       input.type = "checkbox"
       this.identify(input, spec)
-      input.addEventListener("input", () => this.write(spec, input.checked ? true : (spec.required ? false : undefined)))
+      input.addEventListener("input", () => {
+        // Back to what is in force: nothing stated.
+        if (spec.effective) {
+          const element = this.target?.read()
+          const effective = element ? spec.effective(element, this.target?.context()) === true : false
+          this.write(spec, input.checked === effective ? undefined : input.checked)
+        } else this.write(spec, input.checked ? true : (spec.required ? false : undefined))
+      })
       label.prepend(input)
       label.append(" ")
     } else {

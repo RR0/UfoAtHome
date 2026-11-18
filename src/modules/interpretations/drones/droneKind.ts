@@ -6,5 +6,6 @@ import type { DroneFlightJson } from "./DroneFlight.js"
 export const DRONE_KIND: InterpretationKind<DroneFlightJson> = {
   key: "drones",
   messages: DRONE_KIND_MESSAGES,
-  compute: () => import("./DroneFlight.js").then(({ DroneFlight }) => flight => DroneFlight.bodiesOf(flight))
+  compute: () => import("./DroneFlight.js").then(({ DroneFlight }) => flight => DroneFlight.bodiesOf(flight)),
+  editor: () => import("./DroneEditor.js").then(({ DroneEditor }) => (container, host, language) => new DroneEditor(container, host, language))
 }

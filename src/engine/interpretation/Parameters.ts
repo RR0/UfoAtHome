@@ -122,6 +122,11 @@ export interface BooleanParameter extends ParameterBase {
   type: "boolean"
   /** Always states a value: unticked is `false`. Without it unticked states nothing, which is what a switch whose default is off should leave. */
   required?: boolean
+  /**
+   * What is in force when the element states nothing, when it depends on the element (a drone's light that its airframe has off): the box
+   * shows it, and ticking or unticking it back to it states nothing again.
+   */
+  effective?: (element: ParameterHolder, context?: unknown) => boolean | undefined
 }
 
 export interface ColourParameter extends ParameterBase {
