@@ -34,6 +34,9 @@ import { TrafficDecor } from "../../../../src/engine/traffic/TrafficDecor.js"
 import { TrafficModels } from "../../../../src/engine/traffic/TrafficModels.js"
 import { TrafficLights } from "../../../../src/engine/traffic/TrafficLights.js"
 import { DroneAirframes } from "../../../../src/modules/interpretations/drones/DroneAirframe.js"
+import { DroneFlight } from "../../../../src/modules/interpretations/drones/DroneFlight.js"
+import { BodyGlare } from "../../../../src/engine/interpretation/BodyGlare.js"
+import type { DecorLight } from "../../../../src/engine/model/Decor.js"
 import type { AircraftDescription, AircraftPoint } from "../../../../src/engine/traffic/AircraftProvider.js"
 import { TopoBuildings } from "../../../../src/render3d/terrain/TopoBuildings.js"
 import { SurveyedDecor } from "../../../../src/render3d/terrain/SurveyedDecor.js"
@@ -261,6 +264,18 @@ function hisReading(look: Look, startS: number, endS: number) {
 const MOON_RAD = 0.52 * Math.PI / 180
 const APPROACH_MS = 75
 
+/**
+ * How large the lamps of a body at `at`, its nose towards `headingDeg`, look from his eye at `t`, degrees: by Tycho's star sizes, as the
+ * confrontation sizes them at night (see BodyGlare.TYCHO, a contested law).
+ */
+function lightDeg(lamps: DecorLight[], at: { eastM: number, northM: number, upM: number }, headingDeg: number, t = 0): number {
+  const eye = { eastM: 0, northM: 0, upM: 1.6 }
+  const state = { ...at, attitude: { headingDeg, pitchDeg: 0, rollDeg: 0 }, lamps } as never
+  const distanceM = Math.hypot(at.eastM, at.northM, at.upM - eye.upM)
+  return BodyGlare.TYCHO.diameterDeg(BodyGlare.luxAt(BodyGlare.candelaToward(state, eye, t), distanceM))
+}
+const deg = (value: number, language: "en" | "fr") => language === "fr" ? value.toFixed(1).replace(".", ",") : value.toFixed(1)
+
 /** East, north and up from his eye of a point `distanceM` off towards `azimuthDeg`, `altitudeDeg`. */
 function towards(azimuthDeg: number, altitudeDeg: number, distanceM: number): { eastM: number, northM: number, upM: number } {
   const a = azimuthDeg * Math.PI / 180, e = altitudeDeg * Math.PI / 180
@@ -297,9 +312,12 @@ function airlinerAsLarge(look: Look, night: Night, type: string, name: Text) {
   }
   const km = (distanceM / 1000).toFixed(1)
   const meetS = Math.round(distanceM / APPROACH_MS)
+  // What he would then have seen: not the airframe but its landing lights head-on, far larger than the Moon at that distance.
+  const lit = lightDeg(lights, { eastM: seenAt.eastM, northM: seenAt.northM, upM: altitudeM }, headingDeg)
+  const moons = Math.round(lit / 0.52)
   const title = {
-    en: `Size comparison: an ${name.en} (${size.widthM} m span) as large as he said the light looked, half a degree, is ${km} km off and ${Math.round(seenAt.upM)} m up; flying at him at ${APPROACH_MS} m/s, it is over him ${meetS} s later`,
-    fr: `Comparaison de taille : un ${name.fr} (${String(size.widthM).replace(".", ",")} m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${km.replace(".", ",")} km et ${Math.round(seenAt.upM)} m de haut ; volant vers lui à ${APPROACH_MS} m/s, il est au-dessus de lui ${meetS} s plus tard`
+    en: `Size comparison: an ${name.en} (${size.widthM} m span) whose airframe is as large as he said the light looked, half a degree, is ${km} km off and ${Math.round(seenAt.upM)} m up; but its landing lights head-on then look ${deg(lit, "en")}°, ${moons} times the Moon (Tycho's star sizes, a contested law); flying at him at ${APPROACH_MS} m/s, it is over him ${meetS} s later`,
+    fr: `Comparaison de taille : un ${name.fr} (${String(size.widthM).replace(".", ",")} m d'envergure) dont la silhouette est aussi grande qu'il a dit que la lumière paraissait, un demi-degré, est à ${km.replace(".", ",")} km et ${Math.round(seenAt.upM)} m de haut ; mais ses phares d'atterrissage de face paraissent alors ${deg(lit, "fr")}°, ${moons} fois la Lune (tailles d'étoiles de Tycho, loi contestée) ; volant vers lui à ${APPROACH_MS} m/s, il est au-dessus de lui ${meetS} s plus tard`
   }
   const body = {
     id: `${type.toLowerCase()}-as-large`, title: name, explains: [LIGHT], model: { id: modelId }, lamps: lights,
@@ -324,9 +342,16 @@ function quadcopterAsLarge(look: Look, night: Night) {
   }
   const first = point(look.azimuthDeg, look.horizonDeg, distanceM, night.lightAtS)
   const last = point(look.azimuthDeg - 8, look.horizonDeg + 4, distanceM * 0.52 / 0.8, night.durationS)
+  // What its LEDs look like there, between two flashes of its strobe and during one (see DroneAirframes: red at the front, green behind, a white strobe).
+  const lamps = DroneFlight.lampsOf(DroneFlight.lightsOf({ id: "mavic", airframe: "quadcopter", path: [] }), {})
+  const at = { eastM: first.eastM, northM: first.northM, upM: first.altitudeM }
+  const facing = (look.azimuthDeg + 180) % 360
+  const steady = lightDeg(lamps, at, facing, 500)
+  const flash = lightDeg(lamps, at, facing, 10)
+  // Red, green and white points a quarter of a metre apart, which the law sizes as one light: it is carried there far past the stars it was taken on.
   const title = {
-    en: `Size comparison: a consumer quadcopter (a Mavic 3, 51 cm) as large as he said the light looked, half a degree, is ${Math.round(distanceM)} m from him and ${Math.round(first.altitudeM)} m up, its lights a few points`,
-    fr: `Comparaison de taille : un quadricoptère grand public (un Mavic 3, 51 cm) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${Math.round(distanceM)} m de lui et ${Math.round(first.altitudeM)} m de haut, ses feux quelques points`
+    en: `Size comparison: a consumer quadcopter (a Mavic 3, 51 cm) as large as he said the light looked, half a degree, is ${Math.round(distanceM)} m from him and ${Math.round(first.altitudeM)} m up; its red and green LEDs, by Tycho's star sizes carried that far (a contested law), would then look ${deg(steady, "en")}°, its white strobe ${deg(flash, "en")}° as it flashes`,
+    fr: `Comparaison de taille : un quadricoptère grand public (un Mavic 3, 51 cm) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${Math.round(distanceM)} m de lui et ${Math.round(first.altitudeM)} m de haut ; ses LED rouges et vertes, par les tailles d'étoiles de Tycho prolongées jusque-là (loi contestée), paraîtraient alors ${deg(steady, "fr")}°, son flash blanc ${deg(flash, "fr")}° quand il éclate`
   }
   return {
     title,
