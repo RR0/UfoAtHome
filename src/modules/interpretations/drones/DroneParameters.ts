@@ -135,7 +135,7 @@ export class DroneParameters {
         visibleWhen: element => ((Parameters.read(element, "count") as number | undefined) ?? 1) > 1 && DroneParameters.formationOf(element) !== "single"
       },
       {
-        type: "number", key: "headingDeg", min: 0, max: 360, step: 1, unit: "°", group: DroneParameters.FLIGHT, label: "noseTowards",
+        type: "number", key: "headingDeg", min: 0, max: 360, step: 1, unit: "°", group: DroneParameters.FLIGHT, label: "noseTowards", hint: "emptyItFacesWhereItGoes",
         placeholder: "whereItGoes", visibleWhen: DroneParameters.hovers
       },
       {

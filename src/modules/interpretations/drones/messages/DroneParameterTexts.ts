@@ -28,6 +28,7 @@ export interface DroneParameterTexts {
   betweenNeighbours: string
   noseTowards: string
   whereItGoes: string
+  emptyItFacesWhereItGoes: string
   windFrom: string
   whatItLeansInto: string
   windSpeed: string

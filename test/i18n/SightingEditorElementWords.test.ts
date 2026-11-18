@@ -120,6 +120,21 @@ vi.mock("../../src/modules/interpretations/birds/messages/BirdParameterTexts_en.
   const actual = await original<typeof import("../../src/modules/interpretations/birds/messages/BirdParameterTexts_en.js")>()
   return { ...actual, birdParameterTexts_en: WordsAudit.pseudo(actual.birdParameterTexts_en) }
 })
+vi.mock("../../src/modules/interpretations/drones/messages/DroneEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/drones/messages/DroneEditorMessages_en.js")>()
+  return { ...actual, droneEditorMessages_en: WordsAudit.pseudo(actual.droneEditorMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/drones/messages/DroneKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/drones/messages/DroneKindMessages_en.js")>()
+  return { ...actual, droneKindMessages_en: WordsAudit.pseudo(actual.droneKindMessages_en) }
+})
+vi.mock("../../src/modules/interpretations/drones/messages/DroneParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/interpretations/drones/messages/DroneParameterTexts_en.js")>()
+  return { ...actual, droneParameterTexts_en: WordsAudit.pseudo(actual.droneParameterTexts_en) }
+})
 vi.mock("../../src/modules/perception/messages/PerceptionMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/modules/perception/messages/PerceptionMessages_en.js")>()
