@@ -163,7 +163,9 @@ function bodyOf(flight: Flight, id: string, title: Text, startMs: number, durati
     const next = inside[Math.min(i + 1, inside.length - 1)]
     const heading = point.trackDeg ?? TrafficDecor.bearingDeg(at, TrafficDecor.offsetOf(OBSERVER_POINT, next))
     return {
-      t: point.t - startMs, eastM: r1(at.eastM), northM: r1(at.northM), altitudeM: r1(at.upM),
+      // Where the scene draws the recorded aircraft: its group at the height over the origin's ground (see SceneRenderer.trafficHeight), which the
+      // body's middle has to be at, or the body is a second aircraft half its height above it.
+      t: point.t - startMs, eastM: r1(at.eastM), northM: r1(at.northM), altitudeM: r1(at.upM - size.heightM / 2),
       attitude: { headingDeg: r1(heading) },
       ...(i === 0 ? { sizeM: size, appearance: { color: "#dde0e4", albedo: 0.6 } } : {})
     }
@@ -322,7 +324,8 @@ function airlinerAsLarge(look: Look, night: Night, type: string, name: Text) {
   const body = {
     id: `${type.toLowerCase()}-as-large`, title: name, explains: [LIGHT], model: { id: modelId }, lamps: lights,
     track: times.map((t, i) => ({
-      t: t * 1000, ...along(t), altitudeM: r1(altitudeM - size.heightM / 2), attitude: { headingDeg },
+      // Where the decor draws it: its group at the height it is said at over the ground under it, which the body's middle has to be at.
+      t: t * 1000, ...along(t), altitudeAboveGroundM: r1(altitudeM - size.heightM / 2), attitude: { headingDeg },
       ...(i === 0 ? { sizeM: size, appearance: { color: "#dde0e4", albedo: 0.6 } } : {})
     }))
   }
