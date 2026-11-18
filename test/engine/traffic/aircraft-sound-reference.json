@@ -1,0 +1,409 @@
+{
+  "about": "Measures of Pixabay recordings of aircraft (scripts/build-aircraft-sound-reference.ts): what the sound we play is held to. Classes and regimes are what the titles say.",
+  "sampleRate": 22050,
+  "window": 8192,
+  "seed": 20261118,
+  "recordings": [
+    {
+      "pixabayId": 53746,
+      "author": "freesound_community",
+      "title": "Commercial jet flies overhead",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "overflight",
+      "note": "type not said: a narrow-body, as most of the sky is",
+      "durationS": 67.6,
+      "octaveShapeDb": [
+        -10.5,
+        -5.5,
+        -4.9,
+        -6.8,
+        -10.5,
+        -21.7,
+        -39.3,
+        -60.6
+      ],
+      "tones": [],
+      "fluctuationDb": 2.1,
+      "unmodulatedFluctuationDb": 1.8
+    },
+    {
+      "pixabayId": 264942,
+      "author": "tanweraman",
+      "title": "Heavy plane sound at night",
+      "noiseClass": "turbofan-wide-body",
+      "regime": "overflight",
+      "note": "\"heavy\" taken as a wide-body",
+      "durationS": 88.7,
+      "octaveShapeDb": [
+        -12,
+        -3.8,
+        -3.9,
+        -10,
+        -18.6,
+        -31.8,
+        -51.7,
+        -50.1
+      ],
+      "tones": [],
+      "fluctuationDb": 2.5,
+      "unmodulatedFluctuationDb": 2.3
+    },
+    {
+      "pixabayId": 247601,
+      "author": "tanweraman",
+      "title": "Big plane sound effect",
+      "noiseClass": "turbofan-wide-body",
+      "regime": "overflight",
+      "note": "\"big\" taken as a wide-body",
+      "durationS": 20.3,
+      "octaveShapeDb": [
+        -11,
+        -4.4,
+        -4.6,
+        -9,
+        -12.9,
+        -15.6,
+        -24.6,
+        -34.6
+      ],
+      "tones": [],
+      "fluctuationDb": 2.3,
+      "unmodulatedFluctuationDb": 2
+    },
+    {
+      "pixabayId": 247602,
+      "author": "tanweraman",
+      "title": "Plane sound from distance",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "overflight",
+      "durationS": 20.4,
+      "octaveShapeDb": [
+        -12.6,
+        -4.5,
+        -4.4,
+        -8.4,
+        -11.7,
+        -17.7,
+        -27.2,
+        -45.8
+      ],
+      "tones": [],
+      "fluctuationDb": 3.2,
+      "unmodulatedFluctuationDb": 1.9
+    },
+    {
+      "pixabayId": 32737,
+      "author": "freesound_community",
+      "title": "Takeoff 1 distant",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "takeoff",
+      "durationS": 37,
+      "octaveShapeDb": [
+        -1.4,
+        -6.8,
+        -16,
+        -15.4,
+        -20.4,
+        -27.2,
+        -37.4,
+        -49.6
+      ],
+      "tones": [],
+      "fluctuationDb": 3.6,
+      "unmodulatedFluctuationDb": 3.5
+    },
+    {
+      "pixabayId": 214796,
+      "author": "southbaysounds",
+      "title": "Airplane taking off",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "takeoff",
+      "durationS": 30,
+      "octaveShapeDb": [
+        -5,
+        -4.7,
+        -7.3,
+        -9.2,
+        -15.4,
+        -21,
+        -28.8,
+        -40.8
+      ],
+      "tones": [],
+      "fluctuationDb": 2.7,
+      "unmodulatedFluctuationDb": 2.3
+    },
+    {
+      "pixabayId": 521112,
+      "author": "pwlpl",
+      "title": "Plane takeoff sound effect",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "takeoff",
+      "durationS": 10,
+      "octaveShapeDb": [
+        -8.6,
+        -2.6,
+        -8.2,
+        -13.6,
+        -12.2,
+        -13.8,
+        -19,
+        -29.3
+      ],
+      "tones": [],
+      "fluctuationDb": 2.2,
+      "unmodulatedFluctuationDb": 2.4
+    },
+    {
+      "pixabayId": 6732,
+      "author": "freesound_community",
+      "title": "Airplane landing",
+      "noiseClass": "turbofan-narrow-body",
+      "regime": "approach",
+      "note": "heard as a take-off; measured as a low thrust (a bright spectrum, a fan line, no roar behind)",
+      "durationS": 37.6,
+      "octaveShapeDb": [
+        -25.5,
+        -15.1,
+        -8.7,
+        -7.6,
+        -6.6,
+        -7.2,
+        -8,
+        -10.5
+      ],
+      "tones": [
+        {
+          "hz": 1109,
+          "prominenceDb": 15
+        }
+      ],
+      "fluctuationDb": 1.2,
+      "unmodulatedFluctuationDb": 0.8
+    },
+    {
+      "pixabayId": 264944,
+      "author": "tanweraman",
+      "title": "Small plane passing by",
+      "noiseClass": "light-piston",
+      "regime": "overflight",
+      "durationS": 40.9,
+      "octaveShapeDb": [
+        -13.9,
+        -5.3,
+        -2.8,
+        -9.3,
+        -17.3,
+        -30.1,
+        -48.2,
+        -46.6
+      ],
+      "tones": [],
+      "fluctuationDb": 2.4,
+      "unmodulatedFluctuationDb": 2.3
+    },
+    {
+      "pixabayId": 520026,
+      "author": "loswin23",
+      "title": "Small airplane",
+      "noiseClass": "light-piston",
+      "regime": "overflight",
+      "durationS": 45.7,
+      "octaveShapeDb": [
+        -4.1,
+        -6.1,
+        -4.6,
+        -17.9,
+        -25,
+        -35.3,
+        -37.5,
+        -44.7
+      ],
+      "tones": [
+        {
+          "hz": 240,
+          "prominenceDb": 16
+        },
+        {
+          "hz": 253,
+          "prominenceDb": 15
+        },
+        {
+          "hz": 231,
+          "prominenceDb": 14
+        },
+        {
+          "hz": 159,
+          "prominenceDb": 13
+        }
+      ],
+      "fluctuationDb": 2.6,
+      "unmodulatedFluctuationDb": 2.6
+    },
+    {
+      "pixabayId": 333257,
+      "author": "scottishperson",
+      "title": "WW2 fighter plane fly past",
+      "regime": "overflight",
+      "note": "a warbird's piston engine: no class of ours",
+      "durationS": 10.2,
+      "octaveShapeDb": [
+        -13.7,
+        -2.1,
+        -8.8,
+        -12,
+        -13.9,
+        -12.3,
+        -14.2,
+        -19.3
+      ],
+      "tones": [
+        {
+          "hz": 167,
+          "prominenceDb": 17
+        },
+        {
+          "hz": 135,
+          "prominenceDb": 12
+        },
+        {
+          "hz": 145,
+          "prominenceDb": 12
+        }
+      ],
+      "fluctuationDb": 1.8,
+      "unmodulatedFluctuationDb": 2.4
+    },
+    {
+      "pixabayId": 26222,
+      "author": "freesound_community",
+      "title": "Airplane fly by",
+      "regime": "overflight",
+      "durationS": 13.7,
+      "octaveShapeDb": [
+        -19.4,
+        -6.9,
+        -4.6,
+        -9.5,
+        -7.8,
+        -9.4,
+        -14.3,
+        -23.4
+      ],
+      "tones": [],
+      "fluctuationDb": 2,
+      "unmodulatedFluctuationDb": 1.4
+    },
+    {
+      "pixabayId": 95615,
+      "author": "freesound_community",
+      "title": "Airplane",
+      "durationS": 10.3,
+      "octaveShapeDb": [
+        -10.4,
+        -6.2,
+        -6.7,
+        -8.2,
+        -8.8,
+        -9.8,
+        -12.9,
+        -17.2
+      ],
+      "tones": [],
+      "fluctuationDb": 1.7,
+      "unmodulatedFluctuationDb": 1.4
+    },
+    {
+      "pixabayId": 99655,
+      "author": "freesound_community",
+      "title": "Avion",
+      "durationS": 8.1,
+      "octaveShapeDb": [
+        -2.1,
+        -7.8,
+        -7.5,
+        -14.3,
+        -26.7,
+        -44.7,
+        -64.1,
+        -81.3
+      ],
+      "tones": [],
+      "fluctuationDb": 6,
+      "unmodulatedFluctuationDb": 2.4
+    },
+    {
+      "pixabayId": 22955,
+      "author": "freesound_community",
+      "title": "Airplane atmos",
+      "durationS": 90.6,
+      "octaveShapeDb": [
+        -9.3,
+        -3.9,
+        -4.4,
+        -10.3,
+        -16.9,
+        -28.2,
+        -34.9,
+        -40.4
+      ],
+      "tones": [
+        {
+          "hz": 2676,
+          "prominenceDb": 14
+        },
+        {
+          "hz": 3566,
+          "prominenceDb": 13
+        }
+      ],
+      "fluctuationDb": 2.6,
+      "unmodulatedFluctuationDb": 2.2
+    },
+    {
+      "pixabayId": 630924,
+      "author": "greatnessdon",
+      "title": "Airplane inside cabin engine sound",
+      "inside": true,
+      "durationS": 46.9,
+      "octaveShapeDb": [
+        -2,
+        -4.4,
+        -20.5,
+        -33.1,
+        -34.8,
+        -32.4,
+        -38.8,
+        -51.7
+      ],
+      "tones": [
+        {
+          "hz": 1903,
+          "prominenceDb": 17
+        }
+      ],
+      "fluctuationDb": 4.2,
+      "unmodulatedFluctuationDb": 4
+    },
+    {
+      "pixabayId": 45849,
+      "author": "freesound_community",
+      "title": "Cabina avión",
+      "inside": true,
+      "durationS": 10.1,
+      "octaveShapeDb": [
+        -4.9,
+        -3.9,
+        -6.1,
+        -16.2,
+        -32.1,
+        -51.4,
+        -72.2,
+        -80.8
+      ],
+      "tones": [],
+      "fluctuationDb": 2.9,
+      "unmodulatedFluctuationDb": 2.7
+    }
+  ]
+}

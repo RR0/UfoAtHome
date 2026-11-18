@@ -23,10 +23,12 @@ const HARMONICS = 3
 /**
  * The most the A-weighting is taken back by, dB. The levels the bands are given in are A-weighted — the ear's sensitivity, which takes 26 dB off 63 Hz
  * and 16 off 125 — and a sound played with the weighting still on it has lost its lows and is a hiss: a wind tunnel. The real noise of an aircraft has
- * as much below 500 Hz as above, so the weighting is taken off each band. Not all of it, though: what 63 Hz asks is more than a speaker can give, and
- * would take the whole level down with it.
+ * as much below 500 Hz as above, so the weighting is taken off each band: nearly all of it. Held to recordings of jets passing over
+ * (test/engine/traffic/aircraft-sound-reference.json, see AircraftSoundCalibration.test.ts), the classes' own shapes, carried by the air to the
+ * distance that fits each best, are within 1.2 to 1.6 dB of them with 24 dB taken back; with the 12 dB taken back before, 63 Hz was played 10 to
+ * 17 dB under what the recordings have and 125 Hz 2 to 6, and the fits were 2.4 to 3.9 dB out. A recording is a rumble under a roar, not a hiss.
  */
-const MAX_UNWEIGHT_DB = 12
+const MAX_UNWEIGHT_DB = 24
 /**
  * An octave band's filter is two band-pass filters in a row, each with this Q (a band a little over an octave wide), which together are about an octave
  * wide and fall away twice as steeply on both sides. One filter of an octave's width falls at only 6 dB an octave, and the strong bands of a sound
@@ -347,7 +349,7 @@ export class AircraftAudio {
   }
 
   /** What a band's amplitude is multiplied by to take the A-weighting back off it, up to MAX_UNWEIGHT_DB of it. */
-  private static unweighting(frequencyHz: number): number {
+  static unweighting(frequencyHz: number): number {
     return 10 ** (Math.min(MAX_UNWEIGHT_DB, Math.max(0, -SoundInAir.aWeightingDb(frequencyHz))) / 20)
   }
 

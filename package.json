@@ -61,6 +61,7 @@
     "build:light-pollution": "node --import tsx scripts/build-light-pollution-tiles.ts",
     "build:reentries": "node --import tsx scripts/build-reentry-catalog.ts",
     "build:fireballs": "node --import tsx scripts/build-fireball-archive.ts",
+    "build:aircraft-sound-reference": "node --import tsx scripts/build-aircraft-sound-reference.ts",
     "build:aircraft": "node --import tsx scripts/build-aircraft-archive.ts",
     "build:aircraft-demo": "node --import tsx scripts/build-aircraft-demo-slice.ts",
     "fetch:aircraft": "node --import tsx scripts/fetch-aircraft-release.ts"

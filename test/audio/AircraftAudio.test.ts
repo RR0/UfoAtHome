@@ -3,8 +3,8 @@ import { AircraftAudio } from "../../src/audio/AircraftAudio.js"
 import { SoundInAir } from "../../src/engine/traffic/SoundInAir.js"
 import type { AircraftVoice } from "../../src/engine/traffic/TrafficSound.js"
 
-/** What a band is multiplied by to take the A-weighting off it, as AircraftAudio does: up to 12 dB of it. */
-const unweight = (centre: number) => 10 ** (Math.min(12, Math.max(0, -SoundInAir.aWeightingDb(centre))) / 20)
+/** What a band is multiplied by to take the A-weighting off it, as AircraftAudio does: up to 24 dB of it. */
+const unweight = (centre: number) => 10 ** (Math.min(24, Math.max(0, -SoundInAir.aWeightingDb(centre))) / 20)
 const CENTRES = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
 /** The band-pass filters of the voices made, two to each band. */
 const bandFilters = () => made.filters.filter(filter => filter.type === "bandpass")
@@ -199,11 +199,11 @@ describe("AircraftAudio", () => {
     const audio = playing()
     // The same amplitude in every band as the ear has it: played, the lows are far stronger than the highs, as the air carries them.
     audio.setVoices([voice({ bandAmplitudes: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1], character: undefined })])
-    expect(unweight(63)).toBeCloseTo(10 ** (12 / 20), 6)
+    expect(AircraftAudio.unweighting(63)).toBeCloseTo(10 ** (24 / 20), 6)
     expect(unweight(1000)).toBe(1)
     expect(unweight(125)).toBeGreaterThan(unweight(500))
     expect(unweight(500)).toBeGreaterThan(unweight(1000))
-    // At 63 Hz the weighting takes 26 dB and is taken back by 12, not all: what 63 Hz asks is more than a speaker can give, and a sound of lows alone is a blowing.
+    // At 63 Hz the weighting takes 26 dB and is taken back by 24, nearly all: what recordings of jets have there (see AircraftSoundCalibration.test.ts).
     expect(unweight(63)).toBeLessThan(10 ** (26.2 / 20))
   })
 
@@ -460,13 +460,14 @@ describe("AircraftAudio", () => {
       return rmsOf(amplitude) * made.gains[0].gain.target!
     }
     // Quiet: played as asked. Loud: brought toward 0.7, never past it, and the louder the nearer to it.
-    expect(played(0.001)).toBeCloseTo(rmsOf(0.001), 3)
-    expect(played(0.5)).toBeLessThan(0.7)
-    expect(played(0.5)).toBeGreaterThan(played(0.2))
-    expect(played(2)).toBeLessThan(0.7)
-    expect(played(2)).toBeGreaterThan(played(0.5))
-    expect(played(10)).toBeLessThanOrEqual(0.7)
-    expect(played(10)).toBeGreaterThanOrEqual(played(2))
+    expect(played(0.0005)).toBeCloseTo(rmsOf(0.0005), 3)
+    expect(played(0.05)).toBeLessThan(0.7)
+    expect(played(0.05)).toBeGreaterThan(played(0.02))
+    expect(played(0.2)).toBeLessThan(0.7)
+    expect(played(0.2)).toBeGreaterThan(played(0.05))
+    // At the saturation itself, but for the last bit of a float.
+    expect(played(10)).toBeLessThanOrEqual(0.7 + 1e-12)
+    expect(played(10)).toBeGreaterThanOrEqual(played(0.2))
   })
 
   test("sends every voice through one compressor, so that several at once do not clip together", () => {
