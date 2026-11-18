@@ -9,7 +9,7 @@ import { ParameterRegistry } from "../../../engine/interpretation/Parameters.js"
 import type { ParameterHolder } from "../../../engine/interpretation/Parameters.js"
 import type { InterpretationJson } from "../../../engine/interpretation/Interpretation.js"
 import type { LanternLaunchJson } from "./SkyLantern.js"
-import { resolveWeatherAt } from "../../../engine/model/Sighting.js"
+import { resolveWeatherAt, sightingDurationMs } from "../../../engine/model/Sighting.js"
 import type { Sighting } from "../../../engine/model/Sighting.js"
 import type { SaidTexts } from "../../../engine/model/SaidText.js"
 import type { LanternEditorMessages } from "./messages/LanternEditorMessages.js"
@@ -29,6 +29,8 @@ export interface LanternEditorHost {
   shapes(): { id: string, label: string }[]
   /** What a place is said from, and in what words (see PositionPlace); without it, a place is said only the way it is kept. */
   positionPlace?(): PositionPlace
+  /** The recording timeline length in milliseconds, when supplied by the host. */
+  duration?(): number
   /** An edit was written onto the recording. */
   changed(): void
 }
@@ -57,7 +59,22 @@ export class LanternEditor {
   private shown: readonly LanternLaunchJson[] = []
 
   /** The part's layout, given with it (see InterpretationKind.editor). */
-  private static readonly STYLE = `.lantern-editor-part { flex-basis: 100%; min-width: 0; } .lantern-editor-part #lantern-list { flex-basis: 100%; min-width: 0; } .lantern-editor-part .launch-editor, .lantern-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; } .lantern-editor-part .launch-fields { flex-basis: 100%; min-width: 0; } .lantern-editor-part [hidden] { display: none !important; } .lantern-editor-part select { min-width: 0; width: 100%; } .lantern-editor-part .launch-intro { flex-basis: 100%; margin: 0; } .lantern-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; } .lantern-editor-part .parameter-group { flex: 1 1 14em; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-start; align-content: flex-start; } .lantern-editor-part input, .lantern-editor-part select { max-width: 100%; box-sizing: border-box; } .lantern-editor-part input[type="text"] { width: 12em; } .lantern-editor-part label { min-width: 0; max-width: 100%; } .lantern-editor-part input.parameter-derived::placeholder { opacity: .65; }`
+  private static readonly STYLE = `
+.lantern-editor-part, .lantern-editor-part #lantern-list, .lantern-editor-part .launch-fields { flex-basis: 100%; min-width: 0; }
+.lantern-editor-part .launch-editor, .lantern-editor-part .launch-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.lantern-editor-part [hidden] { display: none !important; }
+.lantern-editor-part .launch-intro { flex-basis: 100%; margin: 0; }
+.lantern-editor-part .launch-parameters { flex-basis: 100%; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20em), 1fr)); gap: 12px; align-items: start; }
+.lantern-editor-part .parameter-group { min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.lantern-editor-part .parameter-group > label { display: flex; flex-wrap: wrap; align-items: center; gap: .35em .5em; min-width: 0; max-width: 100%; }
+.lantern-editor-part .parameter-group > label > span { flex: 1 1 11em; min-width: 0; overflow-wrap: anywhere; }
+.lantern-editor-part .parameter-row { width: 100%; min-width: 0; }
+.lantern-editor-part rr0-input-position { min-width: 0; max-width: 100%; }
+.lantern-editor-part rr0-input-position .position-from { flex-wrap: wrap; white-space: normal; min-width: 0; max-width: 100%; }
+.lantern-editor-part input, .lantern-editor-part select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.lantern-editor-part input[type="text"] { width: 12em; }
+.lantern-editor-part input.parameter-derived::placeholder { opacity: .65; }
+`
 
   constructor(private readonly container: HTMLElement, private readonly host: LanternEditorHost, language: string) {
     SkyEventEditorStyle.attach(container, "lantern-editor-part", LanternEditor.STYLE)
@@ -111,7 +128,7 @@ export class LanternEditor {
     this.sync()
   }
 
-  /** Lanterns are let go in front of the observer: they can be added once the recording has a place. */
+  /** Lanterns are let go at the observer’s position: they can be added once the recording has a place. */
   private syncAddState(): void {
     const placed = this.siteOfNew() !== undefined
     this.list?.setAddState(placed, placed ? undefined : this.messages.addLaunchNowhere)
@@ -167,36 +184,38 @@ export class LanternEditor {
   }
 
   /**
-   * Where new lanterns are let go: a kilometre and a half in front of the observer, at the ground of the recording's place — a placeholder
-   * to be given the real garden. Undefined where the recording has no place.
+   * Where new lanterns are let go: zero offset from the observer, in the recording place's frame.
+   * The author can then give the actual launch site. Undefined where the recording has no place.
    */
   private siteOfNew(): { eastM: number, northM: number } | undefined {
     const sighting = this.host.sighting()
     const origin = sighting.event?.place?.[0]
     if (origin?.lat === undefined || origin.lng === undefined) return undefined
     const pose = sighting.observerTrack?.getInterpolatedPoseAt(0)
-    const heading = (pose?.headingDeg ?? 0) * Math.PI / 180
     const metresPerDegree = 111320
-    // The observer may not stand at the place itself: in front of them, in the place's own frame.
+    // The observer may not stand at the place itself: zero relative offset still uses the place’s own frame.
     const eastOfPlace = pose?.lng !== undefined ? (pose.lng - origin.lng) * metresPerDegree * Math.cos(origin.lat * Math.PI / 180) : 0
     const northOfPlace = pose?.lat !== undefined ? (pose.lat - origin.lat) * metresPerDegree : 0
-    return { eastM: Math.round(eastOfPlace + 1500 * Math.sin(heading)), northM: Math.round(northOfPlace + 1500 * Math.cos(heading)) }
+    return { eastM: Math.round(eastOfPlace), northM: Math.round(northOfPlace) }
   }
 
   /**
-   * Adds a dozen lanterns let go over two minutes from the start of the recording, carried by the recording's own wind — the common case,
-   * to be told apart by the fields.
+   * Adds a dozen lanterns over the stated observation, capped at two minutes when it is longer.
+   * The launch site, physical flight and any previously stated launches are left unchanged.
    */
   private addLaunch(): void {
     const site = this.siteOfNew()
     if (!site) return
     let n = this.launches.length + 1
     while (this.launches.some(launch => launch.id === `lanterns-${n}`)) n++
-    const weather = resolveWeatherAt(this.host.sighting(), 0)
+    const sighting = this.host.sighting()
+    const span = sightingDurationMs(sighting.event) ?? this.host.duration?.() ?? sighting.timeline?.duration
+    const untilT = span !== undefined && Number.isFinite(span) && span > 0 ? Math.min(span, 120000) : 120000
+    const weather = resolveWeatherAt(sighting, 0)
     const launch: LanternLaunchJson = {
       id: `lanterns-${n}`,
       site,
-      group: { count: 12, fromT: 0, untilT: 120000, seed: n },
+      group: { count: 12, fromT: 0, untilT, seed: n },
       // Where the wind blows TOWARDS, where a weather states where it comes FROM.
       wind: { towardDeg: Math.round((weather.windDirectionDeg + 180) % 360), speedMS: Math.round(weather.windSpeed * 10) / 10 }
     }

@@ -22,6 +22,8 @@ export class EditorTheme {
   --glow-on-solid: #1a1405;
   --glow-dim: light-dark(#a07d29, #a8873a);
   --sky: light-dark(#12608f, #7fd4ff);
+  --focus: light-dark(#176bba, #7fd4ff);
+  --focus-bg: light-dark(rgba(23, 107, 186, .15), rgba(127, 212, 255, .18));
   --ok: light-dark(#1f7a44, #8fd7a4);
   --error: light-dark(#c0392b, #ff8a7a);
   --error-bg: light-dark(rgba(192, 57, 43, .09), rgba(255, 138, 122, .12));
@@ -86,7 +88,7 @@ export class EditorTheme {
   color: var(--ink);
   font-size: 15px;
 }
-:where(${scope}) :where(input, select, textarea):focus-visible { outline: none; border-color: var(--glow-dim); box-shadow: 0 0 0 3px var(--warn-bg); }
+:where(${scope}) :where(input, select, textarea):focus-visible { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px var(--focus-bg); }
 :where(${scope}) :where([aria-invalid="true"], .invalid) { border-color: var(--error); }
 :where(${scope}) :where(.inconsistent) { border-color: var(--warn); }
 /* A list has a rule of its own for its border. */

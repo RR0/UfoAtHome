@@ -10,10 +10,10 @@ describe("LanternEditor", () => {
   document.body.append(container)
   afterEach(() => container.replaceChildren())
 
-  const build = async (interpretation?: InterpretationJson, place = true) => {
+  const build = async (interpretation?: InterpretationJson, place = true, durationSeconds?: number) => {
     const sighting = {
       interpretation,
-      event: { place: place ? [{ lat: 48, lng: 2 }] : [] },
+      event: { place: place ? [{ lat: 48, lng: 2 }] : [], durationSeconds },
       observerTrack: { getInterpolatedPoseAt: () => ({ headingDeg: 90, lat: 48, lng: 2 }) },
       weatherTrack: new WeatherTrack()
     } as unknown as Sighting
@@ -31,18 +31,27 @@ describe("LanternEditor", () => {
     target.dispatchEvent(new Event("input", { bubbles: true }))
   }
 
-  test("adds a dozen lanterns let go in front of the observer, read into the account beside its bodies", async () => {
+  test("adds a dozen lanterns at zero offset from the observer, read into the account beside its bodies", async () => {
     const body = { id: "b", model: { id: "sphere" }, track: [] }
     const { sighting, changes } = await build({ bodies: [body] })
     container.querySelector<HTMLButtonElement>("#lantern-add")!.click()
     const launches = sighting.interpretation!.lanterns!
     expect(launches).toHaveLength(1)
     expect(launches[0].group!.count).toBe(12)
-    // A kilometre and a half east: the way the observer faces.
-    expect(launches[0].site.eastM).toBeCloseTo(1500, -1)
-    expect(Math.abs(launches[0].site.northM)).toBeLessThan(5)
+    // Zero offset from the observer, regardless of the direction they face.
+    expect(launches[0].site.eastM).toBe(0)
+    expect(launches[0].site.northM).toBe(0)
     expect(sighting.interpretation!.bodies).toEqual([body])
     expect(changes()).toBe(1)
+  })
+
+  test("uses a ten-second observation for a new launch without altering an existing launch", async () => {
+    const existing = { id: "earlier", site: { eastM: 0, northM: 1500 }, group: { count: 12, fromT: 0, untilT: 120000 } }
+    const { sighting } = await build({ bodies: [], lanterns: [existing] }, true, 10)
+    container.querySelector<HTMLButtonElement>("#lantern-add")!.click()
+    expect(sighting.interpretation!.lanterns![1].group!.untilT).toBe(10000)
+    expect(sighting.interpretation!.lanterns![0]).toEqual(existing)
+    expect(container.querySelector<HTMLInputElement>('[data-key="group.untilT"]')!.value).toBe("10")
   })
 
   test("writes an edit as a new launch in a new interpretation, so that the scene computes the lanterns again", async () => {
