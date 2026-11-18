@@ -240,6 +240,21 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "montclair",
+          src: "/demo-data/observer-montclair-2024-11-30-road.json",
+          // The case, for the player: both nights "Friday night" may be, both ways he may have looked, and the readings of the Metabunk thread.
+          playSrc: "/demo-data/case-montclair.json",
+          openEvents: "interpretation-montclair-spirit-nks1862-road",
+          title: { en: "Montclair, 2024", fr: "Montclair, 2024", es: "Montclair, 2024", it: "Montclair, 2024" },
+          titleIsName: true,
+          blurb: {
+            en: "New Jersey's drone wave, about 00:40. Driving into Montclair, Evan Cutler sees a light \"like the full Moon\" right over the horizon, coming towards him, and takes it for a drone the size of a school bus. Replayed with every aircraft of the ADS-B record: at 00:40 on the 30th a Spirit A320neo flies straight at him with its landing lights on.",
+            fr: "Vague de drones du New Jersey, vers 0 h 40. En entrant dans Montclair, Evan Cutler voit une lumière « comme la pleine Lune » juste au-dessus de l'horizon, qui vient vers lui, et la prend pour un drone de la taille d'un bus scolaire. Rejoué avec tous les avions du relevé ADS-B : le 30 à 0 h 40, un A320neo de Spirit vole droit sur lui, phares d'atterrissage allumés.",
+            es: "Oleada de drones de Nueva Jersey, hacia las 00:40. Entrando en Montclair, Evan Cutler ve una luz «como la luna llena» justo sobre el horizonte, que viene hacia él, y la toma por un dron del tamaño de un autobús escolar. Reproducido con todos los aviones del registro ADS-B: el 30 a las 00:40, un A320neo de Spirit vuela derecho hacia él con las luces de aterrizaje encendidas.",
+            it: "Ondata di droni del New Jersey, verso le 00:40. Entrando a Montclair, Evan Cutler vede una luce «come la luna piena» appena sopra l'orizzonte, che viene verso di lui, e la prende per un drone grande come uno scuolabus. Riprodotto con tutti gli aerei del registro ADS-B: il 30 alle 00:40, un A320neo di Spirit vola dritto verso di lui con le luci di atterraggio accese."
+          }
+        },
+        {
           id: "trans-en-provence",
           src: "/demo-data/observer-trans-en-provence.json",
           playSrc: "/demo-data/case-trans-en-provence.json",
