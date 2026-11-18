@@ -236,14 +236,20 @@ export class CaseTimeline {
     return said
   }
 
-  /** A renvoi to the event at `at`: a reference the reader can only read is one they have to go and find. */
-  private renvoi(at: number, label: string, words: CaseTimelineWords): HTMLButtonElement {
-    const link = document.createElement("button")
-    link.type = "button"
+  /**
+   * A renvoi to the event at `at`: a reference the reader can only read is one they have to go and find. A link, not a button: a button is a
+   * box, which a long title wraps inside of, centred under "Reading of" instead of running on after it.
+   */
+  private renvoi(at: number, label: string, words: CaseTimelineWords): HTMLAnchorElement {
+    const link = document.createElement("a")
+    link.href = "#"
     link.className = "event-ref"
     link.textContent = label
     link.title = words.openEvent
-    link.addEventListener("click", () => this.follow(at))
+    link.addEventListener("click", event => {
+      event.preventDefault()
+      this.follow(at)
+    })
     // Pointed at or focused, the card it leads to is lit, so that a reference is found without reading the whole chronology — and nothing
     // is lit when that card is filtered out, which is answer enough.
     const aim = (lit: boolean) => this.list.querySelector<HTMLElement>(`.event-card[data-at="${at}"]`)?.classList.toggle("event-aimed", lit)

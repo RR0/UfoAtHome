@@ -434,7 +434,7 @@ describe("<rr0-case>, a case read", () => {
     const element = await mount()
     const root = element.shadowRoot!
     // The observation names the interview it was told in: pointing at that name lights the interview's own card, and no other.
-    const ref = root.querySelector<HTMLButtonElement>(".event-ref")!
+    const ref = root.querySelector<HTMLElement>(".event-ref")!
     ref.dispatchEvent(new Event("mouseenter"))
     expect([...root.querySelectorAll<HTMLElement>(".event-card.event-aimed")].map(card => card.dataset.at)).toEqual(["2"])
     ref.dispatchEvent(new Event("mouseleave"))

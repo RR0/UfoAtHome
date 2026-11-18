@@ -1066,7 +1066,7 @@ describe("CaseEditorElement's events", () => {
     const root = element.shadowRoot!
     const reading = [...root.querySelectorAll<HTMLElement>(".event-card")].find(card => card.dataset.kind === "reading")!
     // It reads two accounts: it names both, wherever they sit in the chronology, and naming one is a way to it.
-    const refs = [...reading.querySelectorAll<HTMLButtonElement>(".event-ref")]
+    const refs = [...reading.querySelectorAll<HTMLElement>(".event-ref")]
     expect(refs.map(ref => ref.textContent)).toEqual(["An account", "A close-up"])
     expect(reading.querySelector(".event-links")!.textContent).toContain(" and ")
     // Pointed at, the card it leads to is lit, and no other.

@@ -43,7 +43,7 @@ describe("CaseTimeline", () => {
     expect(cards.map(card => card.dataset.kind)).toEqual(["observation", "observation", "observation", "reading"])
     expect(cards[3].dataset.open).toBe("")
     expect(cards[3].querySelector(".event-links")!.textContent).toBe("Reading of A, B and C by Z")
-    const ref = cards[3].querySelectorAll<HTMLButtonElement>(".event-ref")[1]
+    const ref = cards[3].querySelectorAll<HTMLElement>(".event-ref")[1]
     ref.dispatchEvent(new Event("mouseenter"))
     expect([...list.querySelectorAll<HTMLElement>(".event-aimed")].map(card => card.dataset.at)).toEqual(["1"])
     ref.click()
