@@ -3,6 +3,7 @@ import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 import type { AircraftKind } from "./AircraftModels.js"
 import type { AircraftTrack } from "./AircraftProvider.js"
 import { AircraftSighting } from "./AircraftSighting.js"
+import { EngineDirectivity } from "./EngineDirectivity.js"
 import type { AirConditions } from "./SoundInAir.js"
 import { SoundInAir } from "./SoundInAir.js"
 
@@ -25,6 +26,8 @@ export interface AircraftNoise {
   character?: AircraftSoundCharacter
   /** The same aircraft at another thrust, when its class says how it sounds then (see FlightRegime): itself otherwise. */
   regimes?: Partial<Record<FlightRegime, AircraftNoise>>
+  /** Louder behind and ahead than abeam as a turbofan is (see EngineDirectivity): the same all round otherwise. */
+  directivity?: "turbofan"
 }
 
 /**
@@ -134,7 +137,9 @@ function characterIn(character: AircraftSoundCharacter | undefined, change: Regi
 }
 
 export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => {
-  const own: AircraftNoise = { id: noise.id, name: noise.name, soundPowerA: toTotal(noise.shapeDb, noise.totalDbA), character: noise.character }
+  // A class with a turbofan's regimes is a turbofan, and radiates as one.
+  const directivity = noise.regimes === TURBOFAN_REGIMES ? "turbofan" as const : undefined
+  const own: AircraftNoise = { id: noise.id, name: noise.name, soundPowerA: toTotal(noise.shapeDb, noise.totalDbA), character: noise.character, directivity }
   if (!noise.regimes) return own
   const regimes: Partial<Record<FlightRegime, AircraftNoise>> = { overflight: own }
   for (const [regime, change] of Object.entries(noise.regimes) as [FlightRegime, RegimeChange][]) {
@@ -142,7 +147,8 @@ export const AIRCRAFT_NOISES: AircraftNoise[] = NOISE_CLASSES.map(noise => {
       id: `${noise.id}-${regime}`,
       name: `${noise.name}, ${regime}`,
       soundPowerA: toTotal(noise.shapeDb.map((level, band) => level + change.shapeDb[band]), noise.totalDbA + change.levelDb),
-      character: characterIn(noise.character, change)
+      character: characterIn(noise.character, change),
+      directivity
     }
   }
   return { ...own, regimes }
@@ -177,6 +183,8 @@ export interface HeardAircraft {
   /** What it was doing when it made the sound, and the noise it made then: its class's own, or that of its class at that thrust. */
   regime: FlightRegime
   noise: AircraftNoise
+  /** The angle at the aircraft, when it made the sound, between where it was going and the listener, degrees: 0 ahead, 180 behind. */
+  emissionAngleDeg: number
 }
 
 /** When an aircraft can be heard over a span, and at its loudest. */
@@ -267,8 +275,9 @@ export class AircraftHearing {
    */
   static couldBeHeard(noise: AircraftNoise, distanceKm: number, ambientDbA = AircraftHearing.DEFAULT_AMBIENT_DB_A, air: AirConditions = SoundInAir.STANDARD): boolean {
     const ambient = AircraftHearing.ambientBands(ambientDbA)
-    // At any of its thrusts: a take-off has more in the lows, which carry farthest.
-    return [noise, ...Object.values(noise.regimes ?? {})].some(variant => AircraftHearing.bandsAt(variant, distanceKm, air).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A)))
+    // At any of its thrusts, and in the direction it is loudest in: a take-off has more in the lows, which carry farthest, and most behind it.
+    const regimes = Object.entries(noise.regimes ?? { overflight: noise }) as [FlightRegime, AircraftNoise][]
+    return regimes.some(([regime, variant]) => AircraftHearing.bandsAt(variant, distanceKm, air).map((level, band) => level + (variant.directivity === "turbofan" ? EngineDirectivity.loudestDb(regime)[band] : 0)).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A)))
   }
 
   /** The ambient noise in each band, dB(A), for a total of `ambientDbA`. */
@@ -309,7 +318,9 @@ export class AircraftHearing {
     const noise = AircraftHearing.inRegime(options.noise ?? AIRCRAFT_NOISES[0], regime)
     const ambientDbA = options.ambientDbA ?? AircraftHearing.DEFAULT_AMBIENT_DB_A
     const ambient = AircraftHearing.ambientBands(ambientDbA)
-    const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air)
+    const emissionAngleDeg = AircraftHearing.emissionAngle(track, observer, emitted)
+    const radiated = noise.directivity === "turbofan" ? EngineDirectivity.bandsDb(emissionAngleDeg, regime, speed) : undefined
+    const bandsDbA = AircraftHearing.bandsAt(noise, sound.distanceKm, air).map((level, band) => level + (radiated?.[band] ?? 0))
     const audibleBands = bandsDbA.map((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A))
     const loudest = bandsDbA.indexOf(Math.max(...bandsDbA))
     const highest = audibleBands.lastIndexOf(true)
@@ -328,8 +339,28 @@ export class AircraftHearing {
       dominantHz: SoundInAir.OCTAVES[loudest],
       cutoffHz: highest < 0 ? undefined : SoundInAir.OCTAVES[highest],
       regime,
-      noise
+      noise,
+      emissionAngleDeg
     }
+  }
+
+  /** The angle at the aircraft at `t` between its heading (climb or descent included) and the listener, degrees; abeam when it is not known. */
+  static emissionAngle(track: AircraftTrack, observer: GeoPoint, t: number): number {
+    const step = AircraftHearing.VELOCITY_STEP_MS
+    const before = AircraftSighting.positionAt(track, t - step)
+    const after = AircraftSighting.positionAt(track, t + step)
+    const at = AircraftSighting.positionAt(track, t)
+    if (!before || !after || !at) return 90
+    // Where each is from the listener, east, north and up, m: what the aircraft moved by, and the way back from it to them.
+    const local = (geo: GeoPoint) => {
+      const seen = ReentrySighting.seenFrom(observer, geo)
+      const alt = (seen.altitudeDeg * Math.PI) / 180
+      const az = (seen.azimuthDeg * Math.PI) / 180
+      const r = seen.distanceKm * 1000
+      return [r * Math.cos(alt) * Math.sin(az), r * Math.cos(alt) * Math.cos(az), r * Math.sin(alt)]
+    }
+    const [from, to, here] = [local(before.geo), local(after.geo), local(at.geo)]
+    return EngineDirectivity.angleDeg(to.map((value, i) => value - from[i]), here.map(value => -value))
   }
 
   /**

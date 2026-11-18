@@ -115,8 +115,10 @@ describe("AircraftHearing", () => {
   })
 
   test("a close aircraft is a broad sound, a far one a rumble: the air takes the highs away", () => {
-    const near = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200), observer, T0 + 200_000, { ambientDbA: 30 })!
-    const far = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200, -400, 600, 20), observer, T0 + 200_000, { ambientDbA: 30 })!
+    // The same all round, so that only the air makes the difference: the far one is heard from ahead, where a fan's highs are stronger.
+    const noise = { ...AIRCRAFT_NOISES[0], directivity: undefined, regimes: undefined }
+    const near = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200), observer, T0 + 200_000, { ambientDbA: 30, noise })!
+    const far = AircraftHearing.heardAt(Flights.eastbound(3300, 250, 200, -400, 600, 20), observer, T0 + 200_000, { ambientDbA: 30, noise })!
     expect(near.cutoffHz).toBeGreaterThanOrEqual(4000)
     expect(far.cutoffHz!).toBeLessThan(near.cutoffHz!)
     expect(far.bandsDbA[7] - far.bandsDbA[3]).toBeLessThan(near.bandsDbA[7] - near.bandsDbA[3])
@@ -257,6 +259,35 @@ describe("AircraftHearing", () => {
       while (AircraftHearing.bandsAt(own, km).some((level, i) => level >= AircraftHearing.ambientBands(25)[i] + AircraftHearing.DETECTION_MARGIN_DB)) km *= 1.1
       expect(AircraftHearing.bandsAt(takeoff, km).some((level, i) => level >= AircraftHearing.ambientBands(25)[i] + AircraftHearing.DETECTION_MARGIN_DB)).toBe(true)
       expect(AircraftHearing.couldBeHeard(own, km, 25)).toBe(true)
+    })
+  })
+
+  describe("in the direction it radiates", () => {
+    test("knows where it was going against where the listener is: ahead while it comes, abeam overhead, behind once it has passed", () => {
+      const track = Flights.eastbound(3000, 160, 200)
+      // Overhead at the pass, a few kilometres ahead before it, as far behind after.
+      expect(AircraftHearing.emissionAngle(track, observer, T0 + 200_000)).toBeCloseTo(90, 0)
+      expect(AircraftHearing.emissionAngle(track, observer, T0 + 160_000)).toBeLessThan(30)
+      expect(AircraftHearing.emissionAngle(track, observer, T0 + 240_000)).toBeGreaterThan(150)
+    })
+
+    test("a jet taking off is louder in the lows once past than at the same distance before", () => {
+      const track = Flights.sloping(1500, 2500, 160, 200)
+      const distanceAt = (t: number) => AircraftHearing.heardAt(track, observer, t, { ambientDbA: 30 })!
+      // Two instants whose sounds left the aircraft at about the same distance, one ahead and one behind.
+      const before = distanceAt(T0 + 185_000)
+      let after = distanceAt(T0 + 205_000)
+      for (let t = 205_000; Math.abs(after.sound.distanceKm - before.sound.distanceKm) > 0.01 && t < 260_000; t += 100) after = distanceAt(T0 + t)
+      expect(before.emissionAngleDeg).toBeLessThan(90)
+      expect(after.emissionAngleDeg).toBeGreaterThan(90)
+      expect(after.bandsDbA[0] - before.bandsDbA[0]).toBeGreaterThan(4)
+    })
+
+    test("what is not a turbofan radiates the same all round", () => {
+      const piston = AircraftHearing.noiseOfKind("light-piston")
+      expect(piston.directivity).toBeUndefined()
+      const heard = AircraftHearing.heardAt(Flights.eastbound(1500, 90, 200), observer, T0 + 230_000, { noise: piston, ambientDbA: 30 })!
+      expect(heard.bandsDbA).toEqual(AircraftHearing.bandsAt(piston, heard.sound.distanceKm))
     })
   })
 })
