@@ -294,6 +294,10 @@ class JsonSchemaExport {
                 description: "The working for a derivation, or what a guess was chosen for: a string, or one per language ({ \"fr\": …, \"en\": … }) as a title is.",
                 anyOf: [{ type: "string" }, { type: "object", additionalProperties: { type: "string" } }]
               },
+              how: {
+                description: "How the observer came by it, which decides its law of error: a time or a duration by the \"clock\", \"anchored\" to an event or \"estimated\"; a size \"shown-on-the-spot\", through an \"arm-length-gauge\" or a \"recalled-object\" (\"like the full Moon\"); an elevation or a heading by \"instrument\", by \"landmark\" or \"estimated\"; a distance by \"occlusion\", a \"known-size\", \"triangulation\" or \"estimated\".",
+                type: "string"
+              },
               range: {
                 description: "How far what is known lets it be: a number's least and greatest, or a time's EDTF interval (\"1976-06/1976-07\"). What a reading of the observation may move it within.",
                 anyOf: [{ type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }, { type: "string" }]

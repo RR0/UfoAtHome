@@ -6,6 +6,7 @@ import type { Timeline } from "../model/Timeline.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { ErrorModel } from "../witness/WitnessError.js"
 import type { WitnessConditions } from "../model/Account.js"
+import type { Provenance } from "../persistence/Provenance.js"
 
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
@@ -24,8 +25,12 @@ export interface Projection {
  */
 export interface ConfrontationTolerance {
   direction(stated: ShapeAim, predicted: ShapeAim, halfWidthDeg: number): boolean
-  size(stated: number, predicted: number): boolean
+  /** @param how How the size was given, when the recording says (see StatedValue.how): a size compared with a known object is not an arm's length. */
+  size(stated: number, predicted: number, how?: string): boolean
 }
+
+/** How the size of a phenomenon was given at the keyframe at `t`, when its provenance says (see StatedValue.how). */
+export type SizeHowOf = (t: number, sourceId: string) => string | undefined
 
 /** Which part of the account an interpretation fails to reproduce. */
 export type Disagreement = "direction" | "width" | "height"
@@ -37,7 +42,7 @@ export interface ConfrontationReading {
   title?: SaidText
   bodyId: string
   /** What the observer said: their own direction and angles, when the recording states them. */
-  stated: { aim?: ShapeAim, angular?: AngularExtent }
+  stated: { aim?: ShapeAim, angular?: AngularExtent, sizeHow?: string }
   /** What the body, standing where the interpretation puts it, would have looked like. */
   predicted: Projection
   /** Degrees between the two directions — undefined when the recording states none. */
@@ -75,7 +80,27 @@ export class BodyConfrontation {
   private static readonly RINGS = 12
   private static readonly SEGMENTS = 24
 
-  constructor(private readonly timeline: Timeline, private readonly tolerance?: ConfrontationTolerance) {
+  constructor(private readonly timeline: Timeline, private readonly tolerance?: ConfrontationTolerance, private readonly sizeHowOf?: SizeHowOf) {
+  }
+
+  /**
+   * How the size of a phenomenon was given, at `t`, where the provenance says: that of the last keyframe at or before `t` stating its size.
+   * "Like the full Moon" is a `recalled-object`, which its law does not shrink as it does a size estimated at arm's length.
+   */
+  static sizeHows(timeline: Pick<Timeline, "allKeyframes">, provenance: Provenance): SizeHowOf {
+    // Looked up when a comparison asks, a few times a frame, rather than gathered: the editor changes the provenance in place.
+    return (t, sourceId) => {
+      const keyframes = timeline.allKeyframes
+      for (let k = keyframes.length - 1; k >= 0; k--) {
+        const key = keyframes[k]
+        if (key.t > t) continue
+        const n = key.shapes.findIndex(state => state.sourceId === sourceId)
+        if (n < 0 || !key.shapes[n].shape.angular) continue
+        const at = `timeline.keyframes.${k}.shapes.${n}.shape.angular`
+        return (provenance.at(at) ?? provenance.at(`${at}.widthDeg`))?.how
+      }
+      return undefined
+    }
   }
 
   /** The tolerances the laws of `model` give, for an observer in `conditions`: what is contradicted is what is outside its law. */
@@ -90,8 +115,8 @@ export class BodyConfrontation {
           || predicted.altitudeDeg > (elevation.high ?? stated.altitudeDeg) + slack
           || predicted.altitudeDeg < (elevation.low ?? stated.altitudeDeg) - slack
       },
-      size(stated, predicted) {
-        const law = model.law({ kind: "angularSize", value: stated }, conditions)
+      size(stated, predicted, how) {
+        const law = model.law({ kind: "angularSize", value: stated, how }, conditions)
         return predicted < (law.low ?? stated) / BodyConfrontation.SIZE_TOLERANCE || predicted > (law.high ?? stated) * BodyConfrontation.SIZE_TOLERANCE
       }
     }
@@ -132,7 +157,7 @@ export class BodyConfrontation {
         // to measure a body against.
         if (!shape || shape.transparency >= 1) continue
         readings.push({
-          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular }, predicted, this.tolerance),
+          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular, sizeHow: this.sizeHowOf?.(t, sourceId) }, predicted, this.tolerance),
           title: shape.title
         })
       }
@@ -150,7 +175,7 @@ export class BodyConfrontation {
     }
     const widthRatio = stated.angular && stated.angular.widthDeg > 0 ? predicted.angular.widthDeg / stated.angular.widthDeg : undefined
     const heightRatio = stated.angular && stated.angular.heightDeg > 0 ? predicted.angular.heightDeg / stated.angular.heightDeg : undefined
-    const sizeOff = (ratio: number, statedDeg: number) => tolerance ? tolerance.size(statedDeg, statedDeg * ratio) : !BodyConfrontation.withinSize(ratio)
+    const sizeOff = (ratio: number, statedDeg: number) => tolerance ? tolerance.size(statedDeg, statedDeg * ratio, stated.sizeHow) : !BodyConfrontation.withinSize(ratio)
     if (widthRatio !== undefined && sizeOff(widthRatio, stated.angular!.widthDeg)) disagreements.push("width")
     if (heightRatio !== undefined && sizeOff(heightRatio, stated.angular!.heightDeg)) disagreements.push("height")
     return { sourceId, bodyId, stated, predicted, separationDeg, widthRatio, heightRatio, disagreements }

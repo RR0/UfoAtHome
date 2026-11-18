@@ -189,9 +189,13 @@ function surroundings() {
 const LIGHT = "light"
 /** "what looks like the full Moon", "right over the horizon", then "starting to move to the left and heading towards me". */
 function timeline(look: Look, atS: number, endS: number) {
-  const fullMoon = said({ widthDeg: 0.52, heightDeg: 0.52 }, "stated",
-    "\"what looks like the full Moon\": as large as the full Moon looks, half a degree",
-    "« ce qui ressemble à la pleine Lune » : aussi grand que la pleine Lune paraît, un demi-degré", DOCUMENTS.interview)
+  // Compared with an object he knows, not estimated at arm's length: what its law of error is (see WitnessError, "recalled-object").
+  const fullMoon = {
+    ...said({ widthDeg: 0.52, heightDeg: 0.52 }, "stated",
+      "\"what looks like the full Moon\": as large as the full Moon looks, half a degree",
+      "« ce qui ressemble à la pleine Lune » : aussi grand que la pleine Lune paraît, un demi-degré", DOCUMENTS.interview),
+    how: "recalled-object"
+  }
   return {
     keyframes: [
       {
@@ -230,13 +234,14 @@ function hisReading(look: Look, startS: number, endS: number) {
       id: "drone",
       title: { en: "A drone the size of a school bus", fr: "Un drone de la taille d'un bus scolaire" },
       explains: [LIGHT],
-      model: { id: "disc" },
+      // As round as he saw it, "like the full Moon": the size he gave every way.
+      model: { id: "sphere" },
       track: [
         {
           t: startS * 1000, azimuthDeg: look.azimuthDeg, altitudeDeg: look.horizonDeg, distanceM,
-          sizeM: said({ widthM, lengthM: widthM, heightM: 3 }, "stated",
-            "\"the size of a school bus or two car garage\": some 12 m across",
-            "« de la taille d'un bus scolaire ou d'un garage double » : quelque 12 m de large", DOCUMENTS.teej),
+          sizeM: said({ widthM, lengthM: widthM, heightM: widthM }, "stated",
+            "\"the size of a school bus or two car garage\": some 12 m across, round as he saw it",
+            "« de la taille d'un bus scolaire ou d'un garage double » : quelque 12 m de large, rond comme il l'a vu", DOCUMENTS.teej),
           appearance: { color: "#fff6e6", luminanceCdM2: 2500 }
         },
         { t: endS * 1000, azimuthDeg: look.azimuthDeg - 8, altitudeDeg: look.horizonDeg + 4, distanceM: Math.round(distanceM * 0.52 / 0.8) }

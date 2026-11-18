@@ -3,6 +3,8 @@ import { BodyConfrontation } from "../../../src/engine/interpretation/BodyConfro
 import type { BodyState } from "../../../src/engine/interpretation/BodyPlacement.js"
 import { Timeline } from "../../../src/engine/model/Timeline.js"
 import { createOval } from "../../../src/engine/shape/Shape.js"
+import { WitnessError } from "../../../src/engine/witness/WitnessError.js"
+import { Provenance } from "../../../src/engine/persistence/Provenance.js"
 
 const eye = { eastM: 0, northM: 0, upM: 0 }
 
@@ -79,5 +81,29 @@ describe("BodyConfrontation", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), transparency: 1, aim: { azimuthDeg: 90, altitudeDeg: 0 } } }])
     expect(new BodyConfrontation(timeline).at(0, [sphereAt(100, 10)], eye)).toEqual([])
+  })
+
+  it("judges a size compared with a known object by its own law, not as one estimated at arm's length", () => {
+    // "like the full Moon", and a body that is half a degree across: as large as said.
+    const stated = { aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 0.52, heightDeg: 0.52 } }
+    const moonSized = BodyConfrontation.projectionOf(sphereAt(1000, 1000 * 0.52 * Math.PI / 180), eye)!
+    const tolerance = BodyConfrontation.lawsOf(WitnessError.MODELS[0])
+    // At arm's length a witness says three to four times too much: a body as large as said is too large.
+    expect(BodyConfrontation.compare("ufo", "craft", stated, moonSized, tolerance).disagreements).toContain("width")
+    expect(BodyConfrontation.compare("ufo", "craft", { ...stated, sizeHow: "recalled-object" }, moonSized, tolerance).disagreements).toEqual([])
+  })
+
+  it("reads how a size was given from the provenance of the last keyframe stating it", () => {
+    const timeline = { allKeyframes: [
+      { t: 0, shapes: [{ sourceId: "ufo", shape: { angular: { widthDeg: 0.52, heightDeg: 0.52 } } }] },
+      { t: 1000, shapes: [{ sourceId: "ufo", shape: { aim: { azimuthDeg: 1, altitudeDeg: 1 } } }] }
+    ] } as never
+    const { provenance } = Provenance.strip({ timeline: { keyframes: [
+      { t: 0, shapes: [{ sourceId: "ufo", shape: { angular: { value: { widthDeg: 0.52, heightDeg: 0.52 }, basis: "stated", how: "recalled-object" } } }] }
+    ] } } as never)
+    const howOf = BodyConfrontation.sizeHows(timeline, provenance)
+    expect(howOf(500, "ufo")).toBe("recalled-object")
+    expect(howOf(1500, "ufo")).toBe("recalled-object")
+    expect(howOf(500, "other")).toBeUndefined()
   })
 })

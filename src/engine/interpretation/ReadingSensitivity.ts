@@ -141,7 +141,7 @@ export class ReadingSensitivity {
   constructor(account: Sighting, private readonly instants: readonly number[], tolerance?: ConfrontationTolerance,
               private readonly said?: ReadonlyMap<string, SaidAspects>,
               private readonly references: Partial<Record<SensitivityKnob, { lower: number, upper: number }>> = {}) {
-    this.confrontation = new BodyConfrontation(account.timeline, tolerance)
+    this.confrontation = new BodyConfrontation(account.timeline, tolerance, BodyConfrontation.sizeHows(account.timeline, account.provenance))
     this.eyeAt = (t: number) => BodyPlacement.eyeOf(account, t, ReadingSensitivity.FLAT)
   }
 

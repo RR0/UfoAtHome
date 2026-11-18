@@ -3866,7 +3866,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [], interpretation?.smoke ?? [], wind)
     const eye = interpretation && this.comparing ? eyeAt(t) : undefined
     if (eye) {
-      readings = new BodyConfrontation(sighting.timeline, this.confrontationTolerance).at(t, states, eye,
+      readings = new BodyConfrontation(sighting.timeline, this.confrontationTolerance, BodyConfrontation.sizeHows(sighting.timeline, sighting.provenance)).at(t, states, eye,
         state => state.outlineNode ? this.sceneRenderer.bodyOutline?.(state.id, state.outlineNode) : undefined)
     }
     this.confrontationReadings = readings
