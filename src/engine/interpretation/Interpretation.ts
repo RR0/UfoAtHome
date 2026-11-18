@@ -1,5 +1,5 @@
 import type { SaidPosition } from "../model/SaidPosition.js"
-import type { DecorModelRef } from "../model/Decor.js"
+import type { DecorLight, DecorModelRef } from "../model/Decor.js"
 import type { People } from "../model/People.js"
 import type { SaidText } from "../model/SaidText.js"
 import type { FlareSalvoJson } from "../../modules/interpretations/flares/DecoyFlare.js"
@@ -270,6 +270,16 @@ export interface BodyJson {
    * recording's. Optional: a part is named alone as well.
    */
   groups?: BodyPartGroupJson[]
+  /**
+   * The lamps it carries, as an aircraft's or a vehicle's of the decor are said (see DecorLight): where each is on it, how bright, how it
+   * blinks, which way it throws its light. What it shows an eye at night is these, not its outline: an airliner's landing lights seen head-on
+   * from twenty kilometres are a light as large as the Moon, its airframe a tenth of that (see BodyGlare, which the confrontation measures them
+   * by). Optional: a body that carries none shows its outline, or its own glow (`appearance.luminanceCdM2`).
+   *
+   * Measured, not drawn: the scene draws the lamps of the decor object or the recorded aircraft such a body stands for (see TrafficDecor), and a
+   * drone's LEDs as its model's lights (see BodyKeyframe.lights). A body that is the only thing there and carries lamps is not lit by them yet.
+   */
+  lamps?: DecorLight[]
   track: BodyKeyframe[]
   /**
    * What it sounds like: heard from where the observer stands, late by the time sound takes to come, shifted in pitch as it comes and goes, and

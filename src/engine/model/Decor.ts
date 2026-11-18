@@ -842,6 +842,9 @@ export function isLightOnAt(light: DecorLight, t: number): boolean {
   return lightOnFractionBetween(light, t, t + 1) > 0.5
 }
 
+/** A lamp's luminous intensity at `intensity` 1, candela: an ordinary navigation light's, which every `intensity` is a ratio of (see DecorLight.intensity). */
+export const DECOR_LAMP_CANDELA = 100
+
 /** How a lamp is switched at `t` (see DecorLight.keyframes): its intensity, 0 when off, and the pattern it blinks by. */
 export function lightStateAt(light: DecorLight, t: number): { intensity: number, pattern: LightPattern } {
   let key: DecorLightKeyframe | undefined

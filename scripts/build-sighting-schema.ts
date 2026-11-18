@@ -272,6 +272,52 @@ class JsonSchemaExport {
   }
 
   static of(fields: Record<string, SchemaField>, options: JsonSchemaOptions = JsonSchemaExport.RECORDING): object {
+    return JsonSchemaExport.factored(JsonSchemaExport.whole(fields, options))
+  }
+
+  /** The smallest subschema worth naming once rather than writing again, in characters of JSON. */
+  private static readonly SHARED_MIN = 600
+
+  /**
+   * `schema` with each large subschema it holds more than once (a lamp of the decor and of a body, a keyframe's weather and a snapshot's) written
+   * once in `$defs` and referred to: what keeps a validator compiled from it small enough to run. Each copy inlined, ajv's function for a
+   * recording grew a frame the first validation in a test's worker overflowed the stack with.
+   */
+  private static factored(schema: Record<string, unknown>): object {
+    const defs = (schema.$defs ?? {}) as Record<string, unknown>
+    let serial = 0
+    for (;;) {
+      const counts = new Map<string, number>()
+      // A subschema, not a map of them (`properties`, `$defs`), whose keys are names that a reference would be mistaken among.
+      const isSchema = (node: unknown, key: string | undefined): boolean => !!node && typeof node === "object" && !Array.isArray(node)
+        && key !== "properties" && key !== "$defs" && ["type", "anyOf", "properties", "items", "enum"].some(word => word in (node as object))
+      const walk = (node: unknown, key: string | undefined, root: boolean): void => {
+        if (!node || typeof node !== "object") return
+        if (!root && isSchema(node, key)) {
+          const text = JSON.stringify(node)
+          if (text.length >= JsonSchemaExport.SHARED_MIN) counts.set(text, (counts.get(text) ?? 0) + 1)
+        }
+        for (const [child, value] of Object.entries(node)) walk(value, Array.isArray(node) ? key : child, false)
+      }
+      walk({ ...schema, $defs: undefined }, undefined, true)
+      for (const value of Object.values(defs)) walk(value, undefined, false)
+      const repeated = [...counts].filter(([, count]) => count > 1).sort((a, b) => b[0].length - a[0].length)[0]
+      if (!repeated) break
+      const name = `shared${++serial}`
+      defs[name] = JSON.parse(repeated[0])
+      const replace = (node: unknown, key: string | undefined): unknown => {
+        if (!node || typeof node !== "object") return node
+        if (isSchema(node, key) && JSON.stringify(node) === repeated[0]) return { $ref: `#/$defs/${name}` }
+        if (Array.isArray(node)) return node.map(value => replace(value, key))
+        return Object.fromEntries(Object.entries(node).map(([child, value]) => [child, replace(value, child)]))
+      }
+      for (const key of Object.keys(schema)) if (key !== "$defs") schema[key] = replace(schema[key], key)
+      for (const key of Object.keys(defs)) if (key !== name) defs[key] = isSchema(defs[key], undefined) && JSON.stringify(defs[key]) === repeated[0] ? defs[key] : replace(defs[key], undefined)
+    }
+    return Object.keys(defs).length > 0 ? { ...schema, $defs: defs } : schema
+  }
+
+  private static whole(fields: Record<string, SchemaField>, options: JsonSchemaOptions): Record<string, unknown> {
     return {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: options.id,

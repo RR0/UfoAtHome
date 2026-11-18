@@ -7,6 +7,7 @@ import type { SaidText } from "../model/SaidText.js"
 import type { ErrorModel } from "../witness/WitnessError.js"
 import type { WitnessConditions } from "../model/Account.js"
 import type { Provenance } from "../persistence/Provenance.js"
+import { BodyGlare } from "./BodyGlare.js"
 
 const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
@@ -29,6 +30,14 @@ export interface ConfrontationTolerance {
   size(stated: number, predicted: number, how?: string): boolean
 }
 
+/**
+ * How large a light is seen, as the eye makes it (see BodyGlare.TYCHO): the angular diameter, degrees, of a point source giving `lux` at the eye.
+ * What the confrontation measures a body that carries lamps by, where it is larger than its outline.
+ */
+export interface LightSeeing {
+  diameterDeg(lux: number): number
+}
+
 /** How the size of a phenomenon was given at the keyframe at `t`, when its provenance says (see StatedValue.how). */
 export type SizeHowOf = (t: number, sourceId: string) => string | undefined
 
@@ -47,6 +56,8 @@ export interface ConfrontationReading {
   predicted: Projection
   /** Degrees between the two directions — undefined when the recording states none. */
   separationDeg?: number
+  /** Whether what it would have looked like is the light of its lamps, larger than its outline, by a law that is contested (see BodyGlare.TYCHO). */
+  lightSized?: boolean
   /** Predicted over stated. */
   widthRatio?: number
   heightRatio?: number
@@ -80,7 +91,25 @@ export class BodyConfrontation {
   private static readonly RINGS = 12
   private static readonly SEGMENTS = 24
 
-  constructor(private readonly timeline: Timeline, private readonly tolerance?: ConfrontationTolerance, private readonly sizeHowOf?: SizeHowOf) {
+  constructor(private readonly timeline: Timeline, private readonly tolerance?: ConfrontationTolerance, private readonly sizeHowOf?: SizeHowOf,
+              private readonly seeing?: LightSeeing) {
+  }
+
+  /**
+   * What a body looks like, its lights taken in: its outline, or the light its lamps make in the eye where that is larger (see BodyGlare). An
+   * airliner at night is the light of its landing lights, not its airframe.
+   */
+  private projectionWithLights(body: BodyState, eye: LocalPoint, t: number, outline: LocalPoint[] | undefined): (Projection & { lightSized?: boolean }) | undefined {
+    const projection = BodyConfrontation.projectionOf(body, eye, outline)
+    if (!projection || !this.seeing || !body.lamps?.length) return projection
+    const distanceM = Math.hypot(body.eastM - eye.eastM, body.northM - eye.northM, body.upM - eye.upM)
+    const lightDeg = this.seeing.diameterDeg(BodyGlare.luxAt(BodyGlare.candelaToward(body, eye, t), distanceM))
+    if (!(lightDeg > projection.angular.widthDeg || lightDeg > projection.angular.heightDeg)) return projection
+    return {
+      aim: projection.aim,
+      angular: { widthDeg: Math.max(projection.angular.widthDeg, lightDeg), heightDeg: Math.max(projection.angular.heightDeg, lightDeg) },
+      lightSized: true
+    }
   }
 
   /**
@@ -134,7 +163,7 @@ export class BodyConfrontation {
     // Bodies of one ensemble are one thing to the account: a flock taken for a craft. Measured as one, by all their outlines together,
     // under the ensemble's id (see BodyJson.ensemble).
     const ensembles = new Map<string, BodyState[]>()
-    const measured: { id: string, explains: string[], predicted: Projection | undefined }[] = []
+    const measured: { id: string, explains: string[], predicted: (Projection & { lightSized?: boolean }) | undefined }[] = []
     for (const body of bodies) {
       if (body.ensemble && body.explains.length > 0) {
         const members = ensembles.get(body.ensemble)
@@ -142,7 +171,7 @@ export class BodyConfrontation {
         else ensembles.set(body.ensemble, [body])
         continue
       }
-      measured.push({ id: body.id, explains: body.explains, predicted: BodyConfrontation.projectionOf(body, eye, outlineOf?.(body)) })
+      measured.push({ id: body.id, explains: body.explains, predicted: this.projectionWithLights(body, eye, t, outlineOf?.(body)) })
     }
     for (const [id, members] of ensembles) {
       const outline = members.flatMap(member => outlineOf?.(member) ?? BodyConfrontation.outlineOf(member))
@@ -157,7 +186,8 @@ export class BodyConfrontation {
         // to measure a body against.
         if (!shape || shape.transparency >= 1) continue
         readings.push({
-          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular, sizeHow: this.sizeHowOf?.(t, sourceId) }, predicted, this.tolerance),
+          ...BodyConfrontation.compare(sourceId, body.id, { aim: shape.aim, angular: shape.angular, sizeHow: this.sizeHowOf?.(t, sourceId) }, { aim: predicted.aim, angular: predicted.angular }, this.tolerance),
+          ...(predicted.lightSized ? { lightSized: true } : {}),
           title: shape.title
         })
       }

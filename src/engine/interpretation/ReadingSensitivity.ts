@@ -1,5 +1,6 @@
 import type { Sighting } from "../model/Sighting.js"
 import { Provenance } from "../persistence/Provenance.js"
+import { BodyGlare } from "./BodyGlare.js"
 import { fromSightingJson, type SightingRecordingJson } from "../persistence/sightingJson.js"
 import { WitnessError } from "../witness/WitnessError.js"
 import { BodyConfrontation, type ConfrontationTolerance } from "./BodyConfrontation.js"
@@ -66,6 +67,11 @@ export interface ReadingSensitivityResult {
   agreement: number
   /** How many comparisons that is. */
   compared: number
+  /**
+   * Whether a size it was compared on is the light of a body's lamps rather than its outline, by a law that is contested (see BodyGlare.TYCHO):
+   * what the note says beside its verdict.
+   */
+  lightSized?: boolean
   /** How many instants it was compared at: none means there was nothing to confront (no body explains anything the account draws). */
   instants: number
   /** The median of the separations between what was said and what the bodies give, degrees, as written. */
@@ -141,7 +147,7 @@ export class ReadingSensitivity {
   constructor(account: Sighting, private readonly instants: readonly number[], tolerance?: ConfrontationTolerance,
               private readonly said?: ReadonlyMap<string, SaidAspects>,
               private readonly references: Partial<Record<SensitivityKnob, { lower: number, upper: number }>> = {}) {
-    this.confrontation = new BodyConfrontation(account.timeline, tolerance, BodyConfrontation.sizeHows(account.timeline, account.provenance))
+    this.confrontation = new BodyConfrontation(account.timeline, tolerance, BodyConfrontation.sizeHows(account.timeline, account.provenance), BodyGlare.seeingOf(account))
     this.eyeAt = (t: number) => BodyPlacement.eyeOf(account, t, ReadingSensitivity.FLAT)
   }
 
@@ -205,6 +211,7 @@ export class ReadingSensitivity {
       compared: nominal.outcomes.size,
       instants: nominal.instants,
       ...(nominal.separations.length ? { medianSeparationDeg: ReadingSensitivity.median(nominal.separations) } : {}),
+      ...(nominal.lightSized ? { lightSized: true } : {}),
       freeBodies: free.map(body => body.id),
       fixedBodies: bodies.filter(body => !free.includes(body)).map(body => body.id),
       margins: []
@@ -413,7 +420,7 @@ export class ReadingSensitivity {
    *   absent then would break on how the track begins, not on what the reading says. Where its motion has not begun yet, or has ended, it
    *   is held where it begins or ends.
    */
-  private score(bodies: readonly BodyJson[], delayed?: { body: BodyJson, ms: number }): { instants: number, outcomes: Map<string, boolean>, separations: number[] } {
+  private score(bodies: readonly BodyJson[], delayed?: { body: BodyJson, ms: number }): { instants: number, outcomes: Map<string, boolean>, separations: number[], lightSized: boolean } {
     const placements = bodies.map(body => ({ body, placement: new BodyPlacement(body, ReadingSensitivity.FLAT, this.eyeAt) }))
     const stateAt = ({ body, placement }: { body: BodyJson, placement: BodyPlacement }, t: number) => {
       const there = placement.at(t)
@@ -425,6 +432,7 @@ export class ReadingSensitivity {
     let instants = 0
     const separations: number[] = []
     const outcomes = new Map<string, boolean>()
+    let lightSized = false
     for (const t of this.instants) {
       const eye = this.eyeAt(t)
       if (!eye) continue
@@ -436,6 +444,7 @@ export class ReadingSensitivity {
         const aspects = this.said ? this.said.get(pair) : { direction: true, size: true }
         if (!aspects) continue
         compared = true
+        if (aspects.size && reading.lightSized) lightSized = true
         const counted = reading.disagreements.filter(off => off === "direction" ? aspects.direction : aspects.size)
         // Two bodies that explain the same phenomenon: it is reproduced when either does.
         outcomes.set(pair, outcomes.get(pair) === true || counted.length === 0)
@@ -443,7 +452,7 @@ export class ReadingSensitivity {
       }
       if (compared) instants++
     }
-    return { instants, outcomes, separations }
+    return { instants, outcomes, separations, lightSized }
   }
 
   private static median(values: readonly number[]): number {

@@ -10,6 +10,8 @@ export interface ReadingSensitivityMessages {
   noneSaid: string
   /** An indication is a direction or a size the witness gave at an instant: reproduces none of the `{compared}`. */
   noneAgrees: string
+  /** Said beside the verdict when a size compared was the light of lamps, by Tycho's star sizes (see BodyGlare.TYCHO). */
+  lightSizedContested: string
   /** Reproduces one of the `{compared}` indications. */
   agreementOne: string
   /** Reproduces `{agreed}` of the `{compared}` indications. */

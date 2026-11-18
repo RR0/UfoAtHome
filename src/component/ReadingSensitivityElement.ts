@@ -143,8 +143,16 @@ ${HintElement.CSS}
     this.shadowRoot!.replaceChildren(style, details)
   }
 
-  /** The line it comes to: how much of the account it reproduces, then what that is the most tied to, or why there is nothing to say. */
+  /**
+   * The line it comes to: how much of the account it reproduces, then what that is the most tied to, or why there is nothing to say; and, when a
+   * size was the light of lamps, that the law it was sized by is contested (see BodyGlare.TYCHO).
+   */
   private sentence(result: ReadingSensitivityResult, bodies: readonly BodyJson[], m: ReadingSensitivityMessages): string {
+    const verdict = this.verdict(result, bodies, m)
+    return result.lightSized ? `${verdict} · ${m.lightSizedContested}` : verdict
+  }
+
+  private verdict(result: ReadingSensitivityResult, bodies: readonly BodyJson[], m: ReadingSensitivityMessages): string {
     if (result.compared === 0) {
       const explains = bodies.some(body => (body.explains?.length ?? 0) > 0)
       return explains ? m.noneSaid : m.nothingToConfront

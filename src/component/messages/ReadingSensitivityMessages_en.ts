@@ -6,6 +6,7 @@ export const readingSensitivityMessages_en = {
   nothingToConfront: "nothing to set against the account: no body of the reading says which phenomenon it is",
   noneSaid: "nothing to set against the account: it traces no direction and no size to the witness",
   noneAgrees: "reproduces none of the witness's {compared} indications",
+  lightSizedContested: "its lights sized as Tycho saw the stars, carried past them: a contested law",
   agreementOne: "reproduces 1 of the witness's {compared} indications",
   agreement: "reproduces {agreed} of the witness's {compared} indications",
   allAgree: "reproduces all the witness's {compared} indications",

@@ -5,7 +5,7 @@ import type { ModelParameters } from "../engine/model/DecorTraits.js"
 import { DecorBase } from "../engine/model/DecorBase.js"
 import { LightRigs } from "../engine/model/LightRig.js"
 import type { DecorFacade, DecorKind, DecorLight, DecorObject, DecorSide, DecorSize, MeasuredDecorSize, StreetLampSpec } from "../engine/model/Decor.js"
-import { canHoldObserver, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween, lightStateAt } from "../engine/model/Decor.js"
+import { canHoldObserver, DECOR_LAMP_CANDELA, decorModelOf, DEFAULT_BUILDING_FLOORS, isLightOnAt, lightOnFractionBetween, lightStateAt } from "../engine/model/Decor.js"
 import type { RgbColor } from "./skyColors.js"
 import { BridgeGeometry } from "./BridgeGeometry.js"
 import { RoofGeometry } from "./RoofGeometry.js"
@@ -92,7 +92,7 @@ const LAMP_MIN_ANGULAR_RADIUS_RAD = 0.002
  * share — the trail an aircraft leaves in the Gennevilliers photograph — and on an ordinary frame
  * the eye's response, which keeps a colour's hue, shows a red light red however bright it burns.
  */
-const LAMP_CANDELA = 100
+const LAMP_CANDELA = DECOR_LAMP_CANDELA
 /**
  * The most a lamp's brightest channel is drawn at, in the scene's relative units. The picture is held in half floats, which stop at 65 504; a
  * 300 cd lens of ten centimetres, to an eye adapted to the night, is some ten million, so its weak channels overflowed with its strong one and a

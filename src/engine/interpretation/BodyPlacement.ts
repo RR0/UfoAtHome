@@ -1,5 +1,5 @@
 import type { BodyAppearance, BodyAttitude, BodyFlame, BodyJson, BodyKeyframe, BodySize } from "./Interpretation.js"
-import type { DecorModelRef } from "../model/Decor.js"
+import type { DecorLight, DecorModelRef } from "../model/Decor.js"
 import type { Sighting } from "../model/Sighting.js"
 import { resolveObserverPoseAt } from "../model/Sighting.js"
 import { geoToLocalMeters } from "../../render3d/terrain/GeoProjection.js"
@@ -60,6 +60,8 @@ export interface BodyState {
   turns?: Record<string, number>
   /** The luminance of each of its model's lights the track names — see BodyKeyframe.lights. */
   lights?: Record<string, number>
+  /** See BodyJson.lamps. */
+  lamps?: DecorLight[]
   /** Whether it throws one at any instant at all — what lets a renderer ready the light once rather
    * than add and remove it as the flame comes and goes (see FlameEffect). */
   throwsFlame: boolean
@@ -321,6 +323,7 @@ export class BodyPlacement {
       motions: this.motionsAt(t),
       ...(this.turnKeys.size > 0 ? { turns: BodyPlacement.channelsAt(this.turnKeys, t, 0) } : {}),
       lights: this.lightsAt(t),
+      ...(this.body.lamps?.length ? { lamps: this.body.lamps } : {}),
       throwsFlame: this.body.track.some(key => key.flame !== undefined && key.flame.luminanceCdM2 > 0)
     }
   }

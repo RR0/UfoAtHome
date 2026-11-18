@@ -166,7 +166,12 @@ function bodyOf(flight: Flight, id: string, title: Text, startMs: number, durati
     }
   })
   const modelId = TrafficModels.idOf(model.code)
-  return { id, title, explains, ...(modelId ? { model: { id: modelId } } : { model: { id: "poly-google-airliner" } }), track }
+  // The lamps the scene draws on it from the record (see TrafficDecor), which the confrontation sizes the light he saw by (see BodyGlare).
+  const lamps = [
+    ...TrafficLights.lights(model, -30),
+    ...TrafficLights.landingLights(model, -30, inside.map(point => ({ t: point.t - startMs, altitudeFt: point.altitudeFt })))
+  ]
+  return { id, title, explains, ...(modelId ? { model: { id: modelId } } : { model: { id: "poly-google-airliner" } }), lamps, track }
 }
 
 // ---- The houses round the spot ----
@@ -297,7 +302,7 @@ function airlinerAsLarge(look: Look, night: Night, type: string, name: Text) {
     fr: `Comparaison de taille : un ${name.fr} (${String(size.widthM).replace(".", ",")} m d'envergure) aussi grand qu'il a dit que la lumière paraissait, un demi-degré, est à ${km.replace(".", ",")} km et ${Math.round(seenAt.upM)} m de haut ; volant vers lui à ${APPROACH_MS} m/s, il est au-dessus de lui ${meetS} s plus tard`
   }
   const body = {
-    id: `${type.toLowerCase()}-as-large`, title: name, explains: [LIGHT], model: { id: modelId },
+    id: `${type.toLowerCase()}-as-large`, title: name, explains: [LIGHT], model: { id: modelId }, lamps: lights,
     track: times.map((t, i) => ({
       t: t * 1000, ...along(t), altitudeM: r1(altitudeM - size.heightM / 2), attitude: { headingDeg },
       ...(i === 0 ? { sizeM: size, appearance: { color: "#dde0e4", albedo: 0.6 } } : {})

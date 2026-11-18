@@ -123,6 +123,7 @@ import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
+import { BodyGlare } from "../engine/interpretation/BodyGlare.js"
 import type { ConfrontationReading, ConfrontationTolerance } from "../engine/interpretation/BodyConfrontation.js"
 import type { BodyAppearance, BodyAttitude, BodyJson, BodySize, InterpretationJson } from "../engine/interpretation/Interpretation.js"
 
@@ -3866,7 +3867,7 @@ export class SceneElement extends HTMLElement {
     this.sceneRenderer.setBodies(states, t / 1000, interpretation?.bodies.map(body => body.id) ?? [], interpretation?.smoke ?? [], wind)
     const eye = interpretation && this.comparing ? eyeAt(t) : undefined
     if (eye) {
-      readings = new BodyConfrontation(sighting.timeline, this.confrontationTolerance, BodyConfrontation.sizeHows(sighting.timeline, sighting.provenance)).at(t, states, eye,
+      readings = new BodyConfrontation(sighting.timeline, this.confrontationTolerance, BodyConfrontation.sizeHows(sighting.timeline, sighting.provenance), BodyGlare.seeingOf(sighting)).at(t, states, eye,
         state => state.outlineNode ? this.sceneRenderer.bodyOutline?.(state.id, state.outlineNode) : undefined)
     }
     this.confrontationReadings = readings

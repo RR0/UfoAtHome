@@ -1,5 +1,7 @@
 import type { SaidText } from "../../../engine/model/SaidText.js"
 import type { BodyJson, BodyKeyframe } from "../../../engine/interpretation/Interpretation.js"
+import { DECOR_LAMP_CANDELA } from "../../../engine/model/Decor.js"
+import type { DecorLight } from "../../../engine/model/Decor.js"
 import { DroneAirframes } from "./DroneAirframe.js"
 import type { DroneAirframe, DroneAirframeId, DroneLight } from "./DroneAirframe.js"
 
@@ -187,11 +189,34 @@ export class DroneFlight {
           : { ...(flight.explains ? { explains: flight.explains } : {}), ...(count > 1 ? { ensemble: flight.id } : {}) }),
         model: { id: airframe.modelId },
         modelParameters: colours,
+        lamps: DroneFlight.lampsOf(lights, phases),
         ...(flight.silent ? {} : { sound: { kind: "unmanned", ...(flight.quieterDb ? { quieterDb: flight.quieterDb } : {}) } }),
         track: keys
       }
       return body
     })
+  }
+
+  /**
+   * Its LEDs as lamps (see BodyJson.lamps): what the confrontation sizes the light a witness saw of it by, at night (see BodyGlare). Each where it
+   * is on the airframe (the model's front is its −z, a lamp's its +z), as bright as it is (a lamp's intensity is a ratio of DECOR_LAMP_CANDELA)
+   * and blinking as it does, at this drone's phase.
+   */
+  static lampsOf(lights: Record<string, DroneLight>, phases: Record<string, number>): DecorLight[] {
+    return Object.entries(lights).flatMap(([name, light]) => light.leds.map((led, i) => {
+      const flashing = light.hz! > 0
+      const periodS = flashing ? 1 / light.hz! : 0
+      return {
+        id: DroneAirframes.materialOf(name, i, light.leds.length),
+        offsetM: { x: led.at[0], y: led.at[1], z: -led.at[2] },
+        color: light.color,
+        intensity: light.candela / DECOR_LAMP_CANDELA,
+        // A drone's light is on while frac(t/period − phase) is under its flash (see isOn); a lamp's while frac(t/period + phase) is (see Decor).
+        pattern: flashing
+          ? { kind: "flash" as const, perMinute: light.hz! * 60, dutyCycle: Math.min(1, (light.flashS ?? 0.5 * periodS) / periodS), phase: ((1 - (phases[name] ?? 0)) % 1 + 1) % 1 }
+          : { kind: "steady" as const }
+      }
+    }))
   }
 
   /**

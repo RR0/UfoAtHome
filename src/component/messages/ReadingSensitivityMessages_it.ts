@@ -6,6 +6,7 @@ export const readingSensitivityMessages_it = {
   nothingToConfront: "niente da confrontare con il resoconto: nessun corpo della lettura dice quale fenomeno sia",
   noneSaid: "niente da confrontare: il resoconto non attribuisce al testimone, dicendo su cosa si basano, nessuna direzione né dimensione",
   noneAgrees: "non riproduce nessuna delle {compared} indicazioni del testimone",
+  lightSizedContested: "le sue luci misurate come Tycho vedeva le stelle, prolungato oltre: una legge contestata",
   agreementOne: "riproduce 1 delle {compared} indicazioni del testimone",
   agreement: "riproduce {agreed} delle {compared} indicazioni del testimone",
   allAgree: "riproduce tutte le {compared} indicazioni del testimone",
