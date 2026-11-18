@@ -13,6 +13,15 @@ export interface ReentryParameterTexts {
   type: string
   whatCameInNaturalOrPut: string
   notKnown: string
+  seenByTheWitness: string
+  appearedAzimuth: string
+  appearedHeight: string
+  wentOutAzimuth: string
+  wentOutHeight: string
+  seenFor: string
+  fromTheNorthTowardsTheEast: string
+  aboveTheHorizon: string
+  allSaidThePathIsWorkedOut: string
   catalogueName: string
   forAReEntryThePiece: string
   cosparId: string

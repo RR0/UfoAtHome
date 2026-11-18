@@ -496,6 +496,10 @@ export const html = `
          both. Read-only on purpose — it states what else was in that patch of sky, and whether that
          explains anything is the reader's conclusion, never the file's claim. See MeteorShowers.ts
          and Comets.ts. -->
+    <!-- Ticked, the sky holds what the sources know of that date and place besides what the recording states: the meteors of the
+         showers and the sporadics, the fireballs a camera network recorded, the re-entries on record, the satellites tracked. Unticked,
+         it is a sky entered by hand, the meteors the witness saw stated as re-entries (see Sighting.skySources). -->
+    <label class="check"><input id="sky-sources" type="checkbox" checked/> <span id="label-sky-sources"></span></label>
     <output id="sky-candidates" class="weather-source" for="lat lng obs-time"></output>
     <!-- A shooting star for the meteor and a comet for the comet. The meteor button used to carry
          the comet glyph, which was only ever unambiguous while there was nothing else up there. -->

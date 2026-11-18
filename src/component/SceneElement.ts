@@ -2699,8 +2699,14 @@ export class SceneElement extends HTMLElement {
     const sighting = this.ufoElement.sighting
     const spanMs = Math.max((sighting.event.durationSeconds ?? 0) * 1000, this.ufoElement.seekableDuration)
     const startMs = startDate?.getTime()
-    const key = startMs === undefined ? "" : `${startMs}+${spanMs}`
+    // A sky entered by hand asks no archive (see Sighting.skySources).
+    const sourced = sighting.skySources !== false
+    const key = startMs === undefined || !sourced ? "" : `${startMs}+${spanMs}`
     if (this.fireballs?.key === key) return
+    if (!sourced) {
+      this.fireballs = { key, status: "outside", reentries: [] }
+      return
+    }
     if (startMs === undefined || !FireballArchive.mayCover(startMs + spanMs)) {
       this.fireballs = { key, status: "outside", reentries: [] }
       return
@@ -3381,6 +3387,8 @@ export class SceneElement extends HTMLElement {
    * elements do not depend on; the passes computed from them are (see satellitePassesDuring).
    */
   private ensureSatellites(startDate: Date | undefined): void {
+    // A sky entered by hand has no satellite it does not state (see Sighting.skySources).
+    if (this.ufoElement.sighting.skySources === false) startDate = undefined
     const key = startDate ? String(startDate.getTime()) : ""
     if (key === this.satellitesFor) return
     this.satellitesFor = key
@@ -3999,7 +4007,8 @@ export class SceneElement extends HTMLElement {
       time?.second,
       sighting.event.utcOffsetHours,
       sighting.event.durationSeconds,
-      sighting.timeline.duration
+      sighting.timeline.duration,
+      sighting.skySources
     ])
   }
 
@@ -4020,7 +4029,8 @@ export class SceneElement extends HTMLElement {
     const date = place?.lat !== undefined && place.lng !== undefined && time?.year !== undefined
       ? sightingTimeToDate(time, place.lng, sighting.event.utcOffsetHours)
       : undefined
-    if (!date || place?.lat === undefined || place.lng === undefined) {
+    // A sky entered by hand has no meteor it does not state (see Sighting.skySources): those it saw are its re-entries.
+    if (!date || place?.lat === undefined || place.lng === undefined || sighting.skySources === false) {
       this.sceneRenderer.setMeteorShower([], 0, 0)
       return
     }

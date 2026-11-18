@@ -477,6 +477,13 @@ export class Sighting {
   skyEvents?: SkyEventsJson
 
   /**
+   * Whether the sky holds, beside what the recording states, what the sources know of that date and place: the meteors of the
+   * showers and the sporadic background, the fireballs a camera network recorded, the re-entries on record, the satellites tracked.
+   * Absent is true. False is a sky entered by hand: only the events the recording states (see skyEvents) are in it.
+   */
+  skySources?: boolean
+
+  /**
    * The data its scene would otherwise ask third parties for as it plays (the relief, the photograph of the ground, the roads…), kept in
    * annexes beside the recording's file — see Snapshots. Absent is every group asked for live, as every recording made before this did.
    */

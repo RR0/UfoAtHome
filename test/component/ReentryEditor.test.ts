@@ -193,4 +193,22 @@ describe("ReentryEditor", () => {
     expect(sighting.skyEvents!.reentries![0].type).toBe("satellite")
     expect(objectShown()).toBe(true)
   })
+
+  test("works its path out from where the witness saw it, once all of it is said", async () => {
+    const { sighting } = await build({ reentries: [{ ...chelyabinsk(), type: "meteor" }] })
+    const field = (key: string) => container.querySelector(`#reentry-parameters [data-key="seen.${key}"]`)!
+    typed(field("fromAzimuthDeg"), "90")
+    typed(field("fromAltitudeDeg"), "30")
+    typed(field("toAzimuthDeg"), "120")
+    typed(field("toAltitudeDeg"), "20")
+    // Not all said yet: the path is the one it had.
+    expect(sighting.skyEvents!.reentries![0].track[0].lat).toBe(54.5)
+    typed(field("durationS"), "2")
+    const reentry = sighting.skyEvents!.reentries![0]
+    expect(reentry.seen).toEqual({ fromAzimuthDeg: 90, fromAltitudeDeg: 30, toAzimuthDeg: 120, toAltitudeDeg: 20, durationS: 2 })
+    expect(reentry.track.map(place => place.t)).toEqual([-2000, 0])
+    // East of the witness, at 48° N 2° E.
+    expect(reentry.track[0].lng).toBeGreaterThan(2)
+    expect(Math.abs(reentry.track[0].lat - 48)).toBeLessThan(1)
+  })
 })

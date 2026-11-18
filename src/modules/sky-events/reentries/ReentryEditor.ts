@@ -114,8 +114,13 @@ export class ReentryEditor {
       apply => this.editReentry(edited => {
         // The object is copied before it is written to: the one of the re-entry before the edit is left as it was.
         if (edited.object) edited.object = { ...edited.object }
+        if (edited.seen) edited.seen = { ...edited.seen }
         apply(edited as unknown as ParameterHolder)
         if (edited.object && Object.values(edited.object).every(value => value === undefined || value === "")) delete edited.object
+        // What the witness saw, all said, is what its path is: worked out again at every edit of it (see ReentryParameters.trackFromSeen).
+        const origin = this.origin()
+        const derived = origin && ReentryParameters.trackFromSeen(edited, origin)
+        if (derived) edited.track = derived
       })
     ), () => this.written())
   }
@@ -219,6 +224,8 @@ export class ReentryEditor {
   private written(): void {
     const reentry = this.current
     if (reentry) this.list?.rename(reentry.id, this.labelOf(reentry))
+    // Its path may have been worked out again from what the witness saw.
+    if (reentry?.seen) this.syncPlace(true)
   }
 
   // The timeline.

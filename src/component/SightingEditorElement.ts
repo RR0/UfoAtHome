@@ -582,6 +582,8 @@ export class SightingEditorElement extends HTMLElement {
   private readonly lensCondensationInput: HTMLInputElement
   private readonly lensDirtInput: HTMLInputElement
   private readonly lensShelteredInput: HTMLInputElement
+  /** Whether the sky holds what the sources know of it (see Sighting.skySources). */
+  private readonly skySourcesInput: HTMLInputElement
   private readonly lightPollutionInput: HTMLInputElement
   private readonly lightPollutionStatusText: HTMLElement
   private readonly lightPollutionSourceRow: HTMLElement
@@ -1444,6 +1446,7 @@ export class SightingEditorElement extends HTMLElement {
     this.lensCondensationInput = this.shadow.getElementById("lens-condensation") as HTMLInputElement
     this.lensDirtInput = this.shadow.getElementById("lens-dirt") as HTMLInputElement
     this.lensShelteredInput = this.shadow.getElementById("lens-sheltered") as HTMLInputElement
+    this.skySourcesInput = this.shadow.getElementById("sky-sources") as HTMLInputElement
     this.lightPollutionInput = this.shadow.getElementById("lightPollution") as HTMLInputElement
     this.lightPollutionStatusText = this.shadow.getElementById("light-pollution-status-text")!
     this.lightPollutionSourceRow = this.shadow.getElementById("light-pollution-source-row")!
@@ -1994,6 +1997,12 @@ export class SightingEditorElement extends HTMLElement {
     for (const field of [this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
       field.addEventListener(field instanceof HTMLSelectElement || field.type === "checkbox" ? "change" : "input", () => this.updateLens())
     }
+    // A value of the whole recording: unticked, the sky is entered by hand, and no source adds to it.
+    this.skySourcesInput.addEventListener("change", () => {
+      this.ufoElement.sighting.skySources = this.skySourcesInput.checked ? undefined : false
+      this.ufoElement.refresh()
+      this.refreshSkyCandidates()
+    })
     // A value of the place, not of a pose: the towns do not move during an observation. Blank is a
     // natural sky.
     // Typed, it is the author's and no record replaces it; emptied, it is the atlas's to answer again.
@@ -6629,6 +6638,7 @@ export class SightingEditorElement extends HTMLElement {
     this.lensCondensationInput.value = lens?.condensation?.toString() ?? ""
     this.lensDirtInput.value = lens?.dirt?.toString() ?? ""
     this.lensShelteredInput.checked = lens?.sheltered === true
+    this.skySourcesInput.checked = sighting.skySources !== false
     this.lightPollutionInput.value = sighting.lightPollution?.toString() ?? ""
   }
 
@@ -10869,7 +10879,7 @@ export class SightingEditorElement extends HTMLElement {
       date?.getTime(), place?.lat, place?.lng, this.groundElevationM, sighting.instrumentId, sighting.exposureSeconds, sighting.lightPollution,
       resolveWeatherAt(sighting, 0), this.messages.skyLine, this.meteorRankFor,
       this.sceneElement.satelliteState.status, this.satelliteSpanMs(), this.sceneElement.fireballState.status,
-      this.sceneElement.groundKey
+      this.sceneElement.groundKey, sighting.skySources
     ])
     if (key === this.skyCandidatesKey) return
     this.skyCandidatesKey = key
@@ -10884,20 +10894,28 @@ export class SightingEditorElement extends HTMLElement {
       return
     }
     const observer = { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }
+    // A sky entered by hand says so in place of what the sources would have put in it, which the scene does not draw (see
+    // Sighting.skySources); what does not come from a source (the stars, the Moon, a comet's orbit) is still said.
+    const sourced = sighting.skySources !== false
     const parts = [
       this.starsClause(date, observer),
-      this.showerClause(date, observer),
+      sourced ? this.showerClause(date, observer) : this.messages.skyByHand,
       this.cometClause(date, observer),
       this.novaClause(date, observer),
       this.eclipseClause(date, observer),
       this.moonClause(date, observer),
-      this.satelliteClause(date, observer),
-      this.reentryClause(date, observer),
-      this.fireballClause(date, observer),
+      sourced ? this.satelliteClause(date, observer) : undefined,
+      sourced ? this.reentryClause(date, observer) : undefined,
+      sourced ? this.fireballClause(date, observer) : undefined,
       this.opticsClause(date, observer),
       this.rainbowClause(date, observer),
       this.glowClause(date, observer)
     ].filter(part => part !== undefined)
+    if (!sourced) {
+      this.showMeteorButton.disabled = true
+      this.showSatelliteButton.disabled = true
+      this.showFireballButton.disabled = true
+    }
     this.skyCandidatesOutput.textContent = this.messages.skyLine.replace("{parts}", parts.join(" · "))
     this.labelSkyButtons()
   }
@@ -12046,6 +12064,8 @@ export class SightingEditorElement extends HTMLElement {
     this.label("label-lens-dirt", messages.lensDirt)
     this.lensDirtInput.title = messages.lensDirtTitle
     this.label("label-lens-sheltered", messages.lensSheltered)
+    this.label("label-sky-sources", messages.skySources)
+    this.skySourcesInput.closest("label")!.title = messages.skySourcesHint
     this.lensShelteredInput.title = messages.lensShelteredTitle
     this.labelLightPollution.textContent = messages.lightPollution
     this.lightPollutionInput.title = messages.lightPollutionTitle

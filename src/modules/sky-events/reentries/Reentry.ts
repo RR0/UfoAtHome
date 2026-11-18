@@ -32,12 +32,29 @@ export interface ReentryJson {
    * module's. Its nature follows from it, natural or artificial. Not known when absent: often what an account leaves in question.
    */
   type?: string
+  /**
+   * Where the witness saw it in the sky, when that is what is known (a meteor seen, not recorded): its path is then worked out from it
+   * (see ReentryParameters.trackFromSeen), at the heights its path states, and this is kept as what was said.
+   */
+  seen?: ReentrySeen
   /** The object that came down, when it is known — the catalogue says which piece it was. */
   object?: ReentryObject
   /** Where the leading point of the break-up was, at instants of the recording. At least two. */
   track: ReentryKeyframe[]
   /** The pieces seen, each following the same path some seconds behind the leading point. */
   fragments: ReentryFragment[]
+}
+
+/** Where a re-entry was seen in the sky from where the witness stood: where it appeared and went out, and for how long. */
+export interface ReentrySeen {
+  /** Where it appeared: degrees from the north towards the east, and above the horizon. */
+  fromAzimuthDeg?: number
+  fromAltitudeDeg?: number
+  /** Where it went out. */
+  toAzimuthDeg?: number
+  toAltitudeDeg?: number
+  /** How long it was seen, seconds. */
+  durationS?: number
 }
 
 /** Which object re-entered, as the satellite catalogue names it. */

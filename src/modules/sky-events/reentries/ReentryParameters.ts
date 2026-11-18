@@ -1,5 +1,5 @@
 import { ReentrySighting } from "./Reentry.js"
-import type { ReentryFragment, ReentryJson, ReentryKeyframe } from "./Reentry.js"
+import type { ReentryFragment, ReentryJson, ReentryKeyframe, ReentrySeen } from "./Reentry.js"
 import type { ParameterHolder, ParameterSet, ParameterSpec } from "../../../engine/interpretation/Parameters.js"
 import { ReentryTypes } from "./types/ReentryTypes.js"
 
@@ -14,6 +14,49 @@ export class ReentryParameters {
   private static readonly OBJECT = "object"
   private static readonly LIGHT = "light"
   private static readonly WHEN = "when"
+  private static readonly SEEN = "seenByTheWitness"
+
+  /** The Earth's mean radius, km: a sphere is close enough for a path a witness gave to the degree. */
+  private static readonly EARTH_KM = 6371
+
+  /**
+   * Where a line of sight from `observer`, towards an azimuth and an altitude above the horizon (degrees), meets the height `heightKm`
+   * above the Earth: the place under that point.
+   */
+  static placeSeen(observer: { lat: number, lng: number }, azimuthDeg: number, altitudeDeg: number, heightKm: number): { lat: number, lng: number } {
+    const rad = Math.PI / 180
+    const r = ReentryParameters.EARTH_KM
+    const a = altitudeDeg * rad
+    // Along the line of sight, from the eye at r, to the sphere of radius r + h.
+    const s = -r * Math.sin(a) + Math.sqrt((r * Math.sin(a)) ** 2 + (r + heightKm) ** 2 - r ** 2)
+    // The angle at the Earth's centre between the eye and the point, and the place that far along the azimuth's great circle.
+    const theta = Math.atan2(s * Math.cos(a), r + s * Math.sin(a))
+    const lat1 = observer.lat * rad
+    const bearing = azimuthDeg * rad
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(theta) + Math.cos(lat1) * Math.sin(theta) * Math.cos(bearing))
+    const lng2 = observer.lng * rad + Math.atan2(Math.sin(bearing) * Math.sin(theta) * Math.cos(lat1), Math.cos(theta) - Math.sin(lat1) * Math.sin(lat2))
+    return { lat: lat2 / rad, lng: ((lng2 / rad + 540) % 360) - 180 }
+  }
+
+  /**
+   * The path of a re-entry worked out from where the witness saw it (see ReentrySeen): from where it appeared, at the height its path
+   * starts at, to where it went out, at the height its path ends at, over the time it was seen from the path's first instant. Undefined
+   * while what was seen is not all said.
+   */
+  static trackFromSeen(reentry: ReentryJson, observer: { lat: number, lng: number }): ReentryKeyframe[] | undefined {
+    const seen: ReentrySeen | undefined = reentry.seen
+    const { fromAzimuthDeg, fromAltitudeDeg, toAzimuthDeg, toAltitudeDeg, durationS } = seen ?? {}
+    if (fromAzimuthDeg === undefined || fromAltitudeDeg === undefined || toAzimuthDeg === undefined || toAltitudeDeg === undefined || !durationS) return undefined
+    const first = reentry.track[0]
+    const last = reentry.track[reentry.track.length - 1]
+    const start = first?.t ?? 0
+    const fromKm = first?.altitudeKm ?? 100
+    const toKm = last?.altitudeKm ?? fromKm
+    return [
+      { t: start, ...ReentryParameters.placeSeen(observer, fromAzimuthDeg, fromAltitudeDeg, fromKm), altitudeKm: fromKm },
+      { t: start + Math.round(durationS * 1000), ...ReentryParameters.placeSeen(observer, toAzimuthDeg, toAltitudeDeg, toKm), altitudeKm: toKm }
+    ]
+  }
 
   /**
    * A point of the path at `t`, where the leading piece is then: on the path between two of its points, or past either end going on as
@@ -80,7 +123,13 @@ export class ReentryParameters {
       },
       { type: "text", key: "object.cosparId", group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued, label: "cosparId",
         placeholder: "t1968013c" },
-      { type: "number", key: "object.norad", min: 1, max: 999999, step: 1, group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued, label: "noradNumber" }
+      { type: "number", key: "object.norad", min: 1, max: 999999, step: 1, group: ReentryParameters.OBJECT, visibleWhen: ReentryParameters.mayBeCatalogued, label: "noradNumber" },
+      // Where the witness saw it, which its path is worked out from once all is said (see trackFromSeen).
+      { type: "number", key: "seen.fromAzimuthDeg", min: 0, max: 360, step: 1, unit: "°", group: ReentryParameters.SEEN, label: "appearedAzimuth", hint: "fromTheNorthTowardsTheEast" },
+      { type: "number", key: "seen.fromAltitudeDeg", min: -5, max: 90, step: 1, unit: "°", group: ReentryParameters.SEEN, label: "appearedHeight", hint: "aboveTheHorizon" },
+      { type: "number", key: "seen.toAzimuthDeg", min: 0, max: 360, step: 1, unit: "°", group: ReentryParameters.SEEN, label: "wentOutAzimuth", hint: "fromTheNorthTowardsTheEast" },
+      { type: "number", key: "seen.toAltitudeDeg", min: -5, max: 90, step: 1, unit: "°", group: ReentryParameters.SEEN, label: "wentOutHeight", hint: "aboveTheHorizon" },
+      { type: "number", key: "seen.durationS", min: 0.1, max: 3600, step: 0.1, unit: "s", group: ReentryParameters.SEEN, label: "seenFor", hint: "allSaidThePathIsWorkedOut" }
     ] satisfies ParameterSpec[])
   }
 

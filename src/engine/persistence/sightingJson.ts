@@ -163,6 +163,10 @@ export interface SightingRecordingJson {
   variants?: InterpretationJson[]
   /** What happened in the sky while it runs, as facts (a laser shot, a launch, a re-entry) — see SkyEventsJson. Absent means none was stated. */
   skyEvents?: SkyEventsJson
+  /** Whether the sky holds, beside what the recording states, what the sources know of that date and place: the meteors of the
+   * showers and the sporadic background, the fireballs a camera network recorded, the re-entries on record, the satellites tracked.
+   * Absent is true. False is a sky entered by hand: only the events the recording states (see skyEvents) are in it. */
+  skySources?: boolean
   /** Where the data its scene would otherwise ask third parties for is kept, beside this file — see Snapshots. Absent means all of it is
    * asked for live. */
   snapshots?: Snapshots
@@ -245,6 +249,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     interpretation: expanded ? SightingPositions.restatedInterpretation(sighting) : RecordingEvents.writtenInterpretation(sighting, SightingPositions.restatedInterpretation(sighting)),
     variants: sighting.variants.length > 0 ? sighting.variants : undefined,
     skyEvents: SkyEvents.written(sighting.skyEvents),
+    skySources: sighting.skySources === false ? false : undefined,
     snapshots: sighting.snapshots,
     modules: sighting.modules?.length ? sighting.modules : undefined
   }
@@ -346,6 +351,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.interpretation = stated.interpretation
   sighting.variants = Array.isArray(json.variants) ? json.variants : []
   sighting.skyEvents = stated.skyEvents
+  sighting.skySources = json.skySources === false ? false : undefined
   sighting.snapshots = json.snapshots
   sighting.modules = Array.isArray(json.modules) ? json.modules.filter((url): url is string => typeof url === "string") : undefined
   sighting.loadIssues = issues

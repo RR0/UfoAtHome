@@ -656,6 +656,11 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   /** The date or the place is missing, so nothing can be worked out — distinct from "there was
    * nothing", the same way the weather distinguishes the two. */
   skyUnknown: string
+  /** The sky line's clause for a sky entered by hand, in place of the meteors and satellites the sources would add. */
+  skyByHand: string
+  /** The box of the Sky group that lets the sources add to the sky (see Sighting.skySources), and what it says it does. */
+  skySources: string
+  skySourcesHint: string
   /** Jumps the playhead to the next meteor of the shower and turns the observer to face it. Stating
    * that a shower was running without offering this is half a feature: a one-second streak
    * somewhere in sixty degrees of sky is not findable by hand. */
