@@ -3,6 +3,8 @@ import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 import { PoherMatrix } from "../../src/engine/witness/PoherMatrix.js"
 import type { PoherMatrixEntry, PoherReasons } from "../../src/engine/witness/PoherMatrix.js"
+import { InterpretationRegistry } from "../../src/modules/interpretations/interpretationSources.js"
+import { DroneAirframes } from "../../src/modules/interpretations/drones/DroneAirframe.js"
 
 /** The versions as rr0.org holds them, beside this repository: checked when it is there. */
 const RR0 = resolve(process.cwd(), "../rr0.org")
@@ -40,5 +42,15 @@ describe("RR0's version of the Poher matrix, as rr0.org holds it", () => {
     expect(matrix.reason("LensFlare", "Detection.NakedEye")?.why).toBeTruthy()
     for (const phenomenon of ["DroneLightShow", "SkyLantern", "ParachuteFlare"]) expect(of(phenomenon)).toMatchObject({ excludedBy: [], added: true })
     expect(of("Stars").added).toBe(false)
+  })
+
+  it.skipIf(!present)("has a column for every kind of interpretation the app computes, each drone airframe included", () => {
+    const columns = new Set(rr0.flatMap(entry => Object.keys(scoresOf(entry))))
+    const kinds = new Map(InterpretationRegistry.kinds().map(kind => [kind.key, kind]))
+    const said = [
+      ...["flares", "lanterns", "birds"].map(key => kinds.get(key)!.phenomenon!({})),
+      ...DroneAirframes.ALL.map(airframe => kinds.get("drones")!.phenomenon!({ airframe: airframe.id }))
+    ]
+    for (const phenomenon of said) expect(columns, String(phenomenon)).toContain(phenomenon)
   })
 })

@@ -6,6 +6,7 @@ import type { LanternLaunchJson } from "./SkyLantern.js"
 export const LANTERN_KIND: InterpretationKind<LanternLaunchJson> = {
   key: "lanterns",
   messages: LANTERN_KIND_MESSAGES,
+  phenomenon: () => "SkyLantern",
   compute: () => import("./SkyLantern.js").then(({ SkyLantern }) => (launch, context) => SkyLantern.bodiesOf(launch, context?.obstacles)),
   editor: () => import("./LanternEditor.js").then(({ LanternEditor }) => (container, host, language) => new LanternEditor(container, host, language))
 }

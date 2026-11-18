@@ -42,6 +42,11 @@ export interface CandidatesHost {
   traffic(): { tracks: AircraftTrack[], startMs: number, describe(track: AircraftTrack): AircraftDescription | undefined } | undefined
   /** The interpretations of the account: its own, and the readings of it a case holds, each with what it is called. */
   interpretations(): { id: string, label: string, interpretation: InterpretationJson }[]
+  /**
+   * An interpretation with the bodies its kinds compute (drones, lanterns...), and the known phenomenon of Poher's matrix each of these is
+   * an instance of (see SceneElement.computedInterpretation); `loaded` settles once the code of its kinds has come.
+   */
+  computed(interpretation: InterpretationJson): { interpretation: InterpretationJson, phenomenonOf: Map<string, string>, loaded: Promise<void> }
   /** What a bright star is called in the reader's language (see SceneNaming.star). */
   starName(name: string): string
   /** How a body looks from the observer's eye at `t` ms of the recording (see SceneElement.bodyProjectionAt). */
@@ -52,8 +57,12 @@ export interface CandidatesHost {
   remove(index: number): void
 }
 
-/** What a known phenomenon of Poher's matrix is followed by, when its track can be computed. */
-type Tracked = "Moon" | "Planets" | "Stars" | "OrbitingSatellites" | "AtmosphericSatellitesReentry" | "Meteorits" | "HighAltitudePlanes" | "LowAltitudePlanes" | "Helicopters"
+/**
+ * A known phenomenon of Poher's matrix a candidate whose track can be computed is an instance of: one of the sky's ("Moon", "Planets",
+ * "Stars", "OrbitingSatellites", "AtmosphericSatellitesReentry", "Meteorits", aircraft), or the one the kind of an interpretation says its
+ * bodies are (see InterpretationKind.phenomenon: "ConsumerDrone", "SkyLantern"...).
+ */
+type Tracked = string
 
 /**
  * The candidate explanations of the Summary section (see the design handoff, §6, and docs/witness-error-model.md, "The search"): one
@@ -135,6 +144,8 @@ export class CandidatesView {
   /** Which version of the matrix is read: RR0's unless the reader chose Poher's own, a choice kept for the next visit. */
   private poherVersion = CandidatesView.storedVersion()
   private static readonly VERSION_STORAGE = "ufoathome.poherMatrixVersion"
+  /** The interpretations whose kinds' code was asked for (see interpretationTracks): each searched again once, when it has come. */
+  private readonly kindsLoading = new WeakSet<InterpretationJson>()
   /** Which phenomenon of the matrix each variant stands for. */
   private readonly phenomenonOf = new Map<string, Tracked>()
 
@@ -263,13 +274,26 @@ export class CandidatesView {
     })
   }
 
-  /** The interpretations of the account, each followed by the body that claims to be its main phenomenon (else its first body). */
+  /**
+   * The interpretations of the account, each followed by the body that claims to be its main phenomenon (else its first body), the bodies
+   * its kinds compute included: drones, lanterns, birds... A body so computed is assessed as the phenomenon of the matrix its kind says it
+   * is an instance of (see InterpretationKind.phenomenon). Searched again once the code of its kinds has come, when it had not.
+   */
   private interpretationTracks(): CandidateTrack[] {
     const m = this.host.messages().candidates
     const first = this.host.sighting.timeline.sourceIds[0]
-    return this.host.interpretations().flatMap(({ id, label, interpretation }) => {
+    return this.host.interpretations().flatMap(({ id, label, interpretation: stated }) => {
+      const { interpretation, phenomenonOf, loaded } = this.host.computed(stated)
+      if (!this.kindsLoading.has(stated)) {
+        this.kindsLoading.add(stated)
+        void loaded.then(() => {
+          if (this.host.interpretations().some(reading => reading.interpretation === stated)) this.refresh()
+        })
+      }
       const body = interpretation.bodies.find(candidate => first !== undefined && candidate.explains?.includes(first)) ?? interpretation.bodies[0]
       if (!body) return []
+      const phenomenon = phenomenonOf.get(body.id)
+      if (phenomenon) this.phenomenonOf.set(`interpretation-${id}`, phenomenon)
       return [{
         id: `interpretation-${id}`,
         label: m.interpretation.replace("{name}", label),

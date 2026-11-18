@@ -52,6 +52,24 @@ describe("kinds of interpretation", () => {
     expect((await birds.messages.load("fr")).name).toBe("Oiseau")
   })
 
+  it("say which known phenomenon of Poher's matrix each body they compute is an instance of, when its kind says", async () => {
+    const kind = { ...BALLOON, phenomenon: (balloon: { burstM: number }) => balloon.burstM > 1000 ? "StratosphericBalloons" : undefined } as unknown as InterpretationKind
+    const stated = { bodies: [{ id: "craft" } as unknown as BodyJson], balloons: [{ id: "high", burstM: 30000 }, { id: "low", burstM: 1 }] }
+    await InterpretationKinds.load(stated, [kind])
+    const { phenomenonOf } = InterpretationKinds.expandWithKinds(stated, [kind])
+    expect([...phenomenonOf]).toEqual([["high", "StratosphericBalloons"]])
+  })
+
+  it("built in, are each the column of RR0's matrix that scores them, a drone by its airframe", () => {
+    const phenomenon = (key: string, item: unknown) => InterpretationRegistry.kinds().find(kind => kind.key === key)!.phenomenon?.(item)
+    expect(phenomenon("flares", {})).toBe("DecoyFlare")
+    expect(phenomenon("lanterns", {})).toBe("SkyLantern")
+    expect(phenomenon("birds", {})).toBe("Birds")
+    expect(phenomenon("drones", { airframe: "quadcopter" })).toBe("ConsumerDrone")
+    expect(phenomenon("drones", { airframe: "saucer" })).toBe("ConsumerDrone")
+    expect(phenomenon("drones", { airframe: "fixed-wing" })).toBe("MilitaryDrone")
+  })
+
   it("load the code of a kind only when an interpretation states one of it, and compute nothing of it before", async () => {
     let loads = 0
     const kind = { ...BALLOON, compute: async () => { loads++; return (item: { id: string }) => [{ id: item.id, model: { id: "sphere" }, track: [] } as unknown as BodyJson] } } as unknown as InterpretationKind

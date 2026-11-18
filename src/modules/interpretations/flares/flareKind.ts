@@ -7,5 +7,6 @@ import type { FlareSalvoJson } from "./DecoyFlare.js"
 export const FLARE_KIND: InterpretationKind<FlareSalvoJson> = {
   key: "flares",
   messages: FLARE_KIND_MESSAGES,
+  phenomenon: () => "DecoyFlare",
   compute: () => import("./DecoyFlare.js").then(({ DecoyFlare }) => salvo => DecoyFlare.bodiesOf(salvo))
 }

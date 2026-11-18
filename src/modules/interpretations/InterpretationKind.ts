@@ -58,6 +58,12 @@ export interface InterpretationKind<J = unknown> {
    * solid decor of the recording when it is given it (see ComputeContext, Obstacles): a lantern does not go through a building.
    */
   compute(): Promise<(item: J, context?: ComputeContext) => BodyJson[]>
+  /**
+   * The known phenomenon of Poher's matrix one of them is an instance of (a column of the matrix, RR0's version mostly: `SkyLantern`,
+   * `ConsumerDrone`; see PoherMatrix), synchronously and without its code: what the assessment of the candidate it makes reads. None for a
+   * kind no column stands for.
+   */
+  phenomenon?(item: J): string | undefined
   /** The code of the editor's part; a kind without one is drawn and not edited. */
   editor?(): Promise<(container: HTMLElement, host: InterpretationEditorHost, language: string) => InterpretationEditor>
 }
@@ -119,20 +125,28 @@ export class InterpretationKinds {
     return InterpretationKinds.expandWithKinds(interpretation, kinds, context).interpretation
   }
 
-  /** As expand, with the kind that computed each of the bodies it added, by the body's id: what names one under the pointer. */
+  /**
+   * As expand, with the kind that computed each of the bodies it added, by the body's id (what names one under the pointer), and the known
+   * phenomenon of Poher's matrix each is an instance of when its kind says (see InterpretationKind.phenomenon): what assesses it.
+   */
   static expandWithKinds(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[], context?: ComputeContext): {
-    interpretation: InterpretationJson | undefined, kindOf: Map<string, InterpretationKind>
+    interpretation: InterpretationJson | undefined, kindOf: Map<string, InterpretationKind>, phenomenonOf: Map<string, string>
   } {
     const kindOf = new Map<string, InterpretationKind>()
-    if (!interpretation || !InterpretationKinds.computes(interpretation, kinds)) return { interpretation, kindOf }
+    const phenomenonOf = new Map<string, string>()
+    if (!interpretation || !InterpretationKinds.computes(interpretation, kinds)) return { interpretation, kindOf, phenomenonOf }
     const computed = kinds.flatMap(kind => InterpretationKinds.itemsOf(interpretation, kind.key).flatMap(item => {
       const compute = InterpretationKinds.computers.get(kind)
       if (!compute) return []
       const bodies = compute(item, context)
-      for (const body of bodies) kindOf.set(body.id, kind)
+      const phenomenon = kind.phenomenon?.(item)
+      for (const body of bodies) {
+        kindOf.set(body.id, kind)
+        if (phenomenon) phenomenonOf.set(body.id, phenomenon)
+      }
       return bodies
     }))
-    return { interpretation: { ...interpretation, bodies: [...interpretation.bodies, ...computed] }, kindOf }
+    return { interpretation: { ...interpretation, bodies: [...interpretation.bodies, ...computed] }, kindOf, phenomenonOf }
   }
 
   /** What `interpretation` states under the keys of `kinds`, alone: what is computed rather than stated as bodies. */

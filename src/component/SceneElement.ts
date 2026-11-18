@@ -949,6 +949,18 @@ export class SceneElement extends HTMLElement {
     this.ufoElement.refreshSoundControls()
   }
 
+  /**
+   * `interpretation` with the bodies its kinds compute, as the scene would draw them among its decor, and the known phenomenon of Poher's
+   * matrix each computed one is an instance of (see InterpretationKinds.expandWithKinds): what the candidate search follows and assesses
+   * it with. Its kinds' code is asked for when it has not come; `loaded` settles once it has, the bodies it computes being missing until then.
+   */
+  computedInterpretation(interpretation: InterpretationJson): { interpretation: InterpretationJson, phenomenonOf: Map<string, string>, loaded: Promise<void> } {
+    const kinds = InterpretationRegistry.kinds()
+    const loaded = InterpretationKinds.loaded(interpretation, kinds) ? Promise.resolve() : InterpretationKinds.load(interpretation, kinds)
+    const { interpretation: expanded, phenomenonOf } = InterpretationKinds.expandWithKinds(interpretation, kinds, { obstacles: this.obstaclesOf(this.ufoElement.sighting.decor) })
+    return { interpretation: expanded ?? interpretation, phenomenonOf, loaded }
+  }
+
   /** The texts of the kinds that computed bodies on show, in the language of the scene's names: asked again when that language comes. */
   private loadComputedKindTexts(): void {
     const language = this.namesLanguage

@@ -95,8 +95,8 @@ observer really stands, the real instant, the magnitude limit, what the clouds a
 
 A kind of interpretation (`interpretations/InterpretationKind.ts`) is a reading of an account stated as a few parameters under
 `interpretation.<key>` (in a recording, or in a case's interpretation) and computed into bodies when shown, by code loaded the first time one is (`compute`, as a kind of event of the sky loads its `simulation`), given the recording's solid decor as boxes to keep out of (`interpretations/Obstacles.ts`: a lantern slides up a wall, a flock goes round a tower):
-the sky lanterns (`interpretations/lanterns/`), the birds (`interpretations/birds/`) and the decoy flares (`interpretations/flares/`). Not a fact of the sky: what somebody
-claims the account saw. Its editor, when it has one, is a part of the Sky group named by the title of its `messages`, before the events of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
+the sky lanterns (`interpretations/lanterns/`), the birds (`interpretations/birds/`), the drones (`interpretations/drones/`) and the decoy flares (`interpretations/flares/`). Not a fact of the sky: what somebody
+claims the account saw. Its `phenomenon` names the column of Poher's matrix (RR0's version) one of them is an instance of (`SkyLantern`, `ConsumerDrone` for a quadcopter or a saucer "drufo", `MilitaryDrone` for a fixed-wing drone): the candidate it makes is assessed as that column, which the matrix then no longer lists among its other phenomena. A new kind names its column, or has one added to RR0's matrix (`reasons.json`). Its editor, when it has one, is a part of the Sky group named by the title of its `messages`, before the events of the sky. A script gets the page's three.js classes as `context.three` (`sky-events/ModuleThree.ts`): a copy
 of its own would be a second three.js. The list is explicit, since the whole namespace would keep all of three.js in every
 bundle (+120 kB measured); a class a module needs is a line to add there.
 

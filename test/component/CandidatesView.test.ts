@@ -44,6 +44,7 @@ function make(aim: { azimuthDeg: number, altitudeDeg: number }, extra: Record<st
     burning: () => ({ reentries: [], fireballs: [] }),
     traffic: () => undefined,
     interpretations: () => [],
+    computed: (interpretation: unknown) => ({ interpretation, phenomenonOf: new Map(), loaded: Promise.resolve() }),
     starName: (name: string) => name,
     projectionAt: () => undefined,
     variants: () => kept,
@@ -198,4 +199,31 @@ describe("CandidatesView variants kept and interpretations", () => {
     const row = [...section.querySelectorAll(".candidate-head")].find(head => head.textContent!.startsWith("Reading: Balloon"))!
     expect(row.textContent).toContain("Compatible with consolidated biases")
   })
+
+  it("assesses an interpretation made of drones as the column of the matrix its kind says, once its bodies are computed", async () => {
+    const stated = { title: "Drones", bodies: [], drones: [{ id: "mavic", airframe: "quadcopter", path: [] }] }
+    let loaded = false
+    const { view, section } = make({ azimuthDeg: 100, altitudeDeg: 20 }, {
+      interpretations: () => [{ id: "reading-1", label: "Drones", interpretation: stated }],
+      // Its kind's code comes after the first search: the drone is followed once it has.
+      computed: (interpretation: { bodies: unknown[] }) => loaded
+        ? { interpretation: { ...interpretation, bodies: [{ id: "mavic", model: { id: "ufoathome-drone-quadcopter" }, track: [{ t: 0 }] }] }, phenomenonOf: new Map([["mavic", "ConsumerDrone"]]), loaded: Promise.resolve() }
+        : { interpretation, phenomenonOf: new Map(), loaded: Promise.resolve().then(() => { loaded = true }) },
+      projectionAt: () => ({ aim: { azimuthDeg: 102, altitudeDeg: 19 }, angular: { widthDeg: 0.1 } }),
+      poher: () => Promise.resolve({
+        matrix: new PoherMatrix([{ question: "Hour.Night", knownPhenomenaProbabilities: { ConsumerDrone: 1, SkyLantern: 0.5, Sun: 0 } }]),
+        labels: { ConsumerDrone: "consumer drone", SkyLantern: "sky lantern" }
+      })
+    } as never)
+    view.refresh()
+    expect(section.textContent).not.toContain("Reading: Drones")
+    await new Promise(resolve => setTimeout(resolve, 0))
+    const row = [...section.querySelectorAll(".candidate")].find(candidate => candidate.querySelector(".candidate-head")!.textContent!.startsWith("Reading: Drones"))!
+    expect(row.querySelector(".poher-tag")!.textContent).toBe("Poher: possible, score 1")
+    // Its column is the candidate's, and no longer among the matrix's other phenomena.
+    const others = section.querySelector(".poher-block")!
+    expect(others.textContent).not.toContain("consumer drone")
+    expect(others.textContent).toContain("sky lantern")
+  })
 })
+

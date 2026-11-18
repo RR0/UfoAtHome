@@ -7393,10 +7393,12 @@ export class SightingEditorElement extends HTMLElement {
       interpretations: () => {
         const own = this.ufoElement.sighting.interpretation
         return [
-          ...(own && own.bodies.length > 0 ? [{ id: "own", label: this.said.read(own.title) ?? this.principalObserverLabel(), interpretation: own }] : []),
+          ...(own && (own.bodies.length > 0 || InterpretationKinds.computes(own, InterpretationRegistry.kinds()))
+            ? [{ id: "own", label: this.said.read(own.title) ?? this.principalObserverLabel(), interpretation: own }] : []),
           ...this.readings
         ]
       },
+      computed: interpretation => this.sceneElement.computedInterpretation(interpretation),
       starName: name => this.naming.star({ name }),
       projectionAt: (body, t) => this.sceneElement.bodyProjectionAt(body, t),
       variants: () => this.ufoElement.sighting.variants,
