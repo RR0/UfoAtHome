@@ -118,7 +118,7 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
 .event-card[data-nested]::after { left: calc(var(--rail) - 24px - 1px - var(--nest)); }
 .event-card[data-nested] > .event-mark { left: var(--branch); }
 .event-card[data-nested]::before { content: ""; position: absolute; left: var(--branch); top: calc(-1px - var(--gap));
-  bottom: calc(100% - var(--dot-y) - 1px); width: 1px; transform: translateX(-50%); background: var(--tl-ink-faint); pointer-events: none; }
+  bottom: calc(100% - var(--dot-y) - 1px); width: 1px; transform: translateX(-50%); background: var(--tl-line); pointer-events: none; }
 .event-card[data-nested]:has(+ .event-card[data-nested])::before { bottom: -1px; }
 .event-card[data-nested] .event-open::after { left: calc(-24px - 1px - var(--nest)); }
 /* What folds an observation's readings away or unfolds them: above the title's hit area, at the card's end. */
