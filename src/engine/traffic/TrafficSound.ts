@@ -5,6 +5,7 @@ import type { AircraftKind } from "./AircraftModels.js"
 import { AircraftHearing } from "./AircraftHearing.js"
 import type { AircraftHearingOptions, AircraftNoise, AircraftSoundCharacter } from "./AircraftHearing.js"
 import type { AircraftDescription, AircraftTrack } from "./AircraftProvider.js"
+import { AmbientNoise } from "./AmbientNoise.js"
 import { GroundReflection, type GroundEcho } from "./GroundReflection.js"
 import { SoundInAir } from "./SoundInAir.js"
 
@@ -51,6 +52,12 @@ export interface TrafficSoundOptions extends AircraftHearingOptions {
   throughDb?: readonly number[]
   /** The amplitude a sound at the ambient noise's own level is played at: see AmbientNoise.referenceAmplitude. */
   referenceAmplitude?: number
+  /**
+   * Whether a sound under the knee is played expanded (see EXPANSION_RATIO): yes where the scene plays nothing it would be heard against, so
+   * that what is far is the faint thing it is; no where a bed of the ambient noise is played, which masks it as the air does (see
+   * AmbientNoise.bedPlays). Yes by default.
+   */
+  expandUnderKnee?: boolean
 }
 
 /**
@@ -81,12 +88,8 @@ export class TrafficSound {
   static readonly KNEE_DB = 20
   static readonly COMPRESSION_RATIO = 1
   static readonly EXPANSION_RATIO = 1.8
-  /**
-   * How far under the reference a sound at the ambient's own level is played, dB: what leaves room for one that is fifty decibels over it, an
-   * airliner over a calm night, before the player saturates. Some 0.3 of the reference: fitted on the same pass, where the levels played then
-   * follow the real ones within 3 to 5 dB down to 30 under the loudest, and the loudest stays under the saturation (see AircraftAudio).
-   */
-  static readonly HEADROOM_DB = 10.5
+  /** How far under the reference a sound at the ambient's own level is played, dB: see AmbientNoise.HEADROOM_DB, which the bed of what is around is played under too. */
+  static readonly HEADROOM_DB = AmbientNoise.HEADROOM_DB
   static readonly DEFAULT_MAX_VOICES = 4
 
   /**
@@ -101,7 +104,7 @@ export class TrafficSound {
       for (const point of flight.points) {
         nearestKm = Math.min(nearestKm, ReentrySighting.seenFrom(observer, { lat: point.lat, lng: point.lng, heightM: point.altitudeFt * 0.3048 }).distanceKm)
       }
-      if (AircraftHearing.couldBeHeard(noise, nearestKm, options.ambientDbA, options.air)) heard.add(id)
+      if (AircraftHearing.couldBeHeard(noise, nearestKm, options.ambientDbA, options.air, options.ambientShapeDb)) heard.add(id)
     }
     return heard
   }
@@ -124,11 +127,11 @@ export class TrafficSound {
       // What the observer's own shell takes off it before it reaches them, when they are inside one.
       const through = options.throughDb
       const bandsDbA = through ? heard.bandsDbA.map((level, band) => level - (through[band] ?? 0)) : heard.bandsDbA
-      if (through && !TrafficSound.noticed(bandsDbA, heard.ambientDbA)) continue
+      if (through && !TrafficSound.noticed(bandsDbA, heard.ambientDbA, options.ambientShapeDb)) continue
       voices.push({
         id,
         kind,
-        bandAmplitudes: TrafficSound.bandAmplitudes(bandsDbA, heard.ambientDbA, options.referenceAmplitude),
+        bandAmplitudes: TrafficSound.bandAmplitudes(bandsDbA, heard.ambientDbA, options.referenceAmplitude, { ambientShapeDb: options.ambientShapeDb, expandUnderKnee: options.expandUnderKnee }),
         levelDbA: through ? SoundInAir.sumDb(bandsDbA) : heard.levelDbA,
         distanceKm: heard.sound.distanceKm,
         dopplerRatio: heard.dopplerRatio,
@@ -151,19 +154,21 @@ export class TrafficSound {
    * level at which it is noticed (see AircraftHearing.DETECTION_MARGIN_DB), comes in smoothly, and is whole from that far over it.
    */
   /** Whether any band of a sound still stands far enough over what is around it to be noticed at all (see AircraftHearing.couldBeHeard). */
-  private static noticed(bandsDbA: readonly number[], ambientDbA: number): boolean {
-    const ambient = AircraftHearing.ambientBands(ambientDbA)
+  private static noticed(bandsDbA: readonly number[], ambientDbA: number, ambientShapeDb?: readonly number[]): boolean {
+    const ambient = AircraftHearing.ambientBands(ambientDbA, ambientShapeDb)
     return bandsDbA.some((level, band) => level >= ambient[band] + AircraftHearing.DETECTION_MARGIN_DB)
   }
 
-  static bandAmplitudes(bandsDbA: readonly number[], ambientDbA: number, reference = TrafficSound.REFERENCE_AMPLITUDE): number[] {
-    const ambient = AircraftHearing.ambientBands(ambientDbA)
+  static bandAmplitudes(bandsDbA: readonly number[], ambientDbA: number, reference = TrafficSound.REFERENCE_AMPLITUDE,
+    how: { ambientShapeDb?: readonly number[], expandUnderKnee?: boolean } = {}): number[] {
+    const ambient = AircraftHearing.ambientBands(ambientDbA, how.ambientShapeDb)
+    const expansion = how.expandUnderKnee === false ? 1 : TrafficSound.EXPANSION_RATIO
     const noticed = AircraftHearing.DETECTION_MARGIN_DB
     const total = SoundInAir.sumDb(bandsDbA)
     const over = total - ambientDbA
     const played = over >= TrafficSound.KNEE_DB
       ? TrafficSound.KNEE_DB + (over - TrafficSound.KNEE_DB) / TrafficSound.COMPRESSION_RATIO
-      : TrafficSound.KNEE_DB - (TrafficSound.KNEE_DB - over) * TrafficSound.EXPANSION_RATIO
+      : TrafficSound.KNEE_DB - (TrafficSound.KNEE_DB - over) * expansion
     const whole = reference * 10 ** ((played - TrafficSound.HEADROOM_DB) / 20)
     return bandsDbA.map((level, i) => {
       const x = Math.min(1, Math.max(0, (level - ambient[i] - noticed + TrafficSound.MASKING_RANGE_DB) / (2 * TrafficSound.MASKING_RANGE_DB)))

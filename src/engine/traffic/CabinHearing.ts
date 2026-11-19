@@ -50,7 +50,7 @@ export class CabinHearing {
     return {
       id: "observer:cabin",
       kind,
-      bandAmplitudes: TrafficSound.bandAmplitudes(bandsDbA, options.ambientDbA ?? 0, options.referenceAmplitude),
+      bandAmplitudes: TrafficSound.bandAmplitudes(bandsDbA, options.ambientDbA ?? 0, options.referenceAmplitude, { ambientShapeDb: options.ambientShapeDb, expandUnderKnee: options.expandUnderKnee }),
       levelDbA,
       // All around the ear, and going nowhere relative to it: neither placed to one side nor shifted in pitch (see AircraftVoice.inside).
       inside: true,

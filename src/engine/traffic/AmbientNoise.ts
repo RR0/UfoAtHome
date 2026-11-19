@@ -1,3 +1,4 @@
+import { SoundInAir } from "./SoundInAir.js"
 import type { Around } from "../model/Around.js"
 import { AroundNoise } from "./AroundNoise.js"
 
@@ -19,6 +20,15 @@ export interface NoisyWeather {
 export class AmbientNoise {
   /** A quiet rural place on a calm night, dB(A): what the weather adds its noise to. */
   static readonly BASE_DB_A = 30
+  /** The A-weighted shape of an ordinary outdoor noise across the octaves, dB re its total: more in the lows. What the base and the weather are spread as. */
+  static readonly OUTDOOR_SHAPE_DB: readonly number[] = [-12, -7, -5, -5, -7, -11, -17, -25]
+  /**
+   * How far under the reference a sound at the ambient's own level is played, dB: what leaves room for one that is fifty decibels over it, an
+   * airliner over a calm night, before the player saturates. Some 0.3 of the reference, fitted on the pass of an A320neo over Gonesse
+   * (2025-12-30), where the levels played then follow the real ones within 3 to 5 dB down to 30 under the loudest (see TrafficSound.KNEE_DB).
+   * The bed of what is around is played under it as well, so that it and an aircraft stand to each other as their levels do.
+   */
+  static readonly HEADROOM_DB = 10.5
   /** [wind speed m/s, dB(A) of the wind's own noise in vegetation and about the ear, which adds to the base]: a breeze of 3 m/s is about 40, a fresh wind of 8 about 52. */
   private static readonly WIND_DB_A: [number, number][] = [[0, 10], [1, 28], [2, 36], [3, 40], [5, 46], [8, 52], [12, 58], [20, 66]]
   /** [precipitation intensity 0-1, dB(A)]: a drizzle's patter is 42, a downpour's drumming 65. */
@@ -57,19 +67,56 @@ export class AmbientNoise {
    * level over the weather's says.
    */
   static referenceAmplitude(weather: NoisyWeather, around?: Around): number {
-    return Math.max(Math.hypot(AmbientNoise.BED_RMS * AmbientNoise.bedVolume(weather), AmbientNoise.aroundBedRms(around)), AmbientNoise.MINIMUM_REFERENCE)
+    return Math.max(Math.hypot(AmbientNoise.BED_RMS * AmbientNoise.bedVolume(weather), AmbientNoise.aroundReference(around)), AmbientNoise.MINIMUM_REFERENCE)
   }
 
   /**
-   * How loud the bed of what is around is played (see WeatherAudio.setAround), as the root of its mean square: the faint minimum at the base's
-   * level, and as many decibels over it as what is around stands over the base, up to the weather beds' loudest. So the bed and an aircraft are
-   * played in the proportion their levels have. Nothing when nothing is said, or when what is said is under the base.
+   * What an aircraft at the level of what is around is referred to: the faint minimum at the quiet base's level, and as many decibels over it as
+   * what is around stands over the base. So an aircraft over a town is played as loud as the same aircraft over a field: what changes is what it
+   * stands against, and what is masked.
+   */
+  private static aroundReference(around: Around | undefined): number {
+    const level = AroundNoise.dbA(around)
+    if (!Number.isFinite(level) || level <= AmbientNoise.BASE_DB_A) return 0
+    return AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20)
+  }
+
+  /**
+   * How loud the bed of what is around is played (see WeatherAudio.setAround), as the root of its mean square: as an aircraft of the vehicles'
+   * own level is (see HEADROOM_DB), so that the bed and an aircraft stand to each other as their levels do. It was played at the
+   * reference itself, ten decibels over what an aircraft of its level would be: heard on the demo of Gonesse (2025-12-30), a hiss "too loud all
+   * the time", louder than the airliner a kilometre off. The vehicles alone: the voices are in the level heard, not in what the bed plays.
    */
   static aroundBedRms(around: Around | undefined): number {
-    // The vehicles alone: the voices are in the level heard, not in what the bed plays.
     const level = AroundNoise.dbA(around, false)
     if (!Number.isFinite(level) || level <= AmbientNoise.BASE_DB_A) return 0
-    return Math.min(AmbientNoise.BED_RMS, AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20))
+    return Math.min(AmbientNoise.BED_RMS, AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A - AmbientNoise.HEADROOM_DB) / 20))
+  }
+
+  /** Whether the scene plays a bed of the ambient noise, which masks a faint aircraft as the air does (see TrafficSound.expandUnderKnee). */
+  static bedPlays(weather: NoisyWeather, around?: Around): boolean {
+    return AmbientNoise.bedVolume(weather) > 0 || AmbientNoise.aroundBedRms(around) > 0
+  }
+
+  /**
+   * How the ambient noise is spread over the octaves, dB(A) re its total (see AircraftHearingOptions.ambientShapeDb): the quiet base and the
+   * weather in an outdoor noise's shape, more in the lows, and the vehicles around in their own, CNOSSOS-EU's, whose most is from 500 Hz to
+   * 2 kHz. A road masks an aircraft's mids and leaves its rumble; the old single shape, all lows, took the rumble away first.
+   */
+  static shapeDb(weather: NoisyWeather, around?: Around): number[] {
+    const all = 10 ** (AmbientNoise.dbA(weather, around) / 10)
+    const vehiclesLevel = AroundNoise.dbA(around, false)
+    const vehicles = Number.isFinite(vehiclesLevel) ? 10 ** (vehiclesLevel / 10) : 0
+    // What is neither the weather nor the vehicles is the voices, taken in the outdoor shape.
+    const outdoor = Math.max(0, all - vehicles)
+    const base = AmbientNoise.OUTDOOR_SHAPE_DB
+    const baseTotal = 10 ** (SoundInAir.sumDb(base) / 10)
+    const shape = AroundNoise.vehicleShape(around)
+    const aWeighted = shape?.map((amplitude, band) => amplitude * amplitude * 10 ** (SoundInAir.aWeightingDb(SoundInAir.OCTAVES[band]) / 10))
+    const aTotal = aWeighted?.reduce((sum, energy) => sum + energy, 0) ?? 1
+    const energies = SoundInAir.OCTAVES.map((_, band) => outdoor * 10 ** (base[band] / 10) / baseTotal + (aWeighted ? vehicles * aWeighted[band] / aTotal : 0))
+    const total = energies.reduce((sum, energy) => sum + energy, 0)
+    return energies.map(energy => 10 * Math.log10(energy / total))
   }
 
   /** The octave proportions the bed of what is around is played in (see AroundNoise.vehicleShape); none when no vehicle is said. */

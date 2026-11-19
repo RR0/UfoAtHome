@@ -121,6 +121,12 @@ describe("TrafficSound", () => {
       expect(rms(sameShape(46))).toBeCloseTo(played(46), 6)
     })
 
+    test("where a bed of the ambient is played, nothing is expanded: the bed masks what is faint as the air does", () => {
+      const knee = TrafficSound.KNEE_DB
+      const plain = (offsetDb: number) => rms(TrafficSound.bandAmplitudes(ambient.map(level => level + offsetDb), 35, undefined, { expandUnderKnee: false }))
+      expect(plain(knee - 6) / plain(knee)).toBeCloseTo(10 ** (-6 / 20), 6)
+    })
+
     test("under it a sound is played expanded, so that an aircraft far off is the faint thing it is: each decibel less is more than one less", () => {
       const knee = TrafficSound.KNEE_DB
       // Nine decibels over the ambient is where every band is whole; six under the pivot is played so many times six under it.

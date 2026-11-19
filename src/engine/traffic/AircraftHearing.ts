@@ -3,6 +3,7 @@ import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 import type { AircraftKind } from "./AircraftModels.js"
 import type { AircraftTrack } from "./AircraftProvider.js"
 import { AircraftSighting } from "./AircraftSighting.js"
+import { AmbientNoise } from "./AmbientNoise.js"
 import { EngineDirectivity } from "./EngineDirectivity.js"
 import { GroundReflection, type Ground } from "./GroundReflection.js"
 import type { AirConditions } from "./SoundInAir.js"
@@ -203,6 +204,11 @@ export interface AircraftHearingOptions {
   /** The noise of the place, dB(A): about 30 for a quiet rural night, 40 by day, 55 in a town. */
   ambientDbA?: number
   noise?: AircraftNoise
+  /**
+   * How the ambient noise is spread over the octaves, dB(A) re its total: a quiet outdoor place's by default (AMBIENT_SHAPE_DB, more in the
+   * lows), a road's when the place is a town (see AmbientNoise.shapeDb), which masks the mids of an aircraft and leaves its rumble.
+   */
+  ambientShapeDb?: readonly number[]
   /** What the listener stands on, and how high their ears are: grass and a standing listener by default (see GroundReflection); null for none, the air alone. */
   ground?: Ground | null
 }
@@ -238,7 +244,7 @@ export class AircraftHearing {
    */
   static readonly DETECTION_MARGIN_DB = 3
   /** The A-weighted shape of an ordinary outdoor noise across the octaves, dB re its total: more in the lows. */
-  private static readonly AMBIENT_SHAPE_DB = [-12, -7, -5, -5, -7, -11, -17, -25]
+  static readonly AMBIENT_SHAPE_DB: readonly number[] = AmbientNoise.OUTDOOR_SHAPE_DB
   /** Below this a band is not heard whatever it stands against, dB(A): the threshold of hearing, near enough. */
   private static readonly HEARING_FLOOR_DB_A = 0
   private static readonly ITERATIONS = 30
@@ -274,16 +280,15 @@ export class AircraftHearing {
    * Whether anything of a noise could stand above the ambient at `distanceKm`: the nearest an aircraft ever comes is the loudest it is ever
    * heard, so one that cannot be heard there cannot be heard at all, and nothing more need be worked out for it.
    */
-  static couldBeHeard(noise: AircraftNoise, distanceKm: number, ambientDbA = AircraftHearing.DEFAULT_AMBIENT_DB_A, air: AirConditions = SoundInAir.STANDARD): boolean {
-    const ambient = AircraftHearing.ambientBands(ambientDbA)
+  static couldBeHeard(noise: AircraftNoise, distanceKm: number, ambientDbA = AircraftHearing.DEFAULT_AMBIENT_DB_A, air: AirConditions = SoundInAir.STANDARD, ambientShapeDb?: readonly number[]): boolean {
+    const ambient = AircraftHearing.ambientBands(ambientDbA, ambientShapeDb)
     // At any of its thrusts, and in the direction it is loudest in: a take-off has more in the lows, which carry farthest, and most behind it.
     const regimes = Object.entries(noise.regimes ?? { overflight: noise }) as [FlightRegime, AircraftNoise][]
     return regimes.some(([regime, variant]) => AircraftHearing.bandsAt(variant, distanceKm, air).map((level, band) => level + (variant.directivity === "turbofan" ? EngineDirectivity.loudestDb(regime)[band] : 0)).some((level, i) => level >= Math.max(ambient[i] + AircraftHearing.DETECTION_MARGIN_DB, AircraftHearing.HEARING_FLOOR_DB_A)))
   }
 
-  /** The ambient noise in each band, dB(A), for a total of `ambientDbA`. */
-  static ambientBands(ambientDbA: number): number[] {
-    const shape = AircraftHearing.AMBIENT_SHAPE_DB
+  /** The ambient noise in each band, dB(A), for a total of `ambientDbA`, spread as `shape` says (a quiet outdoor place's by default). */
+  static ambientBands(ambientDbA: number, shape: readonly number[] = AircraftHearing.AMBIENT_SHAPE_DB): number[] {
     const total = SoundInAir.sumDb(shape)
     return shape.map(level => ambientDbA + level - total)
   }
@@ -318,7 +323,7 @@ export class AircraftHearing {
     const regime = AircraftHearing.regimeAt(track, emitted, observer)
     const noise = AircraftHearing.inRegime(options.noise ?? AIRCRAFT_NOISES[0], regime)
     const ambientDbA = options.ambientDbA ?? AircraftHearing.DEFAULT_AMBIENT_DB_A
-    const ambient = AircraftHearing.ambientBands(ambientDbA)
+    const ambient = AircraftHearing.ambientBands(ambientDbA, options.ambientShapeDb)
     const emissionAngleDeg = AircraftHearing.emissionAngle(track, observer, emitted)
     const radiated = noise.directivity === "turbofan" ? EngineDirectivity.bandsDb(emissionAngleDeg, regime, speed) : undefined
     // And off the ground under the listener, which takes the lows from a sound that comes from near the horizon.

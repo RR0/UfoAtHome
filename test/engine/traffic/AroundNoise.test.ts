@@ -74,14 +74,33 @@ describe("what is around the observer", () => {
       expect(town).toBeCloseTo(10 * Math.log10(10 ** (AmbientNoise.dbA(CALM) / 10) + 10 ** (AroundNoise.dbA({ cars: 6 }) / 10)), 6)
     })
 
-    test("its bed is played as many decibels over the faint minimum as it stands over the quiet base, up to the weather's loudest", () => {
+    test("its bed is played as an aircraft of its level would be, under the headroom: the two stand to each other as their levels do", () => {
       expect(AmbientNoise.aroundBedRms(undefined)).toBe(0)
       const street = { roads: [{ distanceM: 50, vehiclesPerMinute: 4 }] }
       const level = AroundNoise.dbA(street)
-      expect(AmbientNoise.aroundBedRms(street)).toBeCloseTo(AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20), 9)
-      expect(AmbientNoise.aroundBedRms({ roads: [{ distanceM: 5, vehiclesPerMinute: 60 }] })).toBe(AmbientNoise.BED_RMS)
-      // An aircraft's reference is the whole bed's: the weather's and what is around.
-      expect(AmbientNoise.referenceAmplitude(CALM, street)).toBeCloseTo(AmbientNoise.aroundBedRms(street), 9)
+      expect(AmbientNoise.aroundBedRms(street)).toBeCloseTo(AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A - AmbientNoise.HEADROOM_DB) / 20), 9)
+      expect(AmbientNoise.aroundBedRms({ roads: [{ distanceM: 2, vehiclesPerMinute: 600 }] })).toBe(AmbientNoise.BED_RMS)
+      // An aircraft at the street's level is referred to the faint minimum raised as far as the street stands over the base: as loud as over a
+      // field, ten and a half decibels over the bed.
+      expect(AmbientNoise.referenceAmplitude(CALM, street)).toBeCloseTo(AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20), 9)
+      expect(20 * Math.log10(AmbientNoise.referenceAmplitude(CALM, street) / AmbientNoise.aroundBedRms(street))).toBeCloseTo(AmbientNoise.HEADROOM_DB, 6)
+    })
+
+    test("a road's noise is spread as vehicles' is, mostly from 500 Hz to 2 kHz: it masks an aircraft's mids and leaves its rumble", () => {
+      const field = AmbientNoise.shapeDb(CALM)
+      field.forEach((level, band) => expect(level).toBeCloseTo(AmbientNoise.OUTDOOR_SHAPE_DB[band] - 10 * Math.log10(AmbientNoise.OUTDOOR_SHAPE_DB.reduce((sum, l) => sum + 10 ** (l / 10), 0)), 6))
+      const town = AmbientNoise.shapeDb(CALM, { roads: [{ distanceM: 50, vehiclesPerMinute: 10 }] })
+      expect(10 * Math.log10(town.reduce((sum, level) => sum + 10 ** (level / 10), 0))).toBeCloseTo(0, 6)
+      // Against the outdoor shape, the town's has less in the lows and more at a kilohertz.
+      expect(town[0]).toBeLessThan(field[0] - 6)
+      expect(town[4]).toBeGreaterThan(field[4] + 3)
+    })
+
+    test("says whether a bed is played: a wind, rain, or the vehicles around; not a calm field, nor voices alone", () => {
+      expect(AmbientNoise.bedPlays(CALM)).toBe(false)
+      expect(AmbientNoise.bedPlays({ ...CALM, windSpeed: 6 })).toBe(true)
+      expect(AmbientNoise.bedPlays(CALM, { cars: 3 })).toBe(true)
+      expect(AmbientNoise.bedPlays(CALM, { talking: 3 })).toBe(false)
     })
   })
 })
