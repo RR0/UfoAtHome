@@ -3,6 +3,7 @@ import type { AccountEvaluationMessages } from "../AccountEvaluationFields.js"
 import type { BasisSourceMessages } from "../BasisInputElement.js"
 import type { WitnessErrorMessages } from "./WitnessErrorMessages.js"
 import type { EventsMessages } from "./EventsMessages.js"
+import type { AroundMessages } from "./AroundMessages.js"
 import type { TimelineTracksMessages } from "../TimelineTracks.js"
 import type { SectionFoldMessages } from "../SectionFolds.js"
 import type { InputFileMessages } from "../InputFileElement.js"
@@ -387,6 +388,8 @@ export interface SightingEditorMessages extends SectionFoldMessages, TimelineTra
   witnessError: WitnessErrorMessages
   /** The events panel (see EventsPanel). */
   events: EventsMessages
+  /** The words of what was around the observer (see AroundPanel). */
+  around: AroundMessages
   /** The button that lays the tracks out under the scene, and folds them back. */
   expandTracks: string
   /** The grip under the scene: what dragging it does. */

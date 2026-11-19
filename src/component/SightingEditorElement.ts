@@ -16,6 +16,7 @@ import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js
 import { TimelineTracks } from "./TimelineTracks.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
 import type { TimelineSpan, TimelineTrack } from "./TimelineTracks.js"
+import { AroundPanel } from "./AroundPanel.js"
 import { EventsPanel } from "./EventsPanel.js"
 import { RecordingEvents } from "../engine/events/RecordingEvents.js"
 import { RecordingActors, type ActorIssue, type ActorKind } from "../engine/events/RecordingActors.js"
@@ -529,6 +530,8 @@ export class SightingEditorElement extends HTMLElement {
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
   private readonly sectionFilePanel: SectionFilePanel
   private readonly eventsPanel: EventsPanel
+  /** What was around the observer (see AroundPanel). */
+  private readonly aroundPanel: AroundPanel
   private readonly phenomenonEventsPanel: EventsPanel
   private readonly bodiesEventsPanel: EventsPanel
   /** The Files group's picker: the recording, then each annex (see refreshFileItems). */
@@ -1676,6 +1679,17 @@ export class SightingEditorElement extends HTMLElement {
     this.eventsPanel = new EventsPanel(this.shadow.getElementById("events-section")!, eventsHost, undefined)
     this.phenomenonEventsPanel = new EventsPanel(this.shadow.getElementById("phenomenon-events-section")!, eventsHost, undefined, "phenomenon")
     this.bodiesEventsPanel = new EventsPanel(this.shadow.getElementById("bodies-events-section")!, eventsHost, undefined, "bodies")
+    this.aroundPanel = new AroundPanel(this.shadow.getElementById("around-section")!, {
+      sighting: () => this.ufoElement.sighting,
+      editing: () => this.armHistory(),
+      changed: () => {
+        this.touch()
+        this.ufoElement.refresh()
+        this.scheduleHistoryRecord()
+        this.scheduleFileSync()
+      },
+      valueSources: () => this.valueSources()
+    })
     // How often a keyframe is taken is the recording's (see Sighting.sampleMs): what the events give is worked out again at that pace.
     this.samplingRateInput.addEventListener("change", () => {
       const ms = Number(this.samplingRateInput.value)
@@ -2507,6 +2521,7 @@ export class SightingEditorElement extends HTMLElement {
     this.eventsPanel.render()
     this.phenomenonEventsPanel.render()
     this.bodiesEventsPanel.render()
+    this.aroundPanel.render()
     // Resets to the first source actually present in the loaded data, not the hardcoded
     // default — a loaded recording using different source ids would otherwise have the next
     // appearance edit silently create a disconnected new "ufo-1" source instead of editing
@@ -12015,6 +12030,8 @@ export class SightingEditorElement extends HTMLElement {
     this.eventsPanel.localize(messages.events)
     this.phenomenonEventsPanel.localize(messages.events)
     this.bodiesEventsPanel.localize(messages.events)
+    this.aroundPanel.localize(messages.around, { title: messages.events.basisTitle, basis: messages.events.basis, basisField: messages.events.basisField,
+      howField: messages.events.howField, rationaleField: messages.events.rationaleField })
     this.shadow.getElementById("observer-identity-hint")!.textContent = messages.identityHint
     this.shadow.getElementById("identity-ask-initials")!.textContent = messages.identityInitials
     this.shadow.getElementById("identity-ask-keep")!.textContent = messages.identityKeep

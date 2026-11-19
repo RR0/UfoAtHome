@@ -243,6 +243,19 @@ export class RecordingRules {
    and takes stars away; never write a brighter sky than the source gives.`
     },
     {
+      draft: `\`around\` is what made a noise around the observer, which an aircraft is heard against: \`cars\`,
+   \`trucks\` (and buses), \`people\` and how many were \`talking\`, there at once within \`withinM\` metres
+   (200 if absent), and \`roads\`, each { distanceM, vehiclesPerMinute, trucksPerMinute, speedKmh }. Write
+   what the witness says, as they say it: "a few cars went by on the road fifty metres away" is a road; "there
+   were two of us talking" is people. A figure the witness gives is "stated"; one you estimate from a vaguer
+   word ("a busy road") is "assumed", with the word in the rationale. A witness who says nothing of it gets no
+   \`around\`: never invent a town's traffic.`,
+      file: `\`around\` (an object) is what made a noise around the observer: \`cars\`, \`trucks\`, \`people\`,
+   \`talking\` (numbers, there at once within \`withinM\` metres, 200 if absent) and \`roads\` (each
+   { distanceM, vehiclesPerMinute, trucksPerMinute?, speedKmh? }, 50 km/h if absent). Its noise is worked out
+   from CNOSSOS-EU and added to the weather's: an aircraft is heard against it. Absent means a quiet place.`
+    },
+    {
       file: `The observer's own estimate in metres ("60 m long, 175 m away, 10 m up") is not an observation
    but a conclusion: it goes in \`interpretation\` (bodies in metres, see the format page), never in
    the shapes. When it contradicts the angles the observer measured, keep it anyway and say so in

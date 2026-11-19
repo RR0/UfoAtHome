@@ -1,5 +1,6 @@
 import { basisSourceMessages_it } from "./BasisSourceMessages_it.js"
 import { eventsMessages_it } from "./EventsMessages_it.js"
+import { aroundMessages_it } from "./AroundMessages_it.js"
 import { witnessErrorMessages_it } from "./WitnessErrorMessages_it.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import { sightingLabels_it } from "./SightingLabels_it.js"
@@ -243,6 +244,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   basisSource: basisSourceMessages_it,
   witnessError: witnessErrorMessages_it,
   events: eventsMessages_it,
+  around: aroundMessages_it,
   expandTracks: "Espandi le tracce",
   resizeScene: "Trascinare per ingrandire o ridurre la scena (doppio clic: dimensione originale)",
   viewDragHint: "Alt: la vista di questo solo istante, senza mosso della posa",

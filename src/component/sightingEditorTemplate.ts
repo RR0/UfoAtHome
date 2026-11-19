@@ -290,6 +290,11 @@ export const html = `
          nothing once the author has typed their own (see SightingEditorElement.lookUpLightPollution). -->
     <output id="light-pollution-status" class="place-status" for="lightPollution"><span id="light-pollution-status-text"></span><span id="light-pollution-source-row" class="inline-source" hidden></span></output>
     </div>
+    <!-- What was around the observer that makes a noise — see Around and AroundPanel, which draws its fields. -->
+    <div class="form-section around-section" id="around-section" data-fold="all">
+    <h3 class="section-title"></h3>
+    <div class="around-body"></div>
+    </div>
   </div>
 </section>
 <!-- Its own group, no longer a fieldset nested inside Location. What stands around the observer is
@@ -1220,6 +1225,10 @@ input.invalid {
 }
 /* How many places matched, and the credit the data requires — quieter than the field it explains,
    same role and styling as .weather-source/.apparent-size. */
+/* What was around the observer (see AroundPanel): its counts on one wrapped line, each road on its own. */
+.around-counted, .around-road { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25em 1em; }
+.around-heading { font-size: inherit; font-weight: 600; margin: 0.6em 0 0.2em; flex-basis: 100%; }
+.around-add-road { margin-top: 0.3em; }
 .place-status,
 .ground-elevation {
   min-width: 0;
