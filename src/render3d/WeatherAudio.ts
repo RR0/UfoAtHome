@@ -1,5 +1,6 @@
 import type { PrecipitationType } from "../engine/model/Weather.js"
 import { AudioUnlock } from "../audio/AudioUnlock.js"
+import { SoundInAir } from "../engine/traffic/SoundInAir.js"
 
 /**
  * Real, sourced royalty-free ambient/one-shot sound effects for weather — the audio counterpart to
@@ -32,6 +33,17 @@ const THUNDER_URL = new URL("../assets/audio/thunder.wav", import.meta.url).href
  * doesn't start, replacing the old normalized-scale "0.03" threshold. */
 const MAX_WIND_FOR_FULL_VOLUME_MS = 20
 const MIN_AUDIBLE_WIND_MS = 1
+
+/** How long the noise the bed of what is around is filtered from lasts, s: long enough that its loop is not heard as one. */
+const AROUND_NOISE_SECONDS = 7
+/** How much the bed swells and fades as vehicles come and go, as a fraction of its amplitude, and how slowly: values a second of a random table. */
+const AROUND_SWELL = 0.35
+const AROUND_SWELL_PER_SECOND = 0.4
+const AROUND_SWELL_SECONDS = 40
+/** How fast the bed follows a new level, s (a time constant). */
+const AROUND_SMOOTHING_S = 0.5
+/** The band filters' Q: an octave wide, whose noise bandwidth is some 1.1 of the centre (π/2 f / Q). */
+const AROUND_Q = Math.SQRT2
 
 interface LoopHandle {
   source: AudioBufferSourceNode
@@ -80,6 +92,14 @@ export class WeatherAudio {
     intensity: 0,
     windSpeed: 0
   }
+
+  /**
+   * The bed of what is around (see setAround): a noise through one band filter per octave, in the proportions asked, swelling and fading slowly.
+   * Made at the first request for one, kept while the scene lasts.
+   */
+  private around?: { sources: AudioScheduledSourceNode[]; nodes: AudioNode[]; bands: GainNode[]; gain: GainNode }
+  /** What was last asked of it: the root of its mean square, and its shape (one amplitude per octave of SoundInAir.OCTAVES, whose root sum of squares is 1). */
+  private aroundRequested: { rms: number; shape: readonly number[] } = { rms: 0, shape: [] }
 
   private level = 1
   /** How much of the weather reaches the observer, 0 to 1: all of it in the open, a fraction inside a closed cabin (see ObserverRide). */
@@ -136,6 +156,82 @@ export class WeatherAudio {
       }
     }
     if (AudioUnlock.isLive(this.context)) AudioUnlock.unlock(this.context)
+    this.applyAround()
+  }
+
+  /**
+   * Plays the bed of what is around the observer — the traffic of a town, its roads — at `rms` (the root of its mean square), in the octave
+   * proportions `shape` gives (see AmbientNoise.aroundBedShape). Nothing at 0. Like the weather, heard only while the clock runs, and through
+   * what the observer rides in.
+   */
+  setAround(rms: number, shape: readonly number[]): void {
+    // Asked at every tick with the weather: nothing is retargeted when nothing has changed.
+    const last = this.aroundRequested
+    if (last.rms === Math.max(0, rms) && last.shape.length === shape.length && last.shape.every((value, band) => value === shape[band])) return
+    this.aroundRequested = { rms: Math.max(0, rms), shape }
+    this.applyAround()
+  }
+
+  private applyAround(): void {
+    const context = this.context
+    if (!context) return
+    const { rms, shape } = this.aroundRequested
+    const playing = this.paused ? 0 : rms
+    if (playing === 0 && !this.around) return
+    const bed = this.around ?? (this.around = this.buildAround(context))
+    const now = context.currentTime
+    bed.gain.gain.setTargetAtTime(playing, now, AROUND_SMOOTHING_S)
+    // White noise of full scale has a root mean square of 1/√3, of which a band of constant Q keeps the root of its share of the spectrum.
+    SoundInAir.OCTAVES.forEach((centre, band) => {
+      const kept = Math.sqrt(Math.min(1, (1.11 * centre) / (context.sampleRate / 2))) / Math.sqrt(3)
+      bed.bands[band].gain.setTargetAtTime((shape[band] ?? 0) / kept, now, AROUND_SMOOTHING_S)
+    })
+  }
+
+  private buildAround(context: BaseAudioContext): NonNullable<WeatherAudio["around"]> {
+    const noise = context.createBuffer(1, Math.floor(context.sampleRate * AROUND_NOISE_SECONDS), context.sampleRate)
+    const data = noise.getChannelData(0)
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
+    const source = context.createBufferSource()
+    source.buffer = noise
+    source.loop = true
+    // The swell: a slow random table, smooth between its values and round from its last to its first, laid on the bed's loudness.
+    const swellLength = Math.floor(context.sampleRate * AROUND_SWELL_SECONDS)
+    const table = context.createBuffer(1, swellLength, context.sampleRate)
+    const values = Array.from({ length: Math.round(AROUND_SWELL_SECONDS * AROUND_SWELL_PER_SECOND) }, () => Math.random() * 2 - 1)
+    const tableData = table.getChannelData(0)
+    const step = context.sampleRate / AROUND_SWELL_PER_SECOND
+    for (let i = 0; i < swellLength; i++) {
+      const at = i / step
+      const k = Math.floor(at)
+      const f = at - k
+      const smooth = f * f * (3 - 2 * f)
+      tableData[i] = values[k % values.length] * (1 - smooth) + values[(k + 1) % values.length] * smooth
+    }
+    const swell = context.createBufferSource()
+    swell.buffer = table
+    swell.loop = true
+    const swellDepth = context.createGain()
+    swellDepth.gain.value = AROUND_SWELL
+    const sum = context.createGain()
+    sum.gain.value = 1
+    swell.connect(swellDepth).connect(sum.gain)
+    const gain = context.createGain()
+    gain.gain.value = 0
+    sum.connect(gain).connect(this.output(context))
+    const bands = SoundInAir.OCTAVES.map(centre => {
+      const filter = context.createBiquadFilter()
+      filter.type = "bandpass"
+      filter.frequency.value = centre
+      filter.Q.value = AROUND_Q
+      const band = context.createGain()
+      band.gain.value = 0
+      source.connect(filter).connect(band).connect(sum)
+      return band
+    })
+    source.start()
+    swell.start()
+    return { sources: [source, swell], nodes: [swellDepth, sum, gain, ...bands], bands, gain }
   }
 
   /**
@@ -227,6 +323,7 @@ export class WeatherAudio {
     this.paused = paused
     const { type, intensity, windSpeed } = this.requested
     this.setAmbient(type, intensity, windSpeed)
+    this.applyAround()
   }
 
   /** One-shot thunderclap, triggered by SceneElement on SceneRenderer's onLightningFlash callback
@@ -298,6 +395,15 @@ export class WeatherAudio {
     this.ambientGain = undefined
     this.windSource = undefined
     this.windGain = undefined
+    for (const source of this.around?.sources ?? []) {
+      try {
+        source.stop()
+      } catch {
+        // Already stopped.
+      }
+    }
+    for (const node of this.around?.nodes ?? []) node.disconnect()
+    this.around = undefined
     if (AudioUnlock.isLive(this.context)) void this.context.close()
     this.context = undefined
     this.master = undefined

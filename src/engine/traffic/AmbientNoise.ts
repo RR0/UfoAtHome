@@ -1,3 +1,6 @@
+import type { Around } from "../model/Around.js"
+import { AroundNoise } from "./AroundNoise.js"
+
 /** What of the weather makes noise: the wind, and what falls. */
 export interface NoisyWeather {
   windSpeed: number
@@ -9,10 +12,9 @@ export interface NoisyWeather {
  * The noise of the place an aircraft is heard against: how loud it is, dB(A), and how loud the scene's own bed of weather sound is played, so
  * that an aircraft is played in the proportion to it that the physics says.
  *
- * It is the WEATHER that makes the ambient noise of a scene, since the scene plays nothing else: a wind in the trees, rain on the ground and
- * the leaves. The figures are those reported of such noises, not measurements of any place, and the base is a quiet rural night (30 dB(A)): a
- * place's own noise — a road, a town — is not known to the scene, and is a better thing to be told than to guess (see Sighting.lightPollution,
- * which says how settled a place is).
+ * The WEATHER makes it — a wind in the trees, rain on the ground and the leaves — and what is AROUND, when the recording says (see Around):
+ * cars, trucks, people talking, roads, worked out by AroundNoise. The weather's figures are those reported of such noises, not measurements of
+ * any place, and the base is a quiet rural night (30 dB(A)): a place's own noise is told and not guessed.
  */
 export class AmbientNoise {
   /** A quiet rural place on a calm night, dB(A): what the weather adds its noise to. */
@@ -33,8 +35,8 @@ export class AmbientNoise {
   private static readonly WIND_BED_FULL_MS = 20
 
   /** The ambient noise of that weather, dB(A): the base, and the wind and what falls added to it as energies. */
-  static dbA(weather: NoisyWeather): number {
-    const levels = [AmbientNoise.BASE_DB_A, AmbientNoise.along(AmbientNoise.WIND_DB_A, weather.windSpeed)]
+  static dbA(weather: NoisyWeather, around?: Around): number {
+    const levels = [AmbientNoise.BASE_DB_A, AmbientNoise.along(AmbientNoise.WIND_DB_A, weather.windSpeed), AroundNoise.dbA(around)].filter(Number.isFinite)
     // Snow falls in silence (see WeatherAudio): only its wind carries.
     if (weather.precipitationType === "rain" || weather.precipitationType === "hail") levels.push(AmbientNoise.along(AmbientNoise.RAIN_DB_A, weather.precipitationIntensity))
     return 10 * Math.log10(levels.filter(level => level > 0).reduce((sum, level) => sum + 10 ** (level / 10), 0))
@@ -54,8 +56,25 @@ export class AmbientNoise {
    * as far as the scene's ears are concerned, or a faint minimum where there is none. So an aircraft is no louder against the weather than its
    * level over the weather's says.
    */
-  static referenceAmplitude(weather: NoisyWeather): number {
-    return Math.max(AmbientNoise.BED_RMS * AmbientNoise.bedVolume(weather), AmbientNoise.MINIMUM_REFERENCE)
+  static referenceAmplitude(weather: NoisyWeather, around?: Around): number {
+    return Math.max(Math.hypot(AmbientNoise.BED_RMS * AmbientNoise.bedVolume(weather), AmbientNoise.aroundBedRms(around)), AmbientNoise.MINIMUM_REFERENCE)
+  }
+
+  /**
+   * How loud the bed of what is around is played (see WeatherAudio.setAround), as the root of its mean square: the faint minimum at the base's
+   * level, and as many decibels over it as what is around stands over the base, up to the weather beds' loudest. So the bed and an aircraft are
+   * played in the proportion their levels have. Nothing when nothing is said, or when what is said is under the base.
+   */
+  static aroundBedRms(around: Around | undefined): number {
+    // The vehicles alone: the voices are in the level heard, not in what the bed plays.
+    const level = AroundNoise.dbA(around, false)
+    if (!Number.isFinite(level) || level <= AmbientNoise.BASE_DB_A) return 0
+    return Math.min(AmbientNoise.BED_RMS, AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20))
+  }
+
+  /** The octave proportions the bed of what is around is played in (see AroundNoise.vehicleShape); none when no vehicle is said. */
+  static aroundBedShape(around: Around | undefined): number[] | undefined {
+    return AroundNoise.vehicleShape(around)
   }
 
   /** Linear reading of a table, held at its ends. */

@@ -20,6 +20,8 @@ const sightCalls: string[] = []
 /** The offsets the element hands the renderer for the clouds, per tick. */
 const cloudOffsets: { global: { x: number; z: number }; layers: Record<string, { x: number; z: number }> }[] = []
 const thunderPlayed: number[] = []
+/** What the bed of what is around was last asked to play at, as the scene asked it (see WeatherAudio.setAround). */
+const aroundPlayed: number[] = []
 /** Every sky the element hands the renderer, so a test can see whether editing the observation
  * actually rebuilt the fall or silently left the previous one standing. */
 const meteorShowersSet: { count: number; altitudeDeg: number }[] = []
@@ -193,6 +195,9 @@ vi.mock("../../src/render3d/WeatherAudio.js", () => ({
   WeatherAudio: class {
     resume(): void {}
     setAmbient(): void {}
+    setAround(rms: number): void {
+      aroundPlayed.push(rms)
+    }
     setOutsideHeard(): void {}
     setLevel(): void {}
     dispose(): void {}
@@ -294,6 +299,7 @@ function mount(): SceneElement {
   animationsRunning.length = 0
   audioPaused.length = 0
   thunderPlayed.length = 0
+  aroundPlayed.length = 0
   meteorShowersSet.length = 0
   return element
 }
@@ -1235,6 +1241,28 @@ describe("SceneElement air traffic", () => {
       ...rainyJson,
       weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none" as const, precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] }
     }
+
+    it("plays the bed of what is around the observer, and hears the record's aircraft against it: a busy road masks an airliner at cruise", async () => {
+      const { source } = stubSource(overhead)
+      const quiet = mountAt(AT, source, calm)
+      quiet.tick()
+      await vi.waitFor(() => expect(quiet.element.aircraftState.status).toBe("ready"))
+      quiet.tick(20_000)
+      const heardInQuiet = (quiet.element as unknown as { traffic?: { audible?: Set<string> } }).traffic?.audible?.size ?? 0
+      expect(aroundPlayed.at(-1) ?? 0).toBe(0)
+      quiet.element.remove()
+
+      const busy = mountAt(AT, stubSource(overhead).source, calm)
+      busy.element.ufoElement.sighting.around = { roads: [{ distanceM: 10, vehiclesPerMinute: 30 }] }
+      busy.tick()
+      await vi.waitFor(() => expect(busy.element.aircraftState.status).toBe("ready"))
+      busy.tick(20_000)
+      expect(aroundPlayed.at(-1)).toBeGreaterThan(0)
+      const heardBusy = (busy.element as unknown as { traffic?: { audible?: Set<string> } }).traffic?.audible?.size ?? 0
+      expect(heardInQuiet).toBe(1)
+      expect(heardBusy).toBe(0)
+      busy.element.remove()
+    })
 
     it("lets the sound be turned down for a scene whose only sound is the aircraft of its record, once some are found within hearing", async () => {
       const refresh = vi.spyOn(UfoElement.prototype, "refreshSoundControls")

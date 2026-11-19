@@ -1,3 +1,4 @@
+import type { Around } from "./Around.js"
 import { DurationText } from "./DurationText.js"
 import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { SightingLighting } from "../persistence/sightingJson.js"
@@ -521,6 +522,13 @@ export class Sighting {
    * same reasoning as account above.
    */
   lightPollution?: number
+
+  /**
+   * What was around the observer that makes a noise: cars, trucks and people within some distance, roads at theirs (see Around). An aircraft is
+   * heard against it as against the weather (see AmbientNoise). Absent says nothing, and the place is a quiet one. Not readonly, same reasoning
+   * as account above.
+   */
+  around?: Around
 
   /**
    * Whether the map of where the observer stood starts open when this recording is played or edited. Absent says nothing, and the player

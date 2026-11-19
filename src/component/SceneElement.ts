@@ -63,6 +63,7 @@ import { SceneCredits } from "./SceneCredits.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import type { InvestigatorTrace } from "../engine/model/Trace.js"
 import { WeatherAudio } from "../render3d/WeatherAudio.js"
+import { AmbientNoise } from "../engine/traffic/AmbientNoise.js"
 import { Comets } from "../engine/astronomy/Comets.js"
 import { BRIGHT_COMETS } from "../engine/astronomy/cometCatalog.js"
 import { Novae } from "../engine/astronomy/Novae.js"
@@ -1683,6 +1684,9 @@ export class SceneElement extends HTMLElement {
     // Muffled by whatever the observer rides in, which is why rain on a closed van is a patter and not the roar it is outside it.
     this.weatherAudio.setOutsideHeard(ObserverRide.transmission(this.ufoElement.sighting.vehicle))
     this.weatherAudio.setAmbient(weather.precipitationType, weather.precipitationIntensity * (weather.precipitationAmount ?? 1), weather.windSpeed)
+    // And what is around the observer, whose traffic is a bed as the wind is (see Around).
+    const around = this.ufoElement.sighting.around
+    this.weatherAudio.setAround(AmbientNoise.aroundBedRms(around), AmbientNoise.aroundBedShape(around) ?? [])
   }
 
   /** Optional editing tools share the renderer's actual projection and cloud density. */
@@ -2913,7 +2917,7 @@ export class SceneElement extends HTMLElement {
     const pose = resolveObserverPoseAt(this.ufoElement.sighting, this.lastTimeMs)
     const here = { lat: traffic.observer.lat, lng: traffic.observer.lng, heightM: this.altitudeOf(pose) }
     // Against the same ambient noise as what is played, so that the label and the sound say the same.
-    const ambientDbA = runtime.AmbientNoise.dbA(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs))
+    const ambientDbA = runtime.AmbientNoise.dbA(resolveActualWeatherAt(this.ufoElement.sighting, this.lastTimeMs), this.ufoElement.sighting.around)
     const info = runtime.TrafficInfos.at(flight, description, here, traffic.startMs + this.lastTimeMs, { ambientDbA })
     const contrail = info && this.contrailAt(id, this.lastTimeMs)
     return info && contrail ? { ...info, contrail } : info
@@ -2943,8 +2947,10 @@ export class SceneElement extends HTMLElement {
   /** Which of the aircraft could be heard at all, from the nearest each comes — the only ones worked out at every instant. */
   private sortOutAudible(asked: NonNullable<SceneElement["traffic"]>, runtime: TrafficRuntime): void {
     if (!asked.set || !asked.observer) return
-    // Against the quietest the place could be: the weather only ever adds to it, so what cannot be heard there cannot be heard at all.
-    asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: this.sceneRenderer.groundAltitudeM }, { ambientDbA: runtime.AmbientNoise.BASE_DB_A })
+    // Against the quietest the place could be: the weather only ever adds to it, so what cannot be heard there cannot be heard at all. What is
+    // around is there whatever the weather (see Around).
+    const calm = { windSpeed: 0, precipitationType: "none", precipitationIntensity: 0 }
+    asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: this.sceneRenderer.groundAltitudeM }, { ambientDbA: runtime.AmbientNoise.dbA(calm, this.ufoElement.sighting.around) })
     // The button was drawn before the traffic was known: a scene with aircraft to hear and nothing else has a sound to set the volume of now.
     this.ufoElement.refreshSoundControls()
   }
@@ -2966,7 +2972,8 @@ export class SceneElement extends HTMLElement {
     }
     const pose = resolveObserverPoseAt(sighting, t)
     const weather = resolveActualWeatherAt(sighting, t)
-    const outside = { ambientDbA: runtime.AmbientNoise.dbA(weather), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather) }
+    // Against the weather and what is around the observer (see Around): a town's traffic masks what a calm field would let through.
+    const outside = { ambientDbA: runtime.AmbientNoise.dbA(weather, sighting.around), referenceAmplitude: runtime.AmbientNoise.referenceAmplitude(weather, sighting.around) }
     // Aboard an aircraft, the cabin is the loudest thing there is: it is what everything else outside has to stand against, and its shell
     // takes the highs off whatever gets through (see ObserverRide). A road vehicle's own noise is VehicleAudio's, but its cabin muffles too.
     const ride = sighting.vehicle

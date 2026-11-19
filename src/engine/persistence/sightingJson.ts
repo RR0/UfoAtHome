@@ -1,4 +1,5 @@
 import type { MeteringMode } from "../instrument/Instrument.js"
+import { Arounds, type Around } from "../model/Around.js"
 import type { RecordingSource } from "../model/RecordingSource.js"
 import type { LensStateJson } from "../instrument/LensGhost.js"
 import type { RecordingIssue } from "./RecordingIssue.js"
@@ -144,6 +145,9 @@ export interface SightingRecordingJson {
    * magnitudes per square arcsecond, a Sky Quality Meter's reading or the World Atlas's "SQM" figure
    * (Falchi et al. 2016) — see Sighting.lightPollution. 22.0 is a natural sky. Absent means a natural sky. */
   lightPollution?: number
+  /** What was around the observer that makes a noise: cars, trucks and people within a distance, roads at theirs — see Around. An aircraft is
+   * heard against it. Absent: a quiet place. */
+  around?: Around
   /** Whether the map of where the observer stood starts open — see Sighting.observerMap. Absent says nothing: the player decides. */
   observerMap?: boolean
   /** The named moments of the account — see Milestone. Absent/omitted means none, which is what
@@ -245,6 +249,7 @@ export function plainSightingJson(sighting: Sighting, expanded = false): Sightin
     lens: sighting.lens,
     lighting: sighting.lighting,
     lightPollution: sighting.lightPollution,
+    around: Arounds.says(sighting.around) ? sighting.around : undefined,
     observerMap: sighting.observerMap,
     interpretation: expanded ? SightingPositions.restatedInterpretation(sighting) : RecordingEvents.writtenInterpretation(sighting, SightingPositions.restatedInterpretation(sighting)),
     variants: sighting.variants.length > 0 ? sighting.variants : undefined,
@@ -342,6 +347,7 @@ function fromPlainSightingJson(json: SightingRecordingJson): Sighting {
   sighting.lens = json.lens
   sighting.lighting = json.lighting
   sighting.lightPollution = json.lightPollution
+  sighting.around = Arounds.read(json.around)
   sighting.observerMap = json.observerMap
   sighting.vehicle = json.vehicle
   // Whom each event is about, by an id: the observer's when it says none (see RecordingActors).
