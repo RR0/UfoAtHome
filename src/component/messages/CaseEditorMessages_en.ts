@@ -84,6 +84,8 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   quoted: "“{text}”",
   interpretationOfNone: "—",
   exportButton: "Save",
+  readButton: "Read",
+  readTitle: "Read what is edited, as a reader sees it",
   exportTitle: "Save the case",
   exportAlso: "Also save the observations",
   addToCase: "Add to a case",

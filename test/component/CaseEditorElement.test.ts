@@ -4,6 +4,9 @@ import { register } from "../../src/component/CaseEditorElement.js"
 // Defined by the case editor only when an interview is shown, fetched then: loaded here first, as the editor's own chunk would be in a build.
 import "../../src/component/InterviewEditorElement.js"
 import type { CaseEditorElement } from "../../src/component/CaseEditorElement.js"
+import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT } from "../../src/component/ReadEditSwitch.js"
+import { OpenFiles } from "../../src/engine/net/OpenFiles.js"
+import { SightingFetch } from "../../src/engine/net/SightingFetch.js"
 
 register()
 
@@ -1348,5 +1351,73 @@ describe("The observation's editor, in a case or on its own", () => {
     const row = element.shadowRoot!.querySelector(".event-id-row") as HTMLElement
     expect(row.hidden).toBe(false)
     expect(row.querySelector("#history-slot")!.childElementCount).toBe(1)
+  })
+})
+
+describe("Reading what is edited", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    OpenFiles.clear()
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  it("opens the player on the case's address, on the event on show, in a tab of its own, when the page does not switch in place", async () => {
+    const element = await open("reading.json")
+    const opened = vi.fn()
+    vi.stubGlobal("open", opened)
+    const button = element.shadowRoot!.getElementById("read-case") as HTMLButtonElement
+    expect(button.hidden).toBe(false)
+    button.click()
+    expect(opened).toHaveBeenCalledWith(`https://ufoathome.org/play/?file=${encodeURIComponent("https://example.org/d/case.json")}&events=reading`, "_blank", "noopener")
+    expect(element.hidden).toBe(false)
+  })
+
+  it("switches in place to the case's reader, which reads what the editor holds, changes and all, and back to the editor on its pencil", async () => {
+    const element = await open("reading.json")
+    element.setAttribute(IN_PLACE_ATTRIBUTE, "")
+    const session = element.caseSession!
+    const track = session.tracks.find(candidate => candidate.url === "https://example.org/d/reading.json")!
+    session.keep(track, { ...track.recording!, observer: { title: "Changed here" } } as never)
+    const modes: unknown[] = []
+    document.addEventListener(MODE_CHANGE_EVENT, event => modes.push((event as CustomEvent).detail))
+    const fetched = globalThis.fetch as ReturnType<typeof vi.fn>
+    fetched.mockClear()
+    ;(element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
+    await wait(300)
+    const reader = element.nextElementSibling as HTMLElement
+    expect(reader.tagName).toBe("RR0-CASE")
+    expect(reader.getAttribute("src")).toBe("https://example.org/d/case.json")
+    expect(reader.getAttribute("open-events")).toBe("reading")
+    expect(element.hidden).toBe(true)
+    expect(modes).toEqual([{ mode: "read", src: "https://example.org/d/case.json", track: "https://example.org/d/reading.json" }])
+    // What the reader reads is what the editor holds, not what stands at the address: nothing was fetched of what is held.
+    expect((await SightingFetch.recording("https://example.org/d/reading.json") as { observer: { title: string } }).observer.title).toBe("Changed here")
+    expect(fetched.mock.calls.map(([url]) => url)).not.toContain("https://example.org/d/case.json")
+    expect(OpenFiles.changed("https://example.org/d/reading.json")).toBe(true)
+    expect(OpenFiles.local("https://example.org/d/case.json")).toBe(false)
+
+    reader.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json", track: "https://example.org/d/account.json" }, bubbles: true, composed: true, cancelable: true }))
+    await wait(300)
+    expect(element.nextElementSibling).toBeNull()
+    expect(element.hidden).toBe(false)
+    expect(modes.at(-1)).toEqual({ mode: "edit" })
+    expect(OpenFiles.read("https://example.org/d/reading.json")).toBeUndefined()
+    // On the recording the reader asked to edit, the change made before reading still there.
+    expect(element.sightingData.observer?.title).not.toBe("Changed here")
+    expect((track.recording as { observer: { title: string } }).observer.title).toBe("Changed here")
+  })
+
+  it("reads a recording that has no address, beside the page, with nothing to share of it", async () => {
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    element.setAttribute(IN_PLACE_ATTRIBUTE, "")
+    document.body.appendChild(element)
+    await wait()
+    expect((element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).hidden).toBe(false)
+    ;(element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
+    await wait(300)
+    const reader = element.nextElementSibling as HTMLElement
+    expect(reader.tagName).toBe("RR0-SIGHTING")
+    expect(OpenFiles.local(reader.getAttribute("src")!)).toBe(true)
   })
 })

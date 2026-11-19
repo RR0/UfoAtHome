@@ -2642,6 +2642,11 @@ export class SightingEditorElement extends HTMLElement {
 
   /** The address the recording on show was loaded from, absolute: what sharing it gives. Undefined for one with none (new, picked from the disk). */
   private sourceUrl?: string
+
+  /** The address the recording was read from, absolute; undefined for one picked from the disk or made here. */
+  get address(): string | undefined {
+    return this.sourceUrl
+  }
   private readonly shareButton: HTMLButtonElement
   private readonly shareDialog: ShareDialogElement
   private shareMessages?: ShareMessages

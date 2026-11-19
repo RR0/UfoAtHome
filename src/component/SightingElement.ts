@@ -36,6 +36,9 @@ import { AppLocation } from "./AppLocation.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
+import { EDIT_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditSwitch.js"
+import { OpenFiles } from "../engine/net/OpenFiles.js"
+import type { ShareMessages } from "./messages/ShareMessages.js"
 
 registerScene()
 ShareDialogElement.register()
@@ -163,6 +166,7 @@ export class SightingElement extends HTMLElement {
   private readonly infoCreditsList: HTMLElement
   private readonly infoCloseButton: HTMLButtonElement
   private readonly shareButton: HTMLButtonElement
+  private shareMessages?: ShareMessages
   private readonly shareDialog: ShareDialogElement
   private readonly shareStartOn: HTMLInputElement
   private readonly shareStart: HTMLInputElement
@@ -351,6 +355,11 @@ export class SightingElement extends HTMLElement {
     this.infoCloseButton.addEventListener("click", () => this.toggleInfoPanel())
     this.infoCreditsToggle.addEventListener("click", () => this.toggleCredits())
     this.shareButton.addEventListener("click", () => this.openShare())
+    // A page that switches in place takes it (see ReadEditSwitch); otherwise the link opens the editor, in a tab of its own.
+    this.editLink.addEventListener("click", event => {
+      const detail = this.editDetail()
+      if (detail && ReadEdit.ask(this, EDIT_EVENT, detail)) event.preventDefault()
+    })
     for (const control of [this.shareStartOn, this.shareStart, ...Object.values(this.shareOptions).map(o => o.input)]) {
       control.addEventListener("input", () => this.refreshShareLinks())
     }
@@ -427,7 +436,7 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.milestones.label.textContent = (this.messages?.shareOptionMilestones ?? "")
     this.shareOptions.compare.label.textContent = (this.messages?.shareOptionCompare ?? "")
     this.shareStart.setAttribute("aria-label", (this.messages?.shareStartAt ?? ""))
-    void this.shareDialog.useLanguage(language)
+    void this.shareDialog.useLanguage(language).then(messages => { if (messages) this.shareMessages = messages })
     if (this.infoOpen) this.populateInfoPanel()
     this.updateAccountLine()
   }
@@ -728,6 +737,14 @@ export class SightingElement extends HTMLElement {
     return `${APP_EDITOR_URL}?file=${encodeURIComponent(url.href)}`
   }
 
+  /** What a page that switches in place is asked to edit (see EDIT_EVENT): the case and its recording on show, else the recording. */
+  private editDetail(): ReadEditDetail | undefined {
+    if (!this.currentSrc) return undefined
+    const recording = new URL(this.currentSrc, location.href).href
+    const source = this.caseSource
+    return source ? { src: source.url, track: this.shownTrackUrl() ?? recording } : { src: recording }
+  }
+
   /** Where to open the editor for what is on show: the recording of the reading chosen, else the account's own. */
   get editorHref(): string {
     return this.editorUrl()
@@ -846,6 +863,9 @@ export class SightingElement extends HTMLElement {
     this.shareOptions.compare.input.checked = this.sceneElement.compareAccount
     this.offerShareScope()
     this.shareOpensRow.hidden = !this.sharesCase
+    // What is shared is a file at its address: said so when what is on show is an editor's, changed since (see OpenFiles).
+    const held = [this.caseSource?.url, this.currentSrc, this.shownTrackUrl(), ...this.entries.map(entry => entry.src)]
+    this.shareDialog.note = OpenFiles.changed(...held) ? this.shareMessages?.unsaved : undefined
     this.shareDialog.open()
   }
 
@@ -1356,6 +1376,8 @@ export class SightingElement extends HTMLElement {
     this.sceneElement.filmName = [inCase || undefined, account].filter(Boolean).join(" - ") || undefined
     this.editLink.hidden = !this.currentSrc
     this.editLink.href = this.editorUrl()
+    // A recording an editor holds with no address of its own has none to give: nothing to share (see OpenFiles.local).
+    this.shareButton.hidden = OpenFiles.local(this.caseSource?.url ?? this.currentSrc)
     this.editLink.title = (this.messages?.editThisObservation ?? "")
     this.editLink.setAttribute("aria-label", (this.messages?.editThisObservation ?? ""))
   }

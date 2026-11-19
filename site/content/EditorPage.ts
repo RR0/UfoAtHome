@@ -181,7 +181,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-case-editor id="editor"></rr0-case-editor>
+      <rr0-case-editor id="editor" in-place></rr0-case-editor>
     </div>
     <p class="small">Opening it on an existing recording or case: add <code>?file=</code> and its full address, starting with https:// (<code>?sighting=</code>, its former name, still works) — for instance
       <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
@@ -660,7 +660,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-case-editor id="editor"></rr0-case-editor>
+      <rr0-case-editor id="editor" in-place></rr0-case-editor>
     </div>
     <p class="small">Pour l'ouvrir sur un enregistrement ou un dossier existant : ajoutez <code>?file=</code> suivi de son adresse complète, commençant par https:// (<code>?sighting=</code>, son ancien nom, fonctionne toujours) — par exemple
       <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
@@ -1174,7 +1174,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-case-editor id="editor"></rr0-case-editor>
+      <rr0-case-editor id="editor" in-place></rr0-case-editor>
     </div>
     <p class="small">Para abrirlo sobre un registro o un caso existente: añade <code>?file=</code> y su dirección completa, que empiece por https:// (<code>?sighting=</code>, su nombre anterior, sigue funcionando); por ejemplo
       <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,
@@ -1673,7 +1673,7 @@ if (docs) {
 <section class="band">
   <div class="wrap">
     <div class="stage stage-padded">
-      <rr0-case-editor id="editor"></rr0-case-editor>
+      <rr0-case-editor id="editor" in-place></rr0-case-editor>
     </div>
     <p class="small">Per aprirlo su una registrazione o un caso esistente: aggiungi <code>?file=</code> e il suo indirizzo completo, che inizi con https:// (<code>?sighting=</code>, il suo vecchio nome, funziona ancora); per esempio
       <a id="sighting-edit" href="/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json"><code>/edit/?file=https://ufoathome.org/demo-data/observer-socorro.json</code></a>,

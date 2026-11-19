@@ -1,5 +1,6 @@
 import { FormatVersion } from "../persistence/FormatVersion.js"
 import { RecordingSections } from "../model/Snapshots.js"
+import { OpenFiles } from "./OpenFiles.js"
 
 /** What went wrong fetching a recording, as far as a browser will ever let a page find out. */
 export type SightingFetchKind = "cors" | "mixed-content" | "unreachable" | "status" | "malformed"
@@ -38,6 +39,9 @@ export class SightingFetch {
    * them in annexes (see RecordingSections). An annex that cannot be read leaves the recording as it is.
    */
   static async recording(url: string): Promise<unknown> {
+    // Held by an editor, it is whole as the editor holds it: its annexes were put back in it when it was loaded (see OpenFiles).
+    const held = OpenFiles.read(url)
+    if (held !== undefined) return held
     const json = await SightingFetch.json(url) as Record<string, unknown> & { snapshots?: Record<string, { src?: string, live?: boolean } | undefined> }
     for (const name of RecordingSections.NAMES) {
       const section = json?.snapshots?.[name]
@@ -58,6 +62,9 @@ export class SightingFetch {
     // stays the caller's own string, relative or not, because that is what every consumer of this
     // already passes and what a page's own network log will show.
     const resolved = new URL(url, location.href)
+    // What an editor of this page holds of it, changed or never written, before anything at its address (see OpenFiles).
+    const held = OpenFiles.read(resolved.href)
+    if (held !== undefined) return held
     // Blocked by the browser before a request is even made, and with its own obvious remedy.
     if (location.protocol === "https:" && resolved.protocol === "http:") {
       throw new SightingFetchError("mixed-content", url)

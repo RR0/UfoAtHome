@@ -110,6 +110,9 @@ export interface CaseEditorMessages extends InputFileMessages {
   quoted: string
   interpretationOfNone: string
   exportButton: string
+  /** What is edited, read as a reader sees it (see ReadEditSwitch). */
+  readButton: string
+  readTitle: string
   exportTitle: string
   exportAlso: string
   addToCase: string

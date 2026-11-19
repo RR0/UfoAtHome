@@ -84,6 +84,8 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   quoted: "«\u00a0{text}\u00a0»",
   interpretationOfNone: "—",
   exportButton: "Sauver",
+  readButton: "Lire",
+  readTitle: "Lire ce qui est édité, tel qu'un lecteur le voit",
   exportTitle: "Sauver le dossier",
   exportAlso: "Sauver aussi les observations",
   addToCase: "Ajouter à un dossier",

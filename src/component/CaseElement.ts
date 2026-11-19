@@ -17,6 +17,9 @@ import { TIME_CHANGE_EVENT } from "./UfoElement.js"
 import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, INTERPRETATION_CHANGE_EVENT, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
+import { EDIT_EVENT, ReadEdit } from "./ReadEditSwitch.js"
+import { OpenFiles } from "../engine/net/OpenFiles.js"
+import type { ShareMessages } from "./messages/ShareMessages.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { AppLocation } from "./AppLocation.js"
@@ -84,6 +87,7 @@ export class CaseElement extends HTMLElement {
   private said = new SaidTexts(["en"])
   private json?: CaseJson
   private url?: string
+  private shareMessages?: ShareMessages
   private entries: CaseEntry[] = []
   /** Whether the history sets each reading under the observation it reads (see CaseTimeline.grouped), rather than in the order of time. */
   private grouping = false
@@ -164,9 +168,14 @@ export class CaseElement extends HTMLElement {
     const dialog = this.byId("share-dialog") as ShareDialogElement
     dialog.subject = this.shareSubject
     share.addEventListener("click", () => {
-      if (this.url) dialog.open()
+      if (!this.url) return
+      // What is shared is the case at its address: said so when what is on show is an editor's, changed since (see OpenFiles).
+      dialog.note = OpenFiles.changed(this.url, ...this.entries.map(entry => entry.url)) ? this.shareMessages?.unsaved : undefined
+      dialog.open()
     })
     this.byId("edit").addEventListener("click", () => {
+      // A page that switches in place takes it (see ReadEditSwitch); otherwise the editor opens on the case, in a tab of its own.
+      if (this.url && ReadEdit.ask(this, EDIT_EVENT, { src: this.url })) return
       const where = this.editorUrl()
       if (where) window.open(where, "_blank", "noopener")
     })
@@ -285,7 +294,7 @@ export class CaseElement extends HTMLElement {
     const language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
     this.said = new SaidTexts([language, "en"])
     this.messages = await loadCaseMessages(language)
-    await (this.byId("share-dialog") as ShareDialogElement).useLanguage(language)
+    this.shareMessages = await (this.byId("share-dialog") as ShareDialogElement).useLanguage(language)
     this.draw()
   }
 
@@ -296,6 +305,8 @@ export class CaseElement extends HTMLElement {
     const json = await SightingFetch.recording(this.url) as CaseJson
     if (!CaseFile.isCase(json)) throw new Error(`${url} is not a case: <${CASE_ELEMENT_NAME}> reads a case.json`)
     this.json = json
+    // A case an editor holds with no address of its own has none to give: nothing to share (see OpenFiles.local).
+    this.byId("share").hidden = OpenFiles.local(this.url)
     this.entries = CaseElement.inTime((json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined))
     this.shown.clear()
     this.folded.clear()

@@ -46,12 +46,16 @@ import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
+import { IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT, READ_EVENT, ReadEdit, ReadEditSwitch, type ReadEditDetail } from "./ReadEditSwitch.js"
+import { OpenFiles, type OpenFile } from "../engine/net/OpenFiles.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 
 const TEMPLATE = `
 <style>
   :host { display: block; }
+  /* Hidden while a reader shows what it holds (see ReadEditSwitch): the display above would otherwise keep it on show. */
+  :host([hidden]) { display: none; }
   ${WindowClose.CSS}
   /* The colours of the file's text editor (see SightingFileEditor): a key, a string, a number or a word, and a mistake. Dark mode redefines them. */
   :host { --file-key: #1a5fb4; --file-string: #26662f; --file-literal: #a5321f; --rr0-alert: #c33; }
@@ -269,6 +273,8 @@ const TEMPLATE = `
       <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also"></span></label>
       <!-- A report of the case: its readings compared, their findings and sensitivity, as HTML, PDF, JSON or CSV (see CaseExportElement). -->
       <rr0-case-export id="report-export" class="report-export" variant="pill"></rr0-case-export>
+      <!-- What is edited, read (see ReadEditSwitch): in place on a page that switches, else the player on its address. -->
+      <button id="read-case" type="button" class="pill-btn" hidden><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.2v9.6L12.5 8z"/></svg><span id="label-read-case"></span></button>
       <!-- The editor on this case, for somebody else (see ShareDialogElement): off while the case has no address to give. -->
       <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case"></span></button>
       <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case"></span></button>
@@ -532,6 +538,7 @@ export class CaseEditorElement extends HTMLElement {
     }
     this.shareDialog.subject = this.shareSubject
     this.byId("share-case").addEventListener("click", () => this.openShare())
+    this.byId("read-case").addEventListener("click", () => this.read())
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
@@ -556,10 +563,15 @@ export class CaseEditorElement extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ["src"]
+    return ["src", IN_PLACE_ATTRIBUTE]
   }
 
   attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
+    if (name === IN_PLACE_ATTRIBUTE) {
+      // Switched in place by itself: the page needs nothing more than the attribute (see ReadEditSwitch).
+      if (value !== null) this.switcher ??= new ReadEditSwitch(this, mode => this.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, { detail: mode, bubbles: true, composed: true })))
+      this.refreshCaseState()
+    }
     if (name === "src" && value) this.editor.setAttribute("src", value)
   }
 
@@ -698,6 +710,8 @@ export class CaseEditorElement extends HTMLElement {
     text("label-add", m.addTitle)
     text("label-save-also", m.exportAlso)
     text("label-save-case", m.exportButton)
+    text("label-read-case", m.readButton)
+    this.byId("read-case").title = m.readTitle
     for (const [id, label] of [["previous-event", m.previousEvent], ["next-event", m.nextEvent]] as const) {
       this.byId(id).title = label
       this.byId(id).setAttribute("aria-label", label)
@@ -1703,6 +1717,77 @@ export class CaseEditorElement extends HTMLElement {
     const share = this.byId("share-case") as HTMLButtonElement
     share.disabled = this.sourceUrl === undefined
     share.title = this.sourceUrl === undefined ? this.shareMessages?.unavailable ?? "" : ""
+    // Read in place whatever is held, on a page that switches; else on the player, which needs an address to open.
+    this.byId("read-case").hidden = !this.hasAttribute(IN_PLACE_ATTRIBUTE) && this.readAddress() === undefined
+  }
+
+  /** What switches this editor and a reader in place, once IN_PLACE_ATTRIBUTE is set. */
+  private switcher?: ReadEditSwitch
+
+  /** The address what is edited stands at, if it has one: the case's, else the recording's alone. */
+  private readAddress(): string | undefined {
+    return this.session ? this.sourceUrl : this.editor.address
+  }
+
+  /**
+   * Reads what is edited: handed to the page, which shows it in a reader in place of this editor (see ReadEditSwitch), the files held here
+   * read as they are now (see OpenFiles). A page that does not switch is not handed anything: the player opens on the file's address, in a
+   * tab of its own, and reads what stands there.
+   */
+  private read(): void {
+    const address = this.readAddress()
+    if (this.hasAttribute(IN_PLACE_ATTRIBUTE)) {
+      const detail = this.holdForReading()
+      if (ReadEdit.ask(this, READ_EVENT, detail)) return
+      OpenFiles.clear()
+    }
+    if (address === undefined) return
+    const track = this.session ? this.sharedTrack : undefined
+    window.open(`${AppLocation.home()}/play/?file=${encodeURIComponent(address)}${track ? `&events=${encodeURIComponent(CaseEditorElement.fileKey(track))}` : ""}`, "_blank", "noopener")
+  }
+
+  /** How a case names one of its events by its file: its name without `.json` (see CaseElement's OPEN_EVENTS_ATTRIBUTE). */
+  private static fileKey(url: string): string {
+    return new URL(url, location.href).pathname.split("/").pop()!.replace(/\.json$/i, "")
+  }
+
+  /**
+   * Holds what is edited under the addresses a reader reads it by (see OpenFiles): a case, with every recording of it loaded so far, at the
+   * addresses the case lists them at; a recording alone at its own. What was never read from an address stands beside the page, under the
+   * name it would be saved as, and is said to be local: there is nothing to share of it.
+   */
+  private holdForReading(): ReadEditDetail {
+    const files = new Map<string, OpenFile>()
+    const session = this.session
+    if (session) {
+      this.commit()
+      const local = this.sourceUrl === undefined
+      files.set(session.url, { json: session.json, changed: session.dirty, local })
+      for (const track of session.tracks) {
+        if (track.recording) files.set(track.url, { json: track.recording, changed: session.changed(track), local })
+      }
+      OpenFiles.holdOnly(files)
+      return { src: session.url, ...(this.sharedTrack ? { track: this.sharedTrack } : {}) }
+    }
+    const address = this.editor.address
+    const src = address ?? new URL("recording.json", location.href).href
+    files.set(src, { json: this.editor.sightingData, changed: this.editor.dirty, local: address === undefined })
+    OpenFiles.holdOnly(files)
+    return { src }
+  }
+
+  /**
+   * Opens the recording of the case at `url`, as a reader asked to edit it (see ReadEditSwitch). The event list when the case has no such
+   * recording, and nothing done when it is the one already on show.
+   */
+  async openTrack(url: string): Promise<void> {
+    const session = this.session
+    if (!session) return
+    const absolute = new URL(url, location.href).href
+    const track = session.tracks.find(candidate => candidate.url === absolute)
+    if (!track || (track === this.current && !this.listShown && !this.currentInterview)) return
+    this.listShown = false
+    await this.showTrack(track)
   }
 
   /** The address the case was read from: what sharing it gives. Undefined for a case picked from the disk. */

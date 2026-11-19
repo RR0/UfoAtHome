@@ -78,7 +78,7 @@ export const caseCss = `
 #group-readings[aria-pressed="false"] { background: var(--rr0-button-bg, var(--btn-bg)); }
 #group-readings:is(:hover, :focus-visible) { background: var(--rr0-button-hover, var(--btn-hover)); }
 #group-readings[aria-pressed="true"] { background: var(--rr0-button-on, var(--btn-on)); }
-#group-readings[hidden] { display: none; }
+#group-readings[hidden], #share[hidden] { display: none; }
 .events-heading { display: flex; align-items: center; gap: 6px; margin: 0; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .events-icon { display: inline-flex; }
 .events-icon svg { width: 14px; height: 14px; }
