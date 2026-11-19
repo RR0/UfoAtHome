@@ -111,9 +111,15 @@ button.event-mark:hover { border-color: var(--kind); }
 button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offset: 1px; }
 /* Open, it is ringed in the kind's colour on its disc, never filled: a reading's colour is a translucent grey, which the rail showed through. */
 .event-card[data-open] > button.event-mark { border-color: var(--kind); box-shadow: 0 0 0 1px var(--kind); color: var(--tl-ink); }
-/* A reading grouped under its observation: set in from the rail, its mark still on it, so that the marks stay one column to click down. */
-.event-card[data-nested] { --nest: 22px; margin-left: var(--nest); }
-.event-card[data-nested]::after, .event-card[data-nested] > .event-mark { left: calc(var(--rail) - 24px - 1px - var(--nest)); }
+/* A reading grouped under its observation: set in from the rail, on a branch that comes out of the observation's card, its mark on that
+   branch. The rail goes on past it, to the next event in time. The branch runs from the card above (the observation, or the reading before)
+   down to this mark, and on to the next reading's when there is one. */
+.event-card[data-nested] { --nest: 28px; --branch: calc(-1px - var(--nest) / 2 - 3px); margin-left: var(--nest); }
+.event-card[data-nested]::after { left: calc(var(--rail) - 24px - 1px - var(--nest)); }
+.event-card[data-nested] > .event-mark { left: var(--branch); }
+.event-card[data-nested]::before { content: ""; position: absolute; left: var(--branch); top: calc(-1px - var(--gap));
+  bottom: calc(100% - var(--dot-y) - 1px); width: 1px; transform: translateX(-50%); background: var(--tl-ink-faint); pointer-events: none; }
+.event-card[data-nested]:has(+ .event-card[data-nested])::before { bottom: -1px; }
 .event-card[data-nested] .event-open::after { left: calc(-24px - 1px - var(--nest)); }
 /* What folds an observation's readings away or unfolds them: above the title's hit area, at the card's end. */
 .event-fold { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; justify-self: end; grid-column: -2 / -1;
