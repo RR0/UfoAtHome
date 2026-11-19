@@ -74,6 +74,21 @@ const TURBOFAN_REGIMES: Partial<Record<FlightRegime, RegimeChange>> = {
 }
 
 /**
+ * The regimes of a supersonic airliner's turbojets, the Concorde's Olympus 593. Its certification (Heritage Concorde, "Airframe performance":
+ * 112.2 EPNdB lateral, 116.7 at approach, 119.5 under the take-off) is 21.5 dB over the A320's at both points that TURBOFAN_REGIMES is set by:
+ * the class is the A320's level and 21.5 dB more, and an approach is as much under full thrust as it is for the A320 (4.5 EPNdB more at the
+ * nearer point, both). Its SHAPE is assumed: a jet's with no fan to whine, the turbofan's at take-off without its highs. Full thrust here is
+ * with the afterburners lit, as the lateral point was flown.
+ *
+ * NOT MODELLED: its directivity. A jet this fast (some 600 m/s and more) is out of the range of Stone's shock-free jets that EngineDirectivity
+ * reads, and its shock noise and crackle are not there either.
+ */
+const TURBOJET_REGIMES: Partial<Record<FlightRegime, RegimeChange>> = {
+  takeoff: { shapeDb: [0, 0, 0, 0, 0, 0, 0, 0], levelDb: 0 },
+  approach: { shapeDb: [0, 0, 0, 0, 0, 0, 0, 0], levelDb: -8 }
+}
+
+/**
  * What a noise has besides its broad spectrum, which is what tells a machine by ear: a rotor's blades beat the air at ten to thirty
  * times a second, a propeller or a piston engine hums at a few tens of hertz, a fan whines, a drone's small rotors whistle. Each is a
  * datum of the class, and a played sound is the broad noise with these laid on it.
@@ -104,6 +119,7 @@ export interface AircraftSoundCharacter {
  */
 const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA: number; shapeDb: number[]; character?: AircraftSoundCharacter; regimes?: Partial<Record<FlightRegime, RegimeChange>> }[] = [
   { id: "turbofan-narrow-body", name: "Turbofan airliner, narrow-body", kinds: ["airliner-narrow"], totalDbA: 148, shapeDb: [-32, -17, -9, -6, -5, -7, -12, -22], character: { toneHz: 1800, toneShare: 0.3, humHz: 90, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
+  { id: "turbojet-supersonic", name: "Supersonic turbojet airliner", kinds: ["airliner-supersonic"], totalDbA: 169.5, shapeDb: [-22, -13, -9, -6, -6, -9, -15, -25], character: { humHz: 100, humShare: 0.7 }, regimes: TURBOJET_REGIMES },
   { id: "turbofan-wide-body", name: "Turbofan airliner, wide-body", kinds: ["airliner-wide"], totalDbA: 151, shapeDb: [-28, -14, -7, -4, -3, -6, -12, -22], character: { toneHz: 1200, toneShare: 0.3, humHz: 70, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
   { id: "regional-jet", name: "Regional jet", kinds: ["regional-jet"], totalDbA: 144, shapeDb: [-32, -17, -9, -5, -4, -6, -11, -21], character: { toneHz: 1900, toneShare: 0.3, humHz: 95, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
   { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19], character: { toneHz: 2500, toneShare: 0.25, humHz: 110, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },

@@ -101,6 +101,7 @@ export const decorParameterTexts_es = {
   aircraftRegionalJet: "Jet regional",
   aircraftTurboprop: "Turbohélice",
   aircraftBusinessJet: "Jet privado",
+  aircraftSupersonicAirliner: "Avión de pasajeros supersónico",
   aircraftLightPistonAircraft: "Avioneta de pistones",
   aircraftLightHelicopter: "Helicóptero ligero",
   aircraftMediumHelicopter: "Helicóptero medio",

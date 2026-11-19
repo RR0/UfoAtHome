@@ -301,4 +301,14 @@ describe("AircraftHearing", () => {
       above().bandsDbA.forEach((level, band) => expect(Math.abs(level - above(null).bandsDbA[band])).toBeLessThan(1))
     })
   })
+
+  test("a Concorde is 21.5 dB louder than an A320, as certified at both points, with no fan to whine and no directivity", () => {
+    const concorde = AircraftHearing.noiseOfKind("airliner-supersonic")
+    const a320 = AircraftHearing.noiseOfKind("airliner-narrow")
+    expect(SoundInAir.sumDb(concorde.soundPowerA) - SoundInAir.sumDb(a320.soundPowerA)).toBeCloseTo(21.5, 1)
+    const approach = AircraftHearing.inRegime(concorde, "approach")
+    expect(SoundInAir.sumDb(concorde.soundPowerA) - SoundInAir.sumDb(approach.soundPowerA)).toBeCloseTo(8, 1)
+    expect(concorde.character?.toneHz).toBeUndefined()
+    expect(concorde.directivity).toBeUndefined()
+  })
 })

@@ -36,6 +36,9 @@ export class CabinHearing {
    * the shell (what the other classes are heard as, having no recording of their cabin) was twice as far from the first, too bright by ten
    * decibels a kilohertz.
    */
+  /** The machines whose cabin is a jet airliner's, which JET_CABIN_SHAPE_DB is measured in: not a fighter's cockpit, which nobody recorded. */
+  private static readonly JET_CABINS: readonly AircraftKind[] = ["airliner-narrow", "airliner-wide", "airliner-supersonic", "regional-jet", "business-jet"]
+
   static readonly JET_CABIN_SHAPE_DB: readonly number[] = [-3, -4, -13, -24, -33, -36, -42, -55]
 
   /** What a machine nobody placed in a class sounds like inside: an airliner's, which is most of what anyone rides. */
@@ -55,7 +58,7 @@ export class CabinHearing {
     // what a passenger measures in that cabin, the shell's loss being already in that figure and not to be taken twice.
     // A jet's cabin, shut, is heard as it was recorded; the others, having no recording of theirs, and a window opened (which lets the
     // whine in), as their engines taken through what is left of the shell.
-    const shaped = noise.directivity === "turbofan" && vehicle?.windowsOpen !== true
+    const shaped = CabinHearing.JET_CABINS.includes(kind) && vehicle?.windowsOpen !== true
       ? CabinHearing.JET_CABIN_SHAPE_DB.map((level, band) => level + SoundInAir.aWeightingDb(SoundInAir.OCTAVES[band]))
       : noise.soundPowerA.map((level, band) => level - insulation[band])
     const shapedTotal = SoundInAir.sumDb(shaped)

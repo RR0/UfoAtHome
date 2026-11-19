@@ -2,7 +2,7 @@ import type { AircraftDescription } from "./AircraftProvider.js"
 
 /** What kind of machine it is, which decides how it is lit, how it sounds and how big it is when nothing more is known. */
 export type AircraftKind =
-  | "airliner-narrow" | "airliner-wide" | "regional-turboprop" | "regional-jet" | "business-jet"
+  | "airliner-narrow" | "airliner-wide" | "airliner-supersonic" | "regional-turboprop" | "regional-jet" | "business-jet"
   | "light-piston" | "turboprop-light" | "helicopter-light" | "helicopter-medium" | "helicopter-heavy"
   | "military-jet" | "glider" | "balloon" | "ultralight" | "unmanned" | "unknown"
 
@@ -50,6 +50,7 @@ export class AircraftModels {
     A343: ["Airbus A340-300", "airliner-wide", 60.3, 63.7], A346: ["Airbus A340-600", "airliner-wide", 63.5, 75.4],
     A359: ["Airbus A350-900", "airliner-wide", 64.8, 66.8], A35K: ["Airbus A350-1000", "airliner-wide", 64.8, 73.8],
     A388: ["Airbus A380-800", "airliner-wide", 79.8, 72.7],
+    CONC: ["Concorde", "airliner-supersonic", 25.6, 61.7],
     E170: ["Embraer 170", "regional-jet", 26.0, 29.9], E75L: ["Embraer 175", "regional-jet", 26.0, 31.7],
     E75S: ["Embraer 175", "regional-jet", 26.0, 31.7], E190: ["Embraer 190", "regional-jet", 28.7, 36.2],
     E195: ["Embraer 195", "regional-jet", 28.7, 38.7], E290: ["Embraer 190-E2", "regional-jet", 33.7, 36.2],

@@ -1568,7 +1568,8 @@
       "kind": "aircraft",
       "name": "Concorde, British Airways G-BOAC, gear up",
       "parameters": {
-        "lightRigs": ["airliner"]
+        "lightRigs": ["airliner"],
+        "sound": "airliner-supersonic"
       },
       "file": "mgg8-concorde/concorde-g-boac-gear-up.glb",
       "headingOffsetDeg": 180,

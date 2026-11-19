@@ -216,6 +216,7 @@ export class DecorParameterSets {
       choices: [
         { value: "airliner-narrow", label: "aircraftNarrowBodyAirliner" },
         { value: "airliner-wide", label: "aircraftWideBodyAirliner" },
+        { value: "airliner-supersonic", label: "aircraftSupersonicAirliner" },
         { value: "regional-jet", label: "aircraftRegionalJet" },
         { value: "regional-turboprop", label: "aircraftTurboprop" },
         { value: "business-jet", label: "aircraftBusinessJet" },

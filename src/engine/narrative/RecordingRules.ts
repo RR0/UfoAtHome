@@ -256,6 +256,14 @@ export class RecordingRules {
    from CNOSSOS-EU and added to the weather's: an aircraft is heard against it. Absent means a quiet place.`
     },
     {
+      file: `A witness who flies says so with \`vehicle\` (its \`kind\` an aircraft kind: \`light-piston\`,
+   \`airliner-narrow\`…): they then hear its cabin, and what is outside through its shell. An aircraft of the
+   decor they stand within (a pilot in their cockpit) is taken as the one they ride when \`vehicle\` is absent,
+   and is never heard as one passing them. Give a decor aircraft the \`aircraftSound\` of its machine when its
+   model says none (\`airliner-supersonic\` for the Concorde, \`light-piston\` for a single piston engine):
+   absent, it sounds like a narrow-body jet.`
+    },
+    {
       file: `The observer's own estimate in metres ("60 m long, 175 m away, 10 m up") is not an observation
    but a conclusion: it goes in \`interpretation\` (bodies in metres, see the format page), never in
    the shapes. When it contradicts the angles the observer measured, keep it anyway and say so in

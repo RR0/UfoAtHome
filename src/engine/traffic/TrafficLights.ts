@@ -32,7 +32,7 @@ export class TrafficLights {
   /** The Sun's elevation at an aircraft's place under which it is dusk for its lamps, degrees: the horizon, the upper limb gone. */
   static readonly DUSK_SUN_ELEVATION_DEG = -0.83
   /** The kinds that fly lit at every hour. */
-  private static readonly ALWAYS: ReadonlySet<AircraftKind> = new Set(["airliner-narrow", "airliner-wide", "regional-turboprop", "regional-jet", "business-jet"])
+  private static readonly ALWAYS: ReadonlySet<AircraftKind> = new Set(["airliner-narrow", "airliner-wide", "airliner-supersonic", "regional-turboprop", "regional-jet", "business-jet"])
   private static readonly NONE: ReadonlySet<AircraftKind> = new Set(["glider", "balloon"])
   /** Brightness against an airliner's: [navigation, strobes, beacon]. */
   private static readonly BRIGHTNESS: Partial<Record<AircraftKind, [number, number, number]>> = {
@@ -49,7 +49,7 @@ export class TrafficLights {
   private static readonly LANDING_COLOR = "#fff1dc"
   /** Against an airliner's. A kind absent carries none that can be told: a military aircraft's practice is its own. */
   private static readonly LANDING_BRIGHTNESS: Partial<Record<AircraftKind, number>> = {
-    "airliner-narrow": 1, "airliner-wide": 1, "regional-jet": 0.6, "regional-turboprop": 0.6, "business-jet": 0.4,
+    "airliner-narrow": 1, "airliner-wide": 1, "airliner-supersonic": 1, "regional-jet": 0.6, "regional-turboprop": 0.6, "business-jet": 0.4,
     "turboprop-light": 0.2, "light-piston": 0.1, "ultralight": 0.05,
     "helicopter-light": 0.1, "helicopter-medium": 0.2, "helicopter-heavy": 0.2
   }

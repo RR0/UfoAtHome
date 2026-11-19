@@ -105,6 +105,8 @@ export interface DecorParameterTexts {
   aircraftRegionalJet: string
   aircraftTurboprop: string
   aircraftBusinessJet: string
+  /** A supersonic airliner, the Concorde. */
+  aircraftSupersonicAirliner: string
   aircraftLightPistonAircraft: string
   aircraftLightHelicopter: string
   aircraftMediumHelicopter: string
