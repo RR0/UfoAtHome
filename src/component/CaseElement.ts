@@ -554,7 +554,9 @@ export class CaseElement extends HTMLElement {
    * order changes: put back in the page, a player is read again.
    */
   private order(): void {
-    const rank = new Map(this.listed().map(({ index }, place) => [index, place]))
+    // Its first place: a reading grouped under two observations is listed twice.
+    const rank = new Map<number, number>()
+    this.listed().forEach(({ index }, place) => { if (!rank.has(index)) rank.set(index, place) })
     const blocks = [...this.shown.entries()].sort(([a], [b]) => (rank.get(a) ?? a) - (rank.get(b) ?? b)).map(([, block]) => block)
     if (blocks.length === this.openEvents.children.length && blocks.every((block, place) => this.openEvents.children[place] === block)) return
     this.openEvents.replaceChildren(...blocks)
@@ -646,12 +648,12 @@ export class CaseElement extends HTMLElement {
   }
 
   /**
-   * What the card of the entry at `index` says: its kind, its name, its date, what it names and who made it. Set under the observation
-   * `under` it reads, it no longer names that one: where it stands says it.
+   * What the card of the entry at `index` says: its kind, its name, its date, what it names and who made it. Set under an observation
+   * `under` it reads, it names none of those it reads: it stands under each of them (see CaseTimeline.grouped), which says it.
    */
   private card(entry: CaseEntry, index: number, under?: CaseEntry): CaseTimelineCard {
     const linked = this.linkedTo(entry)
-    const to = (linked?.to ?? []).filter(other => this.entries[other] !== under)
+    const to = under ? [] : linked?.to ?? []
     return {
       at: index, kind: entry.kind, title: entry.title, meta: entry.when.replace("T", " "), open: this.shown.has(index),
       ...(linked && to.length > 0 ? { links: { heading: linked.heading, to: to.map(other => ({ at: other, title: this.entries[other].title })) } } : {}),

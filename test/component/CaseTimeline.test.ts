@@ -27,7 +27,7 @@ describe("CaseTimeline", () => {
     expect(sorted.map(({ index }) => index)).toEqual([2, 3, 1, 0, 4])
   })
 
-  it("sets each reading under the first observation it reads, after that observation's earlier readings", () => {
+  it("sets each reading under every observation it reads, after that observation's earlier readings", () => {
     const items: Item[] = [
       { id: "a", kind: "observation", when: "1990-01" },
       { id: "b", kind: "observation", when: "1990-02" },
@@ -35,14 +35,16 @@ describe("CaseTimeline", () => {
       { id: "interview", kind: "interview", when: "1990-04" },
       { id: "later reading of a", kind: "reading", when: "2000", reads: "a" },
       { id: "reading of b", kind: "reading", when: "2001", reads: "b" },
-      { id: "reading of nothing", kind: "reading", when: "2002" }
+      { id: "reading of nothing", kind: "reading", when: "2002" },
+      { id: "reading of both", kind: "reading", when: "2003", reads: "a b" }
     ]
     const byId = new Map(items.map(item => [item.id, item]))
     const grouped = CaseTimeline.grouped(items.map((item, index) => ({ item, index })), {
-      kind: item => item.kind, read: item => item.reads ? [byId.get(item.reads)!] : []
+      kind: item => item.kind, read: item => item.reads ? item.reads.split(" ").map(id => byId.get(id)!) : []
     })
-    expect(grouped.map(({ item }) => item.id)).toEqual(["a", "reading of a", "later reading of a", "b", "reading of b", "interview", "reading of nothing"])
-    expect(grouped.map(({ under }) => under?.id)).toEqual([undefined, "a", "a", undefined, "b", undefined, undefined])
+    expect(grouped.map(({ item }) => item.id)).toEqual(["a", "reading of a", "later reading of a", "reading of both", "b", "reading of b",
+      "reading of both", "interview", "reading of nothing"])
+    expect(grouped.map(({ under }) => under?.id)).toEqual([undefined, "a", "a", "a", undefined, "b", "b", undefined, undefined])
   })
 
   it("lets the mark on the rail show an event beside the others, where the host lets several be open", () => {
