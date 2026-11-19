@@ -27,6 +27,44 @@ describe("CaseTimeline", () => {
     expect(sorted.map(({ index }) => index)).toEqual([2, 3, 1, 0, 4])
   })
 
+  it("sets each reading under the first observation it reads, after that observation's earlier readings", () => {
+    const items: Item[] = [
+      { id: "a", kind: "observation", when: "1990-01" },
+      { id: "b", kind: "observation", when: "1990-02" },
+      { id: "reading of a", kind: "reading", when: "1990-03", reads: "a" },
+      { id: "interview", kind: "interview", when: "1990-04" },
+      { id: "later reading of a", kind: "reading", when: "2000", reads: "a" },
+      { id: "reading of b", kind: "reading", when: "2001", reads: "b" },
+      { id: "reading of nothing", kind: "reading", when: "2002" }
+    ]
+    const byId = new Map(items.map(item => [item.id, item]))
+    const grouped = CaseTimeline.grouped(items.map((item, index) => ({ item, index })), {
+      kind: item => item.kind, read: item => item.reads ? [byId.get(item.reads)!] : []
+    })
+    expect(grouped.map(({ item }) => item.id)).toEqual(["a", "reading of a", "later reading of a", "b", "reading of b", "interview", "reading of nothing"])
+    expect(grouped.map(({ under }) => under?.id)).toEqual([undefined, "a", "a", undefined, "b", undefined, undefined])
+  })
+
+  it("lets the mark on the rail show an event beside the others, where the host lets several be open", () => {
+    const list = document.createElement("ol")
+    const toggled: number[] = []
+    const chosen: number[] = []
+    new CaseTimeline(list, at => chosen.push(at), undefined, at => toggled.push(at)).render([
+      { at: 0, kind: "observation", title: "A", meta: "", open: true },
+      { at: 1, kind: "reading", title: "R", meta: "", nested: true }
+    ], { ...words, toggleEvent: "Toggle" })
+    const marks = [...list.querySelectorAll<HTMLButtonElement>("button.event-mark")]
+    expect(marks.map(mark => mark.getAttribute("aria-pressed"))).toEqual(["true", "false"])
+    expect(list.querySelectorAll(".event-card")[1].hasAttribute("data-nested")).toBe(true)
+    marks[1].click()
+    expect(toggled).toEqual([1])
+    expect(chosen).toEqual([])
+    // Without a toggle, the mark is a picture of the kind, not a button.
+    new CaseTimeline(list, () => undefined).render([{ at: 0, kind: "observation", title: "A", meta: "" }], words)
+    expect(list.querySelector("button.event-mark")).toBeNull()
+    expect(list.querySelector("span.event-mark")!.getAttribute("aria-hidden")).toBe("true")
+  })
+
   it("draws a card per event on the rail, its renvois listed as a sentence and lighting the card they lead to", () => {
     const list = document.createElement("ol")
     document.body.append(list)

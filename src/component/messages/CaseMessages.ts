@@ -8,8 +8,15 @@ export interface CaseMessages {
   kindObservation: string
   kindReading: string
   kindInterview: string
-  /** What opens the event a card is about. */
+  /** What opens the event a card is about, alone: what was open beside it is put away. */
   openEvent: string
+  /** On the mark of a card, on the rail: what shows its event beside those open, or puts it away. */
+  toggleEvent: string
+  /** The option of the history that sets each reading under the observation it reads, rather than in the order of time. */
+  groupReadings: string
+  /** On an observation, in that grouping: what folds its readings away, and what unfolds them. */
+  foldReadings: string
+  unfoldReadings: string
   /** On a reading's card, before the observations it reads: "Interpretation of X and Y". */
   interpretationOf: string
   /** On an observation's card, before the interviews it was told in. */

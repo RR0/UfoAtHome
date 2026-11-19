@@ -279,10 +279,10 @@ describe("<rr0-case>, a case read", () => {
     const element = await mount()
     const root = element.shadowRoot!
     const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
-    // The reading chosen, the observation it reads shut: what is looked at is the reading alone.
+    // The reading chosen: its card opens it alone, the observation it reads put away. What is looked at is the reading alone.
     cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
-    for (let left = 200; left > 0 && root.querySelectorAll(".open-event").length < 2; left--) await new Promise(resolve => setTimeout(resolve, 5))
-    cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    for (let left = 200; left > 0 && root.querySelector('.open-event[data-at="1"]') === null; left--) await new Promise(resolve => setTimeout(resolve, 5))
+    expect([...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)).toEqual(["1"])
     root.getElementById("share")!.click()
     const dialog = root.getElementById("share-dialog")!.shadowRoot!
     const link = new URL((dialog.getElementById("link") as HTMLTextAreaElement).value)
@@ -373,7 +373,7 @@ describe("<rr0-case>, a case read", () => {
     expect(told.textContent).toContain("Told in Interview of Q. B.")
   })
 
-  it("opens an event, shuts it again, and keeps several open in the order of time", async () => {
+  it("opens an event alone from its card, and beside the others or shut again from its mark, in the order of time", async () => {
     const element = await mount()
     const root = element.shadowRoot!
     const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
@@ -387,26 +387,66 @@ describe("<rr0-case>, a case read", () => {
     expect(cards()[0].dataset.open).toBe("")
     // By the recording's own address: the id of an event of the case is not a name the player answers to.
     expect(element.player!.getAttribute("observer")).toBe(new URL("observer.json", location.href).href)
-    // The interview opens beside it, under it, since it comes later in time.
-    cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    const mark = (at: number) => cards()[at].querySelector<HTMLButtonElement>("button.event-mark")!
+    expect(mark(0).getAttribute("aria-pressed")).toBe("true")
+    // The interview's mark opens it beside the observation, under it, since it comes later in time.
+    mark(2).click()
     await waitFor(() => root.querySelector(".open-event rr0-interview") !== null)
     expect(open()).toEqual(["0", "2"])
     expect(root.querySelector(".open-event rr0-interview")!.getAttribute("src")).toBe(new URL("interview.json", location.href).href)
-    // The reading, opened last, takes its own place in time: between the observation and the interview.
-    cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
+    // The reading, added last, takes its own place in time: between the observation and the interview.
+    mark(1).click()
     await waitFor(() => open().length === 3)
     expect(open()).toEqual(["0", "1", "2"])
-    // Choosing an open event again shuts it.
-    cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    // Its mark again puts an event away.
+    mark(0).click()
     expect(open()).toEqual(["1", "2"])
     expect(cards()[0].dataset.open).toBeUndefined()
+    // Its card opens it alone, whatever else was open; chosen again, it stays open.
+    cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    await waitFor(() => open().length === 1)
+    expect(open()).toEqual(["2"])
+    cards()[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    expect(open()).toEqual(["2"])
+  })
+
+  it("sets each reading under the observation it reads when asked, no longer naming it, and remembers the choice", async () => {
+    localStorage.removeItem("rr0-case-group-readings")
+    const element = await mount()
+    const root = element.shadowRoot!
+    const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
+    const group = root.getElementById("group-readings")!
+    expect(group.getAttribute("aria-pressed")).toBe("false")
+    expect(cards()[1].hasAttribute("data-nested")).toBe(false)
+    expect(cards()[1].querySelector(".event-links")!.textContent).toContain("Reading of Q. B.")
+    group.click()
+    expect(group.getAttribute("aria-pressed")).toBe("true")
+    expect(cards().map(card => card.dataset.at)).toEqual(["0", "1", "2"])
+    expect(cards()[1].hasAttribute("data-nested")).toBe(true)
+    // Where it stands says what it reads; who made it is still said.
+    expect(cards()[1].querySelector(".event-links")!.textContent).not.toContain("Reading of")
+    expect(cards()[1].querySelector(".event-links")!.textContent).toContain("by CousynAntoine and GEIPAN")
+    expect(localStorage.getItem("rr0-case-group-readings")).toBe("1")
+    // The observation folds its readings away, and unfolds them again.
+    const fold = () => cards()[0].querySelector<HTMLButtonElement>(".event-fold")!
+    expect(fold().getAttribute("aria-expanded")).toBe("true")
+    expect(fold().textContent).toBe("1")
+    fold().click()
+    expect(cards().map(card => card.dataset.at)).toEqual(["0", "2"])
+    expect(fold().getAttribute("aria-expanded")).toBe("false")
+    fold().click()
+    expect(cards().map(card => card.dataset.at)).toEqual(["0", "1", "2"])
+    group.click()
+    expect(root.querySelector(".event-fold")).toBeNull()
+    expect(localStorage.getItem("rr0-case-group-readings")).toBe("0")
   })
 
   it("follows a replay in the dialogues open beside it, passage by passage", async () => {
     const element = await mount()
     const root = element.shadowRoot!
     const cards = [...root.querySelectorAll<HTMLElement>(".event-card")]
-    cards[2].querySelector<HTMLButtonElement>(".event-open")!.click()
+    // Beside the observation, by its mark: its card would open it alone.
+    cards[2].querySelector<HTMLButtonElement>("button.event-mark")!.click()
     for (let left = 200; left > 0 && root.querySelector(".open-event rr0-interview") === null; left--) {
       await new Promise(resolve => setTimeout(resolve, 5))
     }

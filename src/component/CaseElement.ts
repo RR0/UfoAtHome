@@ -85,6 +85,28 @@ export class CaseElement extends HTMLElement {
   private json?: CaseJson
   private url?: string
   private entries: CaseEntry[] = []
+  /** Whether the history sets each reading under the observation it reads (see CaseTimeline.grouped), rather than in the order of time. */
+  private grouping = false
+  /** The observations whose readings are folded away while grouped, by their place in `entries`: none until the reader folds one. */
+  private readonly folded = new Set<number>()
+  /** Where the reader's choice of grouping is kept, in their browser alone: a convenience, which a page without storage simply forgets. */
+  private static readonly GROUPING_KEY = "rr0-case-group-readings"
+
+  private static remembered(): boolean {
+    try {
+      return localStorage.getItem(CaseElement.GROUPING_KEY) === "1"
+    } catch {
+      return false
+    }
+  }
+
+  private static remember(grouping: boolean): void {
+    try {
+      localStorage.setItem(CaseElement.GROUPING_KEY, grouping ? "1" : "0")
+    } catch {
+      // Not kept: the next case opens in the order of time, which is no harm.
+    }
+  }
 
   constructor() {
     super()
@@ -95,7 +117,19 @@ export class CaseElement extends HTMLElement {
     frame.innerHTML = caseHtml
     this.shadow.append(style, frame)
     registerSighting()
-    this.timeline = new CaseTimeline(this.byId("case-events"), at => void this.toggle(at), at => void this.open(at))
+    // The card opens its event alone, and so does a renvoi; only the mark on the rail adds one to what is open, or puts one away.
+    this.timeline = new CaseTimeline(this.byId("case-events"), at => void this.only(at), at => void this.only(at), at => void this.toggle(at),
+      at => {
+        if (!this.folded.delete(at)) this.folded.add(at)
+        this.draw()
+      })
+    this.grouping = CaseElement.remembered()
+    this.byId("group-readings").addEventListener("click", () => {
+      this.grouping = !this.grouping
+      CaseElement.remember(this.grouping)
+      this.order()
+      this.draw()
+    })
     ReadingsComparisonElement.register()
     CaseExportElement.register()
     // What a report is made from: the case and every recording it lists, fetched only when a report is asked for.
@@ -264,6 +298,7 @@ export class CaseElement extends HTMLElement {
     this.json = json
     this.entries = CaseElement.inTime((json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined))
     this.shown.clear()
+    this.folded.clear()
     this.openEvents.replaceChildren()
     this.draw()
     this.compareReadings()
@@ -324,7 +359,7 @@ export class CaseElement extends HTMLElement {
       const row = async (): Promise<ComparedReading> => ({
         title: entry.title, witness: account?.title ?? "",
         ...(load && account?.url && entry.url ? { account: await fetch(account.url), reading: await fetch(entry.url) } : {}),
-        open: () => void this.open(at).then(() => this.shown.get(at)?.scrollIntoView({ block: "start", behavior: "smooth" }))
+        open: () => void this.only(at).then(() => this.shown.get(at)?.scrollIntoView({ block: "start", behavior: "smooth" }))
       })
       return [row()]
     }))
@@ -333,8 +368,13 @@ export class CaseElement extends HTMLElement {
 
   /** The account a reading reads, among the case's events: what the player has to be pointed at to replay that reading. */
   private accountOf(entry: CaseEntry): CaseEntry | undefined {
+    return this.accountsOf(entry)[0]
+  }
+
+  /** Every account a reading reads, among the case's events, in the order of time. */
+  private accountsOf(entry: CaseEntry): CaseEntry[] {
     const ids = [entry.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
-    return this.entries.find(other => other.kind === "observation" && ids.includes(other.event.id ?? ""))
+    return this.entries.filter(other => other.kind === "observation" && ids.includes(other.event.id ?? ""))
   }
 
 
@@ -349,7 +389,13 @@ export class CaseElement extends HTMLElement {
     return editor.href
   }
 
-  /** Opens the event at `at`, or shuts it: what is open is shown below, in the order of time, however many there are. */
+  /** Opens the event at `at` alone: whatever else was open is put away. */
+  private async only(at: number): Promise<void> {
+    for (const other of [...this.shown.keys()]) if (other !== at) this.shut(other)
+    await this.open(at)
+  }
+
+  /** Opens the event at `at` beside what is open, or shuts it: what is open is shown below, in the history's order, however many there are. */
   private async toggle(at: number): Promise<void> {
     if (this.shown.has(at)) this.shut(at)
     else await this.open(at)
@@ -447,9 +493,7 @@ export class CaseElement extends HTMLElement {
       player.removeAttribute(INTERPRETATION_ATTRIBUTE)
       if (entry.url) player.setAttribute(OBSERVER_ATTRIBUTE, entry.url)
     }
-    // Moved only when the order of time says it moves: put back in the page, a player is read again.
-    const order = [...this.shown.keys()].sort((a, b) => a - b)
-    if ([...this.openEvents.children].some((child, index) => child !== this.shown.get(order[index]))) this.order()
+    this.order()
     this.draw()
     this.announceOpen()
   }
@@ -505,10 +549,22 @@ export class CaseElement extends HTMLElement {
     this.announceOpen()
   }
 
-  /** What is open, in the order of time: the order they were opened in is the reader's doing, not the case's. */
+  /**
+   * What is open, in the history's order: the order they were opened in is the reader's doing, not the case's. Moved only when that
+   * order changes: put back in the page, a player is read again.
+   */
   private order(): void {
-    const blocks = [...this.shown.entries()].sort(([a], [b]) => a - b).map(([, block]) => block)
+    const rank = new Map(this.listed().map(({ index }, place) => [index, place]))
+    const blocks = [...this.shown.entries()].sort(([a], [b]) => (rank.get(a) ?? a) - (rank.get(b) ?? b)).map(([, block]) => block)
+    if (blocks.length === this.openEvents.children.length && blocks.every((block, place) => this.openEvents.children[place] === block)) return
     this.openEvents.replaceChildren(...blocks)
+  }
+
+  /** The events as the history lists them: in the order of time, or each reading under the observation it reads (see grouping). */
+  private listed(): { item: CaseEntry, index: number, under?: CaseEntry }[] {
+    const inTime = this.entries.map((item, index) => ({ item, index }))
+    if (!this.grouping) return inTime
+    return CaseTimeline.grouped(inTime, { kind: entry => entry.kind, read: entry => this.accountsOf(entry) })
   }
 
   /** Takes the observation `sighting` names to `at` seconds, opening it when it was shut: what a passage of an interview leads to. */
@@ -572,16 +628,35 @@ export class CaseElement extends HTMLElement {
     const edit = this.byId("edit")
     edit.title = m.editCase
     edit.setAttribute("aria-label", m.editCase)
-    this.timeline.render(this.entries.map((entry, index) => this.card(entry, index)), m)
+    const group = this.byId("group-readings")
+    group.title = m.groupReadings
+    group.setAttribute("aria-label", m.groupReadings)
+    group.setAttribute("aria-pressed", String(this.grouping))
+    group.hidden = !this.entries.some(entry => entry.kind === "reading")
+    const listed = this.listed()
+    const readingsOf = (account: CaseEntry) => listed.filter(({ under }) => under === account).length
+    const accountAt = new Map(this.entries.map((entry, at) => [entry, at]))
+    this.timeline.render(listed
+      .filter(({ under }) => under === undefined || !this.folded.has(accountAt.get(under)!))
+      .map(({ item, index, under }) => {
+        const card = this.card(item, index, under)
+        const count = this.grouping && item.kind === "observation" ? readingsOf(item) : 0
+        return count > 0 ? { ...card, readings: { count, folded: this.folded.has(index) } } : card
+      }), m)
   }
 
-  /** What the card of the entry at `index` says: its kind, its name, its date, what it names and who made it. */
-  private card(entry: CaseEntry, index: number): CaseTimelineCard {
+  /**
+   * What the card of the entry at `index` says: its kind, its name, its date, what it names and who made it. Set under the observation
+   * `under` it reads, it no longer names that one: where it stands says it.
+   */
+  private card(entry: CaseEntry, index: number, under?: CaseEntry): CaseTimelineCard {
     const linked = this.linkedTo(entry)
+    const to = (linked?.to ?? []).filter(other => this.entries[other] !== under)
     return {
       at: index, kind: entry.kind, title: entry.title, meta: entry.when.replace("T", " "), open: this.shown.has(index),
-      ...(linked ? { links: { heading: linked.heading, to: linked.to.map(to => ({ at: to, title: this.entries[to].title })) } } : {}),
-      by: entry.kind === "observation" ? "" : this.authors(entry.event.by)
+      ...(linked && to.length > 0 ? { links: { heading: linked.heading, to: to.map(other => ({ at: other, title: this.entries[other].title })) } } : {}),
+      by: entry.kind === "observation" ? "" : this.authors(entry.event.by),
+      ...(under ? { nested: true } : {})
     }
   }
 

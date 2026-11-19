@@ -21,9 +21,14 @@ export const caseHtml = `
   <p id="case-summary" class="case-summary" hidden></p>
   <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 </header>
-<!-- The chronology, in the upper part: choosing an event opens it below, choosing it again shuts it. Several can be open at once. -->
+<!-- The chronology, in the upper part: choosing an event opens it alone below; its mark on the rail shows it beside what is open, or puts
+     it away. Several can be open at once that way. -->
 <section class="case-timeline">
-  <h3 class="events-heading"><span id="events-icon" class="events-icon" aria-hidden="true"></span><span id="events-heading"></span></h3>
+  <div class="events-bar">
+    <h3 class="events-heading"><span id="events-icon" class="events-icon" aria-hidden="true"></span><span id="events-heading"></span></h3>
+    <!-- Each reading under the observation it reads, or every event in the order of time: the reader's choice, remembered. -->
+    <button id="group-readings" type="button" class="icon-btn" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="3.5" r="1.6"/><path d="M4 5.1v7.4M4 8.5h3.5M4 12.5h3.5"/><path d="M9.5 8.5h4M9.5 12.5h4"/></svg></button>
+  </div>
   <ol id="case-events" class="event-list"></ol>
   <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
 </section>
@@ -67,7 +72,14 @@ export const caseCss = `
 .case-timeline { margin: 0 0 14px; }
 .case-timeline[hidden] { display: none; }
 .readings-comparison { margin-top: 12px; }
-.events-heading { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.events-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.events-bar .icon-btn { margin-left: auto; }
+/* Lit when grouping, as a switch is: not the history's own button, which is lit when the history is put away. */
+#group-readings[aria-pressed="false"] { background: var(--rr0-button-bg, var(--btn-bg)); }
+#group-readings:is(:hover, :focus-visible) { background: var(--rr0-button-hover, var(--btn-hover)); }
+#group-readings[aria-pressed="true"] { background: var(--rr0-button-on, var(--btn-on)); }
+#group-readings[hidden] { display: none; }
+.events-heading { display: flex; align-items: center; gap: 6px; margin: 0; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .events-icon { display: inline-flex; }
 .events-icon svg { width: 14px; height: 14px; }
 /* What is open: one block per event, each saying which it is, in the order of time. */

@@ -10,6 +10,11 @@ export interface CaseTimelineWords {
   kindInterview: string
   /** What opens the event a card is about. */
   openEvent: string
+  /** On the mark of a card whose host lets several be open: what shows it beside the others, or puts it away. */
+  toggleEvent?: string
+  /** On an observation whose readings are grouped under it: what folds them away, and what unfolds them. */
+  foldReadings?: string
+  unfoldReadings?: string
   /** Between the last two things a card names. */
   linkAnd: string
   /** Before the authors a card names: "… by Z". */
@@ -30,6 +35,10 @@ export interface CaseTimelineCard {
   links?: { heading: string, to: { at: number, title: string }[] }
   /** Its authors, as a sentence says them; none for an observation, whose author is its witness. */
   by?: string
+  /** Drawn under the card above as one of its own: a reading grouped under the observation it reads (see CaseTimeline.grouped). */
+  nested?: boolean
+  /** The readings grouped under it, for an observation: how many, and whether they are folded away (see the host's fold callback). */
+  readings?: { count: number, folded: boolean }
 }
 
 /** The parts of a card drawn, for a host that adds its own to them (the editor's findings, tools, padlock). */
@@ -95,6 +104,26 @@ export class CaseTimeline {
   width: 22px; height: 22px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--tl-disc); color: var(--kind);
   pointer-events: none; }
 .event-mark svg { width: 14px; height: 14px; }
+/* Where the host lets several events be open, the mark is what shows one beside the others or puts it away: the card itself opens it
+   alone. Above the title's hit area, which runs over the rail. */
+button.event-mark { z-index: 2; padding: 0; border: 1px solid var(--tl-line); font: inherit; cursor: pointer; pointer-events: auto; }
+button.event-mark:hover { border-color: var(--kind); }
+button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offset: 1px; }
+/* Open, it is ringed in the kind's colour on its disc, never filled: a reading's colour is a translucent grey, which the rail showed through. */
+.event-card[data-open] > button.event-mark { border-color: var(--kind); box-shadow: 0 0 0 1px var(--kind); color: var(--tl-ink); }
+/* A reading grouped under its observation: set in from the rail, its mark still on it, so that the marks stay one column to click down. */
+.event-card[data-nested] { --nest: 22px; margin-left: var(--nest); }
+.event-card[data-nested]::after, .event-card[data-nested] > .event-mark { left: calc(var(--rail) - 24px - 1px - var(--nest)); }
+.event-card[data-nested] .event-open::after { left: calc(-24px - 1px - var(--nest)); }
+/* What folds an observation's readings away or unfolds them: above the title's hit area, at the card's end. */
+.event-fold { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; justify-self: end; grid-column: -2 / -1;
+  grid-row: 1; padding: 2px 8px; border: 1px solid var(--tl-line); border-radius: 999px; background: none; color: var(--tl-ink-dim);
+  font: 600 12px/1.5 var(--tl-sans); cursor: pointer; }
+.event-fold:hover { color: var(--tl-ink); border-color: var(--tl-ink-faint); }
+.event-fold:focus-visible { outline: 2px solid var(--tl-sky); outline-offset: 2px; }
+.event-fold svg { width: 12px; height: 12px; transition: transform .15s; }
+.event-fold[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.event-main:has(+ .event-fold) { padding-right: 64px; }
 /* What the card is linked to goes UNDER what it says, across the card: beside the title it had a third of the width and wrapped on every
    reference, below it has the whole of it. */
 .event-body { display: grid; grid-template-columns: minmax(96px, auto) minmax(0, 1fr); grid-template-areas: "pill main" "links links";
@@ -162,6 +191,29 @@ export class CaseTimeline {
       .map(({ item, index }) => ({ item, index }))
   }
 
+  /**
+   * The events of `ordered` (in the order of time, see inTime) with every reading moved under the first observation it reads, after that
+   * observation's earlier readings: what each witness's account has been read as, together. Interviews, observations and readings of
+   * nothing in the case keep their place in time. `under` is the observation a moved reading now stands under.
+   */
+  static grouped<T>(ordered: readonly { item: T, index: number }[], order: Pick<CaseTimelineOrder<T>, "kind" | "read">): { item: T, index: number, under?: T }[] {
+    const accounts = new Set(ordered.filter(({ item }) => order.kind(item) === "observation").map(({ item }) => item))
+    const underOf = new Map<T, T>()
+    for (const { item } of ordered) {
+      if (order.kind(item) !== "reading") continue
+      const account = order.read(item).find(read => accounts.has(read))
+      if (account !== undefined) underOf.set(item, account)
+    }
+    const result: { item: T, index: number, under?: T }[] = []
+    for (const entry of ordered) {
+      if (underOf.has(entry.item)) continue
+      result.push(entry)
+      if (!accounts.has(entry.item)) continue
+      for (const reading of ordered) if (underOf.get(reading.item) === entry.item) result.push({ ...reading, under: entry.item })
+    }
+    return result
+  }
+
   /** The word a kind of event goes by, on its pill. */
   static kindLabel(kind: CaseEventKind, words: CaseTimelineWords): string {
     return { observation: words.kindObservation, reading: words.kindReading, interview: words.kindInterview }[kind]
@@ -171,9 +223,13 @@ export class CaseTimeline {
    * @param list The `<ol class="event-list">` the cards are drawn in.
    * @param choose What its title does: opens the event (the editor), or opens it and shuts it again (the reader).
    * @param follow What a renvoi to another event does: opens it.
+   * @param toggle What the mark on the rail does, for a host that lets several events be open: shows the event beside the others, or puts it
+   * away. Without it, the mark only says what kind the event is.
+   * @param fold What an observation's fold does to the readings grouped under it (see CaseTimelineCard.readings).
    */
   constructor(private readonly list: HTMLElement, private readonly choose: (at: number) => void,
-              private readonly follow: (at: number) => void = choose) {
+              private readonly follow: (at: number) => void = choose, private readonly toggle?: (at: number) => void,
+              private readonly fold?: (at: number) => void) {
   }
 
   /** Draws `cards` in the list, each dressed by `dress` once drawn, when the host has something of its own to add to it. */
@@ -191,6 +247,7 @@ export class CaseTimeline {
     item.dataset.kind = card.kind
     item.dataset.at = String(card.at)
     if (card.open) item.dataset.open = ""
+    if (card.nested) item.dataset.nested = ""
     const pill = document.createElement("span")
     pill.className = "kind-pill"
     pill.dataset.kind = card.kind
@@ -213,12 +270,30 @@ export class CaseTimeline {
     links.append(...this.said(card, words))
     const body = document.createElement("div")
     body.className = "event-body"
-    body.append(pill, main, links)
+    body.append(pill, main)
+    if (card.readings && card.readings.count > 0 && this.fold) {
+      const fold = document.createElement("button")
+      fold.type = "button"
+      fold.className = "event-fold"
+      fold.setAttribute("aria-expanded", String(!card.readings.folded))
+      fold.title = (card.readings.folded ? words.unfoldReadings : words.foldReadings) ?? ""
+      fold.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>`
+      fold.append(String(card.readings.count))
+      fold.addEventListener("click", () => this.fold!(card.at))
+      body.append(fold)
+    }
+    body.append(links)
     // On the rail, in the card's own colour: what kind of event it is. Said twice, here and on the pill, as a word and as a picture.
-    const mark = document.createElement("span")
+    const mark = document.createElement(this.toggle ? "button" : "span")
     mark.className = "event-mark"
     mark.innerHTML = CaseTimeline.MARKS[card.kind]
-    mark.setAttribute("aria-hidden", "true")
+    if (mark instanceof HTMLButtonElement) {
+      mark.type = "button"
+      mark.title = words.toggleEvent ?? words.openEvent
+      mark.setAttribute("aria-label", `${mark.title} — ${card.title}`)
+      mark.setAttribute("aria-pressed", String(card.open === true))
+      mark.addEventListener("click", () => this.toggle!(card.at))
+    } else mark.setAttribute("aria-hidden", "true")
     item.append(body, mark)
     return { card: item, body, links }
   }
