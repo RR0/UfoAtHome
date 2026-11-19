@@ -1293,6 +1293,17 @@ describe("SceneElement air traffic", () => {
       element.remove()
     })
 
+    it("makes no aircraft sound player for an aircraft of the decor its author silenced: the code of the sound comes only for one heard", () => {
+      const element = mount()
+      const flying = { id: "craft", kind: "aircraft", eastM: 70, northM: 110, aircraftSound: "silent", track: [{ t: 0, eastM: 70, northM: 110, altitudeM: 300 }] }
+      element.sightingData = { ...silentJson, decor: [flying] } as never
+      const internal = element as unknown as { applySceneAt(t: number): void; aircraftAudio?: unknown }
+      internal.applySceneAt(0)
+      internal.applySceneAt(1000)
+      expect(internal.aircraftAudio).toBeUndefined()
+      element.remove()
+    })
+
     it("lets the sound be turned down for a body of the reading on show that is heard", () => {
       const element = mount()
       element.sightingData = silentJson as never

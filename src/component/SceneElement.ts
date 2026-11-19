@@ -443,6 +443,8 @@ export class SceneElement extends HTMLElement {
   private bodyHearing?: InstanceType<TrafficRuntime["BodyHearing"]>
   /** What each catalogue model says of the noise it makes in flight, once the catalogue has been asked. */
   private readonly decorModelSounds = new Map<string, AircraftKind | "silent" | undefined>()
+  /** The models of the decor whose sound the catalogue has been asked and has not answered yet: until it does, nothing is loaded for them. */
+  private readonly decorModelsAsked = new Set<string>()
 
   private thunderTimeoutId?: number
 
@@ -3067,14 +3069,26 @@ export class SceneElement extends HTMLElement {
     if (flying.length === 0) return
     for (const decor of flying) {
       const id = decor.model?.id
-      if (!id || decor.model?.url !== undefined || this.decorModelSounds.has(id)) continue
+      if (decor.aircraftSound || !id || decor.model?.url !== undefined || this.decorModelSounds.has(id)) continue
       this.decorModelSounds.set(id, undefined)
+      this.decorModelsAsked.add(id)
       void this.sceneRenderer.entryOfDecorModel(id).then(entry => {
         this.decorModelSounds.set(id, entry?.parameters?.sound)
+        this.decorModelsAsked.delete(id)
         // The button was drawn before the catalogue answered: a model that says it is silent takes it away again.
         this.ufoElement.refreshSoundControls()
+        // And one that makes a noise brings the code of the sound now.
+        this.startDecorAircraftSound(sighting)
       })
     }
+    // The code of the sound comes only for an aircraft that is heard: not for a stand-in of a phenomenon, silent, nor before its model has said.
+    const heard = flying.some(decor => {
+      if (decor.aircraftSound) return decor.aircraftSound !== "silent"
+      const id = decor.model?.id
+      if (!id || decor.model?.url !== undefined) return true
+      return !this.decorModelsAsked.has(id) && this.decorModelSounds.get(id) !== "silent"
+    })
+    if (!heard) return
     if (this.aircraftAudio || SceneElement.trafficRuntime) {
       if (!this.aircraftAudio && SceneElement.trafficRuntime) this.aircraftAudio = this.newAircraftAudio(SceneElement.trafficRuntime)
       return
