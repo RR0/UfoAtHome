@@ -28,6 +28,16 @@ export class CabinHearing {
     "glider": 70, "balloon": 60
   }
 
+  /**
+   * The shape of what is heard inside a jet at cruise, octave by octave from 63 Hz, dB under the whole, as played (not A-weighted): measured
+   * on the two recordings made in a cabin that test/engine/traffic/aircraft-sound-reference.json holds ("Airplane inside cabin engine
+   * sound", "Cabina avión"), half-way between them, within 5 dB of each. A rumble and little else: what fills a jet's cabin at cruise is
+   * the air rushing along its skin, more than its engines, and the shell keeps out all but the lows. The engines' own shape taken through
+   * the shell (what the other classes are heard as, having no recording of their cabin) was twice as far from the first, too bright by ten
+   * decibels a kilohertz.
+   */
+  static readonly JET_CABIN_SHAPE_DB: readonly number[] = [-3, -4, -13, -24, -33, -36, -42, -55]
+
   /** What a machine nobody placed in a class sounds like inside: an airliner's, which is most of what anyone rides. */
   private static readonly DEFAULT_DB_A = 78
 
@@ -43,7 +53,10 @@ export class CabinHearing {
     const insulation = ObserverRide.insulationDb(vehicle)
     // The SHAPE is the machine's own taken through its shell, which is what leaves a rumble where the open air has a whine; the LEVEL is
     // what a passenger measures in that cabin, the shell's loss being already in that figure and not to be taken twice.
-    const shaped = noise.soundPowerA.map((level, band) => level - insulation[band])
+    // A jet's cabin is heard as it was recorded; the others, having no recording of theirs, as their engines taken through the shell.
+    const shaped = noise.directivity === "turbofan"
+      ? CabinHearing.JET_CABIN_SHAPE_DB.map((level, band) => level + SoundInAir.aWeightingDb(SoundInAir.OCTAVES[band]))
+      : noise.soundPowerA.map((level, band) => level - insulation[band])
     const shapedTotal = SoundInAir.sumDb(shaped)
     const levelDbA = CabinHearing.levelDbA(kind, vehicle?.noise)
     const bandsDbA = shaped.map(level => level - shapedTotal + levelDbA)

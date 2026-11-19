@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { AircraftAudio } from "../../../src/audio/AircraftAudio.js"
+import { CabinHearing } from "../../../src/engine/traffic/CabinHearing.js"
+import { ObserverRide } from "../../../src/engine/place/ObserverRide.js"
 import { AIRCRAFT_NOISES, AircraftHearing, type AircraftNoise, type FlightRegime } from "../../../src/engine/traffic/AircraftHearing.js"
 import { SoundInAir } from "../../../src/engine/traffic/SoundInAir.js"
 import { TrafficSound } from "../../../src/engine/traffic/TrafficSound.js"
@@ -97,5 +99,51 @@ describe("what is played of an aircraft, held to recordings of aircraft", () => 
     // roughness that AircraftAudio lays on (DEFAULT_ROUGHNESS) is the small remainder, not the whole that is measured.
     const classed = outdoor.filter(recording => recording.noiseClass)
     for (const recording of classed) expect(recording.fluctuationDb - recording.unmodulatedFluctuationDb).toBeLessThan(1.5)
+  })
+
+  describe("inside a jet's cabin", () => {
+    const cabins = recordings.filter(recording => recording.inside)
+    /** What is played of a cabin, band by band, dB under the whole, in a silence. */
+    const cabinShapeDb = (kind: "airliner-narrow" | "business-jet") => {
+      const voice = CabinHearing.voice({ kind }, { ambientDbA: -100 })!
+      const played = voice.bandAmplitudes.map((amplitude, band) => 20 * Math.log10(amplitude * AircraftAudio.unweighting(SoundInAir.OCTAVES[band])))
+      const total = SoundInAir.sumDb(played)
+      return played.map(level => level - total)
+    }
+    const rmsDb = (played: number[], recording: Reference) => {
+      let squares = 0
+      let weights = 0
+      recording.octaveShapeDb.forEach((measured, band) => {
+        if (measured < FLOOR_DB) return
+        const weight = band === 0 ? LOWEST_BAND_WEIGHT : 1
+        squares += weight * (measured - played[band]) ** 2
+        weights += weight
+      })
+      return Math.sqrt(squares / weights)
+    }
+    /** The engines' noise taken through the shell, which is what a cabin was heard as before it was held to these. */
+    const throughShellDb = () => {
+      const noise = AircraftHearing.noiseOfKind("airliner-narrow")
+      const insulation = ObserverRide.insulationDb({ kind: "airliner-narrow" })
+      const amplitudes = TrafficSound.bandAmplitudes(noise.soundPowerA.map((level, band) => level - insulation[band]), -100)
+      const played = amplitudes.map((amplitude, band) => 20 * Math.log10(amplitude * AircraftAudio.unweighting(SoundInAir.OCTAVES[band])))
+      const total = SoundInAir.sumDb(played)
+      return played.map(level => level - total)
+    }
+
+    test("there are recordings made in a cabin to be held to", () => {
+      expect(cabins.length).toBeGreaterThanOrEqual(2)
+    })
+
+    test.each(cabins.map(recording => [recording.title, recording] as const))("sounds as recorded in a cabin (%s), within 6 dB, and nearer than its engines through the shell", (_, recording) => {
+      for (const kind of ["airliner-narrow", "business-jet"] as const) expect(rmsDb(cabinShapeDb(kind), recording)).toBeLessThan(6)
+      expect(rmsDb(cabinShapeDb("airliner-narrow"), recording)).toBeLessThan(rmsDb(throughShellDb(), recording))
+    })
+
+    test("is a rumble: above 500 Hz, every band is 20 dB under the loudest", () => {
+      const played = cabinShapeDb("airliner-narrow")
+      const loudest = Math.max(...played)
+      for (const level of played.slice(4)) expect(level).toBeLessThan(loudest - 20)
+    })
   })
 })
