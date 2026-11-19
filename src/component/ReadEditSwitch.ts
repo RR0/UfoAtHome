@@ -16,9 +16,9 @@ export interface SwitchedEditor extends HTMLElement {
  * Switches, in place on a page, between an editor and a reader of the same file, each loaded the first time it is asked for.
  *
  * Two ways in, one switch. A page that opens on the editor (`<rr0-case-editor in-place>`) gives it: the reader comes the first time
- * something is read. A page that may open on the reader (`<rr0-read-edit>`) gives none: the editor comes the first time something is
+ * something is read. A page that may open on the reader (`<rr0-ufoathome>`) gives none: the editor comes the first time something is
  * edited, and a page that is only read never fetches it. Each is fetched by `import()`, so that a bundle holds the other as a chunk of
- * its own (see ReadEditElement).
+ * its own (see UfoAtHomeElement).
  *
  * The editor, once there, stays, hidden while the reader is on show, so that coming back to it finds it as it was left: its history, its
  * open panel, the event on show. The reader is made anew at each reading, on the files the editor holds (see OpenFiles), and goes when the

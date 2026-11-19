@@ -9,16 +9,16 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(pkg.version)
   },
   build: {
-    outDir: "dist-embed-read-edit",
+    outDir: "dist-embed-ufoathome",
     emptyOutDir: true,
     copyPublicDir: false,
     assetsDir: "",
     target: "es2022",
     rollupOptions: {
-      input: "src/embed-read-edit.ts",
+      input: "src/embed-ufoathome.ts",
       output: {
         format: "es",
-        entryFileNames: "rr0-read-edit.mjs"
+        entryFileNames: "rr0-ufoathome.mjs"
       }
     }
   }

@@ -6,7 +6,7 @@ import "../../src/component/InterviewEditorElement.js"
 import type { CaseEditorElement } from "../../src/component/CaseEditorElement.js"
 import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT } from "../../src/component/ReadEditEvents.js"
 import { OpenFiles } from "../../src/engine/net/OpenFiles.js"
-import { register as registerReadEdit, type ReadEditElement } from "../../src/component/ReadEditElement.js"
+import { register as registerUfoAtHome, type UfoAtHomeElement } from "../../src/component/UfoAtHomeElement.js"
 import { SightingFetch } from "../../src/engine/net/SightingFetch.js"
 
 register()
@@ -1434,8 +1434,8 @@ describe("A file read or edited in place, each half loaded when first asked for"
   it("opens on the reader with no editor, and makes the editor on the same file, on the recording asked, only when the pencil is used", async () => {
     await open()
     document.body.innerHTML = ""
-    registerReadEdit()
-    const element = document.createElement("rr0-read-edit") as ReadEditElement
+    registerUfoAtHome()
+    const element = document.createElement("rr0-ufoathome") as UfoAtHomeElement
     element.setAttribute("src", "https://example.org/d/case.json")
     document.body.appendChild(element)
     await element.ready
@@ -1461,8 +1461,8 @@ describe("A file read or edited in place, each half loaded when first asked for"
   })
 
   it("opens on a blank editor when given no file", async () => {
-    registerReadEdit()
-    const element = document.createElement("rr0-read-edit") as ReadEditElement
+    registerUfoAtHome()
+    const element = document.createElement("rr0-ufoathome") as UfoAtHomeElement
     document.body.appendChild(element)
     await element.ready
     expect(element.firstElementChild?.tagName).toBe("RR0-CASE-EDITOR")

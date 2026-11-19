@@ -1,12 +1,15 @@
 import { MODE_CHANGE_EVENT } from "./ReadEditEvents.js"
 import { ReadEditSwitch } from "./ReadEditSwitch.js"
 
-export const READ_EDIT_ELEMENT_NAME = "rr0-read-edit"
+export const UFOATHOME_ELEMENT_NAME = "rr0-ufoathome"
 
 /**
- * A file, read or edited in place, each half loaded only when it is first asked for.
+ * UFO@home, as an element: what the installed app shows, and what a page can hold whole.
  *
- * `<rr0-read-edit src="case.json">` opens on the file's reader; its pencil turns it into the editor on the same file, which is fetched
+ * For now, a file read or edited in place, each half loaded only when it is first asked for (see ReadEditSwitch); what the app adds
+ * around them (opening a file, the recent ones) comes here too, the reader and the editor staying what they are.
+ *
+ * `<rr0-ufoathome src="case.json">` opens on the file's reader; its pencil turns it into the editor on the same file, which is fetched
  * then and not before: a file that is only read never costs the editor. `mode="edit"`, or no `src` at all, opens on the editor (blank,
  * without `src`), whose Read turns it into the reader. `track` names the recording of a case to open on. Says which is on show, and on
  * what, by MODE_CHANGE_EVENT, for the page to put it in its address.
@@ -14,7 +17,7 @@ export const READ_EDIT_ELEMENT_NAME = "rr0-read-edit"
  * It holds the one or the other as children of its own, in the page's light: what the page says of `rr0-case-editor`, `rr0-case` or
  * `rr0-sighting` applies to them here as anywhere.
  */
-export class ReadEditElement extends HTMLElement {
+export class UfoAtHomeElement extends HTMLElement {
 
   readonly switcher = new ReadEditSwitch(element => this.append(element), undefined,
     mode => this.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, { detail: mode, bubbles: true, composed: true })))
@@ -40,5 +43,5 @@ export class ReadEditElement extends HTMLElement {
 }
 
 export function register(): void {
-  if (!customElements.get(READ_EDIT_ELEMENT_NAME)) customElements.define(READ_EDIT_ELEMENT_NAME, ReadEditElement)
+  if (!customElements.get(UFOATHOME_ELEMENT_NAME)) customElements.define(UFOATHOME_ELEMENT_NAME, UfoAtHomeElement)
 }
