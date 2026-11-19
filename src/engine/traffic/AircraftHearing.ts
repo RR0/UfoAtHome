@@ -125,7 +125,12 @@ const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA
   { id: "business-jet", name: "Business jet", kinds: ["business-jet"], totalDbA: 141, shapeDb: [-30, -15, -8, -4, -3, -4, -9, -19], character: { toneHz: 2500, toneShare: 0.25, humHz: 110, humShare: 0.7 }, regimes: TURBOFAN_REGIMES },
   // A propeller's blade-passing tone, a few tens of hertz, carries most of what a turboprop sends.
   { id: "turboprop", name: "Turboprop", kinds: ["regional-turboprop", "turboprop-light"], totalDbA: 138, shapeDb: [-14, -9, -8, -6, -8, -13, -20, -28], character: { toneHz: 80, toneShare: 0.5 } },
-  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-18, -9, -5, -4, -8, -14, -22, -30], character: { toneHz: 80, toneShare: 0.4 } },
+  // The shapes of the propellers' classes are held to recordings (see AircraftSoundCalibration.test.ts): a light piston's to two of small
+  // aircraft passing (3.3 dB from each, which differ by as much), a heavy piston's to one of a Second World War fighter flying past near, its
+  // exhaust stacks open. Their LEVELS are assumed: a heavy piston's is a light one's with ten times the power (1,500 hp against 150, 10 log 10).
+  // Neither has regimes or a directivity: nothing measured gives them.
+  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-20, -10, -3, -6, -10, -20, -27, -42], character: { toneHz: 80, toneShare: 0.4 } },
+  { id: "piston-heavy", name: "Heavy piston aircraft", kinds: ["piston-heavy"], totalDbA: 140, shapeDb: [-31, -12, -11, -9, -7, -6, -7, -11], character: { toneHz: 150, toneShare: 0.4 } },
   { id: "ultralight", name: "Ultralight", kinds: ["ultralight"], totalDbA: 124, shapeDb: [-16, -8, -5, -4, -9, -15, -23, -31], character: { toneHz: 140, toneShare: 0.4 } },
   // A rotor's blades beat the air at ten to twenty times a second, and the low harmonics are what carry far.
   { id: "helicopter-light", name: "Light helicopter", kinds: ["helicopter-light"], totalDbA: 134, shapeDb: [-15, -8, -4, -3, -6, -10, -16, -24], character: { modulationHz: 20, modulationDepth: 0.5 } },

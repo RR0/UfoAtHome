@@ -43,7 +43,7 @@ const RECORDINGS: Recording[] = [
   { file: "freesound_community-airplane-landing-6732.mp3", pixabayId: 6732, author: "freesound_community", title: "Airplane landing", noiseClass: "turbofan-narrow-body", regime: "approach", note: "heard as a take-off; measured as a low thrust (a bright spectrum, a fan line, no roar behind)" },
   { file: "tanweraman-small-plane-passing-by-264944.mp3", pixabayId: 264944, author: "tanweraman", title: "Small plane passing by", noiseClass: "light-piston", regime: "overflight" },
   { file: "loswin23-small-airplane-520026.mp3", pixabayId: 520026, author: "loswin23", title: "Small airplane", noiseClass: "light-piston", regime: "overflight" },
-  { file: "scottishperson-sound-effect-ww2-fighter-plane-fly-past-333257.mp3", pixabayId: 333257, author: "scottishperson", title: "WW2 fighter plane fly past", regime: "overflight", note: "a warbird's piston engine: no class of ours" },
+  { file: "scottishperson-sound-effect-ww2-fighter-plane-fly-past-333257.mp3", pixabayId: 333257, author: "scottishperson", title: "WW2 fighter plane fly past", noiseClass: "piston-heavy", regime: "overflight", note: "a warbird's piston engine, flying past near" },
   { file: "freesound_community-airplane-fly-by-26222.mp3", pixabayId: 26222, author: "freesound_community", title: "Airplane fly by", regime: "overflight" },
   { file: "freesound_community-airplane-95615.mp3", pixabayId: 95615, author: "freesound_community", title: "Airplane" },
   { file: "freesound_community-avion-99655.mp3", pixabayId: 99655, author: "freesound_community", title: "Avion" },

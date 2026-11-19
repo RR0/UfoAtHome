@@ -108,6 +108,8 @@ export interface DecorParameterTexts {
   /** A supersonic airliner, the Concorde. */
   aircraftSupersonicAirliner: string
   aircraftLightPistonAircraft: string
+  /** A large piston-engined aircraft: a fighter of the Second World War, a DC-3, a DC-4. */
+  aircraftHeavyPistonAircraft: string
   aircraftLightHelicopter: string
   aircraftMediumHelicopter: string
   aircraftHeavyHelicopter: string

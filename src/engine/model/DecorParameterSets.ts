@@ -221,6 +221,7 @@ export class DecorParameterSets {
         { value: "regional-turboprop", label: "aircraftTurboprop" },
         { value: "business-jet", label: "aircraftBusinessJet" },
         { value: "light-piston", label: "aircraftLightPistonAircraft" },
+        { value: "piston-heavy", label: "aircraftHeavyPistonAircraft" },
         { value: "helicopter-light", label: "aircraftLightHelicopter" },
         { value: "helicopter-medium", label: "aircraftMediumHelicopter" },
         { value: "helicopter-heavy", label: "aircraftHeavyHelicopter" },

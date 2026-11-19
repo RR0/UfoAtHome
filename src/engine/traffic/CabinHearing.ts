@@ -23,7 +23,7 @@ export class CabinHearing {
    */
   private static readonly CABIN_DB_A: Readonly<Partial<Record<AircraftKind, number>>> = {
     "airliner-wide": 76, "airliner-narrow": 78, "regional-jet": 78, "business-jet": 82, "regional-turboprop": 84,
-    "turboprop-light": 88, "light-piston": 92, "military-jet": 95, "ultralight": 95,
+    "turboprop-light": 88, "light-piston": 92, "piston-heavy": 90, "military-jet": 95, "ultralight": 95,
     "helicopter-light": 95, "helicopter-medium": 96, "helicopter-heavy": 98,
     "glider": 70, "balloon": 60
   }

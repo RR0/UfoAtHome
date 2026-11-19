@@ -78,6 +78,18 @@ describe("what is played of an aircraft, held to recordings of aircraft", () => 
     expect(atItsThrust).toBeLessThan(bestFit(recording).rmsDb)
   })
 
+  const pistons = outdoor.filter(recording => recording.noiseClass === "light-piston" || recording.noiseClass === "piston-heavy")
+
+  test("there are recordings of propellers to be held to: two light, one heavy", () => {
+    expect(pistons.filter(recording => recording.noiseClass === "light-piston").length).toBeGreaterThanOrEqual(2)
+    expect(pistons.some(recording => recording.noiseClass === "piston-heavy")).toBe(true)
+  })
+
+  // The two of small aircraft differ by as much from each other: the class is half-way between them.
+  test.each(pistons.map(recording => [recording.noiseClass!, recording.title, recording] as const))("a %s passing (%s) sounds as recorded, at some distance, within 3.5 dB", (_, __, recording) => {
+    expect(bestFit(recording).rmsDb).toBeLessThan(3.5)
+  })
+
   test("a take-off's shape is not a jet passing over's: each regime fits its own recordings better than the other's", () => {
     const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length
     const fit = (recordings: Reference[], regime: FlightRegime) => mean(recordings.map(recording => bestFit(recording, noiseOf(recording.noiseClass!, regime)).rmsDb))

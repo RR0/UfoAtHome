@@ -244,8 +244,9 @@
       "pixabayId": 333257,
       "author": "scottishperson",
       "title": "WW2 fighter plane fly past",
+      "noiseClass": "piston-heavy",
       "regime": "overflight",
-      "note": "a warbird's piston engine: no class of ours",
+      "note": "a warbird's piston engine, flying past near",
       "durationS": 10.2,
       "octaveShapeDb": [
         -13.7,

@@ -103,6 +103,7 @@ export const decorParameterTexts_fr = {
   aircraftBusinessJet: "Jet d'affaires",
   aircraftSupersonicAirliner: "Avion de ligne supersonique",
   aircraftLightPistonAircraft: "Avion léger à pistons",
+  aircraftHeavyPistonAircraft: "Gros avion à pistons (chasseur d'époque, DC-3, DC-4)",
   aircraftLightHelicopter: "Hélicoptère léger",
   aircraftMediumHelicopter: "Hélicoptère moyen",
   aircraftHeavyHelicopter: "Hélicoptère lourd",
