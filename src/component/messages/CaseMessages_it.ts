@@ -9,6 +9,7 @@ export const caseMessages_it: CaseMessages = {
   openEvent: "Apri solo questo evento",
   toggleEvent: "Mostra accanto agli altri, o togli",
   groupReadings: "Raggruppa le letture per osservazione",
+  alsoAbout: "Riguarda anche",
   foldReadings: "Chiudi le sue letture",
   unfoldReadings: "Apri le sue letture",
   interpretationOf: "Lettura di",

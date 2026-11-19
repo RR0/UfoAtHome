@@ -198,25 +198,26 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
   }
 
   /**
-   * The events of `ordered` (in the order of time, see inTime) with every reading moved under each observation it reads, after that
-   * observation's earlier readings: what each witness's account has been read as, together. A reading of two photographs (McMinnville's)
-   * is under both: under the first alone, it named the second, and a reading of the close-up stood under the other photograph. Interviews,
-   * observations and readings of nothing in the case keep their place in time. `under` is the observation a moved reading stands under.
+   * The events of `ordered` (in the order of time, see inTime) with every reading moved under the observation whose data it replays — the
+   * first it reads — after that observation's earlier readings: what each witness's account has been read as, together. A reading is made
+   * from one observation's data, so it stands under that one only: McMinnville's readings, which compare the two photographs, are copies of
+   * the first one's recording, and put under both they looked like two readings of different data. Interviews, observations and readings
+   * of nothing in the case keep their place in time. `under` is the observation a moved reading stands under.
    */
   static grouped<T>(ordered: readonly { item: T, index: number }[], order: Pick<CaseTimelineOrder<T>, "kind" | "read">): { item: T, index: number, under?: T }[] {
     const accounts = new Set(ordered.filter(({ item }) => order.kind(item) === "observation").map(({ item }) => item))
-    const underOf = new Map<T, T[]>()
+    const underOf = new Map<T, T>()
     for (const { item } of ordered) {
       if (order.kind(item) !== "reading") continue
-      const read = order.read(item).filter(account => accounts.has(account))
-      if (read.length > 0) underOf.set(item, read)
+      const account = order.read(item).find(read => accounts.has(read))
+      if (account !== undefined) underOf.set(item, account)
     }
     const result: { item: T, index: number, under?: T }[] = []
     for (const entry of ordered) {
       if (underOf.has(entry.item)) continue
       result.push(entry)
       if (!accounts.has(entry.item)) continue
-      for (const reading of ordered) if (underOf.get(reading.item)?.includes(entry.item)) result.push({ ...reading, under: entry.item })
+      for (const reading of ordered) if (underOf.get(reading.item) === entry.item) result.push({ ...reading, under: entry.item })
     }
     return result
   }
@@ -334,7 +335,6 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
     })
     // Pointed at or focused, the card it leads to is lit, so that a reference is found without reading the whole chronology — and nothing
     // is lit when that card is filtered out, which is answer enough.
-    // A reading grouped under two observations has a card under each: both are lit.
     const aim = (lit: boolean) => this.list.querySelectorAll<HTMLElement>(`.event-card[data-at="${at}"]`).forEach(card => card.classList.toggle("event-aimed", lit))
     for (const [name, lit] of [["mouseenter", true], ["mouseleave", false], ["focus", true], ["blur", false]] as const) {
       link.addEventListener(name, () => aim(lit))

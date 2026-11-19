@@ -14,6 +14,8 @@ export interface CaseMessages {
   toggleEvent: string
   /** The option of the history that sets each reading under the observation it reads, rather than in the order of time. */
   groupReadings: string
+  /** On a reading set under the observation it replays, before the other observations it reads: "Also about Y". */
+  alsoAbout: string
   /** On an observation, in that grouping: what folds its readings away, and what unfolds them. */
   foldReadings: string
   unfoldReadings: string
