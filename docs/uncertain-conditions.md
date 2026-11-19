@@ -1,7 +1,8 @@
 # Uncertain conditions: simulating over several scenarios
 
-Design note, 2026-11-19. Nothing described here is built yet, except what [What exists](#what-exists)
-lists.
+Design note, 2026-11-19. Besides what [What exists](#what-exists) lists, only a first headless
+replay is built (`scripts/scenario-replay.ts`, wind only), tried on the
+[Western U.S. Event](#first-case-the-western-us-event-2026-11-19).
 
 ## The problem
 
@@ -121,9 +122,45 @@ and the editor can show it later, next to `rr0-reading-sensitivity`.
   candidate places are too vague. It is a distribution, not a value, and would need the same
   robustness reading.
 
-## First case
+## First case: the Western U.S. Event (2026-11-19)
 
-The Western U.S. Event: the two candidate places the clues support (Desert Valley in the Desert
-National Wildlife Refuge, and the Pahranagat refuge with the road towards the Area 51 viewpoint) ×
-the two evenings (14 and 15 October 2023), replaying the readings that depend on the wind (flares,
-gossamer, and lanterns, so far excluded without a simulation) and on the horizon (Jupiter behind the eastern ranges, the Black Mountain lights).
+Played with `scripts/scenario-replay.ts`, which takes a scenarios file (candidate conditions, the
+wind each gives, the readings to replay) and judges each reading twice: against what the witness is
+on record as having said (`ReadingSensitivity.forAccount`), and against everything the account's
+timeline draws, every half second, with flat ground. The inputs are kept beside the case, in
+`western/scenarios/` (not under version control): the winds (Open-Meteo historical forecast, 10 m
+and 850 to 300 hPa), the script that writes the scenarios, and the horizon and Jupiter computations.
+
+**Scenarios.** For each recording, its working position and one other candidate place, each on its
+own date and on the other one:
+
+- evenings: the working position on the Alamo Road or the White Rock Road, or the junction of the
+  Alamo and Badger roads with US-93 in the Pahranagat refuge; the 14th or the 15th, the two evenings
+  swapped;
+- before dawn: Frenchman Flat (NNSS), or the Groom Lake Road; the 16th or the 15th.
+
+Only the wind was replaced: the witness's position and the bodies' geometry are those of the working
+position. That is fair for what the air carries; the horizon was computed apart (below).
+
+**Results.**
+
+| Reading | Depends on | Verdict over the scenarios |
+|---|---|---|
+| Decoy flares (AARO and variants: witnesses 1 to 5) | wind aloft | **Robust.** Separations unchanged within 0.1-0.2° in every scenario: a flare burns 4.5 s, too short for 1-10 m/s to move it. |
+| Parachute flares (LUU-2, witnesses 1 and 5) | wind aloft | **Robust.** Median 1.3-1.8°, worst 1.9-3.0°, in every scenario. |
+| Gossamer (witnesses 1 and 5, before dawn) | ground wind | **Conditional.** At Frenchman Flat, both mornings give the same wind (2.4-2.5 m/s towards 150-164°): median 24-34°, as written. On the Groom Lake Road the wind is twice as strong (5.1-5.4 m/s towards 205-210°, above what ballooning spiders take off in): median 94-155°. |
+| Sky lanterns (witness 3, simulated for the first time) | ground wind | **Robust failure.** In all four scenarios (wind towards 263-302°, 1.4-3.0 m/s), at their best distance, median 37-41°, worst 49-62°. A sweep of hypothetical winds finds them fitting (median 2.5°, worst 6.8°) only with a wind towards 195-210° at about 4 m/s and lanterns about 50 m away, where a 1 m lantern would look ten times the 0.1° the witness gives. No scenario has such a wind. |
+| Jupiter (witnesses 2 and 3) | horizon | **Conditional on the time, robust on the height.** Hidden by the eastern ranges until about 19:40 from the Alamo Road (horizon 7.0-7.7°) and 19:35 further south (4.5-5.7°), it clears the lower horizon at Pahranagat (3.0-4.4°) at about 19:23, within witness 2's 19:00-19:30. But it is below 5° then, wherever the witness was, while the orbs are at 35-45°: the exclusion stands on the height, not on the horizon. |
+| Black Mountain obstruction lights (witness 2) | horizon | **Conditional.** Seen just over the relief from the working position, 62 km away; hidden by 2.5° from Pahranagat, 148 km away. |
+
+**What it shows.** Of the six readings, the wind or the place leaves three where they were
+(the flares, the lanterns' failure, Jupiter's height) and makes three conditional (the gossamer, the
+time Jupiter clears the ranges, the Black Mountain lights). The screening of step 3 holds here: the
+flares did not need more than the two scenarios to show that the wind does not matter to them.
+
+**Limits.** Two candidate places only, both in Nevada; the first-pass candidates elsewhere (Idaho,
+Utah, New Mexico) were not played. The witness's position, road and decor were not moved with the
+place: for the gossamer at Groom Lake, the separation in degrees is that of the Frenchman Flat road,
+and only the strength of the wind carries over. The lantern reading is a best case written for this
+test (laminar air, one lantern per red orb, first seen where the witness first saw each), not a
+reading of the case.
