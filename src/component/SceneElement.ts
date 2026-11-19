@@ -2984,7 +2984,13 @@ export class SceneElement extends HTMLElement {
     }
     // Aboard an aircraft, the cabin is the loudest thing there is: it is what everything else outside has to stand against, and its shell
     // takes the highs off whatever gets through (see ObserverRide). A road vehicle's own noise is VehicleAudio's, but its cabin muffles too.
-    const ride = sighting.vehicle
+    // A recording that says nothing of a ride, but stands its observer inside an aircraft of its decor (a pilot in their cockpit), rides that one.
+    const origin = sighting.event.place?.[0]
+    const here = { lat: pose?.lat ?? origin?.lat, lng: pose?.lng ?? origin?.lng }
+    const ear = here.lat !== undefined && here.lng !== undefined ? { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 } : undefined
+    const modelSound = (decor: DecorObject) => this.decorModelSounds.get(decor.model?.id ?? "")
+    const aboard = !sighting.vehicle && ear ? runtime.DecorAircraftHearing.ridden(sighting, t, ear, modelSound) : undefined
+    const ride = sighting.vehicle ?? (aboard ? { kind: aboard.kind } : undefined)
     const cabin = ride ? runtime.CabinHearing.voice(ride, outside) : undefined
     const options = {
       ...outside,
@@ -2993,13 +2999,10 @@ export class SceneElement extends HTMLElement {
     }
     const voices = this.trafficVoices(t, pose, options, runtime)
     // The aircraft the recording places itself are heard like those of a record, and by the same ear: together the loudest few.
-    const origin = sighting.event.place?.[0]
-    const here = { lat: pose?.lat ?? origin?.lat, lng: pose?.lng ?? origin?.lng }
-    if (here.lat !== undefined && here.lng !== undefined) {
+    if (ear) {
       this.decorAircraftHearing ??= new runtime.DecorAircraftHearing()
       // Over the ground, not above the sea, as the heights of the decor are: this is the one ear that is not given an altitude (see DecorAircraftHearing.voices).
-      voices.push(...this.decorAircraftHearing.voices(sighting, t, { lat: here.lat, lng: here.lng, heightM: pose?.elevationM ?? 0 }, options,
-        decor => this.decorModelSounds.get(decor.model?.id ?? "")))
+      voices.push(...this.decorAircraftHearing.voices(sighting, t, ear, options, modelSound))
       voices.push(...this.bodyVoices(sighting, t, options, runtime))
       if (cabin) voices.push(cabin)
       voices.sort((a, b) => b.levelDbA - a.levelDbA)

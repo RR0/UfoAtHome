@@ -5,6 +5,8 @@ import type { AircraftKind } from "../traffic/AircraftModels.js"
 import type { AircraftDescription, AircraftTrack } from "../traffic/AircraftProvider.js"
 import { TrafficSound } from "../traffic/TrafficSound.js"
 import type { AircraftVoice, TrafficSoundOptions } from "../traffic/TrafficSound.js"
+import { SightingPositions } from "../persistence/SightingPositions.js"
+import { ReentrySighting } from "../../modules/sky-events/reentries/Reentry.js"
 import { localMetersToGeo } from "../../render3d/terrain/GeoProjection.js"
 
 /**
@@ -38,19 +40,45 @@ export class DecorAircraftHearing {
   }
 
   /**
+   * The decor aircraft the observer is aboard at `t`, if any: the one that makes a sound and whose box they stand within (half its longest
+   * side from its middle), as a pilot in their cockpit or a passenger in their cabin is. It is not one that passes them: what they hear
+   * of it is its cabin (see CabinHearing), and what is outside is heard through its shell.
+   */
+  static ridden(sighting: Sighting, t: number, observer: { lat: number, lng: number, heightM: number },
+    modelSound: (decor: DecorObject) => AircraftKind | "silent" | undefined = () => undefined): { decor: DecorObject, kind: AircraftKind } | undefined {
+    // Where the decor is placed from: the observer's first place, as the scene has it, and not the recording's (a flight may set off kilometres from it).
+    const origin = SightingPositions.originOf(sighting)
+    if (!origin) return undefined
+    for (const decor of sighting.decor) {
+      const kind = DecorAircraft.kindOf(decor, modelSound(decor))
+      if (!kind) continue
+      const size = decor.sizeM
+      const reachM = Math.max(size?.widthM ?? 0, size?.lengthM ?? 0, size?.heightM ?? 0) / 2
+      if (reachM <= 0) continue
+      const point = DecorAircraftHearing.pointAt(decor, t, origin)
+      const { distanceKm } = ReentrySighting.seenFrom(observer, { lat: point.lat, lng: point.lng, heightM: point.altitudeFt / DecorAircraftHearing.FT_PER_M })
+      if (distanceKm * 1000 <= reachM) return { decor, kind }
+    }
+    return undefined
+  }
+
+  /**
    * The voices of the decor aircraft at `t` (ms from the start of the recording), the loudest first. `modelSound` is what the catalogue says of
    * a model by its id, when it is known. `observer.heightM` is over the ground, as the altitudes of the decor's tracks are: unlike an aircraft of a record, nothing here is
    * measured from the sea.
    */
   voices(sighting: Sighting, t: number, observer: { lat: number, lng: number, heightM: number }, options: TrafficSoundOptions = {},
     modelSound: (decor: DecorObject) => AircraftKind | "silent" | undefined = () => undefined): AircraftVoice[] {
-    const origin = sighting.event.place?.[0]
+    // Where the decor is placed from: the observer's first place, as the scene has it, and not the recording's (a flight may set off kilometres from it).
+    const origin = SightingPositions.originOf(sighting)
     if (!origin) return []
     const flights = new Map<string, AircraftTrack>()
     const kinds = new Map<string, AircraftKind>()
     const span = Math.max(sighting.observerTrack.duration, (sighting.event.durationSeconds ?? 0) * 1000)
+    // The one the observer is aboard is heard as its cabin, not as one passing a metre from them.
+    const aboard = DecorAircraftHearing.ridden(sighting, t, observer, modelSound)?.decor
     for (const decor of sighting.decor) {
-      const kind = DecorAircraft.kindOf(decor, modelSound(decor))
+      const kind = decor === aboard ? undefined : DecorAircraft.kindOf(decor, modelSound(decor))
       if (!kind) continue
       const id = `${DecorAircraftHearing.ID_PREFIX}${decor.id}`
       flights.set(id, this.trackOf(decor, id, origin, span))

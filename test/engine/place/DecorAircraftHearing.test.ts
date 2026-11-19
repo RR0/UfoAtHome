@@ -13,7 +13,7 @@ const CALM = { ambientDbA: 30 }
 /** The part of a recording the hearing reads: where it stands, how long it lasts, what it places. */
 const recording = (...decor: Partial<DecorObject>[]) => ({
   event: { place: [ORIGIN], durationSeconds: 60 },
-  observerTrack: { duration: 60000 },
+  observerTrack: { duration: 60000, getInterpolatedPoseAt: () => undefined },
   decor: decor.map((object, i) => ({ id: `a${i}`, kind: "aircraft", eastM: 0, northM: 0, ...object }))
 }) as unknown as Sighting
 
@@ -26,6 +26,24 @@ const overhead: Partial<DecorObject> = {
 }
 
 describe("DecorAircraftHearing", () => {
+  test("the aircraft the observer stands within is the one they ride: not heard as one passing, but said, for its cabin to be", () => {
+    const own: Partial<DecorObject> = { aircraftSound: "light-piston", sizeM: { widthM: 10, lengthM: 7, heightM: 2.7 }, track: [{ t: 0, eastM: -1, northM: -0.6, altitudeM: 2300, headingDeg: 73 }] }
+    const sighting = recording(own, overhead)
+    const aloft = { ...OBSERVER, heightM: 2300 }
+    expect(DecorAircraftHearing.ridden(sighting, 0, aloft)?.kind).toBe("light-piston")
+    expect(new DecorAircraftHearing().voices(sighting, 0, aloft, CALM).map(voice => voice.id)).not.toContain("decor:a0")
+    // Ten metres off, it is one that flies by.
+    expect(DecorAircraftHearing.ridden(sighting, 0, { ...aloft, heightM: 2310 })).toBeUndefined()
+  })
+
+  test("the decor is placed from the observer's first place, as the scene has it, not from the recording's", () => {
+    const sighting = recording({ ...overhead, track: [{ t: 0, eastM: 0, northM: 0, altitudeM: 300, headingDeg: 90 }] })
+    const away = { lat: ORIGIN.lat + 0.1, lng: ORIGIN.lng }
+    ;(sighting.observerTrack as unknown as { getInterpolatedPoseAt: () => unknown }).getInterpolatedPoseAt = () => away
+    const voice = new DecorAircraftHearing().voices(sighting, 0, { ...away, heightM: 0 }, CALM)[0]
+    expect(voice.distanceKm).toBeCloseTo(0.3, 1)
+  })
+
   test("an aircraft that flies is heard, from where it was, and rising in pitch as it comes", () => {
     const hearing = new DecorAircraftHearing()
     const voices = hearing.voices(recording(overhead), 5000, OBSERVER, CALM)
