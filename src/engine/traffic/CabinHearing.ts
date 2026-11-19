@@ -53,8 +53,9 @@ export class CabinHearing {
     const insulation = ObserverRide.insulationDb(vehicle)
     // The SHAPE is the machine's own taken through its shell, which is what leaves a rumble where the open air has a whine; the LEVEL is
     // what a passenger measures in that cabin, the shell's loss being already in that figure and not to be taken twice.
-    // A jet's cabin is heard as it was recorded; the others, having no recording of theirs, as their engines taken through the shell.
-    const shaped = noise.directivity === "turbofan"
+    // A jet's cabin, shut, is heard as it was recorded; the others, having no recording of theirs, and a window opened (which lets the
+    // whine in), as their engines taken through what is left of the shell.
+    const shaped = noise.directivity === "turbofan" && vehicle?.windowsOpen !== true
       ? CabinHearing.JET_CABIN_SHAPE_DB.map((level, band) => level + SoundInAir.aWeightingDb(SoundInAir.OCTAVES[band]))
       : noise.soundPowerA.map((level, band) => level - insulation[band])
     const shapedTotal = SoundInAir.sumDb(shaped)
