@@ -1242,7 +1242,7 @@ describe("SceneElement air traffic", () => {
       weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none" as const, precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] }
     }
 
-    it("plays the bed of what is around the observer, and hears the record's aircraft against it: a busy road masks an airliner at cruise", async () => {
+    it("hears the record's aircraft against what is around the observer, which it does not play: a busy road masks an airliner at cruise", async () => {
       const { source } = stubSource(overhead)
       const quiet = mountAt(AT, source, calm)
       quiet.tick()
@@ -1257,7 +1257,8 @@ describe("SceneElement air traffic", () => {
       busy.tick()
       await vi.waitFor(() => expect(busy.element.aircraftState.status).toBe("ready"))
       busy.tick(20_000)
-      expect(aroundPlayed.at(-1)).toBeGreaterThan(0)
+      // Not played: a road's bed was a hiss over the aircraft (see AmbientNoise.AROUND_BED_PLAYED).
+      expect(aroundPlayed.at(-1) ?? 0).toBe(0)
       const heardBusy = (busy.element as unknown as { traffic?: { audible?: Set<string> } }).traffic?.audible?.size ?? 0
       expect(heardInQuiet).toBe(1)
       expect(heardBusy).toBe(0)

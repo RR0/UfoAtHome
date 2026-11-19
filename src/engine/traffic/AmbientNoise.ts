@@ -29,6 +29,13 @@ export class AmbientNoise {
    * The bed of what is around is played under it as well, so that it and an aircraft stand to each other as their levels do.
    */
   static readonly HEADROOM_DB = 10.5
+  /**
+   * Whether the vehicles around are played as a bed (see aroundBedRms, WeatherAudio.setAround). Not now: a noise of a road's spectrum is a hiss
+   * that does not move, and heard on the demo of Gonesse (2025-12-30) it was "always there, dominant and never fading", over the aircraft whose
+   * rumble a laptop's speakers hardly play. What is around still masks the aircraft, which is what it is for; it will be heard when the scene
+   * has vehicles of its own to play, where they are.
+   */
+  static readonly AROUND_BED_PLAYED = false
   /** [wind speed m/s, dB(A) of the wind's own noise in vegetation and about the ear, which adds to the base]: a breeze of 3 m/s is about 40, a fresh wind of 8 about 52. */
   private static readonly WIND_DB_A: [number, number][] = [[0, 10], [1, 28], [2, 36], [3, 40], [5, 46], [8, 52], [12, 58], [20, 66]]
   /** [precipitation intensity 0-1, dB(A)]: a drizzle's patter is 42, a downpour's drumming 65. */
@@ -88,6 +95,7 @@ export class AmbientNoise {
    * the time", louder than the airliner a kilometre off. The vehicles alone: the voices are in the level heard, not in what the bed plays.
    */
   static aroundBedRms(around: Around | undefined): number {
+    if (!AmbientNoise.AROUND_BED_PLAYED) return 0
     const level = AroundNoise.dbA(around, false)
     if (!Number.isFinite(level) || level <= AmbientNoise.BASE_DB_A) return 0
     return Math.min(AmbientNoise.BED_RMS, AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A - AmbientNoise.HEADROOM_DB) / 20))

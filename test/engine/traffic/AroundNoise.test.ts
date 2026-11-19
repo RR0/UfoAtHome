@@ -74,16 +74,13 @@ describe("what is around the observer", () => {
       expect(town).toBeCloseTo(10 * Math.log10(10 ** (AmbientNoise.dbA(CALM) / 10) + 10 ** (AroundNoise.dbA({ cars: 6 }) / 10)), 6)
     })
 
-    test("its bed is played as an aircraft of its level would be, under the headroom: the two stand to each other as their levels do", () => {
-      expect(AmbientNoise.aroundBedRms(undefined)).toBe(0)
+    test("is not played as a bed, which was a hiss over the aircraft; an aircraft over it is referred as over a field", () => {
+      expect(AmbientNoise.AROUND_BED_PLAYED).toBe(false)
       const street = { roads: [{ distanceM: 50, vehiclesPerMinute: 4 }] }
+      expect(AmbientNoise.aroundBedRms(street)).toBe(0)
+      // An aircraft at the street's level is referred to the faint minimum raised as far as the street stands over the base: as loud as over a field.
       const level = AroundNoise.dbA(street)
-      expect(AmbientNoise.aroundBedRms(street)).toBeCloseTo(AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A - AmbientNoise.HEADROOM_DB) / 20), 9)
-      expect(AmbientNoise.aroundBedRms({ roads: [{ distanceM: 2, vehiclesPerMinute: 600 }] })).toBe(AmbientNoise.BED_RMS)
-      // An aircraft at the street's level is referred to the faint minimum raised as far as the street stands over the base: as loud as over a
-      // field, ten and a half decibels over the bed.
       expect(AmbientNoise.referenceAmplitude(CALM, street)).toBeCloseTo(AmbientNoise.MINIMUM_REFERENCE * 10 ** ((level - AmbientNoise.BASE_DB_A) / 20), 9)
-      expect(20 * Math.log10(AmbientNoise.referenceAmplitude(CALM, street) / AmbientNoise.aroundBedRms(street))).toBeCloseTo(AmbientNoise.HEADROOM_DB, 6)
     })
 
     test("a road's noise is spread as vehicles' is, mostly from 500 Hz to 2 kHz: it masks an aircraft's mids and leaves its rumble", () => {
@@ -96,11 +93,10 @@ describe("what is around the observer", () => {
       expect(town[4]).toBeGreaterThan(field[4] + 3)
     })
 
-    test("says whether a bed is played: a wind, rain, or the vehicles around; not a calm field, nor voices alone", () => {
+    test("says whether a bed is played: a wind or rain; not a calm field, nor what is around, which is not played", () => {
       expect(AmbientNoise.bedPlays(CALM)).toBe(false)
       expect(AmbientNoise.bedPlays({ ...CALM, windSpeed: 6 })).toBe(true)
-      expect(AmbientNoise.bedPlays(CALM, { cars: 3 })).toBe(true)
-      expect(AmbientNoise.bedPlays(CALM, { talking: 3 })).toBe(false)
+      expect(AmbientNoise.bedPlays(CALM, { cars: 3 })).toBe(false)
     })
   })
 })
