@@ -4,8 +4,9 @@ import { register } from "../../src/component/CaseEditorElement.js"
 // Defined by the case editor only when an interview is shown, fetched then: loaded here first, as the editor's own chunk would be in a build.
 import "../../src/component/InterviewEditorElement.js"
 import type { CaseEditorElement } from "../../src/component/CaseEditorElement.js"
-import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT } from "../../src/component/ReadEditSwitch.js"
+import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT } from "../../src/component/ReadEditEvents.js"
 import { OpenFiles } from "../../src/engine/net/OpenFiles.js"
+import { register as registerReadEdit, type ReadEditElement } from "../../src/component/ReadEditElement.js"
 import { SightingFetch } from "../../src/engine/net/SightingFetch.js"
 
 register()
@@ -1419,5 +1420,52 @@ describe("Reading what is edited", () => {
     const reader = element.nextElementSibling as HTMLElement
     expect(reader.tagName).toBe("RR0-SIGHTING")
     expect(OpenFiles.local(reader.getAttribute("src")!)).toBe(true)
+  })
+})
+
+describe("A file read or edited in place, each half loaded when first asked for", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    OpenFiles.clear()
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  it("opens on the reader with no editor, and makes the editor on the same file, on the recording asked, only when the pencil is used", async () => {
+    await open()
+    document.body.innerHTML = ""
+    registerReadEdit()
+    const element = document.createElement("rr0-read-edit") as ReadEditElement
+    element.setAttribute("src", "https://example.org/d/case.json")
+    document.body.appendChild(element)
+    await element.ready
+    expect(element.firstElementChild?.tagName).toBe("RR0-CASE")
+    expect(element.switcher.editorLoaded).toBe(false)
+    expect(element.querySelector("rr0-case-editor")).toBeNull()
+
+    element.firstElementChild!.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json", track: "https://example.org/d/reading.json" }, bubbles: true, composed: true, cancelable: true }))
+    await wait(300)
+    const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
+    expect(editor).not.toBeNull()
+    expect(element.childElementCount).toBe(1)
+    expect(editor.getAttribute("src")).toBe("https://example.org/d/case.json")
+    expect(editor.getAttribute("track")).toBe("https://example.org/d/reading.json")
+    expect(editor.hasAttribute(IN_PLACE_ATTRIBUTE)).toBe(true)
+    expect(editor.caseSession?.url).toBe("https://example.org/d/case.json")
+
+    // Its Read goes back to a reader, in the same element: the editor stays, hidden.
+    ;(editor.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
+    await wait(300)
+    expect(element.lastElementChild?.tagName).toBe("RR0-CASE")
+    expect(editor.hidden).toBe(true)
+  })
+
+  it("opens on a blank editor when given no file", async () => {
+    registerReadEdit()
+    const element = document.createElement("rr0-read-edit") as ReadEditElement
+    document.body.appendChild(element)
+    await element.ready
+    expect(element.firstElementChild?.tagName).toBe("RR0-CASE-EDITOR")
+    expect(element.switcher.reading).toBe(false)
   })
 })

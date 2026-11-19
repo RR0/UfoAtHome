@@ -47,6 +47,7 @@ import { NumberFields } from "./NumberFields.js"
 import type { BodyJson, BodyKeyframe } from "../engine/interpretation/Interpretation.js"
 import { BLUR_RADIUS_UNIT } from "../render/CanvasRenderer.js"
 import { SightingFetch, SightingFetchError } from "../engine/net/SightingFetch.js"
+import { OpenFiles } from "../engine/net/OpenFiles.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import type { ShareMessages } from "./messages/ShareMessages.js"
 import { AppLocation } from "./AppLocation.js"
@@ -3226,7 +3227,8 @@ export class SightingEditorElement extends HTMLElement {
       // What the models it names by `url` are relative to — see SceneElement.documentUrl.
       this.sceneElement.documentUrl = new URL(url, location.href).href
       this.sightingData = json
-      this.sourceUrl = new URL(url, location.href).href
+      // A file a reader handed over with no address of its own (see OpenFiles.local) has none to give either.
+      this.sourceUrl = OpenFiles.local(url) ? undefined : new URL(url, location.href).href
       // Says where the open recording came from, whichever way it was asked for: typed here, the
       // `src` attribute (a site's `?file=` link), or a observer's own file. Absolute, so the
       // address can be copied out of the field and still work, and so the field is a valid URL.

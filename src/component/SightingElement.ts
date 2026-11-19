@@ -36,7 +36,7 @@ import { AppLocation } from "./AppLocation.js"
 import type { SightingMessages } from "./messages/SightingMessages.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { PlaybackPosition } from "../engine/model/PlaybackPosition.js"
-import { EDIT_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditSwitch.js"
+import { EDIT_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditEvents.js"
 import { OpenFiles } from "../engine/net/OpenFiles.js"
 import type { ShareMessages } from "./messages/ShareMessages.js"
 

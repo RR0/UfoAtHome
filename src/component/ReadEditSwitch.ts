@@ -1,70 +1,42 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { OpenFiles } from "../engine/net/OpenFiles.js"
+import { SightingFetch } from "../engine/net/SightingFetch.js"
 
-/**
- * Fired by an editor (`<rr0-case-editor>`) when its author asks to read what it holds, by a reader (`<rr0-case>`, `<rr0-sighting>`) when its
- * reader asks to edit what it shows. Both bubble out of the element and can be cancelled: a page that switches between the two in place
- * takes it (`preventDefault()`), and the element then does nothing more. Not taken, the element opens the other on the file's address, in a
- * tab of its own, as it always did.
- */
-export const READ_EVENT = "rr0-read"
-export const EDIT_EVENT = "rr0-edit"
-
-/**
- * Set on `<rr0-case-editor>` for it to switch in place with a reader (see ReadEditSwitch), and on the reader it is switched with: the editor
- * then offers to read what it holds even when it has no address, since what it holds is handed over in memory (see OpenFiles).
- */
-export const IN_PLACE_ATTRIBUTE = "in-place"
-
-/** Fired by `<rr0-case-editor in-place>` when it switches, `detail` a ReadEditMode: what a page puts in its address or its title. */
-export const MODE_CHANGE_EVENT = "rr0-mode"
-
-/** What a switch is asked for: the file, by the address it is read by, and the recording of a case to open on, if one is named. */
-export interface ReadEditDetail {
-  readonly src: string
-  readonly track?: string
-}
-
-/** What a reader or an editor needs of the event: whether the page took it. */
-export class ReadEdit {
-
-  /** Asks the page around `from` to switch in place: true when it did, and the element is to do nothing more. */
-  static ask(from: HTMLElement, type: typeof READ_EVENT | typeof EDIT_EVENT, detail: ReadEditDetail): boolean {
-    const event = new CustomEvent<ReadEditDetail>(type, { detail, bubbles: true, composed: true, cancelable: true })
-    from.dispatchEvent(event)
-    return event.defaultPrevented
-  }
-}
-
-/** What the page is told when it switches: which of the two is on show now, and on what. */
-export type ReadEditMode = { readonly mode: "edit" } | { readonly mode: "read", readonly src: string, readonly track?: string }
+import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, READ_EVENT, type ReadEditDetail, type ReadEditMode } from "./ReadEditEvents.js"
 
 /** The editor's side of it: what the switch needs of `<rr0-case-editor>`. */
 export interface SwitchedEditor extends HTMLElement {
   /** Opens the recording of the open case at `url`, the editor being shown again on it. */
   openTrack(url: string): Promise<void>
+  /** The switch the editor is in, set before IN_PLACE_ATTRIBUTE so that it does not make one of its own. */
+  switcher?: ReadEditSwitch
 }
 
 /**
- * Switches, in place on a page, between an editor and a reader of what it holds.
+ * Switches, in place on a page, between an editor and a reader of the same file, each loaded the first time it is asked for.
  *
- * The editor stays where it is, hidden while the reader is on show, so that coming back to it finds it as it was left: its history, its
+ * Two ways in, one switch. A page that opens on the editor (`<rr0-case-editor in-place>`) gives it: the reader comes the first time
+ * something is read. A page that may open on the reader (`<rr0-read-edit>`) gives none: the editor comes the first time something is
+ * edited, and a page that is only read never fetches it. Each is fetched by `import()`, so that a bundle holds the other as a chunk of
+ * its own (see ReadEditElement).
+ *
+ * The editor, once there, stays, hidden while the reader is on show, so that coming back to it finds it as it was left: its history, its
  * open panel, the event on show. The reader is made anew at each reading, on the files the editor holds (see OpenFiles), and goes when the
- * editor comes back. Which reader is the file's own: `<rr0-case>` for a case, `<rr0-sighting>` for a recording alone; both come in a bundle
- * of their own, fetched the first time something is read.
+ * editor comes back. Which reader is the file's own: `<rr0-case>` for a case, `<rr0-sighting>` for a recording alone.
  */
 export class ReadEditSwitch {
 
   private reader?: HTMLElement
+  private editor?: SwitchedEditor
 
-  /** @param changed What the page does when it switches: its address, its title. */
-  constructor(private readonly editor: SwitchedEditor, private readonly changed: (mode: ReadEditMode) => void = () => {}) {
-    // Set only when missing: the editor makes its switch when the attribute comes, and would be asked to make it a second time.
-    if (!editor.hasAttribute(IN_PLACE_ATTRIBUTE)) editor.setAttribute(IN_PLACE_ATTRIBUTE, "")
-    editor.addEventListener(READ_EVENT, event => {
-      event.preventDefault()
-      void this.read((event as CustomEvent<ReadEditDetail>).detail)
-    })
+  /**
+   * @param place Puts a reader or an editor made here where the page wants it.
+   * @param editor The editor the page opened on, if it opened on one.
+   * @param changed What the page does when it switches: its address, its title.
+   */
+  constructor(private readonly place: (element: HTMLElement) => void, editor?: SwitchedEditor,
+              private readonly changed: (mode: ReadEditMode) => void = () => {}) {
+    if (editor) this.adopt(editor)
   }
 
   /** Whether the reader is the one on show. */
@@ -72,13 +44,34 @@ export class ReadEditSwitch {
     return this.reader !== undefined
   }
 
-  private async read({ src, track }: ReadEditDetail): Promise<void> {
+  /** Whether the editor was ever asked for: until then, it is not even loaded. */
+  get editorLoaded(): boolean {
+    return this.editor !== undefined
+  }
+
+  /** Makes `editor` the one this switches with, and it the switch of the editor. */
+  private adopt(editor: SwitchedEditor): void {
+    this.editor = editor
+    editor.switcher = this
+    // Set only when missing, and after the switcher: the editor makes a switch of its own when the attribute comes without one.
+    if (!editor.hasAttribute(IN_PLACE_ATTRIBUTE)) editor.setAttribute(IN_PLACE_ATTRIBUTE, "")
+    editor.addEventListener(READ_EVENT, event => {
+      event.preventDefault()
+      void this.read((event as CustomEvent<ReadEditDetail>).detail)
+    })
+  }
+
+  /**
+   * Shows the reader of the file at `src`, opening a case on `track`: the case's reader for a case, the observation's for a recording, told
+   * apart by what the file holds.
+   */
+  async read({ src, track }: ReadEditDetail): Promise<void> {
     const [{ register: registerCase, CASE_ELEMENT_NAME, OPEN_EVENTS_ATTRIBUTE }, { registerSighting, SIGHTING_ELEMENT_NAME }] = await Promise.all([
       import("./CaseElement.js"), import("./SightingElement.js")
     ])
     registerSighting()
     registerCase()
-    const isCase = CaseFile.isCase(OpenFiles.read(src))
+    const isCase = CaseFile.isCase(OpenFiles.read(src) ?? await SightingFetch.json(src))
     const reader = document.createElement(isCase ? CASE_ELEMENT_NAME : SIGHTING_ELEMENT_NAME)
     reader.setAttribute(IN_PLACE_ATTRIBUTE, "")
     // The case opens on the event being edited, named by its file (see OPEN_EVENTS_ATTRIBUTE).
@@ -89,19 +82,42 @@ export class ReadEditSwitch {
       void this.edit((event as CustomEvent<ReadEditDetail>).detail)
     })
     this.reader?.remove()
-    this.editor.after(reader)
-    this.editor.hidden = true
+    this.place(reader)
+    if (this.editor) this.editor.hidden = true
     this.reader = reader
     this.changed({ mode: "read", src, ...(track ? { track } : {}) })
   }
 
-  private async edit({ track }: ReadEditDetail): Promise<void> {
+  /**
+   * Shows the editor: the one there was, as it was left, on the recording asked for; else one made now on `src` (none for a blank one),
+   * loaded the first time it is asked for.
+   */
+  async edit(detail?: Partial<ReadEditDetail>): Promise<void> {
+    const editor = this.editor
+    if (editor) {
+      this.dropReader()
+      // What the editor holds is what was read: what was handed over is not needed any more.
+      OpenFiles.clear()
+      editor.hidden = false
+      this.changed({ mode: "edit" })
+      if (detail?.track) await editor.openTrack(detail.track)
+      return
+    }
+    const { register, CASE_EDITOR_ELEMENT_NAME } = await import("./CaseEditorElement.js")
+    register()
+    const made = document.createElement(CASE_EDITOR_ELEMENT_NAME) as SwitchedEditor
+    this.adopt(made)
+    // Read by the same paths as the reader read it: what was handed over stays held until the next reading replaces it (see OpenFiles).
+    if (detail?.track) made.setAttribute("track", detail.track)
+    if (detail?.src) made.setAttribute("src", detail.src)
+    this.dropReader()
+    this.place(made)
+    this.changed({ mode: "edit" })
+  }
+
+  private dropReader(): void {
     this.reader?.remove()
     this.reader = undefined
-    OpenFiles.clear()
-    this.editor.hidden = false
-    this.changed({ mode: "edit" })
-    if (track) await this.editor.openTrack(track)
   }
 
   /** How a case names one of its events by its file: its name without `.json` (see OPEN_EVENTS_ATTRIBUTE). */

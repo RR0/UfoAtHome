@@ -17,13 +17,15 @@
     "./scene": "./dist-embed-scene/rr0-scene.mjs",
     "./sighting": "./dist-embed-sighting/rr0-sighting.mjs",
     "./editor": "./dist-embed-sighting-editor/rr0-sighting-editor.mjs",
-    "./interview": "./dist-embed-interview/rr0-interview.mjs"
+    "./interview": "./dist-embed-interview/rr0-interview.mjs",
+    "./read-edit": "./dist-embed-read-edit/rr0-read-edit.mjs"
   },
   "files": [
     "dist-embed-scene",
     "dist-embed-sighting",
     "dist-embed-sighting-editor",
-    "dist-embed-interview"
+    "dist-embed-interview",
+    "dist-embed-read-edit"
   ],
   "scripts": {
     "predev": "npm run build:schema",
@@ -33,13 +35,14 @@
     "build:embed-scene": "tsc --noEmit && vite build --config vite.embed-scene.config.ts",
     "build:embed-sighting": "tsc --noEmit && vite build --config vite.embed-sighting.config.ts",
     "build:embed-interview": "vite build --config vite.embed-interview.config.ts",
-    "build:all": "npm run build:schema && npm run build && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview",
-    "build:site": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview && vite build --config vite.site.config.ts && tsx site/build.ts",
+    "build:embed-read-edit": "vite build --config vite.embed-read-edit.config.ts",
+    "build:all": "npm run build:schema && npm run build && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview && npm run build:embed-read-edit",
+    "build:site": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview && npm run build:embed-read-edit && vite build --config vite.site.config.ts && tsx site/build.ts",
     "site": "tsx site/build.ts",
     "site:watch": "node --watch-path=./site --watch-path=./public/demo-data --import tsx site/build.ts",
     "deploy:site": "npm run build:site && npx netlify deploy --prod --dir dist-site --no-build --site 90e69d49-ac43-433a-9829-3cb861a623ef",
     "site:serve": "vite preview --outDir dist-site --port 5181 --strictPort",
-    "prepublishOnly": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview && npm test",
+    "prepublishOnly": "npm run build:schema && npm run build:embed-sighting-editor && npm run build:embed-scene && npm run build:embed-sighting && npm run build:embed-interview && npm run build:embed-read-edit && npm test",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

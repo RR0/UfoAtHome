@@ -46,7 +46,8 @@ import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
-import { IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT, READ_EVENT, ReadEdit, ReadEditSwitch, type ReadEditDetail } from "./ReadEditSwitch.js"
+import { IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT, READ_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditEvents.js"
+import { ReadEditSwitch } from "./ReadEditSwitch.js"
 import { OpenFiles, type OpenFile } from "../engine/net/OpenFiles.js"
 
 export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
@@ -459,7 +460,8 @@ export class CaseEditorElement extends HTMLElement {
     this.editor.addEventListener("caseloaded", event => {
       event.preventDefault()
       const { json, url } = (event as CustomEvent<{ json: unknown, url?: string }>).detail
-      void this.openCase(json as Parameters<typeof CaseFile.sightingUrls>[0], url ?? location.href, url !== undefined)
+      // A case a reader handed over with no address of its own (see OpenFiles.local) is one picked from the disk, as here.
+      void this.openCase(json as Parameters<typeof CaseFile.sightingUrls>[0], url ?? location.href, url !== undefined && !OpenFiles.local(url))
     })
     // A recording loaded into the editor by its own fields is not the case's any more.
     this.editor.addEventListener("recordingloaded", () => this.closeCase())
@@ -569,7 +571,10 @@ export class CaseEditorElement extends HTMLElement {
   attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
     if (name === IN_PLACE_ATTRIBUTE) {
       // Switched in place by itself: the page needs nothing more than the attribute (see ReadEditSwitch).
-      if (value !== null) this.switcher ??= new ReadEditSwitch(this, mode => this.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, { detail: mode, bubbles: true, composed: true })))
+      if (value !== null && !this.switcher) {
+        new ReadEditSwitch(reader => this.after(reader), this,
+          mode => this.dispatchEvent(new CustomEvent(MODE_CHANGE_EVENT, { detail: mode, bubbles: true, composed: true })))
+      }
       this.refreshCaseState()
     }
     if (name === "src" && value) this.editor.setAttribute("src", value)
@@ -1721,8 +1726,8 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("read-case").hidden = !this.hasAttribute(IN_PLACE_ATTRIBUTE) && this.readAddress() === undefined
   }
 
-  /** What switches this editor and a reader in place, once IN_PLACE_ATTRIBUTE is set. */
-  private switcher?: ReadEditSwitch
+  /** What switches this editor and a reader in place, once IN_PLACE_ATTRIBUTE is set: its own, or that of the page it is in (see ReadEditSwitch). */
+  switcher?: ReadEditSwitch
 
   /** The address what is edited stands at, if it has one: the case's, else the recording's alone. */
   private readAddress(): string | undefined {
