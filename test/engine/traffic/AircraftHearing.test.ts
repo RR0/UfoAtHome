@@ -218,7 +218,7 @@ describe("AircraftHearing", () => {
       expect(AircraftHearing.regimeAt(Flights.sloping(12000, 2500, 200, 200), at, { ...observer, heightM: 2000 })).toBe("takeoff")
     })
 
-    test("a jet taking off is heard as its class at full thrust, the lows stronger; one that comes in to land is quieter, and brighter", () => {
+    test("a jet taking off is heard as its class at full thrust, the lows stronger; one that comes in to land is quieter, and as its class otherwise", () => {
       const at = T0 + 200_000
       const takeoff = AircraftHearing.heardAt(Flights.sloping(1500, 2500, 160, 200), observer, at, { ambientDbA: 30 })!
       const approach = AircraftHearing.heardAt(Flights.sloping(1500, -700, 160, 200), observer, at, { ambientDbA: 30 })!
@@ -233,15 +233,12 @@ describe("AircraftHearing", () => {
       // Where the energy is: the lowest band against the 2 kHz one.
       const tilt = (heard: typeof passing) => heard.noise.soundPowerA[0] - heard.noise.soundPowerA[5]
       expect(tilt(takeoff)).toBeGreaterThan(tilt(passing) + 10)
-      expect(tilt(approach)).toBeLessThan(tilt(passing) - 15)
+      expect(tilt(approach)).toBeCloseTo(tilt(passing), 9)
     })
 
-    test("an approaching jet's fan sings lower, as it turns slower, and stands out more", () => {
+    test("an approaching jet keeps its class's fan: the one recording that said otherwise is doubted by the ear", () => {
       const own = AircraftHearing.noiseOfKind("airliner-narrow")
-      const approach = AircraftHearing.inRegime(own, "approach")
-      expect(approach.character?.toneHz).toBeCloseTo(1008, 0)
-      expect(approach.character?.toneShare).toBeCloseTo(0.6, 6)
-      expect(approach.character?.humHz).toBeLessThan(own.character!.humHz!)
+      expect(AircraftHearing.inRegime(own, "approach").character).toEqual(own.character)
     })
 
     test("what has no regimes of its own is itself at every thrust", () => {

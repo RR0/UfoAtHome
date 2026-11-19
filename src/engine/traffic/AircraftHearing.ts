@@ -51,26 +51,25 @@ interface RegimeChange {
 }
 
 /**
- * How a turbofan sounds at full thrust and at a low one, against its class's own (a climb's). Its SHAPES are measured, on Pixabay recordings
- * (test/engine/traffic/aircraft-sound-reference.json, held to in AircraftSoundCalibration.test.ts): the band by band difference between three take-offs
- * and what the class plays at the distance that fits each best, and between the one approach and the same. A take-off is the jet's roar, low and
- * strong, with the crackle of its shocks above; an approach has little of the jet and much of the fan and of the airframe, gear and flaps out: bright.
- * The approach rests on one recording, whose title says "landing" and which the ear takes for a take-off: its spectrum, its fan line and the 30 dB
- * it loses in 8 s once past, with no roar behind, are those of a low thrust. Its 8 kHz is held to its 4 kHz's, since it is the band a recording made
- * nearer than any distance fitted (50 m) overstates most.
+ * How a turbofan sounds at full thrust and at a low one, against its class's own (a climb's). The take-off's SHAPE is measured, on Pixabay
+ * recordings (test/engine/traffic/aircraft-sound-reference.json, held to in AircraftSoundCalibration.test.ts): the band by band difference between
+ * three take-offs and what the class plays at the distance that fits each best. A take-off is the jet's roar, low and strong, with the crackle of its
+ * shocks above.
+ *
+ * The approach keeps its class's shape and its fan. It had a shape and a fan of its own, measured on the one recording titled "landing": bright
+ * (the lows 10 to 14 dB down, 2 to 9 dB more from 1 to 4 kHz) and with a fan line at 1 013 Hz. Heard on the demo of Gonesse (2025-12-30), an A320neo
+ * coming in at 600 m was a roar with a hair-dryer's hiss laid over it, close and not the aircraft's, and once past a hiss alone, its lows under the
+ * ambient's; and that recording sounds to the ear like a take-off. One recording that the ear doubts is not enough to make the approach brighter
+ * than every jet recorded passing over.
  *
  * Their LEVELS cannot be measured on recordings made at no known distance, and are from the certification of an A320-216 (CFM56-5B6/P, ICAO noise
  * database, Annex 16 chapter 3): 90.7 EPNdB lateral, at full thrust some 540 m from the aircraft, and 95.2 at approach, 120 m under it; brought to the
  * same distance (20 log 540/120 = 13 dB), an approach is some 8 dB under full thrust. Full thrust is taken as the class's own, which is a climb's:
  * the difference between the two, a cutback of a few decibels, is not established.
- *
- * Its FAN sings lower at approach, as it turns slower: the line of the approach recording is at 1 013 Hz once its Doppler shift is taken out (1 184 Hz
- * coming, 886 going), 0.56 of the narrow-body's 1 800; and it stands out of the noise by 15 to 17 dB, where no recording of a jet passing at a
- * climb's thrust has a line that does: twice as strong.
  */
 const TURBOFAN_REGIMES: Partial<Record<FlightRegime, RegimeChange>> = {
   takeoff: { shapeDb: [10, 3, -3, -2, -2, -2, 5, 4], levelDb: 0 },
-  approach: { shapeDb: [-14, -10, -4, -1, 2, 4, 9, 9], levelDb: -8, toneRatio: 0.56, toneGain: 2 }
+  approach: { shapeDb: [0, 0, 0, 0, 0, 0, 0, 0], levelDb: -8 }
 }
 
 /**
