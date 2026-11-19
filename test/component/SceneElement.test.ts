@@ -1,3 +1,4 @@
+import { UfoElement } from "../../src/component/UfoElement.js"
 import { DecorAircraftHearing } from "../../src/engine/place/DecorAircraftHearing.js"
 import { describe, expect, it, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { registerScene, SCENE_ELEMENT_NAME, AIRCRAFT_CHANGE_EVENT } from "../../src/component/SceneElement.js"
@@ -1234,6 +1235,21 @@ describe("SceneElement air traffic", () => {
       ...rainyJson,
       weatherTrack: { keyframes: [{ t: 0, weather: { cloudCover: 0, cloudDarkness: 0, precipitationType: "none" as const, precipitationIntensity: 0, windDirectionDeg: 0, windSpeed: 0, storm: false } }] }
     }
+
+    it("lets the sound be turned down for a scene whose only sound is the aircraft of its record, once some are found within hearing", async () => {
+      const refresh = vi.spyOn(UfoElement.prototype, "refreshSoundControls")
+      spies.push(refresh)
+      const { source } = stubSource(low)
+      const { element, tick } = mountAt(AT, source, calm)
+      expect(element.ufoElement.audible).toBe(false)
+      tick()
+      await vi.waitFor(() => expect(element.aircraftState.status).toBe("ready"))
+      tick(60_000)
+      expect(element.ufoElement.audible).toBe(true)
+      // And the button is drawn again when they are, not left as it was drawn before the record answered.
+      expect(refresh).toHaveBeenCalled()
+      element.remove()
+    })
 
     it("lets the sound be turned down for an aircraft of the decor in flight, which states no engine: what flies is heard by itself", () => {
       const element = mount()

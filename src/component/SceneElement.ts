@@ -1397,6 +1397,8 @@ export class SceneElement extends HTMLElement {
       || this.interpretationShown?.bodies.some(body => body.sound) === true
       || sighting.weatherTrack.allKeyframes.some(frame => frame.weather.precipitationType !== "none" || frame.weather.windSpeed > 1)
       || this.detonates(sighting)
+      // The aircraft of a record of traffic, once some of them are found to be within hearing.
+      || (this.traffic?.audible?.size ?? 0) > 0
     this.ufoElement.addEventListener("referenceview", event => this.applyReferenceView((event as CustomEvent<ReferenceViewDetail>).detail))
     this.ufoElement.addEventListener("traceview", event => this.sceneRenderer.setTracesShown((event as CustomEvent<{ shown: boolean }>).detail.shown))
     this.ufoElement.canvasElement.addEventListener("pointermove", this.handlePointerMove)
@@ -2943,6 +2945,8 @@ export class SceneElement extends HTMLElement {
     if (!asked.set || !asked.observer) return
     // Against the quietest the place could be: the weather only ever adds to it, so what cannot be heard there cannot be heard at all.
     asked.audible = runtime.TrafficSound.candidates(asked.set.flights, asked.descriptions ?? new Map(), TrafficIds.keyOf, { ...asked.observer, heightM: this.sceneRenderer.groundAltitudeM }, { ambientDbA: runtime.AmbientNoise.BASE_DB_A })
+    // The button was drawn before the traffic was known: a scene with aircraft to hear and nothing else has a sound to set the volume of now.
+    this.ufoElement.refreshSoundControls()
   }
 
   /**
