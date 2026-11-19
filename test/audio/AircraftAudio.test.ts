@@ -399,17 +399,26 @@ describe("AircraftAudio", () => {
       delete FakeContext.prototype.createConvolver
     })
 
-    test("a far sound arrives in a long reverberation, and a near one in hardly any", () => {
+    test("as much of a sound arrives diffuse as direct at 2 km, more the farther it is, none of a cabin's", () => {
+      // The reverberant over the direct is the square of the send (see DIFFUSE_KM): a kilometre off, half; 2 km, as much; capped far off.
+      expect(AircraftAudio.reverbSend(1) ** 2).toBeCloseTo(0.5, 9)
+      expect(AircraftAudio.reverbSend(2)).toBeCloseTo(1, 9)
+      expect(AircraftAudio.reverbSend(0.15)).toBeLessThan(0.3)
+      expect(AircraftAudio.reverbSend(40)).toBe(AircraftAudio.reverbSend(25))
+      expect(AircraftAudio.reverbSend(0)).toBe(0)
+    })
+
+    test("a far sound arrives in a long reverberation, and a near one in little", () => {
       const audio = playing()
-      audio.setVoices([voice({ id: "near", distanceKm: 1 }), voice({ id: "far", distanceKm: 40 })])
+      audio.setVoices([voice({ id: "near", distanceKm: 0.1 }), voice({ id: "far", distanceKm: 40 })])
       expect(made.convolvers).toHaveLength(1)
       // A tail of several seconds, in both ears.
       expect(made.convolvers[0].buffer!.numberOfChannels).toBe(2)
       expect(made.convolvers[0].buffer!.length).toBeGreaterThan(48000 * 3)
-      // The send is the last gain of each voice (after the two roughnesses): nothing for the near one, a good deal for the far one.
+      // The send is the last gain of each voice (after the two roughnesses): little for the near one, a good deal for the far one.
       const sends = made.gains.filter(gain => made.convolvers[0] && made.convolvers[0] !== undefined && gain.connections.includes(made.convolvers[0]))
       expect(sends).toHaveLength(2)
-      expect(sends[0].gain.target).toBe(0)
+      expect(sends[0].gain.target).toBeLessThan(0.3)
       expect(sends[1].gain.target).toBeGreaterThan(1)
     })
 

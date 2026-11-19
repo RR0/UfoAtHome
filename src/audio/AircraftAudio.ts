@@ -76,6 +76,18 @@ const TONE_AMPLITUDE = 0.16
  * most of a sound that is sent to the reverberation.
  */
 const REVERB_SEND = 1.6
+/**
+ * The distance at which as much of a sound arrives diffuse as direct, km: the reverberant over the direct grows as the distance does (the direct
+ * falls as the square of it, what the ground, the hills and the turbulent air scatter towards the ear much less), so a send of the root of
+ * distance / DIFFUSE_KM (played, the reverberant over the direct is the square of the send within 10 %: a coherence of 0.52 at 0.87 km, 0.87 at 150 m).
+ *
+ * Measured on the recordings of aircraft passing that are in stereo, by the coherence of their two channels between 250 Hz and 1 kHz, which is
+ * (1 / (1 + reverberant / direct))^2: 0.3 to 0.6 for those heard passing over (0.45 at the median), 0.8 to 0.9 for the warbird flying past near.
+ * Their distances are not given; taken as a kilometre for an overflight and 150 m for that pass, the two agree on 2 km (coherence 0.44 and 0.87).
+ * It was sent nothing within 5 km: heard on the Western U.S. Event (2023-10-14), a fighter passing at 0.9 km sounded nearer than a kilometre, a
+ * coherence of 1 where no recorded aircraft has more than 0.9.
+ */
+const DIFFUSE_KM = 2
 /** How long the reverberation lasts, s, and how fast it dies away (a time constant), s: a long tail, as in the open air and over distance, where a sound comes back off the ground and the hills. */
 const REVERB_SECONDS = 3.6
 const REVERB_DECAY_S = 1.1
@@ -373,7 +385,7 @@ export class AircraftAudio {
     const master = rms > 0 ? AircraftAudio.saturated(rms) / rms : 1
     set(built.output.gain, master * (1 - FAR_QUIETING * far))
     set(built.wanderDepth.gain, master * FAR_WANDER * far / WANDER_RATES_HZ.length)
-    if (built.send) set(built.send.gain, REVERB_SEND * far)
+    if (built.send) set(built.send.gain, AircraftAudio.reverbSend(voice.distanceKm))
     if (built.echo) {
       const echo = voice.groundEcho
       set(built.echo.gain.gain, echo?.lowGain ?? 0)
@@ -405,6 +417,11 @@ export class AircraftAudio {
   }
 
   /** What a band's amplitude is multiplied by to take the A-weighting back off it, up to MAX_UNWEIGHT_DB of it. */
+  /** How much of a voice `distanceKm` away is sent to the reverberation (see DIFFUSE_KM): none of a cabin's, which is all round the ear. */
+  static reverbSend(distanceKm: number): number {
+    return Math.min(REVERB_SEND, Math.sqrt(Math.max(0, distanceKm) / DIFFUSE_KM))
+  }
+
   static unweighting(frequencyHz: number): number {
     return 10 ** (Math.min(MAX_UNWEIGHT_DB, Math.max(0, -SoundInAir.aWeightingDb(frequencyHz))) / 20)
   }
