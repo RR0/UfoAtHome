@@ -296,6 +296,31 @@ describe("<rr0-case>, a case read", () => {
     expect((dialog.getElementById("embed-markup") as HTMLTextAreaElement).value).toContain(` show-timeline="false"`)
   })
 
+  it("shares the reading picked in a player's own menu, and tells the page so", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const announced: string[] = []
+    element.addEventListener("openchange", event => announced.push((event as CustomEvent).detail.events))
+    const player = () => root.querySelector(".open-event rr0-sighting") as HTMLElement | null
+    for (let left = 200; left > 0 && !player()?.shadowRoot?.querySelector("#interpretation option[value='case-0']"); left--) {
+      await new Promise(resolve => setTimeout(resolve, 5))
+    }
+    const menu = player()!.shadowRoot!.getElementById("interpretation") as HTMLSelectElement
+    menu.value = "case-0"
+    menu.dispatchEvent(new Event("change"))
+    for (let left = 200; left > 0 && !announced.includes("reading"); left--) await new Promise(resolve => setTimeout(resolve, 5))
+    expect(announced).toContain("reading")
+    root.getElementById("share")!.click()
+    const dialog = root.getElementById("share-dialog")!.shadowRoot!
+    expect(new URL((dialog.getElementById("link") as HTMLTextAreaElement).value).searchParams.get("events")).toBe("reading")
+    // Back to the account: the case opens on it anyway, and the link says nothing of what is open.
+    menu.value = "account"
+    menu.dispatchEvent(new Event("change"))
+    for (let left = 200; left > 0 && announced[announced.length - 1] !== ""; left--) await new Promise(resolve => setTimeout(resolve, 5))
+    root.getElementById("share")!.click()
+    expect(new URL((dialog.getElementById("link") as HTMLTextAreaElement).value).searchParams.has("events")).toBe(false)
+  })
+
   it("opens on the events a link names, by their event's id or by their file's name", async () => {
     const opened = async (asked: string, count: number) => {
       files[new URL("case.json", location.href).href] = caseJson

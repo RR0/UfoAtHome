@@ -166,6 +166,15 @@ const listenToStage = () => {
     shownSrc = event.detail && event.detail.src ? event.detail.src : undefined
     describe()
   })
+  /* A case says what is open whenever the reader changes it (an event opened or shut, another reading picked in a player): the page's
+     address follows, so that the one in the bar reopens what is looked at, as the case's Share does (see CaseElement's openchange). */
+  stage.addEventListener("openchange", event => {
+    const events = event.detail && typeof event.detail.events === "string" ? event.detail.events : ""
+    const next = new URL(location.href)
+    if (events) next.searchParams.set("events", events)
+    else next.searchParams.delete("events")
+    if (next.href !== location.href) history.replaceState(null, "", next)
+  })
 }
 listenToStage()
 

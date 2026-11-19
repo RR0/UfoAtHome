@@ -733,6 +733,16 @@ export class SightingElement extends HTMLElement {
     return this.editorUrl()
   }
 
+  /** The address of the account on show: on a case, the witness's recording picked (see OBSERVER_CHANGE_EVENT). */
+  get shownRecordingUrl(): string | undefined {
+    return this.currentSrc ? new URL(this.currentSrc, location.href).href : undefined
+  }
+
+  /** The address of the reading of the case chosen in the menu, none while the account is on show (see INTERPRETATION_CHANGE_EVENT). */
+  get shownReadingUrl(): string | undefined {
+    return this.shownTrackUrl()
+  }
+
   /** The address of the recording of the reading chosen in the menu, when one is (see offerInterpretations). */
   private shownTrackUrl(): string | undefined {
     return this.readingUrlOf(this.interpretationSelect.value)
@@ -1091,7 +1101,7 @@ export class SightingElement extends HTMLElement {
     this.shownInterpretation = value
     this.showReadingFindings(entry, reading)
     this.editLink.href = this.editorUrl()
-    this.dispatchEvent(new CustomEvent("interpretationchange", { detail: { track: this.shownTrackUrl() } }))
+    this.dispatchEvent(new CustomEvent(INTERPRETATION_CHANGE_EVENT, { detail: { track: this.shownTrackUrl() } }))
     this.updateCompareButton()
     this.showConfrontation(this.sceneElement.confrontation)
     this.showVariantMoved()
@@ -1844,6 +1854,10 @@ export const SIGHTING_ELEMENT_NAME = "rr0-sighting"
 /** Fired by `<rr0-sighting>` whenever the recording on show changes: loaded, set through
  * `sightingData`, or another observer picked. Read `sightingData` back off the element. */
 export const OBSERVER_CHANGE_EVENT = "observerchange"
+
+/** Fired by `<rr0-sighting>` once the reading picked in its menu is on show: `detail.track` is its address (see shownReadingUrl), none for
+ * the account. */
+export const INTERPRETATION_CHANGE_EVENT = "interpretationchange"
 
 export function registerSighting(): void {
   registerScene()

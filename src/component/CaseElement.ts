@@ -14,7 +14,7 @@ import type { CaseMessages } from "./messages/CaseMessages.js"
 import { Icons } from "./Icons.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { TIME_CHANGE_EVENT } from "./UfoElement.js"
-import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
+import { CASE_NAMED_ATTRIBUTE, HIDE_PICKERS_ATTRIBUTE, INTERPRETATION_ATTRIBUTE, INTERPRETATION_CHANGE_EVENT, OBSERVER_ATTRIBUTE, OBSERVER_CHANGE_EVENT, SHOW_INFO_ATTRIBUTE, SIGHTING_ELEMENT_NAME, registerSighting } from "./SightingElement.js"
 import type { SightingElement } from "./SightingElement.js"
 import { caseHtml, caseCss } from "./caseTemplate.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
@@ -31,6 +31,11 @@ export const SHOW_TIMELINE_ATTRIBUTE = "show-timeline"
  * Absent, or naming nothing the case holds, the case opens on its first observation. What a shared link says is open (see shareSubject).
  */
 export const OPEN_EVENTS_ATTRIBUTE = "open-events"
+
+/** Fired by `<rr0-case>` when what is open changes, by the reader's doing: an event opened or shut, another witness or another reading picked
+ * in a player. `detail.events` is what OPEN_EVENTS_ATTRIBUTE would say of it, empty when it is what the case opens on anyway (see openKeys):
+ * what a page puts in its own address, so that the address in the bar is the one the share dialog gives. */
+export const OPEN_CHANGE_EVENT = "openchange"
 
 /** One event of the case, as the reader shows it: what the case says of it, and nothing fetched. */
 interface CaseEntry {
@@ -404,13 +409,54 @@ export class CaseElement extends HTMLElement {
       // What a page around this element listens for, as it would on the player itself: the wrapper is not a wall.
       player.addEventListener(OBSERVER_CHANGE_EVENT, event => {
         this.dispatchEvent(new CustomEvent(OBSERVER_CHANGE_EVENT, { detail: (event as CustomEvent).detail }))
+        this.follow(block, player)
       })
+      // Another reading picked in the player is another event of the case open: the share dialog and the page's address have to say it.
+      player.addEventListener(INTERPRETATION_CHANGE_EVENT, () => this.follow(block, player))
       block.append(player)
     }
     this.shown.set(at, block)
     this.order()
     this.draw()
     if (entry.kind !== "interview") window.setTimeout(() => this.markCitedMoments(), 300)
+    this.announceOpen()
+  }
+
+  /**
+   * Files the player of `block` under the event it shows now: the reading picked in its menu, else the witness's recording. A player opened on
+   * one reading and turned to another by its own menu went on being shared, and its event marked in the history, as the one it opened on.
+   */
+  private follow(block: HTMLElement, player: SightingElement): void {
+    const was = Number(block.dataset.at)
+    const reading = player.shownReadingUrl
+    const account = player.shownRecordingUrl
+    const same = (url: string | undefined, other: string | undefined) => url !== undefined && other !== undefined
+      && new URL(url, this.url ?? location.href).href === new URL(other, this.url ?? location.href).href
+    const at = reading
+      ? this.entries.findIndex(entry => entry.kind === "reading" && same(entry.url, reading))
+      : this.entries.findIndex(entry => entry.kind === "observation" && same(entry.url, account))
+    if (at < 0 || at === was || this.shown.get(was) !== block || this.shown.has(at)) return
+    this.shown.delete(was)
+    this.shown.set(at, block)
+    block.dataset.at = String(at)
+    // What the player was asked to open on follows what it shows: asked again (by being moved in the page, say), it would put back the
+    // reading it was opened on, which wins over what is chosen (see SightingElement.offerInterpretations).
+    const entry = this.entries[at]!
+    if (entry.kind === "reading") player.setAttribute(INTERPRETATION_ATTRIBUTE, entry.url!)
+    else {
+      player.removeAttribute(INTERPRETATION_ATTRIBUTE)
+      if (entry.url) player.setAttribute(OBSERVER_ATTRIBUTE, entry.url)
+    }
+    // Moved only when the order of time says it moves: put back in the page, a player is read again.
+    const order = [...this.shown.keys()].sort((a, b) => a - b)
+    if ([...this.openEvents.children].some((child, index) => child !== this.shown.get(order[index]))) this.order()
+    this.draw()
+    this.announceOpen()
+  }
+
+  /** Tells the page around what is open now (see OPEN_CHANGE_EVENT). */
+  private announceOpen(): void {
+    this.dispatchEvent(new CustomEvent(OPEN_CHANGE_EVENT, { detail: { events: this.openKeys() } }))
   }
 
   /**
@@ -456,6 +502,7 @@ export class CaseElement extends HTMLElement {
     this.shown.delete(at)
     this.markCitedMoments()
     this.draw()
+    this.announceOpen()
   }
 
   /** What is open, in the order of time: the order they were opened in is the reader's doing, not the case's. */
