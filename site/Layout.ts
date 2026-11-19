@@ -201,10 +201,11 @@ export class Layout {
       .join("\n  ")
     const loader = this.moduleLoader(meta.modules ?? [])
     const script = page.script?.(language)
+    const app = meta.shell === "app"
     let content = this.shots.insert(this.headings.withAnchors(page.render(language), words.sectionLink, this.anchors(page, language)), meta.slug, language)
     // The hero's way back goes to the top of the outline, when there is one (see PageOutline.render).
     const crumb = /<p class="eyebrow">\s*(<a class="crumb"[^>]*>[\s\S]*?<\/a>)\s*<\/p>/.exec(content)
-    const outline = this.outline.render(content, words.onThisPage, crumb?.[1])
+    const outline = app ? undefined : this.outline.render(content, words.onThisPage, crumb?.[1])
     if (outline && crumb) {
       content = content.replace(crumb[0], "")
     }
@@ -231,13 +232,13 @@ ${this.languageRedirect(page, language)}
   <link rel="stylesheet" href="/style.css">
   ${modules}
 </head>
-<body${outline ? ` class="has-outline"` : ""}>
-${this.header(page, language)}
+<body${outline ? ` class="has-outline"` : app ? ` class="app-shell"` : ""}>
+${app ? this.appHeader(language) : this.header(page, language)}
 ${outline ?? ""}
 <main>
 ${content}
 </main>
-${this.siteFooter(language)}
+${app ? "" : this.siteFooter(language)}
 ${scripts}
 ${outline ? PageOutline.SCRIPT : ""}
 ${OfflineKit.REGISTER}
@@ -281,19 +282,34 @@ ${OfflineKit.REGISTER}
   </script>`
   }
 
+  /**
+   * The app's header (see PageMeta.shell): the way back and forward an installed app has no bar for, and the name, leading to the site.
+   * Nothing else: the page is the tool.
+   */
+  private appHeader(language: SiteLanguage): string {
+    return `<header class="site-header app-header">
+  ${this.historyButtons(language)}
+  <a class="brand" href="/"><img class="brand-logo" src="/logo-96.png" width="28" height="28" alt="">UFO<span class="at">@</span>home</a>
+</header>`
+  }
+
+  /** Shown by OfflineKit.APP in the installed app only, which has no browser bar to offer them. */
+  private historyButtons(language: SiteLanguage): string {
+    const words = Layout.SHELL[language]
+    return `<span class="app-history" hidden>
+    <button type="button" class="app-back" title="${words.previousPage}" aria-label="${words.previousPage}">‹</button>
+    <button type="button" class="app-forward" title="${words.nextPage}" aria-label="${words.nextPage}">›</button>
+  </span>`
+  }
+
   private header(current: SitePage, language: SiteLanguage): string {
     const links = this.pages.filter(page => !page.meta.asideFromNav).map(page => {
       const currentAttr = page === current ? ` aria-current="page"` : ""
       return `<a href="${this.path(page.meta)}"${currentAttr}>${this.text(page.meta.navLabel[language])}</a>`
     }).join("\n    ")
     const words = Layout.SHELL[language]
-    // Shown by OfflineKit.APP in the installed app only, which has no browser bar to offer them.
-    const history = `<span class="app-history" hidden>
-    <button type="button" class="app-back" title="${words.previousPage}" aria-label="${words.previousPage}">‹</button>
-    <button type="button" class="app-forward" title="${words.nextPage}" aria-label="${words.nextPage}">›</button>
-  </span>`
     return `<header class="site-header">
-  ${history}
+  ${this.historyButtons(language)}
   <a class="brand" href="/"><img class="brand-logo" src="/logo-96.png" width="28" height="28" alt="">UFO<span class="at">@</span>home</a>
   <nav class="site-nav" aria-label="${words.mainNavigation}">
     ${links}

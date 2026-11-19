@@ -1414,8 +1414,12 @@ describe("Reading what is edited", () => {
     element.setAttribute(IN_PLACE_ATTRIBUTE, "")
     document.body.appendChild(element)
     await wait()
-    expect((element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).hidden).toBe(false)
-    ;(element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
+    const read = element.shadowRoot!.getElementById("read-case") as HTMLButtonElement
+    expect(read.hidden).toBe(false)
+    // No case open: among the actions of the recording editor's own header, the one drawn then.
+    expect(read.parentElement).toBe(element.sightingEditor)
+    expect(read.slot).toBe("head-actions")
+    read.click()
     await wait(300)
     const reader = element.nextElementSibling as HTMLElement
     expect(reader.tagName).toBe("RR0-SIGHTING")

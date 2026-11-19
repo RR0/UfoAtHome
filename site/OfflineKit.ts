@@ -133,8 +133,10 @@ if ("serviceWorker" in navigator) {
       name: "UFO@home",
       short_name: "UFO@home",
       description: "Replay what a witness saw, under the sky of that night.",
-      // source=pwa tells the worker that the app is being opened: it answers with a launch screen.
-      start_url: "/?source=pwa",
+      // source=pwa tells the worker that the app is being opened: it answers with a launch screen. The app opens on its own page (see
+      // AppPage), not on the site's home: a blank editor, the reader coming when something is read. The id stays "/", which is what
+      // makes an app installed before this the same app.
+      start_url: "/app/?source=pwa",
       scope: "/",
       display: "standalone",
       background_color: OfflineKit.THEME_DARK,

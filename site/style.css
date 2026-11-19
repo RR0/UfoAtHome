@@ -172,6 +172,11 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 3rem 0; }
 
 /* ---------------------------------------------------------------- layout */
 
+/* The installed app (see AppPage, Layout.appHeader): the whole width to the tool, a gutter only where a phone needs it. */
+.app-shell main { padding: 0.75rem clamp(0.5rem, 2vw, 1.5rem) 1.5rem; }
+.app-shell rr0-ufoathome > :is(rr0-case, rr0-sighting, rr0-case-editor):not([hidden]) { display: block; }
+.app-header { padding-top: 0.45rem; padding-bottom: 0.45rem; }
+
 main { display: block; }
 .wrap { max-width: var(--wide); margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
 .prose { max-width: var(--prose); }

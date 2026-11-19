@@ -8,9 +8,9 @@ describe("OfflineKit", () => {
 
   const kit = new OfflineKit()
 
-  it("describes an app that opens on the home page, in its own window", () => {
+  it("describes an app that opens on its own page, not the site's home, in its own window, and is still the app installed before", () => {
     const manifest = JSON.parse(kit.manifest())
-    expect(manifest).toMatchObject({start_url: "/?source=pwa", scope: "/", display: "standalone"})
+    expect(manifest).toMatchObject({id: "/", start_url: "/app/?source=pwa", scope: "/", display: "standalone"})
     expect(manifest.icons.map((icon: { sizes: string }) => icon.sizes)).toEqual(["192x192", "512x512"])
   })
 

@@ -7,6 +7,7 @@ import { SITE_LANGUAGES, type SiteLanguage, type SitePage } from "./SitePage.js"
 import { HomePage } from "./content/HomePage.js"
 import { PlayerPage } from "./content/PlayerPage.js"
 import { EditorPage } from "./content/EditorPage.js"
+import { AppPage } from "./content/AppPage.js"
 import { DemosPage } from "./content/DemosPage.js"
 import { DemoSectionPage } from "./content/DemoSectionPage.js"
 import { DemoCatalogue } from "./content/DemoCatalogue.js"
@@ -101,7 +102,7 @@ class SiteBuilder {
     const version = JSON.parse(await readFile(join(this.root, "package.json"), "utf8")).version as string
     const example = await readFile(join(this.root, "public", "demo-data", "example-minimal.json"), "utf8")
     this.pages = [
-      new HomePage(), new PlayerPage(), new EditorPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
+      new HomePage(), new PlayerPage(), new EditorPage(), new AppPage(), new DemosPage(), ...new DemoCatalogue().sections.map(section => new DemoSectionPage(section, new DemoCatalogue())), new DocsPage(),
       // The documentation pages sit under the hub above and stay out of the navigation, which names
       // only it — see DocsSection for why they are split by question rather than by subject.
       new DocsCreatePage(), new DocsCreateEventPage("interpretation"), new DocsCreateEventPage("interview"), new DocsCasePage(), new DocsFormatPage(example.trim()), new DocsFormatContextPage(), new DocsFormatReadingsPage(), new DocsFormatComponentsPage(), new DocsFormatSourcesPage(), new DocsInterviewPage(), new DocsSharePage(), new DocsModulesPage(),
@@ -245,11 +246,12 @@ class SiteBuilder {
    */
   private async writeOfflineKit(layout: Layout, version: string, rendered: readonly string[]): Promise<void> {
     const kit = new OfflineKit()
-    const installed = [new HomePage().meta, new PlayerPage().meta]
+    // The app first: it is what the home screen opens, and it has to open without a network.
+    const installed = [new AppPage().meta, new HomePage().meta, new PlayerPage().meta]
     const pageUrls = installed.flatMap(meta => SITE_LANGUAGES.map(language => layout.fileUrl(meta, language)))
     const libDir = join(this.out, "lib", version)
     const libFiles = [...new Set(await Promise.all(
-      ["rr0-sighting.mjs"].map(entry => kit.closure(libDir, entry))).then(closures => closures.flat()))]
+      ["rr0-ufoathome.mjs", "rr0-sighting.mjs"].map(entry => kit.closure(libDir, entry))).then(closures => closures.flat()))]
     const precache = kit.precache(pageUrls, libFiles, version)
 
     const manifest = kit.manifest()

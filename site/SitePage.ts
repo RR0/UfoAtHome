@@ -38,6 +38,11 @@ export interface PageMeta {
   /** Kept out of the footer too: a page one hub already lists in full (the three component pages,
    * which "The components" links), where a second list at the bottom of every page is noise. */
   readonly asideFromFooter?: boolean
+  /**
+   * What is around the page: the site's (`site`, the default), or the installed app's (`app`): no navigation, no footer, no outline, the
+   * whole width of the screen to the page's own content — a tool, not a page to read. Still reached at its address in a browser.
+   */
+  readonly shell?: "site" | "app"
 }
 
 export interface SitePage {

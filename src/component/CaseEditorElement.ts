@@ -1723,7 +1723,15 @@ export class CaseEditorElement extends HTMLElement {
     share.disabled = this.sourceUrl === undefined
     share.title = this.sourceUrl === undefined ? this.shareMessages?.unavailable ?? "" : ""
     // Read in place whatever is held, on a page that switches; else on the player, which needs an address to open.
-    this.byId("read-case").hidden = !this.hasAttribute(IN_PLACE_ATTRIBUTE) && this.readAddress() === undefined
+    const read = this.byId("read-case")
+    read.hidden = !this.hasAttribute(IN_PLACE_ATTRIBUTE) && this.readAddress() === undefined
+    // Among the actions on show: the case's header in a case, else the recording editor's own, which is the one drawn then. Moved, not
+    // copied: it stays in this element's tree, and keeps its looks.
+    if (this.session && read.parentElement !== share.parentElement) share.before(read)
+    else if (!this.session && read.parentElement !== this.editor) {
+      read.slot = "head-actions"
+      this.editor.append(read)
+    }
   }
 
   /** What switches this editor and a reader in place, once IN_PLACE_ATTRIBUTE is set: its own, or that of the page it is in (see ReadEditSwitch). */
