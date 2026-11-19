@@ -639,7 +639,8 @@ export class CaseElement extends HTMLElement {
     const readingsOf = (account: CaseEntry) => listed.filter(({ under }) => under === account).length
     const accountAt = new Map(this.entries.map((entry, at) => [entry, at]))
     this.timeline.render(listed
-      .filter(({ under }) => under === undefined || !this.folded.has(accountAt.get(under)!))
+      // Folded, an observation still shows those of its readings that are open: what is looked at stays in the history, lit.
+      .filter(({ index, under }) => under === undefined || !this.folded.has(accountAt.get(under)!) || this.shown.has(index))
       .map(({ item, index, under }) => {
         const card = this.card(item, index, under)
         const count = this.grouping && item.kind === "observation" ? readingsOf(item) : 0

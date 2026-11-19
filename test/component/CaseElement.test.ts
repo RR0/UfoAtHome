@@ -436,6 +436,13 @@ describe("<rr0-case>, a case read", () => {
     expect(fold().getAttribute("aria-expanded")).toBe("false")
     fold().click()
     expect(cards().map(card => card.dataset.at)).toEqual(["0", "1", "2"])
+    // A reading open stays shown when its observation's readings are folded.
+    cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
+    for (let left = 200; left > 0 && root.querySelector('.open-event[data-at="1"]') === null; left--) await new Promise(resolve => setTimeout(resolve, 5))
+    fold().click()
+    expect(cards().map(card => card.dataset.at)).toEqual(["0", "1", "2"])
+    expect(fold().getAttribute("aria-expanded")).toBe("false")
+    fold().click()
     group.click()
     expect(root.querySelector(".event-fold")).toBeNull()
     expect(localStorage.getItem("rr0-case-group-readings")).toBe("0")
