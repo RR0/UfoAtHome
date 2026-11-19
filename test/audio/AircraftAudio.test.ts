@@ -460,6 +460,16 @@ describe("AircraftAudio", () => {
     expect(made.panners[1].pan.target).toBeCloseTo(0.9 * 0.5, 6)
   })
 
+  test("is played as asked up to seven tenths of the saturation, and bent towards it only beyond: the loud is not squeezed into the far", () => {
+    expect(AircraftAudio.saturated(0.3)).toBe(0.3)
+    expect(AircraftAudio.saturated(0.49)).toBe(0.49)
+    expect(AircraftAudio.saturated(0.6)).toBeLessThan(0.6)
+    expect(AircraftAudio.saturated(0.6)).toBeGreaterThan(0.55)
+    // Smooth at the knee: its slope there is one.
+    expect((AircraftAudio.saturated(0.4901) - AircraftAudio.saturated(0.49)) / 0.0001).toBeCloseTo(1, 2)
+    expect(AircraftAudio.saturated(100)).toBeLessThanOrEqual(0.7)
+  })
+
   test("is never louder than the saturation, and approaches it smoothly: a louder aircraft is still louder", () => {
     // The strength of the whole is that of the bands as they are played, with the ear's weighting taken off.
     const rmsOf = (amplitude: number) => Math.sqrt(CENTRES.reduce((sum, centre) => sum + (amplitude * unweight(centre)) ** 2, 0))

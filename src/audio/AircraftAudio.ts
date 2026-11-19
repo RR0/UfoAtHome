@@ -88,6 +88,7 @@ const REFERENCE_BAND_HZ = 1000
  * it is brought down smoothly, so that a close aircraft is louder than a nearer one still and never clips, and two of them together have room.
  */
 const SATURATION = 0.7
+const SATURATION_KNEE = 0.7
 
 interface Voice {
   sources: AudioScheduledSourceNode[]
@@ -368,8 +369,8 @@ export class AircraftAudio {
       set(gain.gain, heardAt < highest ? share * TONE_AMPLITUDE * played[AircraftAudio.bandOf(heardAt)] / harmonic : 0)
     }
     if (character?.modulationHz !== undefined) set(built.lfo.frequency, character.modulationHz * pitch)
-    // Never louder than SATURATION, and softly: the bands keep their proportions, and the whole its place among the louder and the quieter.
-    const master = rms > 0 ? (SATURATION * (1 - Math.exp(-rms / SATURATION))) / rms : 1
+    // Never louder than SATURATION, and softly near it: the bands keep their proportions, and the whole its place among the louder and the quieter.
+    const master = rms > 0 ? AircraftAudio.saturated(rms) / rms : 1
     set(built.output.gain, master * (1 - FAR_QUIETING * far))
     set(built.wanderDepth.gain, master * FAR_WANDER * far / WANDER_RATES_HZ.length)
     if (built.send) set(built.send.gain, REVERB_SEND * far)
@@ -389,6 +390,18 @@ export class AircraftAudio {
       const placed = voice.inside ? 0 : Math.max(-MAX_PAN, Math.min(MAX_PAN, Math.sin(toward))) * (1 - FAR_PAN_LOSS * far)
       set(built.panner.pan, placed)
     }
+  }
+
+  /**
+   * The strength a voice is played at for the strength it is asked: as asked up to SATURATION_KNEE of the saturation, and from there bent smoothly
+   * towards it, never past. It was bent from the start (SATURATION (1 − e^(−x / SATURATION))), which took 5.5 dB from an airliner overhead and
+   * nearly nothing from one far off: the loud was played little louder than the far (see TrafficSound.KNEE_DB).
+   */
+  static saturated(rms: number): number {
+    const knee = SATURATION_KNEE * SATURATION
+    if (rms <= knee) return rms
+    const room = SATURATION - knee
+    return knee + room * (1 - Math.exp(-(rms - knee) / room))
   }
 
   /** What a band's amplitude is multiplied by to take the A-weighting back off it, up to MAX_UNWEIGHT_DB of it. */

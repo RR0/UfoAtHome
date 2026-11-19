@@ -105,19 +105,20 @@ describe("TrafficSound", () => {
     const sameShape = (offsetDb: number, reference?: number) => TrafficSound.bandAmplitudes(ambient.map(level => level + offsetDb), 35, reference)
     const rms = (amplitudes: number[]) => Math.sqrt(amplitudes.reduce((sum, amplitude) => sum + amplitude * amplitude, 0))
 
-    test("the whole is as loud as its level over the ambient says: the reference at the pivot, and twice for twelve decibels more over it", () => {
+    /** The whole played for a level `over` the ambient at or above the knee: each decibel a decibel, under the headroom. */
+    const played = (over: number, reference = TrafficSound.REFERENCE_AMPLITUDE) => reference * 10 ** ((over - TrafficSound.HEADROOM_DB) / 20)
+
+    test("the whole is as loud as its level over the ambient says: the reference, under the headroom, at the ambient's own level", () => {
       const knee = TrafficSound.KNEE_DB
-      expect(rms(sameShape(knee))).toBeCloseTo(TrafficSound.REFERENCE_AMPLITUDE * 10 ** (knee / 20), 6)
-      // Above the pivot it is compressed: so many decibels of level for one played.
-      expect(rms(sameShape(knee + 12)) / rms(sameShape(knee))).toBeCloseTo(10 ** (12 / TrafficSound.COMPRESSION_RATIO / 20), 6)
+      expect(rms(sameShape(knee))).toBeCloseTo(played(knee), 6)
+      expect(rms(sameShape(knee + 12)) / rms(sameShape(knee))).toBeCloseTo(10 ** (12 / 20), 6)
     })
 
-    test("beyond the knee it is played compressed: not the whole range of an aircraft over a calm night, which nobody listens at", () => {
-      const knee = TrafficSound.KNEE_DB
-      const ratio = TrafficSound.COMPRESSION_RATIO
-      expect(rms(sameShape(knee + 20)) / rms(sameShape(knee))).toBeCloseTo(10 ** (20 / ratio / 20), 6)
-      // A sound 46 dB over the weather is played as 20 + 26 / ratio over it: a seventy-fold amplitude and not a two-hundred-fold.
-      expect(rms(sameShape(46)) / TrafficSound.REFERENCE_AMPLITUDE).toBeCloseTo(10 ** ((knee + (46 - knee) / ratio) / 20), 6)
+    test("beyond the knee it is played as loud as it is: an airliner overhead stands as far over one a few kilometres off as it does in the air", () => {
+      expect(TrafficSound.COMPRESSION_RATIO).toBe(1)
+      expect(rms(sameShape(46)) / rms(sameShape(24))).toBeCloseTo(10 ** (22 / 20), 6)
+      // Room for fifty decibels over a calm night: the headroom takes 10.5 of them.
+      expect(rms(sameShape(46))).toBeCloseTo(played(46), 6)
     })
 
     test("under it a sound is played expanded, so that an aircraft far off is the faint thing it is: each decibel less is more than one less", () => {
@@ -140,15 +141,15 @@ describe("TrafficSound", () => {
     test("the same sound is as loud whatever the ambient's shape, since only its level decides it", () => {
       const bands = [60, 62, 58, 50, 40, 30, 20, 10]
       expect(rms(TrafficSound.bandAmplitudes(bands, 20))).toBeGreaterThan(0)
-      // The spectrum's own total is 64 dB(A); at 20 dB(A) of ambient that is 44 over, played compressed from the knee.
+      // The spectrum's own total is 64 dB(A); at 20 dB(A) of ambient that is 44 over, played as loud as it is.
       const over = SoundInAir.sumDb(bands) - 20
-      const expected = TrafficSound.REFERENCE_AMPLITUDE * 10 ** ((TrafficSound.KNEE_DB + (over - TrafficSound.KNEE_DB) / TrafficSound.COMPRESSION_RATIO) / 20)
+      const expected = played(over)
       expect(rms(TrafficSound.bandAmplitudes(bands, 20))).toBeCloseTo(expected, 6)
     })
 
     test("the reference is the amplitude of the scene's own bed, so that the aircraft is as loud against the weather as its level over it says", () => {
       expect(rms(sameShape(20, 0.1)) / rms(sameShape(20, 0.05))).toBeCloseTo(2, 9)
-      expect(rms(sameShape(20, 0.04))).toBeCloseTo(0.04 * 10 ** (20 / 20), 6)
+      expect(rms(sameShape(20, 0.04))).toBeCloseTo(played(20, 0.04), 6)
     })
 
     test("a band the ambient masks is silent, and comes in smoothly, whatever the rest is doing", () => {

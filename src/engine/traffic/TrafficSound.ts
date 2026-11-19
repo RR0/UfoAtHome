@@ -70,15 +70,23 @@ export class TrafficSound {
    */
   static readonly MASKING_RANGE_DB = 6
   /**
-   * The level over the ambient noise at which a sound is played as loud as it is, the pivot of its playing. Above it a sound is played compressed:
-   * the real range of an aircraft over a calm night is fifty decibels, a hundred and fifty times in amplitude, and nobody listens at that. Each
-   * further COMPRESSION_RATIO decibels of level are played as one, as any mix is, so that the loud is loud and the quiet is heard in the same room.
-   * Under it a sound is played expanded: each decibel less is EXPANSION_RATIO less, so that an aircraft far off, at a few decibels over the noise, is
-   * the faint thing it is and not nearly as present as one that is overhead.
+   * The level over the ambient noise above which a sound is played as loud as it is, each decibel of level a decibel played, and under which it is
+   * played expanded: each decibel less is EXPANSION_RATIO less, so that an aircraft far off, at a few decibels over the noise, is the faint thing it
+   * is and not nearly as present as one that is overhead.
+   *
+   * It was played compressed above it, each 1.5 dB of level as one: heard on the demo of Gonesse (2025-12-30), an A320neo that passed at 600 m was
+   * not loud enough overhead and too loud once gone, "as if it were still near" — played, it had lost 6 dB at 1.7 km where it had lost 22. Each
+   * decibel now counts, and the room it takes is made by HEADROOM_DB.
    */
   static readonly KNEE_DB = 20
-  static readonly COMPRESSION_RATIO = 1.5
+  static readonly COMPRESSION_RATIO = 1
   static readonly EXPANSION_RATIO = 1.8
+  /**
+   * How far under the reference a sound at the ambient's own level is played, dB: what leaves room for one that is fifty decibels over it, an
+   * airliner over a calm night, before the player saturates. Some 0.3 of the reference: fitted on the same pass, where the levels played then
+   * follow the real ones within 3 to 5 dB down to 30 under the loudest, and the loudest stays under the saturation (see AircraftAudio).
+   */
+  static readonly HEADROOM_DB = 10.5
   static readonly DEFAULT_MAX_VOICES = 4
 
   /**
@@ -156,7 +164,7 @@ export class TrafficSound {
     const played = over >= TrafficSound.KNEE_DB
       ? TrafficSound.KNEE_DB + (over - TrafficSound.KNEE_DB) / TrafficSound.COMPRESSION_RATIO
       : TrafficSound.KNEE_DB - (TrafficSound.KNEE_DB - over) * TrafficSound.EXPANSION_RATIO
-    const whole = reference * 10 ** (played / 20)
+    const whole = reference * 10 ** ((played - TrafficSound.HEADROOM_DB) / 20)
     return bandsDbA.map((level, i) => {
       const x = Math.min(1, Math.max(0, (level - ambient[i] - noticed + TrafficSound.MASKING_RANGE_DB) / (2 * TrafficSound.MASKING_RANGE_DB)))
       const heard = x * x * (3 - 2 * x)
