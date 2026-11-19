@@ -14,6 +14,12 @@ export interface AircraftSoundMeasure {
    */
   fluctuationDb: number
   unmodulatedFluctuationDb: number
+  /**
+   * The periodic beat of its loudness, if it has one: the rate, Hz, between MODULATION_MIN_HZ and MODULATION_MAX_HZ, at which the noise
+   * between 250 Hz and 1 kHz swells and falls, and how much (the index m of an amplitude modulation, (1 + m cos) × the noise). A piston engine's
+   * firings and a propeller's blades beat a noise this way, and a jet's roar does not: in a jet, what is measured is the measure's own floor.
+   */
+  modulation: { hz: number; depth: number }
 }
 
 /**
@@ -46,8 +52,64 @@ export class AircraftSoundAnalysis {
       octaveShapeDb: AircraftSoundAnalysis.octaveShapeDb(power, sampleRate),
       tones: AircraftSoundAnalysis.tones(power, sampleRate),
       fluctuationDb: AircraftSoundAnalysis.fluctuationDb(samples, sampleRate),
-      unmodulatedFluctuationDb: AircraftSoundAnalysis.fluctuationDb(AircraftSoundAnalysis.unmodulated(samples, random), sampleRate)
+      unmodulatedFluctuationDb: AircraftSoundAnalysis.fluctuationDb(AircraftSoundAnalysis.unmodulated(samples, random), sampleRate),
+      modulation: AircraftSoundAnalysis.modulation(samples, sampleRate)
     }
+  }
+
+  /** The span the beat is measured over, samples: about six seconds at 22 050 Hz, the loudest of the recording. */
+  static readonly MODULATION_WINDOW = 1 << 17
+  static readonly MODULATION_MIN_HZ = 50
+  static readonly MODULATION_MAX_HZ = 200
+  /** An engine's rate wanders: the beat's power is summed this far either side of its peak, Hz. */
+  static readonly MODULATION_SPREAD_HZ = 3
+
+  /** The beat of the loudness (see AircraftSoundMeasure.modulation), over the loudest MODULATION_WINDOW of the recording. */
+  static modulation(samples: Float32Array, sampleRate: number): { hz: number; depth: number } {
+    const n = AircraftSoundAnalysis.MODULATION_WINDOW
+    // The loudest stretch: the aircraft at its nearest.
+    let start = 0
+    let loudest = -1
+    for (let at = 0; at + n <= samples.length; at += 4096) {
+      let energy = 0
+      for (let i = at; i < at + n; i += 16) energy += samples[i] ** 2
+      if (energy > loudest) {
+        loudest = energy
+        start = at
+      }
+    }
+    const re = new Float64Array(n)
+    const im = new Float64Array(n)
+    for (let i = 0; i < n; i++) re[i] = samples[start + i] ?? 0
+    // The noise between 250 Hz and 1 kHz, where the beat is heard, and not the lows, where it is a tone of its own; nor the highs, where a
+    // jet's own flicker is as strong (measured from 1 to 4 kHz, a jet passing over beats as much as a small aircraft does).
+    AircraftSoundAnalysis.fft(re, im)
+    for (let k = 0; k < n; k++) {
+      const hz = Math.min(k, n - k) * sampleRate / n
+      if (hz < 250 || hz > 1000) re[k] = im[k] = 0
+    }
+    AircraftSoundAnalysis.fft(re, im, true)
+    // Its power over time, around its mean, under a Hann window; and the spectrum of that.
+    let mean = 0
+    for (let i = 0; i < n; i++) mean += re[i] * re[i]
+    mean /= n
+    const envelope = new Float64Array(n)
+    const zero = new Float64Array(n)
+    for (let i = 0; i < n; i++) envelope[i] = (re[i] * re[i] / mean - 1) * (0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n))
+    AircraftSoundAnalysis.fft(envelope, zero)
+    const lines: [number, number][] = []
+    for (let k = 1; k < n / 2; k++) {
+      const hz = k * sampleRate / n
+      if (hz >= AircraftSoundAnalysis.MODULATION_MIN_HZ && hz <= AircraftSoundAnalysis.MODULATION_MAX_HZ) lines.push([hz, envelope[k] ** 2 + zero[k] ** 2])
+    }
+    const peak = lines.reduce((best, line) => line[1] > best[1] ? line : best, [0, 0])
+    const floor = lines.map(line => line[1]).sort((a, b) => a - b)[lines.length >> 1]
+    let power = 0
+    for (const [hz, value] of lines) if (Math.abs(hz - peak[0]) <= AircraftSoundAnalysis.MODULATION_SPREAD_HZ) power += value - floor
+    // A cosine of amplitude a has (a n / 4)² × 1.5 of power over the bins of a Hann window; the power of (1 + m cos)² noise beats at a = 2m / (1 + m²/2).
+    const a = (4 * Math.sqrt(Math.max(0, power) / 1.5)) / n
+    const depth = a >= Math.SQRT2 ? 1 : (2 - Math.sqrt(4 - 2 * a * a)) / a
+    return { hz: peak[0], depth: Number.isFinite(depth) ? depth : 0 }
   }
 
   /** The power spectrum averaged over the whole recording, Hann windows overlapping by half: WINDOW / 2 values. */

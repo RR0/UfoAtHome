@@ -24,7 +24,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.1,
-      "unmodulatedFluctuationDb": 1.8
+      "unmodulatedFluctuationDb": 1.8,
+      "modulation": {
+        "hz": 74.2,
+        "depth": 0.09
+      }
     },
     {
       "pixabayId": 264942,
@@ -46,7 +50,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.5,
-      "unmodulatedFluctuationDb": 2.3
+      "unmodulatedFluctuationDb": 2.3,
+      "modulation": {
+        "hz": 54,
+        "depth": 0.11
+      }
     },
     {
       "pixabayId": 247601,
@@ -68,7 +76,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.3,
-      "unmodulatedFluctuationDb": 2
+      "unmodulatedFluctuationDb": 2,
+      "modulation": {
+        "hz": 122.1,
+        "depth": 0.06
+      }
     },
     {
       "pixabayId": 247602,
@@ -89,7 +101,11 @@
       ],
       "tones": [],
       "fluctuationDb": 3.2,
-      "unmodulatedFluctuationDb": 1.9
+      "unmodulatedFluctuationDb": 1.9,
+      "modulation": {
+        "hz": 60.4,
+        "depth": 0.06
+      }
     },
     {
       "pixabayId": 32737,
@@ -110,7 +126,11 @@
       ],
       "tones": [],
       "fluctuationDb": 3.6,
-      "unmodulatedFluctuationDb": 3.5
+      "unmodulatedFluctuationDb": 3.5,
+      "modulation": {
+        "hz": 133.4,
+        "depth": 0.13
+      }
     },
     {
       "pixabayId": 214796,
@@ -131,7 +151,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.7,
-      "unmodulatedFluctuationDb": 2.3
+      "unmodulatedFluctuationDb": 2.3,
+      "modulation": {
+        "hz": 90.3,
+        "depth": 0.1
+      }
     },
     {
       "pixabayId": 521112,
@@ -152,7 +176,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.2,
-      "unmodulatedFluctuationDb": 2.4
+      "unmodulatedFluctuationDb": 2.4,
+      "modulation": {
+        "hz": 72.5,
+        "depth": 0.15
+      }
     },
     {
       "pixabayId": 6732,
@@ -179,7 +207,11 @@
         }
       ],
       "fluctuationDb": 1.2,
-      "unmodulatedFluctuationDb": 0.8
+      "unmodulatedFluctuationDb": 0.8,
+      "modulation": {
+        "hz": 73,
+        "depth": 0.1
+      }
     },
     {
       "pixabayId": 264944,
@@ -200,7 +232,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.4,
-      "unmodulatedFluctuationDb": 2.3
+      "unmodulatedFluctuationDb": 2.3,
+      "modulation": {
+        "hz": 91.3,
+        "depth": 0.07
+      }
     },
     {
       "pixabayId": 520026,
@@ -238,7 +274,11 @@
         }
       ],
       "fluctuationDb": 2.6,
-      "unmodulatedFluctuationDb": 2.6
+      "unmodulatedFluctuationDb": 2.6,
+      "modulation": {
+        "hz": 60.1,
+        "depth": 0.28
+      }
     },
     {
       "pixabayId": 333257,
@@ -273,7 +313,11 @@
         }
       ],
       "fluctuationDb": 1.8,
-      "unmodulatedFluctuationDb": 2.4
+      "unmodulatedFluctuationDb": 2.4,
+      "modulation": {
+        "hz": 83.8,
+        "depth": 0.22
+      }
     },
     {
       "pixabayId": 26222,
@@ -293,7 +337,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2,
-      "unmodulatedFluctuationDb": 1.4
+      "unmodulatedFluctuationDb": 1.4,
+      "modulation": {
+        "hz": 52.2,
+        "depth": 0.18
+      }
     },
     {
       "pixabayId": 95615,
@@ -312,7 +360,11 @@
       ],
       "tones": [],
       "fluctuationDb": 1.7,
-      "unmodulatedFluctuationDb": 1.4
+      "unmodulatedFluctuationDb": 1.4,
+      "modulation": {
+        "hz": 67.8,
+        "depth": 0.09
+      }
     },
     {
       "pixabayId": 99655,
@@ -331,7 +383,11 @@
       ],
       "tones": [],
       "fluctuationDb": 6,
-      "unmodulatedFluctuationDb": 2.4
+      "unmodulatedFluctuationDb": 2.4,
+      "modulation": {
+        "hz": 76.9,
+        "depth": 0.13
+      }
     },
     {
       "pixabayId": 22955,
@@ -359,7 +415,11 @@
         }
       ],
       "fluctuationDb": 2.6,
-      "unmodulatedFluctuationDb": 2.2
+      "unmodulatedFluctuationDb": 2.2,
+      "modulation": {
+        "hz": 78.1,
+        "depth": 0.09
+      }
     },
     {
       "pixabayId": 630924,
@@ -384,7 +444,11 @@
         }
       ],
       "fluctuationDb": 4.2,
-      "unmodulatedFluctuationDb": 4
+      "unmodulatedFluctuationDb": 4,
+      "modulation": {
+        "hz": 64.6,
+        "depth": 0.17
+      }
     },
     {
       "pixabayId": 45849,
@@ -404,7 +468,11 @@
       ],
       "tones": [],
       "fluctuationDb": 2.9,
-      "unmodulatedFluctuationDb": 2.7
+      "unmodulatedFluctuationDb": 2.7,
+      "modulation": {
+        "hz": 63.6,
+        "depth": 0.12
+      }
     }
   ]
 }

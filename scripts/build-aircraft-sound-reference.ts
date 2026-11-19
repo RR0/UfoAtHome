@@ -90,7 +90,8 @@ for (const recording of RECORDINGS) {
     octaveShapeDb: measure.octaveShapeDb.map(round),
     tones: measure.tones,
     fluctuationDb: round(measure.fluctuationDb),
-    unmodulatedFluctuationDb: round(measure.unmodulatedFluctuationDb)
+    unmodulatedFluctuationDb: round(measure.unmodulatedFluctuationDb),
+    modulation: { hz: round(measure.modulation.hz), depth: Math.round(measure.modulation.depth * 100) / 100 }
   })
   console.log(`${recording.title}: ${measure.octaveShapeDb.map(level => level.toFixed(0)).join(" ")} dB, flicker ${measure.fluctuationDb.toFixed(1)} dB (unmodulated ${measure.unmodulatedFluctuationDb.toFixed(1)})`)
 }

@@ -15,6 +15,7 @@ interface Reference {
   octaveShapeDb: number[]
   fluctuationDb: number
   unmodulatedFluctuationDb: number
+  modulation: { hz: number; depth: number }
 }
 
 const recordings = reference.recordings as Reference[]
@@ -88,6 +89,23 @@ describe("what is played of an aircraft, held to recordings of aircraft", () => 
   // The two of small aircraft differ by as much from each other: the class is half-way between them.
   test.each(pistons.map(recording => [recording.noiseClass!, recording.title, recording] as const))("a %s passing (%s) sounds as recorded, at some distance, within 3.5 dB", (_, __, recording) => {
     expect(bestFit(recording).rmsDb).toBeLessThan(3.5)
+  })
+
+  test("a piston engine beats its noise at its firing rate, as the nearest recording of its class does, and a jet does not", () => {
+    /** The index of the beat played: a gain swelling between 1 and 1 - depth. */
+    const played = (noiseClass: string) => {
+      const depth = noiseOf(noiseClass).character?.modulationDepth ?? 0
+      return depth / 2 / (1 - depth / 2)
+    }
+    for (const noiseClass of ["light-piston", "piston-heavy"]) {
+      const strongest = Math.max(...pistons.filter(recording => recording.noiseClass === noiseClass).map(recording => recording.modulation.depth))
+      expect(Math.abs(played(noiseClass) - strongest)).toBeLessThan(0.05)
+      // Above what any jet beats, which is the measure's own floor.
+      expect(strongest).toBeGreaterThan(Math.max(...jets.map(recording => recording.modulation.depth)))
+    }
+    const fighter = pistons.find(recording => recording.noiseClass === "piston-heavy")!
+    expect(noiseOf("piston-heavy").character?.modulationHz).toBeCloseTo(fighter.modulation.hz, -1)
+    for (const noiseClass of ["turbofan-narrow-body", "turbofan-wide-body"]) expect(noiseOf(noiseClass).character?.modulationDepth ?? 0).toBe(0)
   })
 
   test("a take-off's shape is not a jet passing over's: each regime fits its own recordings better than the other's", () => {

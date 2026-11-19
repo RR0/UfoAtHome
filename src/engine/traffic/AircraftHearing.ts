@@ -129,8 +129,12 @@ const NOISE_CLASSES: { id: string; name: string; kinds: AircraftKind[]; totalDbA
   // aircraft passing (3.3 dB from each, which differ by as much), a heavy piston's to one of a Second World War fighter flying past near, its
   // exhaust stacks open. Their LEVELS are assumed: a heavy piston's is a light one's with ten times the power (1,500 hp against 150, 10 log 10).
   // Neither has regimes or a directivity: nothing measured gives them.
-  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-20, -10, -3, -6, -10, -20, -27, -42], character: { toneHz: 80, toneShare: 0.4 } },
-  { id: "piston-heavy", name: "Heavy piston aircraft", kinds: ["piston-heavy"], totalDbA: 140, shapeDb: [-31, -12, -11, -9, -7, -6, -7, -11], character: { toneHz: 150, toneShare: 0.4 } },
+  // What tells a piston engine by ear is the BEAT of its noise at its firing rate, which a jet has not (AircraftSoundAnalysis.modulation, between
+  // 250 Hz and 1 kHz): an index of 0.28 in the small aircraft heard near, 0.22 in the fighter, against 0.06 to 0.15 in the jets, which is the
+  // measure's own floor. A beat of depth d swells between 1 and 1 - d, an index of (d/2) / (1 - d/2): 0.4 is 0.25. Its rate is the fighter's,
+  // 84 Hz, and the small aircraft's from its harmonics (159, 240 Hz), 80. The tone is the same engine's, at that rate.
+  { id: "light-piston", name: "Light piston aircraft", kinds: ["light-piston"], totalDbA: 130, shapeDb: [-20, -10, -3, -6, -10, -20, -27, -42], character: { toneHz: 80, toneShare: 0.4, modulationHz: 80, modulationDepth: 0.4 } },
+  { id: "piston-heavy", name: "Heavy piston aircraft", kinds: ["piston-heavy"], totalDbA: 140, shapeDb: [-31, -12, -11, -9, -7, -6, -7, -11], character: { toneHz: 84, toneShare: 0.4, modulationHz: 84, modulationDepth: 0.36 } },
   { id: "ultralight", name: "Ultralight", kinds: ["ultralight"], totalDbA: 124, shapeDb: [-16, -8, -5, -4, -9, -15, -23, -31], character: { toneHz: 140, toneShare: 0.4 } },
   // A rotor's blades beat the air at ten to twenty times a second, and the low harmonics are what carry far.
   { id: "helicopter-light", name: "Light helicopter", kinds: ["helicopter-light"], totalDbA: 134, shapeDb: [-15, -8, -4, -3, -6, -10, -16, -24], character: { modulationHz: 20, modulationDepth: 0.5 } },

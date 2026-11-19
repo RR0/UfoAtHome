@@ -53,4 +53,14 @@ describe("AircraftSoundAnalysis", () => {
     const after = AircraftSoundAnalysis.octaveShapeDb(AircraftSoundAnalysis.averageSpectrum(AircraftSoundAnalysis.unmodulated(low, seeded(8))), RATE)
     before.slice(0, 6).forEach((level, band) => expect(after[band]).toBeCloseTo(level, 0))
   })
+
+  test("measures the beat of a noise at a piston engine's rate, and none in a noise that has none", () => {
+    const noise = whiteNoise(8, seeded(7))
+    const beaten = noise.map((sample, i) => sample * (1 + 0.3 * Math.cos(2 * Math.PI * 80 * i / RATE)))
+    const measured = AircraftSoundAnalysis.modulation(beaten, RATE)
+    expect(measured.hz).toBeCloseTo(80, 0)
+    expect(measured.depth).toBeGreaterThan(0.25)
+    expect(measured.depth).toBeLessThan(0.35)
+    expect(AircraftSoundAnalysis.modulation(noise, RATE).depth).toBeLessThan(0.1)
+  })
 })
