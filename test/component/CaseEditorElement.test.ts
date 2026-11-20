@@ -232,6 +232,10 @@ const caseJson = () => ({
 })
 const files: Record<string, unknown> = {}
 const wait = (ms = 30) => new Promise(resolve => setTimeout(resolve, ms))
+/** Waits for `check` to hold, up to `ms`: a chunk loaded on demand comes in its own time on a busy runner, never in a set one. */
+const until = async (check: () => boolean, ms = 10000): Promise<void> => {
+  for (const end = Date.now() + ms; !check() && Date.now() < end;) await wait(10)
+}
 
 const open = async (track?: string, own?: Record<string, unknown>): Promise<CaseEditorElement> => {
   files["https://example.org/d/case.json"] = { ...caseJson(), ...own }
@@ -1385,7 +1389,7 @@ describe("Reading what is edited", () => {
     const fetched = globalThis.fetch as ReturnType<typeof vi.fn>
     fetched.mockClear()
     ;(element.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
-    await wait(300)
+    await until(() => element.nextElementSibling !== null && element.hidden)
     const reader = element.nextElementSibling as HTMLElement
     expect(reader.tagName).toBe("RR0-CASE")
     expect(reader.getAttribute("src")).toBe("https://example.org/d/case.json")
@@ -1399,7 +1403,7 @@ describe("Reading what is edited", () => {
     expect(OpenFiles.local("https://example.org/d/case.json")).toBe(false)
 
     reader.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json", track: "https://example.org/d/account.json" }, bubbles: true, composed: true, cancelable: true }))
-    await wait(300)
+    await until(() => element.nextElementSibling === null && !element.hidden)
     expect(element.nextElementSibling).toBeNull()
     expect(element.hidden).toBe(false)
     expect(modes.at(-1)).toEqual({ mode: "edit" })
@@ -1420,7 +1424,7 @@ describe("Reading what is edited", () => {
     expect(read.parentElement).toBe(element.sightingEditor)
     expect(read.slot).toBe("head-actions")
     read.click()
-    await wait(300)
+    await until(() => element.nextElementSibling !== null)
     const reader = element.nextElementSibling as HTMLElement
     expect(reader.tagName).toBe("RR0-SIGHTING")
     expect(OpenFiles.local(reader.getAttribute("src")!)).toBe(true)
@@ -1448,7 +1452,7 @@ describe("A file read or edited in place, each half loaded when first asked for"
     expect(element.querySelector("rr0-case-editor")).toBeNull()
 
     element.firstElementChild!.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json", track: "https://example.org/d/reading.json" }, bubbles: true, composed: true, cancelable: true }))
-    await wait(300)
+    await until(() => (element.querySelector("rr0-case-editor") as CaseEditorElement | null)?.caseSession !== undefined)
     const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
     expect(editor).not.toBeNull()
     expect(element.childElementCount).toBe(1)
@@ -1459,7 +1463,7 @@ describe("A file read or edited in place, each half loaded when first asked for"
 
     // Its Read goes back to a reader, in the same element: the editor stays, hidden.
     ;(editor.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
-    await wait(300)
+    await until(() => element.lastElementChild?.tagName === "RR0-CASE" && editor.hidden)
     expect(element.lastElementChild?.tagName).toBe("RR0-CASE")
     expect(editor.hidden).toBe(true)
   })
@@ -1497,7 +1501,7 @@ describe("Opening files in the app", () => {
     document.body.innerHTML = ""
     const element = await app("https://example.org/d/case.json")
     await element.openFiles([json("account.json", account), json("case.json", caseJson())])
-    await wait(300)
+    await until(() => /\/local\//.test(element.querySelector("rr0-case")?.getAttribute("src") ?? ""))
     const reader = element.querySelector("rr0-case")!
     const src = reader.getAttribute("src")!
     // The case is the one opened, whichever was picked first; its observation is beside it, held as well.
@@ -1511,7 +1515,7 @@ describe("Opening files in the app", () => {
     const element = await app()
     const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
     await element.openFiles([json("plain.json", { version: 4, id: "plain", timeline: { keyframes: [] } })])
-    await wait(300)
+    await until(() => /\/local\//.test(editor.getAttribute("src") ?? ""))
     expect(editor.getAttribute("src")).toMatch(/\/local\/[a-z0-9]+\/plain\.json$/)
     expect((editor.sightingEditor.shadowRoot!.getElementById("share") as HTMLButtonElement).disabled).toBe(true)
   })
@@ -1522,11 +1526,11 @@ describe("Opening files in the app", () => {
     const element = await app()
     const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
     ;(editor.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
-    await wait(300)
+    await until(() => element.querySelector("rr0-case, rr0-sighting") !== null)
     await element.openAddress("https://example.org/d/case.json")
-    await wait(300)
+    await until(() => element.querySelector("rr0-case") !== null)
     element.querySelector("rr0-case")!.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json" }, bubbles: true, composed: true, cancelable: true }))
-    await wait(300)
+    await until(() => editor.caseSession?.url === "https://example.org/d/case.json")
     expect(element.querySelector("rr0-case-editor")).toBe(editor)
     expect(editor.caseSession?.url).toBe("https://example.org/d/case.json")
   })
