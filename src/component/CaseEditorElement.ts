@@ -149,11 +149,11 @@ const TEMPLATE = `
   /* And the case's events stay beside the one open, as the reader's history does (see caseTemplate): the list on the left, kept in sight
      while the event scrolls, the event on the right. Narrower, it is the one or the other, the way back to the case above the event. */
   @container (min-width: 1100px) {
-    #group-events.event-open { display: grid; grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr); column-gap: 20px; align-items: start; }
-    #group-events.event-open > * { grid-column: 2; }
-    #group-events.event-open > #case-overview[hidden] { display: block !important; }
-    #group-events.event-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
-    #group-events.event-open #back-to-case, #group-events.event-open #back-to-case + .crumb-sep { display: none; }
+    #group-events.one-open { display: grid; grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr); column-gap: 20px; align-items: start; }
+    #group-events.one-open > * { grid-column: 2; }
+    #group-events.one-open > #case-overview[hidden] { display: block !important; }
+    #group-events.one-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
+    #group-events.one-open #back-to-case, #group-events.one-open #back-to-case + .crumb-sep { display: none; }
   }
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
@@ -1331,7 +1331,7 @@ export class CaseEditorElement extends HTMLElement {
     overview.hidden = !session || !this.listShown
     crumbs.hidden = !session || this.listShown
     this.byId("event-item").hidden = session !== undefined && this.listShown
-    this.byId("group-events").classList.toggle("event-open", session !== undefined && !this.listShown)
+    this.byId("group-events").classList.toggle("one-open", session !== undefined && !this.listShown)
     this.byId("events-count").textContent = session ? String(this.items(session).length) : ""
     this.byId("case-heading").textContent = (session && String((session.json as Record<string, unknown>).title ?? "")) || this.messages.caseHeading
     if (!session) return
