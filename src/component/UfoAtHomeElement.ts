@@ -101,6 +101,8 @@ export class UfoAtHomeElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    window.addEventListener("resize", this.fitHeight)
+    this.fitHeight()
     if (this.started) return
     this.started = true
     void this.loadLocale()
@@ -110,6 +112,21 @@ export class UfoAtHomeElement extends HTMLElement {
       ? this.switcher.read({ src, ...(track ? { track } : {}) })
       : this.switcher.edit({ ...(src ? { src } : {}), ...(track ? { track } : {}) })
     this.ready = opened.catch(() => this.say(this.messages?.openFailed, "error"))
+    // Again once the page around is laid out: its header may not have been when this was connected.
+    void this.ready.then(this.fitHeight)
+  }
+
+  disconnectedCallback(): void {
+    window.removeEventListener("resize", this.fitHeight)
+  }
+
+  /**
+   * Tells the editor the height the screen leaves it under what is above it (the page's header, this bar), so that, laid out in two columns
+   * (see sightingEditorTemplate), it ends where the screen does rather than a header's height below it.
+   */
+  private readonly fitHeight = (): void => {
+    const top = this.byId("open").closest(".bar")!.getBoundingClientRect().bottom + window.scrollY
+    this.style.setProperty("--rr0-editor-height", `calc(100dvh - ${Math.round(top + 12)}px)`)
   }
 
   /** Settles once the first half to show is there. */

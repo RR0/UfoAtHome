@@ -21,6 +21,8 @@ export const caseHtml = `
   <p id="case-summary" class="case-summary" hidden></p>
   <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
 </header>
+<!-- The chronology and what is open, one above the other; side by side when the case is given the width for both (see .case-layout). -->
+<div class="case-layout">
 <!-- The chronology, in the upper part: choosing an event opens it alone below; its mark on the rail shows it beside what is open, or puts
      it away. Several can be open at once that way. -->
 <section class="case-timeline">
@@ -34,6 +36,7 @@ export const caseHtml = `
 </section>
 <!-- What is open, in the order of time whatever the order they were opened in. -->
 <div id="open-events" class="open-events"></div>
+</div>
 `
 
 export const caseCss = `
@@ -86,6 +89,13 @@ export const caseCss = `
 /* One column as wide as the case, never as wide as what is in it: an implicit "auto" column grew to the player's own widest content,
    McMinnville's longest reading in its choice (228 letters), and the stage, 16:9 of that, put the photograph beyond the case's edge. */
 .open-events { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+/* Given the width (the app on a computer), the chronology in a column of its own beside what is open, kept in view as that scrolls; the
+   whole width to what is open when the chronology is put away. The width the case is given, never the window's. */
+@container (min-width: 1100px) {
+  .case-layout { display: grid; grid-template-columns: minmax(18rem, 1fr) minmax(0, 2.6fr); gap: 20px; align-items: start; }
+  .case-layout:has(> .case-timeline[hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
+}
 .open-event { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .open-event > .open-title { margin: 0; font: 600 13px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .open-event rr0-interview { padding: 10px 12px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px;

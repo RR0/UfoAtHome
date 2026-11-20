@@ -54,7 +54,8 @@ export const CASE_EDITOR_ELEMENT_NAME = "rr0-case-editor"
 
 const TEMPLATE = `
 <style>
-  :host { display: block; }
+  /* What the layout adapts to: the width this editor is given, never the window's. */
+  :host { display: block; container-type: inline-size; }
   /* Hidden while a reader shows what it holds (see ReadEditSwitch): the display above would otherwise keep it on show. */
   :host([hidden]) { display: none; }
   ${WindowClose.CSS}
@@ -143,6 +144,8 @@ const TEMPLATE = `
   ${EditorTheme.fields(".case")}
   /* A case is a card, as the observation alone is: the observation it holds draws none of its own then (see SightingEditorElement.embedded). */
   .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
+  /* Given the width (the app on a computer), the whole of it: the recording's editor lays itself out in two columns from there. */
+  @container (min-width: 1100px) { .case.in-case { max-width: none; } }
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
   /* The case's title keeps room to be read on a line or two, and the actions go under it when they do not fit beside it: squeezed by them,

@@ -2267,6 +2267,27 @@ ${EditorTheme.fields(".app")}
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
+/* Given the width (the app on a computer): the render in a column of its own, the sections and the one open in the other, the editor the
+   height of the screen and the open section scrolling under its chips. The grip has nothing to share out between the two any more. The
+   width this editor is given, never the window's: held by a case, it is the case's. */
+@container (min-width: 1100px) {
+  .app {
+    /* The screen's height, or what a page that has something above it says is left (see UfoAtHomeElement). */
+    max-width: none; height: var(--rr0-editor-height, 100dvh); max-height: none;
+    display: grid; grid-template-columns: minmax(0, 3fr) minmax(24rem, 2fr);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    grid-template-areas: "head head" "notes notes" "scene tabs" "scene tracks" "scene panel";
+  }
+  .app > .editor-head { grid-area: head; }
+  .app > .save-refused { grid-area: notes; }
+  .app > .scene-card { grid-area: scene; align-self: start; border-right: 1px solid var(--line); }
+  /* As tall as the screen leaves it under the header, whatever height the grip gave it in one column. */
+  .app > .scene-card { --rr0-scene-max-height: calc(var(--rr0-editor-height, 100dvh) - 6rem); }
+  .app > .scene-resize { display: none; }
+  .app > #group-tabs { grid-area: tabs; }
+  .app > #timeline-tracks { grid-area: tracks; }
+  .app > .group-panel { grid-area: panel; }
+}
 @container (max-width: 640px) {
   .editor-head { flex-wrap: wrap; }
   .app > .group-panel, #group-tabs.section-chips, .editor-head { padding-left: 14px; padding-right: 14px; }
