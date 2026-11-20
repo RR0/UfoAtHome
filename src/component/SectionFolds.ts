@@ -29,19 +29,28 @@ export class SectionFolds {
   /** A section its title folds: marked so (see markTitles), its title saying something. */
   private static readonly TITLED = `.form-section[data-foldable]`
 
+  /** The titles of those sections, first in them or in a head of their own, with `then` after each and `section` on the section. */
+  private static titles(then = "", section = ""): string {
+    return [`${SectionFolds.TITLED}${section} > .section-title${then}`, `${SectionFolds.TITLED}${section} > .section-head > .section-title${then}`].join(", ")
+  }
+
+  private static readonly TITLES = SectionFolds.titles()
+
   static readonly CSS = `
-${SectionFolds.TITLED}:not([data-unfolded]) > :not(.section-title) { display: none !important; }
+${SectionFolds.TITLED}:not([data-unfolded]) > :not(.section-title, .section-head) { display: none !important; }
+/* A title in a head of its own (beside a choice that is part of what it folds): the head stays, the title alone in it. */
+${SectionFolds.TITLED}:not([data-unfolded]) > .section-head > :not(.section-title) { display: none !important; }
 /* Folded, a line of a list: as little room under its title as over it. The room over it is the same either way, so that the title stays
    where it is when it opens; only what is under it grows. */
 ${SectionFolds.TITLED} { padding-top: 10px; }
-${SectionFolds.TITLED}:not([data-unfolded]) { padding-bottom: 10px; }
-${SectionFolds.TITLED} > .section-title { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; user-select: none; }
-${SectionFolds.TITLED} > .section-title:hover { color: var(--ink, CanvasText); }
-${SectionFolds.TITLED} > .section-title:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: 3px; border-radius: 4px; }
-${SectionFolds.TITLED} > .section-title::before { content: "›"; display: inline-block; width: .6em; font-size: 1.5em; line-height: .7; letter-spacing: 0;
+${SectionFolds.TITLED}:not([data-unfolded]) { padding-bottom: 9px; }
+${SectionFolds.TITLES} { display: flex; align-items: center; gap: 8px; margin: 0 0 -2px; cursor: pointer; user-select: none; }
+${SectionFolds.titles(":hover")} { color: var(--ink, CanvasText); }
+${SectionFolds.titles(":focus-visible")} { outline: 2px solid var(--sky, Highlight); outline-offset: 3px; border-radius: 4px; }
+${SectionFolds.titles("::before")} { content: "›"; display: inline-block; width: .6em; font-size: 1.5em; line-height: .7; letter-spacing: 0;
   transition: transform .12s ease; }
-${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rotate(90deg); }
-@media (prefers-reduced-motion: reduce) { ${SectionFolds.TITLED} > .section-title::before { transition: none; } }
+${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { ${SectionFolds.titles("::before")} { transition: none; } }
 .form-section:not([data-open], [data-fits]) .adv { display: none !important; }
 .form-section[data-fold="all"]:not([data-open], [data-foldable]) > :not(.section-title, .more-toggle) { display: none !important; }
 /* Folded by its title like every other, a section held back whole needs no second fold under it. */
@@ -65,12 +74,11 @@ ${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rota
     // The titles fold their sections, those drawn later included: listened to where they all are rather than one by one.
     const titleOf = (event: Event): HTMLElement | undefined => {
       const title = (event.target as Element | null)?.closest?.<HTMLElement>(".section-title")
-      const section = title?.parentElement
-      return title && section?.hasAttribute("data-foldable") ? title : undefined
+      return title && SectionFolds.sectionOf(title)?.hasAttribute("data-foldable") ? title : undefined
     }
     root.addEventListener("click", event => {
       const title = titleOf(event)
-      if (title) this.unfold(title.parentElement!, !title.parentElement!.hasAttribute("data-unfolded"))
+      if (title) this.unfold(SectionFolds.sectionOf(title)!, !SectionFolds.sectionOf(title)!.hasAttribute("data-unfolded"))
     })
     root.addEventListener("keydown", event => {
       const key = (event as KeyboardEvent).key
@@ -78,7 +86,7 @@ ${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rota
       const title = titleOf(event)
       if (!title) return
       event.preventDefault()
-      this.unfold(title.parentElement!, !title.parentElement!.hasAttribute("data-unfolded"))
+      this.unfold(SectionFolds.sectionOf(title)!, !SectionFolds.sectionOf(title)!.hasAttribute("data-unfolded"))
     })
     for (const section of root.querySelectorAll<HTMLElement>(".form-section")) {
       if (section.dataset.fold !== "all" && !section.querySelector(".adv")) continue
@@ -173,7 +181,7 @@ ${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rota
 
   private unfold(section: HTMLElement, open: boolean): void {
     section.toggleAttribute("data-unfolded", open)
-    section.querySelector(":scope > .section-title")?.setAttribute("aria-expanded", String(open))
+    section.querySelector(SectionFolds.TITLE)?.setAttribute("aria-expanded", String(open))
     // What a fold holds back is measured on show: the section's fields have just come out.
     if (open) this.refresh()
   }
@@ -183,11 +191,12 @@ ${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rota
    * title left empty, or hidden, would leave a folded section nothing to be opened by), drawn since the last time too.
    */
   private markTitles(): void {
-    for (const title of this.root.querySelectorAll<HTMLElement>(".form-section > .section-title")) {
-      const section = title.parentElement!
+    for (const title of this.root.querySelectorAll<HTMLElement>(`.form-section > .section-title, .form-section > .section-head > .section-title`)) {
+      const section = SectionFolds.sectionOf(title)!
       const folds = !title.hidden && (title.textContent ?? "").trim() !== ""
-      if (section.hasAttribute("data-foldable") === folds) continue
       section.toggleAttribute("data-foldable", folds)
+      // Asked of the title, not of the section: a section that draws its content again draws a new title, unmarked.
+      if (folds === title.hasAttribute("role")) continue
       if (folds) {
         title.tabIndex = 0
         title.setAttribute("role", "button")
@@ -199,6 +208,17 @@ ${SectionFolds.TITLED}[data-unfolded] > .section-title::before { transform: rota
       }
     }
   }
+
+  /** Where a section's title is: first in it, or in a head of its own. */
+  private static readonly TITLE = ":scope > .section-title, :scope > .section-head > .section-title"
+
+  /** The section a title folds. */
+  private static sectionOf(title: HTMLElement): HTMLElement | undefined {
+    const parent = title.parentElement
+    const section = parent?.classList.contains("section-head") ? parent.parentElement : parent
+    return section?.classList.contains("form-section") ? section : undefined
+  }
+
 
   private setOpen(section: HTMLElement, open: boolean): void {
     section.toggleAttribute("data-open", open)
