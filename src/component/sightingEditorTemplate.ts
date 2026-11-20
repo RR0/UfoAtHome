@@ -2270,11 +2270,11 @@ ${EditorTheme.fields(".app")}
 /* Given the width (the app on a computer): the render in a column of its own, the sections and the one open in the other, the editor the
    height of the screen and the open section scrolling under its chips. The grip has nothing to share out between the two any more. The
    width this editor is given, never the window's: held by a case, it is the case's. */
-@container (min-width: 1100px) {
+@container (min-width: 820px) {
   .app {
     /* The screen's height, or what a page that has something above it says is left (see UfoAtHomeElement). */
     max-width: none; height: var(--rr0-editor-height, 100dvh); max-height: none;
-    display: grid; grid-template-columns: minmax(0, 3fr) minmax(24rem, 2fr);
+    display: grid; grid-template-columns: minmax(0, 11fr) minmax(22rem, 9fr);
     grid-template-rows: auto auto auto auto minmax(0, 1fr);
     grid-template-areas: "head head" "notes notes" "scene tabs" "scene tracks" "scene panel";
   }

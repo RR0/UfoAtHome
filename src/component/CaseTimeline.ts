@@ -92,7 +92,9 @@ export class CaseTimeline {
    first from its mark down and the last down to its mark, and none when it is the only one. Both are placed from the card's outer edge,
    past its 1px border. The mark stands level with the kind's pill: the card's middle while the card is one row, the pill's line once it
    wraps. */
-.event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; }
+/* Its own container: the cards are laid out for the width the list is given, which a column beside an open event narrows (see the
+   editor's and the reader's two columns), not for the whole component's. */
+.event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; container-type: inline-size; }
 .event-card { --dot-y: 50%; position: relative; border: 1px solid var(--tl-line); border-radius: 10px; background: var(--tl-ground); color: var(--tl-ink); }
 .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); top: calc(-1px - var(--gap) / 2);
   bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--tl-line); pointer-events: none; }
@@ -161,6 +163,9 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
 @container (max-width: 640px) {
   .event-card { --dot-y: 24px; }
   .event-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pill" "main" "links"; gap: 6px 10px; }
+  /* The fold under what the card says: on the top line it would sit under an editor's tools. */
+  .event-fold { grid-row: auto; justify-self: start; }
+  .event-main:has(+ .event-fold) { padding-right: 0; }
 }
 `
 
@@ -220,6 +225,27 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
       for (const reading of ordered) if (underOf.get(reading.item) === entry.item) result.push({ ...reading, under: entry.item })
     }
     return result
+  }
+
+  /** Where the choice of grouping readings is kept, in the browser alone: the same for the reader and the editor, a convenience which a page
+   * without storage simply forgets. */
+  private static readonly GROUPING_KEY = "rr0-case-group-readings"
+
+  /** Whether readings were last asked to be grouped under their observations. */
+  static groupingRemembered(): boolean {
+    try {
+      return localStorage.getItem(CaseTimeline.GROUPING_KEY) === "1"
+    } catch {
+      return false
+    }
+  }
+
+  static rememberGrouping(grouping: boolean): void {
+    try {
+      localStorage.setItem(CaseTimeline.GROUPING_KEY, grouping ? "1" : "0")
+    } catch {
+      // Not kept: the next case opens in the order of time, which is no harm.
+    }
   }
 
   /** The word a kind of event goes by, on its pill. */

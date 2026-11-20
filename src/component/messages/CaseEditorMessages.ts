@@ -109,6 +109,12 @@ export interface CaseEditorMessages extends InputFileMessages {
   /** A quotation as the language marks one, `{text}` standing for it. */
   quoted: string
   interpretationOfNone: string
+  /** What sets each reading under the observation it reads, or back in the order of time (the reader has the same, see CaseMessages). */
+  groupReadings: string
+  /** Over what a reading set under an observation reads besides it. */
+  alsoAbout: string
+  foldReadings: string
+  unfoldReadings: string
   exportButton: string
   /** What is edited, read as a reader sees it (see ReadEditSwitch). */
   readButton: string

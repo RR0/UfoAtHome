@@ -145,11 +145,11 @@ const TEMPLATE = `
   /* A case is a card, as the observation alone is: the observation it holds draws none of its own then (see SightingEditorElement.embedded). */
   .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
   /* Given the width (the app on a computer), the whole of it: the recording's editor lays itself out in two columns from there. */
-  @container (min-width: 1100px) { .case.in-case { max-width: none; } }
+  @container (min-width: 760px) { .case.in-case { max-width: none; } }
   /* And the case's events stay beside the one open, as the reader's history does (see caseTemplate): the list on the left, kept in sight
      while the event scrolls, the event on the right. Narrower, it is the one or the other, the way back to the case above the event. */
-  @container (min-width: 1100px) {
-    #group-events.one-open { display: grid; grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr); column-gap: 20px; align-items: start; }
+  @container (min-width: 760px) {
+    #group-events.one-open { display: grid; grid-template-columns: clamp(15rem, 36%, 22rem) minmax(0, 1fr); column-gap: 18px; align-items: start; }
     #group-events.one-open > * { grid-column: 2; }
     #group-events.one-open > #case-overview[hidden] { display: block !important; }
     #group-events.one-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
@@ -189,7 +189,9 @@ const TEMPLATE = `
   .case-fields > .field .edtf-mode { grid-row: 1; grid-column: 2; justify-self: start; min-height: 0; }
   .case-fields > .field .edtf-field { grid-row: 2; grid-column: 1 / -1; }
   .case-fields input[type="text"] { box-sizing: border-box; width: 100%; height: 38px; font-weight: 400; }
-  .events-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 12px; }
+  .events-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 18px 0 12px; }
+  .events-head > h3 { margin-right: auto; }
+  #group-readings[aria-pressed="true"] { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid); }
   .section-title { margin: 0; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
   /* The chronology is common to the case's reader (see CaseTimeline), in the editor's tokens; what follows is the editor's own. */
   ${CaseTimeline.CSS}
@@ -265,7 +267,7 @@ const TEMPLATE = `
     /* Narrow, as the handoff's mobile view: the pill above the title, "Open" beside the title, or under what the event is linked to
        when it says something; the removal keeps its column. */
     /* Narrow, the pill is alone on the top line, so it is the one that keeps clear of the buttons. */
-    .event-main { margin-right: 0; }
+    .event-main, .event-card:has(.event-tool) .event-main { margin-right: 0; }
     .kind-pill { margin-right: 40px; }
     .event-card:has(.event-tool) .kind-pill { margin-right: 100px; }
     .editor-head { flex-wrap: wrap; }
@@ -309,6 +311,7 @@ const TEMPLATE = `
       </div>
       <div class="events-head">
         <h3 id="label-events-in-time" class="section-title"></h3>
+        <button id="group-readings" type="button" class="icon-btn" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="3.5" r="1.6"/><path d="M4 5.1v7.4M4 8.5h3.5M4 12.5h3.5"/><path d="M9.5 8.5h4M9.5 12.5h4"/></svg></button>
         <button id="add" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><span id="label-add"></span></button>
       </div>
       <!-- What the list shows, by kind: a way of reading the chronology, never written in the case (see renderFilter). -->
@@ -526,6 +529,11 @@ export class CaseEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.byId("add").addEventListener("click", () => this.askAdd())
+    this.byId("group-readings").addEventListener("click", () => {
+      this.grouping = !this.grouping
+      CaseTimeline.rememberGrouping(this.grouping)
+      this.refreshOverview()
+    })
     this.byId("cited-back").addEventListener("click", () => {
       const from = this.citedFrom
       if (!from || !this.session) return
@@ -766,6 +774,9 @@ export class CaseEditorElement extends HTMLElement {
     ;[m.sourceBlank, m.sourceFile].forEach((label, index) => { source.options[index].textContent = label })
     const kind = this.byId("kind") as HTMLSelectElement
     ;[m.kindObservation, m.kindReading, m.kindInterview].forEach((label, index) => { kind.options[index].textContent = label })
+    const group = this.byId("group-readings")
+    group.title = m.groupReadings
+    group.setAttribute("aria-label", m.groupReadings)
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
@@ -1385,6 +1396,10 @@ export class CaseEditorElement extends HTMLElement {
    * Which kinds of event the list shows. All of them until the author says otherwise, and the choice holds while the case is open: it is a
    * way of reading a long chronology, not something to write in the case.
    */
+  /** Whether each reading is drawn under the observation it reads, as the reader can (the same choice, remembered for both). */
+  private grouping = CaseTimeline.groupingRemembered()
+  /** The observations whose readings are folded away while grouped, by their place among the events. */
+  private readonly folded = new Set<number>()
   private readonly kindsShown = new Set<"observation" | "interview" | "reading">(["observation", "interview", "reading"])
 
   /** The filter over the list: one button per kind the case holds, saying how many, and whether its events are shown. */
@@ -1430,13 +1445,29 @@ export class CaseEditorElement extends HTMLElement {
   private renderEvents(session: CaseSession, events: { item: { track?: CaseTrack, interview?: InterviewEvent }, index: number }[]): void {
     const m = this.messages
     const list = this.byId("event-list")
-    // Every event on the same footing, in the order of time: a reading used to be drawn inside the observation it reads, but a case is a
-    // chronology, and a reading of the first observation may well have been made after the second. What reads what is said by the links a
-    // card carries, not by where it sits. The filter above the list is what tames a long one.
-    const shown = events.filter(({ item }) => this.kindsShown.has(this.kindOf(item)))
+    // Every event on the same footing, in the order of time: a case is a chronology, and a reading of the first observation may well have
+    // been made after the second. What reads what is said by the links a card carries. Asked to (the same choice as the reader's), each
+    // reading is set under the first observation it reads instead, which can fold them away. The filter above the list tames a long one.
+    const inTime = events.filter(({ item }) => this.kindsShown.has(this.kindOf(item)))
     this.renderFilter(events)
-    this.byId("events-count").textContent = String(shown.length)
-    const cards = shown.map(({ item, index }): CaseTimelineCard => {
+    this.byId("events-count").textContent = String(inTime.length)
+    type Item = { track?: CaseTrack, interview?: InterviewEvent }
+    const readOf = (item: Item): Item[] => {
+      const ids = [item.track?.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
+      return inTime.map(({ item: other }) => other)
+        .filter(other => other.track?.kind === "observer" && ids.some(id => other.track!.event.id === id || other.track!.recording?.id === id))
+    }
+    const hasReadings = inTime.some(({ item }) => this.kindOf(item) === "reading")
+    const group = this.byId("group-readings")
+    group.hidden = !hasReadings
+    group.setAttribute("aria-pressed", String(this.grouping))
+    const listed: { item: Item, index: number, under?: Item }[] = this.grouping
+      ? CaseTimeline.grouped(inTime, { kind: item => this.kindOf(item), read: readOf })
+      : inTime
+    const indexOf = new Map(inTime.map(({ item, index }) => [item, index]))
+    const isOpen = (item: Item) => !this.listShown && (item.interview ? item.interview === this.currentInterview : item.track === this.current)
+    const shown = listed.filter(({ item, under }) => under === undefined || !this.folded.has(indexOf.get(under)!) || isOpen(item))
+    const cards = shown.map(({ item, index, under }): CaseTimelineCard => {
       const kind = this.kindOf(item)
       const event = (item.track?.event ?? item.interview)!
       const card: CaseTimelineCard = {
@@ -1446,8 +1477,11 @@ export class CaseEditorElement extends HTMLElement {
         // account's author is the witness it is the account of, so it says none.
         by: kind === "observation" ? "" : this.authorsSaid(event.by),
         // Lit when it is the one open: beside it in two columns, the list says which it is.
-        open: !this.listShown && (item.interview ? item.interview === this.currentInterview : item.track === this.current)
+        open: isOpen(item),
+        ...(under ? { nested: true } : {})
       }
+      const count = this.grouping && kind === "observation" ? listed.filter(other => other.under === item).length : 0
+      if (count > 0) card.readings = { count, folded: this.folded.has(index) }
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
           .map(interview => ({ at: session.tracks.length + session.interviews.indexOf(interview), title: this.optionLabel({ interview }, 0) }))
@@ -1459,14 +1493,19 @@ export class CaseEditorElement extends HTMLElement {
         const others = [item.track.event.interpretationOf].flat().filter((id): id is string => id !== undefined)
           .map(id => session.tracks.find(other => other.kind === "observer" && (other.event.id === id || other.recording?.id === id)))
           .filter((other): other is CaseTrack => other !== undefined)
+          // Set under the observation it reads, it no longer names that one: where it stands says it. The others are what it is also about.
+          .filter(other => other !== under?.track)
           .map(other => ({ at: session.tracks.indexOf(other), title: this.labelOf(other, session.tracks.indexOf(other)) }))
-        if (others.length > 0) card.links = { heading: m.interpretationOf, to: others }
+        if (others.length > 0) card.links = { heading: under ? m.alsoAbout : m.interpretationOf, to: others }
       }
       return card
     })
     // What the editor adds to a card the reader draws as well: what a reading's findings come to, whether it is frozen, and what can be done
     // to the event.
-    new CaseTimeline(list, at => this.openEvent(at)).render(cards, m, (card, { card: element, body, links }) =>
+    new CaseTimeline(list, at => this.openEvent(at), at => this.openEvent(at), undefined, at => {
+      if (!this.folded.delete(at)) this.folded.add(at)
+      this.refreshOverview()
+    }).render(cards, m, (card, { card: element, body, links }) =>
       this.dress(session, events.find(({ index }) => index === card.at)!.item, card.at, element, body, links))
   }
 

@@ -91,8 +91,8 @@ export const caseCss = `
 .open-events { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 /* Given the width (the app on a computer), the chronology in a column of its own beside what is open, kept in view as that scrolls; the
    whole width to what is open when the chronology is put away. The width the case is given, never the window's. */
-@container (min-width: 1100px) {
-  .case-layout { display: grid; grid-template-columns: minmax(18rem, 1fr) minmax(0, 2.6fr); gap: 20px; align-items: start; }
+@container (min-width: 760px) {
+  .case-layout { display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.6fr); gap: 20px; align-items: start; }
   .case-layout:has(> .case-timeline[hidden]) { grid-template-columns: minmax(0, 1fr); }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
 }

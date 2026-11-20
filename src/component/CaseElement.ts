@@ -93,25 +93,6 @@ export class CaseElement extends HTMLElement {
   private grouping = false
   /** The observations whose readings are folded away while grouped, by their place in `entries`: none until the reader folds one. */
   private readonly folded = new Set<number>()
-  /** Where the reader's choice of grouping is kept, in their browser alone: a convenience, which a page without storage simply forgets. */
-  private static readonly GROUPING_KEY = "rr0-case-group-readings"
-
-  private static remembered(): boolean {
-    try {
-      return localStorage.getItem(CaseElement.GROUPING_KEY) === "1"
-    } catch {
-      return false
-    }
-  }
-
-  private static remember(grouping: boolean): void {
-    try {
-      localStorage.setItem(CaseElement.GROUPING_KEY, grouping ? "1" : "0")
-    } catch {
-      // Not kept: the next case opens in the order of time, which is no harm.
-    }
-  }
-
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: "open" })
@@ -127,10 +108,10 @@ export class CaseElement extends HTMLElement {
         if (!this.folded.delete(at)) this.folded.add(at)
         this.draw()
       })
-    this.grouping = CaseElement.remembered()
+    this.grouping = CaseTimeline.groupingRemembered()
     this.byId("group-readings").addEventListener("click", () => {
       this.grouping = !this.grouping
-      CaseElement.remember(this.grouping)
+      CaseTimeline.rememberGrouping(this.grouping)
       this.order()
       this.draw()
     })
