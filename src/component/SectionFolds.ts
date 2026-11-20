@@ -31,7 +31,6 @@ export class SectionFolds {
 
   static readonly CSS = `
 ${SectionFolds.TITLED}:not([data-unfolded]) > :not(.section-title) { display: none !important; }
-${SectionFolds.TITLED}:not([data-unfolded]) { padding-top: 12px; padding-bottom: 12px; }
 ${SectionFolds.TITLED} > .section-title { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; user-select: none; }
 ${SectionFolds.TITLED} > .section-title:hover { color: var(--ink, CanvasText); }
 ${SectionFolds.TITLED} > .section-title:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: 3px; border-radius: 4px; }
