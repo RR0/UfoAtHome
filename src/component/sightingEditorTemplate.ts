@@ -2267,22 +2267,23 @@ ${EditorTheme.fields(".app")}
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
-/* Given the width (the app on a computer): the render in a column of its own, the sections and the one open in the other, the editor the
-   height of the screen and the open section scrolling under its chips. The grip has nothing to share out between the two any more. The
+/* Given the width (the app on a computer): the chips of the sections across the whole width, under them the render in a column of its
+   own on the right and the section open on the left (dicté 2026-11-20 : « settings à gauche, rendu à droite »), the editor the height of the screen and the open section scrolling on its own. The chips have
+   the whole width so that they all show on one line: in the right column alone they ran past its edge. The grip has nothing to share out between the two any more. The
    width this editor is given, never the window's: held by a case, it is the case's. */
-@container (min-width: 820px) {
+@container (min-width: 760px) {
   .app {
     /* The screen's height, or what a page that has something above it says is left (see UfoAtHomeElement). */
     max-width: none; height: var(--rr0-editor-height, 100dvh); max-height: none;
-    display: grid; grid-template-columns: minmax(0, 11fr) minmax(22rem, 9fr);
+    display: grid; grid-template-columns: minmax(22rem, 9fr) minmax(0, 11fr);
     grid-template-rows: auto auto auto auto minmax(0, 1fr);
-    grid-template-areas: "head head" "notes notes" "scene tabs" "scene tracks" "scene panel";
+    grid-template-areas: "head head" "notes notes" "tabs tabs" "tracks scene" "panel scene";
   }
   .app > .editor-head { grid-area: head; }
   .app > .save-refused { grid-area: notes; }
-  .app > .scene-card { grid-area: scene; align-self: start; border-right: 1px solid var(--line); }
+  .app > .scene-card { grid-area: scene; align-self: start; border-left: 1px solid var(--line); }
   /* As tall as the screen leaves it under the header, whatever height the grip gave it in one column. */
-  .app > .scene-card { --rr0-scene-max-height: calc(var(--rr0-editor-height, 100dvh) - 6rem); }
+  .app > .scene-card { --rr0-scene-max-height: calc(var(--rr0-editor-height, 100dvh) - 9.5rem); }
   .app > .scene-resize { display: none; }
   .app > #group-tabs { grid-area: tabs; }
   .app > #timeline-tracks { grid-area: tracks; }
