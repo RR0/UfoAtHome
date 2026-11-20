@@ -31,6 +31,10 @@ export class SectionFolds {
 
   static readonly CSS = `
 ${SectionFolds.TITLED}:not([data-unfolded]) > :not(.section-title) { display: none !important; }
+/* Folded, a line of a list: as little room under its title as over it. The room over it is the same either way, so that the title stays
+   where it is when it opens; only what is under it grows. */
+${SectionFolds.TITLED} { padding-top: 10px; }
+${SectionFolds.TITLED}:not([data-unfolded]) { padding-bottom: 10px; }
 ${SectionFolds.TITLED} > .section-title { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; user-select: none; }
 ${SectionFolds.TITLED} > .section-title:hover { color: var(--ink, CanvasText); }
 ${SectionFolds.TITLED} > .section-title:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: 3px; border-radius: 4px; }
