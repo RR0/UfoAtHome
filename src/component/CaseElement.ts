@@ -383,8 +383,42 @@ export class CaseElement extends HTMLElement {
 
   /** Opens the event at `at` alone: whatever else was open is put away. */
   private async only(at: number): Promise<void> {
+    const kept = this.turn(at)
     for (const other of [...this.shown.keys()]) if (other !== at) this.shut(other)
-    await this.open(at)
+    if (!kept) await this.open(at)
+  }
+
+  /**
+   * Turns the player already open to the recording at `at` (a witness's, or a reading of one), rather than building another: going from one
+   * reading to the next put a blank player in the page, flashing white, while the new one made its scene from nothing. Whether one was turned.
+   */
+  private turn(at: number): boolean {
+    const entry = this.entries[at]
+    if (!entry?.url || this.shown.has(at) || (entry.kind !== "observation" && entry.kind !== "reading")) return false
+    const [was, block] = [...this.shown.entries()].find(([index, other]) => {
+      const kind = this.entries[index]?.kind
+      return (kind === "observation" || kind === "reading") && other.querySelector(SIGHTING_ELEMENT_NAME)
+    }) ?? []
+    const player = block?.querySelector(SIGHTING_ELEMENT_NAME) as SightingElement | null | undefined
+    if (was === undefined || !block || !player) return false
+    this.shown.delete(was)
+    this.shown.set(at, block)
+    block.dataset.at = String(at)
+    // A reading before the account it reads: asked while the account on show is another, the reading is not among its own and changes
+    // nothing; the account then opens on it (see SightingElement.selectObserver). A witness's recording before the reading is let go, for
+    // the same reason: let go first, the account on show would come back for a moment.
+    if (entry.kind === "reading") {
+      player.setAttribute(INTERPRETATION_ATTRIBUTE, entry.url)
+      player.setAttribute(OBSERVER_ATTRIBUTE, this.accountOf(entry)?.url ?? entry.url)
+    } else {
+      player.setAttribute(OBSERVER_ATTRIBUTE, entry.url)
+      player.removeAttribute(INTERPRETATION_ATTRIBUTE)
+    }
+    this.order()
+    this.draw()
+    window.setTimeout(() => this.markCitedMoments(), 300)
+    this.announceOpen()
+    return true
   }
 
   /** Opens the event at `at` beside what is open, or shuts it: what is open is shown below, in the history's order, however many there are. */

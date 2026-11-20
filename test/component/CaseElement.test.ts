@@ -410,6 +410,24 @@ describe("<rr0-case>, a case read", () => {
     expect(open()).toEqual(["2"])
   })
 
+  it("turns the player open to the reading chosen from its card, and back to the observation, rather than building another", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const cards = () => [...root.querySelectorAll<HTMLElement>(".event-card")]
+    const open = () => [...root.querySelectorAll<HTMLElement>(".open-event")].map(block => block.dataset.at)
+    const first = element.player!
+    // A new player flashed white while it made its scene from nothing, and showed the account's cover before the reading's.
+    cards()[1].querySelector<HTMLButtonElement>(".event-open")!.click()
+    expect(open()).toEqual(["1"])
+    expect(element.player).toBe(first)
+    expect(first.getAttribute("interpretation")).toBe(new URL("reading.json", location.href).href)
+    expect(first.getAttribute("observer")).toBe(new URL("observer.json", location.href).href)
+    cards()[0].querySelector<HTMLButtonElement>(".event-open")!.click()
+    expect(open()).toEqual(["0"])
+    expect(element.player).toBe(first)
+    expect(first.hasAttribute("interpretation")).toBe(false)
+  })
+
   it("sets each reading under the observation it reads when asked, no longer naming it, and remembers the choice", async () => {
     localStorage.removeItem("rr0-case-group-readings")
     const element = await mount()

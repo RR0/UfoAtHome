@@ -496,7 +496,12 @@ export class SightingElement extends HTMLElement {
     }
     if (name === INTERPRETATION_ATTRIBUTE) {
       const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
-      if (entry) this.offerInterpretations(entry)
+      // The page no longer asking for a reading is the page asking for the account (a case turning its player back to the observation):
+      // what was chosen before would otherwise be kept.
+      if (entry && newValue === null && oldValue !== null && this.interpretationSelect.value !== ACCOUNT_OPTION) {
+        this.interpretationSelect.value = ACCOUNT_OPTION
+        void this.chooseInterpretation(ACCOUNT_OPTION)
+      } else if (entry) this.offerInterpretations(entry)
     }
     if (name === HIDE_PICKERS_ATTRIBUTE) {
       // Both pickers follow it at once: the witnesses' own, and the readings' (whose row is worked out in offerInterpretations).
@@ -1295,8 +1300,11 @@ export class SightingElement extends HTMLElement {
     // Its cover picture stands in for the loader until play is asked, unless it already was (another observer picked while playing).
     // The recording's own picture, else the case's; relative to the file stating it.
     // Kept even then, for a thumbnail to put it back when the mouse leaves (see ScenePoster.restore).
+    // Not when the page asks for one of its readings: that reading's cover is the one to show (see chooseInterpretation), and the account's,
+    // put up meanwhile, stood for half a second over a reading opened from the case's history before giving way to it.
     const up = !this.sceneElement.ufoElement.playRequested
-    if (entry.sighting.image) this.sceneElement.showPoster(entry.sighting.image, entry.src ? new URL(entry.src, location.href).href : undefined, up)
+    if (this.askedInterpretation()) { /* the reading's cover comes with it */ }
+    else if (entry.sighting.image) this.sceneElement.showPoster(entry.sighting.image, entry.src ? new URL(entry.src, location.href).href : undefined, up)
     else this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url, up)
     // Another recording: shown once it is whole, not built in view — see SceneElement.holdForNewScene.
     this.sceneElement.holdForNewScene()
