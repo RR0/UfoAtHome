@@ -9,6 +9,7 @@ export const caseMessages_en: CaseMessages = {
   openEvent: "Open this event alone",
   toggleEvent: "Show beside the others, or put away",
   groupReadings: "Group the readings under their observation",
+  resizeColumns: "Resize the history column (double-click: back to its width)",
   alsoAbout: "Also about",
   foldReadings: "Fold its readings away",
   unfoldReadings: "Unfold its readings",

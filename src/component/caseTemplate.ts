@@ -1,4 +1,5 @@
 import { CaseTimeline } from "./CaseTimeline.js"
+import { ColumnResize } from "./ColumnResize.js"
 
 /** What a case looks like when it is read, not edited — see CaseElement. */
 export const caseHtml = `
@@ -34,6 +35,8 @@ export const caseHtml = `
   <ol id="case-events" class="event-list"></ol>
   <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
 </section>
+<!-- The grip between the two, on the history's edge: its width, dragged. -->
+<div id="column-resize" class="column-resize"></div>
 <!-- What is open, in the order of time whatever the order they were opened in. -->
 <div id="open-events" class="open-events"></div>
 </div>
@@ -92,8 +95,13 @@ export const caseCss = `
 /* Given the width (the app on a computer), the chronology in a column of its own beside what is open, kept in view as that scrolls; the
    whole width to what is open when the chronology is put away. The width the case is given, never the window's. */
 @container (min-width: 760px) {
-  .case-layout { display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.6fr); gap: 20px; align-items: start; }
+  .case-layout { display: grid; grid-template-columns: var(${ColumnResize.PROPERTY}, minmax(16rem, 1fr)) minmax(0, 2.6fr); gap: 20px; align-items: start; }
+  .case-layout > .case-timeline { grid-column: 1; grid-row: 1; }
+  .case-layout > .open-events { grid-column: 2; grid-row: 1; }
+  .case-layout > .column-resize { display: block; grid-column: 1; grid-row: 1; margin-right: -16px; }
   .case-layout:has(> .case-timeline[hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .case-layout:has(> .case-timeline[hidden]) > :is(.open-events, .column-resize) { grid-column: 1; }
+  .case-layout:has(> .case-timeline[hidden]) > .column-resize { display: none; }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
   /* A dialogue open alone beside the chronology has the height the chronology has (dicté : « toute la hauteur »), not the 22 lines kept
      under a player when they are one above the other; kept in view as the page scrolls, as the chronology is. */
@@ -105,4 +113,5 @@ export const caseCss = `
 .open-event rr0-interview { padding: 10px 12px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: 10px;
   font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto; }
 ${CaseTimeline.CSS}
+${ColumnResize.CSS}
 `

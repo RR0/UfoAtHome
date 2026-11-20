@@ -111,6 +111,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   interpretationOfNone: string
   /** What sets each reading under the observation it reads, or back in the order of time (the reader has the same, see CaseMessages). */
   groupReadings: string
+  /** The grip between the history and what is open beside it: dragged, or moved with the arrows; double-clicked, back to its width. */
+  resizeColumns: string
   /** Over what a reading set under an observation reads besides it. */
   alsoAbout: string
   foldReadings: string

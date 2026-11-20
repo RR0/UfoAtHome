@@ -3,6 +3,7 @@ import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { EditorTheme } from "./EditorTheme.js"
 import { CaseTimeline, type CaseTimelineCard } from "./CaseTimeline.js"
+import { ColumnResize } from "./ColumnResize.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
@@ -149,10 +150,12 @@ const TEMPLATE = `
   /* And the case's events stay beside the one open, as the reader's history does (see caseTemplate): the list on the left, kept in sight
      while the event scrolls, the event on the right. Narrower, it is the one or the other, the way back to the case above the event. */
   @container (min-width: 760px) {
-    #group-events.one-open { display: grid; grid-template-columns: clamp(15rem, 36%, 22rem) minmax(0, 1fr); column-gap: 18px; align-items: start; }
+    #group-events.one-open { display: grid; grid-template-columns: var(${ColumnResize.PROPERTY}, clamp(15rem, 36%, 22rem)) minmax(0, 1fr); column-gap: 18px; align-items: start; }
     #group-events.one-open > * { grid-column: 2; }
     #group-events.one-open > #case-overview[hidden] { display: block !important; }
     #group-events.one-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
+    /* The grip on the list's edge, as tall as it: the list's width, dragged (see ColumnResize). */
+    #group-events.one-open > .column-resize { display: block; grid-column: 1; grid-row: 1 / span 6; margin-right: -15px; }
     #group-events.one-open #back-to-case, #group-events.one-open #back-to-case + .crumb-sep { display: none; }
   }
   .case-panel { margin: 0; }
@@ -195,6 +198,7 @@ const TEMPLATE = `
   .section-title { margin: 0; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
   /* The chronology is common to the case's reader (see CaseTimeline), in the editor's tokens; what follows is the editor's own. */
   ${CaseTimeline.CSS}
+  ${ColumnResize.CSS}
   :host {
     ${CaseTimeline.EDITOR_TOKENS}
   }
@@ -302,6 +306,7 @@ const TEMPLATE = `
   </div>
 </section>
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
+    <div id="column-resize" class="column-resize"></div>
     <!-- The case itself while no event is open: its title, its date, its id, then its events in the order of time (see renderEvents). -->
     <div id="case-overview" class="case-overview" hidden>
       <div class="case-fields">
@@ -469,6 +474,8 @@ export class CaseEditorElement extends HTMLElement {
     ;(this.shadow.getElementById("case-date") as DateInputElement).build()
     for (const input of this.shadow.querySelectorAll<InputFileElement>("rr0-input-file")) input.build()
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
+    // The same width as the case's reader keeps: one history, read or edited.
+    this.columns = new ColumnResize(this.byId("column-resize"), this.byId("group-events"), () => this.byId("case-overview"), ColumnResize.CASE_HISTORY_KEY)
     this.interviewElement = this.shadow.getElementById("interview") as InterviewEditorElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
     this.interviewElement.addEventListener(INTERVIEW_SEEK_EVENT, event => void this.followToObservation((event as CustomEvent<{ sighting?: string, at: number }>).detail))
@@ -777,6 +784,7 @@ export class CaseEditorElement extends HTMLElement {
     const group = this.byId("group-readings")
     group.title = m.groupReadings
     group.setAttribute("aria-label", m.groupReadings)
+    this.columns.label(m.resizeColumns)
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording
@@ -1398,6 +1406,8 @@ export class CaseEditorElement extends HTMLElement {
    */
   /** Whether each reading is drawn under the observation it reads, as the reader can (the same choice, remembered for both). */
   private grouping = CaseTimeline.groupingRemembered()
+  /** The grip between the case's events and the one open beside them. */
+  private readonly columns: ColumnResize
   /** The observations whose readings are folded away while grouped, by their place among the events. */
   private readonly folded = new Set<number>()
   private readonly kindsShown = new Set<"observation" | "interview" | "reading">(["observation", "interview", "reading"])

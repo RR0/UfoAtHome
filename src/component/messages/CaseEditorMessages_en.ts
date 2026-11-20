@@ -84,6 +84,7 @@ export const caseEditorMessages_en: CaseEditorMessages = {
   quoted: "“{text}”",
   interpretationOfNone: "—",
   groupReadings: "Group the readings under their observation",
+  resizeColumns: "Resize the history column (double-click: back to its width)",
   alsoAbout: "Also about",
   foldReadings: "Fold its readings away",
   unfoldReadings: "Unfold its readings",

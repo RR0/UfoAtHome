@@ -24,6 +24,7 @@ import { ShareDialogElement, type ShareSubject } from "./ShareDialogElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { AppLocation } from "./AppLocation.js"
 import { CaseTimeline, type CaseTimelineCard } from "./CaseTimeline.js"
+import { ColumnResize } from "./ColumnResize.js"
 
 export const CASE_ELEMENT_NAME = "rr0-case"
 /** Whether the chronology is shown from the start: on unless the page says `show-timeline="false"`. What is open stays open either way. */
@@ -93,6 +94,8 @@ export class CaseElement extends HTMLElement {
   private grouping = false
   /** The observations whose readings are folded away while grouped, by their place in `entries`: none until the reader folds one. */
   private readonly folded = new Set<number>()
+  /** The grip between the history and what is open beside it. */
+  private readonly columns: ColumnResize
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: "open" })
@@ -109,6 +112,8 @@ export class CaseElement extends HTMLElement {
         this.draw()
       })
     this.grouping = CaseTimeline.groupingRemembered()
+    this.columns = new ColumnResize(this.byId("column-resize"), this.shadow.querySelector<HTMLElement>(".case-layout")!,
+      () => this.shadow.querySelector<HTMLElement>(".case-timeline")!, ColumnResize.CASE_HISTORY_KEY)
     this.byId("group-readings").addEventListener("click", () => {
       this.grouping = !this.grouping
       CaseTimeline.rememberGrouping(this.grouping)
@@ -657,6 +662,7 @@ export class CaseElement extends HTMLElement {
     const group = this.byId("group-readings")
     group.title = m.groupReadings
     group.setAttribute("aria-label", m.groupReadings)
+    this.columns.label(m.resizeColumns)
     group.setAttribute("aria-pressed", String(this.grouping))
     group.hidden = !this.entries.some(entry => entry.kind === "reading")
     const listed = this.listed()
