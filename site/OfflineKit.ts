@@ -139,6 +139,8 @@ if ("serviceWorker" in navigator) {
       start_url: "/app/?source=pwa",
       scope: "/",
       display: "standalone",
+      // "Open with" a reconstruction, once installed (Chrome and Edge, on a computer): the app's page receives it (see AppPage).
+      file_handlers: [{action: "/app/", accept: {"application/json": [".json"]}}],
       background_color: OfflineKit.THEME_DARK,
       theme_color: OfflineKit.THEME_DARK,
       icons: [

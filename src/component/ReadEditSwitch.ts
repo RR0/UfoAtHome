@@ -10,6 +10,8 @@ export interface SwitchedEditor extends HTMLElement {
   openTrack(url: string): Promise<void>
   /** The switch the editor is in, set before IN_PLACE_ATTRIBUTE so that it does not make one of its own. */
   switcher?: ReadEditSwitch
+  /** Does `action`, which replaces what the editor holds, once the author agreed to lose what was not saved: at once when nothing was. */
+  askBeforeReplacing(action: () => void): void
 }
 
 /**
@@ -28,6 +30,8 @@ export class ReadEditSwitch {
 
   private reader?: HTMLElement
   private editor?: SwitchedEditor
+  /** What the editor last handed to the reader: a pencil on it comes back to the editor as it was; on anything else, loads it there. */
+  private handed?: string
 
   /**
    * @param place Puts a reader or an editor made here where the page wants it.
@@ -57,7 +61,9 @@ export class ReadEditSwitch {
     if (!editor.hasAttribute(IN_PLACE_ATTRIBUTE)) editor.setAttribute(IN_PLACE_ATTRIBUTE, "")
     editor.addEventListener(READ_EVENT, event => {
       event.preventDefault()
-      void this.read((event as CustomEvent<ReadEditDetail>).detail)
+      const detail = (event as CustomEvent<ReadEditDetail>).detail
+      this.handed = detail.src
+      void this.read(detail)
     })
   }
 
@@ -96,10 +102,15 @@ export class ReadEditSwitch {
     const editor = this.editor
     if (editor) {
       this.dropReader()
-      // What the editor holds is what was read: what was handed over is not needed any more.
-      OpenFiles.clear()
+      // What the editor holds is what was read: the copies handed over are not needed any more.
+      OpenFiles.releaseCopies()
       editor.hidden = false
       this.changed({ mode: "edit" })
+      if (detail?.src !== undefined && detail.src !== this.handed) {
+        // Another file than the one it handed over was read since: it is that one that is edited, asked first if what it held was not saved.
+        this.load(editor, detail.src, detail.track)
+        return
+      }
       if (detail?.track) await editor.openTrack(detail.track)
       return
     }
@@ -113,6 +124,36 @@ export class ReadEditSwitch {
     this.dropReader()
     this.place(made)
     this.changed({ mode: "edit" })
+  }
+
+  /**
+   * Opens the file at `src` where the author is: in the reader when reading (or when nothing was edited yet), in the editor when editing,
+   * which asks before replacing what was not saved.
+   */
+  async open(src: string): Promise<void> {
+    const editor = this.editor
+    if (this.reading || !editor) return this.read({ src })
+    this.load(editor, src)
+  }
+
+  /** Loads `src` in the editor, on `track` if named, else on the case's list: asked first by the editor if what it held was not saved. */
+  private load(editor: SwitchedEditor, src: string, track?: string): void {
+    this.handed = undefined
+    if (track) editor.setAttribute("track", track)
+    else editor.removeAttribute("track")
+    editor.setAttribute("src", src)
+  }
+
+  /** A blank editor, in place of the one there was once its author agreed to lose what was not saved; the reader put away. */
+  async startNew(): Promise<void> {
+    const editor = this.editor
+    if (!editor) return this.edit()
+    if (this.reading) await this.edit()
+    editor.askBeforeReplacing(() => {
+      editor.remove()
+      this.editor = undefined
+      void this.edit()
+    })
   }
 
   private dropReader(): void {

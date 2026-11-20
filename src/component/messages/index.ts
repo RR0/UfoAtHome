@@ -5,6 +5,7 @@ import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
 import type { SightingMessages } from "./SightingMessages.js"
 import type { CaseMessages } from "./CaseMessages.js"
+import type { UfoAtHomeMessages } from "./UfoAtHomeMessages.js"
 import type { TagNames } from "./TagNames.js"
 import type { SceneNames } from "./SceneNames.js"
 import type { CloudEditorMessages } from "./CloudEditorMessages.js"
@@ -72,6 +73,20 @@ export const CASE_MESSAGES = Messages.catalog<CaseMessages>(caseLoaders)
 
 export function loadCaseMessages(language: UfoLanguage): Promise<CaseMessages> {
   return CASE_MESSAGES.load(language)
+}
+
+const ufoAtHomeLoaders: Record<UfoLanguage, () => Promise<UfoAtHomeMessages>> = {
+  en: () => import("./UfoAtHomeMessages_en.js").then(m => m.ufoAtHomeMessages_en),
+  fr: () => import("./UfoAtHomeMessages_fr.js").then(m => m.ufoAtHomeMessages_fr),
+  es: () => import("./UfoAtHomeMessages_es.js").then(m => m.ufoAtHomeMessages_es),
+  it: () => import("./UfoAtHomeMessages_it.js").then(m => m.ufoAtHomeMessages_it)
+}
+
+/** The texts of the application element, one chunk per language (see MessageCatalog). */
+export const UFOATHOME_MESSAGES = Messages.catalog<UfoAtHomeMessages>(ufoAtHomeLoaders)
+
+export function loadUfoAtHomeMessages(language: UfoLanguage): Promise<UfoAtHomeMessages> {
+  return UFOATHOME_MESSAGES.load(language)
 }
 
 const shareLoaders: Record<UfoLanguage, () => Promise<ShareMessages>> = {

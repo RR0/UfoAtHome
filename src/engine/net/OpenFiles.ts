@@ -25,15 +25,31 @@ export class OpenFiles {
 
   private static readonly files = new Map<string, OpenFile>()
 
-  /** Holds `files` in place of all those held before: one document is handed over at a time. */
-  static holdOnly(files: ReadonlyMap<string, OpenFile>): void {
-    OpenFiles.files.clear()
+  /** Holds `files`, each in place of what was held at its address. */
+  static hold(files: ReadonlyMap<string, OpenFile>): void {
     for (const [url, file] of files) OpenFiles.files.set(OpenFiles.key(url), file)
   }
 
-  /** Lets go of every file held: the reader reads from the network again. */
+  /**
+   * Lets go of the copies of files that have an address: what is read of them is what stands there again. The files that have none are
+   * kept, since nothing else holds them: a case picked from the disk with its recordings has them read from here, the editor loading each
+   * only when it is opened.
+   */
+  static releaseCopies(): void {
+    for (const [url, file] of OpenFiles.files) if (!file.local) OpenFiles.files.delete(url)
+  }
+
+  /** Lets go of every file held, those with no address too. */
   static clear(): void {
     OpenFiles.files.clear()
+  }
+
+  /**
+   * Where files with no address of their own are held together, beside the page: under a directory of their own, so that what one names
+   * of another by its bare name (a case its recordings) is found, and two files of the same name opened apart are two files.
+   */
+  static localBase(): string {
+    return new URL(`local/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}/`, location.href).href
   }
 
   /** A copy of what is held at `url`, if anything is. */

@@ -1473,3 +1473,67 @@ describe("A file read or edited in place, each half loaded when first asked for"
     expect(element.switcher.reading).toBe(false)
   })
 })
+
+describe("Opening files in the app", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    OpenFiles.clear()
+    vi.unstubAllGlobals()
+    globalThis.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) }) as typeof fetch
+  })
+
+  const app = async (src?: string): Promise<UfoAtHomeElement> => {
+    registerUfoAtHome()
+    const element = document.createElement("rr0-ufoathome") as UfoAtHomeElement
+    if (src) element.setAttribute("src", src)
+    document.body.appendChild(element)
+    await element.ready
+    return element
+  }
+  const json = (name: string, content: unknown) => new File([JSON.stringify(content)], name, { type: "application/json" })
+
+  it("opens a case picked from the disk with its observation in the reader when reading, held beside each other with no address", async () => {
+    await open()
+    document.body.innerHTML = ""
+    const element = await app("https://example.org/d/case.json")
+    await element.openFiles([json("account.json", account), json("case.json", caseJson())])
+    await wait(300)
+    const reader = element.querySelector("rr0-case")!
+    const src = reader.getAttribute("src")!
+    // The case is the one opened, whichever was picked first; its observation is beside it, held as well.
+    expect(src).toMatch(/\/local\/[a-z0-9]+\/case\.json$/)
+    expect(OpenFiles.local(src)).toBe(true)
+    expect(OpenFiles.read(new URL("account.json", src).href)).toEqual(account)
+    expect(element.switcher.editorLoaded).toBe(false)
+  })
+
+  it("opens a file picked from the disk in the editor when editing, which then has no address to share", async () => {
+    const element = await app()
+    const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
+    await element.openFiles([json("plain.json", { version: 4, id: "plain", timeline: { keyframes: [] } })])
+    await wait(300)
+    expect(editor.getAttribute("src")).toMatch(/\/local\/[a-z0-9]+\/plain\.json$/)
+    expect((editor.sightingEditor.shadowRoot!.getElementById("share") as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it("edits, on the pencil, the file read since rather than the one the editor held", async () => {
+    await open()
+    document.body.innerHTML = ""
+    const element = await app()
+    const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
+    ;(editor.shadowRoot!.getElementById("read-case") as HTMLButtonElement).click()
+    await wait(300)
+    await element.openAddress("https://example.org/d/case.json")
+    await wait(300)
+    element.querySelector("rr0-case")!.dispatchEvent(new CustomEvent(EDIT_EVENT, { detail: { src: "https://example.org/d/case.json" }, bubbles: true, composed: true, cancelable: true }))
+    await wait(300)
+    expect(element.querySelector("rr0-case-editor")).toBe(editor)
+    expect(editor.caseSession?.url).toBe("https://example.org/d/case.json")
+  })
+
+  it("says nothing was picked that could be opened when no file is a reconstruction", async () => {
+    const element = await app()
+    await element.openFiles([new File(["not json"], "notes.txt")])
+    expect(element.shadowRoot!.getElementById("status")!.hidden).toBe(false)
+  })
+})

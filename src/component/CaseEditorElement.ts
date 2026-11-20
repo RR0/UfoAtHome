@@ -1752,7 +1752,7 @@ export class CaseEditorElement extends HTMLElement {
     if (this.hasAttribute(IN_PLACE_ATTRIBUTE)) {
       const detail = this.holdForReading()
       if (ReadEdit.ask(this, READ_EVENT, detail)) return
-      OpenFiles.clear()
+      OpenFiles.releaseCopies()
     }
     if (address === undefined) return
     const track = this.session ? this.sharedTrack : undefined
@@ -1779,14 +1779,25 @@ export class CaseEditorElement extends HTMLElement {
       for (const track of session.tracks) {
         if (track.recording) files.set(track.url, { json: track.recording, changed: session.changed(track), local })
       }
-      OpenFiles.holdOnly(files)
+      OpenFiles.releaseCopies()
+      OpenFiles.hold(files)
       return { src: session.url, ...(this.sharedTrack ? { track: this.sharedTrack } : {}) }
     }
     const address = this.editor.address
     const src = address ?? new URL("recording.json", location.href).href
     files.set(src, { json: this.editor.sightingData, changed: this.editor.dirty, local: address === undefined })
-    OpenFiles.holdOnly(files)
+    OpenFiles.releaseCopies()
+    OpenFiles.hold(files)
     return { src }
+  }
+
+  /** Does `action`, which replaces what is edited, once the author agreed to lose what was not saved (see ReadEditSwitch). */
+  askBeforeReplacing(action: () => void): void {
+    this.guarded(() => {
+      // Agreed: nothing is to be asked again as the page replaces this editor.
+      this.leaving = true
+      action()
+    })
   }
 
   /**

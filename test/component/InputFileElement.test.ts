@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { register } from "../../src/component/InputFileElement.js"
 import type { InputFileElement, InputFilePick } from "../../src/component/InputFileElement.js"
 
@@ -34,7 +34,32 @@ describe("InputFileElement", () => {
     const { picks, file } = make()
     const picked = new File(["{}"], "a.json")
     pickFile(file, picked)
-    expect(picks).toEqual([{ file: picked }])
+    expect(picks).toEqual([{ file: picked, files: [picked] }])
+  })
+
+  it("says every file picked at once when asked for several, the first as the file", () => {
+    const { picks, file } = make({ multiple: "" })
+    expect(file.multiple).toBe(true)
+    const first = new File(["{}"], "case.json")
+    const second = new File(["{}"], "account.json")
+    Object.defineProperty(file, "files", { configurable: true, value: [first, second] })
+    file.dispatchEvent(new Event("change"))
+    expect(picks).toEqual([{ file: first, files: [first, second] }])
+  })
+
+  it("reads the files from the handles the browser's own picker gives, when handles are asked for and it has one", async () => {
+    const { picks, file } = make({ handles: "", multiple: "" })
+    const picked = new File(["{}"], "case.json")
+    const handle = { name: "case.json", getFile: () => Promise.resolve(picked) }
+    const showOpenFilePicker = vi.fn(async () => [handle])
+    vi.stubGlobal("showOpenFilePicker", showOpenFilePicker)
+    const click = new MouseEvent("click", { cancelable: true })
+    file.dispatchEvent(click)
+    await new Promise(resolve => setTimeout(resolve))
+    expect(click.defaultPrevented).toBe(true)
+    expect(showOpenFilePicker).toHaveBeenCalledWith({ multiple: true })
+    expect(picks).toEqual([{ file: picked, files: [picked], handles: [handle] }])
+    vi.unstubAllGlobals()
   })
 
   it("switches to an address and back, and says the address once loaded", () => {

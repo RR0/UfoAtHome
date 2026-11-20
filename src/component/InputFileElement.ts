@@ -19,8 +19,16 @@ export const inputFileMessages_en: InputFileMessages = {
   inputFileLoad: "Load"
 }
 
-/** What a pick gives: a file of the reader's, or an address. */
-export type InputFilePick = { file: File; url?: undefined } | { url: string; file?: undefined }
+/**
+ * What a pick gives: a file of the reader's, or an address. With `multiple`, `files` are all those picked, `file` the first; with
+ * `handles`, where the browser gives them, the handles they were read from, to read them again later (see InputFileElement).
+ */
+export type InputFilePick =
+  | { file: File; files?: readonly File[]; handles?: readonly FileSystemFileHandle[]; url?: undefined }
+  | { url: string; file?: undefined; files?: undefined; handles?: undefined }
+
+/** What a browser that gives handles to the files it opens offers (Chromium's File System Access): absent elsewhere. */
+type HandlePicker = (options: { multiple?: boolean, types?: { description?: string, accept: Record<string, string[]> }[] }) => Promise<FileSystemFileHandle[]>
 
 const STYLE = `
 rr0-input-file { display: inline-flex; align-items: center; gap: .3em; }
@@ -41,6 +49,8 @@ rr0-input-file [hidden] { display: none !important; }
  * (`import-file`), an address field (`import-url`) and its button (`import-url-button`): the ids derive from `name`. `mode="url"` starts on
  * the address, `no-button` reads the address as it is committed (Enter, or leaving the field) instead of on a button, and `placeholder` is the
  * address field's. `keep-file` keeps the file picked shown (a form that reads it when submitted, see `file`) rather than emptying the picker.
+ * `multiple` lets several files be picked at once. `handles` asks, where the browser has it (`showOpenFilePicker`), for the handles of the
+ * files picked, which can be read again later; elsewhere, the files alone.
  *
  * It says what was picked by a `filepick` event whose `detail` is an InputFilePick. The picker is emptied once it has said it, so that the
  * same file picked again is said again. `url` sets the address shown, telling nobody; `file` is the file the picker holds, if it keeps it.
@@ -64,6 +74,7 @@ export class InputFileElement extends HTMLElement {
     file.type = "file"
     const accept = this.getAttribute("accept")
     if (accept) file.accept = accept
+    file.multiple = this.hasAttribute("multiple")
     const url = this.urlInput = doc.createElement("input")
     url.type = "url"
     url.placeholder = this.getAttribute("placeholder") ?? "https://…"
@@ -81,10 +92,17 @@ export class InputFileElement extends HTMLElement {
     }
     this.append(style, file, url, load, mode)
     file.addEventListener("change", () => {
-      const picked = file.files?.[0]
-      if (!picked) return
-      this.pick({ file: picked })
+      const picked = [...file.files ?? []]
+      if (picked.length === 0) return
+      this.pick({ file: picked[0], files: picked })
       if (!this.hasAttribute("keep-file")) file.value = ""
+    })
+    // Handles asked for and given: the browser's own picker in place of the input's, the files read from the handles it gives.
+    file.addEventListener("click", event => {
+      const picker = (window as unknown as { showOpenFilePicker?: HandlePicker }).showOpenFilePicker
+      if (!this.hasAttribute("handles") || typeof picker !== "function") return
+      event.preventDefault()
+      void this.pickHandles(picker)
     })
     load.addEventListener("click", () => this.commitUrl())
     url.addEventListener("keydown", event => {
@@ -103,6 +121,22 @@ export class InputFileElement extends HTMLElement {
 
   connectedCallback(): void {
     this.build()
+  }
+
+  private async pickHandles(picker: HandlePicker): Promise<void> {
+    let handles: FileSystemFileHandle[]
+    try {
+      const accept = (this.getAttribute("accept") ?? "").split(",").map(type => type.trim()).filter(type => type.startsWith("."))
+      handles = await picker({
+        multiple: this.hasAttribute("multiple"),
+        ...(accept.length ? { types: [{ accept: { "application/json": accept } }] } : {})
+      })
+    } catch {
+      return // Cancelled: nothing picked.
+    }
+    if (handles.length === 0) return
+    const files = await Promise.all(handles.map(handle => handle.getFile()))
+    this.pick({ file: files[0], files, handles })
   }
 
   private commitUrl(): void {

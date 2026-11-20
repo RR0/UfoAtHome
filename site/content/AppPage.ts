@@ -6,7 +6,8 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
  * Where the manifest opens it (see OfflineKit.manifest): on a blank editor, the reader coming the first time something is read. Given
  * a file (`?file=` and its whole address, as every "open it" link of the site), it opens on that file's reader, the editor coming the
  * first time the pencil is used; `mode=edit` opens it in the editor, `track=` on one recording of a case. Kept out of the navigation and
- * the footer: the site's own pages are the player and the editor; this is the tool that a home screen opens.
+ * the footer: the site's own pages are the player and the editor; this is the tool that a home screen opens. A file the system opens
+ * with the installed app ("Open with") comes through launchQueue (see OfflineKit.manifest's file_handlers).
  */
 export class AppPage implements SitePage {
 
@@ -53,6 +54,15 @@ app.addEventListener("rr0-mode", event => {
   if (next.href !== location.href) history.replaceState(null, "", next)
 })
 document.getElementById("app-root").append(app)
+/* A file the system opens with the installed app ("Open with", see the manifest's file_handlers): opened as one picked, its handles kept
+   among the recent files. Chrome and Edge only; elsewhere there is no launchQueue, and no file comes this way. */
+if ("launchQueue" in window) {
+  window.launchQueue.setConsumer(async params => {
+    if (!params.files || params.files.length === 0) return
+    await app.ready
+    app.openFiles(await Promise.all(params.files.map(handle => handle.getFile())), params.files)
+  })
+}
 `
   }
 }
