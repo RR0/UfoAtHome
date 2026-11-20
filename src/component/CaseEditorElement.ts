@@ -146,6 +146,15 @@ const TEMPLATE = `
   .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
   /* Given the width (the app on a computer), the whole of it: the recording's editor lays itself out in two columns from there. */
   @container (min-width: 1100px) { .case.in-case { max-width: none; } }
+  /* And the case's events stay beside the one open, as the reader's history does (see caseTemplate): the list on the left, kept in sight
+     while the event scrolls, the event on the right. Narrower, it is the one or the other, the way back to the case above the event. */
+  @container (min-width: 1100px) {
+    #group-events.event-open { display: grid; grid-template-columns: minmax(17rem, 24rem) minmax(0, 1fr); column-gap: 20px; align-items: start; }
+    #group-events.event-open > * { grid-column: 2; }
+    #group-events.event-open > #case-overview[hidden] { display: block !important; }
+    #group-events.event-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
+    #group-events.event-open #back-to-case, #group-events.event-open #back-to-case + .crumb-sep { display: none; }
+  }
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
   /* The case's title keeps room to be read on a line or two, and the actions go under it when they do not fit beside it: squeezed by them,
@@ -1322,6 +1331,7 @@ export class CaseEditorElement extends HTMLElement {
     overview.hidden = !session || !this.listShown
     crumbs.hidden = !session || this.listShown
     this.byId("event-item").hidden = session !== undefined && this.listShown
+    this.byId("group-events").classList.toggle("event-open", session !== undefined && !this.listShown)
     this.byId("events-count").textContent = session ? String(this.items(session).length) : ""
     this.byId("case-heading").textContent = (session && String((session.json as Record<string, unknown>).title ?? "")) || this.messages.caseHeading
     if (!session) return
@@ -1434,7 +1444,9 @@ export class CaseEditorElement extends HTMLElement {
         meta: [event.time ? String(event.time).replace("T", " ") : "", event.id ?? ""].filter(Boolean).join(" · "),
         // Whose reading it is, whose interview it was, said as a sentence rather than as a label: "Interpretation of X and Y by Z". An
         // account's author is the witness it is the account of, so it says none.
-        by: kind === "observation" ? "" : this.authorsSaid(event.by)
+        by: kind === "observation" ? "" : this.authorsSaid(event.by),
+        // Lit when it is the one open: beside it in two columns, the list says which it is.
+        open: !this.listShown && (item.interview ? item.interview === this.currentInterview : item.track === this.current)
       }
       if (item.track?.kind === "observer") {
         const told = session.interviews.filter(interview => session.intervieweesOf(interview).includes(item.track!))
