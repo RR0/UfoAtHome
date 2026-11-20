@@ -95,6 +95,10 @@ export const caseCss = `
   .case-layout { display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.6fr); gap: 20px; align-items: start; }
   .case-layout:has(> .case-timeline[hidden]) { grid-template-columns: minmax(0, 1fr); }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
+  /* A dialogue open alone beside the chronology has the height the chronology has (dicté : « toute la hauteur »), not the 22 lines kept
+     under a player when they are one above the other; kept in view as the page scrolls, as the chronology is. */
+  .case-layout > .open-events:has(> .open-event:only-child rr0-interview) { position: sticky; top: 0; }
+  .open-event:only-child rr0-interview { max-height: calc(var(--rr0-editor-height, 100dvh) - 3rem); }
 }
 .open-event { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .open-event > .open-title { margin: 0; font: 600 13px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
