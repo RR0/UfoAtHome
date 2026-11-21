@@ -206,6 +206,8 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
   private readonly chosen = new WeakMap<HTMLElement, HTMLElement>()
   /** The sections listed in the index as it is drawn. */
   private listed: HTMLElement[] = []
+  /** Or the parts of the group open (the Sky's, the Phenomenon's), listed in their place: their tabs, which the index clicks. */
+  private listedParts: HTMLElement[] = []
   /** What the index was drawn from, to draw it again only when that changes. */
   private indexKey = ""
   private indexFrame?: number
@@ -222,6 +224,12 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
   indexIn(nav: HTMLElement, panel: () => HTMLElement | undefined): void {
     this.index = { nav, panel }
     nav.addEventListener("click", event => {
+      const part = (event.target as Element | null)?.closest?.<HTMLElement>("[data-part]")
+      if (part) {
+        this.listedParts[Number(part.dataset.part)]?.click()
+        this.refreshIndex()
+        return
+      }
       const link = (event.target as Element | null)?.closest?.<HTMLElement>("[data-section]")
       const section = link ? this.listed[Number(link.dataset.section)] : undefined
       const open = section?.closest<HTMLElement>(".group-panel")
@@ -278,8 +286,15 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
       for (let node: Element | null = element; node && node !== panel; node = node.parentElement) if ((node as HTMLElement).hidden) return false
       return true
     }
-    // The outermost sections a title folds, on show in the group open (in its part open, for a group in parts).
-    const sections = panel ? [...panel.querySelectorAll<HTMLElement>(SectionFolds.TITLED)]
+    // A group in parts (the Sky's ten, the Phenomenon's two) lists its parts rather than its sections (dicté 2026-11-21 : « déplacer
+    // les sous-groupes en sous-sections dans la colonne de gauche »): the strip of their tabs goes (see INDEXED_CSS), the sections of
+    // the part open fold under their titles as before, and what belongs to no part stays at the top of the group.
+    const parts = panel ? [...panel.querySelectorAll<HTMLElement>(":scope > .group-tabs > .subgroup-tab, :scope > .subtabs-row > .group-tabs > .subgroup-tab")]
+      .filter(tab => !tab.hidden) : []
+    const inParts = parts.length > 1
+    this.listedParts = inParts ? parts : []
+    // The outermost sections a title folds, on show in the group open.
+    const sections = panel && !inParts ? [...panel.querySelectorAll<HTMLElement>(SectionFolds.TITLED)]
       .filter(section => shown(section) && !section.parentElement?.closest(`${SectionFolds.TITLED}`)) : []
     let chosen = panel ? this.chosen.get(panel) : undefined
     if (!chosen || !sections.includes(chosen)) chosen = sections[0]
@@ -297,8 +312,10 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
       chosen.querySelector(SectionFolds.TITLE)?.setAttribute("aria-expanded", "true")
     }
     this.listed = sections
-    const titles = sections.map(section => SectionFolds.titleText(section.querySelector<HTMLElement>(SectionFolds.TITLE)))
-    const key = `${titles.join("\n")}\n${chosen ? sections.indexOf(chosen) : -1}\n${this.messages?.sectionIndex ?? ""}`
+    const titles = inParts ? parts.map(tab => SectionFolds.titleText(tab))
+      : sections.map(section => SectionFolds.titleText(section.querySelector<HTMLElement>(SectionFolds.TITLE)))
+    const current = inParts ? parts.findIndex(tab => tab.getAttribute("aria-expanded") === "true") : chosen ? sections.indexOf(chosen) : -1
+    const key = `${inParts ? "parts" : "sections"}\n${titles.join("\n")}\n${current}\n${this.messages?.sectionIndex ?? ""}`
     if (key === this.indexKey) return
     this.indexKey = key
     const nav = index.nav
@@ -307,9 +324,10 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
       const link = document.createElement("button")
       link.type = "button"
       link.className = "section-link"
-      link.dataset.section = String(at)
+      if (inParts) link.dataset.part = String(at)
+      else link.dataset.section = String(at)
       link.textContent = title
-      if (sections[at] === chosen) link.setAttribute("aria-current", "true")
+      if (at === current) link.setAttribute("aria-current", "true")
       return link
     }))
   }
@@ -331,6 +349,8 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
   /** What, beside the index (see indexIn), is left to it: the sections not chosen, and the fold of the one that is. */
   static readonly INDEXED_CSS = `
 .form-section[data-elsewhere] { display: none !important; }
+/* The parts of a group, listed in the index: their strip of tabs goes, what stands beside it (the Phenomenon's view) stays. */
+.group-panel > .group-tabs:has(> .subgroup-tab), .group-panel > .subtabs-row > .group-tabs:has(> .subgroup-tab) { display: none !important; }
 ${SectionFolds.titles("", "[data-chosen]")} { cursor: default; }
 ${SectionFolds.titles("::before", "[data-chosen]")} { display: none; }
 `

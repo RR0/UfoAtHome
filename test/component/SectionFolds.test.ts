@@ -109,4 +109,27 @@ describe("WindowClose", () => {
     expect(profile.hasAttribute("data-unfolded")).toBe(true)
     root.remove()
   })
+
+  it("lists a group's parts in the index rather than its sections, choosing one by its own tab", () => {
+    const root = fixture(`<nav class="section-index"></nav>
+      <section class="group-panel"><div class="group-tabs"><button class="subgroup-tab" aria-expanded="true">Rain</button><button class="subgroup-tab" aria-expanded="false">Clouds</button></div>
+      <section class="subgroup-panel"><div class="form-section"><h3 class="section-title">Layer</h3><label>Base <input/></label></div></section></section>`)
+    document.body.append(root)
+    const folds = new SectionFolds(root)
+    folds.setMessages(messages)
+    const nav = root.querySelector<HTMLElement>(".section-index")!
+    nav.style.display = "block"
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>(".subgroup-tab")]
+    // The editor's own handler: the tab chosen says so.
+    for (const tab of tabs) tab.addEventListener("click", () => tabs.forEach(other => other.setAttribute("aria-expanded", String(other === tab))))
+    folds.indexIn(nav, () => root.querySelector<HTMLElement>(".group-panel")!)
+    expect([...nav.children].map(link => link.textContent)).toEqual(["Rain", "Clouds"])
+    expect(nav.children[0].getAttribute("aria-current")).toBe("true")
+    // The sections of the part open are not listed, nor left aside: they fold as before.
+    expect(root.querySelector(".form-section")!.hasAttribute("data-elsewhere")).toBe(false)
+    ;(nav.children[1] as HTMLElement).click()
+    expect(tabs[1].getAttribute("aria-expanded")).toBe("true")
+    expect(nav.children[1].getAttribute("aria-current")).toBe("true")
+    root.remove()
+  })
 })
