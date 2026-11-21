@@ -2308,7 +2308,7 @@ ${EditorTheme.fields(".app")}
   .app > #group-tabs { grid-area: tabs; }
   .app > #timeline-tracks { grid-area: tracks; border-left: 1px solid var(--line); }
   .app > .group-panel { grid-area: panel; border-left: 1px solid var(--line); }
-  .app > .section-index { grid-area: index; display: block; min-width: 9rem; padding: 10px 0; overflow-y: auto; background: var(--ground-raised); }
+  .app > .section-index { grid-area: index; display: block; padding: 10px 0; overflow-y: auto; overflow-x: hidden; background: var(--ground-raised); }
   .app > .column-resize { display: block; grid-column: 1; grid-row: 4 / span 3; margin-right: -6px; }
   ${SectionFolds.INDEXED_CSS}
 }

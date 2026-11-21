@@ -23,15 +23,6 @@ export class ColumnResize {
   background: var(--line-strong, rgba(127, 127, 127, .5)); opacity: 0; transition: opacity .15s ease; }
 .column-resize:is(:hover, :focus-visible, .dragging)::after { opacity: 1; }
 .column-resize:focus-visible { outline: none; }
-/* The button that folds the column away and back, at the top of the grip, on its line: in the gap between the columns, as wide as the
-   gap (18px), so that it stands over neither of them (wider, it covered the kind of the event open). A grid with another gap moves it. */
-.column-fold { display: none; position: sticky; top: 2px; z-index: 4; align-self: start; justify-self: end; box-sizing: border-box; width: 18px; height: 18px;
-  min-width: 0; min-height: 0; margin: 0 var(--rr0-column-fold-margin, -18px) 0 0; padding: 0; border: 1px solid var(--line-strong, rgba(127, 127, 127, .5));
-  border-radius: 50%; background: var(--ground-raised, Canvas); color: var(--ink-dim, inherit); font: 600 13px/1 var(--sans, inherit); cursor: pointer; }
-.column-fold::before { content: "‹"; display: block; margin-top: -1px; }
-[data-folded] > .column-fold::before { content: "›"; }
-.column-fold:hover { color: var(--ink, CanvasText); }
-.column-fold:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: 2px; }
 `
 
   /** Narrower, the history's cards no longer say what they are. */
@@ -86,48 +77,6 @@ export class ColumnResize {
   label(text: string): void {
     this.grip.title = text
     this.grip.setAttribute("aria-label", text)
-  }
-
-  private fold?: { button: HTMLButtonElement, fold: string, unfold: string }
-
-  /**
-   * Lets `button` fold the column away, to the button alone, and back (dicté 2026-11-21 : « en plus de resize il faut pouvoir
-   * replier/déplier la colonne de gauche »): `data-folded` on the host, for its grid to lay out; remembered beside the width.
-   */
-  foldWith(button: HTMLButtonElement): void {
-    this.fold = { button, fold: "", unfold: "" }
-    let folded = false
-    try { folded = localStorage.getItem(`${this.key}-folded`) === "true" } catch { /* As above. */ }
-    this.setFolded(folded)
-    button.addEventListener("click", () => this.setFolded(!this.folded))
-  }
-
-  /** Words the fold button: what it does folded and unfolded. */
-  foldLabels(fold: string, unfold: string): void {
-    if (!this.fold) return
-    this.fold.fold = fold
-    this.fold.unfold = unfold
-    this.setFolded(this.folded)
-  }
-
-  /** Whether the column is folded away. */
-  get folded(): boolean {
-    return this.host.hasAttribute("data-folded")
-  }
-
-  setFolded(folded: boolean): void {
-    this.host.toggleAttribute("data-folded", folded)
-    const fold = this.fold
-    if (fold) {
-      const text = folded ? fold.unfold : fold.fold
-      fold.button.title = text
-      fold.button.setAttribute("aria-label", text)
-      fold.button.setAttribute("aria-expanded", String(!folded))
-    }
-    try {
-      if (folded) localStorage.setItem(`${this.key}-folded`, "true")
-      else localStorage.removeItem(`${this.key}-folded`)
-    } catch { /* As above. */ }
   }
 
   /** Gives the first column `widthPx`, within bounds, or its own width back. */

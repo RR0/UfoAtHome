@@ -96,7 +96,7 @@ describe("WindowClose", () => {
     expect(identity.hasAttribute("data-elsewhere")).toBe(false)
     nav.style.display = "block"
     folds.refresh()
-    expect([...nav.children].map(link => link.textContent)).toEqual(["Identity", "Profile"])
+    expect([...nav.children].map(link => link.querySelector(".section-text")!.textContent)).toEqual(["Identity", "Profile"])
     expect(nav.children[0].getAttribute("aria-current")).toBe("true")
     expect(identity.hasAttribute("data-unfolded")).toBe(true)
     expect(profile.hasAttribute("data-elsewhere")).toBe(true)
@@ -123,7 +123,7 @@ describe("WindowClose", () => {
     // The editor's own handler: the tab chosen says so.
     for (const tab of tabs) tab.addEventListener("click", () => tabs.forEach(other => other.setAttribute("aria-expanded", String(other === tab))))
     folds.indexIn(nav, () => root.querySelector<HTMLElement>(".group-panel")!)
-    expect([...nav.children].map(link => link.textContent)).toEqual(["Rain", "Clouds"])
+    expect([...nav.children].map(link => link.querySelector(".section-text")!.textContent)).toEqual(["Rain", "Clouds"])
     expect(nav.children[0].getAttribute("aria-current")).toBe("true")
     // The sections of the part open are not listed, nor left aside: they fold as before.
     expect(root.querySelector(".form-section")!.hasAttribute("data-elsewhere")).toBe(false)

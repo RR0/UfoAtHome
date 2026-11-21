@@ -63,6 +63,49 @@ export class Icons {
   static readonly SHAPES = Icons.draw(`<circle cx="5.6" cy="6" r="3.2"/><rect x="8.2" y="8.2" width="5.8" height="5.8" rx="1"/>`)
   static readonly BODIES = Icons.draw(`<path d="M8 1.8 13.5 4.8v6.4L8 14.2 2.5 11.2V4.8z"/><path d="M2.5 4.8 8 7.8l5.5-3M8 7.8v6.4"/>`)
 
+  /** The sections of the groups, in the index beside the render, which is folded to them where it is narrow (dicté 2026-11-21). */
+  static readonly ID_CARD = Icons.draw(`<rect x="2" y="3.5" width="12" height="9" rx="1.5"/><circle cx="5.8" cy="7.2" r="1.4"/><path d="M3.8 10.8c.4-1.1 1.1-1.6 2-1.6s1.6.5 2 1.6M9.5 6.5h3M9.5 9h2.5"/>`)
+  static readonly STRANGE = Icons.draw(`<circle cx="8" cy="8" r="6"/><path d="M6.3 6.3a1.8 1.8 0 1 1 2.5 1.7c-.5.2-.8.6-.8 1.1v.4"/><path d="M8 11.6v.1"/>`)
+  static readonly EYE = Icons.draw(`<path d="M1.5 8s2.4-4.3 6.5-4.3S14.5 8 14.5 8 12.1 12.3 8 12.3 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>`)
+  static readonly PERCEPTION = Icons.draw(`<circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M3.8 12.2l1.4-1.4M10.8 5.2l1.4-1.4"/>`)
+  static readonly GAUGE = Icons.draw(`<path d="M2.5 11a5.5 5.5 0 0 1 11 0"/><path d="M8 11l2.6-3.2"/><circle cx="8" cy="11" r=".9"/>`)
+  static readonly HAZE = Icons.draw(`<path d="M2 5.5h12M3.5 8.5h9M2 11.5h12"/>`)
+  static readonly MOON = Icons.draw(`<path d="M10.8 2.6a5.6 5.6 0 1 0 2.6 9.6 4.6 4.6 0 0 1-2.6-9.6z"/>`)
+  static readonly SLIDERS = Icons.draw(`<path d="M2.5 4h11M2.5 8h11M2.5 12h11"/><circle cx="6" cy="4" r="1.3" fill="var(--ground-raised, Canvas)"/><circle cx="10.5" cy="8" r="1.3" fill="var(--ground-raised, Canvas)"/><circle cx="5" cy="12" r="1.3" fill="var(--ground-raised, Canvas)"/>`)
+  static readonly GLOBE = Icons.draw(`<circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c1.8 1.7 2.6 3.7 2.6 6S9.8 12.3 8 14M8 2C6.2 3.7 5.4 5.7 5.4 8s.8 4.3 2.6 6"/>`)
+  static readonly GAZE = Icons.draw(`<circle cx="8" cy="8" r="6"/><path d="M10.6 5.4 9 9 5.4 10.6 7 7z"/>`)
+  static readonly EVENTS = Icons.draw(`<path d="M2 8h12"/><circle cx="4" cy="8" r="1.4"/><circle cx="8.5" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/>`)
+  static readonly TOWN = Icons.draw(`<path d="M1.5 13.5h13"/><path d="M3 13.5V9l2.5-2L8 9v4.5"/><path d="M10 13.5v-6h3.5v6"/>`)
+  static readonly FLAG = Icons.draw(`<path d="M4 14V2.5"/><path d="M4 3h7.5l-1.8 2.6L11.5 8.2H4"/>`)
+  static readonly MIC = Icons.draw(`<rect x="6" y="2" width="4" height="7.5" rx="2"/><path d="M3.8 7.8a4.2 4.2 0 0 0 8.4 0M8 12v2"/>`)
+  static readonly CAMERA = Icons.draw(`<path d="M2 5.5h2.6l1.2-1.8h4.4l1.2 1.8H14V13H2z"/><circle cx="8" cy="9" r="2.3"/>`)
+  static readonly LANDMARK = Icons.draw(`<path d="M1.5 13.5 6 5l3 5.2 1.6-2.4 3.9 5.7z"/>`)
+  static readonly GHOST = Icons.draw(`<path d="M8 2.2 13 5.1v5.8L8 13.8 3 10.9V5.1z"/>`)
+  static readonly TRACE = Icons.draw(`<path d="M2.5 12.5c2-4 4-1 6-4s3.5-3 5-5"/><circle cx="2.5" cy="12.5" r="1"/><circle cx="13.5" cy="3.5" r="1"/>`)
+  static readonly APPEARANCE = Icons.draw(`<path d="M8 2l1.5 4.5L14 8l-4.5 1.5L8 14l-1.5-4.5L2 8l4.5-1.5z"/>`)
+  static readonly RULER = Icons.draw(`<rect x="1.8" y="5.5" width="12.4" height="5" rx="1"/><path d="M4.5 5.5v2M7 5.5v2.6M9.5 5.5v2M12 5.5v2.6"/>`)
+  static readonly PATH = Icons.draw(`<path d="M2.5 12C4 6 9 3.5 13 4"/><path d="M10.5 2.3 13 4l-2 2.3"/>`)
+  static readonly IDEA = Icons.draw(`<path d="M5.5 10.5a4 4 0 1 1 5 0c-.6.5-.9 1-.9 1.6v.4H6.4v-.4c0-.6-.3-1.1-.9-1.6z"/><path d="M6.5 14.2h3"/>`)
+
+  /**
+   * The pictogram of a section, by the key its `data-icon` gives, else the id of its title (or of what names it), else its own id; none
+   * for a section it does not know, which the index then marks with its title's first letter.
+   */
+  static section(key: string): string | undefined {
+    return ({
+      "label-section-identity": Icons.ID_CARD, "label-section-profile": Icons.WITNESS, "label-section-testimony": Icons.INTERVIEW,
+      "strangeness-section": Icons.STRANGE, "label-section-vision": Icons.EYE, "label-section-perception": Icons.PERCEPTION,
+      "witness-conditions": Icons.GAUGE, "viewing-conditions": Icons.HAZE, "moon-gauge": Icons.MOON, "error-parameters": Icons.SLIDERS,
+      "label-section-coordinates": Icons.GLOBE, "label-section-gaze": Icons.GAZE, "label-section-events": Icons.EVENTS,
+      "label-section-night-sky": Icons.STAR, "around-section": Icons.TOWN, "label-section-survey": Icons.ENVIRONMENT,
+      "label-section-period": Icons.DATE, "label-milestones": Icons.FLAG, "label-section-heard": Icons.SOUND,
+      "label-section-sound-recording": Icons.MIC, "label-section-picture": Icons.PICTURES, "label-section-pose": Icons.CAMERA,
+      "label-reference-landmarks": Icons.LANDMARK, "label-reference-ghosts": Icons.GHOST, "label-trace-import": Icons.TRACE,
+      "label-section-appearance": Icons.APPEARANCE, "label-section-size": Icons.RULER, "label-section-path": Icons.PATH,
+      "label-section-phenomenon-events": Icons.EVENTS, "label-section-bodies-events": Icons.EVENTS, "candidates": Icons.IDEA
+    } as Record<string, string>)[key]
+  }
+
   /** The pictogram of a part of a group, by the id of its panel; none for a part it does not know (one a module adds, say). */
   static part(panelId: string): string | undefined {
     return ({

@@ -1,3 +1,5 @@
+import { Icons } from "./Icons.js"
+
 /** What a fold says, by how many settings it holds back. */
 export interface SectionFoldMessages {
   /** "More settings ({n})": the advanced fields of a section, held back at its end. */
@@ -265,6 +267,17 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
     return (words.textContent ?? "").replace(/\s+/g, " ").trim()
   }
 
+  /** The pictogram of a section (see Icons.section): by its `data-icon`, else by the id of its title or of what names it, else its own. */
+  private static iconOf(section: HTMLElement): string | undefined {
+    const title = section.querySelector<HTMLElement>(SectionFolds.TITLE)
+    const keys = [section.dataset.icon, title?.id, title?.querySelector("[id]")?.id, section.id]
+    for (const key of keys) {
+      const icon = key ? Icons.section(key) : undefined
+      if (icon) return icon
+    }
+    return undefined
+  }
+
   /** Whether the index is on show: the page gives it room. */
   private get indexed(): boolean {
     const nav = this.index?.nav
@@ -326,7 +339,17 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
       link.className = "section-link"
       if (inParts) link.dataset.part = String(at)
       else link.dataset.section = String(at)
-      link.textContent = title
+      // Its pictogram, which is all it shows where the column is made narrow (see INDEX_CSS): the title said by its tooltip then.
+      const icon = document.createElement("span")
+      icon.className = "section-icon"
+      const drawn = inParts ? parts[at].querySelector("svg")?.outerHTML : SectionFolds.iconOf(sections[at])
+      if (drawn) icon.innerHTML = drawn
+      else icon.textContent = title.slice(0, 1)
+      const text = document.createElement("span")
+      text.className = "section-text"
+      text.textContent = title
+      link.append(icon, text)
+      link.title = title
       if (at === current) link.setAttribute("aria-current", "true")
       return link
     }))
@@ -334,12 +357,21 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
 
   /** The index of a group's sections: its titles one under the other, each a link to its section, the one shown marked. */
   static readonly INDEX_CSS = `
-.section-index { display: none; }
+.section-index { display: none; container: section-index / inline-size; }
 .section-index > .section-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0;
   padding: 10px 14px 10px 18px; border: 0; border-radius: 0; background: none; color: var(--ink-dim, inherit); text-align: start;
   font: 600 12px/1.3 var(--sans, inherit); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 /* A title longer than the column is wide wraps (see the column's width in the editor's template). */
 .section-index > .section-link::after { content: "›"; font-size: 1.5em; line-height: .7; letter-spacing: 0; }
+.section-link > .section-icon { flex: none; display: inline-grid; place-items: center; width: 16px; height: 16px; font-size: 13px; letter-spacing: 0; }
+.section-link > .section-icon > svg { width: 16px; height: 16px; }
+.section-link > .section-text { flex: 1 1 auto; min-width: 0; }
+/* Made narrower than its titles, the index is its pictograms alone, one under the other, each title said by its tooltip (dicté 2026-11-21 :
+   « afficher les icônes seulement »). */
+@container section-index (max-width: 6.5rem) {
+  .section-index > .section-link { justify-content: center; padding-inline: 0; }
+  .section-index > .section-link > .section-text, .section-index > .section-link::after { display: none; }
+}
 .section-index > .section-link:hover { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 6%, transparent); }
 .section-index > .section-link[aria-current="true"] { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 10%, transparent);
   box-shadow: inset 3px 0 0 var(--glow-solid, var(--sky, Highlight)); }

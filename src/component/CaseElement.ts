@@ -113,7 +113,7 @@ export class CaseElement extends HTMLElement {
       })
     this.grouping = CaseTimeline.groupingRemembered()
     this.columns = new ColumnResize(this.byId("column-resize"), this.shadow.querySelector<HTMLElement>(".case-layout")!,
-      () => this.shadow.querySelector<HTMLElement>(".case-timeline")!, ColumnResize.CASE_HISTORY_KEY)
+      () => this.shadow.querySelector<HTMLElement>(".case-timeline")!, ColumnResize.CASE_HISTORY_KEY, ColumnResize.PROPERTY, 44)
     this.byId("group-readings").addEventListener("click", () => {
       this.grouping = !this.grouping
       CaseTimeline.rememberGrouping(this.grouping)

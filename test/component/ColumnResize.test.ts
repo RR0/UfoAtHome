@@ -35,22 +35,11 @@ describe("ColumnResize", () => {
     expect(grip.getAttribute("aria-label")).toBe("Redimensionner")
   })
 
-  it("folds the column away to its button, and back, remembering it, its button saying what it does", () => {
-    const { host, resize } = make()
-    const button = document.createElement("button")
-    resize.foldWith(button)
-    resize.foldLabels("Fold", "Unfold")
-    expect(host.hasAttribute("data-folded")).toBe(false)
-    expect(button.title).toBe("Fold")
-    button.click()
-    expect(host.hasAttribute("data-folded")).toBe(true)
-    expect(button.title).toBe("Unfold")
-    expect(button.getAttribute("aria-expanded")).toBe("false")
-    // The next one opens folded.
-    const next = make()
-    next.resize.foldWith(document.createElement("button"))
-    expect(next.host.hasAttribute("data-folded")).toBe(true)
-    button.click()
-    expect(host.hasAttribute("data-folded")).toBe(false)
+  it("goes narrower than its words where it is asked to, down to its pictograms", () => {
+    const host = document.createElement("div")
+    const grip = document.createElement("div")
+    new ColumnResize(grip, host, () => host, "test-width", "--test-width", 44)
+    grip.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }))
+    expect(host.style.getPropertyValue("--test-width")).toBe("44px")
   })
 })

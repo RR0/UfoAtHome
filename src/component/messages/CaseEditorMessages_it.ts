@@ -79,8 +79,6 @@ export const caseEditorMessages_it: CaseEditorMessages = {
   interpretationOfNone: "—",
   groupReadings: "Raggruppa le letture per osservazione",
   resizeColumns: "Ridimensiona la colonna della cronologia (doppio clic: larghezza predefinita)",
-  foldColumn: "Ripiega la colonna del caso",
-  unfoldColumn: "Apri la colonna del caso",
   alsoAbout: "Riguarda anche",
   foldReadings: "Chiudi le sue letture",
   unfoldReadings: "Apri le sue letture",

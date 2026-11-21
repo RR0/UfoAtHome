@@ -1387,7 +1387,7 @@ export class SightingEditorElement extends HTMLElement {
     const sectionIndex = this.shadow.getElementById("section-index")!
     this.sectionFolds.indexIn(sectionIndex, () => this.groupPanels?.find(panel => !panel.hidden))
     this.sectionIndexResize = new ColumnResize(this.shadow.getElementById("section-index-resize")!, this.shadow.querySelector<HTMLElement>(".app")!,
-      () => sectionIndex, "rr0-section-index-width", "--rr0-section-index-width", 144)
+      () => sectionIndex, "rr0-section-index-width", "--rr0-section-index-width", 44)
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
       get sighting() { return editor.ufoElement.sighting },
@@ -7390,6 +7390,7 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessErrorView.placeObserverSections(perception)
     const candidates = document.createElement("div")
     candidates.className = "form-section candidates-section"
+    candidates.dataset.icon = "candidates"
     this.shadow.getElementById("group-observation")!.append(candidates)
     const label = (element: Element | null) => element?.closest<HTMLElement>("label") ?? undefined
     this.candidatesView = new CandidatesView({

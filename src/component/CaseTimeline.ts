@@ -123,6 +123,20 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
   bottom: calc(100% - var(--dot-y) - 1px); width: 1px; transform: translateX(-50%); background: var(--tl-line); pointer-events: none; }
 .event-card[data-nested]:has(+ .event-card[data-nested])::before { bottom: -1px; }
 .event-card[data-nested] .event-open::after { left: calc(-24px - 1px - var(--nest)); }
+/* A column made narrower than its cards (dicté 2026-11-21 : « afficher les icônes seulement »): the marks alone on the rail, one under
+   the other, each opening its event by the title's hit area, which still covers it; the title said by its tooltip (see card). */
+@container (max-width: 3rem) {
+  .event-list { gap: 6px; }
+  .event-card { min-height: 26px; border-color: transparent; background: none; overflow: visible; }
+  .event-card[data-nested] { margin-left: 0; }
+  .event-card[data-nested]::before { display: none; }
+  .event-card[data-nested]::after { left: calc(var(--rail) - 24px - 1px); }
+  .event-card[data-nested] > .event-mark { left: calc(var(--rail) - 24px - 1px); }
+  .event-card > :not(.event-body, .event-mark), .event-body > :not(.event-main), .event-main > :not(.event-open) { display: none !important; }
+  .event-body, .event-main { display: block !important; padding: 0 !important; margin: 0 !important; }
+  .event-open { display: block; height: 26px; font-size: 0 !important; color: transparent; }
+  .event-card[data-nested] .event-open::after { left: calc(-24px - 1px); }
+}
 /* What folds an observation's readings away or unfolds them: above the title's hit area, at the card's end. */
 .event-fold { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 4px; justify-self: end; grid-column: -2 / -1;
   grid-row: 1; padding: 2px 8px; border: 1px solid var(--tl-line); border-radius: 999px; background: none; color: var(--tl-ink-dim);
@@ -293,7 +307,8 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
     title.type = "button"
     title.className = "event-open"
     title.textContent = card.title
-    title.title = words.openEvent
+    // What the event is, said again by its tooltip: all there is of it where the column is its marks alone (see the compact @container).
+    title.title = card.title || words.openEvent
     title.addEventListener("click", () => this.choose(card.at))
     const meta = document.createElement("span")
     meta.className = "event-meta"

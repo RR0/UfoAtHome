@@ -102,6 +102,8 @@ export const caseCss = `
   .case-layout:has(> .case-timeline[hidden]) { grid-template-columns: minmax(0, 1fr); }
   .case-layout:has(> .case-timeline[hidden]) > :is(.open-events, .column-resize) { grid-column: 1; }
   .case-layout:has(> .case-timeline[hidden]) > .column-resize { display: none; }
+  /* Narrower than its cards, the history is its events' marks alone (see CaseTimeline.CSS). */
+  .case-layout > .case-timeline { container: case-history / inline-size; }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
   /* A dialogue open alone beside the chronology has the height the chronology has (dicté : « toute la hauteur »), not the 22 lines kept
      under a player when they are one above the other; kept in view as the page scrolls, as the chronology is. */
@@ -114,4 +116,8 @@ export const caseCss = `
   font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto; }
 ${CaseTimeline.CSS}
 ${ColumnResize.CSS}
+@container case-history (max-width: 6rem) {
+  .case-timeline > :not(.event-list) { display: none !important; }
+  .case-timeline > .event-list { padding-left: 30px; }
+}
 `

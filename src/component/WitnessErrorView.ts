@@ -262,6 +262,8 @@ export class WitnessErrorView {
       return section
     }
     const sections = [make(), make(), make(), make()]
+    // What each is pictured by in the index of the sections (see Icons.section).
+    sections.forEach((section, at) => { section.dataset.icon = ["witness-conditions", "viewing-conditions", "moon-gauge", "error-parameters"][at] })
     after.after(...sections)
     this.renderObserver()
   }
