@@ -105,9 +105,6 @@ export const caseCss = `
   /* Narrower than its cards, the history is its events' marks alone (see CaseTimeline.CSS). */
   .case-layout > .case-timeline { container: case-history / inline-size; }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
-  /* A column that scrolls clips what passes its edge: the marks on the rail stand half outside the list, so the list is set in by as much
-     as they and their ring stick out (as narrowed below, and in the case editor). */
-  .case-layout > .case-timeline > .event-list { padding-left: 30px; }
   /* A dialogue open alone beside the chronology has the height the chronology has (dicté : « toute la hauteur »), not the 22 lines kept
      under a player when they are one above the other; kept in view as the page scrolls, as the chronology is. */
   .case-layout > .open-events:has(> .open-event:only-child rr0-interview) { position: sticky; top: 0; }
@@ -119,6 +116,12 @@ export const caseCss = `
   font-size: 14px; line-height: 1.5; max-height: 22em; overflow-y: auto; }
 ${CaseTimeline.CSS}
 ${ColumnResize.CSS}
+/* The history in a column of its own scrolls, and a column that scrolls clips what passes its edge: the marks on the rail stand half outside
+   the list, so the list is set in by as much as they and their ring stick out (as in the case editor). Asked of the column itself, the one
+   container it is in: a query on the case's width, which is not its container, was never true for it. */
+@container case-history (min-width: 0) {
+  .case-timeline > .event-list { padding-left: 30px; }
+}
 @container case-history (max-width: 6rem) {
   .case-timeline > :not(.event-list) { display: none !important; }
   .case-timeline > .event-list { padding-left: 30px; }
