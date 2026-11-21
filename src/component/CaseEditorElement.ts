@@ -185,6 +185,8 @@ const TEMPLATE = `
     display: inline-flex; align-items: center; gap: 8px; min-height: 0; margin: 0 0 -1px; padding: 12px 10px;
     border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; box-shadow: none; color: var(--ink-dim); font: 600 15px/1.2 var(--sans);
   }
+  /* A pictogram before each name, as the observation's groups have (dicté 2026-11-21 : « pour être cohérent »). */
+  #case-tabs .group-tab > svg { flex: none; width: 16px; height: 16px; }
   #case-tabs .group-tab:hover { background: none; color: var(--ink); }
   #case-tabs .group-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
   .count { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 999px; background: var(--neutral-bg); color: var(--ink-dim); font-size: 12px; text-align: center; }
@@ -317,8 +319,8 @@ const TEMPLATE = `
   </header>
   <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
   <div id="case-tabs" class="group-tabs">
-    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true"><span id="label-events-group"></span> <span id="events-count" class="count"></span></button>
-    <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false"><span id="label-case-file-group"></span></button>
+    <button class="group-tab" type="button" aria-controls="group-events" aria-expanded="true">${Icons.CLOCK}<span id="label-events-group"></span> <span id="events-count" class="count"></span></button>
+    <button class="group-tab" type="button" aria-controls="group-case-file" aria-expanded="false">${Icons.FILES}<span id="label-case-file-group"></span></button>
   </div>
 </section>
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
