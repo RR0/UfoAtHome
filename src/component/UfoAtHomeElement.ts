@@ -33,7 +33,8 @@ ${MessageStyle.CSS}
 .open-menu rr0-input-file { display: flex; flex-wrap: wrap; }
 .open-menu .hint { margin: 6px 0 0; color: var(--ink-dim); font-size: .78em; line-height: 1.3; }
 .open-menu h2 { margin: 14px 0 6px; font: 600 12px/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--glow-dim); }
-.recent { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 50vh; overflow-y: auto; }
+/* Room right of the last button: the cross stood against the edge of the list, which scrolls. */
+.recent { list-style: none; margin: 0; padding: 0 6px 0 0; display: grid; gap: 2px; max-height: 50vh; overflow-y: auto; }
 .recent li { display: flex; align-items: center; gap: 6px; }
 .recent .reopen { flex: 1; min-width: 0; display: grid; padding: 6px 8px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit;
   text-align: left; cursor: pointer; }
