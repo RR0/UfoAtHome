@@ -158,7 +158,7 @@ const TEMPLATE = `
     /* The grip on the list's edge, as tall as it: the list's width, dragged (see ColumnResize). */
     #group-events.one-open > .column-resize { display: block; grid-column: 1; grid-row: 1 / span 6; margin-right: -15px; }
     /* Higher than the grip's top: in the panel's padding, over the columns (dicté 2026-11-21 : « il doit être plus haut »). */
-    #group-events.one-open > .column-fold { display: block; grid-column: 1; grid-row: 1; margin-top: -12px; }
+    #group-events.one-open > .column-fold { display: block; grid-column: 1; grid-row: 1; margin-top: -12px; --rr0-column-fold-margin: -9px; }
     /* What the button folds lights up while it is pointed at (dicté). */
     #group-events.one-open:not([data-folded]):has(> .column-fold:is(:hover, :focus-visible)) > #case-overview {
       /* Lit with a margin of its colour around it, drawn rather than laid out (nothing moves), and no line of its own (dicté). */
