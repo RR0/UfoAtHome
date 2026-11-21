@@ -14,6 +14,9 @@ import type { SightingLabels } from "./SightingLabels.js"
  * under this directory (`SightingEditorMessages_en.ts`, `SightingEditorMessages_fr.ts`) and loaded
  * via `loadSightingEditorMessages`. */
 export interface SightingEditorMessages extends SectionFoldMessages, TimelineTracksMessages, InputFileMessages, PositionInputMessages, SightingLabels {
+  sectionIndex: string
+  /** The grip between the index of a group's sections and the section shown beside the render (see SectionFolds.indexIn). */
+  resizeSectionIndex: string
   oval: string
   /** The "Polygon" preset button — a plain quad, the starting point for a freeform shape (see
    * Shape.ts's own createCustomPolygon doc comment). */

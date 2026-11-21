@@ -9,6 +9,8 @@ export interface SectionFoldMessages {
   /** A section advanced as a whole whose settings cannot be counted from here (they are drawn by a component of their own). */
   showSettingsAny: string
   hideSettings: string
+  /** What the index of a group's sections is called, read aloud (see SectionFolds.indexIn). */
+  sectionIndex?: string
 }
 
 /**
@@ -78,13 +80,14 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
     }
     root.addEventListener("click", event => {
       const title = titleOf(event)
-      if (title) this.unfold(SectionFolds.sectionOf(title)!, !SectionFolds.sectionOf(title)!.hasAttribute("data-unfolded"))
+      // Beside an index, a section listed in it is shown whole under its title, which is no fold any more: the index chooses.
+      if (title && !this.listedNow(SectionFolds.sectionOf(title)!)) this.unfold(SectionFolds.sectionOf(title)!, !SectionFolds.sectionOf(title)!.hasAttribute("data-unfolded"))
     })
     root.addEventListener("keydown", event => {
       const key = (event as KeyboardEvent).key
       if (key !== "Enter" && key !== " ") return
       const title = titleOf(event)
-      if (!title) return
+      if (!title || this.listedNow(SectionFolds.sectionOf(title)!)) return
       event.preventDefault()
       this.unfold(SectionFolds.sectionOf(title)!, !SectionFolds.sectionOf(title)!.hasAttribute("data-unfolded"))
     })
@@ -128,6 +131,7 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
   /** Says again what each fold holds back: what the form shows may have changed since (an instrument picked, a decor kind). */
   refresh(): void {
     this.markTitles()
+    this.refreshIndex()
     const m = this.messages
     if (!m) return
     for (const [section, toggle] of this.toggles) {
@@ -172,6 +176,16 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
 
   /** Opens the section `element` is in, if it is held back there: a field somebody is sent to has to be seen. */
   reveal(element: Element): void {
+    // Beside an index, the section listed that holds it is the one shown.
+    const panel = element.closest<HTMLElement>(".group-panel")
+    let outer: HTMLElement | undefined
+    for (let section = element.closest<HTMLElement>(".form-section"); section && panel?.contains(section); section = section.parentElement?.closest<HTMLElement>(".form-section") ?? null) {
+      if (section.hasAttribute("data-foldable")) outer = section
+    }
+    if (panel && outer) {
+      this.chosen.set(panel, outer)
+      this.refreshIndex()
+    }
     for (let section = element.closest<HTMLElement>(".form-section"); section; section = section.parentElement?.closest<HTMLElement>(".form-section") ?? null) {
       if (!section.hasAttribute("data-unfolded")) this.unfold(section, true)
     }
@@ -185,6 +199,141 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
     // What a fold holds back is measured on show: the section's fields have just come out.
     if (open) this.refresh()
   }
+
+  /** Where the index of the open group's sections is drawn, and the group open; none until indexIn. */
+  private index?: { nav: HTMLElement, panel: () => HTMLElement | undefined }
+  /** The section shown, group by group, beside the index. */
+  private readonly chosen = new WeakMap<HTMLElement, HTMLElement>()
+  /** The sections listed in the index as it is drawn. */
+  private listed: HTMLElement[] = []
+  /** What the index was drawn from, to draw it again only when that changes. */
+  private indexKey = ""
+  private indexFrame?: number
+
+  /**
+   * Lists the titles of the open group's sections in `nav`, as links to each (dicté 2026-11-21 : en trois colonnes, le contenu des
+   * sous-sections sous le rendu, « IDENTITÉ › » plutôt que « › IDENTITÉ »): where the page shows `nav` (its CSS decides, by the width
+   * there is), one section at a time is shown, whole, and the others are left to the index. Where it does not, the titles fold their
+   * sections as before. Drawn again whenever what is on show may have changed: a group or a part of one opened, a section shown or hidden.
+   *
+   * @param nav Where the index is drawn.
+   * @param panel The group open.
+   */
+  indexIn(nav: HTMLElement, panel: () => HTMLElement | undefined): void {
+    this.index = { nav, panel }
+    nav.addEventListener("click", event => {
+      const link = (event.target as Element | null)?.closest?.<HTMLElement>("[data-section]")
+      const section = link ? this.listed[Number(link.dataset.section)] : undefined
+      const open = section?.closest<HTMLElement>(".group-panel")
+      if (!section || !open) return
+      this.chosen.set(open, section)
+      this.refreshIndex()
+      // Its fields seen from their first line.
+      open.scrollTop = 0
+    })
+    const later = () => {
+      if (this.indexFrame !== undefined) return
+      this.indexFrame = requestAnimationFrame(() => {
+        this.indexFrame = undefined
+        this.refreshIndex()
+      })
+    }
+    // Whether the index is shown is the width's doing; what it lists, the groups' and sections' being shown or not.
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(later).observe(nav.parentElement ?? nav)
+    if (typeof MutationObserver !== "undefined") {
+      new MutationObserver(later).observe(this.root as Node, { subtree: true, attributes: true, attributeFilter: ["hidden"] })
+    }
+    this.refreshIndex()
+  }
+
+  /**
+   * What a title says, and only that: not the help of a (?) beside it, whose text came along with it (« Alentour ?Ce qui faisait du bruit
+   * autour de l'observateur… » in the index), nor what a button or a mark in it says.
+   */
+  private static titleText(title: HTMLElement | null): string {
+    if (!title) return ""
+    const words = title.cloneNode(true) as HTMLElement
+    for (const aside of words.querySelectorAll("rr0-hint, button, [aria-hidden='true'], [hidden]")) aside.remove()
+    return (words.textContent ?? "").replace(/\s+/g, " ").trim()
+  }
+
+  /** Whether the index is on show: the page gives it room. */
+  private get indexed(): boolean {
+    const nav = this.index?.nav
+    return nav !== undefined && nav.isConnected && getComputedStyle(nav).display !== "none"
+  }
+
+  /** Whether `section` is one the index shows on its own, now. */
+  private listedNow(section: HTMLElement): boolean {
+    return this.listed.includes(section) && this.indexed
+  }
+
+  /** Lists the open group's sections, and shows the one chosen (the first, until one is) alone. */
+  private refreshIndex(): void {
+    const index = this.index
+    if (!index) return
+    const on = this.indexed
+    const panel = on ? index.panel() : undefined
+    const shown = (element: Element): boolean => {
+      for (let node: Element | null = element; node && node !== panel; node = node.parentElement) if ((node as HTMLElement).hidden) return false
+      return true
+    }
+    // The outermost sections a title folds, on show in the group open (in its part open, for a group in parts).
+    const sections = panel ? [...panel.querySelectorAll<HTMLElement>(SectionFolds.TITLED)]
+      .filter(section => shown(section) && !section.parentElement?.closest(`${SectionFolds.TITLED}`)) : []
+    let chosen = panel ? this.chosen.get(panel) : undefined
+    if (!chosen || !sections.includes(chosen)) chosen = sections[0]
+    for (const section of this.listed) if (!sections.includes(section)) {
+      section.removeAttribute("data-elsewhere")
+      section.removeAttribute("data-chosen")
+    }
+    for (const section of sections) {
+      section.toggleAttribute("data-elsewhere", section !== chosen)
+      section.toggleAttribute("data-chosen", section === chosen)
+    }
+    // Shown whole: unfolded, without going through unfold, whose refresh would come back here.
+    if (chosen && !chosen.hasAttribute("data-unfolded")) {
+      chosen.setAttribute("data-unfolded", "")
+      chosen.querySelector(SectionFolds.TITLE)?.setAttribute("aria-expanded", "true")
+    }
+    this.listed = sections
+    const titles = sections.map(section => SectionFolds.titleText(section.querySelector<HTMLElement>(SectionFolds.TITLE)))
+    const key = `${titles.join("\n")}\n${chosen ? sections.indexOf(chosen) : -1}\n${this.messages?.sectionIndex ?? ""}`
+    if (key === this.indexKey) return
+    this.indexKey = key
+    const nav = index.nav
+    if (this.messages?.sectionIndex) nav.setAttribute("aria-label", this.messages.sectionIndex)
+    nav.replaceChildren(...titles.map((title, at) => {
+      const link = document.createElement("button")
+      link.type = "button"
+      link.className = "section-link"
+      link.dataset.section = String(at)
+      link.textContent = title
+      if (sections[at] === chosen) link.setAttribute("aria-current", "true")
+      return link
+    }))
+  }
+
+  /** The index of a group's sections: its titles one under the other, each a link to its section, the one shown marked. */
+  static readonly INDEX_CSS = `
+.section-index { display: none; }
+.section-index > .section-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0;
+  padding: 10px 14px 10px 18px; border: 0; border-radius: 0; background: none; color: var(--ink-dim, inherit); text-align: start;
+  font: 600 12px/1.3 var(--sans, inherit); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+/* As wide as the longest title by default (the column is max-content), a title wraps when the column is made narrower. */
+.section-index > .section-link::after { content: "›"; font-size: 1.5em; line-height: .7; letter-spacing: 0; }
+.section-index > .section-link:hover { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 6%, transparent); }
+.section-index > .section-link[aria-current="true"] { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 10%, transparent);
+  box-shadow: inset 3px 0 0 var(--glow-solid, var(--sky, Highlight)); }
+.section-index > .section-link:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: -2px; }
+`
+
+  /** What, beside the index (see indexIn), is left to it: the sections not chosen, and the fold of the one that is. */
+  static readonly INDEXED_CSS = `
+.form-section[data-elsewhere] { display: none !important; }
+${SectionFolds.titles("", "[data-chosen]")} { cursor: default; }
+${SectionFolds.titles("::before", "[data-chosen]")} { display: none; }
+`
 
   /**
    * Marks the sections their titles fold, and makes those titles controls a keyboard reaches: those whose title says something (a

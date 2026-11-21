@@ -35,12 +35,15 @@ export class ColumnResize {
    * @param host Where the width is set, and what holds both columns: its width bounds the first one's.
    * @param column The first column, whose width is dragged from.
    * @param key Where the width is remembered.
+   * @param property The property the width is given in: another than the case's history, for a grid held inside it (a custom property is
+   * inherited through every element and shadow root under the one it is set on).
+   * @param minPx Narrower than that, the column says nothing any more.
    */
   constructor(private readonly grip: HTMLElement, private readonly host: HTMLElement, private readonly column: () => HTMLElement,
-              private readonly key: string) {
+              private readonly key: string, private readonly property = ColumnResize.PROPERTY, private readonly minPx = ColumnResize.MIN_PX) {
     try {
       const kept = localStorage.getItem(key)
-      if (kept && /^\d+px$/.test(kept)) host.style.setProperty(ColumnResize.PROPERTY, kept)
+      if (kept && /^\d+px$/.test(kept)) host.style.setProperty(property, kept)
     } catch { /* No storage here (a private window, a preview): the width lasts as long as the page. */ }
     grip.setAttribute("role", "separator")
     grip.setAttribute("aria-orientation", "vertical")
@@ -79,14 +82,14 @@ export class ColumnResize {
   /** Gives the first column `widthPx`, within bounds, or its own width back. */
   set(widthPx: number | undefined): void {
     const host = this.host
-    if (widthPx === undefined) host.style.removeProperty(ColumnResize.PROPERTY)
+    if (widthPx === undefined) host.style.removeProperty(this.property)
     else {
-      const max = Math.max(ColumnResize.MIN_PX, host.getBoundingClientRect().width - ColumnResize.OTHER_MIN_PX)
-      host.style.setProperty(ColumnResize.PROPERTY, `${Math.round(Math.min(max, Math.max(ColumnResize.MIN_PX, widthPx)))}px`)
+      const max = Math.max(this.minPx, host.getBoundingClientRect().width - ColumnResize.OTHER_MIN_PX)
+      host.style.setProperty(this.property, `${Math.round(Math.min(max, Math.max(this.minPx, widthPx)))}px`)
     }
     try {
       if (widthPx === undefined) localStorage.removeItem(this.key)
-      else localStorage.setItem(this.key, host.style.getPropertyValue(ColumnResize.PROPERTY))
+      else localStorage.setItem(this.key, host.style.getPropertyValue(this.property))
     } catch { /* As above. */ }
   }
 }

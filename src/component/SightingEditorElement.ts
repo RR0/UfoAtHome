@@ -7,6 +7,7 @@ import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
+import { ColumnResize } from "./ColumnResize.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
 import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
@@ -526,6 +527,8 @@ export class SightingEditorElement extends HTMLElement {
   private candidatesView?: CandidatesView
   /** The advanced fields of each section, held back where they are (see SectionFolds). */
   private readonly sectionFolds: SectionFolds
+  /** The grip on the edge of the index of a group's sections (see SectionFolds.indexIn). */
+  private readonly sectionIndexResize: ColumnResize
   /** The File group's account of the data frozen beside the recording, and what takes it at export. */
   private readonly snapshotsPanel: SnapshotsPanel
   /** The Files group's account of the recording's weather, kept inside it or beside it. */
@@ -1380,6 +1383,11 @@ export class SightingEditorElement extends HTMLElement {
     this.shareDialog = this.shadow.getElementById("share-dialog") as ShareDialogElement
     this.shareDialog.subject = this.shareSubject
     this.sectionFolds = new SectionFolds(this.shadow)
+    // Given the width, the titles of the open group's sections in a column of their own, the one chosen shown under the render.
+    const sectionIndex = this.shadow.getElementById("section-index")!
+    this.sectionFolds.indexIn(sectionIndex, () => this.groupPanels?.find(panel => !panel.hidden))
+    this.sectionIndexResize = new ColumnResize(this.shadow.getElementById("section-index-resize")!, this.shadow.querySelector<HTMLElement>(".app")!,
+      () => sectionIndex, "rr0-section-index-width", "--rr0-section-index-width", 144)
     const editor = this
     this.witnessErrorView = new WitnessErrorView({
       get sighting() { return editor.ufoElement.sighting },
@@ -7553,17 +7561,25 @@ export class SightingEditorElement extends HTMLElement {
     const app = this.shadow.querySelector<HTMLElement>(".app")!
     // The scene, which took the place of its slot: its height is what is dragged.
     const slot = this.sceneElement
+    // One height in one column, another beside the index of the sections (see the template's @container): the tall render chosen in one
+    // column left the section under it in two a few lines high.
+    const wide = () => getComputedStyle(app).display === "grid"
+    const property = () => wide() ? "--rr0-scene-wide-height" : "--rr0-scene-max-height"
+    const key = () => wide() ? `${SightingEditorElement.SCENE_HEIGHT_KEY}-wide` : SightingEditorElement.SCENE_HEIGHT_KEY
     const set = (heightPx: number | undefined) => {
-      if (heightPx === undefined) app.style.removeProperty("--rr0-scene-max-height")
-      else app.style.setProperty("--rr0-scene-max-height", `${Math.round(Math.min(window.innerHeight * 0.85, Math.max(120, heightPx)))}px`)
+      const [name, stored] = [property(), key()]
+      if (heightPx === undefined) app.style.removeProperty(name)
+      else app.style.setProperty(name, `${Math.round(Math.min(window.innerHeight * 0.85, Math.max(120, heightPx)))}px`)
       try {
-        if (heightPx === undefined) localStorage.removeItem(SightingEditorElement.SCENE_HEIGHT_KEY)
-        else localStorage.setItem(SightingEditorElement.SCENE_HEIGHT_KEY, app.style.getPropertyValue("--rr0-scene-max-height"))
+        if (heightPx === undefined) localStorage.removeItem(stored)
+        else localStorage.setItem(stored, app.style.getPropertyValue(name))
       } catch { /* No storage here (a private window, a preview): the height lasts as long as the page. */ }
     }
     try {
-      const kept = localStorage.getItem(SightingEditorElement.SCENE_HEIGHT_KEY)
-      if (kept && /^\d+px$/.test(kept)) app.style.setProperty("--rr0-scene-max-height", kept)
+      for (const [name, stored] of [["--rr0-scene-max-height", SightingEditorElement.SCENE_HEIGHT_KEY], ["--rr0-scene-wide-height", `${SightingEditorElement.SCENE_HEIGHT_KEY}-wide`]]) {
+        const kept = localStorage.getItem(stored)
+        if (kept && /^\d+px$/.test(kept)) app.style.setProperty(name, kept)
+      }
     } catch { /* As above. */ }
     grip.addEventListener("pointerdown", event => {
       event.preventDefault()
@@ -12345,6 +12361,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     for (const [key, text] of Object.entries(sections)) this.shadow.getElementById(`label-section-${key}`)!.textContent = text
     this.sectionFolds.setMessages(messages)
+    this.sectionIndexResize.label(messages.resizeSectionIndex)
     this.candidatesView?.languageChanged()
     this.witnessErrorView.refresh()
     this.timelineTracks.setMessages(messages)

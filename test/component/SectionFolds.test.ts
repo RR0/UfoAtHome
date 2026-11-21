@@ -78,4 +78,35 @@ describe("WindowClose", () => {
     buttons[0].click()
     expect(closed).toBe(1)
   })
+
+  it("lists the open group's sections in an index where the page shows it, the one chosen shown alone, unfolded, its title no fold", () => {
+    const root = fixture(`<nav class="section-index"></nav>
+      <section class="group-panel"><div class="form-section"><h3 class="section-title">Identity</h3><label>ID <input/></label></div>
+      <div class="form-section"><h3 class="section-title">Profile</h3><label>Age <input/></label></div></section>`)
+    document.body.append(root)
+    const folds = new SectionFolds(root)
+    folds.setMessages(messages)
+    const nav = root.querySelector<HTMLElement>(".section-index")!
+    folds.indexIn(nav, () => root.querySelector<HTMLElement>(".group-panel")!)
+    const [identity, profile] = [...root.querySelectorAll<HTMLElement>(".form-section")]
+    // Where the page leaves no room for it (its CSS hides it), nothing is listed: the titles fold their sections as before.
+    nav.style.display = "none"
+    folds.refresh()
+    expect(nav.children.length).toBe(0)
+    expect(identity.hasAttribute("data-elsewhere")).toBe(false)
+    nav.style.display = "block"
+    folds.refresh()
+    expect([...nav.children].map(link => link.textContent)).toEqual(["Identity", "Profile"])
+    expect(nav.children[0].getAttribute("aria-current")).toBe("true")
+    expect(identity.hasAttribute("data-unfolded")).toBe(true)
+    expect(profile.hasAttribute("data-elsewhere")).toBe(true)
+    ;(nav.children[1] as HTMLElement).click()
+    expect(profile.hasAttribute("data-elsewhere")).toBe(false)
+    expect(profile.hasAttribute("data-unfolded")).toBe(true)
+    expect(identity.hasAttribute("data-elsewhere")).toBe(true)
+    // Its title, beside the index, folds nothing.
+    profile.querySelector<HTMLElement>(".section-title")!.click()
+    expect(profile.hasAttribute("data-unfolded")).toBe(true)
+    root.remove()
+  })
 })

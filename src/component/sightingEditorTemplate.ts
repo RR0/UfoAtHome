@@ -5,6 +5,7 @@ import { ElementList } from "./ElementList.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
 import { SectionFolds } from "./SectionFolds.js"
+import { ColumnResize } from "./ColumnResize.js"
 import { TimelineTracks } from "./TimelineTracks.js"
 import { EventsPanel } from "./EventsPanel.js"
 import { SceneFieldOverlay } from "./SceneFieldOverlay.js"
@@ -91,6 +92,9 @@ export const html = `
 </nav>
 <!-- The tracks, laid out after the sections' chips rather than under the scene: the chips stay where they are when the tracks unfold. -->
 <div id="timeline-tracks" hidden></div>
+<!-- Given the width, the titles of the open group's sections, each a link to its section shown under the render (see SectionFolds.indexIn). -->
+<nav id="section-index" class="section-index"></nav>
+<div id="section-index-resize" class="column-resize"></div>
 <section class="group-panel" id="group-observation" aria-labelledby="label-observation-group" hidden>
   <!-- One section, its id held back: what a case names this account by, set once (see SectionFolds). -->
   <div class="form-section">
@@ -840,7 +844,7 @@ export const html = `
 </div>
 `
 
-export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${TimelineTracks.CSS}${EventsPanel.CSS}${SceneFieldOverlay.CSS}${WitnessErrorView.CSS}${CandidatesView.CSS}
+export const css = `${InputFont.CSS}${ElementList.CSS}${Icons.CSS}${WindowClose.CSS}${SectionFolds.CSS}${SectionFolds.INDEX_CSS}${ColumnResize.CSS}${TimelineTracks.CSS}${EventsPanel.CSS}${SceneFieldOverlay.CSS}${WitnessErrorView.CSS}${CandidatesView.CSS}
 :host {
   color-scheme: light dark;
   display: block;
@@ -2267,27 +2271,31 @@ ${EditorTheme.fields(".app")}
 /* What a click in the scene opened, pointed out for a moment. */
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
-/* Given the width (the app on a computer): the chips of the sections across the whole width, under them the render in a column of its
-   own on the right and the section open on the left (dicté 2026-11-20 : « settings à gauche, rendu à droite »), the editor the height of the screen and the open section scrolling on its own. The chips have
-   the whole width so that they all show on one line: in the right column alone they ran past its edge. The grip has nothing to share out between the two any more. The
+/* Given the width (the app on a computer): the chips of the groups across the whole width, so that they all show on one line; under them
+   the titles of the open group's sections in a column of their own on the left, as wide as the longest (dicté 2026-11-21, its width
+   dragged on its edge), and on the right the render, the tracks and the section chosen in that index, alone, scrolling on its own (dicté :
+   « passer le contenu des sous-sections d'un groupe dans la 3e colonne, sous le rendu »). The editor is the height of the screen. The
    width this editor is given, never the window's: held by a case, it is the case's. */
 @container (min-width: 760px) {
   .app {
     /* The screen's height, or what a page that has something above it says is left (see UfoAtHomeElement). */
     max-width: none; height: var(--rr0-editor-height, 100dvh); max-height: none;
-    display: grid; grid-template-columns: minmax(22rem, 9fr) minmax(0, 11fr);
-    grid-template-rows: auto auto auto auto minmax(0, 1fr);
-    grid-template-areas: "head head" "notes notes" "tabs tabs" "tracks scene" "panel scene";
+    display: grid; grid-template-columns: var(--rr0-section-index-width, max-content) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+    grid-template-areas: "head head" "notes notes" "tabs tabs" "index scene" "index tracks" "index panel";
   }
   .app > .editor-head { grid-area: head; }
   .app > .save-refused { grid-area: notes; }
-  .app > .scene-card { grid-area: scene; align-self: start; border-left: 1px solid var(--line); }
-  /* As tall as the screen leaves it under the header, whatever height the grip gave it in one column. */
-  .app > .scene-card { --rr0-scene-max-height: calc(var(--rr0-editor-height, 100dvh) - 9.5rem); }
-  .app > .scene-resize { display: none; }
+  .app > .scene-card { grid-area: scene; border-left: 1px solid var(--line); --rr0-scene-max-height: var(--rr0-scene-wide-height, calc((var(--rr0-editor-height, 100dvh) - 9.5rem) * .34)); }
+  /* The render a third of what the screen leaves under the header (its bar and its timeline come on top of that), the section shown
+     having the rest; its grip, above the tracks, gives it more or less, remembered apart from the height it has in one column. */
+  .app > .scene-resize { grid-area: tracks; align-self: start; margin: -4px 0 0; }
   .app > #group-tabs { grid-area: tabs; }
-  .app > #timeline-tracks { grid-area: tracks; }
-  .app > .group-panel { grid-area: panel; }
+  .app > #timeline-tracks { grid-area: tracks; border-left: 1px solid var(--line); }
+  .app > .group-panel { grid-area: panel; border-left: 1px solid var(--line); }
+  .app > .section-index { grid-area: index; display: block; min-width: 9rem; padding: 10px 0; overflow-y: auto; background: var(--ground-raised); }
+  .app > .column-resize { display: block; grid-column: 1; grid-row: 4 / span 3; margin-right: -6px; }
+  ${SectionFolds.INDEXED_CSS}
 }
 @container (max-width: 640px) {
   .editor-head { flex-wrap: wrap; }
