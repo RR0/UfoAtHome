@@ -285,7 +285,7 @@ export const sightingEditorMessages_es: SightingEditorMessages = {
   showSettingsAny: "Mostrar",
   hideSettings: "Ocultar",
   sectionIndex: "Subsecciones del grupo",
-  resizeSectionIndex: "Cambiar el ancho de la columna de subsecciones (doble clic: ancho del título más largo)",
+  resizeSectionIndex: "Cambiar el ancho de la columna de subsecciones (doble clic: ancho por defecto)",
   save: "Guardar",
   stateNew: "Nueva grabación",
   panelIntroObservation: "Lo que pasó, en pocas líneas, y lo que queda por completar.",

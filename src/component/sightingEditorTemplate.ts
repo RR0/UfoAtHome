@@ -2272,15 +2272,15 @@ ${EditorTheme.fields(".app")}
 .flash { background: var(--warn-bg) !important; border-radius: 8px; box-shadow: 0 0 0 6px var(--warn-bg); transition: background .3s ease, box-shadow .3s ease; }
 @media (prefers-reduced-motion: reduce) { .scene-card > :is(.render-line, .playback-row) { transition: none; } }
 /* Given the width (the app on a computer): the chips of the groups across the whole width, so that they all show on one line; under them
-   the titles of the open group's sections in a column of their own on the left, as wide as the longest (dicté 2026-11-21, its width
-   dragged on its edge), and on the right the render, the tracks and the section chosen in that index, alone, scrolling on its own (dicté :
+   the titles of the open group's sections in a column of their own on the left, 11rem wide (dicté 2026-11-21 : the longest wrap on
+   two or three lines; its width dragged on its edge), and on the right the render, the tracks and the section chosen in that index, alone, scrolling on its own (dicté :
    « passer le contenu des sous-sections d'un groupe dans la 3e colonne, sous le rendu »). The editor is the height of the screen. The
    width this editor is given, never the window's: held by a case, it is the case's. */
 @container (min-width: 760px) {
   .app {
     /* The screen's height, or what a page that has something above it says is left (see UfoAtHomeElement). */
     max-width: none; height: var(--rr0-editor-height, 100dvh); max-height: none;
-    display: grid; grid-template-columns: var(--rr0-section-index-width, max-content) minmax(0, 1fr);
+    display: grid; grid-template-columns: var(--rr0-section-index-width, 11rem) minmax(0, 1fr);
     grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
     grid-template-areas: "head head" "notes notes" "tabs tabs" "index scene" "index tracks" "index panel";
   }

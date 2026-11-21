@@ -285,7 +285,7 @@ export const sightingEditorMessages_it: SightingEditorMessages = {
   showSettingsAny: "Mostra",
   hideSettings: "Nascondi",
   sectionIndex: "Sottosezioni del gruppo",
-  resizeSectionIndex: "Ridimensiona la colonna delle sottosezioni (doppio clic: larghezza del titolo più lungo)",
+  resizeSectionIndex: "Ridimensiona la colonna delle sottosezioni (doppio clic: larghezza predefinita)",
   save: "Salva",
   stateNew: "Nuova registrazione",
   panelIntroObservation: "Cosa è successo, in poche righe, e cosa resta da completare.",

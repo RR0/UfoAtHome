@@ -320,7 +320,7 @@ ${SectionFolds.titles("::before", "[data-unfolded]")} { transform: rotate(90deg)
 .section-index > .section-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0;
   padding: 10px 14px 10px 18px; border: 0; border-radius: 0; background: none; color: var(--ink-dim, inherit); text-align: start;
   font: 600 12px/1.3 var(--sans, inherit); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
-/* As wide as the longest title by default (the column is max-content), a title wraps when the column is made narrower. */
+/* A title longer than the column is wide wraps (see the column's width in the editor's template). */
 .section-index > .section-link::after { content: "›"; font-size: 1.5em; line-height: .7; letter-spacing: 0; }
 .section-index > .section-link:hover { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 6%, transparent); }
 .section-index > .section-link[aria-current="true"] { color: var(--ink, CanvasText); background: color-mix(in srgb, currentColor 10%, transparent);
