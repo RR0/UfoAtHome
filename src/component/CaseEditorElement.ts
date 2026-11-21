@@ -157,7 +157,12 @@ const TEMPLATE = `
     #group-events.one-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
     /* The grip on the list's edge, as tall as it: the list's width, dragged (see ColumnResize). */
     #group-events.one-open > .column-resize { display: block; grid-column: 1; grid-row: 1 / span 6; margin-right: -15px; }
-    #group-events.one-open > .column-fold { display: block; grid-column: 1; grid-row: 1; }
+    /* Higher than the grip's top: in the panel's padding, over the columns (dicté 2026-11-21 : « il doit être plus haut »). */
+    #group-events.one-open > .column-fold { display: block; grid-column: 1; grid-row: 1; margin-top: -19px; }
+    /* What the button folds lights up while it is pointed at (dicté). */
+    #group-events.one-open:not([data-folded]):has(> .column-fold:is(:hover, :focus-visible)) > #case-overview {
+      background: color-mix(in srgb, var(--sky, Highlight) 9%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sky, Highlight) 35%, transparent);
+      border-radius: 8px; transition: background .12s ease; }
     /* Folded, the case's column is its fold button alone; what is open has the rest. */
     #group-events.one-open[data-folded] { grid-template-columns: 12px minmax(0, 1fr); }
     #group-events.one-open[data-folded] > #case-overview, #group-events.one-open[data-folded] > .column-resize { display: none !important; }
