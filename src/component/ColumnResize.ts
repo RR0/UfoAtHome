@@ -23,11 +23,12 @@ export class ColumnResize {
   background: var(--line-strong, rgba(127, 127, 127, .5)); opacity: 0; transition: opacity .15s ease; }
 .column-resize:is(:hover, :focus-visible, .dragging)::after { opacity: 1; }
 .column-resize:focus-visible { outline: none; }
-/* The button that folds the column away and back, at the top of its edge (see foldWith). */
-.column-fold { display: none; position: sticky; top: 6px; z-index: 4; align-self: start; justify-self: end; box-sizing: border-box; width: 24px; height: 24px;
-  min-width: 0; min-height: 0; margin: 6px -18px 0 0; padding: 0; border: 1px solid var(--line-strong, rgba(127, 127, 127, .5)); border-radius: 50%;
-  background: var(--ground-raised, Canvas); color: var(--ink-dim, inherit); font: 600 15px/1 var(--sans, inherit); cursor: pointer; }
-.column-fold::before { content: "‹"; display: block; margin-top: -2px; }
+/* The button that folds the column away and back, at the top of the grip, on its line: in the gap between the columns, as wide as the
+   gap (18px), so that it stands over neither of them (wider, it covered the kind of the event open). A grid with another gap moves it. */
+.column-fold { display: none; position: sticky; top: 2px; z-index: 4; align-self: start; justify-self: end; box-sizing: border-box; width: 18px; height: 18px;
+  min-width: 0; min-height: 0; margin: 0 var(--rr0-column-fold-margin, -18px) 0 0; padding: 0; border: 1px solid var(--line-strong, rgba(127, 127, 127, .5));
+  border-radius: 50%; background: var(--ground-raised, Canvas); color: var(--ink-dim, inherit); font: 600 13px/1 var(--sans, inherit); cursor: pointer; }
+.column-fold::before { content: "‹"; display: block; margin-top: -1px; }
 [data-folded] > .column-fold::before { content: "›"; }
 .column-fold:hover { color: var(--ink, CanvasText); }
 .column-fold:focus-visible { outline: 2px solid var(--sky, Highlight); outline-offset: 2px; }
