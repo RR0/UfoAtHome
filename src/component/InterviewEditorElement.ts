@@ -108,6 +108,8 @@ const TEMPLATE = `
     display: inline-flex; align-items: center; gap: 8px; min-height: 0; margin: 0 0 -1px; padding: 12px 10px;
     border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; box-shadow: none; color: var(--ink-dim); font: 600 15px/1.2 var(--sans);
   }
+  /* A pictogram before each name, as the case's and the observation's tabs have. */
+  #tabs .group-tab > svg { flex: none; width: 16px; height: 16px; }
   #tabs .group-tab:hover { background: none; color: var(--ink); }
   #tabs .group-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
   .interview-app > .group-panel { margin: 0; padding: 18px 0 0; border: 0; border-radius: 0; background: none; color: var(--ink); }
@@ -201,9 +203,9 @@ const TEMPLATE = `
 <!-- The player: what plays the interview's recordings, with who speaks along it (see InterviewPlayer). -->
 <div id="player"></div>
 <div id="tabs" class="group-tabs">
-  <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true"><span id="label-summary-group"></span></button>
-  <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false"><span id="label-exchanges-group"></span></button>
-  <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false"><span id="label-file-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true">${Icons.SUMMARY}<span id="label-summary-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false">${Icons.INTERVIEW}<span id="label-exchanges-group"></span></button>
+  <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false">${Icons.FILES}<span id="label-file-group"></span></button>
 </div>
 <section class="group-panel" id="group-summary" aria-labelledby="label-summary-group">
   <div class="row">
