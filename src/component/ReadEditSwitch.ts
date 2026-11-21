@@ -80,6 +80,9 @@ export class ReadEditSwitch {
     const isCase = CaseFile.isCase(OpenFiles.read(src) ?? await SightingFetch.json(src))
     const reader = document.createElement(isCase ? CASE_ELEMENT_NAME : SIGHTING_ELEMENT_NAME)
     reader.setAttribute(IN_PLACE_ATTRIBUTE, "")
+    // The strip of chips stating the recording under its render, as the player's own page shows it (dicté 2026-11-21 : « par défaut en
+    // lecture affiche les chips »); a reader still closes it from the "i" panel. A case passes it on to its players.
+    reader.setAttribute("show-labels", "")
     // The case opens on the event being edited, named by its file (see OPEN_EVENTS_ATTRIBUTE).
     if (isCase && track) reader.setAttribute(OPEN_EVENTS_ATTRIBUTE, ReadEditSwitch.fileKey(track))
     reader.setAttribute("src", src)
