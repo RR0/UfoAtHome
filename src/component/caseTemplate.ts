@@ -105,6 +105,9 @@ export const caseCss = `
   /* Narrower than its cards, the history is its events' marks alone (see CaseTimeline.CSS). */
   .case-layout > .case-timeline { container: case-history / inline-size; }
   .case-layout > .case-timeline { position: sticky; top: 0; max-height: 100dvh; overflow-y: auto; margin: 0; }
+  /* A column that scrolls clips what passes its edge: the marks on the rail stand half outside the list, so the list is set in by as much
+     as they and their ring stick out (as narrowed below, and in the case editor). */
+  .case-layout > .case-timeline > .event-list { padding-left: 30px; }
   /* A dialogue open alone beside the chronology has the height the chronology has (dicté : « toute la hauteur »), not the 22 lines kept
      under a player when they are one above the other; kept in view as the page scrolls, as the chronology is. */
   .case-layout > .open-events:has(> .open-event:only-child rr0-interview) { position: sticky; top: 0; }
