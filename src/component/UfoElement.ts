@@ -572,7 +572,7 @@ export class UfoElement extends HTMLElement {
   private readonly handlePointerMove = (event: PointerEvent): void => {
     const point = this.canvasPointFromEvent(event)
     const hit = point && this.shapeAt(point.x, point.y)
-    const title = this.said.read(hit?.shape.title)
+    const title = this.namesHeldValue ? undefined : this.said.read(hit?.shape.title)
     if (!title) {
       this.tooltip.hidden = true
       return
@@ -2506,6 +2506,14 @@ export class UfoElement extends HTMLElement {
   set captionHeld(held: boolean) {
     this.stageElement.classList.toggle("caption-held", held)
   }
+
+  /** Holds back the names of the shapes under the pointer while what is drawn is not what is seen: behind the loader or a cover. */
+  set namesHeld(held: boolean) {
+    this.namesHeldValue = held
+    if (held) this.tooltip.hidden = true
+  }
+
+  private namesHeldValue = false
 
   /** Holds the controls back for as long as the loader is up (see SceneElement): they come with the first frame. */
   set controlsHeld(held: boolean) {

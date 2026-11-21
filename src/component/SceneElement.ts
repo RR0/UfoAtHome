@@ -537,7 +537,9 @@ export class SceneElement extends HTMLElement {
 
   private hoverAt(event: { clientX: number, clientY: number, altKey: boolean }): void {
     this.showCompassFor({ hovered: true })
-    if (this.holding) {
+    // Nothing is named under the cover either (dicté : « quand la couverture est affichée il ne doit plus y avoir de tooltips ») : what
+    // the pointer is over is the scene behind it, which the reader does not see.
+    if (this.holding || this.poster.up) {
       this.hoverTooltip.hidden = true
       return
     }
@@ -1782,8 +1784,9 @@ export class SceneElement extends HTMLElement {
     const holding = this.holding
     const covered = this.poster.up
     this.loader.hidden = !holding || covered
-    // Nothing of the scene under the black screen is named: not an object's tooltip, not the account's first moment
-    if (holding) this.hoverTooltip.hidden = true
+    // Nothing of the scene under the black screen or the cover is named: not an object's tooltip, not the account's first moment
+    if (holding || covered) this.hoverTooltip.hidden = true
+    this.ufoElement.namesHeld = holding || covered
     // The sentence saying what this is not (a video) has the picture to itself while it waits: the
     // account's first moment would be printed over it, both centred, and neither could be read.
     // The poster is no different: it has neither the caption nor the controls over it.
