@@ -79,6 +79,8 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   interpretationOfNone: "—",
   groupReadings: "Agrupar las lecturas por observación",
   resizeColumns: "Cambiar el ancho de la columna del historial (doble clic: ancho por defecto)",
+  foldColumn: "Plegar la columna del caso",
+  unfoldColumn: "Desplegar la columna del caso",
   alsoAbout: "También trata de",
   foldReadings: "Plegar sus lecturas",
   unfoldReadings: "Desplegar sus lecturas",

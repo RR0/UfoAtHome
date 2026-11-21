@@ -157,6 +157,10 @@ const TEMPLATE = `
     #group-events.one-open > #case-overview { grid-column: 1; grid-row: 1 / span 6; position: sticky; top: 0; max-height: var(--rr0-editor-height, 100dvh); overflow: auto; overscroll-behavior: contain; }
     /* The grip on the list's edge, as tall as it: the list's width, dragged (see ColumnResize). */
     #group-events.one-open > .column-resize { display: block; grid-column: 1; grid-row: 1 / span 6; margin-right: -15px; }
+    #group-events.one-open > .column-fold { display: block; grid-column: 1; grid-row: 1; }
+    /* Folded, the case's column is its fold button alone; what is open has the rest. */
+    #group-events.one-open[data-folded] { grid-template-columns: 12px minmax(0, 1fr); }
+    #group-events.one-open[data-folded] > #case-overview, #group-events.one-open[data-folded] > .column-resize { display: none !important; }
     #group-events.one-open #back-to-case, #group-events.one-open #back-to-case + .crumb-sep { display: none; }
     #group-events.one-open .crumbs { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "kind nav" "title nav"; }
   }
@@ -313,6 +317,7 @@ const TEMPLATE = `
 </section>
   <section class="group-panel" id="group-events" aria-labelledby="label-events-group">
     <div id="column-resize" class="column-resize"></div>
+    <button id="column-fold" type="button" class="column-fold"></button>
     <!-- The case itself while no event is open: its title, its date, its id, then its events in the order of time (see renderEvents). -->
     <div id="case-overview" class="case-overview" hidden>
       <div class="case-fields">
@@ -479,6 +484,7 @@ export class CaseEditorElement extends HTMLElement {
     this.editor = this.shadow.getElementById("editor") as SightingEditorElement
     // The same width as the case's reader keeps: one history, read or edited.
     this.columns = new ColumnResize(this.byId("column-resize"), this.byId("group-events"), () => this.byId("case-overview"), ColumnResize.CASE_HISTORY_KEY)
+    this.columns.foldWith(this.byId("column-fold") as HTMLButtonElement)
     this.interviewElement = this.shadow.getElementById("interview") as InterviewEditorElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
     this.interviewElement.addEventListener(INTERVIEW_SEEK_EVENT, event => void this.followToObservation((event as CustomEvent<{ sighting?: string, at: number }>).detail))
@@ -777,6 +783,7 @@ export class CaseEditorElement extends HTMLElement {
     group.title = m.groupReadings
     group.setAttribute("aria-label", m.groupReadings)
     this.columns.label(m.resizeColumns)
+    this.columns.foldLabels(m.foldColumn, m.unfoldColumn)
     this.byId("add").title = m.addHint
     this.byId("add").setAttribute("aria-label", m.addHint)
     this.byId("delete").title = m.deleteRecording

@@ -107,6 +107,9 @@ export interface CaseEditorMessages extends InputFileMessages {
   groupReadings: string
   /** The grip between the history and what is open beside it: dragged, or moved with the arrows; double-clicked, back to its width. */
   resizeColumns: string
+  /** The button on the edge of the case's column that folds it away, and back. */
+  foldColumn: string
+  unfoldColumn: string
   /** Over what a reading set under an observation reads besides it. */
   alsoAbout: string
   foldReadings: string

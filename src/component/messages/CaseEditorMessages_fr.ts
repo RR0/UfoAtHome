@@ -79,6 +79,8 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   interpretationOfNone: "—",
   groupReadings: "Regrouper les lectures par observation",
   resizeColumns: "Redimensionner la colonne de l'historique (double-clic : largeur par défaut)",
+  foldColumn: "Replier la colonne du dossier",
+  unfoldColumn: "Déplier la colonne du dossier",
   alsoAbout: "Porte aussi sur",
   foldReadings: "Replier ses lectures",
   unfoldReadings: "Déplier ses lectures",
