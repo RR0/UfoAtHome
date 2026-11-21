@@ -2043,15 +2043,17 @@ ${EditorTheme.HEAD}
 #group-observation > .param-summary-fold { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
 .param-summary-fold > summary { cursor: pointer; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .param-summary-fold > .param-summary { margin-top: 10px; }
-/* The sections, as a row of chips that scrolls sideways rather than wrapping. */
+/* The groups, as a row of tabs underlined as the case's are (dicté 2026-11-21 : « des onglets soulignés partout »), that scrolls sideways
+   rather than wrapping. Each underline says its group's state, in the colour the chips' outline had: complete, something still to
+   answer, wrong; the open one's is full and thicker, the others' paler. */
 #group-tabs.section-chips {
   display: flex;
   flex-wrap: nowrap;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  gap: 6px;
   min-height: 0;
   margin: 0;
-  padding: 12px 18px;
+  padding: 0 18px;
   padding-inline-end: 18px;
   border: 0;
   border-top: 1px solid var(--line);
@@ -2059,25 +2061,29 @@ ${EditorTheme.HEAD}
   overflow-x: auto;
   scrollbar-width: none;
 }
+/* In a case, under the event's own head and its line: one line between them, not two. */
+.app.embedded > #group-tabs.section-chips { border-top: 0; }
 .section-chips > .group-tab {
+  --tab-state: var(--ok);
   flex: none;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
-  margin: 0;
-  padding: 0 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: var(--ground-raised);
-  color: var(--ink);
+  min-height: 0;
+  height: auto;
+  margin: 0 0 -1px;
+  padding: 11px 10px 10px;
+  border: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--tab-state) 45%, transparent);
+  border-radius: 0;
+  background: none;
+  color: var(--ink-dim);
   box-shadow: none;
-  font: 600 14px/1 var(--sans);
+  font: 600 15px/1.2 var(--sans);
 }
-.section-chips > .group-tab:hover { background: var(--ground-sunken); color: var(--ink); }
-/* Its state, as its outline: complete, or with something still to answer, or wrong. */
-.section-chips > .group-tab { border: 1.5px solid var(--ok); }
-.section-chips > .group-tab:has(.tab-badge:not([hidden])) { border-color: var(--glow-solid); }
+.section-chips > .group-tab:hover { background: none; color: var(--ink); }
+/* Its state, as its underline: complete, or with something still to answer, or wrong. */
+.section-chips > .group-tab:has(.tab-badge:not([hidden])) { --tab-state: var(--glow-solid); }
 .app:has(#group-observation [aria-invalid="true"]) [aria-controls="group-observation"],
 .app:has(#group-observer [aria-invalid="true"]) [aria-controls="group-observer"],
 .app:has(#group-location [aria-invalid="true"]) [aria-controls="group-location"],
@@ -2087,9 +2093,9 @@ ${EditorTheme.HEAD}
 .app:has(#group-shape [aria-invalid="true"]) [aria-controls="group-shape"],
 .app:has(#group-sound [aria-invalid="true"]) [aria-controls="group-sound"],
 .app:has(#group-reference [aria-invalid="true"]) [aria-controls="group-reference"],
-.app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"] { border-color: var(--error); }
+.app:has(#group-file [aria-invalid="true"]) [aria-controls="group-file"] { --tab-state: var(--error); }
 /* No room for every name: the pictograms alone (see fitGroupTabs). */
-.section-chips.compact > .group-tab:not([aria-expanded="true"], :hover, :focus-visible) { padding: 0 9px; }
+.section-chips.compact > .group-tab:not([aria-expanded="true"], :hover, :focus-visible) { padding-inline: 9px; }
 /* ...except the open one, which always says what it is, and the one pointed at or reached by keyboard, which says it then. The name folds away rather than vanishing, so that a tab opened grows into
    its name and the one closed shrinks back to its pictogram, instead of the strip jumping. Still read aloud, folded: only its width goes. */
 .section-chips > .group-tab { transition: padding 0.2s ease; }
@@ -2103,8 +2109,8 @@ ${EditorTheme.HEAD}
 .section-chips.compact > .group-tab:not([aria-expanded="true"], :hover, :focus-visible) > span:not(.tab-badge) { max-width: 0; margin-inline-start: -6px; opacity: 0; }
 /* Measured at once, not halfway through a fold (see fitGroupTabs). */
 .section-chips.measuring > .group-tab, .section-chips.measuring > .group-tab > span { transition: none; }
-.section-chips > .group-tab[aria-expanded="true"] { background: var(--ink); color: var(--ground-raised); box-shadow: none; }
-/* The count stays for whoever reads the chip aloud; the outline says it to the eye. */
+.section-chips > .group-tab[aria-expanded="true"] { color: var(--ink); border-bottom: 3px solid var(--tab-state); padding-bottom: 9px; background: none; box-shadow: none; }
+/* The count stays for whoever reads the tab aloud; the underline says it to the eye. */
 .section-chips .tab-badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .app > .group-panel {
   margin: 0;
