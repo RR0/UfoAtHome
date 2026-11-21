@@ -89,6 +89,7 @@ export const caseEditorMessages_fr: CaseEditorMessages = {
   readTitle: "Lire ce qui est édité, tel qu'un lecteur le voit",
   exportTitle: "Sauver le dossier",
   exportAlso: "Sauver aussi les observations",
+  saveOptions: "Options de sauvegarde",
   addToCase: "Ajouter à un dossier",
   unsavedChanges: "Modifications non sauvées",
   discardQuestion: "Des modifications ne sont pas encore sauvées. Charger quand même et les perdre ?",

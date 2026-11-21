@@ -120,6 +120,8 @@ export interface CaseEditorMessages extends InputFileMessages {
   readTitle: string
   exportTitle: string
   exportAlso: string
+  /** The arrow beside Save that opens what it saves with the case. */
+  saveOptions: string
   addToCase: string
   unsavedChanges: string
   discardQuestion: string

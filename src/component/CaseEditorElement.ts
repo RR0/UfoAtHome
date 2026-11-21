@@ -178,6 +178,17 @@ const TEMPLATE = `
   .editor-head .head-text.title { flex: 1 1 14em; }
   .editor-head .head-actions { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
   .editor-head .check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-dim); }
+  /* Save and its options, one pill cut in two. */
+  .save-split { display: inline-flex; }
+  .save-split > #save-case { border-start-end-radius: 0; border-end-end-radius: 0; padding-inline-end: 12px; }
+  .save-split > .save-more { width: auto; padding: 0 9px; border-start-start-radius: 0; border-end-start-radius: 0; border-inline-start: 0; }
+  /* Its colour while there is something to save, a thin line between the two. */
+  .save-split:has(> #save-case:not(:disabled)) > .save-more { background: var(--glow-solid); border-color: var(--glow-solid); color: var(--glow-on-solid);
+    box-shadow: inset 1px 0 0 color-mix(in srgb, var(--glow-on-solid) 25%, transparent); }
+  /* Under the button, its right edge on the button's (see placeSaveMenu): an anchor in CSS is not one every browser keeps for a popover. */
+  .save-menu:popover-open { position: fixed; inset: auto; margin: 0; padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: 10px;
+    background: var(--ground-raised); color: var(--ink); box-shadow: 0 8px 28px rgba(0, 0, 0, .25); font: 400 14px/1.4 var(--sans); }
+  .save-menu .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; }
   .editor-head .dirty { display: none !important; }
   /* Two tabs, underlined. */
   #case-tabs { display: flex; gap: 6px; padding: 0 18px; border-bottom: 1px solid var(--line); }
@@ -307,14 +318,20 @@ const TEMPLATE = `
       <span id="dirty" class="dirty" role="status" hidden></span>
     </div>
     <div class="head-actions">
-      <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also"></span></label>
       <!-- A report of the case: its readings compared, their findings and sensitivity, as HTML, PDF, JSON or CSV (see CaseExportElement). -->
       <rr0-case-export id="report-export" class="report-export" variant="pill"></rr0-case-export>
       <!-- What is edited, read (see ReadEditSwitch): in place on a page that switches, else the player on its address. -->
       <button id="read-case" type="button" class="pill-btn" hidden><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.2v9.6L12.5 8z"/></svg><span id="label-read-case"></span></button>
       <!-- The editor on this case, for somebody else (see ShareDialogElement): off while the case has no address to give. -->
       <button id="share-case" type="button" class="pill-btn" aria-haspopup="dialog" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3 14 7.5 9.5 12V9.3C5.8 9.2 3.8 10.4 2.5 12.8c.4-3.9 2.4-6.6 7-7.3V3z"/></svg><span id="label-share-case"></span></button>
-      <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case"></span></button>
+      <!-- Save, and beside it what it saves with the case: an option in a popover under it (dicté 2026-11-21), not a box in the header. -->
+      <span class="save-split">
+        <button id="save-case" type="button" class="pill-btn primary" disabled><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v8"/><path d="m4.5 7 3.5 3.5L11.5 7"/><path d="M3 13.5h10"/></svg><span id="label-save-case"></span></button>
+        <button id="save-options" type="button" class="pill-btn save-more" popovertarget="save-menu" aria-haspopup="true"><svg class="icon" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></button>
+      </span>
+      <div id="save-menu" class="save-menu" popover>
+        <label class="check"><input id="save-also" type="checkbox" checked/> <span id="label-save-also"></span></label>
+      </div>
     </div>
   </header>
   <rr0-share-dialog id="share-dialog"></rr0-share-dialog>
@@ -579,6 +596,14 @@ export class CaseEditorElement extends HTMLElement {
     this.shareDialog.subject = this.shareSubject
     this.byId("share-case").addEventListener("click", () => this.openShare())
     this.byId("read-case").addEventListener("click", () => this.read())
+    // The options of Save open under it.
+    this.byId("save-menu").addEventListener("beforetoggle", event => {
+      if ((event as ToggleEvent).newState !== "open") return
+      const button = this.byId("save-options").getBoundingClientRect()
+      const menu = this.byId("save-menu")
+      menu.style.top = `${Math.round(button.bottom + 6)}px`
+      menu.style.right = `${Math.max(8, Math.round(window.innerWidth - button.right))}px`
+    })
     this.byId("save-case").addEventListener("click", () => void this.exportCase(this.input("save-also").checked).then(() => this.refreshDirty()))
     this.byId("make-case").addEventListener("click", () => this.makeCase())
     this.byId("delete").addEventListener("click", () => this.askDelete())
@@ -753,6 +778,8 @@ export class CaseEditorElement extends HTMLElement {
     text("label-add", m.addTitle)
     text("label-save-also", m.exportAlso)
     text("label-save-case", m.exportButton)
+    this.byId("save-options").title = m.saveOptions
+    this.byId("save-options").setAttribute("aria-label", m.saveOptions)
     text("label-read-case", m.readButton)
     this.byId("read-case").title = m.readTitle
     text("label-case-id", m.caseId)
