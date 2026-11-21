@@ -1804,7 +1804,12 @@ export class CaseEditorElement extends HTMLElement {
 
   /** Whether there is anything to save: Save, on or off, is all the header says of it. */
   private refreshCaseState(): void {
-    ;(this.byId("save-case") as HTMLButtonElement).disabled = !(this.session?.dirty ?? false)
+    const nothingToSave = !(this.session?.dirty ?? false)
+    ;(this.byId("save-case") as HTMLButtonElement).disabled = nothingToSave
+    // Its options with it: nothing to save, nothing to choose about saving it (dicté 2026-11-21).
+    ;(this.byId("save-options") as HTMLButtonElement).disabled = nothingToSave
+    const menu = this.byId("save-menu") as HTMLElement & { hidePopover?: () => void }
+    if (nothingToSave && menu.matches?.(":popover-open")) menu.hidePopover?.()
     const share = this.byId("share-case") as HTMLButtonElement
     share.disabled = this.sourceUrl === undefined
     share.title = this.sourceUrl === undefined ? this.shareMessages?.unavailable ?? "" : ""
