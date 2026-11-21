@@ -32,6 +32,9 @@ export const caseHtml = `
     <!-- Each reading under the observation it reads, or every event in the order of time: the reader's choice, remembered. -->
     <button id="group-readings" type="button" class="icon-btn" aria-pressed="false"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="3.5" r="1.6"/><path d="M4 5.1v7.4M4 8.5h3.5M4 12.5h3.5"/><path d="M9.5 8.5h4M9.5 12.5h4"/></svg></button>
   </div>
+  <!-- Only the events whose words hold what is typed here (see CaseTimeline.search): the history of a case of fifty events is long. -->
+  <input id="events-search" class="events-search" type="search" autocomplete="off" spellcheck="false" hidden>
+  <p id="events-none" class="events-none" role="status" hidden></p>
   <ol id="case-events" class="event-list"></ol>
   <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
 </section>
@@ -80,6 +83,10 @@ export const caseCss = `
 .readings-comparison { margin-top: 12px; }
 .events-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
 .events-bar .icon-btn { margin-left: auto; }
+.events-search { box-sizing: border-box; width: 100%; margin: 0 0 10px; padding: 5px 12px; border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 999px; background: transparent; color: inherit; font: 13px/1.4 var(--rr0-sans, system-ui, sans-serif); }
+.events-search[hidden], .events-none[hidden] { display: none; }
+.events-none { margin: 0 0 10px; font: 13px/1.4 var(--rr0-sans, system-ui, sans-serif); opacity: .7; }
 /* Lit when grouping, as a switch is: not the history's own button, which is lit when the history is put away. */
 #group-readings[aria-pressed="false"] { background: var(--rr0-button-bg, var(--btn-bg)); }
 #group-readings:is(:hover, :focus-visible) { background: var(--rr0-button-hover, var(--btn-hover)); }

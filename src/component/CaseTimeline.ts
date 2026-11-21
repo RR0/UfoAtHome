@@ -95,6 +95,7 @@ export class CaseTimeline {
 /* Its own container: the cards are laid out for the width the list is given, which a column beside an open event narrows (see the
    editor's and the reader's two columns), not for the whole component's. */
 .event-list { --rail: 7px; --gap: 10px; display: grid; gap: var(--gap); margin: 0; padding: 0 0 0 24px; list-style: none; container-type: inline-size; }
+.event-card[hidden] { display: none; }
 .event-card { --dot-y: 50%; position: relative; border: 1px solid var(--tl-line); border-radius: 10px; background: var(--tl-ground); color: var(--tl-ink); }
 .event-card::after { content: ""; position: absolute; left: calc(var(--rail) - 24px - 1px); top: calc(-1px - var(--gap) / 2);
   bottom: calc(-1px - var(--gap) / 2); width: 1px; transform: translateX(-50%); background: var(--tl-line); pointer-events: none; }
@@ -280,6 +281,9 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
               private readonly fold?: (at: number) => void) {
   }
 
+  /** What the host's search field holds (see search). */
+  private query = ""
+
   /** Draws `cards` in the list, each dressed by `dress` once drawn, when the host has something of its own to add to it. */
   render(cards: readonly CaseTimelineCard[], words: CaseTimelineWords, dress?: (card: CaseTimelineCard, parts: CaseTimelineParts) => void): void {
     this.list.replaceChildren(...cards.map(card => {
@@ -287,6 +291,34 @@ button.event-mark:focus-visible { outline: 2px solid var(--tl-sky); outline-offs
       dress?.(card, parts)
       return parts.card
     }))
+    this.applySearch()
+  }
+
+  /**
+   * Keeps in view only the cards that hold every word of `query`, wherever on the card: its kind, its title, its date, what it names, who
+   * made it. Neither case nor accents count: "lanterne" finds "Lanternes célestes", "temoin 3" finds "Témoin 3". Kept for the cards drawn
+   * next. Returns how many are left in view.
+   */
+  search(query: string): number {
+    this.query = query
+    return this.applySearch()
+  }
+
+  private applySearch(): number {
+    const words = CaseTimeline.plain(this.query).split(/\s+/).filter(word => word !== "")
+    let shown = 0
+    for (const card of this.list.querySelectorAll<HTMLElement>(":scope > .event-card")) {
+      const said = CaseTimeline.plain(`${card.textContent ?? ""} ${card.querySelector<HTMLElement>(".event-open")?.title ?? ""}`)
+      const kept = words.every(word => said.includes(word))
+      card.hidden = !kept
+      if (kept) shown++
+    }
+    return shown
+  }
+
+  /** Lower case and without accents, for a search that does not ask the reader to type them. */
+  private static plain(text: string): string {
+    return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
   }
 
   private card(card: CaseTimelineCard, words: CaseTimelineWords): CaseTimelineParts {

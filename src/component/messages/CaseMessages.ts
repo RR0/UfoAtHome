@@ -12,6 +12,10 @@ export interface CaseMessages {
   openEvent: string
   /** On the mark of a card, on the rail: what shows its event beside those open, or puts it away. */
   toggleEvent: string
+  /** The field at the top of the history that keeps only the events whose words hold what is typed in it: its placeholder. */
+  searchEvents: string
+  /** Under that field, when no event holds what is typed. */
+  noEventFound: string
   /** The option of the history that sets each reading under the observation it reads, rather than in the order of time. */
   groupReadings: string
   /** The grip between the history and what is open beside it: dragged, or moved with the arrows; double-clicked, back to its width. */

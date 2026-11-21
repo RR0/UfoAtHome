@@ -236,6 +236,29 @@ describe("<rr0-case>, a case read", () => {
     expect(root.querySelector(".event-freeze")).toBeNull()
   })
 
+  it("keeps in its history only the events that hold every word typed, whatever their case or accents, and says when none does", async () => {
+    const element = await mount()
+    const root = element.shadowRoot!
+    const search = root.getElementById("events-search") as HTMLInputElement
+    const shown = () => [...root.querySelectorAll<HTMLElement>(".event-card")].filter(card => !card.hidden).map(card => card.querySelector(".event-open")!.textContent)
+    const type = (text: string) => {
+      search.value = text
+      search.dispatchEvent(new Event("input"))
+    }
+    expect(search.placeholder).not.toBe("")
+    type("BALLOON")
+    expect(shown()).toEqual(["A balloon"])
+    // Every word, wherever on the card: its title, and what it names (the observation names the interview it was told in).
+    type("q. b. interview")
+    expect(shown()).toEqual(["Q. B.", "Interview of Q. B."])
+    type("lanterne")
+    expect(shown()).toEqual([])
+    expect(root.getElementById("events-none")!.hidden).toBe(false)
+    type("")
+    expect(shown()).toEqual(["Q. B.", "A balloon", "Interview of Q. B."])
+    expect(root.getElementById("events-none")!.hidden).toBe(true)
+  })
+
   // Braine-le-Comte's six readings, undated, were listed before the three accounts they read.
   it("lists a reading nobody dated after the account it reads, never before it", async () => {
     const [sighting, reading, interview] = caseJson.events

@@ -92,6 +92,8 @@ export class CaseElement extends HTMLElement {
   private entries: CaseEntry[] = []
   /** Whether the history sets each reading under the observation it reads (see CaseTimeline.grouped), rather than in the order of time. */
   private grouping = false
+  /** What the history's search field holds: only the events whose words hold it are listed (see CaseTimeline.search). */
+  private query = ""
   /** The observations whose readings are folded away while grouped, by their place in `entries`: none until the reader folds one. */
   private readonly folded = new Set<number>()
   /** The grip between the history and what is open beside it. */
@@ -114,6 +116,11 @@ export class CaseElement extends HTMLElement {
     this.grouping = CaseTimeline.groupingRemembered()
     this.columns = new ColumnResize(this.byId("column-resize"), this.shadow.querySelector<HTMLElement>(".case-layout")!,
       () => this.shadow.querySelector<HTMLElement>(".case-timeline")!, ColumnResize.CASE_HISTORY_KEY, ColumnResize.PROPERTY, 44)
+    // Typed in, the history keeps only the events that hold it, the readings folded away included (see draw).
+    this.byId("events-search").addEventListener("input", event => {
+      this.query = (event.target as HTMLInputElement).value
+      this.draw()
+    })
     this.byId("group-readings").addEventListener("click", () => {
       this.grouping = !this.grouping
       CaseTimeline.rememberGrouping(this.grouping)
@@ -669,13 +676,23 @@ export class CaseElement extends HTMLElement {
     const readingsOf = (account: CaseEntry) => listed.filter(({ under }) => under === account).length
     const accountAt = new Map(this.entries.map((entry, at) => [entry, at]))
     this.timeline.render(listed
-      // Folded, an observation still shows those of its readings that are open: what is looked at stays in the history, lit.
-      .filter(({ index, under }) => under === undefined || !this.folded.has(accountAt.get(under)!) || this.shown.has(index))
+      // Folded, an observation still shows those of its readings that are open: what is looked at stays in the history, lit. And none is
+      // folded away while the history is searched: a reading that holds what is looked for is found where it is.
+      .filter(({ index, under }) => under === undefined || this.query.trim() !== "" || !this.folded.has(accountAt.get(under)!) || this.shown.has(index))
       .map(({ item, index, under }) => {
         const card = this.card(item, index, under)
         const count = this.grouping && item.kind === "observation" ? readingsOf(item) : 0
         return count > 0 ? { ...card, readings: { count, folded: this.folded.has(index) } } : card
       }), m)
+    const search = this.byId("events-search") as HTMLInputElement
+    search.placeholder = m.searchEvents
+    search.setAttribute("aria-label", m.searchEvents)
+    // Worth it from a handful of events: a case of two has nothing to look for.
+    search.hidden = this.entries.length < 5
+    const found = this.timeline.search(this.query)
+    const none = this.byId("events-none")
+    none.textContent = m.noEventFound
+    none.hidden = this.query.trim() === "" || found > 0
   }
 
   /**

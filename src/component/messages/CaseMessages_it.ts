@@ -8,6 +8,8 @@ export const caseMessages_it: CaseMessages = {
   kindInterview: "Intervista",
   openEvent: "Apri solo questo evento",
   toggleEvent: "Mostra accanto agli altri, o togli",
+  searchEvents: "Cerca nella cronologia",
+  noEventFound: "Nessun evento corrisponde",
   groupReadings: "Raggruppa le letture per osservazione",
   resizeColumns: "Ridimensiona la colonna della cronologia (doppio clic: larghezza predefinita)",
   alsoAbout: "Riguarda anche",
