@@ -104,6 +104,10 @@ export interface CaseEditorMessages extends InputFileMessages {
   quoted: string
   interpretationOfNone: string
   /** What sets each reading under the observation it reads, or back in the order of time (the reader has the same, see CaseMessages). */
+  /** The field over the list of the case's events that keeps only those whose words hold what is typed in it: its placeholder. */
+  searchEvents: string
+  /** Under that field, when no event holds what is typed. */
+  noEventFound: string
   groupReadings: string
   /** The grip between the history and what is open beside it: dragged, or moved with the arrows; double-clicked, back to its width. */
   resizeColumns: string

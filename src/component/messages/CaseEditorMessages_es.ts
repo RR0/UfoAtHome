@@ -77,6 +77,8 @@ export const caseEditorMessages_es: CaseEditorMessages = {
   colon: ": ",
   quoted: "«{text}»",
   interpretationOfNone: "—",
+  searchEvents: "Buscar en los eventos",
+  noEventFound: "Ningún evento coincide",
   groupReadings: "Agrupar las lecturas por observación",
   resizeColumns: "Cambiar el ancho de la columna del historial (doble clic: ancho por defecto)",
   alsoAbout: "También trata de",

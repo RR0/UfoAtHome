@@ -144,6 +144,10 @@ const TEMPLATE = `
   }
   ${EditorTheme.HEAD}
   ${EditorTheme.fields(".case")}
+  /* The dialog (adding an event, a question) is outside the case's card: its fields and buttons look as the editor's do, not as the
+     browser draws them bare. */
+  ${EditorTheme.fields("dialog")}
+  dialog { background: var(--ground-raised); color: var(--ink); font: 400 15px/1.5 var(--sans); }
   /* A case is a card, as the observation alone is: the observation it holds draws none of its own then (see SightingEditorElement.embedded). */
   .case.in-case { max-width: 68rem; margin: 0 auto; background: var(--ground-raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 12px; overflow: clip; }
   /* Given the width (the app on a computer), the whole of it: the recording's editor lays itself out in two columns from there. */
@@ -231,6 +235,10 @@ const TEMPLATE = `
   .event-card:has(.event-tool) .event-main { margin-right: 100px; }
   /* The filter over the list: a button per kind, lit while its events are shown, with how many of them the case holds. */
   .event-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .events-search { box-sizing: border-box; width: 100%; margin: 0 0 10px; padding: 5px 12px; border: 1px solid var(--line-strong);
+    border-radius: 999px; background: transparent; color: inherit; font: 13px/1.4 var(--rr0-sans, system-ui, sans-serif); }
+  .events-search[hidden], .events-none[hidden] { display: none; }
+  .events-none { margin: 0 0 10px; font: 13px/1.4 var(--rr0-sans, system-ui, sans-serif); color: var(--ink-faint); }
   .event-filter[hidden] { display: none; }
   .filter-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
     background: none; color: var(--ink-dim); font: 600 12px/1.6 var(--sans); cursor: pointer; }
@@ -353,6 +361,9 @@ const TEMPLATE = `
       </div>
       <!-- What the list shows, by kind: a way of reading the chronology, never written in the case (see renderFilter). -->
       <div id="event-filter" class="event-filter" role="group" hidden></div>
+      <!-- Only the events whose words hold what is typed here (see CaseTimeline.search), as in the case's reader. -->
+      <input id="events-search" class="events-search" type="search" autocomplete="off" spellcheck="false" hidden>
+      <p id="events-none" class="events-none" role="status" hidden></p>
       <ol id="event-list" class="event-list"></ol>
       <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
     </div>
@@ -430,8 +441,8 @@ const TEMPLATE = `
       <label class="check"><input id="export-recordings" type="checkbox" checked/> <span id="label-export-recordings"></span></label>
     </div>
     <div class="actions">
-      <button id="ok" type="submit" value="ok"></button>
-      <button id="cancel" type="button"></button>
+      <button id="ok" type="submit" value="ok" class="pill-btn primary"></button>
+      <button id="cancel" type="button" class="pill-btn"></button>
     </div>
   </form>
 </dialog>
@@ -565,6 +576,11 @@ export class CaseEditorElement extends HTMLElement {
     this.byId("group-readings").addEventListener("click", () => {
       this.grouping = !this.grouping
       CaseTimeline.rememberGrouping(this.grouping)
+      this.refreshOverview()
+    })
+    // Typed in, the list keeps only the events that hold it, the readings folded away included (see renderEvents).
+    this.byId("events-search").addEventListener("input", event => {
+      this.query = (event.target as HTMLInputElement).value
       this.refreshOverview()
     })
     this.byId("cited-back").addEventListener("click", () => {
@@ -1438,6 +1454,8 @@ export class CaseEditorElement extends HTMLElement {
   /** The observations whose readings are folded away while grouped, by their place among the events. */
   private readonly folded = new Set<number>()
   private readonly kindsShown = new Set<"observation" | "interview" | "reading">(["observation", "interview", "reading"])
+  /** What the search field over the list holds: only the events whose words hold it are listed (see CaseTimeline.search). */
+  private query = ""
 
   /** The filter over the list: one button per kind the case holds, saying how many, and whether its events are shown. */
   private renderFilter(events: { item: { track?: CaseTrack, interview?: InterviewEvent } }[]): void {
@@ -1503,7 +1521,8 @@ export class CaseEditorElement extends HTMLElement {
       : inTime
     const indexOf = new Map(inTime.map(({ item, index }) => [item, index]))
     const isOpen = (item: Item) => !this.listShown && (item.interview ? item.interview === this.currentInterview : item.track === this.current)
-    const shown = listed.filter(({ item, under }) => under === undefined || !this.folded.has(indexOf.get(under)!) || isOpen(item))
+    // None folded away while the list is searched: a reading that holds what is looked for is found where it is.
+    const shown = listed.filter(({ item, under }) => under === undefined || this.query.trim() !== "" || !this.folded.has(indexOf.get(under)!) || isOpen(item))
     const cards = shown.map(({ item, index, under }): CaseTimelineCard => {
       const kind = this.kindOf(item)
       const event = (item.track?.event ?? item.interview)!
@@ -1539,11 +1558,21 @@ export class CaseEditorElement extends HTMLElement {
     })
     // What the editor adds to a card the reader draws as well: what a reading's findings come to, whether it is frozen, and what can be done
     // to the event.
-    new CaseTimeline(list, at => this.openEvent(at), at => this.openEvent(at), undefined, at => {
+    const timeline = new CaseTimeline(list, at => this.openEvent(at), at => this.openEvent(at), undefined, at => {
       if (!this.folded.delete(at)) this.folded.add(at)
       this.refreshOverview()
-    }).render(cards, m, (card, { card: element, body, links }) =>
+    })
+    timeline.render(cards, m, (card, { card: element, body, links }) =>
       this.dress(session, events.find(({ index }) => index === card.at)!.item, card.at, element, body, links))
+    // Searched after the editor has dressed its cards: a reading's verdict is among what is looked for.
+    const search = this.byId("events-search") as HTMLInputElement
+    search.placeholder = m.searchEvents
+    search.setAttribute("aria-label", m.searchEvents)
+    search.hidden = events.length < 5
+    const found = timeline.search(this.query)
+    const none = this.byId("events-none")
+    none.textContent = m.noEventFound
+    none.hidden = this.query.trim() === "" || found > 0
   }
 
   /** Adds to the card of the event at `index` what only the editor shows: a reading's verdict and findings, a padlock, the corner's tools. */

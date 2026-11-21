@@ -1030,6 +1030,33 @@ describe("CaseEditorElement's events", () => {
     expect(shown()).toEqual(["observation", "interview"])
   })
 
+  it("keeps in the list only the events that hold every word typed in its search field, as the reader does", async () => {
+    const element = await open(undefined, {
+      events: [
+        { type: "event", eventType: "sighting", id: "x-1", time: "1950", title: "An account", url: "account.json" },
+        { type: "event", eventType: "sighting", interpretationOf: "x-1", time: "2013-04", title: { en: "A model" }, url: "reading.json" }
+      ]
+    })
+    await wait(80)
+    const root = element.shadowRoot!
+    const search = root.getElementById("events-search") as HTMLInputElement
+    const shown = () => [...root.querySelectorAll<HTMLElement>(".event-card")].filter(card => !card.hidden).map(card => card.dataset.kind)
+    const type = async (text: string) => {
+      search.value = text
+      search.dispatchEvent(new Event("input"))
+      await wait()
+    }
+    expect(search.placeholder).toBe("Search the events")
+    await type("MODEL")
+    expect(shown()).toEqual(["reading"])
+    await type("nothing like it")
+    expect(shown()).toEqual([])
+    expect(root.getElementById("events-none")!.hidden).toBe(false)
+    await type("")
+    expect(shown()).toEqual(["observation", "reading"])
+    expect(root.getElementById("events-none")!.hidden).toBe(true)
+  })
+
   it("hides the readings compared when the readings are filtered out of the list", async () => {
     const element = await open(undefined, {
       events: [
