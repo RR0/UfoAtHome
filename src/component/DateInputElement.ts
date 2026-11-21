@@ -88,19 +88,42 @@ export class DateInputElement extends HTMLElement {
       time => this.dispatchEvent(new CustomEvent("datechange", { detail: { time }, bubbles: true, composed: true })),
       HostLocale.preferencesFor(this)[0] ?? "en")
     help.addEventListener("click", () => this.toggleHelp())
+    // How the date is said is part of its label (see .edtf-mode): saying it another way goes on to the field that says it so.
+    mode.addEventListener("click", () => this.focus())
     this.shown = undefined
     this.fillHelp()
   }
 
   connectedCallback(): void {
     this.build()
+    // Its label, beside it in the row that holds them, is not a <label> (a click on one went to the hidden picker, or nowhere): a click
+    // on its words goes to the field all the same (dicté 2026-11-21).
+    this.holder = this.parentElement?.tagName === "LABEL" ? undefined : this.parentElement ?? undefined
+    this.holder?.addEventListener("click", this.focusFromLabel)
     document.addEventListener("pointerdown", this.closeHelpOutside, true)
     document.addEventListener("keydown", this.closeHelpOnEscape, true)
   }
 
   disconnectedCallback(): void {
+    this.holder?.removeEventListener("click", this.focusFromLabel)
+    this.holder = undefined
     document.removeEventListener("pointerdown", this.closeHelpOutside, true)
     document.removeEventListener("keydown", this.closeHelpOnEscape, true)
+  }
+
+  /** The row it is in with its label, listened to while it is in it. */
+  private holder?: HTMLElement
+
+  private readonly focusFromLabel = (event: Event): void => {
+    const target = event.target as Element | null
+    if (!target || this.contains(target) || target.closest("input, select, textarea, button, a, [tabindex], rr0-date-input") !== null) return
+    this.focus()
+  }
+
+  /** Puts the focus in the field that says the date as it is said now: the picker for a precise one, the text for one in EDTF. */
+  override focus(options?: FocusOptions): void {
+    const field = this.querySelector<HTMLInputElement>(".edtf-field > input:not([hidden])")
+    field?.focus(options)
   }
 
   private readonly closeHelpOutside = (event: Event): void => {
