@@ -334,22 +334,13 @@ describe("CaseEditorElement", () => {
     expect(JSON.parse(written[1].content).description).toBe("Edited, not saved")
   })
 
-  it("shows an account's id, proposed greyed when it has none, and refuses what is wrong with the one typed", async () => {
+  it("gives an event no field for its id: one is made from its title when the case gives none, and is written in the case's file only", async () => {
     const element = await open()
-    const { field } = parts(element)
     const root = element.shadowRoot!
-    const id = field("recording-id")
-    expect(id.value).toBe("")
-    expect(id.placeholder).not.toBe("")
-    id.value = "has space"
-    id.dispatchEvent(new Event("input"))
-    expect(root.getElementById("recording-id-error")!.hidden).toBe(false)
-    expect(element.caseSession!.tracks[0].event.id).toBeUndefined()
-    id.value = "witness"
-    id.dispatchEvent(new Event("input"))
-    expect(root.getElementById("recording-id-error")!.hidden).toBe(true)
-    expect(element.caseSession!.tracks[0].event.id).toBe("witness")
-    expect(element.caseSession!.dirty).toBe(true)
+    expect(root.getElementById("recording-id")).toBeNull()
+    const session = element.caseSession!
+    expect(session.tracks[0].event.id).toBeUndefined()
+    expect(session.proposedId(session.tracks[0])).not.toBe("")
   })
 
   it("adds a reading through the one + button: naming the account it interprets, with a title and an author", async () => {
@@ -405,7 +396,6 @@ describe("CaseEditorElement", () => {
     expect(frame.parentElement).toBe(root.getElementById("group-events"))
     expect(frame.parentElement!.contains(parts(element).select)).toBe(true)
     expect(frame.contains(parts(element).select)).toBe(false)
-    expect(frame.contains(root.getElementById("recording-id"))).toBe(true)
     expect(panel.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(frame.classList.contains("in-case")).toBe(true)
     expect(frame.contains(root.getElementById("editor"))).toBe(true)
@@ -868,9 +858,8 @@ describe("CaseEditorElement's events", () => {
 
   it("keeps an interview naming an account by the account's new id when that id is changed", async () => {
     const element = await open(undefined, interviewed())
-    const id = parts(element).field("recording-id")
-    id.value = "qb"
-    id.dispatchEvent(new Event("input", { bubbles: true }))
+    // Changed by the session (the case's file is where it is written): the interview follows.
+    expect(element.caseSession!.setId(element.caseSession!.tracks[0], "qb")).toBe("ok")
     expect(element.caseSession!.interviews[0].interviewOf).toBe("qb")
   })
 
@@ -1139,8 +1128,6 @@ describe("CaseEditorElement's events", () => {
     // An edit that reaches the session anyway is refused, not written.
     session.keep(track, { ...track.recording!, description: { en: "typed after it was frozen" } } as never)
     expect((track.recording as { description?: unknown }).description).toBeUndefined()
-    // Its id is outside its editor and is frozen too: renamed, it would be cited by nothing.
-    expect(parts(element).field("recording-id").disabled).toBe(true)
     // And it does not leave the case while it is frozen: what rests on it would be left citing nothing.
     expect(card().querySelector<HTMLButtonElement>(".event-delete")!.disabled).toBe(true)
     expect(parts(element).remove.disabled).toBe(true)
@@ -1150,7 +1137,6 @@ describe("CaseEditorElement's events", () => {
     expect(JSON.parse(session.files(false)[0].content).events[0].sealed).toBeUndefined()
     expect(card().dataset.sealed).toBeUndefined()
     expect(element.sightingEditor.hasAttribute("inert")).toBe(false)
-    expect(parts(element).field("recording-id").disabled).toBe(false)
     session.keep(track, { ...track.recording!, description: { en: "typed once thawed" } } as never)
     expect((track.recording as { description?: { en: string } }).description!.en).toBe("typed once thawed")
   })
@@ -1350,12 +1336,13 @@ describe("The observation's editor, in a case or on its own", () => {
     expect((element.shadowRoot!.querySelector(".event-id-row") as HTMLElement).hidden).toBe(true)
   })
 
-  it("leaves its header to the case's, its Undo and Redo on the event's line", async () => {
+  it("leaves its header to the case's, its Undo and Redo where the events before and after were stepped to, beside its title", async () => {
     const element = await open()
     expect(element.sightingEditor.shadowRoot!.getElementById("editor-head")!.hidden).toBe(true)
-    const row = element.shadowRoot!.querySelector(".event-id-row") as HTMLElement
-    expect(row.hidden).toBe(false)
-    expect(row.querySelector("#history-slot")!.childElementCount).toBe(1)
+    const crumbs = element.shadowRoot!.getElementById("event-crumbs")!
+    expect(crumbs.querySelector("#history-slot")!.childElementCount).toBe(1)
+    expect(element.shadowRoot!.getElementById("previous-event")).toBeNull()
+    expect(element.shadowRoot!.getElementById("next-event")).toBeNull()
   })
 })
 

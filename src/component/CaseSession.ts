@@ -267,13 +267,18 @@ export class CaseSession {
   }
 
   /**
-   * The id an event of the case would be given: the observer's family name as a slug (`trent`), else the title as the case words it, else
-   * `sighting-1`, `sighting-2`; suffixed (`trent-2`) when the case already has it.
+   * The id an event of the case is given when the case gives it none (dicté 2026-11-21 : « généré d'après le titre si non spécifié », and
+   * edited in the case's file only): the id its recording states for its witness (`csg2-nassau`), which is one specified; else its title
+   * as a slug, the event's as the case words it, else its witness's (`observateur-a-nassau`); else the observer's family name; else
+   * `sighting-1`, `sighting-2`. Suffixed (`trent-2`) when the case already has it.
    */
   proposedId(track: CaseTrack): string {
     const slug = (text: string | undefined): string => (text ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
-    const title = typeof track.event.title === "string" ? track.event.title : undefined
-    const base = slug(track.recording?.observer?.lastName) || slug(track.recording?.observer?.id) || slug(title)
+    // A title said in several languages gives its first.
+    const said = (text: unknown): string | undefined => typeof text === "string" ? text
+      : text && typeof text === "object" ? Object.values(text as Record<string, unknown>).find((value): value is string => typeof value === "string") : undefined
+    const base = slug(track.recording?.observer?.id) || slug(said(track.event.title)) || slug(said(track.recording?.observer?.title))
+      || slug(track.recording?.observer?.lastName)
     const taken = this.eventIds(track)
     if (base !== "") {
       let id = base

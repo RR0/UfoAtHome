@@ -19,8 +19,6 @@ export interface CaseEditorMessages extends InputFileMessages {
   citedMoment: string
   backToInterview: string
   openEvent: string
-  previousEvent: string
-  nextEvent: string
   /** A reading's kind, on its pill; and how many readings an account has. */
   kindReading: string
   readingsCount: string
@@ -81,10 +79,6 @@ export interface CaseEditorMessages extends InputFileMessages {
   cancel: string
   caseHeading: string
   caseId: string
-  recordingId: string
-  idTaken: string
-  idInvalid: string
-  idNeeded: string
   /** With `{id}`. */
   idDuplicated: string
   /** With `{id}`. */

@@ -86,7 +86,8 @@ const TEMPLATE = `
   #event-item:not(.in-case) { border: 0; padding: 0; margin: 0; }
   .event-id-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: .5em; }
   .event-id-row[hidden] { display: none; }
-  .event-id-row > .history-slot { margin-left: auto; }
+  /* Nothing to say when the event names no author. */
+  .event-id-row:not(:has(> :not([hidden]))) { display: none; }
   .history-slot[hidden] { display: none; }
   .history-slot .history { display: inline-flex; gap: 8px; }
   .history-slot .history .icon-btn { box-sizing: border-box; width: 36px; height: 36px; min-width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
@@ -157,6 +158,7 @@ const TEMPLATE = `
     /* The grip on the list's edge, as tall as it: the list's width, dragged (see ColumnResize). */
     #group-events.one-open > .column-resize { display: block; grid-column: 1; grid-row: 1 / span 6; margin-right: -15px; }
     #group-events.one-open #back-to-case, #group-events.one-open #back-to-case + .crumb-sep { display: none; }
+    #group-events.one-open .crumbs { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "kind nav" "title nav"; }
   }
   .case-panel { margin: 0; }
   .editor-head .head-text.title { display: block; }
@@ -259,11 +261,15 @@ const TEMPLATE = `
   .frozen-note[hidden] { display: none; }
   /* A field frozen with its event has to LOOK frozen: one that takes nothing while looking as it always did is the silent loss again. */
   .event-id-row input:disabled { opacity: .5; cursor: not-allowed; }
-  /* The event open: the way back to the case, and the events before and after. */
-  .crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
-  .crumb-sep { color: var(--ink-faint); }
-  .crumb-title { font: 600 20px/1.3 var(--serif); }
-  .crumb-nav { display: flex; gap: 6px; margin-left: auto; }
+  /* The event open: the way back to the case, its kind over its title as on its card, and on the right its Undo and Redo. */
+  .crumbs { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "back sep kind nav" "back sep title nav";
+    align-items: center; column-gap: 10px; row-gap: 4px; margin: 0 0 14px; padding: 0 0 12px; border-bottom: 1px solid var(--line); }
+  .crumbs > #back-to-case { grid-area: back; }
+  .crumbs > .crumb-sep { grid-area: sep; color: var(--ink-faint); }
+  .crumbs > .kind-pill { grid-area: kind; justify-self: start; }
+  .crumbs > .crumb-title { grid-area: title; font: 600 20px/1.3 var(--serif); }
+  .crumbs > .crumb-nav { grid-area: nav; display: flex; gap: 6px; }
+  .crumbs > .crumb-nav[hidden] { display: none; }
   .cited { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px;
     border: 1px solid var(--glow-dim); border-radius: 10px; background: var(--warn-bg); font-size: 14px; }
   .cited[hidden] { display: none; }
@@ -324,7 +330,6 @@ const TEMPLATE = `
       <ol id="event-list" class="event-list"></ol>
       <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
     </div>
-    <p id="recording-id-error" class="recording-id-error" role="alert" hidden></p>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of the event picked. -->
     <div id="events-row" class="element-list-row">
@@ -332,28 +337,26 @@ const TEMPLATE = `
       <button id="delete" type="button" class="icon-btn">${Icons.TRASH}</button>
     </div>
     <div id="event-item" class="element-list-body">
-    <!-- The event open, in the case: the way back to it, what kind of event and which, and the events before and after. -->
+    <!-- The event open, in the case: the way back to it, what kind of event above which, as its card says it, and its Undo and Redo. -->
     <nav id="event-crumbs" class="crumbs" hidden>
       <button id="back-to-case" type="button" class="pill-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg><span id="label-back-to-case"></span></button>
       <span class="crumb-sep" aria-hidden="true">›</span>
       <span id="crumb-kind" class="kind-pill"></span>
       <span id="crumb-title" class="crumb-title"></span>
-      <span class="crumb-nav">
-        <button id="previous-event" type="button" class="icon-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button>
-        <button id="next-event" type="button" class="icon-btn"><svg class="icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3.5 4.5 4.5L6 12.5"/></svg></button>
-      </span>
+      <!-- The observation's Undo and Redo, where the events before and after were stepped to: the history beside it does that
+           (dicté 2026-11-21, « pour gagner de la hauteur »; see SightingEditorElement.historyControls). -->
+      <span id="history-slot" class="history-slot crumb-nav"></span>
     </nav>
     <!-- Over the observation opened from an interview's link to one of its moments: where it was quoted, and the way back (§5). -->
     <div id="cited" class="cited" role="status" hidden>
       <span id="cited-text"></span>
       <button id="cited-back" type="button" class="pill-btn"><span id="label-back-to-interview"></span></button>
     </div>
-    <!-- The event's id, and on its line the observation's Undo and Redo (see SightingEditorElement.historyControls). -->
+    <!-- Who made the event. Not its id: made from its title when the case gives it none (see CaseSession.proposedId), and written in the
+         case's file only (dicté 2026-11-21). -->
     <div class="event-id-row" hidden>
-      <label id="row-recording-id" class="row"><span id="label-recording-id"></span> <input id="recording-id" type="text" size="14" autocomplete="off" spellcheck="false"/></label>
       <!-- Who made this reading, or held this interview: an account's is its witness, so it has none here (see CaseEventJson.by). -->
       <label id="row-event-author" class="row" hidden><span id="label-event-author"></span> <input id="event-author" type="text" size="20" autocomplete="off"/></label>
-      <span id="history-slot" class="history-slot"></span>
     </div>
     <!-- Over a frozen event: why its editor takes no input, and the way to thaw it (see CaseEventJson.sealed). -->
     <p id="frozen-note" class="frozen-note" role="status" hidden>
@@ -523,10 +526,6 @@ export class CaseEditorElement extends HTMLElement {
       if (item.interview) void this.showInterview(item.interview)
       else void this.showTrack(item.track)
     })
-    const recordingId = this.input("recording-id")
-    recordingId.addEventListener("input", () => this.writeRecordingId())
-    // What was refused is not kept in the field: it goes back to the id the event has.
-    recordingId.addEventListener("blur", () => { this.showRecordingIdError(undefined); this.refreshRow() })
     for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#case-tabs .group-tab")) {
       tab.addEventListener("click", () => this.openGroup(tab.getAttribute("aria-controls") === "group-case-file" ? "file" : "events"))
     }
@@ -551,8 +550,6 @@ export class CaseEditorElement extends HTMLElement {
       this.listShown = true
       this.refreshRow()
     })
-    this.byId("previous-event").addEventListener("click", () => this.stepEvent(-1))
-    this.byId("next-event").addEventListener("click", () => this.stepEvent(1))
     this.shareDialog = this.byId("share-dialog") as ShareDialogElement
     CaseExportElement.register()
     // What a report is made from: the case as it is being edited, and each of its recordings, loaded where they were not yet.
@@ -744,10 +741,6 @@ export class CaseEditorElement extends HTMLElement {
     text("label-save-case", m.exportButton)
     text("label-read-case", m.readButton)
     this.byId("read-case").title = m.readTitle
-    for (const [id, label] of [["previous-event", m.previousEvent], ["next-event", m.nextEvent]] as const) {
-      this.byId(id).title = label
-      this.byId(id).setAttribute("aria-label", label)
-    }
     text("label-case-id", m.caseId)
     text("label-case-title", m.caseTitle)
     text("label-case-time", m.caseTime)
@@ -759,7 +752,6 @@ export class CaseEditorElement extends HTMLElement {
     text("label-kind", m.kindField)
     text("label-witness", m.witnessField)
     text("label-medium", m.mediumField)
-    text("label-recording-id", m.recordingId)
     text("make-case", m.addToCase)
     for (const id of ["dirty", "recording-dirty"]) {
       this.byId(id).title = m.unsavedChanges
@@ -1366,8 +1358,6 @@ export class CaseEditorElement extends HTMLElement {
       pill.dataset.kind = kind
       this.byId("crumb-title").textContent = this.optionLabel(current.item, current.index)
     }
-    ;(this.byId("previous-event") as HTMLButtonElement).disabled = open <= 0
-    ;(this.byId("next-event") as HTMLButtonElement).disabled = open < 0 || open >= events.length - 1
   }
 
   /** What one of an event's authors is called: the entry it names on RR0, or the name it was described with (see AgentRef). */
@@ -1770,16 +1760,6 @@ export class CaseEditorElement extends HTMLElement {
     this.askDelete()
   }
 
-  /** Opens the event before or after the one open, in the order of time. */
-  private stepEvent(step: number): void {
-    const session = this.session
-    if (!session) return
-    const events = this.eventsInTime(session)
-    const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
-    const next = events[open + step]
-    if (next) this.openEvent(next.index)
-  }
-
   /** Whether there is anything to save: Save, on or off, is all the header says of it. */
   private refreshCaseState(): void {
     ;(this.byId("save-case") as HTMLButtonElement).disabled = !(this.session?.dirty ?? false)
@@ -2054,20 +2034,8 @@ export class CaseEditorElement extends HTMLElement {
     this.shadow.querySelector<HTMLElement>(".event-id-row")!.hidden = !inCase
   }
 
-  /** The id of the recording on show: its event's, or, shown greyed, the one it would be given. A reading is not named, nothing reads it. */
+  /** What is wrong with the ids of the case's events, said over them: two events with one id, a reading naming none of them. */
   private refreshRecordingId(session: CaseSession): void {
-    const track = this.current
-    const named = track !== undefined && track.kind === "observer"
-    this.byId("row-recording-id").hidden = !named
-    if (named) {
-      const input = this.input("recording-id")
-      if (this.shadow.activeElement !== input) input.value = track.event.id ?? ""
-      input.placeholder = session.proposedId(track)
-      // The id lives outside the recording's own editor, so freezing it has to reach here too: renaming a frozen event would leave the
-      // interview or the hypothesis that cites it citing nothing.
-      input.disabled = CaseSession.sealed(track.event)
-      input.title = input.disabled ? this.messages.frozenNote : ""
-    }
     const { duplicateIds, unresolved } = session.problems()
     const messages = [
       ...duplicateIds.map(id => this.messages.idDuplicated.replace("{id}", id)),
@@ -2076,24 +2044,6 @@ export class CaseEditorElement extends HTMLElement {
     const note = this.byId("case-problems")
     note.hidden = messages.length === 0
     note.textContent = messages.join(" ")
-  }
-
-  private showRecordingIdError(message: string | undefined): void {
-    const error = this.byId("recording-id-error")
-    error.textContent = message ?? ""
-    error.hidden = message === undefined
-  }
-
-  /** What is typed in the id field goes to the event when it is a good id, and what is wrong with it is said when it is not. */
-  private writeRecordingId(): void {
-    const session = this.session
-    const track = this.current
-    if (!session || !track) return
-    const refused = session.setId(track, this.input("recording-id").value.trim())
-    this.showRecordingIdError(refused === "ok" ? undefined : {
-      empty: this.messages.idNeeded, invalid: this.messages.idInvalid, taken: this.messages.idTaken
-    }[refused])
-    this.scheduleDirtyCheck()
   }
 
   // -- The dialog ----------------------------------------------------------------------------------
