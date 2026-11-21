@@ -22,7 +22,9 @@ export class SceneFieldOverlay {
   padding: 3px 9px; border-radius: 999px; background: rgba(7, 10, 18, .66); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   color: #f5c451; font: 600 12px/1.4 var(--sans, sans-serif); white-space: nowrap;
 }
-.sfo-horizon { left: 0; right: 0; height: 0; border-top: 2px dashed #f5c451; }
+/* The horizon, seen through: it is a guide over the picture, not part of it, and a full orange line over the whole width was too loud
+   while dragging (dicté 2026-11-21). Its label keeps its colour. */
+.sfo-horizon { left: 0; right: 0; height: 0; border-top: 1.5px dashed rgba(245, 196, 81, .45); }
 .sfo-horizon > .sfo-pill { position: absolute; left: 10px; top: 4px; }
 .sfo-frame { inset: 0; border: 2px solid #f5c451; box-sizing: border-box; }
 .sfo-frame > .sfo-pill { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); }
@@ -33,7 +35,7 @@ export class SceneFieldOverlay {
 .scene-field-overlay { overflow: hidden; }
 .sfo-curve { inset: 0; }
 .sfo-curve svg { width: 100%; height: 100%; overflow: visible; }
-.sfo-curve path { fill: none; stroke: #f5c451; stroke-width: 2px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+.sfo-curve path { fill: none; stroke: rgba(245, 196, 81, .45); stroke-width: 1.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
 .sfo-horizon-label { left: 10px; margin-top: 4px; }
 /* Standing on the horizon, never across its line. */
 .sfo-compass { transform: translate(-50%, calc(-100% - 5px)); padding: 1px 7px; color: #fff; }
