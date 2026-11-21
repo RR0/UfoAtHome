@@ -2344,6 +2344,7 @@ export class SightingEditorElement extends HTMLElement {
     this.subgroupTabs = [...this.shadow.querySelectorAll<HTMLButtonElement>(".subgroup-tab")]
     for (const tab of this.subgroupTabs) {
       tab.addEventListener("click", () => this.openSubgroup(tab))
+      SightingEditorElement.pictureTab(tab)
     }
     this.buildSkyParts()
     // Every number field as wide as the values it takes, from its own bounds — see NumberFields.
@@ -9417,6 +9418,12 @@ export class SightingEditorElement extends HTMLElement {
    * A part of the Sky group for each kind that has an editor (see wantedSkyParts): a tab after the Sky group's own, in the registry's order,
    * and its panel. Said again when a module brings or takes away a kind; a part whose kind went is removed, with its editor.
    */
+  /** Puts the pictogram of a part's tab before its name, as the groups' tabs have theirs (see Icons.part). */
+  private static pictureTab(tab: HTMLElement): void {
+    const icon = Icons.part(tab.getAttribute("aria-controls") ?? "")
+    if (icon && !tab.querySelector("svg")) tab.insertAdjacentHTML("afterbegin", icon)
+  }
+
   private buildSkyParts(): void {
     const strip = this.shadow.getElementById("weather-tabs")
     const panelBefore = this.shadow.getElementById("sky-event-parts")
@@ -9444,6 +9451,7 @@ export class SightingEditorElement extends HTMLElement {
       label.id = `label-${want.id}`
       this.nameSkyPart(label, want.titles)
       tab.append(label)
+      SightingEditorElement.pictureTab(tab)
       tab.addEventListener("click", () => this.openSubgroup(tab))
       strip.append(tab)
       this.subgroupTabs.push(tab)

@@ -2138,34 +2138,40 @@ ${EditorTheme.HEAD}
 .group-panel .toolbar > label > :is(input, select, textarea) { font-weight: 400; }
 .group-panel .toolbar > label.wide { display: flex; }
 ${EditorTheme.fields(".app")}
-/* A section's parts: one segmented control, the part open raised in it. */
+/* A group's parts: tabs underlined as the groups' are, each with its pictogram (dicté 2026-11-21 : « le même principe d'onglets avec
+   icônes, et arrête les boutons de groupes »), the part open underlined; a line under them all. */
 .subtabs-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
 .group-panel .group-tabs:has(> .subgroup-tab) {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0 4px;
   margin-bottom: 16px;
-  padding: 4px;
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  background: var(--ground);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
 }
-/* As specific as the rule above, which would otherwise push the control up out of the row's middle. */
+/* As specific as the rule above, which would otherwise push the strip up out of the row's middle. */
 .group-panel .subtabs-row > .group-tabs { margin: 0; }
 .subgroup-tab {
-  min-height: 34px;
-  margin: 0;
-  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  margin: 0 0 -1px;
+  padding: 9px 8px 8px;
   border: 0;
-  border-radius: 8px;
-  background: transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
   color: var(--ink-dim);
   box-shadow: none;
-  font: 600 14px/1 var(--sans);
+  font: 600 14px/1.2 var(--sans);
 }
-.subgroup-tab:hover { background: var(--ground-sunken); color: var(--ink); }
-/* The part open stands out of the control in both themes: the raised ground alone was within a few levels of the control's own in dark. */
-.subgroup-tab[aria-expanded="true"] { background: color-mix(in srgb, var(--ink) 16%, var(--ground-raised)); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong), 0 1px 2px rgba(0, 0, 0, .18); }
+.subgroup-tab > svg { flex: none; width: 15px; height: 15px; }
+.subgroup-tab:hover { background: none; color: var(--ink); }
+.subgroup-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
 .subgroup-panel { margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
 .account-view { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .app .element-list-body { border-color: var(--line); border-radius: 0 10px 10px 10px; }
