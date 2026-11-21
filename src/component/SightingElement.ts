@@ -1117,7 +1117,7 @@ export class SightingElement extends HTMLElement {
       // In the account's scene, its cover too: the reading's own picture for a reading (none when it has none, rather than the account's,
       // where a link to Mount Rainier's analysts' craft showed Arnold's empty sky), the account's back for the account.
       const up = !this.sceneElement.ufoElement.playRequested
-      if (readingUrl) this.sceneElement.showPoster(fetched?.image, readingUrl, up)
+      if (readingUrl) this.sceneElement.showPoster(this.ownCover(fetched?.image, readingUrl), readingUrl, up)
       else if (entry.sighting.image) this.sceneElement.showPoster(entry.sighting.image, entry.src ? new URL(entry.src, location.href).href : undefined, up)
       else this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url, up)
     }
@@ -1151,6 +1151,25 @@ export class SightingElement extends HTMLElement {
     return of(account) !== of(reading)
   }
 
+  /**
+   * A reading's own cover: none when it is the picture of the account it reads. A reading is written as a copy of its account, and a copy that
+   * kept the account's `image` showed the account's picture over every reading of it (the Western U.S. Event's thirty), as if none were chosen.
+   */
+  private ownCover(image: string | undefined, base: string | undefined): string | undefined {
+    const entry = this.entries.find(candidate => candidate.src === this.currentSrc)
+    const accountImage = entry?.sighting.image
+    if (!image || !accountImage) return image
+    const absolute = (address: string, from: string | undefined) => {
+      try {
+        return new URL(address, from ?? location.href).href
+      } catch {
+        return address
+      }
+    }
+    const accountBase = entry!.src ? new URL(entry!.src, location.href).href : undefined
+    return absolute(image, base) === absolute(accountImage, accountBase) ? undefined : image
+  }
+
   /** Puts a recording in the scene where the playhead is, its models' addresses relative to where it was read from. */
   private showScene(recording: SightingRecordingJson, src: string, account = false): void {
     const t = this.sceneElement.ufoElement.currentTime
@@ -1159,7 +1178,8 @@ export class SightingElement extends HTMLElement {
     // and none otherwise, so that what is shown is the reading's scene rather than the account's picture standing over it.
     const up = !this.sceneElement.ufoElement.playRequested
     const base = src ? new URL(src, location.href).href : undefined
-    if (recording.image) this.sceneElement.showPoster(recording.image, base, up)
+    const cover = account ? recording.image : this.ownCover(recording.image, base)
+    if (cover) this.sceneElement.showPoster(cover, base, up)
     else if (account) this.sceneElement.showPoster(this.caseSource?.json.image, this.caseSource?.url, up)
     else this.sceneElement.showPoster(undefined, undefined, up)
     this.sceneElement.sightingData = recording
