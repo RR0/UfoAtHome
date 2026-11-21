@@ -29,10 +29,10 @@ export class Shots {
     {
       page: "edit", after: "case", name: "edit-case",
       caption: {
-        en: "The case at the top of the editor: its identifier, title and date, and the observations it holds.",
-        fr: "Le dossier en haut de l'éditeur : son identifiant, son titre et sa date, et les observations qu'il contient.",
-        es: "El caso en lo alto del editor: su identificador, su título y su fecha, y las observaciones que contiene.",
-        it: "Il caso in cima all'editor: il suo identificatore, il suo titolo e la sua data, e le osservazioni che contiene."
+        en: "The case at the top of the editor: its title with Report, Read, Share and Save, its title, date and identifier, and its events in the order of time.",
+        fr: "Le dossier en haut de l'éditeur : son titre avec Rapport, Lire, Partager et Sauver, son titre, sa date et son identifiant, et ses événements dans l'ordre du temps.",
+        es: "El caso en lo alto del editor: su título con Informe, Leer, Compartir y Guardar, su título, su fecha y su identificador, y sus eventos en orden cronológico.",
+        it: "Il caso in cima all'editor: il suo titolo con Rapporto, Leggi, Condividi e Salva, il suo titolo, la sua data e il suo identificativo, e i suoi eventi in ordine di tempo."
       }
     },
     {
@@ -65,10 +65,10 @@ export class Shots {
     {
       page: "edit", after: "summary", name: "edit-summary",
       caption: {
-        en: "Summary: the identifier, tags and description of the observation.",
-        fr: "Résumé : l'identifiant, les mots-clés et la description de l'observation.",
-        es: "Resumen: el identificador, las etiquetas y la descripción de la observación.",
-        it: "Riepilogo: l'identificatore, le parole chiave e la descrizione dell'osservazione."
+        en: "Summary: the identifier, tags and description of the observation, and the candidate explanations it is set against.",
+        fr: "Résumé : l'identifiant, les mots-clés et la description de l'observation, et les explications candidates qui lui sont confrontées.",
+        es: "Resumen: el identificador, las etiquetas y la descripción de la observación, y las explicaciones candidatas con las que se contrasta.",
+        it: "Riepilogo: l'identificatore, le parole chiave e la descrizione dell'osservazione, e le spiegazioni candidate con cui è confrontata."
       }
     },
     {
@@ -255,10 +255,10 @@ export class Shots {
     {
       page: "docs/case", after: "in-the-case-editor", name: "case-file",
       caption: {
-        en: 'The File group of the case editor: the case file as text, completed from its own schema.',
-        fr: "Le groupe Fichier de l'éditeur de dossier : le fichier de dossier en texte, complété d'après son propre schéma.",
-        es: 'El grupo Archivo del editor de casos: el archivo del caso como texto, completado según su propio esquema.',
-        it: "Il gruppo File dell'editor di casi: il file del caso come testo, completato secondo il suo schema."
+        en: 'The File tab of the case editor: the case file as text, completed from its own schema.',
+        fr: "L'onglet Fichier de l'éditeur de dossier : le fichier de dossier en texte, complété d'après son propre schéma.",
+        es: 'La pestaña Archivo del editor de casos: el archivo del caso como texto, completado según su propio esquema.',
+        it: "La scheda File dell'editor di casi: il file del caso come testo, completato secondo il suo schema."
       }
     },
     {
@@ -291,19 +291,19 @@ export class Shots {
     {
       page: "docs/create/interpretation", after: "in-the-case-editor", name: "case-add-interpretation",
       caption: {
-        en: 'The dialog of the + button: the observation the new one is an interpretation of is chosen.',
-        fr: "La boîte du bouton + : on choisit l'observation dont la nouvelle est l'interprétation.",
-        es: 'El cuadro del botón +: se elige la observación de la que la nueva es interpretación.',
-        it: "La finestra del pulsante +: si sceglie l'osservazione di cui la nuova è l'interpretazione."
+        en: 'Under + Add an event, for a reading: the observation it is a reading of is chosen.',
+        fr: "Sous + Ajouter un événement, pour une lecture : on choisit l'observation dont elle est une lecture.",
+        es: 'Bajo + Añadir un evento, para una lectura: se elige la observación de la que es una lectura.',
+        it: "Sotto + Aggiungi un evento, per una lettura: si sceglie l'osservazione di cui è una lettura."
       }
     },
     {
       page: "docs/create/interview", after: "in-the-case-editor", name: "case-add-interview",
       caption: {
-        en: 'The dialog of the + button for an interview: the witness, the medium, the title, the interviewer and the date.',
-        fr: "La boîte du bouton + pour une interview : le témoin, le moyen, le titre, l'enquêteur et la date.",
-        es: 'El cuadro del botón + para una entrevista: el testigo, el medio, el título, el entrevistador y la fecha.',
-        it: "La finestra del pulsante + per un'intervista: il testimone, il mezzo, il titolo, l'intervistatore e la data."
+        en: 'Under + Add an event, for an interview: the witness, the medium, the title, the interviewer and the date.',
+        fr: "Sous + Ajouter un événement, pour une interview : le témoin, le moyen, le titre, l'enquêteur et la date.",
+        es: 'Bajo + Añadir un evento, para una entrevista: el testigo, el medio, el título, el entrevistador y la fecha.',
+        it: "Sotto + Aggiungi un evento, per un'intervista: il testimone, il mezzo, il titolo, l'intervistatore e la data."
       }
     }
   ]

@@ -334,7 +334,7 @@ export class FaqPage implements SitePage {
       <p>Yes. UFO@home is a web app you can install: in Chrome or Edge use the install button of the
         address bar, on an iPhone or iPad choose <em>Share</em> then <em>Add to Home Screen</em>, on
         Android choose <em>Install app</em> in the browser menu. It then opens in its own window, with
-        its own icon.</p>
+        its own icon, on a blank editor: <em>New</em> starts another observation, <em>Open</em> takes a file of yours (several at once, a case with its observations), one at an address, or one of the recent files, and a file is read or edited in the same place, the pencil of the reader leading to the editor and <em>Read</em> back.</p>
       <p>Offline, the home page, the player and the component are kept on your device, and so is every
         page, recording, model and map tile you have opened since — enough to replay an account again
         in the field with no signal. What needs the network stays out of reach without it: the weather
@@ -677,7 +677,7 @@ export class FaqPage implements SitePage {
       <p>Oui. UFO@home est une application web qu'on peut installer : dans Chrome ou Edge, avec le
         bouton d'installation de la barre d'adresse ; sur iPhone ou iPad, <em>Partager</em> puis
         <em>Sur l'écran d'accueil</em> ; sur Android, <em>Installer l'application</em> dans le menu du
-        navigateur. Elle s'ouvre alors dans sa propre fenêtre, avec sa propre icône.</p>
+        navigateur. Elle s'ouvre alors dans sa propre fenêtre, avec sa propre icône, sur un éditeur vierge : <em>Nouveau</em> commence une autre observation, <em>Ouvrir</em> prend un de vos fichiers (plusieurs à la fois, un dossier avec ses observations), un fichier à une adresse, ou un des fichiers récents, et un fichier se lit ou s'édite au même endroit, le crayon du lecteur menant à l'éditeur et <em>Lire</em> y ramenant.</p>
       <p>Hors ligne, la page d'accueil, le lecteur et le composant sont conservés sur votre appareil,
         ainsi que chaque page, enregistrement, modèle et tuile de carte ouverts depuis : de quoi rejouer
         un compte rendu sur le terrain, sans réseau. Ce qui demande le réseau reste hors de portée : la
@@ -1002,7 +1002,7 @@ export class FaqPage implements SitePage {
       <p>Sí. UFO@home es una aplicación web que se puede instalar: en Chrome o Edge, con el botón de
         instalación de la barra de direcciones; en iPhone o iPad, <em>Compartir</em> y luego <em>Añadir
         a pantalla de inicio</em>; en Android, <em>Instalar aplicación</em> en el menú del navegador.
-        Se abre entonces en su propia ventana, con su propio icono.</p>
+        Se abre entonces en su propia ventana, con su propio icono, sobre un editor vacío: <em>Nuevo</em> empieza otra observación, <em>Abrir</em> toma un archivo tuyo (varios a la vez, un caso con sus observaciones), uno en una dirección, o uno de los archivos recientes, y un archivo se lee o se edita en el mismo sitio, el lápiz del lector llevando al editor y <em>Leer</em> de vuelta.</p>
       <p>Sin conexión, la página de inicio, el reproductor y el componente se conservan en tu
         dispositivo, igual que cada página, grabación, modelo y tesela de mapa que hayas abierto desde
         entonces: lo bastante para volver a reproducir un relato sobre el terreno, sin señal. Lo que
@@ -1325,7 +1325,7 @@ export class FaqPage implements SitePage {
       <p>Sì. UFO@home è un'app web che si può installare: in Chrome o Edge con il pulsante di
         installazione della barra degli indirizzi; su iPhone o iPad, <em>Condividi</em> e poi
         <em>Aggiungi alla schermata Home</em>; su Android, <em>Installa app</em> nel menu del browser.
-        Si apre allora in una finestra tutta sua, con la sua icona.</p>
+        Si apre allora in una finestra tutta sua, con la sua icona, su un editor vuoto: <em>Nuovo</em> comincia un'altra osservazione, <em>Apri</em> prende un tuo file (più di uno insieme, un caso con le sue osservazioni), uno a un indirizzo, o uno dei file recenti, e un file si legge o si modifica nello stesso posto, la matita del lettore che porta all'editor e <em>Leggi</em> che riporta indietro.</p>
       <p>Offline, la pagina iniziale, il lettore e il componente restano sul tuo dispositivo, insieme a
         ogni pagina, registrazione, modello e tessera di mappa aperti da allora: abbastanza per
         riprodurre di nuovo un resoconto sul campo, senza segnale. Quello che richiede la rete resta

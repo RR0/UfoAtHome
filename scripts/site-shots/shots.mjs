@@ -14,6 +14,50 @@ const GROUPS = {
 }
 const groupTab = (page, name) => page.locator(`.group-tab[aria-controls="${GROUPS[name]}"]`)
 
+/**
+ * Unfolds every section of a panel, folded to its title by default (see SectionFolds): the page describes the fields, and a picture of
+ * titles alone shows none of them.
+ */
+const unfoldAll = async (panel, maxHeight = Infinity) => {
+  for (let round = 0; round < 3; round++) {
+    const titles = panel.locator(".form-section[data-foldable]:not([data-unfolded]) > .section-title, .form-section[data-foldable]:not([data-unfolded]) > .section-head > .section-title")
+    const count = await titles.count()
+    if (count === 0) break
+    for (let at = 0; at < count; at++) {
+      // In their order, as long as the picture stays a picture of the group rather than a page of fields.
+      if ((await panel.boundingBox())?.height > maxHeight) return
+      const title = panel.locator(".form-section[data-foldable]:not([data-unfolded]) > .section-title, .form-section[data-foldable]:not([data-unfolded]) > .section-head > .section-title").first()
+      if (!(await title.count()) || !(await title.isVisible())) break
+      await title.click()
+      await panel.page().waitForTimeout(250)
+    }
+  }
+}
+
+/**
+ * Lets the observation's editor take the height of what it holds: on a screen it is the screen's height and its panel scrolls, which cut
+ * the picture of a panel in the middle of a field.
+ */
+const fullHeight = async (page) => {
+  await page.evaluate(() => {
+    const deep = (root, out = []) => {
+      for (const element of root.querySelectorAll("*")) {
+        if (element.tagName === "RR0-SIGHTING-EDITOR") out.push(element)
+        if (element.shadowRoot) deep(element.shadowRoot, out)
+      }
+      return out
+    }
+    for (const editor of deep(document)) {
+      if (editor.shadowRoot.getElementById("shot-full-height")) continue
+      const style = document.createElement("style")
+      style.id = "shot-full-height"
+      style.textContent = ".app { height: auto !important; max-height: none !important } .app > .group-panel { overflow: visible !important; max-height: none !important }"
+      editor.shadowRoot.append(style)
+    }
+  })
+  await page.waitForTimeout(300)
+}
+
 /** Opens a group of the editor and frames its tab bar and panel together. */
 const group = (name) => ({
   name: `edit-${name}`,
@@ -27,22 +71,29 @@ const group = (name) => ({
     if (await groupTab(page, name).getAttribute("aria-expanded") !== "true") await groupTab(page, name).click()
     await page.waitForTimeout(800)
     const panel = page.locator(`#${GROUPS[name]}`)
+    // Not the Files group: its text editor scrolls on its own, and laid out again at another height its line numbers drifted off its lines.
+    if (name !== "file") await fullHeight(page)
+    await unfoldAll(panel, 900)
     // Taken from a local copy of the site, whose address the field would show.
     if (name === "file") await panel.locator("input").evaluateAll(inputs => {
       for (const input of inputs) if (input.value.includes("localhost")) input.value = new URL(input.value).pathname.replace(/^/, "https://ufoathome.org")
     })
     await tools.highlight(page, groupTab(page, name))
-    return { region: [groupTab(page, name).locator(".."), panel], pad: 0 }
+    // A picture of the group, not of the page it scrolls to: a section that opens long (the candidate explanations) is cut at that height.
+    const box = await tools.boxOf([groupTab(page, name).locator(".."), panel], 0)
+    return { clip: { ...box, height: Math.min(box.height, 1000) } }
   }
 })
 
 /** Opens the Phenomenon group, then the editor of a shape by clicking its chip, which is how one is reached. */
 const shapeEditor = async (page) => {
-  await groupTab(page, "phenomenon").click()
+  if (await groupTab(page, "phenomenon").getAttribute("aria-expanded") !== "true") await groupTab(page, "phenomenon").click()
   await page.waitForTimeout(1500)
-  await page.locator("button.param-chip", { hasText: /Object|Objet|Objeto|Oggetto/ }).first().click()
-  await page.waitForTimeout(1500)
-  return page.locator("section.group-panel:visible").first()
+  const panel = page.locator(`#${GROUPS.phenomenon}`)
+  // The shape's kind (oval, polygon) is in its Appearance, folded to its title with the rest.
+  await unfoldAll(panel)
+  await fullHeight(page)
+  return panel
 }
 
 /** A recording played in the player, the picture alone (no summary chips): the scene a documentation section talks about. */
@@ -58,9 +109,20 @@ const scene = (name, file) => ({
 
 const SAINT_LO = "?file=/demo-data/case-saint-lo.json"
 
-/** Chooses an event of the case in the picker by its place in the list (0 the observation, 1 the interview). */
+/** Back to the case's list of events, when an event is open in its place (one column): the case editor opens on its first observation. */
+const showList = async (page) => {
+  const back = page.locator("rr0-case-editor #back-to-case")
+  if (await back.isVisible()) {
+    await back.click()
+    await page.waitForTimeout(800)
+  }
+}
+
+/** Opens an event of the case by its card, by its place in the history (0 the observation, 1 the interview). */
 const choose = async (page, index) => {
-  await page.locator("rr0-case-editor #track").selectOption(String(index))
+  await showList(page)
+  // Dispatched rather than pointed at: the stretched hit area of the card above covers the top of the next one's title.
+  await page.locator("rr0-case-editor #event-list .event-card .event-open").nth(index).dispatchEvent("click")
   await page.waitForTimeout(1500)
 }
 
@@ -71,18 +133,18 @@ const interviewGroup = (name, index) => ({
   query: SAINT_LO,
   async take({ page, highlight }) {
     await choose(page, 1)
-    const tabs = page.locator("rr0-interview #tabs .group-tab")
+    const tabs = page.locator("rr0-interview-editor #tabs .group-tab")
     await tabs.nth(index).click()
     await page.waitForTimeout(2500)
     if (name === "exchanges") {
       // Scrolled to a turn that tells of a moment of the observation: its link, outlined, is what the page talks about.
-      const turn = page.locator("rr0-interview .turn:has(.ref)").first()
+      const turn = page.locator("rr0-interview-editor .turn:has(.ref)").first()
       await turn.scrollIntoViewIfNeeded()
       await page.waitForTimeout(400)
       await highlight(page, turn.locator(".ref").first())
     }
     await highlight(page, tabs.nth(index))
-    return { region: [page.locator("rr0-interview #tabs"), page.locator("rr0-interview section.group-panel:visible").first()] }
+    return { region: [page.locator("rr0-interview-editor #tabs"), page.locator("rr0-interview-editor section.group-panel:visible").first()] }
   }
 })
 
@@ -92,6 +154,7 @@ const addDialog = (name, fill) => ({
   page: EDIT,
   query: SAINT_LO,
   async take({ page }) {
+    await showList(page)
     await page.locator("rr0-case-editor #add").click()
     await page.waitForTimeout(600)
     await fill(page)
@@ -110,6 +173,7 @@ export const SHOTS = [
     async take({ page, highlight }) {
       // The events of the case are cards now, not a picker: what is shown is the button that adds one and the list itself,
       // where each card carries what can be done to it (clone, padlock, bin).
+      await showList(page)
       await highlight(page, page.locator("rr0-case-editor #add"))
       return { region: [page.locator("rr0-case-editor #add"), page.locator("rr0-case-editor #event-list")], pad: 10 }
     }
@@ -118,7 +182,9 @@ export const SHOTS = [
     await page.locator("rr0-case-editor #kind").selectOption("interview")
   }),
   addDialog("case-add-interpretation", async page => {
-    await page.locator("rr0-case-editor #of").selectOption({ index: 1 })
+    await page.locator("rr0-case-editor #kind").selectOption("reading")
+    await page.waitForTimeout(300)
+    await page.locator("rr0-case-editor #of").selectOption({ index: 0 })
   }),
   {
     // The case file as text, in the case editor's own File group.
@@ -171,10 +237,11 @@ export const SHOTS = [
     page: EDIT,
     query: RECORDING,
     async take({ page, highlight, boxOf }) {
-      await groupTab(page, "location").click()
+      if (await groupTab(page, "location").getAttribute("aria-expanded") !== "true") await groupTab(page, "location").click()
       await page.waitForTimeout(600)
-      const panel = page.locator("section.group-panel:visible").first()
-      const inputs = panel.locator("input")
+      const panel = page.locator(`#${GROUPS.location}`)
+      await unfoldAll(panel)
+      const inputs = panel.locator("input:visible")
       await highlight(page, inputs.nth(0))
       await highlight(page, panel.locator("button").first())
       const across = await boxOf([panel], 0)
@@ -187,11 +254,17 @@ export const SHOTS = [
     name: "edit-draw",
     page: EDIT,
     query: RECORDING,
-    async take({ page, highlight }) {
+    async take({ page, highlight, boxOf }) {
       const panel = await shapeEditor(page)
-      await highlight(page, panel.locator("button", { hasText: /Oval|Ovale|Óvalo/ }).first())
-      await highlight(page, panel.locator("button", { hasText: /Polygon|Polygone|Polígono|Poligono/ }).first())
-      return { region: [panel] }
+      // The kind of a new shape, oval or polygon, is chosen in the menu of the list's "+".
+      const add = page.locator("rr0-sighting-editor #add-shape")
+      await add.click()
+      await page.waitForTimeout(500)
+      await highlight(page, add)
+      const menu = page.locator("rr0-sighting-editor #add-shape-kind")
+      const shown = await menu.isVisible().catch(() => false)
+      const box = await boxOf(shown ? [panel, menu] : [panel], 0)
+      return { clip: { ...box, height: Math.min(box.height, 700) } }
     }
   },
   {
@@ -200,10 +273,10 @@ export const SHOTS = [
     page: EDIT,
     query: RECORDING,
     async take({ page, highlight, boxOf }) {
-      await groupTab(page, "phenomenon").click()
+      if (await groupTab(page, "phenomenon").getAttribute("aria-expanded") !== "true") await groupTab(page, "phenomenon").click()
       await page.waitForTimeout(1500)
       // The playback bar, which shows while the picture is pointed at; the Phenomenon group has sliders of its own.
-      await page.locator("canvas:visible").first().hover()
+      await page.locator("rr0-sighting-editor .scene-card").first().hover()
       await page.waitForTimeout(400)
       const bar = page.locator("#seek")
       await highlight(page, bar)
@@ -220,6 +293,7 @@ export const SHOTS = [
     settle: 14000,
     async take({ page }) {
       // The case itself: what it is called and when, and the events it gathers.
+      await showList(page)
       return { region: [page.locator("rr0-case-editor .case-panel"), page.locator("rr0-case-editor #event-list")], pad: 8 }
     }
   }

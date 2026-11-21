@@ -8,7 +8,8 @@
 // written to site/shots/<name>_<lang>.webp, because the interface the picture shows is in the reader's language.
 import { createRequire } from "node:module"
 import { execFileSync } from "node:child_process"
-import { mkdirSync, rmSync } from "node:fs"
+import { mkdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { SHOTS } from "./shots.mjs"
@@ -60,9 +61,22 @@ async function highlight(page, locator) {
   }, { x: b.x, y: b.y, w: b.width, h: b.height, color: HIGHLIGHT })
 }
 
-const browser = await chromium.launch({ headless: false, channel: "chrome", args: ["--lang=en-US"] })
+/**
+ * The installed Chrome, in `language` down to its native fields: a date field draws its placeholder in the system's language whatever the
+ * page's, which only macOS's own arguments override, and Playwright refuses those, hence a launcher (see the articles' captures).
+ */
+const launch = (language) => {
+  const locale = LOCALES[language]
+  const launcher = join(tmpdir(), `chrome-${language}.sh`)
+  writeFileSync(launcher, `#!/bin/sh\nexec "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" -AppleLanguages "(${locale})" -AppleLocale ${locale.replace("-", "_")} "$@"\n`, { mode: 0o755 })
+  return chromium.launch({ headless: false, executablePath: launcher, args: [`--lang=${locale}`] })
+}
+
+let browser
 try {
   for (const language of languages) {
+    await browser?.close()
+    browser = await launch(language)
     const context = await browser.newContext({ locale: LOCALES[language], viewport: { width: 640, height: 900 }, deviceScaleFactor: 2 })
     for (const shot of SHOTS) {
       if (wanted.length && !wanted.includes(shot.name)) continue
@@ -71,9 +85,12 @@ try {
       page.on("pageerror", error => problems.push(error.message))
       try {
         const suffix = language === "en" ? "index.html" : `index_${language}.html`
-        await page.goto(`${site}${shot.page}${suffix}${shot.query ?? ""}`, { waitUntil: "load" })
+        // A file is given by its whole address: the player and the editor take no other (a path of this site makes a link that works
+        // here only), and the files of the demos are this site's.
+        const query = (shot.query ?? "").replace(/([?&]file=)\//g, `$1${site}/`)
+        await page.goto(`${site}${shot.page}${suffix}${query}`, { waitUntil: "load" })
         // The sticky header would land in the middle of a full-page capture.
-        await page.addStyleTag({ content: "header, .site-header, .site-nav { position: static !important }" })
+        await page.addStyleTag({ content: "header, .site-header, .site-nav, .page-outline { position: static !important }" })
         await page.waitForTimeout(shot.settle ?? 6000)
         const tools = { page, language, boxOf, highlight }
         const done = await shot.take(tools)
@@ -93,5 +110,5 @@ try {
     await context.close()
   }
 } finally {
-  await browser.close()
+  await browser?.close()
 }
