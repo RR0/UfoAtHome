@@ -2172,6 +2172,9 @@ ${EditorTheme.fields(".app")}
 .subgroup-tab > svg { flex: none; width: 15px; height: 15px; }
 .subgroup-tab:hover { background: none; color: var(--ink); }
 .subgroup-tab[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--glow-solid); background: none; box-shadow: none; }
+/* What the Sky says of the date and place, and its buttons for what else was up there, kept apart from the fields of the part open under
+   it: the labels of those fields, just under the buttons, read as theirs (dicté 2026-11-21). */
+#group-weather > .toolbar:has(#show-meteor) { margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .subgroup-panel { margin: 0; padding: 0; border: 0; background: transparent; color: inherit; }
 .account-view { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1.3 var(--sans); color: var(--ink-dim); }
 .app .element-list-body { border-color: var(--line); border-radius: 0 10px 10px 10px; }
