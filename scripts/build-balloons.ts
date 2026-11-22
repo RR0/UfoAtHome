@@ -18,7 +18,7 @@
  *
  * Run with: node --import tsx scripts/build-balloons.ts
  */
-import { BoxGeometry, BufferGeometry, ConeGeometry, CylinderGeometry, LatheGeometry, Quaternion, SphereGeometry, TorusGeometry, Vector2, Vector3 } from "three"
+import { BoxGeometry, BufferGeometry, ConeGeometry, CylinderGeometry, ExtrudeGeometry, LatheGeometry, Quaternion, Shape, SphereGeometry, TorusGeometry, Vector2, Vector3 } from "three"
 import { mkdirSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -132,6 +132,104 @@ function foil(model: BalloonModel): void {
   model.add("valve", new BoxGeometry(0.07, 0.06, 0.01).translate(0, 0.03, 0))
 }
 
+/** A foil pillow of this outline: two sheets welded at their rim, puffed to `thickness` in the middle, its middle at z = `z`. */
+const pillow = (shape: Shape, thickness: number, z = 0): BufferGeometry => {
+  const bevel = thickness / 2
+  const geometry = new ExtrudeGeometry(shape, { depth: 0.002, bevelEnabled: true, bevelThickness: bevel, bevelSize: Math.min(0.03, bevel), bevelSegments: 6, curveSegments: 24 })
+  return geometry.translate(0, 0, z - 0.001)
+}
+
+/** An ellipse as a shape, its middle at (x, y). */
+const ellipse = (x: number, y: number, rx: number, ry: number): Shape => {
+  const shape = new Shape()
+  shape.absellipse(x, y, rx, ry, 0, 2 * Math.PI, false, 0)
+  return shape
+}
+
+/** A rectangle with rounded corners, its middle at (x, y). */
+const rounded = (x: number, y: number, w: number, h: number, r: number): Shape => {
+  const shape = new Shape(), x0 = x - w / 2, y0 = y - h / 2
+  shape.moveTo(x0 + r, y0)
+  shape.lineTo(x0 + w - r, y0)
+  shape.quadraticCurveTo(x0 + w, y0, x0 + w, y0 + r)
+  shape.lineTo(x0 + w, y0 + h - r)
+  shape.quadraticCurveTo(x0 + w, y0 + h, x0 + w - r, y0 + h)
+  shape.lineTo(x0 + r, y0 + h)
+  shape.quadraticCurveTo(x0, y0 + h, x0, y0 + h - r)
+  shape.lineTo(x0, y0 + r)
+  shape.quadraticCurveTo(x0, y0, x0 + r, y0)
+  return shape
+}
+
+/** A five-pointed foil star half a metre from its middle to a point, its top point up, and its valve's tab at its foot. */
+function foilStar(model: BalloonModel): void {
+  const shape = new Shape()
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? 0.25 : 0.105, a = Math.PI / 2 + i * Math.PI / 5
+    const x = r * Math.cos(a), y = 0.25 + r * Math.sin(a)
+    if (i === 0) shape.moveTo(x, y)
+    else shape.lineTo(x, y)
+  }
+  shape.closePath()
+  model.add("foil", pillow(shape, 0.1).translate(0, 0.03, 0))
+  model.add("valve", new BoxGeometry(0.035, 0.04, 0.005).translate(0, 0.02, 0))
+}
+
+/** A foil heart half a metre across. */
+function foilHeart(model: BalloonModel): void {
+  const shape = new Shape()
+  shape.moveTo(0, 0.02)
+  shape.bezierCurveTo(-0.06, 0.1, -0.25, 0.2, -0.25, 0.33)
+  shape.bezierCurveTo(-0.25, 0.45, -0.12, 0.5, 0, 0.4)
+  shape.bezierCurveTo(0.12, 0.5, 0.25, 0.45, 0.25, 0.33)
+  shape.bezierCurveTo(0.25, 0.2, 0.06, 0.1, 0, 0.02)
+  model.add("foil", pillow(shape, 0.11).translate(0, 0.02, 0))
+  model.add("valve", new BoxGeometry(0.035, 0.04, 0.005).translate(0, 0.02, 0))
+}
+
+/**
+ * The figure of a child, a "super shape" foil balloon 0.9 m tall: a big head of hair round a face, a shirt, shorts, legs, shoes, the arms
+ * wide and up, each a pillow of its own colour (the model's settings `hairColor`, `skinColor`, `envelopeColor` for the shirt,
+ * `bottomColor`, `shoesColor`). A figure of no one in particular, of the proportions of such balloons (the "Dora" of Nancy, 2005).
+ */
+function foilFigure(model: BalloonModel): void {
+  const d = 0.08
+  // Its shoes, legs and shorts.
+  for (const side of [-1, 1]) {
+    model.add("foil-shoes", pillow(ellipse(side * 0.085, 0.06, 0.075, 0.05), d))
+    model.add("foil-skin", pillow(rounded(side * 0.07, 0.17, 0.08, 0.16, 0.03), d * 0.8, -0.005))
+    // Its arm, from the shoulder up and out, and its hand.
+    const arm = rounded(0, 0, 0.26, 0.075, 0.035)
+    model.add("foil-skin", pillow(arm, d * 0.8, -0.005).rotateZ(side * 0.4).translate(side * 0.225, 0.585, 0))
+    model.add("foil-skin", pillow(ellipse(side * 0.345, 0.65, 0.05, 0.055), d))
+  }
+  model.add("foil-bottom", pillow(rounded(0, 0.3, 0.28, 0.15, 0.04), d))
+  model.add("foil-top", pillow(rounded(0, 0.46, 0.33, 0.22, 0.06), d))
+  // Its head: the hair behind, the face in front of it.
+  model.add("foil-hair", pillow(rounded(0, 0.73, 0.42, 0.33, 0.14), d * 1.2, -0.01))
+  model.add("foil-skin", pillow(ellipse(0, 0.68, 0.13, 0.12), d * 0.9, 0.012))
+  model.add("valve", new BoxGeometry(0.035, 0.04, 0.005).translate(0, 0.02, -0.03))
+}
+
+/**
+ * A prank balloon: a bag 0.6 m across and a metre tall, open at its mouth, held open by a cross of straws on which up to nine flames burn
+ * (`light-flame-1` in the middle, the others round it, so that two, four or eight lit stand evenly), each a ball a fiftieth of its width
+ * (see BalloonFlight.lightsOf). The bag ("envelope") glows by their light from inside (see LitFromWithin).
+ */
+const PRANK_FLAMES: [number, number, number][] = [[0, 0.13, 0], ...[0, 180, 90, 270, 45, 225, 135, 315].map(a => {
+  const r = a * Math.PI / 180
+  return [Math.round(0.15 * Math.sin(r) * 1e4) / 1e4, 0.13, Math.round(-0.15 * Math.cos(r) * 1e4) / 1e4] as [number, number, number]
+})]
+
+function prank(model: BalloonModel): void {
+  const profile: [number, number][] = [[0.2, 0.12], [0.26, 0.25], [0.295, 0.45], [0.3, 0.65], [0.28, 0.82], [0.22, 0.94], [0.12, 1.0], [0, 1.02]]
+  model.add("envelope", lathe(profile, 40))
+  // The cross of straws the flames stand on.
+  model.add("frame", new BoxGeometry(0.4, 0.008, 0.008).translate(0, 0.12, 0))
+  model.add("frame", new BoxGeometry(0.008, 0.008, 0.4).translate(0, 0.12, 0))
+  PRANK_FLAMES.forEach((at, i) => model.add(`light-flame-${i + 1}`, new SphereGeometry(0.012, 10, 8).scale(1, 1.6, 1).translate(...at)))
+}
+
 function stratospheric(model: BalloonModel): void {
   // The natural shape at float, one metre wide: from its foot, where the flight train hangs, out to its shoulder and round over its crown.
   const profile: [number, number][] = [[0.006, 0], [0.07, 0.08], [0.17, 0.2], [0.28, 0.34], [0.38, 0.47], [0.45, 0.58], [0.495, 0.68],
@@ -180,6 +278,21 @@ const MODELS: { id: string, build: (model: BalloonModel) => void, materials: Glt
     materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.5, { ...glowing("#ffffff"), doubleSided: true }), GltfWriter.material("knot", "#d8d0c4", 0, 0.6)]
   },
   { id: "foil", build: foil, materials: [GltfWriter.material("foil", "#ffffff", 1, 0.12), GltfWriter.material("valve", "#f2f2f2", 0, 0.5)] },
+  { id: "foil-star", build: foilStar, materials: [GltfWriter.material("foil", "#ffffff", 1, 0.12), GltfWriter.material("valve", "#f2f2f2", 0, 0.5)] },
+  { id: "foil-heart", build: foilHeart, materials: [GltfWriter.material("foil", "#ffffff", 1, 0.12), GltfWriter.material("valve", "#f2f2f2", 0, 0.5)] },
+  {
+    id: "foil-figure", build: foilFigure,
+    materials: ["hair", "skin", "top", "bottom", "shoes"].map(part => GltfWriter.material(`foil-${part}`, "#ffffff", 0.6, 0.25)).concat(GltfWriter.material("valve", "#f2f2f2", 0, 0.5))
+  },
+  {
+    id: "prank", build: prank, lit: [["envelope"], [0, 0.2, 0]],
+    materials: [
+      GltfWriter.material("envelope", "#ffffff", 0, 0.5, { emissiveFactor: GltfWriter.linear("#ffb347"), doubleSided: true, alphaMode: "BLEND",
+        pbrMetallicRoughness: { baseColorFactor: [1, 1, 1, 0.75], metallicFactor: 0, roughnessFactor: 0.5 } }),
+      GltfWriter.material("frame", "#e8e2d0", 0, 0.8),
+      ...Array.from({ length: 9 }, (_, i) => GltfWriter.material(`light-flame-${i + 1}`, "#ffffff", 0, 0.4, { emissiveFactor: [1, 1, 1] }))
+    ]
+  },
   {
     id: "stratospheric", build: stratospheric,
     materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.3, { doubleSided: true }), GltfWriter.material("fitting", "#5a5f66", 0.7, 0.4)]

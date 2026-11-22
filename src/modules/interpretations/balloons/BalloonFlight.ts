@@ -2,7 +2,7 @@ import type { SaidPosition } from "../../../engine/model/SaidPosition.js"
 import type { SaidText } from "../../../engine/model/SaidText.js"
 import type { BodyJson, BodyKeyframe } from "../../../engine/interpretation/Interpretation.js"
 import { BalloonTypes } from "./BalloonType.js"
-import type { BalloonType, BalloonTypeId } from "./BalloonType.js"
+import type { BalloonType, BalloonTypeId, FoilShape } from "./BalloonType.js"
 
 /**
  * Balloons an interpretation claims were what the observer saw: a weather balloon high in the Sun at dusk, a stratospheric balloon
@@ -47,8 +47,15 @@ export interface BalloonFlightJson {
   tetherM?: number
   /** Its lamp lit, for a type that carries one (see BalloonType.lamp). */
   lit?: boolean
+  /** Its shape, for a type sold in several (see BalloonType.shapes): a foil balloon round, a star, a heart or a figure. Its first when absent. */
+  shape?: FoilShape
+  /** How many of its flames are lit, 1 to 9, for a type that has some (see BalloonType.flames): a prank balloon's candles. Its type's when absent. */
+  flames?: number
   /** Its colour, for an LED balloon its light's too, instead of its type's. */
   color?: string
+  /** The colours of its model's other parts, by part (see the catalogue's settings): a figure's `hair`, `skin`, `top`, `bottom`, `shoes`; a
+   * prank balloon's `flame`. Each is the model setting `<part>Color`. */
+  partColors?: Record<string, string>
   /** How long each flight is computed for from when it is let go, s, instead of its type's: it may burst or land before. */
   durationS?: number
   /** The phenomena of the account it claims to be, the balloons together (see BodyJson.ensemble). */
@@ -124,6 +131,8 @@ export interface BalloonSample {
   widthM: number
   /** Whether its burner is firing. */
   burning: boolean
+  /** How much of their full light its flames give, 0 to 1 (see BalloonType.flames). 0 for a balloon with none. */
+  flame: number
 }
 
 /** What a flight ended by: its time was up, it burst, or it came down to the ground and stayed. */
@@ -163,6 +172,8 @@ export class BalloonFlight {
   static readonly TURBULENCE: BalloonTurbulence = { horizontalMS: 0.8, verticalMS: 0.3, timescaleS: 30 }
   /** How far above the ground a gust's up and down reaches its full strength, m (see SkyLantern.GUST_GROUND_M). */
   private static readonly GUST_GROUND_M = 2
+  /** The most flames a prank balloon's model has (see build-balloons.ts). */
+  static readonly MAX_FLAMES = 9
   /** A captive balloon's line when the recording does not say, m. */
   static readonly TETHER_M = 30
   /** What a hot-air balloon's pilot climbs to when the recording does not say, m above the site. */
@@ -178,6 +189,11 @@ export class BalloonFlight {
     pilot: { en: "Pilot balloon", fr: "Ballon pilote", es: "Globo piloto", it: "Pallone pilota" },
     weather: { en: "Weather balloon", fr: "Ballon-sonde", es: "Globo sonda", it: "Pallone sonda" },
     stratospheric: { en: "Stratospheric balloon", fr: "Ballon stratosphérique", es: "Globo estratosférico", it: "Pallone stratosferico" },
+    "stratospheric-large": { en: "Large stratospheric balloon", fr: "Grand ballon stratosphérique", es: "Gran globo estratosférico", it: "Grande pallone stratosferico" },
+    superpressure: { en: "Superpressure balloon", fr: "Ballon pressurisé", es: "Globo presurizado", it: "Pallone pressurizzato" },
+    infrared: { en: "Infrared hot-air balloon", fr: "Montgolfière infrarouge", es: "Globo infrarrojo", it: "Mongolfiera infrarossa" },
+    "prank-candles": { en: "Prank balloon", fr: "Ballon farceur", es: "Globo de broma", it: "Pallone scherzo" },
+    "prank-flares": { en: "Prank balloon with a flare", fr: "Ballon farceur à feu de détresse", es: "Globo de broma con bengala", it: "Pallone scherzo con razzo" },
     solar: { en: "Solar balloon", fr: "Ballon solaire", es: "Globo solar", it: "Pallone solare" },
     captive: { en: "Captive balloon", fr: "Ballon captif", es: "Globo cautivo", it: "Pallone frenato" }
   }
@@ -196,11 +212,28 @@ export class BalloonFlight {
   }
 
   /** The type a flight lets go: its own figures over its type's. */
-  static typeOf(flight: Pick<BalloonFlightJson, "balloon">): BalloonType {
+  static typeOf(flight: Pick<BalloonFlightJson, "balloon"> & { shape?: FoilShape }): BalloonType {
     const stated = flight.balloon
     const id = typeof stated === "string" ? stated : stated?.id
-    const type = BalloonTypes.byId(id) ?? BalloonTypes.ALL[0]
+    const base = BalloonTypes.byId(id) ?? BalloonTypes.ALL[0]
+    // Its shape's model and figures over its type's, then what the recording changes of them.
+    const shape = base.shapes ? base.shapes[flight.shape ?? "round"] ?? Object.values(base.shapes)[0] : undefined
+    const type = shape ? { ...base, ...shape } : base
     return typeof stated === "string" ? type : { ...type, ...stated, id: type.id }
+  }
+
+  /** How many flames it has lit (see BalloonFlightJson.flames), 1 to 9; none for a type that has none. */
+  static flamesOf(flight: Pick<BalloonFlightJson, "flames">, type: BalloonType): number {
+    if (!type.flames) return 0
+    return Math.max(1, Math.min(9, Math.round(flight.flames ?? type.flames.count)))
+  }
+
+  /** How much of their full heat and light its flames give `s` seconds after it is let go: full, fading over the last quarter, then out. */
+  static flameShare(type: BalloonType, s: number): number {
+    const burn = type.flames?.burnS
+    if (burn === undefined || s < 0 || s >= burn) return 0
+    const fade = burn * 0.75
+    return s <= fade ? 1 : (burn - s) / (burn - fade)
   }
 
   /** Every balloon of a flight: those stated one by one, then those its group draws; one at the start when neither says any. */
@@ -309,7 +342,10 @@ export class BalloonFlight {
     sampleMs = Math.max(sampleMs, Math.ceil(durationS * 1000 / BalloonFlight.MAX_KEYFRAMES / 500) * 500)
     const perSample = Math.max(1, Math.round(sampleMs / 1000 / step))
     const anchor = { x: site.eastM + (release.eastM ?? 0), y: site.northM + (release.northM ?? 0) }
-    const tether = type.envelope === "sealed" ? flight.tetherM ?? BalloonFlight.TETHER_M : undefined
+    const tether = type.tethered ? flight.tetherM ?? BalloonFlight.TETHER_M : undefined
+    // A prank balloon's air is as much hotter as it has flames lit, in proportion to its type's.
+    const flameCount = BalloonFlight.flamesOf(flight, type)
+    const flameExcessK = type.flames ? (type.insideExcessK ?? 0) * flameCount / type.flames.count : 0
     const air = (z: number) => {
       const { pressurePa, temperatureK } = BalloonFlight.airAt(z + seaM, offsetK, siteSeaM)
       return { p: pressurePa, T: temperatureK, rho: pressurePa / (BalloonFlight.R_AIR * temperatureK) }
@@ -325,15 +361,20 @@ export class BalloonFlight {
       const at = air(startZ)
       state.excessK = type.burner
         ? Math.max(0, at.T * type.massKg / (at.rho * type.maxVolumeM3 - type.massKg))
-        : type.insideExcessK ?? 0
+        : type.flames ? flameExcessK * BalloonFlight.flameShare(type, 0) : type.insideExcessK ?? 0
     }
     const volumeOf = (at: { p: number, T: number }) => {
-      if (type.envelope === "open" || type.envelope === "sealed") return type.maxVolumeM3
+      if (type.envelope === "sealed") return type.maxVolumeM3
+      if (type.envelope === "open") {
+        // Let go partly filled, its warm air swells as the air thins, until it fills its envelope.
+        if (type.launchVolumeM3 >= type.maxVolumeM3) return type.maxVolumeM3
+        return Math.min(type.maxVolumeM3, type.launchVolumeM3 * fill * (101325 / 288.15) / (at.p / at.T))
+      }
       const natural = state.gasKg * BalloonFlight.R * at.T / (at.p * gasMol)
-      return type.envelope === "vented" ? Math.min(natural, type.maxVolumeM3) : natural
+      return type.envelope === "elastic" ? natural : Math.min(natural, type.maxVolumeM3)
     }
     const at0 = air(startZ)
-    const samples: BalloonSample[] = [{ t: release.t, x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, volumeOf(at0)), burning: false }]
+    const samples: BalloonSample[] = [{ t: release.t, x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, volumeOf(at0)), burning: false, flame: BalloonFlight.flameShare(type, 0) }]
     const gust = BalloonFlight.gusts(flight.turbulence ?? BalloonFlight.TURBULENCE, BalloonFlight.seedOf(release), step)
     let end: BalloonEnd = "time"
     let restingS = 0
@@ -345,7 +386,7 @@ export class BalloonFlight {
       let volume = volumeOf(at)
       if (type.envelope === "elastic" && volume >= type.maxVolumeM3) {
         end = "burst"
-        samples.push({ t: release.t + Math.round(s * 1000), x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, type.maxVolumeM3), burning: false })
+        samples.push({ t: release.t + Math.round(s * 1000), x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, type.maxVolumeM3), burning: false, flame: 0 })
         break
       }
       if (type.envelope === "vented") {
@@ -378,7 +419,10 @@ export class BalloonFlight {
         if (!burning && state.vz > ventAbove) state.excessK -= 0.5 * step
         state.excessK = Math.max(0, state.excessK)
       }
-      const insideKg = type.envelope === "open" ? at.p * type.maxVolumeM3 / (BalloonFlight.R_AIR * (at.T + state.excessK)) : state.gasKg
+      // A prank balloon's flames heat its air as they burn, and it cools fast through its thin bag once they die.
+      const flame = BalloonFlight.flameShare(type, s)
+      if (type.flames) state.excessK += (flameExcessK * flame - state.excessK) * Math.min(1, step / type.flames.coolingS)
+      const insideKg = type.envelope === "open" ? at.p * volume / (BalloonFlight.R_AIR * (at.T + state.excessK)) : state.gasKg
       const lift = (at.rho * volume - insideKg) * BalloonFlight.G
       let massKg = type.massKg - ((type.ballastKg ?? 0) - state.ballastKg)
       // Heavier than what lifts it once it has floated, it lets go of the ballast that makes up the difference, while it has any.
@@ -413,13 +457,13 @@ export class BalloonFlight {
       if (tether !== undefined) BalloonFlight.heldBy(state, anchor, ground, tether)
       // Down again and staying there, a free balloon's flight is over (a hot-air balloon has landed; a party balloon is in a tree).
       restingS = resting && s > 10 ? restingS + step : 0
-      const landed = restingS > 30 && type.envelope !== "sealed"
+      const landed = restingS > 30 && !type.tethered
       const switching = samples.length > 0 && samples[samples.length - 1].burning !== burning
       if (i % perSample === 0 || i === steps || switching || landed) {
         const t = release.t + Math.round(s * 1000)
         // A burner starting or stopping is stated by two keys a millisecond apart (see BodyKeyframe.lights).
-        if (switching) samples.push({ t: t - 1, x: state.x, y: state.y, z: state.z, widthM: width, burning: !burning })
-        samples.push({ t, x: state.x, y: state.y, z: state.z, widthM: width, burning })
+        if (switching) samples.push({ t: t - 1, x: state.x, y: state.y, z: state.z, widthM: width, burning: !burning, flame })
+        samples.push({ t, x: state.x, y: state.y, z: state.z, widthM: width, burning, flame })
       }
       if (landed) {
         end = "landed"
@@ -458,10 +502,22 @@ export class BalloonFlight {
     const lamp = flight.lit && type.lamp ? type.lamp : undefined
     // An LED balloon glows all over: its LED's candela over the disc it shows.
     const glowCdM2 = (width: number) => type.glow ? type.glow.candela / (Math.PI * width * width / 4) : 0
-    // A foil balloon turns slowly as it goes, at a rate of its own.
+    // A foil or a prank balloon turns slowly as it goes, at a rate of its own; a prank balloon also swings as a pendulum, a few degrees.
     const random = BalloonFlight.randomFrom(BalloonFlight.seedOf(release) ^ 0x9e3779b9)
-    const spinDegS = type.finish === "mirror" ? (5 + 15 * random()) * (random() < 0.5 ? -1 : 1) : 0
+    const spinDegS = type.spins ? (5 + 15 * random()) * (random() < 0.5 ? -1 : 1) : 0
     const headingStart = 360 * random()
+    const sway = type.sways ? { degrees: 3 + 4 * random(), periodS: 3 + 3 * random(), phase: 2 * Math.PI * random() } : undefined
+    const attitudeAt = (t: number) => {
+      if (spinDegS === 0 && !sway) return undefined
+      const s = (t - release.t) / 1000
+      const a = sway ? 2 * Math.PI * s / sway.periodS + sway.phase : 0
+      return {
+        ...(spinDegS !== 0 ? { headingDeg: BalloonFlight.round(((headingStart + spinDegS * s) % 360 + 360) % 360, 10) } : {}),
+        ...(sway ? { pitchDeg: BalloonFlight.round(sway.degrees * Math.sin(a), 10), rollDeg: BalloonFlight.round(sway.degrees * Math.cos(a * 0.83), 10) } : {})
+      }
+    }
+    const flames = BalloonFlight.flamesOf(flight, type)
+    const flameColor = flight.partColors?.flame ?? type.flames?.color
     let lastWidth = -1
     const track: BodyKeyframe[] = samples.map((sample, i) => {
       const resized = Math.abs(sample.widthM - lastWidth) > lastWidth * 0.005
@@ -474,11 +530,11 @@ export class BalloonFlight {
         altitudeM: BalloonFlight.round(sample.z),
         ...(i === 0 ? { present: true } : {}),
         ...(resized ? { sizeM: size } : {}),
-        ...(spinDegS !== 0 ? { attitude: { headingDeg: BalloonFlight.round(((headingStart + spinDegS * (sample.t - release.t) / 1000) % 360 + 360) % 360, 10) } } : {}),
+        ...(attitudeAt(sample.t) ? { attitude: attitudeAt(sample.t) } : {}),
         ...(i === 0 ? { appearance: { color, albedo: type.albedo, ...(type.finish ? { finish: type.finish } : {}), ...(type.glow ? { luminanceCdM2: glowCdM2(sample.widthM) } : {}) } }
           : type.glow && resized ? { appearance: { color, luminanceCdM2: BalloonFlight.round(glowCdM2(sample.widthM), 100) } } : {})
       }
-      const lights = BalloonFlight.lightsOf(type, sample.burning, lamp, sample.widthM)
+      const lights = BalloonFlight.lightsOf(type, sample.burning, lamp, sample.widthM, flames, sample.flame)
       if (lights) key.lights = lights
       return key
     })
@@ -490,6 +546,8 @@ export class BalloonFlight {
     const colours: Record<string, string> = { envelopeColor: color }
     if (type.stripeColor) colours.stripeColor = type.stripeColor
     if (lamp) colours.lampColor = lamp.color
+    if (flameColor) colours.flameColor = flameColor
+    for (const [part, colour] of Object.entries(flight.partColors ?? {})) colours[`${part}Color`] = colour
     return {
       id: count > 1 ? `${flight.id}-${index + 1}` : flight.id,
       title, ...explains,
@@ -506,7 +564,18 @@ export class BalloonFlight {
    * lights from inside while it fires, nothing between; a pilot balloon's lamp, its candela over the disc it shows. None for a balloon with
    * no light of its own.
    */
-  static lightsOf(type: BalloonType, burning: boolean, lamp: BalloonType["lamp"] | undefined, widthM: number): Record<string, number> | undefined {
+  static lightsOf(type: BalloonType, burning: boolean, lamp: BalloonType["lamp"] | undefined, widthM: number, flames = 0, flame = 0): Record<string, number> | undefined {
+    if (type.flames) {
+      // Each flame a ball a fiftieth of the bag's width (see build-balloons.ts), its candela over its disc; those not lit, nothing. The bag
+      // glows by what of their light it lets through (half, SUPPOSED), over the ellipse it shows.
+      const radiusM = widthM / 50
+      const lights: Record<string, number> = {}
+      for (let i = 1; i <= BalloonFlight.MAX_FLAMES; i++) {
+        lights[`light-flame-${i}`] = i <= flames ? BalloonFlight.round(type.flames.candela * flame / (Math.PI * radiusM * radiusM), 1) : 0
+      }
+      lights.envelope = BalloonFlight.round(type.flames.candela * flames * flame * 0.5 / (Math.PI * widthM / 2 * widthM * type.aspect / 2), 1000)
+      return lights
+    }
     if (type.burner) {
       const envelope = burning ? type.burner.envelopeCdM2 : 0
       return { flame: burning ? type.burner.flameCdM2 : 0, envelope, "envelope-stripe": envelope }

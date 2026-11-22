@@ -21,6 +21,23 @@ export interface BalloonParameterTexts {
   stratospheric: string
   solar: string
   captive: string
+  stratosphericLarge: string
+  superpressure: string
+  infrared: string
+  prankCandles: string
+  prankFlares: string
+  shape: string
+  round: string
+  star: string
+  heart: string
+  figure: string
+  hair: string
+  skin: string
+  bottom: string
+  shoes: string
+  flamesLit: string
+  candlesOrFlares: string
+  flameColour: string
   colour: string
   itsLightsForAnLedBalloon: string
   filledWith: string

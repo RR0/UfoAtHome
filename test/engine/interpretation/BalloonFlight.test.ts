@@ -159,6 +159,42 @@ describe("BalloonFlight", () => {
     expect(heavy.end).toBe("landed")
   })
 
+  test("floats a superpressure balloon at some 19 km without bursting, an infrared one at some 25 km, a large stratospheric one at some 38 km", () => {
+    const float = (id: BalloonTypeId, s: number) => at(BalloonFlight.trajectory(flight(id), { t: 0 }).samples, s).z
+    expect(float("superpressure", 9000)).toBeGreaterThan(17000)
+    expect(float("superpressure", 9000)).toBeLessThan(21000)
+    expect(float("infrared", 9000)).toBeGreaterThan(23000)
+    expect(float("infrared", 9000)).toBeLessThan(27000)
+    expect(float("stratospheric-large", 7200)).toBeGreaterThan(36000)
+    expect(float("stratospheric-large", 7200)).toBeLessThan(41000)
+  })
+
+  test("lets a prank balloon climb while its candles burn, their light fading over the last quarter, and come down once they are out", () => {
+    const { samples } = BalloonFlight.trajectory(flight("prank-candles", { durationS: 1800 }), { t: 0 })
+    expect(at(samples, 60).z).toBeGreaterThan(50)
+    expect(at(samples, 300).flame).toBe(1)
+    expect(at(samples, 650).flame).toBeGreaterThan(0)
+    expect(at(samples, 650).flame).toBeLessThan(1)
+    expect(at(samples, 900).flame).toBe(0)
+    expect(climbOver(samples, 900, 1100)).toBeLessThan(0)
+    // As many flames lit as stated, and the others dark; more of them heat it more.
+    const [body] = BalloonFlight.bodiesOf(flight("prank-candles", { flames: 2, durationS: 60 }))
+    const lights = body.track[1].lights!
+    expect(Object.keys(lights).filter(name => name.startsWith("light-flame-") && lights[name] > 0)).toHaveLength(2)
+    expect(lights.envelope).toBeGreaterThan(0)
+    const climb = (flames: number) => climbOver(BalloonFlight.trajectory(flight("prank-candles", { flames }), { t: 0 }).samples, 30, 120)
+    expect(climb(8)).toBeGreaterThan(climb(2))
+  })
+
+  test("turns and swings a prank balloon, and draws a foil balloon in its shape", () => {
+    const [prank] = BalloonFlight.bodiesOf(flight("prank-candles", { durationS: 30 }))
+    expect(new Set(prank.track.filter(key => key.attitude).map(key => key.attitude!.pitchDeg)).size).toBeGreaterThan(5)
+    const [figure] = BalloonFlight.bodiesOf(flight("foil", { shape: "figure", partColors: { hair: "#5a2e14" }, durationS: 30 }))
+    expect(figure.model).toEqual({ id: "ufoathome-balloon-foil-figure" })
+    expect(figure.modelParameters).toMatchObject({ envelopeColor: "#f0a3c8", hairColor: "#5a2e14" })
+    expect(figure.track[0].sizeM!.heightM).toBeCloseTo(0.8 * 1.112, 2)
+  })
+
   test("computes every type within a few hundred milliseconds", () => {
     for (const type of BalloonTypes.ALL) {
       const start = performance.now()

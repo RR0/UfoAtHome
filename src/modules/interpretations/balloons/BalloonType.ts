@@ -10,7 +10,11 @@
  *   "zero-pressure" balloon), and a foil party balloon, whose seams and valve let its helium out as it swells. It floats where it weighs
  *   what the air it pushes aside does.
  * - "sealed": an envelope that holds its gas whatever the height, a captive balloon's, which a line holds down.
- * - "open": a hot-air balloon or a solar balloon, lifted by its own air, hotter than outside: by a burner its pilot fires, or by the Sun.
+ * - "superpressure": an envelope let go slack that fills out as it rises, then holds its gas at more than the air's pressure: it no longer
+ *   swells, and floats where it weighs what the air it pushes aside does, for weeks (the CNES's BPS, Google's Loon).
+ * - "open": a hot-air balloon, a solar, infrared or prank balloon, lifted by its own air, hotter than outside: by a burner its pilot fires, by
+ *   the Sun or the Earth's warmth, or by candles. One let go partly filled (its stated volume less than its most) fills out as it rises, its
+ *   warm air swelling as a gas does.
  *
  * Every figure below is a type's own, sourced where it could be and SUPPOSED where it could not: a recording changes any of them (see
  * BalloonFlightJson.balloon).
@@ -62,15 +66,50 @@ export interface BalloonType {
   glow?: { candela: number, color: string }
   /** A lamp it carries under it (the lamp a pilot balloon took up at night), candela, and its colour; unlit unless the recording lights it. */
   lamp?: { candela: number, color: string }
+  /** The flames that heat and light an open envelope with no burner (see BalloonFlames). */
+  flames?: BalloonFlames
+  /** Held on a line from where it is let go (see BalloonFlightJson.tetherM). */
+  tethered?: boolean
+  /** It turns slowly about its vertical, at a rate of its own: a foil balloon, a prank balloon whose lights go round "like a slow frisbee". */
+  spins?: boolean
+  /** It swings a few degrees to and fro as a pendulum, its heavy foot under its light top: a prank balloon in the gusts. */
+  sways?: boolean
+  /** The shapes it is sold in, each changing its model and its figures; the first when the recording says none (see BalloonFlightJson.shape). */
+  shapes?: Partial<Record<FoilShape, BalloonShape>>
   /** The column of RR0's version of Poher's matrix it is assessed as (see InterpretationKind.phenomenon). */
   phenomenon: string
   /** How long its flight is computed for when the recording does not say, s: it may burst, or land, before. */
   durationS: number
 }
 
-export type BalloonEnvelope = "elastic" | "vented" | "sealed" | "open"
+export type BalloonEnvelope = "elastic" | "vented" | "sealed" | "superpressure" | "open"
 
-export type BalloonTypeId = "hot-air" | "party" | "led" | "foil" | "pilot" | "weather" | "stratospheric" | "solar" | "captive"
+export type BalloonTypeId = "hot-air" | "party" | "led" | "foil" | "pilot" | "weather" | "stratospheric" | "stratospheric-large" | "superpressure" | "infrared"
+  | "solar" | "captive" | "prank-candles" | "prank-flares"
+
+/** The shapes foil balloons are sold in (see BalloonType.shapes). */
+export const FOIL_SHAPES = ["round", "star", "heart", "figure"] as const
+export type FoilShape = typeof FOIL_SHAPES[number]
+
+/**
+ * What a shape of a type changes of it: its model, its proportions, and what it holds and weighs. A foil balloon is round, a star, a heart or
+ * a figure, a pillow of film each, the same physics.
+ */
+export type BalloonShape = Pick<BalloonType, "modelId" | "aspect" | "widthM" | "depthRatio" | "launchVolumeM3" | "maxVolumeM3" | "massKg" | "color">
+
+/**
+ * The flames that heat an open envelope that has no burner, and light it: a prank balloon's birthday candles or road flares, on a cross of
+ * straws or balsa at its mouth. How many are lit when nothing says (a recording may say another number, 1 to 9: see
+ * BalloonFlightJson.flames), how bright each is and of what colour, how long they burn, and how fast the bag's air cools once they go out.
+ * Its air is the type's `insideExcessK` hotter for that many flames, in proportion for another number.
+ */
+export interface BalloonFlames {
+  count: number
+  candela: number
+  color: string
+  burnS: number
+  coolingS: number
+}
 
 /**
  * The burner of a hot-air balloon: how fast a blast heats its air, how fast that air cools through its fabric, how long a blast lasts, and
@@ -129,13 +168,21 @@ export class BalloonTypes {
       phenomenon: "LedBalloon", durationS: 3600
     },
     /**
-     * An 18-inch (45 cm) round foil balloon, 10 g with its ribbon, holding some 14 litres of helium. Its film cannot stretch: as the air
+     * An 18-inch (45 cm) round foil balloon, 10 g with its ribbon, holding some 14 litres of helium; or a star, a heart, or the figure of a
+   * child, arms wide and head big, 0.9 m tall and 0.8 m across, its shirt the balloon's colour and its hair, skin, shorts and shoes their own (the "Dora" balloon seen over Nancy on 23 October 2005 was one), 50
+   * litres, 30 g: sizes and weights SUPPOSED from sellers' listings. Its film cannot stretch: as the air
      * thins its helium leaks through its seams and valve, and it floats at some 4 km, for days, polished, flashing the Sun as it turns. The
      * loss of its gas as it swells is SUPPOSED, which is what keeps it from bursting as one sealed would.
      */
     {
       id: "foil", modelId: "ufoathome-balloon-foil", envelope: "vented", launchVolumeM3: 0.014, maxVolumeM3: 0.014, massKg: 0.01,
-      dragCoefficient: 0.6, aspect: 1.034, widthM: 0.45, depthRatio: 0.267, color: "#c9cdd2", albedo: 0.85, finish: "mirror",
+      dragCoefficient: 0.6, aspect: 1.034, widthM: 0.45, depthRatio: 0.267, color: "#c9cdd2", albedo: 0.85, finish: "mirror", spins: true,
+      shapes: {
+        round: { modelId: "ufoathome-balloon-foil", aspect: 1.034, widthM: 0.45, depthRatio: 0.267, launchVolumeM3: 0.014, maxVolumeM3: 0.014, massKg: 0.01, color: "#c9cdd2" },
+        star: { modelId: "ufoathome-balloon-foil-star", aspect: 1.029, widthM: 0.5, depthRatio: 0.183, launchVolumeM3: 0.012, maxVolumeM3: 0.012, massKg: 0.009, color: "#e0b83a" },
+        heart: { modelId: "ufoathome-balloon-foil-heart", aspect: 0.903, widthM: 0.5, depthRatio: 0.2, launchVolumeM3: 0.014, maxVolumeM3: 0.014, massKg: 0.01, color: "#d81e3c" },
+        figure: { modelId: "ufoathome-balloon-foil-figure", aspect: 1.112, widthM: 0.8, depthRatio: 0.127, launchVolumeM3: 0.05, maxVolumeM3: 0.05, massKg: 0.03, color: "#f0a3c8" }
+      },
       phenomenon: "FoilBalloon", durationS: 3600
     },
     /**
@@ -169,6 +216,56 @@ export class BalloonTypes {
       dragCoefficient: 0.4, aspect: 0.91, color: "#e9eef2", albedo: 0.8, ballastKg: 20, phenomenon: "StratosphericBalloons", durationS: 10800
     },
     /**
+     * A large open stratospheric balloon of the CNES's (a BSO) or NASA's: 150 000 m³ full, some 66 m across, carrying 700 kg, floating at
+     * some 38 km, where it is lit for an hour and more after the ground's sunset. The CNES has let go some 3 000 of 30 to 80 m from France
+     * and elsewhere. Its figures are SUPPOSED, for one of the middle of that range; 70 kg of ballast.
+     */
+    {
+      id: "stratospheric-large", modelId: "ufoathome-balloon-stratospheric", envelope: "vented", launchVolumeM3: 730, maxVolumeM3: 150000, massKg: 700,
+      dragCoefficient: 0.4, aspect: 0.91, color: "#e9eef2", albedo: 0.8, ballastKg: 140, phenomenon: "StratosphericBalloons", durationS: 14400
+    },
+    /**
+     * A superpressure balloon (the CNES's BPS, Google's Loon): a sealed sphere 10 m across, let go slack, that fills out as it rises and
+     * then floats for weeks at some 19 km without swelling more, its gas kept at more than the air's pressure. Carrying 44 kg; figures
+     * SUPPOSED. Drawn as a sphere.
+     */
+    {
+      id: "superpressure", modelId: "ufoathome-balloon-latex", envelope: "superpressure", launchVolumeM3: 45, maxVolumeM3: 523, massKg: 44,
+      dragCoefficient: 0.4, aspect: 1.13, color: "#eef1f4", albedo: 0.8, phenomenon: "StratosphericBalloons", durationS: 10800
+    },
+    /**
+     * The CNES's infrared hot-air balloon (MIR): an open envelope of 45 000 m³, black above to take in the Sun and the Earth's warmth, its
+     * air some 20 K hotter than outside, floating at some 25 km. Let go partly filled, it fills out as it rises. Its figures are SUPPOSED (a
+     * 150 kg flight chain); drawn as a stratospheric balloon's natural shape.
+     */
+    {
+      id: "infrared", modelId: "ufoathome-balloon-stratospheric", envelope: "open", launchVolumeM3: 2075, maxVolumeM3: 45000, massKg: 150,
+      dragCoefficient: 0.4, aspect: 0.91, color: "#9aa0a8", albedo: 0.4, insideExcessK: 20, phenomenon: "StratosphericBalloons", durationS: 10800
+    },
+    /**
+     * A prank balloon: a dry-cleaning bag (some 0.25 m³, 0.6 m across) held open at its mouth by a cross of straws on which four birthday
+     * candles burn, 20 g in all. Its air some 60 K hotter while they burn, it climbs a few hundred metres, its candles a ring of small lights
+     * under a faint glowing dome, turning slowly and swinging in the gusts, and goes out after ten minutes or so: one of the four kinds of
+     * prank balloon known since 1897 (the "Omaha airship"). Its heat and its candles' 0.5 cd each are SUPPOSED.
+     */
+    {
+      id: "prank-candles", modelId: "ufoathome-balloon-prank", envelope: "open", launchVolumeM3: 0.25, maxVolumeM3: 0.25, massKg: 0.02,
+      dragCoefficient: 0.6, aspect: 1.515, widthM: 0.6, color: "#f4f4f4", albedo: 0.6, insideExcessK: 60, spins: true, sways: true,
+      flames: { count: 4, candela: 0.5, color: "#ffb347", burnS: 720, coolingS: 15 },
+      phenomenon: "SkyLantern", durationS: 1200
+    },
+    /**
+     * A prank balloon of the long-lasting kind: several leaf bags taped into one of some 2 m³ (1.2 m across), held open by balsa on which one
+     * road flare burns red, 300 g in all: a bright red point that drifts for a quarter of an hour. Its heat (80 K) and the flare's 150 cd are
+     * SUPPOSED.
+     */
+    {
+      id: "prank-flares", modelId: "ufoathome-balloon-prank", envelope: "open", launchVolumeM3: 2, maxVolumeM3: 2, massKg: 0.3,
+      dragCoefficient: 0.6, aspect: 1.515, widthM: 1.2, color: "#2b2d30", albedo: 0.1, insideExcessK: 80, spins: true, sways: true,
+      flames: { count: 1, candela: 150, color: "#ff3a20", burnS: 900, coolingS: 30 },
+      phenomenon: "SkyLantern", durationS: 1500
+    },
+    /**
      * A solar balloon: a black plastic envelope of some 14 m³ (3 m across), 250 g, its air warmed by the Sun some 20 K over the outside's
      * (SUPPOSED, for a sunny day): a toy that climbs to a few hundred metres and drifts while the Sun is up.
      */
@@ -182,7 +279,7 @@ export class BalloonTypes {
      * balloons that sway over a town. Its line is 30 m when the recording does not say (see BalloonFlightJson.tetherM).
      */
     {
-      id: "captive", modelId: "ufoathome-balloon-latex", envelope: "sealed", launchVolumeM3: 14, maxVolumeM3: 14, massKg: 8,
+      id: "captive", modelId: "ufoathome-balloon-latex", envelope: "sealed", tethered: true, launchVolumeM3: 14, maxVolumeM3: 14, massKg: 8,
       dragCoefficient: 0.47, aspect: 1.13, color: "#f4f4f4", albedo: 0.7, phenomenon: "WeatherBalloonsOrMongolfieres", durationS: 3600
     }
   ]

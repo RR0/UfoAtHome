@@ -73,6 +73,8 @@ describe("kinds of interpretation", () => {
     expect(phenomenon("balloons", { balloon: { id: "stratospheric", massKg: 300 } })).toBe("StratosphericBalloons")
     expect(phenomenon("balloons", { balloon: "foil" })).toBe("FoilBalloon")
     expect(phenomenon("balloons", { balloon: "led" })).toBe("LedBalloon")
+    expect(phenomenon("balloons", { balloon: "prank-candles" })).toBe("SkyLantern")
+    expect(phenomenon("balloons", { balloon: "superpressure" })).toBe("StratosphericBalloons")
     expect(phenomenon("airships", { airship: "blimp" })).toBe("Airship")
     expect(phenomenon("airships", { airship: "aerostat" })).toBe("Airship")
   })

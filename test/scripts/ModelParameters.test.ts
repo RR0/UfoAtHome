@@ -23,9 +23,9 @@ const published = catalogue.filter(entry => entry.parameters?.parameters?.length
 describe("the settings the catalogue's models publish", () => {
   test("there are some, for figures, for trees, for an airliner, for the project's own crafts, for sky lanterns, for birds, for drones, for balloons, for airships and for a van", () => {
     const keys = new Set(published.flatMap(entry => entry.parameters!.parameters!.map(spec => spec.key)))
-    expect([...keys].sort()).toEqual(["billColor", "bodyColor", "costumeColor", "envelopeColor", "finColor", "foliageColor", "frontColor", "gearUp", "headColor", "hullColor",
-      "lampColor", "legsUp", "navLeftColor", "navRightColor", "neckColor", "noseColor", "paintColor", "paperColor", "rearColor", "rimColor", "signColor", "sternColor",
-      "stripeColor", "strobeColor", "tailColor", "tipColor", "underColor", "upperColor"])
+    expect([...keys].sort()).toEqual(["billColor", "bodyColor", "bottomColor", "costumeColor", "envelopeColor", "finColor", "flameColor", "foliageColor", "frontColor",
+      "gearUp", "hairColor", "headColor", "hullColor", "lampColor", "legsUp", "navLeftColor", "navRightColor", "neckColor", "noseColor", "paintColor", "paperColor",
+      "rearColor", "rimColor", "shoesColor", "signColor", "skinColor", "sternColor", "stripeColor", "strobeColor", "tailColor", "tipColor", "underColor", "upperColor"])
   })
 
   test.each(published.map(entry => [entry.id, entry] as const))("%s: every setting is bound, and bound to what the file holds", (_id, entry) => {

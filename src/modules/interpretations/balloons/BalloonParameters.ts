@@ -3,7 +3,7 @@ import type { ParameterHolder, ParameterSet, ParameterSpec } from "../../../engi
 import { DroneParameters } from "../drones/DroneParameters.js"
 import { BalloonFlight } from "./BalloonFlight.js"
 import type { BalloonFlightJson, BalloonGroup, BalloonRelease, BalloonWind } from "./BalloonFlight.js"
-import { BalloonTypes } from "./BalloonType.js"
+import { BalloonTypes, FOIL_SHAPES } from "./BalloonType.js"
 import type { BalloonType, BalloonTypeId } from "./BalloonType.js"
 
 /** What the form of a balloon needs of the editor: the shapes it may stand for. */
@@ -84,8 +84,11 @@ export class BalloonParameters {
 
   private static typeOf(element: ParameterHolder): BalloonType {
     const view = element as unknown as BalloonView
-    return BalloonFlight.typeOf({ balloon: view.figures ? { ...view.figures, id: view.balloon } : view.balloon })
+    return BalloonFlight.typeOf({ balloon: view.figures ? { ...view.figures, id: view.balloon } : view.balloon, shape: view.shape })
   }
+
+  /** A figure's colours when the recording states none: the catalogue's (see public/models/index.json). */
+  private static readonly FIGURE = { hair: "#5a2e14", skin: "#e8955a", bottom: "#f39a1e", shoes: "#f2f2f2" }
 
   private static one(element: ParameterHolder): boolean {
     return Parameters.read(element, "mode") !== "group"
@@ -106,8 +109,25 @@ export class BalloonParameters {
         choices: BalloonTypes.ALL.map(type => ({ value: type.id, label: DroneParameters.textKey(type.id) }))
       },
       {
+        type: "choice", key: "shape", group: BalloonParameters.BALLOON, label: "shape", effective: () => "round",
+        choices: FOIL_SHAPES.map(shape => ({ value: shape, label: shape })),
+        visibleWhen: element => BalloonParameters.typeOf(element).shapes !== undefined
+      },
+      {
         type: "colour", key: "color", group: BalloonParameters.BALLOON, label: "colour",
         hint: "itsLightsForAnLedBalloon", effective: element => { const type = BalloonParameters.typeOf(element); return type.glow?.color ?? type.color }
+      },
+      ...(["hair", "skin", "bottom", "shoes"] as const).map((part): ParameterSpec => ({
+        type: "colour", key: `partColors.${part}`, group: BalloonParameters.BALLOON, label: part,
+        fallback: BalloonParameters.FIGURE[part], visibleWhen: element => Parameters.read(element, "shape") === "figure"
+      })),
+      {
+        type: "number", key: "flames", min: 1, max: 9, step: 1, group: BalloonParameters.BALLOON, label: "flamesLit", hint: "candlesOrFlares",
+        effective: element => BalloonParameters.typeOf(element).flames?.count, visibleWhen: element => BalloonParameters.typeOf(element).flames !== undefined
+      },
+      {
+        type: "colour", key: "partColors.flame", group: BalloonParameters.BALLOON, label: "flameColour",
+        effective: element => BalloonParameters.typeOf(element).flames?.color, visibleWhen: element => BalloonParameters.typeOf(element).flames !== undefined
       },
       {
         type: "number", key: "figures.launchVolumeM3", min: 0.001, max: 1000000, step: 0.001, unit: "m³", group: BalloonParameters.BALLOON,

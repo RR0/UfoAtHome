@@ -3801,6 +3801,308 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
       }
+    },
+    {
+      "id": "ufoathome-balloon-foil-star",
+      "kind": "aircraft",
+      "name": "Foil balloon, star",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#e0b83a",
+            "label": {
+              "en": "Film",
+              "fr": "Film",
+              "es": "Película",
+              "it": "Pellicola"
+            },
+            "hint": {
+              "en": "The colour of its metallised film.",
+              "fr": "La couleur de son film métallisé.",
+              "es": "El color de su película metalizada.",
+              "it": "Il colore della sua pellicola metallizzata."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^foil$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-foil-star/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.5,
+        "lengthM": 0.092,
+        "heightM": 0.515
+      },
+      "credit": {
+        "title": "Foil star balloon, after photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-foil-heart",
+      "kind": "aircraft",
+      "name": "Foil balloon, heart",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#d81e3c",
+            "label": {
+              "en": "Film",
+              "fr": "Film",
+              "es": "Película",
+              "it": "Pellicola"
+            },
+            "hint": {
+              "en": "The colour of its metallised film.",
+              "fr": "La couleur de son film métallisé.",
+              "es": "El color de su película metalizada.",
+              "it": "Il colore della sua pellicola metallizzata."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^foil$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-foil-heart/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.5,
+        "lengthM": 0.1,
+        "heightM": 0.452
+      },
+      "credit": {
+        "title": "Foil heart balloon, after photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-foil-figure",
+      "kind": "aircraft",
+      "name": "Foil balloon, figure of a child (\"super shape\")",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#f0a3c8",
+            "label": {
+              "en": "Shirt",
+              "fr": "Haut",
+              "es": "Camiseta",
+              "it": "Maglietta"
+            },
+            "hint": {
+              "en": "The colour of its shirt, the balloon's own.",
+              "fr": "La couleur de son haut, celle du ballon.",
+              "es": "El color de su camiseta, el del globo.",
+              "it": "Il colore della maglietta, quello del palloncino."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "hairColor",
+            "fallback": "#5a2e14",
+            "label": {
+              "en": "Hair",
+              "fr": "Cheveux",
+              "es": "Pelo",
+              "it": "Capelli"
+            },
+            "hint": {
+              "en": "The colour of its hair.",
+              "fr": "La couleur de ses cheveux.",
+              "es": "El color de su pelo.",
+              "it": "Il colore dei suoi capelli."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "skinColor",
+            "fallback": "#e8955a",
+            "label": {
+              "en": "Skin",
+              "fr": "Peau",
+              "es": "Piel",
+              "it": "Pelle"
+            },
+            "hint": {
+              "en": "The colour of its face, arms and legs.",
+              "fr": "La couleur de son visage, de ses bras et de ses jambes.",
+              "es": "El color de su cara, brazos y piernas.",
+              "it": "Il colore del viso, delle braccia e delle gambe."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "bottomColor",
+            "fallback": "#f39a1e",
+            "label": {
+              "en": "Shorts",
+              "fr": "Short",
+              "es": "Pantalón corto",
+              "it": "Pantaloncini"
+            },
+            "hint": {
+              "en": "The colour of its shorts.",
+              "fr": "La couleur de son short.",
+              "es": "El color de su pantalón corto.",
+              "it": "Il colore dei suoi pantaloncini."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "shoesColor",
+            "fallback": "#f2f2f2",
+            "label": {
+              "en": "Shoes",
+              "fr": "Chaussures",
+              "es": "Zapatos",
+              "it": "Scarpe"
+            },
+            "hint": {
+              "en": "The colour of its shoes.",
+              "fr": "La couleur de ses chaussures.",
+              "es": "El color de sus zapatos.",
+              "it": "Il colore delle sue scarpe."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^foil-top$"
+            ]
+          },
+          "hairColor": {
+            "materials": [
+              "^foil-hair$"
+            ]
+          },
+          "skinColor": {
+            "materials": [
+              "^foil-skin$"
+            ]
+          },
+          "bottomColor": {
+            "materials": [
+              "^foil-bottom$"
+            ]
+          },
+          "shoesColor": {
+            "materials": [
+              "^foil-shoes$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-foil-figure/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.8,
+        "lengthM": 0.102,
+        "heightM": 0.89
+      },
+      "credit": {
+        "title": "Foil figure balloon, after photographs of such balloons",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-prank",
+      "kind": "aircraft",
+      "name": "Prank balloon: a bag over candles or a flare",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#f4f4f4",
+            "label": {
+              "en": "Bag",
+              "fr": "Sac",
+              "es": "Bolsa",
+              "it": "Sacchetto"
+            },
+            "hint": {
+              "en": "The colour of its bag, which tints its light.",
+              "fr": "La couleur de son sac, qui teinte sa lumière.",
+              "es": "El color de su bolsa, que tiñe su luz.",
+              "it": "Il colore del sacchetto, che tinge la sua luce."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "flameColor",
+            "fallback": "#ffb347",
+            "label": {
+              "en": "Flames",
+              "fr": "Flammes",
+              "es": "Llamas",
+              "it": "Fiamme"
+            },
+            "hint": {
+              "en": "The colour of its candles' or flare's light.",
+              "fr": "La couleur de la lumière de ses bougies ou de son feu.",
+              "es": "El color de la luz de sus velas o de su bengala.",
+              "it": "Il colore della luce delle candele o del razzo."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "flameColor": {
+            "materials": [
+              "^light-flame-\\d$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-prank/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.6,
+        "lengthM": 0.6,
+        "heightM": 0.909
+      },
+      "credit": {
+        "title": "Prank balloon, after the descriptions of rr0.org and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
     }
   ]
 }
