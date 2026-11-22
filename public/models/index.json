@@ -3077,6 +3077,730 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
       }
+    },
+    {
+      "id": "ufoathome-airship-blimp",
+      "kind": "aircraft",
+      "name": "Blimp (Goodyear GZ-20A class), with its sign",
+      "parameters": {
+        "sound": "light-piston",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#c9ccd1",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "finColor",
+            "fallback": "#1d3f8a",
+            "label": {
+              "en": "Fins",
+              "fr": "Empennage",
+              "es": "Empenaje",
+              "it": "Impennaggi"
+            },
+            "hint": {
+              "en": "The colour of its fins.",
+              "fr": "La couleur de ses empennages.",
+              "es": "El color de sus aletas.",
+              "it": "Il colore dei suoi impennaggi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "signColor",
+            "fallback": "#fff4d8",
+            "label": {
+              "en": "Sign",
+              "fr": "Enseigne",
+              "es": "Letrero",
+              "it": "Insegna"
+            },
+            "hint": {
+              "en": "The colour of the sign of lamps along its flanks.",
+              "fr": "La couleur de l'enseigne lumineuse sur ses flancs.",
+              "es": "El color del letrero luminoso de sus costados.",
+              "it": "Il colore dell'insegna luminosa sui suoi fianchi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navLeftColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Left light",
+              "fr": "Feu gauche",
+              "es": "Luz izquierda",
+              "it": "Luce sinistra"
+            },
+            "hint": {
+              "en": "Its navigation light on its left.",
+              "fr": "Son feu de navigation à gauche.",
+              "es": "Su luz de navegación a la izquierda.",
+              "it": "La sua luce di navigazione a sinistra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navRightColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Right light",
+              "fr": "Feu droit",
+              "es": "Luz derecha",
+              "it": "Luce destra"
+            },
+            "hint": {
+              "en": "Its navigation light on its right.",
+              "fr": "Son feu de navigation à droite.",
+              "es": "Su luz de navegación a la derecha.",
+              "it": "La sua luce di navigazione a destra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tailColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Tail light",
+              "fr": "Feu arrière",
+              "es": "Luz de cola",
+              "it": "Luce di coda"
+            },
+            "hint": {
+              "en": "The white light at its tail.",
+              "fr": "Le feu blanc à sa queue.",
+              "es": "La luz blanca de su cola.",
+              "it": "La luce bianca in coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "strobeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Strobe",
+              "fr": "Feu à éclats",
+              "es": "Luz estroboscópica",
+              "it": "Luce stroboscopica"
+            },
+            "hint": {
+              "en": "Its anti-collision strobe, under its gondola.",
+              "fr": "Son feu anticollision à éclats, sous sa nacelle.",
+              "es": "Su luz anticolisión, bajo su góndola.",
+              "it": "La sua luce anticollisione, sotto la gondola."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "finColor": {
+            "materials": [
+              "^fin$"
+            ]
+          },
+          "signColor": {
+            "materials": [
+              "^light-sign-(left|right)$"
+            ]
+          },
+          "navLeftColor": {
+            "materials": [
+              "^light-nav-left(-\\d+)?$"
+            ]
+          },
+          "navRightColor": {
+            "materials": [
+              "^light-nav-right(-\\d+)?$"
+            ]
+          },
+          "tailColor": {
+            "materials": [
+              "^light-tail(-\\d+)?$"
+            ]
+          },
+          "strobeColor": {
+            "materials": [
+              "^light-strobe(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-airship-blimp/airship.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 14.72,
+        "lengthM": 59.46,
+        "heightM": 17.59
+      },
+      "credit": {
+        "title": "Blimp (GZ-20A size), after Goodyear's figures and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
+      }
+    },
+    {
+      "id": "ufoathome-airship-zeppelin-nt",
+      "kind": "aircraft",
+      "name": "Zeppelin NT",
+      "parameters": {
+        "sound": "light-piston",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#eef0f2",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "finColor",
+            "fallback": "#eef0f2",
+            "label": {
+              "en": "Fins",
+              "fr": "Empennage",
+              "es": "Empenaje",
+              "it": "Impennaggi"
+            },
+            "hint": {
+              "en": "The colour of its fins.",
+              "fr": "La couleur de ses empennages.",
+              "es": "El color de sus aletas.",
+              "it": "Il colore dei suoi impennaggi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "signColor",
+            "fallback": "#fff4d8",
+            "label": {
+              "en": "Sign",
+              "fr": "Enseigne",
+              "es": "Letrero",
+              "it": "Insegna"
+            },
+            "hint": {
+              "en": "The colour of the sign of lamps along its flanks.",
+              "fr": "La couleur de l'enseigne lumineuse sur ses flancs.",
+              "es": "El color del letrero luminoso de sus costados.",
+              "it": "Il colore dell'insegna luminosa sui suoi fianchi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navLeftColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Left light",
+              "fr": "Feu gauche",
+              "es": "Luz izquierda",
+              "it": "Luce sinistra"
+            },
+            "hint": {
+              "en": "Its navigation light on its left.",
+              "fr": "Son feu de navigation à gauche.",
+              "es": "Su luz de navegación a la izquierda.",
+              "it": "La sua luce di navigazione a sinistra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navRightColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Right light",
+              "fr": "Feu droit",
+              "es": "Luz derecha",
+              "it": "Luce destra"
+            },
+            "hint": {
+              "en": "Its navigation light on its right.",
+              "fr": "Son feu de navigation à droite.",
+              "es": "Su luz de navegación a la derecha.",
+              "it": "La sua luce di navigazione a destra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tailColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Tail light",
+              "fr": "Feu arrière",
+              "es": "Luz de cola",
+              "it": "Luce di coda"
+            },
+            "hint": {
+              "en": "The white light at its tail.",
+              "fr": "Le feu blanc à sa queue.",
+              "es": "La luz blanca de su cola.",
+              "it": "La luce bianca in coda."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "strobeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Strobe",
+              "fr": "Feu à éclats",
+              "es": "Luz estroboscópica",
+              "it": "Luce stroboscopica"
+            },
+            "hint": {
+              "en": "Its anti-collision strobe, under its gondola.",
+              "fr": "Son feu anticollision à éclats, sous sa nacelle.",
+              "es": "Su luz anticolisión, bajo su góndola.",
+              "it": "La sua luce anticollisione, sotto la gondola."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "finColor": {
+            "materials": [
+              "^fin$"
+            ]
+          },
+          "signColor": {
+            "materials": [
+              "^light-sign-(left|right)$"
+            ]
+          },
+          "navLeftColor": {
+            "materials": [
+              "^light-nav-left(-\\d+)?$"
+            ]
+          },
+          "navRightColor": {
+            "materials": [
+              "^light-nav-right(-\\d+)?$"
+            ]
+          },
+          "tailColor": {
+            "materials": [
+              "^light-tail(-\\d+)?$"
+            ]
+          },
+          "strobeColor": {
+            "materials": [
+              "^light-strobe(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-airship-zeppelin-nt/airship.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 18.2,
+        "lengthM": 75.11,
+        "heightM": 19.55
+      },
+      "credit": {
+        "title": "Zeppelin NT, after Zeppelin's figures and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
+      }
+    },
+    {
+      "id": "ufoathome-airship-lightship",
+      "kind": "aircraft",
+      "name": "Lightship (A-60 class), lit from within",
+      "parameters": {
+        "sound": "light-piston",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#f4f4f2",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navLeftColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Left light",
+              "fr": "Feu gauche",
+              "es": "Luz izquierda",
+              "it": "Luce sinistra"
+            },
+            "hint": {
+              "en": "Its navigation light on its left.",
+              "fr": "Son feu de navigation à gauche.",
+              "es": "Su luz de navegación a la izquierda.",
+              "it": "La sua luce di navigazione a sinistra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navRightColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Right light",
+              "fr": "Feu droit",
+              "es": "Luz derecha",
+              "it": "Luce destra"
+            },
+            "hint": {
+              "en": "Its navigation light on its right.",
+              "fr": "Son feu de navigation à droite.",
+              "es": "Su luz de navegación a la derecha.",
+              "it": "La sua luce di navigazione a destra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tailColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Tail light",
+              "fr": "Feu arrière",
+              "es": "Luz de cola",
+              "it": "Luce di coda"
+            },
+            "hint": {
+              "en": "The white light at its tail.",
+              "fr": "Le feu blanc à sa queue.",
+              "es": "La luz blanca de su cola.",
+              "it": "La luce bianca in coda."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "navLeftColor": {
+            "materials": [
+              "^light-nav-left(-\\d+)?$"
+            ]
+          },
+          "navRightColor": {
+            "materials": [
+              "^light-nav-right(-\\d+)?$"
+            ]
+          },
+          "tailColor": {
+            "materials": [
+              "^light-tail(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-airship-lightship/airship.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 10.16,
+        "lengthM": 39.66,
+        "heightM": 11.98
+      },
+      "credit": {
+        "title": "Lightship (A-60 size), after makers' figures and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
+      }
+    },
+    {
+      "id": "ufoathome-airship-aerostat",
+      "kind": "aircraft",
+      "name": "Tethered aerostat (TARS 420K class)",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#f2f2f0",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "finColor",
+            "fallback": "#f2f2f0",
+            "label": {
+              "en": "Fins",
+              "fr": "Empennage",
+              "es": "Empenaje",
+              "it": "Impennaggi"
+            },
+            "hint": {
+              "en": "The colour of its fins.",
+              "fr": "La couleur de ses empennages.",
+              "es": "El color de sus aletas.",
+              "it": "Il colore dei suoi impennaggi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "noseColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Nose light",
+              "fr": "Feu avant",
+              "es": "Luz de proa",
+              "it": "Luce di prua"
+            },
+            "hint": {
+              "en": "The obstruction light flashing at its nose.",
+              "fr": "Le feu d'obstacle qui clignote à son nez.",
+              "es": "La luz de obstáculo que destella en su proa.",
+              "it": "La luce di ostacolo che lampeggia a prua."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "sternColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Stern light",
+              "fr": "Feu arrière",
+              "es": "Luz de popa",
+              "it": "Luce di poppa"
+            },
+            "hint": {
+              "en": "The obstruction light flashing at its stern.",
+              "fr": "Le feu d'obstacle qui clignote à sa poupe.",
+              "es": "La luz de obstáculo que destella en su popa.",
+              "it": "La luce di ostacolo che lampeggia a poppa."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "finColor": {
+            "materials": [
+              "^fin$"
+            ]
+          },
+          "noseColor": {
+            "materials": [
+              "^light-nose(-\\d+)?$"
+            ]
+          },
+          "sternColor": {
+            "materials": [
+              "^light-stern(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-airship-aerostat/airship.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 25.14,
+        "lengthM": 63.6,
+        "heightM": 27.05
+      },
+      "credit": {
+        "title": "Tethered aerostat (420K size), after published figures and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
+      }
+    },
+    {
+      "id": "ufoathome-airship-rigid",
+      "kind": "aircraft",
+      "name": "Rigid airship (Graf Zeppelin size)",
+      "parameters": {
+        "sound": "piston-heavy",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#b9bcbf",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "finColor",
+            "fallback": "#b9bcbf",
+            "label": {
+              "en": "Fins",
+              "fr": "Empennage",
+              "es": "Empenaje",
+              "it": "Impennaggi"
+            },
+            "hint": {
+              "en": "The colour of its fins.",
+              "fr": "La couleur de ses empennages.",
+              "es": "El color de sus aletas.",
+              "it": "Il colore dei suoi impennaggi."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navLeftColor",
+            "fallback": "#ff2a1a",
+            "label": {
+              "en": "Left light",
+              "fr": "Feu gauche",
+              "es": "Luz izquierda",
+              "it": "Luce sinistra"
+            },
+            "hint": {
+              "en": "Its navigation light on its left.",
+              "fr": "Son feu de navigation à gauche.",
+              "es": "Su luz de navegación a la izquierda.",
+              "it": "La sua luce di navigazione a sinistra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "navRightColor",
+            "fallback": "#2aff5a",
+            "label": {
+              "en": "Right light",
+              "fr": "Feu droit",
+              "es": "Luz derecha",
+              "it": "Luce destra"
+            },
+            "hint": {
+              "en": "Its navigation light on its right.",
+              "fr": "Son feu de navigation à droite.",
+              "es": "Su luz de navegación a la derecha.",
+              "it": "La sua luce di navigazione a destra."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "tailColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Tail light",
+              "fr": "Feu arrière",
+              "es": "Luz de cola",
+              "it": "Luce di coda"
+            },
+            "hint": {
+              "en": "The white light at its tail.",
+              "fr": "Le feu blanc à sa queue.",
+              "es": "La luz blanca de su cola.",
+              "it": "La luce bianca in coda."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "finColor": {
+            "materials": [
+              "^fin$"
+            ]
+          },
+          "navLeftColor": {
+            "materials": [
+              "^light-nav-left(-\\d+)?$"
+            ]
+          },
+          "navRightColor": {
+            "materials": [
+              "^light-nav-right(-\\d+)?$"
+            ]
+          },
+          "tailColor": {
+            "materials": [
+              "^light-tail(-\\d+)?$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-airship-rigid/airship.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 33.38,
+        "lengthM": 236.66,
+        "heightM": 35.79
+      },
+      "credit": {
+        "title": "Rigid airship (LZ 127 size), after published figures and photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-airships.ts"
+      }
     }
   ]
 }

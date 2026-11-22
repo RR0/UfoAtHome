@@ -7,6 +7,7 @@ import type { LanternLaunchJson } from "../../modules/interpretations/lanterns/S
 import type { BirdFlockJson } from "../../modules/interpretations/birds/BirdFlock.js"
 import type { DroneFlightJson } from "../../modules/interpretations/drones/DroneFlight.js"
 import type { BalloonFlightJson } from "../../modules/interpretations/balloons/BalloonFlight.js"
+import type { AirshipFlightJson } from "../../modules/interpretations/airships/AirshipFlight.js"
 import type { AircraftKind } from "../traffic/AircraftModels.js"
 
 /**
@@ -46,6 +47,8 @@ export interface InterpretationJson {
   drones?: DroneFlightJson[]
   /** Balloons, one or let go together, computed into bodies when shown — see BalloonFlightJson. */
   balloons?: BalloonFlightJson[]
+  /** Airships, each computed into a body when shown — see AirshipFlightJson. */
+  airships?: AirshipFlightJson[]
   /**
    * When this interpretation is a VARIANT of the account: what the observer would have to have erred by for the account to be a
    * misperception of a candidate, as the candidate search found it (see CandidateSearch, docs/witness-error-model.md). The account never

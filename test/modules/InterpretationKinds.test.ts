@@ -24,9 +24,9 @@ afterEach(() => ModuleRegistry.uninstall("kites"))
 
 describe("kinds of interpretation", () => {
   it("are the built-in flares, lanterns, birds and drones, then a module's", () => {
-    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds", "drones", "balloons"])
+    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds", "drones", "balloons", "airships"])
     install()
-    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds", "drones", "balloons", "kites"])
+    expect(InterpretationRegistry.kinds().map(kind => kind.key)).toEqual(["flares", "lanterns", "birds", "drones", "balloons", "airships", "kites"])
   })
 
   it("compute their bodies beside the interpretation's own once their code has come, and leave one that states none as it is", async () => {
@@ -73,6 +73,8 @@ describe("kinds of interpretation", () => {
     expect(phenomenon("balloons", { balloon: { id: "stratospheric", massKg: 300 } })).toBe("StratosphericBalloons")
     expect(phenomenon("balloons", { balloon: "foil" })).toBe("FoilBalloon")
     expect(phenomenon("balloons", { balloon: "led" })).toBe("LedBalloon")
+    expect(phenomenon("airships", { airship: "blimp" })).toBe("Airship")
+    expect(phenomenon("airships", { airship: "aerostat" })).toBe("Airship")
   })
 
   it("load the code of a kind only when an interpretation states one of it, and compute nothing of it before", async () => {
