@@ -5,6 +5,7 @@ import { ReferenceTimeline } from "../engine/reference/ReferenceTimeline.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
 import { PictureFetch, PictureFetchError } from "../engine/reference/PictureFetch.js"
 import type { PictureFailure } from "../engine/reference/PictureFetch.js"
+import { RenderLayers } from "./RenderLayers.js"
 
 /**
  * The layer the pictures of the place are on, and the only one: the main pass never draws them.
@@ -12,7 +13,7 @@ import type { PictureFailure } from "../engine/reference/PictureFetch.js"
  * over everything and hidden by nothing — see SceneReference for why nothing in the scene may
  * hide a picture.
  */
-export const REFERENCE_LAYER = 3
+export const REFERENCE_LAYER = RenderLayers.reference
 
 /**
  * How far the panel stands from the eye, metres. Not a fact about anything: a picture is a field

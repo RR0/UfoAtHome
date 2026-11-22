@@ -26,6 +26,7 @@ import type { LuminanceDisplay } from "./Photometry.js"
 export type { LuminanceDisplay } from "./Photometry.js"
 import type { SmokeSource } from "../engine/interpretation/Interpretation.js"
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js"
+import { RenderLayers } from "./RenderLayers.js"
 
 const DEG_TO_RAD = Math.PI / 180
 
@@ -106,7 +107,7 @@ export interface BodyFrame {
  * showed the observer's phenomenon at half strength, the one thing in the picture that was not
  * supposed to be the picture's.
  */
-export const BODY_OVER_LAYER = 4
+export const BODY_OVER_LAYER = RenderLayers.bodyOver
 
 /**
  * The bodies of an interpretation, standing in the scene — see InterpretationJson.

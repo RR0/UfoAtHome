@@ -6,6 +6,7 @@ import type { Shape, ShapeBounds } from "../engine/shape/Shape.js"
 import { CanvasRenderer } from "../render/CanvasRenderer.js"
 import { ApparentSize } from "../engine/shape/ApparentSize.js"
 import type { ImageProjection } from "../engine/instrument/ImageProjection.js"
+import { RenderLayers } from "./RenderLayers.js"
 
 /**
  * One phenomenon as the scene is to stand it up at one instant — everything the recording and the
@@ -51,7 +52,7 @@ export interface PhenomenonFrame {
  * them at all. They are drawn by SceneRenderer.renderPhenomenaPass afterwards, tested against a
  * depth that holds the decor alone — see there for why the ground must not hide them.
  */
-export const PHENOMENON_LAYER = 2
+export const PHENOMENON_LAYER = RenderLayers.phenomenon
 /** Back-to-front among themselves, the timeline's own order — nothing else is drawn in their pass. */
 const PHENOMENON_RENDER_ORDER = 5
 /** No texture side longer than this — a shape filling the frame on a large screen at three device

@@ -183,6 +183,7 @@ import { SourceDiffraction } from "./SourceDiffraction.js"
 import { Reflections } from "./Reflections.js"
 import { Photometry } from "./Photometry.js"
 import { MeshRaycast } from "./MeshRaycast.js"
+import { RenderLayers } from "./RenderLayers.js"
 
 /** Plain field-by-field comparison — see setWeather's own doc comment on why reference equality
  * stopped being enough once weather started being resolved fresh every tick from a keyframe
@@ -214,12 +215,12 @@ function weatherEquals(a: Weather, b: Weather): boolean {
 const SKY_RADIUS = 900
 /** The layer the decor's solid parts are ALSO on, so that they alone can be drawn into the depth
  * the phenomena are tested against — see renderPhenomenaPass. */
-const DECOR_DEPTH_LAYER = 1
+const DECOR_DEPTH_LAYER = RenderLayers.decorDepth
 /** The Sun's dazzle alone, for drawing it onto a picture resampled from the cube — see renderDazzleOnResample. */
-const DAZZLE_LAYER = 4
+const DAZZLE_LAYER = RenderLayers.dazzle
 /** The compass: the screen's, not the world's — drawn with the overlays, over the eye's response to
  * the scene rather than in it (see FINISH_GLSL), and never in a reflection. */
-const HUD_LAYER = 5
+const HUD_LAYER = RenderLayers.hud
 /** See decorDistancesAt — filters out a spurious near-camera self-intersection with decor
  * geometry built close to the observer, well inside the camera's own near plane. */
 const UFO_OCCLUSION_MIN_DISTANCE_M = 0.5

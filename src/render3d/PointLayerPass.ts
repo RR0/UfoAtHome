@@ -16,6 +16,7 @@ import {
 import { PointSources } from "./PointSources.js"
 import { SkyRibbons } from "./SkyRibbons.js"
 import { EquidistantProjectionPass } from "./EquidistantProjectionPass.js"
+import { RenderLayers } from "./RenderLayers.js"
 
 /** What the layer needs to know about the scene it draws for. */
 export interface PointLayerHost {
@@ -50,8 +51,8 @@ export interface PointLayerHost {
  */
 export class PointLayerPass {
   /** The layers the foreground and the clouds are put on for the small picture of them. */
-  static readonly OCCLUDER_LAYER = 6
-  static readonly CLOUD_LAYER = 7
+  static readonly OCCLUDER_LAYER = RenderLayers.pointOccluder
+  static readonly CLOUD_LAYER = RenderLayers.pointCloud
   /** The opacity from which a transparent surface that writes its depth is a foreground (see markForeground). */
   private static readonly SOLID_OPACITY = 0.5
   /** Pixels of that picture, as a share of the source's, on each side. */
