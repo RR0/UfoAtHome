@@ -1,0 +1,145 @@
+{
+  "version": 4,
+  "id": "sky-test-balloons-prank",
+  "tags": [
+    "balloons",
+    "misidentification"
+  ],
+  "description": {
+    "en": "Prank balloons let go from a beach on the Vendée coast on a summer night, drifting out over the sea: three bags over candles, a ring of small orange lights under a faint glowing dome each, turning and swinging, and one over a red road flare. Place, date and balloons assumed.",
+    "fr": "Des ballons farceurs lâchés d'une plage de la côte vendéenne par une nuit d'été, qui dérivent au-dessus de la mer : trois sacs au-dessus de bougies, chacun un anneau de petites lumières orange sous un dôme qui luit faiblement, qui tournent et se balancent, et un au-dessus d'un feu de détresse rouge. Lieu, date et ballons supposés.",
+    "es": "Globos de broma soltados desde una playa de la costa de Vendée en una noche de verano, que derivan sobre el mar: tres bolsas sobre velas, cada una un anillo de lucecitas naranjas bajo una cúpula que brilla débilmente, girando y balanceándose, y una sobre una bengala roja. Lugar, fecha y globos supuestos.",
+    "it": "Palloni scherzo lasciati andare da una spiaggia della costa della Vandea in una notte d'estate, che derivano sopra il mare: tre sacchetti sopra candele, ciascuno un anello di lucine arancioni sotto una cupola che brilla debolmente, che girano e oscillano, e uno sopra un razzo rosso. Luogo, data e palloni ipotizzati."
+  },
+  "time": "2026-07-18T23:40:00",
+  "utcOffsetHours": 2,
+  "durationSeconds": 180,
+  "place": {
+    "name": "Beach on the Vendée coast (assumed)",
+    "locations": [
+      {
+        "lat": 46.79,
+        "lng": -2.09
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 20.5,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 3000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 80,
+          "windSpeed": 3,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 46.79,
+          "lng": -2.09,
+          "elevationM": 0,
+          "headingDeg": 260,
+          "pitchDeg": 10,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Prank balloons",
+      "fr": "Ballons farceurs",
+      "es": "Globos de broma",
+      "it": "Palloni scherzo"
+    },
+    "bodies": [],
+    "balloons": [
+      {
+        "id": "candles",
+        "balloon": "prank-candles",
+        "site": {
+          "eastM": -500,
+          "northM": -150,
+          "originElevationM": 5
+        },
+        "group": {
+          "count": 3,
+          "fromT": -90000,
+          "untilT": 20000,
+          "radiusM": 8,
+          "seed": 5
+        },
+        "wind": {
+          "towardDeg": 260,
+          "speedMS": 3
+        },
+        "windsAloft": [
+          {
+            "atM": 400,
+            "towardDeg": 245,
+            "speedMS": 5
+          }
+        ],
+        "durationS": 900
+      },
+      {
+        "id": "flare",
+        "balloon": "prank-flares",
+        "site": {
+          "eastM": -520,
+          "northM": -120,
+          "originElevationM": 5
+        },
+        "releases": [
+          {
+            "t": -40000
+          }
+        ],
+        "wind": {
+          "towardDeg": 260,
+          "speedMS": 3
+        },
+        "windsAloft": [
+          {
+            "atM": 400,
+            "towardDeg": 245,
+            "speedMS": 5
+          }
+        ],
+        "durationS": 900
+      }
+    ]
+  }
+}

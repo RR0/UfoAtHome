@@ -5,7 +5,9 @@
  *   horizon: a stratospheric balloon floating at 30 km, the kind the Columbia Scientific Balloon Facility lets go from Fort Sumner, and
  *   a weather balloon a few hundred metres under its burst, both still in the Sun while the ground is in the dusk.
  * - public/demo-data/sky-test-balloons-day.json: a morning's mass ascension of hot-air balloons, their burners firing as they climb, and a
- *   foil party balloon lost high over them, flashing the Sun as it turns.
+ *   foil party balloon lost high over them, flashing the Sun as it turns, and a child's figure balloon drifting off low.
+ * - public/demo-data/sky-test-balloons-prank.json: prank balloons let go from a beach on the Vendée coast on a summer night, three over
+ *   candles and one over a red road flare, drifting out over the sea.
  * - public/demo-data/sky-test-balloons-night.json: LED balloons let go one after the other from a garden in the Beauce on a summer night, drifting off
  *   in a loose line, red, white and blue.
  *
@@ -79,7 +81,10 @@ write("sky-test-balloons-day.json", recording("sky-test-balloons-day", {
     group: { count: 8, fromT: -240_000, untilT: 60_000, radiusM: 200, colors: ["#c8202f", "#1f5fbf", "#f08a00", "#2f9e44", "#7b2fbf", "#e0e0e0", "#d43f8d", "#14a3a3"], seed: 3 },
     plan: [{ t: 0, altitudeM: 350 }], wind: { towardDeg: 200, speedMS: 2 }, windsAloft: [{ atM: 400, towardDeg: 20, speedMS: 3 }], durationS: 300 },
   { id: "foil", balloon: "foil", site: { eastM: 500, northM: 1800, originElevationM: 1520 }, releases: [{ t: 0, altitudeM: 1200 }],
-    wind: { towardDeg: 200, speedMS: 2 }, windsAloft: [{ atM: 1500, towardDeg: 60, speedMS: 6 }], durationS: 300 }
+    wind: { towardDeg: 200, speedMS: 2 }, windsAloft: [{ atM: 1500, towardDeg: 60, speedMS: 6 }], durationS: 300 },
+  // A child's figure balloon lost at the fiesta, drifting off low over the field, a pink and orange pillow turning in the Sun.
+  { id: "figure", balloon: "foil", shape: "figure", site: { eastM: -150, northM: 350, originElevationM: 1520 }, releases: [{ t: 0, altitudeM: 120 }],
+    wind: { towardDeg: 20, speedMS: 3 }, durationS: 300 }
 ]))
 
 // A garden on a summer night, some 400 m away across the flat fields of the Beauce: a party lets its LED balloons go one after the other.
@@ -94,5 +99,20 @@ write("sky-test-balloons-night.json", recording("sky-test-balloons-night", {
   { id: "led", balloon: "led", site: { eastM: 120, northM: 380, originElevationM: 140 },
     group: { count: 15, fromT: -30_000, untilT: 60_000, radiusM: 6, colors: ["#ff3030", "#ffffff", "#3070ff"], seed: 11 },
     wind: { towardDeg: 60, speedMS: 3 }, windsAloft: [{ atM: 500, towardDeg: 75, speedMS: 6 }], durationS: 240 }
+]))
+// A beach on the Vendée coast on a summer night: a party on the sand lets prank balloons go over the sea, three bags over candles and
+// one over a red road flare, as were reported off the Île d'Yeu (2008) and Oléron (2010).
+const coast = { name: "Beach on the Vendée coast (assumed)", lat: 46.79, lng: -2.09 }
+write("sky-test-balloons-prank.json", recording("sky-test-balloons-prank", {
+  en: "Prank balloons let go from a beach on the Vendée coast on a summer night, drifting out over the sea: three bags over candles, a ring of small orange lights under a faint glowing dome each, turning and swinging, and one over a red road flare. Place, date and balloons assumed.",
+  fr: "Des ballons farceurs lâchés d'une plage de la côte vendéenne par une nuit d'été, qui dérivent au-dessus de la mer : trois sacs au-dessus de bougies, chacun un anneau de petites lumières orange sous un dôme qui luit faiblement, qui tournent et se balancent, et un au-dessus d'un feu de détresse rouge. Lieu, date et ballons supposés.",
+  es: "Globos de broma soltados desde una playa de la costa de Vendée en una noche de verano, que derivan sobre el mar: tres bolsas sobre velas, cada una un anillo de lucecitas naranjas bajo una cúpula que brilla débilmente, girando y balanceándose, y una sobre una bengala roja. Lugar, fecha y globos supuestos.",
+  it: "Palloni scherzo lasciati andare da una spiaggia della costa della Vandea in una notte d'estate, che derivano sopra il mare: tre sacchetti sopra candele, ciascuno un anello di lucine arancioni sotto una cupola che brilla debolmente, che girano e oscillano, e uno sopra un razzo rosso. Luogo, data e palloni ipotizzati."
+}, "2026-07-18T23:40:00", 2, 180, coast, { headingDeg: 260, pitchDeg: 10, fovDeg: 60 }, 20.5, clear(80, 3),
+{ en: "Prank balloons", fr: "Ballons farceurs", es: "Globos de broma", it: "Palloni scherzo" }, [
+  { id: "candles", balloon: "prank-candles", site: { eastM: -500, northM: -150, originElevationM: 5 },
+    group: { count: 3, fromT: -90_000, untilT: 20_000, radiusM: 8, seed: 5 }, wind: { towardDeg: 260, speedMS: 3 }, windsAloft: [{ atM: 400, towardDeg: 245, speedMS: 5 }], durationS: 900 },
+  { id: "flare", balloon: "prank-flares", site: { eastM: -520, northM: -120, originElevationM: 5 }, releases: [{ t: -40_000 }],
+    wind: { towardDeg: 260, speedMS: 3 }, windsAloft: [{ atM: 400, towardDeg: 245, speedMS: 5 }], durationS: 900 }
 ]))
 console.log("written")

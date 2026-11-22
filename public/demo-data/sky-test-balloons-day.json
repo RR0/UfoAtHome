@@ -156,6 +156,27 @@
           }
         ],
         "durationS": 300
+      },
+      {
+        "id": "figure",
+        "balloon": "foil",
+        "shape": "figure",
+        "site": {
+          "eastM": -150,
+          "northM": 350,
+          "originElevationM": 1520
+        },
+        "releases": [
+          {
+            "t": 0,
+            "altitudeM": 120
+          }
+        ],
+        "wind": {
+          "towardDeg": 20,
+          "speedMS": 3
+        },
+        "durationS": 300
       }
     ]
   }
