@@ -15,5 +15,6 @@ export const BALLOON_KIND: InterpretationKind<BalloonFlightJson> = {
     const id = typeof flight.balloon === "string" ? flight.balloon : flight.balloon?.id
     return (BalloonTypes.byId(id) ?? BalloonTypes.ALL[0]).phenomenon
   },
-  compute: () => import("./BalloonFlight.js").then(({ BalloonFlight }) => flight => BalloonFlight.bodiesOf(flight))
+  compute: () => import("./BalloonFlight.js").then(({ BalloonFlight }) => flight => BalloonFlight.bodiesOf(flight)),
+  editor: () => import("./BalloonEditor.js").then(({ BalloonEditor }) => (container, host, language) => new BalloonEditor(container, host, language))
 }

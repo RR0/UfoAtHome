@@ -299,7 +299,7 @@ describe("a kind of event of the sky a module brings", () => {
     } })
     const element = await mount()
     const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
-    expect(tabs.slice(-8)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-kites", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
+    expect(tabs.slice(-10)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-balloons", "interpretation-airships", "interpretation-kites", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
   })
 
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {

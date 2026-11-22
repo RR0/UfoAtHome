@@ -11,5 +11,6 @@ export const AIRSHIP_KIND: InterpretationKind<AirshipFlightJson> = {
     const id = typeof flight.airship === "string" ? flight.airship : flight.airship?.id
     return (AirshipTypes.byId(id) ?? AirshipTypes.ALL[0]).phenomenon
   },
-  compute: () => import("./AirshipFlight.js").then(({ AirshipFlight }) => flight => AirshipFlight.bodiesOf(flight))
+  compute: () => import("./AirshipFlight.js").then(({ AirshipFlight }) => flight => AirshipFlight.bodiesOf(flight)),
+  editor: () => import("./AirshipEditor.js").then(({ AirshipEditor }) => (container, host, language) => new AirshipEditor(container, host, language))
 }
