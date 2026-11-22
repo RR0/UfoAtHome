@@ -5,6 +5,7 @@ import { PoherMatrix } from "../../src/engine/witness/PoherMatrix.js"
 import type { PoherMatrixEntry, PoherReasons } from "../../src/engine/witness/PoherMatrix.js"
 import { InterpretationRegistry } from "../../src/modules/interpretations/interpretationSources.js"
 import { DroneAirframes } from "../../src/modules/interpretations/drones/DroneAirframe.js"
+import { BalloonTypes } from "../../src/modules/interpretations/balloons/BalloonType.js"
 
 /** The versions as rr0.org holds them, beside this repository: checked when it is there. */
 const RR0 = resolve(process.cwd(), "../rr0.org")
@@ -44,12 +45,13 @@ describe("RR0's version of the Poher matrix, as rr0.org holds it", () => {
     expect(of("Stars").added).toBe(false)
   })
 
-  it.skipIf(!present)("has a column for every kind of interpretation the app computes, each drone airframe included", () => {
+  it.skipIf(!present)("has a column for every kind of interpretation the app computes, each drone airframe and each balloon type included", () => {
     const columns = new Set(rr0.flatMap(entry => Object.keys(scoresOf(entry))))
     const kinds = new Map(InterpretationRegistry.kinds().map(kind => [kind.key, kind]))
     const said = [
       ...["flares", "lanterns", "birds"].map(key => kinds.get(key)!.phenomenon!({})),
-      ...DroneAirframes.ALL.map(airframe => kinds.get("drones")!.phenomenon!({ airframe: airframe.id }))
+      ...DroneAirframes.ALL.map(airframe => kinds.get("drones")!.phenomenon!({ airframe: airframe.id })),
+      ...BalloonTypes.ALL.map(type => kinds.get("balloons")!.phenomenon!({ balloon: type.id }))
     ]
     for (const phenomenon of said) expect(columns, String(phenomenon)).toContain(phenomenon)
   })

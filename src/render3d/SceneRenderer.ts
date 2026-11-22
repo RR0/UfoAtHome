@@ -3036,7 +3036,8 @@ export class SceneRenderer {
       occluders: [...this.decorGroups.values()],
       transmittance: (px, py, pz) => this.transmittanceTo(px, py, pz),
       pixelRad: (this.camera.fov * Math.PI) / 180 / Math.max(1, this.renderer.getDrawingBufferSize(this.bloomSize).y),
-      daylight: this.daylightOnBodies()
+      daylight: this.daylightOnBodies(),
+      sunAloft: this.sunAloft()
     }, seconds, sky ? Object.assign((rgb: readonly [number, number, number], luminance: number) => sky.relativeOfLuminance(rgb, luminance), { recorded: sky.recorded }) : undefined, ids)
     this.bodySystem.setSmoke(smoke, seconds)
     // Something is there to cast a shadow, whatever the decor says.
@@ -3069,6 +3070,42 @@ export class SceneRenderer {
       ground: [ground.r * skyI, ground.g * skyI, ground.b * skyI]
     }
   }
+
+  /**
+   * The Sun a body sees high in the air beyond the scene's own (see BodyFrame.sunAloft), worked out as for an aircraft of the traffic (see
+   * lightFromAbove): how high the Sun stands over the horizontal where the body is (tilted from the observer's by its distance over the curved
+   * Earth, see AircraftLighting.sunElevationDeg), the share of its disc above that height's horizon, the air above that height alone, and the
+   * clouds unless it is over them all. None without a Sun.
+   */
+  private sunAloft(): BodyFrame["sunAloft"] {
+    const sun = this.lastAstronomy?.sun
+    if (!sun) return undefined
+    const { x, y, z } = horizontalToCartesian(sun.altitudeDeg, sun.azimuthDeg, 1)
+    const towardSun = new Vector3(x, y, z)
+    const illuminance = ForwardDiffraction.illuminanceOf(sun.magnitude) * this.relativeScale
+    const sinAlt = Math.sin(sun.altitudeDeg * DEG_TO_RAD), cosAlt = Math.cos(sun.altitudeDeg * DEG_TO_RAD)
+    const towardEast = Math.sin(sun.azimuthDeg * DEG_TO_RAD), towardNorth = Math.cos(sun.azimuthDeg * DEG_TO_RAD)
+    const ground = this.sceneSunBeam
+    let clouds: number | undefined
+    return {
+      towardSun,
+      beamAt: (eastM, northM, upM) => {
+        const heightM = this.siteElevationM + Math.max(0, upM)
+        // The body's vertical leans from the observer's by the angle its distance makes at the Earth's centre, towards where it is.
+        const tilt = (towardEast * eastM + towardNorth * northM) / SceneRenderer.EARTH_RADIUS_M
+        const elevationDeg = Math.asin(Math.max(-1, Math.min(1, sinAlt + cosAlt * tilt))) / DEG_TO_RAD
+        const lit = AircraftLighting.litFraction(elevationDeg, heightM)
+        if (lit <= 0) return undefined
+        const through = this.air.transmittanceFromSpace(heightM, elevationDeg)
+        const over = heightM >= SceneRenderer.ABOVE_CLOUD_M ? 1 : (clouds ??= this.cloudTransmission(sun))
+        const extra: [number, number, number] = [0, 0, 0]
+        for (let c = 0; c < 3; c++) extra[c] = Math.max(0, illuminance * through[c] * lit * over - ground[c])
+        return extra[0] > 0 || extra[1] > 0 || extra[2] > 0 ? extra : undefined
+      }
+    }
+  }
+
+  private static readonly EARTH_RADIUS_M = 6371000
 
   private plumeLight(): [number, number, number] {
     const sun = this.celestialLight.color

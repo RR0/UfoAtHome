@@ -2793,6 +2793,290 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-drones.ts"
       }
+    },
+    {
+      "id": "ufoathome-balloon-latex",
+      "kind": "aircraft",
+      "name": "Latex balloon, party, pilot or weather",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#d8263a",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "lampColor",
+            "fallback": "#fff1c4",
+            "label": {
+              "en": "Lamp",
+              "fr": "Lampe",
+              "es": "Lámpara",
+              "it": "Lampada"
+            },
+            "hint": {
+              "en": "The small lamp under its knot, lit at night.",
+              "fr": "La petite lampe sous son nœud, allumée la nuit.",
+              "es": "La pequeña lámpara bajo su nudo, encendida de noche.",
+              "it": "La piccola lampada sotto il nodo, accesa di notte."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "lampColor": {
+            "materials": [
+              "^light-lamp$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-latex/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.28,
+        "lengthM": 0.28,
+        "heightM": 0.316
+      },
+      "credit": {
+        "title": "Latex balloon, after photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-led",
+      "kind": "aircraft",
+      "name": "LED balloon, glowing from within",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#ffffff",
+            "label": {
+              "en": "Light",
+              "fr": "Lumière",
+              "es": "Luz",
+              "it": "Luce"
+            },
+            "hint": {
+              "en": "The colour of its LED's light through the latex.",
+              "fr": "La couleur de la lumière de sa LED à travers le latex.",
+              "es": "El color de la luz de su LED a través del látex.",
+              "it": "Il colore della luce del suo LED attraverso il lattice."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-led/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.3,
+        "lengthM": 0.3,
+        "heightM": 0.335
+      },
+      "credit": {
+        "title": "LED balloon, after photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-foil",
+      "kind": "aircraft",
+      "name": "Round foil balloon",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#c9cdd2",
+            "label": {
+              "en": "Film",
+              "fr": "Film",
+              "es": "Película",
+              "it": "Pellicola"
+            },
+            "hint": {
+              "en": "The colour of its metallised film.",
+              "fr": "La couleur de son film métallisé.",
+              "es": "El color de su película metalizada.",
+              "it": "Il colore della sua pellicola metallizzata."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^foil$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-foil/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 0.45,
+        "lengthM": 0.12,
+        "heightM": 0.465
+      },
+      "credit": {
+        "title": "Round foil balloon (18 in), after photographs",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-stratospheric",
+      "kind": "aircraft",
+      "name": "Stratospheric balloon at float, natural shape",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#e9eef2",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-stratospheric/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 30.0,
+        "lengthM": 30.0,
+        "heightM": 27.3
+      },
+      "credit": {
+        "title": "Stratospheric (zero-pressure) balloon, after photographs and makers' drawings",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
+    },
+    {
+      "id": "ufoathome-balloon-hot-air",
+      "kind": "aircraft",
+      "name": "Hot-air balloon, sport, 90 000 ft³",
+      "parameters": {
+        "sound": "balloon",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "envelopeColor",
+            "fallback": "#c8202f",
+            "label": {
+              "en": "Envelope",
+              "fr": "Enveloppe",
+              "es": "Envoltura",
+              "it": "Involucro"
+            },
+            "hint": {
+              "en": "The colour of its envelope.",
+              "fr": "La couleur de son enveloppe.",
+              "es": "El color de su envoltura.",
+              "it": "Il colore del suo involucro."
+            }
+          },
+          {
+            "type": "colour",
+            "key": "stripeColor",
+            "fallback": "#f5c400",
+            "label": {
+              "en": "Stripes",
+              "fr": "Bandes",
+              "es": "Franjas",
+              "it": "Strisce"
+            },
+            "hint": {
+              "en": "The colour of every other gore of its envelope.",
+              "fr": "La couleur d'un fuseau sur deux de son enveloppe.",
+              "es": "El color de uno de cada dos husos de su envoltura.",
+              "it": "Il colore di uno spicchio su due del suo involucro."
+            }
+          }
+        ],
+        "bindings": {
+          "envelopeColor": {
+            "materials": [
+              "^envelope$"
+            ]
+          },
+          "stripeColor": {
+            "materials": [
+              "^envelope-stripe$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-hot-air/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 16.5,
+        "lengthM": 16.5,
+        "heightM": 24.1
+      },
+      "credit": {
+        "title": "Hot-air balloon (Cameron Z-90 size), after makers' figures",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
     }
   ]
 }

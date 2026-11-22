@@ -87,6 +87,16 @@ export interface BodyFrame {
     /** The irradiance the sky gives a surface facing up, and the ground one facing down: what a mirror shows of each is this over π. */
     sky: readonly [number, number, number], ground: readonly [number, number, number]
   }
+  /**
+   * The Sun a body high in the air sees beyond what the scene's own light gives it, in the scene's units, at a point metres east, north and
+   * up from the ground at the origin: the Sun still up there once the ground has lost it, through the air above that height alone (see
+   * SceneRenderer.sunAloft). What a weather balloon at thirty kilometres shines by, white against a sky already dark. None when it gives
+   * nothing more there.
+   */
+  sunAloft?: {
+    towardSun: Vector3
+    beamAt(eastM: number, northM: number, upM: number): readonly [number, number, number] | undefined
+  }
 }
 
 /**
@@ -117,7 +127,7 @@ export const BODY_OVER_LAYER = 4
 export class BodySystem {
   readonly group = new Group()
   /** `whole`: a model that glows all over (see BodySystem.GLOWS_WHOLE), whose light is the body's own rather than its parts'. */
-  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], whole?: boolean, motions?: Map<string, AnimationAction>, parts?: Map<string, { node: Object3D, rest: Quaternion } | undefined>, loaded?: boolean }>()
+  private readonly built = new Map<string, { holder: Group, signature: string, material?: MeshStandardMaterial, glowing?: Glow[], whole?: boolean, motions?: Map<string, AnimationAction>, parts?: Map<string, { node: Object3D, rest: Quaternion } | undefined>, loaded?: boolean, litAloft?: boolean }>()
   /** Bumped whenever the set of bodies is replaced, so a model arriving for a previous one is
    * dropped. */
   private token = 0
@@ -238,6 +248,7 @@ export class BodySystem {
       if (entry.motions) BodySystem.move(entry.motions, state.motions ?? {})
       if (state.turns) BodySystem.turn(entry, state.turns)
       if (state.lightFromBelow && entry.loaded) LightFromBelow.set(holder, this.belowOf(state.lightFromBelow))
+      this.lightAloft(entry, state, frame)
       this.shine(state, holder, whole ? undefined : glowing, frame)
       if (whole && glowing) this.hideSpecks(holder, glowing, frame)
       // Drawn as a point under a pixel or two (see shine), its shape shows only its share of the light, and none at all under a pixel and a
@@ -500,6 +511,38 @@ export class BodySystem {
     return clear / points.length
   }
 
+  /** The Sun's beam beyond the scene's on each body, by its id, this instant (see lightAloft): what its speck adds (see shineReflected). */
+  private readonly aloft = new Map<string, readonly [number, number, number]>()
+  /** The share of the light falling on a body that a surface turned any way takes: the mean of the cosine over its lit half. */
+  private static readonly MEAN_COSINE = 0.5
+
+  /**
+   * Lights a body with the Sun it sees high in the air, over what the scene's light already gives it (see BodyFrame.sunAloft), as the scene
+   * lights an aircraft of its traffic (see SceneRenderer.lightFromAbove): an emissive term on every surface of it that does not glow of
+   * itself, the Lambert light it would take on average, albedo over π times the beam over a surface turned any way. Uniform over the body,
+   * which has no side in the dark: one a few pixels across has none worth drawing.
+   */
+  private lightAloft(entry: { holder: Group, material?: MeshStandardMaterial, glowing?: Glow[], litAloft?: boolean }, state: BodyState, frame: BodyFrame): void {
+    const beam = frame.sunAloft?.beamAt(state.eastM, state.northM, state.upM)
+    if (beam) this.aloft.set(state.id, beam)
+    else this.aloft.delete(state.id)
+    if (!beam && !entry.litAloft) return
+    entry.litAloft = !!beam
+    const k = BodySystem.MEAN_COSINE / Math.PI
+    const glowing = new Set(entry.glowing?.map(glow => glow.material))
+    entry.holder.traverse(object => {
+      if (!(object instanceof Mesh)) return
+      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+        if (!(material instanceof MeshStandardMaterial) || glowing.has(material)) continue
+        // A primitive's own surface is given its glow at every instant (see paint): this adds to it; a model's surface that does not glow is
+        // given this alone.
+        const base = material === entry.material ? material.emissive.clone() : new Color(0, 0, 0)
+        if (beam) base.add(new Color(material.color.r * beam[0] * k, material.color.g * beam[1] * k, material.color.b * beam[2] * k))
+        material.emissive.copy(base)
+      }
+    })
+  }
+
   /** The specks of the bodies that give out no light and are under a pixel or two, by body id (see shineReflected). */
   private readonly specks = new Map<string, Sprite>()
   /** The specks set this instant: the others are hidden. */
@@ -553,6 +596,13 @@ export class BodySystem {
       : plate
         ? this.plateLit(plate, toEye, daylight, state.appearance.albedo, hue, luminance)
         : [0, 1, 2].map(c => state.appearance.albedo * hue[c] / luminance / Math.PI * (daylight.sun[c] * phase + daylight.round[c]))
+    // The Sun it sees high up that the ground no longer does, by its phase from there (see lightAloft).
+    const aloft = this.aloft.get(state.id)
+    if (aloft && frame.sunAloft) {
+      const beta = Math.acos(Math.min(1, Math.max(-1, toEye.dot(frame.sunAloft.towardSun))))
+      const sunPhase = (Math.sin(beta) + (Math.PI - beta) * Math.cos(beta)) / Math.PI
+      for (let c = 0; c < 3; c++) radiance[c] += state.appearance.albedo * hue[c] / luminance / Math.PI * aloft[c] * sunPhase
+    }
     // The air takes the contrast it has with what is behind it as it takes its light: by its transmittance.
     const through = this.frame?.transmittance?.(holder.position.x, holder.position.y, holder.position.z) ?? [1, 1, 1]
     const air = (through[0] + through[1] + through[2]) / 3
