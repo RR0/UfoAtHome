@@ -637,6 +637,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "airships-night",
+          src: "/demo-data/sky-test-airships-night.json",
+          title: { en: "Airships at night", fr: "Des dirigeables la nuit", es: "Dirigibles de noche", it: "Dirigibili di notte" },
+          blurb: {
+            en: "A night in the Florida Keys, from Sugarloaf Key: Cudjoe Key's tethered aerostat moored at 3 km, its nose in the wind and its red obstruction lights flashing under it; a blimp cruising along the coast, its sign of lamps a band of light along its flank, its strobe flashing; a lightship glowing from within, passing near. The aerostat's site is the real one; date, height, wind and airships assumed.",
+            fr: "Une nuit dans les Keys de Floride, depuis Sugarloaf Key : l'aérostat captif de Cudjoe Key amarré à 3 km, le nez au vent, ses feux d'obstacle rouges clignotant dessous ; un dirigeable qui longe la côte, son enseigne lumineuse en bande sur son flanc, son feu à éclats ; un dirigeable lumineux, éclairé de l'intérieur, qui passe près. Le site de l'aérostat est le vrai ; date, hauteur, vent et dirigeables supposés.",
+            es: "Una noche en los Cayos de Florida, desde Sugarloaf Key: el aeróstato cautivo de Cudjoe Key amarrado a 3 km, la proa al viento y sus luces rojas de obstáculo destellando debajo; un dirigible que bordea la costa, su letrero luminoso como una banda en su costado, su luz estroboscópica destellando; un dirigible luminoso, iluminado desde dentro, que pasa cerca. El sitio del aeróstato es el real; fecha, altura, viento y dirigibles supuestos.",
+            it: "Una notte nelle Keys della Florida, da Sugarloaf Key: l'aerostato frenato di Cudjoe Key ormeggiato a 3 km, la prua al vento e le luci rosse di ostacolo che lampeggiano sotto; un dirigibile che costeggia la riva, l'insegna luminosa come una fascia sul fianco, la luce stroboscopica che lampeggia; un dirigibile luminoso, illuminato dall'interno, che passa vicino. Il sito dell'aerostato è quello vero; data, quota, vento e dirigibili ipotizzati."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

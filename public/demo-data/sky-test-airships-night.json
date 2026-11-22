@@ -1,0 +1,166 @@
+{
+  "version": 4,
+  "id": "sky-test-airships-night",
+  "tags": [
+    "airships",
+    "misidentification"
+  ],
+  "description": {
+    "en": "A night in the Florida Keys, from Sugarloaf Key: Cudjoe Key's tethered aerostat moored at 3 km, its red lights flashing; a blimp cruising along the coast with its sign lit; a lightship glowing from within, passing near. Date, height, wind and airships assumed.",
+    "fr": "Une nuit dans les Keys de Floride, depuis Sugarloaf Key : l'aérostat captif de Cudjoe Key amarré à 3 km, ses feux rouges clignotants ; un dirigeable qui longe la côte, son enseigne allumée ; un dirigeable lumineux, éclairé de l'intérieur, qui passe près. Date, hauteur, vent et dirigeables supposés.",
+    "es": "Una noche en los Cayos de Florida, desde Sugarloaf Key: el aeróstato cautivo de Cudjoe Key amarrado a 3 km, sus luces rojas destellando; un dirigible que bordea la costa con su letrero encendido; un dirigible luminoso, iluminado desde dentro, que pasa cerca. Fecha, altura, viento y dirigibles supuestos.",
+    "it": "Una notte nelle Keys della Florida, da Sugarloaf Key: l'aerostato frenato di Cudjoe Key ormeggiato a 3 km, le luci rosse lampeggianti; un dirigibile che costeggia la riva con l'insegna accesa; un dirigibile luminoso, illuminato dall'interno, che passa vicino. Data, quota, vento e dirigibili ipotizzati."
+  },
+  "time": "2026-03-20T21:30:00",
+  "utcOffsetHours": -4,
+  "durationSeconds": 180,
+  "place": {
+    "name": "Sugarloaf Key, Florida (assumed)",
+    "locations": [
+      {
+        "lat": 24.648,
+        "lng": -81.565
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 20.5,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 2500,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 90,
+          "windSpeed": 5,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 24.648,
+          "lng": -81.565,
+          "elevationM": 0,
+          "headingDeg": 75,
+          "pitchDeg": 12,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Airships",
+      "fr": "Dirigeables",
+      "es": "Dirigibles",
+      "it": "Dirigibili"
+    },
+    "bodies": [],
+    "airships": [
+      {
+        "id": "aerostat",
+        "airship": "aerostat",
+        "wind": {
+          "fromDeg": 90,
+          "speedMS": 5
+        },
+        "seed": 4,
+        "path": [
+          {
+            "t": 0,
+            "eastM": 6374,
+            "northM": 3117,
+            "altitudeM": 3000
+          },
+          {
+            "t": 180000,
+            "eastM": 6374,
+            "northM": 3117,
+            "altitudeM": 3000
+          }
+        ]
+      },
+      {
+        "id": "blimp",
+        "airship": "blimp",
+        "wind": {
+          "fromDeg": 90,
+          "speedMS": 5
+        },
+        "seed": 2,
+        "path": [
+          {
+            "t": 0,
+            "eastM": 2500,
+            "northM": -500,
+            "altitudeM": 300
+          },
+          {
+            "t": 120000,
+            "eastM": 3500,
+            "northM": 1500,
+            "altitudeM": 300
+          },
+          {
+            "t": 180000,
+            "eastM": 3000,
+            "northM": 2400,
+            "altitudeM": 320
+          }
+        ]
+      },
+      {
+        "id": "lightship",
+        "airship": "lightship",
+        "wind": {
+          "fromDeg": 90,
+          "speedMS": 5
+        },
+        "seed": 3,
+        "path": [
+          {
+            "t": 0,
+            "eastM": 800,
+            "northM": -300,
+            "altitudeM": 200
+          },
+          {
+            "t": 180000,
+            "eastM": 1500,
+            "northM": 1200,
+            "altitudeM": 250
+          }
+        ]
+      }
+    ]
+  }
+}

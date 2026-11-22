@@ -15,7 +15,8 @@ import type { AircraftKind } from "../../../engine/traffic/AircraftModels.js"
  * - "lightship": a small advertising airship of the A-60 class, 39.6 m long and 9.8 m across, whose white envelope is lit from inside at
  *   night, a glowing cigar in the dark: some 20 cd/m² of envelope (SUPPOSED, from photographs). It cruises at some 13 m/s.
  * - "aerostat": a tethered surveillance aerostat (the US border's TARS, of the 420K class), 63.6 m long and 21 m across, moored on its line
- *   at some kilometres, its nose into the wind; red obstruction lights flashing at its nose and tail (2000 cd, FAA L-864's). It does not
+ *   at some kilometres, its nose into the wind; red obstruction lights flashing under its nose and its tail, where the ground sees them (2000 cd,
+ *   FAA L-864's; on top, its hull hid them from anyone below). It does not
  *   fly a path: it stays at the first point stated.
  * - "rigid": a rigid airship of the great Zeppelins' era, the LZ 127 Graf Zeppelin's size: 236.6 m long and 30.5 m across, cruising at 32 m/s.
  *
@@ -87,8 +88,8 @@ export class AirshipTypes {
       id: "aerostat", modelId: "ufoathome-airship-aerostat", sizeM: { widthM: 25.14, lengthM: 63.6, heightM: 27.05 }, cruiseMS: 0, maxSpeedMS: 0, tethered: true,
       color: "#f2f2f0", finColor: "#f2f2f0", albedo: 0.7,
       lights: {
-        nose: { color: "#ff2a1a", candela: 2000, hz: 0.5, flashS: 0.6, leds: [{ at: [0, 4.2, -30], radiusM: 0.12 }] },
-        stern: { color: "#ff2a1a", candela: 2000, hz: 0.5, flashS: 0.6, leds: [{ at: [0, 6.3, 22], radiusM: 0.12 }] }
+        nose: { color: "#ff2a1a", candela: 2000, hz: 0.5, flashS: 0.6, leds: [{ at: [0, -4.2, -30], radiusM: 0.12 }] },
+        stern: { color: "#ff2a1a", candela: 2000, hz: 0.5, flashS: 0.6, leds: [{ at: [0, -6.3, 22], radiusM: 0.12 }] }
       },
       phenomenon: "Airship"
     },
