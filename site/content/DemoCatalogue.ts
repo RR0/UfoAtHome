@@ -637,6 +637,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "balloons-anti-hail",
+          src: "/demo-data/sky-test-balloons-anti-hail.json",
+          title: { en: "Anti-hail balloons", fr: "Des ballons anti-grêle", es: "Globos antigranizo", it: "Palloni antigrandine" },
+          blurb: {
+            en: "The vineyards of the Combe de Savoie on a summer night as a storm comes: three firing posts let an anti-hail balloon go each, as winegrowers there have done since 2018 at a radar's alert. At 600 m an altimeter lights each one's torch of hygroscopic salts, which bursts it; the torch comes down under its parachute, an orange glow that seems to hang still, the kind taken for ball lightning, and goes out. Place, date and balloons assumed.",
+            fr: "Les vignes de la Combe de Savoie une nuit d'été à l'approche d'un orage : trois postes de tir lâchent chacun un ballon anti-grêle, comme les vignerons le font depuis 2018 à l'alerte d'un radar. À 600 m, un altimètre allume la torche de sels hygroscopiques de chacun, ce qui le fait éclater ; la torche descend sous son parachute, une lueur orange qui semble immobile, de celles qu'on prend pour de la foudre en boule, puis s'éteint. Lieu, date et ballons supposés.",
+            es: "Los viñedos de la Combe de Savoie una noche de verano al acercarse una tormenta: tres puestos de tiro sueltan cada uno un globo antigranizo, como hacen los viticultores desde 2018 a la alerta de un radar. A 600 m un altímetro enciende la antorcha de sales higroscópicas de cada uno, lo que lo hace estallar; la antorcha baja bajo su paracaídas, un resplandor naranja que parece inmóvil, de los que se toman por rayos en bola, y se apaga. Lugar, fecha y globos supuestos.",
+            it: "I vigneti della Combe de Savoie una notte d'estate all'arrivo di un temporale: tre postazioni di tiro lasciano andare ciascuna un pallone antigrandine, come fanno i viticoltori dal 2018 all'allerta di un radar. A 600 m un altimetro accende la torcia di sali igroscopici di ciascuno, facendolo scoppiare; la torcia scende sotto il paracadute, un bagliore arancione che sembra immobile, di quelli presi per fulmini globulari, e si spegne. Luogo, data e palloni ipotizzati."
+          }
+        },
+        {
           id: "balloons-night",
           src: "/demo-data/sky-test-balloons-night.json",
           title: { en: "LED balloons at night", fr: "Des ballons à LED la nuit", es: "Globos de LED de noche", it: "Palloncini a LED di notte" },

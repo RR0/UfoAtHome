@@ -936,6 +936,13 @@ export class BodySystem {
       const hue = [glow.hue[0] / peak, glow.hue[1] / peak, glow.hue[2] / peak]
       const light = this.throughAir([hue[0] * lux, hue[1] * lux, hue[2] * lux], centre)
       veil.shine(centre, light, (angularRadius * 180) / Math.PI)
+      // Under a pixel or two, it is also drawn as a star is, by the light it sends (see drawPoints), as a body that glows whole is (see shine):
+      // its veil alone, a faint ring degrees wide, left an anti-hail balloon's torch as bright as Venus all but unseen at 3 km.
+      if (frame.pixelRad !== undefined) {
+        const pixels = 2 * angularRadius / frame.pixelRad
+        const shape = Math.min(1, Math.max(0, (pixels - BodySystem.SHAPE_FROM_PIXELS) / (BodySystem.SHAPE_FULL_PIXELS - BodySystem.SHAPE_FROM_PIXELS)))
+        if (shape < 1) this.pointLights.set(key, { position: centre.clone(), light: [light[0] * (1 - shape), light[1] * (1 - shape), light[2] * (1 - shape)] })
+      }
     }
   }
 

@@ -4103,6 +4103,54 @@
         "license": "CC0 1.0",
         "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
       }
+    },
+    {
+      "id": "ufoathome-balloon-torch",
+      "kind": "aircraft",
+      "name": "Anti-hail balloon's hygroscopic torch, lit, under its parachute",
+      "parameters": {
+        "sound": "silent",
+        "lights": false,
+        "parameters": [
+          {
+            "type": "colour",
+            "key": "flameColor",
+            "fallback": "#ff9a3c",
+            "label": {
+              "en": "Flame",
+              "fr": "Flamme",
+              "es": "Llama",
+              "it": "Fiamma"
+            },
+            "hint": {
+              "en": "The colour of its burning salts' light.",
+              "fr": "La couleur de la lumière de ses sels en combustion.",
+              "es": "El color de la luz de sus sales al arder.",
+              "it": "Il colore della luce dei suoi sali che bruciano."
+            }
+          }
+        ],
+        "bindings": {
+          "flameColor": {
+            "materials": [
+              "^light-flame$"
+            ]
+          }
+        }
+      },
+      "file": "ufoathome-balloon-torch/balloon.gltf",
+      "headingOffsetDeg": 0,
+      "sizeM": {
+        "widthM": 1.2,
+        "lengthM": 1.2,
+        "heightM": 1.6
+      },
+      "credit": {
+        "title": "Hygroscopic torch under its parachute, after the descriptions of meprises-du-ciel.fr",
+        "author": "UFO@home",
+        "license": "CC0 1.0",
+        "sourceUrl": "https://github.com/RR0/UfoAtHome/blob/main/scripts/build-balloons.ts"
+      }
     }
   ]
 }

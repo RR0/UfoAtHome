@@ -49,6 +49,8 @@ export interface BalloonFlightJson {
   lit?: boolean
   /** Its shape, for a type sold in several (see BalloonType.shapes): a foil balloon round, a star, a heart or a figure. Its first when absent. */
   shape?: FoilShape
+  /** How high above where it is let go an anti-hail balloon's torch is lit, m, instead of its type's (see BalloonTorch). */
+  triggerM?: number
   /** How many of its flames are lit, 1 to 9, for a type that has some (see BalloonType.flames): a prank balloon's candles. Its type's when absent. */
   flames?: number
   /** Its colour, for an LED balloon its light's too, instead of its type's. */
@@ -136,7 +138,7 @@ export interface BalloonSample {
 }
 
 /** What a flight ended by: its time was up, it burst, or it came down to the ground and stayed. */
-export type BalloonEnd = "time" | "burst" | "landed"
+export type BalloonEnd = "time" | "burst" | "landed" | "lit"
 
 interface BalloonState {
   x: number
@@ -194,6 +196,7 @@ export class BalloonFlight {
     infrared: { en: "Infrared hot-air balloon", fr: "Montgolfière infrarouge", es: "Globo infrarrojo", it: "Mongolfiera infrarossa" },
     "prank-candles": { en: "Prank balloon", fr: "Ballon farceur", es: "Globo de broma", it: "Pallone scherzo" },
     "prank-flares": { en: "Prank balloon with a flare", fr: "Ballon farceur à feu de détresse", es: "Globo de broma con bengala", it: "Pallone scherzo con razzo" },
+    "anti-hail": { en: "Anti-hail balloon", fr: "Ballon anti-grêle", es: "Globo antigranizo", it: "Pallone antigrandine" },
     solar: { en: "Solar balloon", fr: "Ballon solaire", es: "Globo solar", it: "Pallone solare" },
     captive: { en: "Captive balloon", fr: "Ballon captif", es: "Globo cautivo", it: "Pallone frenato" }
   }
@@ -204,7 +207,8 @@ export class BalloonFlight {
     const key = JSON.stringify(flight)
     let bodies = BalloonFlight.computed.get(key)
     if (!bodies) {
-      bodies = BalloonFlight.releasesOf(flight).map((release, index, all) => BalloonFlight.balloonBody(flight, release, index, all.length))
+      const releases = BalloonFlight.releasesOf(flight)
+      bodies = releases.flatMap((release, index) => BalloonFlight.balloonBodies(flight, release, index, releases.length))
       BalloonFlight.computed.set(key, bodies)
       if (BalloonFlight.computed.size > 16) BalloonFlight.computed.delete(BalloonFlight.computed.keys().next().value!)
     }
@@ -384,6 +388,12 @@ export class BalloonFlight {
       const at = air(state.z)
       // A latex balloon bursts once it has swelled to its most; a vented one lets go of the gas it can no longer hold.
       let volume = volumeOf(at)
+      // An anti-hail balloon's altimeter lights its torch at its height, which bursts it (see BalloonTorch, torchBody).
+      if (type.torch && state.z - ground >= (flight.triggerM ?? type.torch.aboveM)) {
+        end = "lit"
+        samples.push({ t: release.t + Math.round(s * 1000), x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, volume), burning: false, flame: 0 })
+        break
+      }
       if (type.envelope === "elastic" && volume >= type.maxVolumeM3) {
         end = "burst"
         samples.push({ t: release.t + Math.round(s * 1000), x: state.x, y: state.y, z: state.z, widthM: BalloonFlight.widthOf(type, type.maxVolumeM3), burning: false, flame: 0 })
@@ -493,10 +503,59 @@ export class BalloonFlight {
     }
   }
 
-  /** One balloon as a body: its model along its computed path, at the size it has swelled to, gone once its flight is over. */
-  private static balloonBody(flight: BalloonFlightJson, release: BalloonRelease, index: number, count: number): BodyJson {
+  /** One balloon's bodies: the balloon, and the torch it lights when it is an anti-hail one (see torchBody). */
+  private static balloonBodies(flight: BalloonFlightJson, release: BalloonRelease, index: number, count: number): BodyJson[] {
+    const { samples, end } = BalloonFlight.trajectory(flight, release)
+    const balloon = BalloonFlight.balloonBody(flight, release, index, count, samples)
     const type = BalloonFlight.typeOf(flight)
-    const { samples } = BalloonFlight.trajectory(flight, release)
+    return end === "lit" && type.torch ? [balloon, BalloonFlight.torchBody(flight, release, balloon.id, samples[samples.length - 1], type.torch)] : [balloon]
+  }
+
+  /**
+   * The torch an anti-hail balloon lit, from where it was lit: coming down under its parachute at its rate, going with the wind of its height,
+   * burning orange for its while, then dark until it reaches the ground. Its light is its candela over the ball of flame drawn (see
+   * build-balloons.ts's torch, a fifth of a metre across); what the salts make of the cloud is not drawn.
+   */
+  private static torchBody(flight: BalloonFlightJson, release: BalloonRelease, balloonId: string, from: BalloonSample, torch: NonNullable<BalloonType["torch"]>): BodyJson {
+    const ground = flight.site.altitudeM ?? 0
+    const radiusM = BalloonFlight.TORCH_FLAME_M / 2
+    const track: BodyKeyframe[] = []
+    let x = from.x, y = from.y, z = from.z
+    const random = BalloonFlight.randomFrom(BalloonFlight.seedOf(release) ^ 0x51ed270b)
+    const sway = { degrees: 4 + 4 * random(), periodS: 2 + 2 * random(), phase: 2 * Math.PI * random() }
+    for (let s = 0; ; s++) {
+      const share = s < torch.burnS * 0.9 ? 1 : s < torch.burnS ? (torch.burnS - s) / (torch.burnS * 0.1) : 0
+      const a = 2 * Math.PI * s / sway.periodS + sway.phase
+      track.push({
+        t: from.t + s * 1000,
+        eastM: BalloonFlight.round(x), northM: BalloonFlight.round(y), altitudeM: BalloonFlight.round(z),
+        ...(s === 0 ? { sizeM: BalloonFlight.TORCH_SIZE, present: true, appearance: { color: "#d8d2c4", albedo: 0.6 } } : {}),
+        attitude: { pitchDeg: BalloonFlight.round(sway.degrees * Math.sin(a), 10), rollDeg: BalloonFlight.round(sway.degrees * Math.cos(a), 10) },
+        lights: { "light-flame": BalloonFlight.round(torch.candela * share / (Math.PI * radiusM * radiusM), 1) }
+      })
+      if (z <= ground) break
+      const wind = BalloonFlight.windAt(flight, z - ground)
+      x += wind.x
+      y += wind.y
+      z = Math.max(ground, z - torch.fallMS)
+    }
+    track.push({ t: track[track.length - 1].t + 1, present: false })
+    return {
+      id: `${balloonId}-torch`, title: BalloonFlight.TORCH_TITLE,
+      ...(flight.explains ? { explains: flight.explains } : {}),
+      model: { id: "ufoathome-balloon-torch" }, modelParameters: { flameColor: torch.color },
+      track
+    }
+  }
+
+  /** The torch's size as its model is built, its parachute included (see build-balloons.ts), and its ball of flame's width, m. */
+  static readonly TORCH_SIZE = { widthM: 1.2, lengthM: 1.2, heightM: 1.6 }
+  static readonly TORCH_FLAME_M = 0.2
+  static readonly TORCH_TITLE: SaidText = { en: "Hygroscopic torch", fr: "Torche hygroscopique", es: "Antorcha higroscópica", it: "Torcia igroscopica" }
+
+  /** One balloon as a body: its model along its computed path, at the size it has swelled to, gone once its flight is over. */
+  private static balloonBody(flight: BalloonFlightJson, release: BalloonRelease, index: number, count: number, samples: BalloonSample[]): BodyJson {
+    const type = BalloonFlight.typeOf(flight)
     const color = release.color ?? flight.color ?? (type.glow ? type.glow.color : type.color)
     const depth = type.depthRatio ?? 1
     const lamp = flight.lit && type.lamp ? type.lamp : undefined

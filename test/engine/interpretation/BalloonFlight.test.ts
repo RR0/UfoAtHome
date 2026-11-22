@@ -195,6 +195,25 @@ describe("BalloonFlight", () => {
     expect(figure.track[0].sizeM!.heightM).toBeCloseTo(0.8 * 1.112, 2)
   })
 
+  test("lights an anti-hail balloon's torch at its height, which bursts it, and brings the torch down burning under its parachute, then dark", () => {
+    const { samples, end } = BalloonFlight.trajectory(flight("anti-hail"), { t: 0 })
+    expect(end).toBe("lit")
+    expect(samples[samples.length - 1].z).toBeCloseTo(600, -1)
+    const [balloon, torch] = BalloonFlight.bodiesOf(flight("anti-hail", { triggerM: 800 }))
+    expect(balloon.track[balloon.track.length - 1].present).toBe(false)
+    expect(torch.id).toBe("b-torch")
+    expect(torch.model).toEqual({ id: "ufoathome-balloon-torch" })
+    expect(torch.track[0].altitudeM).toBeGreaterThan(790)
+    const lit = (key: { lights?: Record<string, number> }) => (key.lights?.["light-flame"] ?? 0) > 0
+    expect(lit(torch.track[10])).toBe(true)
+    expect(lit(torch.track[120])).toBe(false)
+    // Down at its parachute's 4 m/s: some 200 s from 800 m.
+    const keys = torch.track.filter(key => key.altitudeM !== undefined)
+    expect(keys[keys.length - 1].altitudeM).toBe(0)
+    expect(keys.length).toBeGreaterThan(190)
+    expect(keys.length).toBeLessThan(215)
+  })
+
   test("computes every type within a few hundred milliseconds", () => {
     for (const type of BalloonTypes.ALL) {
       const start = performance.now()

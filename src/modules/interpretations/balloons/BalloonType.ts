@@ -68,6 +68,8 @@ export interface BalloonType {
   lamp?: { candela: number, color: string }
   /** The flames that heat and light an open envelope with no burner (see BalloonFlames). */
   flames?: BalloonFlames
+  /** The torch it lights at a height and burns as it comes down (see BalloonTorch). */
+  torch?: BalloonTorch
   /** Held on a line from where it is let go (see BalloonFlightJson.tetherM). */
   tethered?: boolean
   /** It turns slowly about its vertical, at a rate of its own: a foil balloon, a prank balloon whose lights go round "like a slow frisbee". */
@@ -85,7 +87,7 @@ export interface BalloonType {
 export type BalloonEnvelope = "elastic" | "vented" | "sealed" | "superpressure" | "open"
 
 export type BalloonTypeId = "hot-air" | "party" | "led" | "foil" | "pilot" | "weather" | "stratospheric" | "stratospheric-large" | "superpressure" | "infrared"
-  | "solar" | "captive" | "prank-candles" | "prank-flares"
+  | "solar" | "captive" | "prank-candles" | "prank-flares" | "anti-hail"
 
 /** The shapes foil balloons are sold in (see BalloonType.shapes). */
 export const FOIL_SHAPES = ["round", "star", "heart", "figure"] as const
@@ -96,6 +98,20 @@ export type FoilShape = typeof FOIL_SHAPES[number]
  * a figure, a pillow of film each, the same physics.
  */
 export type BalloonShape = Pick<BalloonType, "modelId" | "aspect" | "widthM" | "depthRatio" | "launchVolumeM3" | "maxVolumeM3" | "massKg" | "color">
+
+/**
+ * The torch an anti-hail balloon carries: a cake of hygroscopic salts (calcium chloride, potassium) that an altimeter lights at some height
+ * above where it was let go, under the cloud's base, which bursts the balloon; it then burns as it comes down under its parachute, an orange
+ * light that seems to hang still, and goes out. How high it is lit, how bright it burns and of what colour, for how long, and how fast it
+ * comes down.
+ */
+export interface BalloonTorch {
+  aboveM: number
+  candela: number
+  color: string
+  burnS: number
+  fallMS: number
+}
 
 /**
  * The flames that heat an open envelope that has no burner, and light it: a prank balloon's birthday candles or road flares, on a cross of
@@ -264,6 +280,20 @@ export class BalloonTypes {
       dragCoefficient: 0.6, aspect: 1.515, widthM: 1.2, color: "#2b2d30", albedo: 0.1, insideExcessK: 80, spins: true, sways: true,
       flames: { count: 1, candela: 150, color: "#ff3a20", burnS: 900, coolingS: 30 },
       phenomenon: "SkyLantern", durationS: 1500
+    },
+    /**
+     * An anti-hail balloon: a small weather balloon let go by a farmer or a winegrower as a storm comes (in Savoie, the Drôme, the Beaujolais
+     * since 2018, under the alert of a radar), carrying a torch of hygroscopic salts that an altimeter lights at some 600 m (600 to 800 m by
+     * the sources), under the base of the cloud, which bursts the balloon. The torch then burns as it comes down under its parachute: orange
+     * glows "that seem still", taken for ball lightning (meprises-du-ciel.fr). Sources: Terre-net and Vitisphere on the Selerys system, ICI
+     * (France Bleu) 21 July 2018. The balloon (100 g of latex, 0.65 m³ of helium), the torch's 300 g, its 300 cd, its 90 s of burning and its
+     * 4 m/s under its parachute are SUPPOSED: none of the sources gives them.
+     */
+    {
+      id: "anti-hail", modelId: "ufoathome-balloon-latex", envelope: "elastic", launchVolumeM3: 0.65, maxVolumeM3: 8, massKg: 0.4,
+      dragCoefficient: 0.35, aspect: 1.13, color: "#f2ece0", albedo: 0.55,
+      torch: { aboveM: 600, candela: 300, color: "#ff9a3c", burnS: 90, fallMS: 4 },
+      phenomenon: "ParachuteFlare", durationS: 1200
     },
     /**
      * A solar balloon: a black plastic envelope of some 14 m³ (3 m across), 250 g, its air warmed by the Sun some 20 K over the outside's

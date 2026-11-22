@@ -1,0 +1,172 @@
+{
+  "version": 4,
+  "id": "sky-test-balloons-anti-hail",
+  "tags": [
+    "balloons",
+    "misidentification"
+  ],
+  "description": {
+    "en": "The vineyards of the Combe de Savoie on a summer night as a storm comes: three firing posts let an anti-hail balloon go each; at 600 m each lights its torch of hygroscopic salts, which comes down glowing orange under its parachute, seeming to hang still, and goes out. Place, date and balloons assumed.",
+    "fr": "Les vignes de la Combe de Savoie une nuit d'été à l'approche d'un orage : trois postes de tir lâchent chacun un ballon anti-grêle ; à 600 m, chacun allume sa torche de sels hygroscopiques, qui descend en luisant orange sous son parachute, semblant immobile, puis s'éteint. Lieu, date et ballons supposés.",
+    "es": "Los viñedos de la Combe de Savoie una noche de verano al acercarse una tormenta: tres puestos de tiro sueltan cada uno un globo antigranizo; a 600 m, cada uno enciende su antorcha de sales higroscópicas, que baja brillando naranja bajo su paracaídas, como inmóvil, y se apaga. Lugar, fecha y globos supuestos.",
+    "it": "I vigneti della Combe de Savoie una notte d'estate all'arrivo di un temporale: tre postazioni di tiro lasciano andare ciascuna un pallone antigrandine; a 600 m ciascuno accende la sua torcia di sali igroscopici, che scende brillando arancione sotto il paracadute, come immobile, e si spegne. Luogo, data e palloni ipotizzati."
+  },
+  "time": "2026-07-24T22:40:00",
+  "utcOffsetHours": 2,
+  "durationSeconds": 240,
+  "place": {
+    "name": "Vineyards of the Combe de Savoie (assumed)",
+    "locations": [
+      {
+        "lat": 45.49,
+        "lng": 6.03
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 20,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0.85,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo: a storm coming."
+          },
+          "cloudDarkness": 0.7,
+          "cloudBaseM": 1100,
+          "lowerCloudCover": 0.85,
+          "highCloudCover": 0.6,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 240,
+          "windSpeed": 4,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 45.49,
+          "lng": 6.03,
+          "elevationM": 0,
+          "headingDeg": 60,
+          "pitchDeg": 12,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Anti-hail balloons",
+      "fr": "Ballons anti-grêle",
+      "es": "Globos antigranizo",
+      "it": "Palloni antigrandine"
+    },
+    "bodies": [],
+    "balloons": [
+      {
+        "id": "post-1",
+        "balloon": "anti-hail",
+        "site": {
+          "eastM": 1200,
+          "northM": 1500,
+          "originElevationM": 300
+        },
+        "releases": [
+          {
+            "t": -150000,
+            "seed": 31
+          }
+        ],
+        "wind": {
+          "towardDeg": 60,
+          "speedMS": 4
+        },
+        "windsAloft": [
+          {
+            "atM": 800,
+            "towardDeg": 70,
+            "speedMS": 7
+          }
+        ],
+        "durationS": 900
+      },
+      {
+        "id": "post-2",
+        "balloon": "anti-hail",
+        "site": {
+          "eastM": 1700,
+          "northM": 900,
+          "originElevationM": 300
+        },
+        "releases": [
+          {
+            "t": -140000,
+            "seed": 32
+          }
+        ],
+        "wind": {
+          "towardDeg": 60,
+          "speedMS": 4
+        },
+        "windsAloft": [
+          {
+            "atM": 800,
+            "towardDeg": 70,
+            "speedMS": 7
+          }
+        ],
+        "durationS": 900
+      },
+      {
+        "id": "post-3",
+        "balloon": "anti-hail",
+        "site": {
+          "eastM": 800,
+          "northM": 1900,
+          "originElevationM": 300
+        },
+        "releases": [
+          {
+            "t": -125000,
+            "seed": 33
+          }
+        ],
+        "wind": {
+          "towardDeg": 60,
+          "speedMS": 4
+        },
+        "windsAloft": [
+          {
+            "atM": 800,
+            "towardDeg": 70,
+            "speedMS": 7
+          }
+        ],
+        "durationS": 900
+      }
+    ]
+  }
+}

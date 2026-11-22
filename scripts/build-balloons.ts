@@ -230,6 +230,20 @@ function prank(model: BalloonModel): void {
   PRANK_FLAMES.forEach((at, i) => model.add(`light-flame-${i + 1}`, new SphereGeometry(0.012, 10, 8).scale(1, 1.6, 1).translate(...at)))
 }
 
+/**
+ * An anti-hail balloon's torch once lit: its casing of salts, the ball of flame a fifth of a metre across under it ("light-flame", see
+ * BalloonFlight.TORCH_FLAME_M), and the small parachute it comes down under, 1.2 m across, on its lines.
+ */
+function torch(model: BalloonModel): void {
+  model.add("light-flame", new SphereGeometry(0.1, 16, 12).translate(0, 0.1, 0))
+  model.add("casing", new CylinderGeometry(0.045, 0.045, 0.25, 16).translate(0, 0.325, 0))
+  model.add("parachute", new SphereGeometry(0.6, 32, 10, 0, 2 * Math.PI, 0, Math.PI / 2).scale(1, 0.67, 1).translate(0, 1.2, 0))
+  for (let i = 0; i < 6; i++) {
+    const a = 2 * Math.PI * i / 6
+    model.add("casing", rod([0, 0.45, 0], [0.58 * Math.cos(a), 1.2, 0.58 * Math.sin(a)], 0.004))
+  }
+}
+
 function stratospheric(model: BalloonModel): void {
   // The natural shape at float, one metre wide: from its foot, where the flight train hangs, out to its shoulder and round over its crown.
   const profile: [number, number][] = [[0.006, 0], [0.07, 0.08], [0.17, 0.2], [0.28, 0.34], [0.38, 0.47], [0.45, 0.58], [0.495, 0.68],
@@ -283,6 +297,11 @@ const MODELS: { id: string, build: (model: BalloonModel) => void, materials: Glt
   {
     id: "foil-figure", build: foilFigure,
     materials: ["hair", "skin", "top", "bottom", "shoes"].map(part => GltfWriter.material(`foil-${part}`, "#ffffff", 0.6, 0.25)).concat(GltfWriter.material("valve", "#f2f2f2", 0, 0.5))
+  },
+  {
+    id: "torch", build: torch,
+    materials: [GltfWriter.material("light-flame", "#ffffff", 0, 0.4, { emissiveFactor: [1, 1, 1] }), GltfWriter.material("casing", "#7a7068", 0.2, 0.6),
+      GltfWriter.material("parachute", "#e8e2d4", 0, 0.8, { doubleSided: true })]
   },
   {
     id: "prank", build: prank, lit: [["envelope"], [0, 0.2, 0]],

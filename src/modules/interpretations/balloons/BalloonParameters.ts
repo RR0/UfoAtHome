@@ -209,6 +209,11 @@ export class BalloonParameters {
         visibleWhen: element => BalloonParameters.typeOf(element).burner !== undefined
       },
       {
+        type: "number", key: "triggerM", min: 10, max: 10000, step: 10, unit: "m", group: BalloonParameters.FLIGHT, label: "torchLitAt",
+        hint: "itsAltimeterLightsIt", effective: element => BalloonParameters.typeOf(element).torch?.aboveM,
+        visibleWhen: element => BalloonParameters.typeOf(element).torch !== undefined
+      },
+      {
         type: "number", key: "tetherM", min: 1, max: 5000, step: 1, unit: "m", group: BalloonParameters.FLIGHT, effective: () => BalloonFlight.TETHER_M,
         label: "line", visibleWhen: element => BalloonParameters.typeOf(element).envelope === "sealed"
       },

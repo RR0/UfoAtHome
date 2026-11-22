@@ -21,6 +21,9 @@ export interface BalloonParameterTexts {
   stratospheric: string
   solar: string
   captive: string
+  antiHail: string
+  torchLitAt: string
+  itsAltimeterLightsIt: string
   stratosphericLarge: string
   superpressure: string
   infrared: string

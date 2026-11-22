@@ -31,4 +31,13 @@ describe("Balloon models", () => {
       }
     }
   })
+
+  test("an anti-hail balloon's torch is in the catalogue at the size the flight states, its flame the light the flight lights", () => {
+    const entry = index.models.find(model => model.id === "ufoathome-balloon-torch")!
+    const gltf = JSON.parse(readFileSync(`public/models/${entry.file}`, "utf8")) as { materials: { name: string }[] }
+    const [x, y, z] = GltfBounds.sizeOf(gltf)
+    expect([x, y, z].map(v => Math.round(v * 10) / 10)).toEqual([BalloonFlight.TORCH_SIZE.widthM, BalloonFlight.TORCH_SIZE.heightM, BalloonFlight.TORCH_SIZE.lengthM])
+    expect(gltf.materials.map(material => material.name)).toContain("light-flame")
+    expect(entry.parameters.bindings.flameColor).toBeDefined()
+  })
 })

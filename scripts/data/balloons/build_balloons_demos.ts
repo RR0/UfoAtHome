@@ -8,6 +8,8 @@
  *   foil party balloon lost high over them, flashing the Sun as it turns, and a child's figure balloon drifting off low.
  * - public/demo-data/sky-test-balloons-prank.json: prank balloons let go from a beach on the Vendée coast on a summer night, three over
  *   candles and one over a red road flare, drifting out over the sea.
+ * - public/demo-data/sky-test-balloons-anti-hail.json: anti-hail balloons let go from three firing posts of the Savoie vineyards as a storm
+ *   comes, their torches of salts lit at 600 m and coming down glowing orange under their parachutes.
  * - public/demo-data/sky-test-balloons-night.json: LED balloons let go one after the other from a garden in the Beauce on a summer night, drifting off
  *   in a loose line, red, white and blue.
  *
@@ -115,4 +117,21 @@ write("sky-test-balloons-prank.json", recording("sky-test-balloons-prank", {
   { id: "flare", balloon: "prank-flares", site: { eastM: -520, northM: -120, originElevationM: 5 }, releases: [{ t: -40_000 }],
     wind: { towardDeg: 260, speedMS: 3 }, windsAloft: [{ atM: 400, towardDeg: 245, speedMS: 5 }], durationS: 900 }
 ]))
+// The vineyards of the Combe de Savoie on a summer evening as a storm comes: three firing posts, each guarding some 60 ha, let an
+// anti-hail balloon go at the radar's alert; at 600 m each lights its torch of salts, which comes down glowing orange under its parachute.
+const vines = { name: "Vineyards of the Combe de Savoie (assumed)", lat: 45.49, lng: 6.03 }
+const stormy = {
+  keyframes: [{ t: 0, weather: { cloudCover: { value: 0.85, basis: "assumed", rationale: "Assumed for the demo: a storm coming." }, cloudDarkness: 0.7, cloudBaseM: 1100, lowerCloudCover: 0.85, highCloudCover: 0.6, precipitationType: "none", precipitationIntensity: 0, windDirectionDeg: 240, windSpeed: 4, storm: false } }]
+}
+write("sky-test-balloons-anti-hail.json", recording("sky-test-balloons-anti-hail", {
+  en: "The vineyards of the Combe de Savoie on a summer night as a storm comes: three firing posts let an anti-hail balloon go each; at 600 m each lights its torch of hygroscopic salts, which comes down glowing orange under its parachute, seeming to hang still, and goes out. Place, date and balloons assumed.",
+  fr: "Les vignes de la Combe de Savoie une nuit d'été à l'approche d'un orage : trois postes de tir lâchent chacun un ballon anti-grêle ; à 600 m, chacun allume sa torche de sels hygroscopiques, qui descend en luisant orange sous son parachute, semblant immobile, puis s'éteint. Lieu, date et ballons supposés.",
+  es: "Los viñedos de la Combe de Savoie una noche de verano al acercarse una tormenta: tres puestos de tiro sueltan cada uno un globo antigranizo; a 600 m, cada uno enciende su antorcha de sales higroscópicas, que baja brillando naranja bajo su paracaídas, como inmóvil, y se apaga. Lugar, fecha y globos supuestos.",
+  it: "I vigneti della Combe de Savoie una notte d'estate all'arrivo di un temporale: tre postazioni di tiro lasciano andare ciascuna un pallone antigrandine; a 600 m ciascuno accende la sua torcia di sali igroscopici, che scende brillando arancione sotto il paracadute, come immobile, e si spegne. Luogo, data e palloni ipotizzati."
+}, "2026-07-24T22:40:00", 2, 240, vines, { headingDeg: 60, pitchDeg: 12, fovDeg: 60 }, 20, stormy,
+{ en: "Anti-hail balloons", fr: "Ballons anti-grêle", es: "Globos antigranizo", it: "Palloni antigrandine" },
+[[1200, 1500, -150_000], [1700, 900, -140_000], [800, 1900, -125_000]].map(([eastM, northM, t], i): BalloonFlightJson => ({
+  id: `post-${i + 1}`, balloon: "anti-hail", site: { eastM, northM, originElevationM: 300 }, releases: [{ t, seed: 31 + i }],
+  wind: { towardDeg: 60, speedMS: 4 }, windsAloft: [{ atM: 800, towardDeg: 70, speedMS: 7 }], durationS: 900
+}))))
 console.log("written")
