@@ -11,6 +11,7 @@ import type { DecorModelRef } from "../engine/model/Decor.js"
 import { FlameEffect } from "./FlameEffect.js"
 import type { NearEmitter } from "./EmitterLights.js"
 import { LightFromBelow } from "./LightFromBelow.js"
+import { ShownArea } from "./ShownArea.js"
 import { DecorSystem } from "./DecorSystem.js"
 import { LitFromWithin } from "./LitFromWithin.js"
 import type { ModelParameters } from "../engine/model/DecorTraits.js"
@@ -901,11 +902,15 @@ export class BodySystem {
       const centre = box.getCenter(new Vector3())
       const size = box.getSize(new Vector3())
       const radiusM = Math.max(size.x, size.y, size.z) / 2
-      // It lights what is round it, whether the eye sees it or not: the ground under a craft's lights, the field a triangle hovers over.
-      emitters.push({ position: centre.clone(), candela: luminanceCdM2 * Math.PI * radiusM * radiusM, colour: glow.hue })
+      // It lights what is round it, whether the eye sees it or not: the ground under a craft's lights, the field a triangle hovers over. By
+      // the area it shows on average from all round (see ShownArea).
+      emitters.push({ position: centre.clone(), candela: luminanceCdM2 * ShownArea.of(glow.meshes), colour: glow.hue })
       const distanceM = Math.max(centre.distanceTo(eye), radiusM * 1.01, 1e-3)
       occluders ??= [holder, ...(frame.occluders ?? [])].map(object => ({ object, box: new Box3().setFromObject(object) }))
-      const angularRadius = Math.asin(Math.min(1, radiusM / distanceM))
+      // What reaches the eye is its luminance over the area it shows the eye, not over a disc as wide as its largest side: right for an LED,
+      // three to four times too much for a blimp's sign or a lightship's envelope (see ShownArea). The veil's source is the disc of that area.
+      const shown = ShownArea.of(glow.meshes, this.scratch.copy(eye).sub(centre).normalize())
+      const angularRadius = Math.asin(Math.min(1, Math.sqrt(shown / Math.PI) / distanceM))
       // A light under a pixel is looked at through its middle alone: its five points all fall in the same pixel, and looking along each
       // through a drone's own hull cost 5.7 ms an image for the 46 LEDs of nine drones.
       const clear = this.clearShare(eye, box, centre, glow.meshes, occluders, frame.pixelRad !== undefined && 2 * angularRadius < frame.pixelRad)

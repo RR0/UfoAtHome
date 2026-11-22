@@ -9,7 +9,8 @@ import type { AircraftKind } from "../../../engine/traffic/AircraftModels.js"
  *
  * - "blimp": a non-rigid advertising blimp of Goodyear's GZ-20A class, 59.4 m long and 14.3 m across, its gondola under it, its two piston
  *   engines beside the gondola; it cruises at some 15 m/s and at most 22 m/s (Goodyear's figures). On its flanks, the sign of lamps it
- *   carries at night, some 30 m by 7 m, lit at 300 cd/m² (its luminance SUPPOSED, an LED billboard's at night).
+ *   carries at night, some 28 m by 6.5 m, lit at 150 cd/m² (its luminance SUPPOSED: an LED billboard's at night is dimmed to some 100 to
+ *   300 cd/m²).
  * - "zeppelin-nt": a semi-rigid Zeppelin NT (Goodyear's Wingfoot One), 75 m long, 19.5 m across its fins, its three fins in an inverted Y;
  *   it cruises at 19 m/s and at most 35 m/s (Zeppelin's figures). No sign unless the recording lights one.
  * - "lightship": a small advertising airship of the A-60 class, 39.6 m long and 9.8 m across, whose white envelope is lit from inside at
@@ -62,7 +63,7 @@ export class AirshipTypes {
   static readonly ALL: readonly AirshipType[] = [
     {
       id: "blimp", modelId: "ufoathome-airship-blimp", sizeM: { widthM: 14.72, lengthM: 59.46, heightM: 17.59 }, cruiseMS: 15, maxSpeedMS: 22,
-      color: "#c9ccd1", finColor: "#1d3f8a", albedo: 0.6, sign: { color: "#fff4d8", luminanceCdM2: 300, lit: true },
+      color: "#c9ccd1", finColor: "#1d3f8a", albedo: 0.6, sign: { color: "#fff4d8", luminanceCdM2: 150, lit: true },
       lights: {
         ...navigation([-1.22, -8.6, -9], [1.22, -8.6, -9], [0, 0, 29.7]),
         strobe: { color: "#ffffff", candela: 400, hz: 1, flashS: 0.06, leds: [{ at: [0, -10.15, -9], radiusM: 0.08 }] }
@@ -71,7 +72,7 @@ export class AirshipTypes {
     },
     {
       id: "zeppelin-nt", modelId: "ufoathome-airship-zeppelin-nt", sizeM: { widthM: 18.2, lengthM: 75.11, heightM: 19.55 }, cruiseMS: 19, maxSpeedMS: 35,
-      color: "#eef0f2", finColor: "#eef0f2", albedo: 0.75, sign: { color: "#fff4d8", luminanceCdM2: 300, lit: false },
+      color: "#eef0f2", finColor: "#eef0f2", albedo: 0.75, sign: { color: "#fff4d8", luminanceCdM2: 150, lit: false },
       lights: {
         ...navigation([-1.32, -8.4, -14], [1.32, -8.4, -14], [0, 0, 37.5]),
         strobe: { color: "#ffffff", candela: 400, hz: 1, flashS: 0.06, leds: [{ at: [0, -9.65, -14], radiusM: 0.08 }] }

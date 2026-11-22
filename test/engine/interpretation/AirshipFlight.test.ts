@@ -50,13 +50,13 @@ describe("AirshipFlight", () => {
 
   test("lights its sign unless the recording puts it out, and a Zeppelin NT's only when it lights it", () => {
     const [lit] = AirshipFlight.bodiesOf(blimp())
-    expect(lit.track[0].lights!["light-sign-left"]).toBe(300)
+    expect(lit.track[0].lights!["light-sign-left"]).toBe(150)
     const [dark] = AirshipFlight.bodiesOf(blimp({ sign: false }))
     expect(dark.track[0].lights!["light-sign-right"]).toBe(0)
     const [nt] = AirshipFlight.bodiesOf({ id: "nt", airship: "zeppelin-nt", path: blimp().path })
     expect(nt.track[0].lights!["light-sign-left"]).toBe(0)
     const [ntLit] = AirshipFlight.bodiesOf({ id: "nt", airship: "zeppelin-nt", path: blimp().path, sign: { color: "#40a0ff" } })
-    expect(ntLit.track[0].lights!["light-sign-left"]).toBe(300)
+    expect(ntLit.track[0].lights!["light-sign-left"]).toBe(150)
     expect(ntLit.modelParameters!.signColor).toBe("#40a0ff")
   })
 
