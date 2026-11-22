@@ -314,10 +314,10 @@ export class BalloonFlight {
       const { pressurePa, temperatureK } = BalloonFlight.airAt(z + seaM, offsetK, siteSeaM)
       return { p: pressurePa, T: temperatureK, rho: pressurePa / (BalloonFlight.R_AIR * temperatureK) }
     }
-    // Its gas, weighed where it was filled, at the site: what a latex balloon then swells with as it rises.
-    const filled = air(ground)
+    // Its gas, weighed as its volume is stated, in the standard air at the sea (see BalloonType.launchVolumeM3): a crew fills a balloon to the
+    // lift it wants, and what a gas lifts beyond its own weight is the same wherever it is filled.
     const fill = 1 + (release.fill ?? 0)
-    const gasKg = type.launchVolumeM3 * fill * filled.p * gasMol / (BalloonFlight.R * filled.T)
+    const gasKg = type.launchVolumeM3 * fill * 101325 * gasMol / (BalloonFlight.R * 288.15)
     const startZ = release.altitudeM ?? ground
     const state: BalloonState = { x: anchor.x, y: anchor.y, z: startZ, vx: 0, vy: 0, vz: 0, gasKg, excessK: 0, burnUntilS: -1, ballastKg: type.ballastKg ?? 0, floated: false }
     // The air in a hot-air balloon's envelope starts as hot as holding it on the ground takes: let go, its pilot's first blast lifts it.

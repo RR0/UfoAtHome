@@ -1,0 +1,162 @@
+{
+  "version": 4,
+  "id": "sky-test-balloons-day",
+  "tags": [
+    "balloons",
+    "misidentification"
+  ],
+  "description": {
+    "en": "A morning's mass ascension of hot-air balloons, their burners firing as they climb and level off at a few hundred metres, and a foil party balloon lost high over them, flashing the Sun as it turns. Place, date and balloons assumed.",
+    "fr": "L'envol groupé matinal de montgolfières, leurs brûleurs qui s'allument tandis qu'elles montent puis se stabilisent à quelques centaines de mètres, et un ballon métallisé perdu haut au-dessus d'elles, qui renvoie le Soleil en tournant. Lieu, date et ballons supposés.",
+    "es": "El despegue matinal en masa de globos aerostáticos, sus quemadores encendiéndose mientras suben y se estabilizan a unos cientos de metros, y un globo metalizado perdido muy por encima, que refleja el Sol al girar. Lugar, fecha y globos supuestos.",
+    "it": "Il decollo mattutino in massa di mongolfiere, i bruciatori che si accendono mentre salgono e si stabilizzano a qualche centinaio di metri, e un palloncino metallizzato perso in alto sopra di loro, che riflette il Sole girando. Luogo, data e palloni ipotizzati."
+  },
+  "time": "2026-10-03T07:40:00",
+  "utcOffsetHours": -6,
+  "durationSeconds": 180,
+  "place": {
+    "name": "South of a balloon field, Albuquerque, New Mexico (assumed)",
+    "locations": [
+      {
+        "lat": 35.18,
+        "lng": -106.597
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 19,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 3000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 180,
+          "windSpeed": 2,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 35.18,
+          "lng": -106.597,
+          "elevationM": 0,
+          "headingDeg": 5,
+          "pitchDeg": 16,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Balloons by day",
+      "fr": "Ballons de jour",
+      "es": "Globos de día",
+      "it": "Palloni di giorno"
+    },
+    "bodies": [],
+    "balloons": [
+      {
+        "id": "ascension",
+        "balloon": "hot-air",
+        "site": {
+          "eastM": 0,
+          "northM": 700,
+          "originElevationM": 1520
+        },
+        "group": {
+          "count": 8,
+          "fromT": -240000,
+          "untilT": 60000,
+          "radiusM": 200,
+          "colors": [
+            "#c8202f",
+            "#1f5fbf",
+            "#f08a00",
+            "#2f9e44",
+            "#7b2fbf",
+            "#e0e0e0",
+            "#d43f8d",
+            "#14a3a3"
+          ],
+          "seed": 3
+        },
+        "plan": [
+          {
+            "t": 0,
+            "altitudeM": 350
+          }
+        ],
+        "wind": {
+          "towardDeg": 200,
+          "speedMS": 2
+        },
+        "windsAloft": [
+          {
+            "atM": 400,
+            "towardDeg": 20,
+            "speedMS": 3
+          }
+        ],
+        "durationS": 300
+      },
+      {
+        "id": "foil",
+        "balloon": "foil",
+        "site": {
+          "eastM": 500,
+          "northM": 1800,
+          "originElevationM": 1520
+        },
+        "releases": [
+          {
+            "t": 0,
+            "altitudeM": 1200
+          }
+        ],
+        "wind": {
+          "towardDeg": 200,
+          "speedMS": 2
+        },
+        "windsAloft": [
+          {
+            "atM": 1500,
+            "towardDeg": 60,
+            "speedMS": 6
+          }
+        ],
+        "durationS": 300
+      }
+    ]
+  }
+}

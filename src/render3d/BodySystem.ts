@@ -373,7 +373,9 @@ export class BodySystem {
     // matter at the distances they are seen from.
     if (!(luminanceCdM2 > 0) || !eye || (glowing && glowing.length > 0)) {
       veil?.hide()
-      if (!(luminanceCdM2 > 0) && eye && !(glowing && glowing.length > 0)) this.shineReflected(state, holder, frame, eye)
+      // What it sends back of the light on it, whether or not some part of it also glows: a weather balloon carrying an unlit lamp, a drone's
+      // hull by day beside its LEDs. Its lit parts are drawn for themselves (see shineLights).
+      if (!(luminanceCdM2 > 0) && eye) this.shineReflected(state, holder, frame, eye)
       return
     }
     if (!veil) {

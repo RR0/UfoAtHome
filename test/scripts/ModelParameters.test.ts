@@ -21,10 +21,11 @@ function namesOf(file: string): { materials: string[], nodes: string[] } {
 const published = catalogue.filter(entry => entry.parameters?.parameters?.length)
 
 describe("the settings the catalogue's models publish", () => {
-  test("there are some, for figures, for trees, for an airliner, for the project's own crafts, for sky lanterns, for birds, for drones and for a van", () => {
+  test("there are some, for figures, for trees, for an airliner, for the project's own crafts, for sky lanterns, for birds, for drones, for balloons and for a van", () => {
     const keys = new Set(published.flatMap(entry => entry.parameters!.parameters!.map(spec => spec.key)))
-    expect([...keys].sort()).toEqual(["billColor", "bodyColor", "costumeColor", "foliageColor", "frontColor", "gearUp", "headColor", "hullColor", "legsUp", "navLeftColor",
-      "navRightColor", "neckColor", "paintColor", "paperColor", "rearColor", "rimColor", "strobeColor", "tailColor", "tipColor", "underColor", "upperColor"])
+    expect([...keys].sort()).toEqual(["billColor", "bodyColor", "costumeColor", "envelopeColor", "foliageColor", "frontColor", "gearUp", "headColor", "hullColor", "lampColor",
+      "legsUp", "navLeftColor", "navRightColor", "neckColor", "paintColor", "paperColor", "rearColor", "rimColor", "stripeColor", "strobeColor", "tailColor", "tipColor",
+      "underColor", "upperColor"])
   })
 
   test.each(published.map(entry => [entry.id, entry] as const))("%s: every setting is bound, and bound to what the file holds", (_id, entry) => {
@@ -81,8 +82,11 @@ describe("the settings the catalogue's models publish", () => {
       const sound = entry.parameters!.sound!
       if (sound !== "silent") expect(AircraftHearing.noiseOfKind(sound), `${entry.id}: ${sound}`).toBeDefined()
     }
-    // The project's own crafts stand for phenomena nobody heard; its drones are machines, and buzz as theirs do.
-    for (const entry of catalogue.filter(candidate => candidate.id.startsWith("ufoathome-") && !candidate.id.startsWith("ufoathome-drone-") && candidate.kind === "aircraft")) expect(entry.parameters?.sound, entry.id).toBe("silent")
+    // The project's own crafts stand for phenomena nobody heard; its drones are machines, and buzz as theirs do; its hot-air balloon roars
+    // when its burner fires, its other balloons make no sound.
+    const machines = new Set(["ufoathome-balloon-hot-air"])
+    for (const entry of catalogue.filter(candidate => candidate.id.startsWith("ufoathome-") && !candidate.id.startsWith("ufoathome-drone-") && !machines.has(candidate.id) && candidate.kind === "aircraft")) expect(entry.parameters?.sound, entry.id).toBe("silent")
+    expect(catalogue.find(entry => entry.id === "ufoathome-balloon-hot-air")!.parameters!.sound).toBe("balloon")
     for (const entry of catalogue.filter(candidate => candidate.id.startsWith("ufoathome-drone-"))) expect(entry.parameters?.sound, entry.id).toBe("unmanned")
     for (const id of ["amvlab-a350", "amvlab-a380", "amvlab-b787"]) expect(catalogue.find(entry => entry.id === id)!.parameters!.sound).toBe("airliner-wide")
   })

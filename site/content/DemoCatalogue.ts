@@ -604,6 +604,39 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "balloons-dusk",
+          src: "/demo-data/sky-test-balloons-dusk.json",
+          title: { en: "Balloons in the Sun at dusk", fr: "Des ballons au Soleil au crépuscule", es: "Globos al Sol al anochecer", it: "Palloni al Sole al crepuscolo" },
+          blurb: {
+            en: "Twenty minutes after sunset over the plains of eastern New Mexico: a stratospheric balloon floating at 30 km, as those let go from Fort Sumner do, and a weather balloon nearing its burst, both still in the Sun while the ground is in the dusk, two white points against a darkening sky — until the weather balloon bursts. Place, date and balloons assumed.",
+            fr: "Vingt minutes après le coucher du Soleil sur les plaines de l'est du Nouveau-Mexique : un ballon stratosphérique qui flotte à 30 km, comme ceux lâchés de Fort Sumner, et un ballon-sonde près d'éclater, tous deux encore au Soleil alors que le sol est dans le crépuscule, deux points blancs sur un ciel qui s'assombrit — jusqu'à ce que le ballon-sonde éclate. Lieu, date et ballons supposés.",
+            es: "Veinte minutos después de la puesta del Sol sobre las llanuras del este de Nuevo México: un globo estratosférico que flota a 30 km, como los que se sueltan en Fort Sumner, y un globo sonda a punto de estallar, ambos todavía al Sol mientras el suelo está en el crepúsculo, dos puntos blancos sobre un cielo que se oscurece, hasta que el globo sonda estalla. Lugar, fecha y globos supuestos.",
+            it: "Venti minuti dopo il tramonto sulle pianure del Nuovo Messico orientale: un pallone stratosferico che galleggia a 30 km, come quelli lanciati da Fort Sumner, e un pallone sonda prossimo a scoppiare, entrambi ancora al Sole mentre il suolo è nel crepuscolo, due punti bianchi su un cielo che si scurisce, finché il pallone sonda scoppia. Luogo, data e palloni ipotizzati."
+          }
+        },
+        {
+          id: "balloons-day",
+          src: "/demo-data/sky-test-balloons-day.json",
+          title: { en: "Hot-air balloons and a foil balloon", fr: "Des montgolfières et un ballon métallisé", es: "Globos aerostáticos y un globo metalizado", it: "Mongolfiere e un palloncino metallizzato" },
+          blurb: {
+            en: "A morning's mass ascension: eight hot-air balloons let go a few at a time, their pilots firing their burners to climb and level off at 350 m; high over them, a lost foil party balloon drifting at 1.2 km, a polished speck turning in the Sun. Place, date and balloons assumed.",
+            fr: "L'envol groupé d'un matin : huit montgolfières lâchées quelques-unes à la fois, leurs pilotes allumant les brûleurs pour monter et se stabiliser à 350 m ; haut au-dessus, un ballon métallisé perdu qui dérive à 1,2 km, un point poli qui tourne au Soleil. Lieu, date et ballons supposés.",
+            es: "El despegue en masa de una mañana: ocho globos aerostáticos soltados de pocos en pocos, sus pilotos encendiendo los quemadores para subir y estabilizarse a 350 m; muy por encima, un globo metalizado perdido que deriva a 1,2 km, un punto pulido que gira al Sol. Lugar, fecha y globos supuestos.",
+            it: "Il decollo in massa di una mattina: otto mongolfiere lasciate andare poche alla volta, i piloti che accendono i bruciatori per salire e stabilizzarsi a 350 m; in alto sopra di loro, un palloncino metallizzato perso che deriva a 1,2 km, un punto lucido che gira al Sole. Luogo, data e palloni ipotizzati."
+          }
+        },
+        {
+          id: "balloons-night",
+          src: "/demo-data/sky-test-balloons-night.json",
+          title: { en: "LED balloons at night", fr: "Des ballons à LED la nuit", es: "Globos de LED de noche", it: "Palloncini a LED di notte" },
+          blurb: {
+            en: "A summer night: fifteen LED balloons let go one after the other from a garden some 400 m away, red, white and blue, climbing at two metres a second and drifting off over the fields in a loose, slowly stretching line of silent coloured points. Place, date and balloons assumed.",
+            fr: "Une nuit d'été : quinze ballons à LED lâchés l'un après l'autre depuis un jardin à quelque 400 m, rouges, blancs et bleus, qui montent à deux mètres par seconde et s'éloignent au-dessus des champs en une ligne lâche de points colorés silencieux, qui s'étire lentement. Lieu, date et ballons supposés.",
+            es: "Una noche de verano: quince globos de LED soltados uno tras otro desde un jardín a unos 400 m, rojos, blancos y azules, que suben a dos metros por segundo y se alejan sobre los campos en una línea suelta de puntos de colores silenciosos, que se estira lentamente. Lugar, fecha y globos supuestos.",
+            it: "Una notte d'estate: quindici palloncini a LED lasciati andare uno dopo l'altro da un giardino a circa 400 m, rossi, bianchi e blu, che salgono a due metri al secondo e si allontanano sopra i campi in una fila irregolare di punti colorati silenziosi, che si allunga lentamente. Luogo, data e palloni ipotizzati."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

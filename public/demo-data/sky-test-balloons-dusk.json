@@ -1,0 +1,155 @@
+{
+  "version": 4,
+  "id": "sky-test-balloons-dusk",
+  "tags": [
+    "balloons",
+    "misidentification"
+  ],
+  "description": {
+    "en": "Twenty minutes after sunset over the plains of eastern New Mexico: a stratospheric balloon floating at 30 km and a weather balloon nearing its burst, both still in the Sun while the ground is in the dusk. Place, date and balloons assumed.",
+    "fr": "Vingt minutes après le coucher du Soleil sur les plaines de l'est du Nouveau-Mexique : un ballon stratosphérique qui flotte à 30 km et un ballon-sonde près d'éclater, tous deux encore au Soleil alors que le sol est dans le crépuscule. Lieu, date et ballons supposés.",
+    "es": "Veinte minutos después de la puesta del Sol sobre las llanuras del este de Nuevo México: un globo estratosférico que flota a 30 km y un globo sonda a punto de estallar, ambos todavía al Sol mientras el suelo está en el crepúsculo. Lugar, fecha y globos supuestos.",
+    "it": "Venti minuti dopo il tramonto sulle pianure del Nuovo Messico orientale: un pallone stratosferico che galleggia a 30 km e un pallone sonda prossimo a scoppiare, entrambi ancora al Sole mentre il suolo è nel crepuscolo. Luogo, data e palloni ipotizzati."
+  },
+  "time": "2026-09-16T19:20:00",
+  "utcOffsetHours": -6,
+  "durationSeconds": 150,
+  "place": {
+    "name": "East of Clovis, New Mexico (assumed)",
+    "locations": [
+      {
+        "lat": 34.4,
+        "lng": -103.2
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 21.5,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 3000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 200,
+          "windSpeed": 3,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 34.4,
+          "lng": -103.2,
+          "elevationM": 0,
+          "headingDeg": 58,
+          "pitchDeg": 25,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "Balloons in the Sun",
+      "fr": "Ballons au Soleil",
+      "es": "Globos al Sol",
+      "it": "Palloni al Sole"
+    },
+    "bodies": [],
+    "balloons": [
+      {
+        "id": "stratospheric",
+        "balloon": "stratospheric",
+        "site": {
+          "eastM": 38000,
+          "northM": 14000,
+          "originElevationM": 1300
+        },
+        "releases": [
+          {
+            "t": 0,
+            "altitudeM": 28900
+          }
+        ],
+        "wind": {
+          "towardDeg": 30,
+          "speedMS": 3
+        },
+        "windsAloft": [
+          {
+            "atM": 10000,
+            "towardDeg": 60,
+            "speedMS": 15
+          },
+          {
+            "atM": 25000,
+            "towardDeg": 270,
+            "speedMS": 8
+          }
+        ],
+        "durationS": 600
+      },
+      {
+        "id": "weather",
+        "balloon": "weather",
+        "site": {
+          "eastM": 30000,
+          "northM": 30000,
+          "originElevationM": 1300
+        },
+        "releases": [
+          {
+            "t": 0,
+            "altitudeM": 28000
+          }
+        ],
+        "wind": {
+          "towardDeg": 30,
+          "speedMS": 3
+        },
+        "windsAloft": [
+          {
+            "atM": 10000,
+            "towardDeg": 60,
+            "speedMS": 15
+          },
+          {
+            "atM": 25000,
+            "towardDeg": 270,
+            "speedMS": 8
+          }
+        ],
+        "durationS": 600
+      }
+    ]
+  }
+}

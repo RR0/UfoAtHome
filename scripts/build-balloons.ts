@@ -118,17 +118,18 @@ const LATEX_PROFILE: [number, number][] = (() => {
 
 function latex(model: BalloonModel, lamp: boolean): void {
   model.add("envelope", lathe(LATEX_PROFILE, 48))
-  // The knot: a ring of rolled latex under its neck.
-  model.add("envelope", new TorusGeometry(0.03, 0.012, 8, 20).rotateX(Math.PI / 2).translate(0, 0.075, 0))
+  // The knot: a ring of rolled latex under its neck, as thick as it is dull, which neither its colour nor its light reaches.
+  model.add("knot", new TorusGeometry(0.03, 0.012, 8, 20).rotateX(Math.PI / 2).translate(0, 0.075, 0))
   if (lamp) model.add("light-lamp", new SphereGeometry(0.025, 12, 8).translate(0, 0.025, 0))
-  else model.add("envelope", new CylinderGeometry(0.012, 0.012, 0.05, 8).translate(0, 0.04, 0))
+  else model.add("knot", new CylinderGeometry(0.012, 0.012, 0.05, 8).translate(0, 0.04, 0))
 }
 
 function foil(model: BalloonModel): void {
   // A pillow of two discs of film welded at their rim: round, flat where it is widest, its seam a thin ridge.
   model.add("foil", new SphereGeometry(0.5, 48, 24).scale(1, 1, 0.27).translate(0, 0.54, 0))
   model.add("foil", new TorusGeometry(0.5, 0.006, 6, 64).translate(0, 0.54, 0))
-  model.add("foil", new BoxGeometry(0.07, 0.06, 0.01).translate(0, 0.03, 0))
+  // The tab of its valve, white plastic, where it was filled.
+  model.add("valve", new BoxGeometry(0.07, 0.06, 0.01).translate(0, 0.03, 0))
 }
 
 function stratospheric(model: BalloonModel): void {
@@ -137,7 +138,7 @@ function stratospheric(model: BalloonModel): void {
     [0.5, 0.73], [0.48, 0.79], [0.42, 0.84], [0.3, 0.88], [0.15, 0.9], [0, 0.905]]
   model.add("envelope", lathe(profile, 64))
   // The fitting at its crown, and the tapes that run up its gores: ridges seen in the Sun.
-  model.add("envelope", new CylinderGeometry(0.03, 0.03, 0.01, 16).translate(0, 0.905, 0))
+  model.add("fitting", new CylinderGeometry(0.03, 0.03, 0.01, 16).translate(0, 0.905, 0))
 }
 
 /** The hot-air balloon's envelope, from its mouth to its crown, metres: a Cameron Z-90's 16.5 m across, 24 m from the basket's floor. */
@@ -171,14 +172,18 @@ const glowing = (css: string) => ({ emissiveFactor: GltfWriter.linear(css) })
 const MODELS: { id: string, build: (model: BalloonModel) => void, materials: GltfMaterial[], whole?: boolean, lit?: [string[], [number, number, number]] }[] = [
   {
     id: "latex", build: model => latex(model, true),
-    materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.35), GltfWriter.material("light-lamp", "#ffffff", 0, 0.4, glowing("#ffffff"))]
+    materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.35), GltfWriter.material("knot", "#d8d0c4", 0, 0.6),
+      GltfWriter.material("light-lamp", "#ffffff", 0, 0.4, glowing("#ffffff"))]
   },
   {
     id: "led", build: model => latex(model, false), whole: true, lit: [["envelope"], [0, 0.6, 0]],
-    materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.5, { ...glowing("#ffffff"), doubleSided: true })]
+    materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.5, { ...glowing("#ffffff"), doubleSided: true }), GltfWriter.material("knot", "#d8d0c4", 0, 0.6)]
   },
-  { id: "foil", build: foil, materials: [GltfWriter.material("foil", "#ffffff", 1, 0.12)] },
-  { id: "stratospheric", build: stratospheric, materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.3, { doubleSided: true })] },
+  { id: "foil", build: foil, materials: [GltfWriter.material("foil", "#ffffff", 1, 0.12), GltfWriter.material("valve", "#f2f2f2", 0, 0.5)] },
+  {
+    id: "stratospheric", build: stratospheric,
+    materials: [GltfWriter.material("envelope", "#ffffff", 0, 0.3, { doubleSided: true }), GltfWriter.material("fitting", "#5a5f66", 0.7, 0.4)]
+  },
   {
     id: "hot-air", build: hotAir, lit: [["envelope", "envelope-stripe"], FLAME_AT],
     materials: [

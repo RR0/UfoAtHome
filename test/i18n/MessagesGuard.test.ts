@@ -34,7 +34,8 @@ const SOURCES = Object.fromEntries(Object.entries(import.meta.glob("../../src/**
 const INLINE_STILL = new Map<string, string>([
   // Not words of the interface: the title the bodies computed from a launch carry, as a recording's own bodies carry theirs (SaidText is
   // the content's form), computed synchronously whenever the interpretation is shown.
-  ["modules/interpretations/lanterns/SkyLantern.ts", "content: the computed bodies' title"]
+  ["modules/interpretations/lanterns/SkyLantern.ts", "content: the computed bodies' title"],
+  ["modules/interpretations/balloons/BalloonFlight.ts", "content: the computed bodies' title, by the balloon's type"]
 ])
 
 /** Components that still import English up front: none any more, and none to come. */

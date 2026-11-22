@@ -21,8 +21,9 @@ export interface BalloonType {
   modelId: string
   envelope: BalloonEnvelope
   /**
-   * How much it holds when it is let go, m³: the gas a latex or stratospheric balloon is filled with, measured at the ground; the whole
-   * envelope of one that is full from the start (a foil, a captive or a hot-air balloon).
+   * How much it holds when it is let go, m³: the gas a latex or stratospheric balloon is filled with, measured in the standard air at the sea
+   * (15 °C, 1013.25 hPa) — what fixes how much gas it holds, and so what it lifts, wherever it is filled; the whole envelope of one that is
+   * full from the start (a foil, a captive or a hot-air balloon).
    */
   launchVolumeM3: number
   /** The most it holds, m³: where a latex one bursts, a vented one lets its gas go, a sealed one stops swelling. */

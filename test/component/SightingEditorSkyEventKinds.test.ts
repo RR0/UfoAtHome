@@ -292,14 +292,14 @@ describe("a kind of event of the sky a module brings", () => {
   it("comes after the kinds of interpretation, whose parts are made the same way, a module's among them", async () => {
     ModuleRegistry.install({ id: "ball-lightning", name: "Ball lightning", contributes: {
       skyEvents: [{ id: "ballLightning", name: "Ball lightning", credit: "©", creditUrl: "https://example.org", create: () => BALL_LIGHTNING }],
-      interpretations: [{ id: "balloons", name: "Balloons", credit: "©", creditUrl: "https://example.org", create: () => ({
-        key: "balloons", messages: Messages.catalog({ en: async () => ({ title: "Balloons" }), fr: async () => ({ title: "Ballons" }), es: async () => ({ title: "Globos" }), it: async () => ({ title: "Palloni" }) }), compute: async () => () => [],
+      interpretations: [{ id: "kites", name: "Kites", credit: "©", creditUrl: "https://example.org", create: () => ({
+        key: "kites", messages: Messages.catalog({ en: async () => ({ title: "Kites" }), fr: async () => ({ title: "Cerfs-volants" }), es: async () => ({ title: "Cometas" }), it: async () => ({ title: "Aquiloni" }) }), compute: async () => () => [],
         editor: async () => () => ({ sync: () => undefined, refresh: () => undefined, setLanguage: async () => undefined })
       }) }]
     } })
     const element = await mount()
     const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
-    expect(tabs.slice(-8)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-balloons", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
+    expect(tabs.slice(-8)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-kites", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-ballLightning"])
   })
 
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {

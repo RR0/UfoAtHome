@@ -1,0 +1,124 @@
+{
+  "version": 4,
+  "id": "sky-test-balloons-night",
+  "tags": [
+    "balloons",
+    "misidentification"
+  ],
+  "description": {
+    "en": "LED balloons let go one after the other from a garden some 400 m away on a summer night, drifting off over the fields in a loose line, red, white and blue. Place, date and balloons assumed.",
+    "fr": "Des ballons à LED lâchés l'un après l'autre depuis un jardin à quelque 400 m par une nuit d'été, qui s'éloignent au-dessus des champs en une ligne lâche, rouges, blancs et bleus. Lieu, date et ballons supposés.",
+    "es": "Globos de LED soltados uno tras otro desde un jardín a unos 400 m en una noche de verano, que se alejan sobre los campos en una línea suelta, rojos, blancos y azules. Lugar, fecha y globos supuestos.",
+    "it": "Palloncini a LED lasciati andare uno dopo l'altro da un giardino a circa 400 m in una notte d'estate, che si allontanano sopra i campi in una fila irregolare, rossi, bianchi e blu. Luogo, data e palloni ipotizzati."
+  },
+  "time": "2026-07-04T23:30:00",
+  "utcOffsetHours": 2,
+  "durationSeconds": 180,
+  "place": {
+    "name": "Edge of a village in the Beauce (assumed)",
+    "locations": [
+      {
+        "lat": 48.3,
+        "lng": 1.7
+      }
+    ]
+  },
+  "instrument": "eye",
+  "lightPollution": 20,
+  "weatherTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "weather": {
+          "cloudCover": {
+            "value": 0,
+            "basis": "assumed",
+            "rationale": "Assumed for the demo."
+          },
+          "cloudDarkness": 0,
+          "cloudBaseM": 3000,
+          "lowerCloudCover": 0,
+          "highCloudCover": 0,
+          "precipitationType": "none",
+          "precipitationIntensity": 0,
+          "windDirectionDeg": 240,
+          "windSpeed": 3,
+          "storm": false
+        }
+      }
+    ]
+  },
+  "timeline": {
+    "keyframes": [
+      {
+        "t": 0,
+        "shapes": []
+      }
+    ],
+    "order": [],
+    "groups": []
+  },
+  "observerTrack": {
+    "keyframes": [
+      {
+        "t": 0,
+        "pose": {
+          "lat": 48.3,
+          "lng": 1.7,
+          "elevationM": 0,
+          "headingDeg": 20,
+          "pitchDeg": 10,
+          "fovDeg": 60
+        }
+      }
+    ]
+  },
+  "soundTrack": {
+    "keyframes": []
+  },
+  "decor": [],
+  "interpretation": {
+    "title": {
+      "en": "LED balloons",
+      "fr": "Ballons à LED",
+      "es": "Globos de LED",
+      "it": "Palloncini a LED"
+    },
+    "bodies": [],
+    "balloons": [
+      {
+        "id": "led",
+        "balloon": "led",
+        "site": {
+          "eastM": 120,
+          "northM": 380,
+          "originElevationM": 140
+        },
+        "group": {
+          "count": 15,
+          "fromT": -30000,
+          "untilT": 60000,
+          "radiusM": 6,
+          "colors": [
+            "#ff3030",
+            "#ffffff",
+            "#3070ff"
+          ],
+          "seed": 11
+        },
+        "wind": {
+          "towardDeg": 60,
+          "speedMS": 3
+        },
+        "windsAloft": [
+          {
+            "atM": 500,
+            "towardDeg": 75,
+            "speedMS": 6
+          }
+        ],
+        "durationS": 240
+      }
+    ]
+  }
+}
