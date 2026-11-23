@@ -48,6 +48,48 @@ interface InterviewDocText {
 }
 
 /** A short interview file, as the page quotes it. */
+/** What the page says of questionnaires: the template a form is drawn from, and how its answers become an interview's turns. */
+interface QuestionnaireDocText {
+  heading: string
+  concept: string
+  exchanges: string
+  when: string
+  techHeading: string
+  techIntro: string
+  templateRows: ReadonlyArray<[string, string]>
+  fieldHeading: string
+  fieldRows: ReadonlyArray<[string, string]>
+  exampleHeading: string
+  exampleIntro: string
+}
+
+const QUESTIONNAIRE_EXAMPLE = `{
+  "id": "my-questionnaire",
+  "version": "2026-1",
+  "title": { "en": "Sighting questionnaire", "fr": "Questionnaire d'observation" },
+  "intro": { "en": "Thank you for telling us.\\n\\nAnswer what you remember; say when you are not sure." },
+  "sections": [{
+    "title": { "en": "When and where" },
+    "fields": [
+      { "id": "1", "question": { "en": "Date" }, "kind": "date", "feeds": "date" },
+      { "id": "2", "question": { "en": "Time it began" }, "kind": "time", "feeds": "startTime" },
+      { "id": "3", "question": { "en": "Direction at the start" }, "kind": "text", "feeds": "startAzimuth",
+        "images": [{ "src": "compass.png", "alt": { "en": "Compass rose" } }] },
+      { "id": "4", "question": { "en": "What did you hear?" }, "kind": "choice", "multiple": true, "required": false,
+        "choices": [{ "value": "nothing", "label": { "en": "Nothing" } }, { "value": "hum", "label": { "en": "A hum" } }] }
+    ]
+  }]
+}`
+
+const QUESTIONNAIRE_EXCHANGES = `"questionnaire": { "id": "my-questionnaire", "version": "2026-1" },
+"segments": [
+  { "speaker": "interviewer", "field": "1", "text": "Date" },
+  { "speaker": "witness", "field": "1", "text": "early July 1965" },
+  { "speaker": "interviewer", "field": "2", "text": "Time it began" },
+  { "speaker": "interviewer", "field": "4", "text": "What did you hear?" },
+  { "speaker": "witness", "field": "4", "text": "nothing; hum" }
+]`
+
 const EXAMPLE = `{
   "version": 1,
   "id": "interview-qb-1",
@@ -114,7 +156,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "What it is called, said in as many languages as you like"],
         ["summary", "What it established, in the same way"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> or <code>other</code>"],
-        ["questionnaire", "For an interview held through a questionnaire: <code>{ id, version }</code> of the questionnaire it was filled in on (<code>geipan-qt-2025</code>, GEIPAN’s technical questionnaire, is the default one). It is then also a form to fill in, each answer the witness’s turn after its question"],
+        ["questionnaire", "For an interview held through a questionnaire: <code>{ id, version }</code> of the questionnaire it was filled in on (<code>geipan-qt-2025</code>, GEIPAN’s technical questionnaire, or another: see “Questionnaires”). It is then also a form to fill in, each answer the witness’s turn after its question"],
         ["by", "Who held it: one agent, or several (<code>{ \"people\": \"…\" }</code> or <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "The <code>id</code> of the observation the interview was held with, or a list of them when there were several witnesses"],
         ["url", "The transcript file, when there is one, relative to the case"]
@@ -167,7 +209,7 @@ export class DocsInterviewPage extends DocsSection {
         "<strong>Whisper, in your browser</strong> (the default): nothing leaves your computer. The first time, the model (Whisper large-v3-turbo, about 760 MB) is downloaded, then kept by the browser. On a recent computer with WebGPU it transcribes about six times faster than the recording plays (an hour and a half in about a quarter of an hour); without WebGPU it is much slower.",
         "<strong>A service on your own key</strong> (Groq, OpenAI, AssemblyAI): faster, and the recording is <em>sent</em> to it, which the editor says before anything goes. The key is asked for beside the choice, kept in the page's memory until it is reloaded, and never stored."
       ],
-      transcribeVoices: "A transcription does not know whose each voice is: every turn is given to a <em>voice to attribute</em> (role <code>unattributed</code>), never guessed to be the interviewer's or the witness's. The case's interviewers and witnesses are speakers already, and <strong>Who speaks…</strong> under each turn gives it to the right one; a voice nobody speaks with any more goes. AssemblyAI tells the voices apart: its turns come as <em>Voice A</em>, <em>Voice B</em>…, and saying who one of them is gives that person all its turns at once. A voice to attribute is not asked to proofread. The file says how it was made: <code>transcription.method</code> is <code>automatic</code> and <code>engine</code> names the model. Another way of transcribing can be added as a module (see <a href='/docs/modules/'>Modules</a>, point <code>transcription</code>).",
+      transcribeVoices: "A transcription does not know whose each voice is: every turn is given to a <em>voice to attribute</em> (role <code>unattributed</code>), never guessed to be the interviewer's or the witness's. The case's interviewers and witnesses are speakers already, and <strong>Who speaks…</strong> under each turn gives it to the right one; a voice nobody speaks with any more goes. AssemblyAI tells the voices apart: its turns come as <em>Voice A</em>, <em>Voice B</em>…, and saying who one of them is gives that person all its turns at once. A voice to attribute is not asked to proofread. The file says how it was made: <code>transcription.method</code> is <code>automatic</code> and <code>engine</code> names the model. Another way of transcribing can be added as a module (see Modules (<code>case-template</code>), point <code>transcription</code>).",
       dataHeading: "In code",
       data: "<code>@rr0/data</code> reads and writes the same files: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> for the event, <code>fromFileJson</code> / <code>toFileJson</code> for the file, and <code>proofread</code> says whether everyone approved. In UFO@home, <code>InterviewFile.toVtt</code> makes subtitles from a transcript, <code>InterviewFile.passagesAbout</code> lists the turns that tell of an observation, and <code>InterviewImport.parse</code> reads a foreign file.",
       field: "Field",
@@ -189,7 +231,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Son nom, dit dans autant de langues qu'on veut"],
         ["summary", "Ce qu'elle a établi, de la même façon"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> ou <code>other</code>"],
-        ["questionnaire", "Pour une interview tenue par questionnaire : <code>{ id, version }</code> du questionnaire sur lequel elle a été remplie (<code>geipan-qt-2025</code>, le questionnaire technique du GEIPAN, par défaut). Elle est alors aussi un formulaire à remplir, chaque réponse étant le tour du témoin après sa question"],
+        ["questionnaire", "Pour une interview tenue par questionnaire : <code>{ id, version }</code> du questionnaire sur lequel elle a été remplie (<code>geipan-qt-2025</code>, le questionnaire technique du GEIPAN, ou un autre : voir « Les questionnaires »). Elle est alors aussi un formulaire à remplir, chaque réponse étant le tour du témoin après sa question"],
         ["by", "Qui l'a menée : un agent, ou plusieurs (<code>{ \"people\": \"…\" }</code> ou <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> de l'observation avec laquelle elle a eu lieu, ou une liste quand il y avait plusieurs témoins"],
         ["url", "Le fichier de transcription, s'il y en a un, relatif au dossier"]
@@ -242,7 +284,7 @@ export class DocsInterviewPage extends DocsSection {
         "<strong>Whisper, dans votre navigateur</strong> (par défaut) : rien ne quitte votre ordinateur. La première fois, le modèle (Whisper large-v3-turbo, environ 760 Mo) est téléchargé, puis gardé par le navigateur. Sur un ordinateur récent avec WebGPU, il transcrit environ six fois plus vite que l'enregistrement ne se joue (une heure et demie en un quart d'heure environ) ; sans WebGPU, c'est beaucoup plus lent.",
         "<strong>Un service, avec votre propre clé</strong> (Groq, OpenAI, AssemblyAI) : plus rapide, mais l'enregistrement lui est <em>envoyé</em>, et l'éditeur vous prévient avant tout envoi. La clé est demandée à côté du choix, gardée dans la mémoire de la page jusqu'à son rechargement, et jamais enregistrée."
       ],
-      transcribeVoices: "Une transcription automatique ne sait pas à qui appartient chaque voix : chaque tour est attribué à une <em>voix à attribuer</em> (rôle <code>unattributed</code>), et n'est jamais supposé venir de l'enquêteur ou du témoin. Les enquêteurs et les témoins du dossier figurent déjà parmi les locuteurs : sous chaque tour, <strong>Qui parle…</strong> permet de l'attribuer au bon. Une voix à laquelle plus aucun tour n'est attribué disparaît. AssemblyAI sépare les voix : ses tours arrivent comme <em>Voix A</em>, <em>Voix B</em>…, et dire qui est l'une d'elles lui attribue tous ses tours d'un coup. Une voix à attribuer n'a pas à approuver la transcription. Le fichier dit comment il a été fait : <code>transcription.method</code> vaut <code>automatic</code> et <code>engine</code> nomme le modèle. Une autre façon de transcrire peut s'ajouter comme module (voir <a href='/docs/modules/'>Modules</a>, point <code>transcription</code>).",
+      transcribeVoices: "Une transcription automatique ne sait pas à qui appartient chaque voix : chaque tour est attribué à une <em>voix à attribuer</em> (rôle <code>unattributed</code>), et n'est jamais supposé venir de l'enquêteur ou du témoin. Les enquêteurs et les témoins du dossier figurent déjà parmi les locuteurs : sous chaque tour, <strong>Qui parle…</strong> permet de l'attribuer au bon. Une voix à laquelle plus aucun tour n'est attribué disparaît. AssemblyAI sépare les voix : ses tours arrivent comme <em>Voix A</em>, <em>Voix B</em>…, et dire qui est l'une d'elles lui attribue tous ses tours d'un coup. Une voix à attribuer n'a pas à approuver la transcription. Le fichier dit comment il a été fait : <code>transcription.method</code> vaut <code>automatic</code> et <code>engine</code> nomme le modèle. Une autre façon de transcrire peut s'ajouter comme module (voir Modules (<code>case-template</code>), point <code>transcription</code>).",
       dataHeading: "En code",
       data: "<code>@rr0/data</code> lit et écrit les mêmes fichiers : <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> pour l'événement, <code>fromFileJson</code> / <code>toFileJson</code> pour le fichier, et <code>proofread</code> dit si tous ont approuvé. Dans UFO@home, <code>InterviewFile.toVtt</code> fait des sous-titres d'une transcription, <code>InterviewFile.passagesAbout</code> liste les tours qui racontent une observation, et <code>InterviewImport.parse</code> lit un fichier d'un autre format.",
       field: "Champ",
@@ -264,7 +306,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Cómo se llama, en tantos idiomas como se quiera"],
         ["summary", "Lo que estableció, del mismo modo"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> u <code>other</code>"],
-        ["questionnaire", "Para una entrevista hecha mediante cuestionario: <code>{ id, version }</code> del cuestionario en el que se rellenó (<code>geipan-qt-2025</code>, el cuestionario técnico del GEIPAN, por defecto). Es entonces también un formulario que rellenar, cada respuesta el turno del testigo tras su pregunta"],
+        ["questionnaire", "Para una entrevista hecha mediante cuestionario: <code>{ id, version }</code> del cuestionario en el que se rellenó (<code>geipan-qt-2025</code>, el cuestionario técnico del GEIPAN, u otro: véase «Los cuestionarios»). Es entonces también un formulario que rellenar, cada respuesta el turno del testigo tras su pregunta"],
         ["by", "Quién la realizó: un agente o varios (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "El <code>id</code> de la observación con la que se celebró, o una lista si hubo varios testigos"],
         ["url", "El archivo de transcripción, si lo hay, relativo al caso"]
@@ -317,7 +359,7 @@ export class DocsInterviewPage extends DocsSection {
         "<strong>Whisper, en tu navegador</strong> (por defecto): nada sale de tu ordenador. La primera vez se descarga el modelo (Whisper large-v3-turbo, unos 760 MB), que el navegador conserva. En un ordenador reciente con WebGPU transcribe unas seis veces más rápido de lo que dura la grabación (hora y media en un cuarto de hora aproximadamente); sin WebGPU es mucho más lento.",
         "<strong>Un servicio con tu propia clave</strong> (Groq, OpenAI, AssemblyAI): más rápido, y la grabación se le <em>envía</em>, lo que el editor dice antes de que nada salga. La clave se pide junto a la elección, se guarda en la memoria de la página hasta que se recarga y nunca se almacena."
       ],
-      transcribeVoices: "Una transcripción no sabe de quién es cada voz: cada turno se da a una <em>voz por atribuir</em> (rol <code>unattributed</code>), nunca se supone que sea la del entrevistador o la del testigo. Los entrevistadores y los testigos del caso ya son hablantes, y <strong>Quién habla…</strong>, bajo cada turno, lo da al correcto; una voz a la que ya no se da ningún turno desaparece. AssemblyAI separa las voces: sus turnos llegan como <em>Voz A</em>, <em>Voz B</em>…, y decir quién es una de ellas le da todos sus turnos de una vez. A una voz por atribuir no se le pide revisar. El archivo dice cómo se hizo: <code>transcription.method</code> es <code>automatic</code> y <code>engine</code> nombra el modelo. Otra manera de transcribir puede añadirse como módulo (ver <a href='/docs/modules/'>Módulos</a>, punto <code>transcription</code>).",
+      transcribeVoices: "Una transcripción no sabe de quién es cada voz: cada turno se da a una <em>voz por atribuir</em> (rol <code>unattributed</code>), nunca se supone que sea la del entrevistador o la del testigo. Los entrevistadores y los testigos del caso ya son hablantes, y <strong>Quién habla…</strong>, bajo cada turno, lo da al correcto; una voz a la que ya no se da ningún turno desaparece. AssemblyAI separa las voces: sus turnos llegan como <em>Voz A</em>, <em>Voz B</em>…, y decir quién es una de ellas le da todos sus turnos de una vez. A una voz por atribuir no se le pide revisar. El archivo dice cómo se hizo: <code>transcription.method</code> es <code>automatic</code> y <code>engine</code> nombra el modelo. Otra manera de transcribir puede añadirse como módulo (ver Módulos (<code>case-template</code>), punto <code>transcription</code>).",
       dataHeading: "En código",
       data: "<code>@rr0/data</code> lee y escribe los mismos archivos: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> para el evento, <code>fromFileJson</code> / <code>toFileJson</code> para el archivo, y <code>proofread</code> dice si todos aprobaron. En UFO@home, <code>InterviewFile.toVtt</code> hace subtítulos de una transcripción, <code>InterviewFile.passagesAbout</code> enumera los turnos que cuentan una observación e <code>InterviewImport.parse</code> lee un archivo ajeno.",
       field: "Campo",
@@ -339,7 +381,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Come si chiama, in quante lingue si vuole"],
         ["summary", "Ciò che ha stabilito, allo stesso modo"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> oppure <code>other</code>"],
-        ["questionnaire", "Per un'intervista tenuta tramite questionario: <code>{ id, version }</code> del questionario su cui è stata compilata (<code>geipan-qt-2025</code>, il questionario tecnico del GEIPAN, per impostazione predefinita). È allora anche un modulo da compilare, ogni risposta il turno del testimone dopo la sua domanda"],
+        ["questionnaire", "Per un'intervista tenuta tramite questionario: <code>{ id, version }</code> del questionario su cui è stata compilata (<code>geipan-qt-2025</code>, il questionario tecnico del GEIPAN, o un altro: vedi «I questionari»). È allora anche un modulo da compilare, ogni risposta il turno del testimone dopo la sua domanda"],
         ["by", "Chi l'ha condotta: un agente o più (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> dell'osservazione con cui si è tenuta, o un elenco se c'erano più testimoni"],
         ["url", "Il file di trascrizione, se c'è, relativo al caso"]
@@ -392,7 +434,7 @@ export class DocsInterviewPage extends DocsSection {
         "<strong>Whisper, nel tuo browser</strong> (predefinito): nulla lascia il tuo computer. La prima volta il modello (Whisper large-v3-turbo, circa 760 MB) viene scaricato e poi conservato dal browser. Su un computer recente con WebGPU trascrive circa sei volte più veloce della durata della registrazione (un'ora e mezza in circa un quarto d'ora); senza WebGPU è molto più lento.",
         "<strong>Un servizio con la tua chiave</strong> (Groq, OpenAI, AssemblyAI): più veloce, e la registrazione gli viene <em>inviata</em>, cosa che l'editor dice prima che parta qualsiasi cosa. La chiave viene chiesta accanto alla scelta, tenuta nella memoria della pagina fino al ricaricamento e mai salvata."
       ],
-      transcribeVoices: "Una trascrizione non sa di chi sia ogni voce: ogni turno è dato a una <em>voce da attribuire</em> (ruolo <code>unattributed</code>), mai supposta essere quella dell'intervistatore o del testimone. Gli intervistatori e i testimoni del caso sono già parlanti, e <strong>Chi parla…</strong>, sotto ogni turno, lo dà a quello giusto; una voce a cui non è più dato alcun turno scompare. AssemblyAI separa le voci: i suoi turni arrivano come <em>Voce A</em>, <em>Voce B</em>…, e dire chi è una di esse le dà tutti i suoi turni in una volta. A una voce da attribuire non si chiede di rileggere. Il file dice come è stato fatto: <code>transcription.method</code> è <code>automatic</code> e <code>engine</code> nomina il modello. Un altro modo di trascrivere può aggiungersi come modulo (vedi <a href='/docs/modules/'>Moduli</a>, punto <code>transcription</code>).",
+      transcribeVoices: "Una trascrizione non sa di chi sia ogni voce: ogni turno è dato a una <em>voce da attribuire</em> (ruolo <code>unattributed</code>), mai supposta essere quella dell'intervistatore o del testimone. Gli intervistatori e i testimoni del caso sono già parlanti, e <strong>Chi parla…</strong>, sotto ogni turno, lo dà a quello giusto; una voce a cui non è più dato alcun turno scompare. AssemblyAI separa le voci: i suoi turni arrivano come <em>Voce A</em>, <em>Voce B</em>…, e dire chi è una di esse le dà tutti i suoi turni in una volta. A una voce da attribuire non si chiede di rileggere. Il file dice come è stato fatto: <code>transcription.method</code> è <code>automatic</code> e <code>engine</code> nomina il modello. Un altro modo di trascrivere può aggiungersi come modulo (vedi Moduli (<code>case-template</code>), punto <code>transcription</code>).",
       dataHeading: "Nel codice",
       data: "<code>@rr0/data</code> legge e scrive gli stessi file: <code>RR0Interview.fromEventJson</code> / <code>toEventJson</code> per l'evento, <code>fromFileJson</code> / <code>toFileJson</code> per il file, e <code>proofread</code> dice se tutti hanno approvato. In UFO@home, <code>InterviewFile.toVtt</code> ricava sottotitoli da una trascrizione, <code>InterviewFile.passagesAbout</code> elenca i turni che raccontano un'osservazione e <code>InterviewImport.parse</code> legge un file altrui.",
       field: "Campo",
@@ -518,8 +560,144 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
       ])
   }
 
+  private readonly questionnaireText: Said<QuestionnaireDocText> = {
+    en: {
+      heading: "Questionnaires",
+      concept: "An interview may be held through a <strong>questionnaire</strong>: a form the witness fills in, alone or with an investigator. UFO@home knows none in particular. A questionnaire is a <strong>template</strong>, a JSON file that says its questions, in sections, and the kind of answer each asks; the form is drawn from it. Which questionnaires a new case asks its witness to fill in is said by the case template (<code>case-template</code>) the page names, and by nothing else: without one, no case is given a questionnaire. GEIPAN's technical questionnaire is one such template, shipped with UFO@home (<code>geipan-qt-2025</code>); any other can be named by its address.",
+      exchanges: "The form is a view of the interview, not a file of its own. Each question is a turn of the interviewer, with its <code>field</code>; each answer is the witness's turn right after it, with the same <code>field</code>, in the words typed or ticked. A question left empty has no answer turn: it stays unanswered, never an absence. So the Exchanges group reads a filled questionnaire as a dialogue, and a value of the observation set from an answer cites that turn (<code>source.said</code>).",
+      when: "A date or a time is always offered two ways: <strong>precise</strong>, the browser's picker, or <strong>imprecise</strong>, in the witness's own words (“around 9 pm”, “early July”), which a picker would force into a figure they never gave. Only what reads as a figure is set in the observation.",
+      techHeading: "The questionnaire template",
+      techIntro: "A template is read by its id when UFO@home ships it, otherwise from its address, its pictures' <code>src</code> relative to it.",
+      templateRows: [
+        ["id", "What an interview names it by (<code>questionnaire.id</code>)"],
+        ["version", "Its version, as its publisher names it (<code>questionnaire.version</code>)"],
+        ["language", "The language its questions are in"],
+        ["title", "Its name, in as many languages as you like"],
+        ["intro", "What the witness reads before the questions; a blank line separates paragraphs. Without it the form says what it is"],
+        ["source", "<code>{ publisher, title, url, date }</code>: the questionnaire as published, linked from the form"],
+        ["note", "What this template keeps or leaves out of the published questionnaire"],
+        ["stops", "The titles of the parts of a printed questionnaire that ask nothing to put in a case (personal details, a grant of rights): what is under them in a filled one is not read as answers"],
+        ["sections", "<code>{ title, intro?, images?, fields }</code>, in order"]
+      ],
+      fieldHeading: "A question",
+      fieldRows: [
+        ["id", "Its number or name, as the questionnaire gives it: the <code>field</code> of its turns"],
+        ["question", "What is asked"],
+        ["hint", "Said under the question"],
+        ["kind", "<code>text</code> (a line), <code>long</code> (a text, the default), <code>date</code>, <code>time</code>, <code>choice</code> or <code>scale</code>"],
+        ["choices", "For <code>choice</code> and <code>scale</code>: <code>{ value, label }</code>, the value being what the answer turn says"],
+        ["multiple", "For <code>choice</code>: several may be ticked (a multiple-choice question), written one after another separated by <code>; </code>"],
+        ["required", "<code>false</code> when not every witness is asked it"],
+        ["images", "<code>{ src, alt, caption? }</code>, shown under the question: a compass rose, heights above the horizon"],
+        ["feeds", "What the answer may set in the observation: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
+      ],
+      exampleHeading: "An example",
+      exampleIntro: "A template, then the interview it makes once filled in: the second question left empty has no answer turn."
+    },
+    fr: {
+      heading: "Les questionnaires",
+      concept: "Une interview peut être tenue par <strong>questionnaire</strong> : un formulaire que le témoin remplit, seul ou avec un enquêteur. UFO@home n'en connaît aucun en particulier. Un questionnaire est un <strong>modèle</strong>, un fichier JSON qui dit ses questions, par sections, et le genre de réponse que chacune demande ; le formulaire en est tiré. Quels questionnaires un nouveau dossier demande à son témoin de remplir, c'est le modèle de dossier (<code>case-template</code>) que nomme la page qui le dit, et rien d'autre : sans lui, aucun dossier ne reçoit de questionnaire. Le questionnaire technique du GEIPAN est un tel modèle, livré avec UFO@home (<code>geipan-qt-2025</code>) ; tout autre peut être nommé par son adresse.",
+      exchanges: "Le formulaire est une vue de l'interview, pas un fichier à part. Chaque question est un tour de l'enquêteur, avec son <code>field</code> ; chaque réponse est le tour du témoin juste après, avec le même <code>field</code>, dans les mots tapés ou cochés. Une question laissée vide n'a pas de tour de réponse : elle reste sans réponse, jamais une absence. Le groupe Échanges lit donc un questionnaire rempli comme un dialogue, et une valeur de l'observation tirée d'une réponse cite ce tour (<code>source.said</code>).",
+      when: "Une date ou une heure est toujours proposée de deux façons : <strong>précise</strong>, avec le sélecteur du navigateur, ou <strong>imprécise</strong>, dans les mots du témoin (« vers 21 h », « début juillet »), qu'un sélecteur forcerait en un chiffre qu'il n'a jamais donné. Seul ce qui se lit comme un chiffre est reporté dans l'observation.",
+      techHeading: "Le modèle de questionnaire",
+      techIntro: "Un modèle est lu par son id quand UFO@home le livre, sinon à son adresse, le <code>src</code> de ses images étant relatif à celle-ci.",
+      templateRows: [
+        ["id", "Ce par quoi une interview le nomme (<code>questionnaire.id</code>)"],
+        ["version", "Sa version, telle que son éditeur la nomme (<code>questionnaire.version</code>)"],
+        ["language", "La langue de ses questions"],
+        ["title", "Son nom, dans autant de langues qu'on veut"],
+        ["intro", "Ce que le témoin lit avant les questions ; une ligne vide sépare les paragraphes. Sans lui, le formulaire dit ce qu'il est"],
+        ["source", "<code>{ publisher, title, url, date }</code> : le questionnaire tel que publié, lié depuis le formulaire"],
+        ["note", "Ce que ce modèle garde ou laisse du questionnaire publié"],
+        ["stops", "Les titres des parties d'un questionnaire imprimé qui ne demandent rien à mettre dans un dossier (état civil, cession de droits) : ce qui est dessous dans un questionnaire rempli n'est pas lu comme des réponses"],
+        ["sections", "<code>{ title, intro?, images?, fields }</code>, dans l'ordre"]
+      ],
+      fieldHeading: "Une question",
+      fieldRows: [
+        ["id", "Son numéro ou son nom, comme le questionnaire le donne : le <code>field</code> de ses tours"],
+        ["question", "Ce qui est demandé"],
+        ["hint", "Dit sous la question"],
+        ["kind", "<code>text</code> (une ligne), <code>long</code> (un texte, par défaut), <code>date</code>, <code>time</code>, <code>choice</code> ou <code>scale</code>"],
+        ["choices", "Pour <code>choice</code> et <code>scale</code> : <code>{ value, label }</code>, la valeur étant ce que dit le tour de réponse"],
+        ["multiple", "Pour <code>choice</code> : plusieurs peuvent être cochés (un QCM), écrits à la suite séparés par <code>; </code>"],
+        ["required", "<code>false</code> quand elle n'est pas posée à tout témoin"],
+        ["images", "<code>{ src, alt, caption? }</code>, montrées sous la question : une rose des vents, les hauteurs au-dessus de l'horizon"],
+        ["feeds", "Ce que la réponse peut reporter dans l'observation : <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
+      ],
+      exampleHeading: "Un exemple",
+      exampleIntro: "Un modèle, puis l'interview qu'il donne une fois rempli : la deuxième question laissée vide n'a pas de tour de réponse."
+    },
+    es: {
+      heading: "Los cuestionarios",
+      concept: "Una entrevista puede hacerse mediante un <strong>cuestionario</strong>: un formulario que el testigo rellena, solo o con un investigador. UFO@home no conoce ninguno en particular. Un cuestionario es una <strong>plantilla</strong>, un archivo JSON que dice sus preguntas, por secciones, y el tipo de respuesta que pide cada una; el formulario se saca de ella. Qué cuestionarios pide un caso nuevo a su testigo lo dice la plantilla de caso (<code>case-template</code>) que nombra la página, y nada más: sin ella, ningún caso recibe cuestionario. El cuestionario técnico del GEIPAN es una de esas plantillas, incluida en UFO@home (<code>geipan-qt-2025</code>); cualquier otra puede nombrarse por su dirección.",
+      exchanges: "El formulario es una vista de la entrevista, no un archivo aparte. Cada pregunta es un turno del investigador, con su <code>field</code>; cada respuesta es el turno del testigo justo después, con el mismo <code>field</code>, en las palabras escritas o marcadas. Una pregunta dejada vacía no tiene turno de respuesta: queda sin respuesta, nunca es una ausencia. Así el grupo Intercambios lee un cuestionario rellenado como un diálogo, y un valor de la observación sacado de una respuesta cita ese turno (<code>source.said</code>).",
+      when: "Una fecha o una hora se ofrece siempre de dos maneras: <strong>precisa</strong>, con el selector del navegador, o <strong>imprecisa</strong>, con las palabras del testigo («hacia las 21 h», «a principios de julio»), que un selector forzaría en una cifra que nunca dio. Solo lo que se lee como una cifra se lleva a la observación.",
+      techHeading: "La plantilla de cuestionario",
+      techIntro: "Una plantilla se lee por su id cuando UFO@home la incluye, si no en su dirección, con el <code>src</code> de sus imágenes relativo a esta.",
+      templateRows: [
+        ["id", "Lo que una entrevista usa para nombrarla (<code>questionnaire.id</code>)"],
+        ["version", "Su versión, como la nombra su editor (<code>questionnaire.version</code>)"],
+        ["language", "El idioma de sus preguntas"],
+        ["title", "Su nombre, en tantos idiomas como se quiera"],
+        ["intro", "Lo que el testigo lee antes de las preguntas; una línea vacía separa los párrafos. Sin él, el formulario dice lo que es"],
+        ["source", "<code>{ publisher, title, url, date }</code>: el cuestionario tal como se publicó, enlazado desde el formulario"],
+        ["note", "Lo que esta plantilla conserva o deja del cuestionario publicado"],
+        ["stops", "Los títulos de las partes de un cuestionario impreso que no piden nada que poner en un caso (datos personales, cesión de derechos): lo que hay debajo en uno rellenado no se lee como respuestas"],
+        ["sections", "<code>{ title, intro?, images?, fields }</code>, en orden"]
+      ],
+      fieldHeading: "Una pregunta",
+      fieldRows: [
+        ["id", "Su número o su nombre, como lo da el cuestionario: el <code>field</code> de sus turnos"],
+        ["question", "Lo que se pregunta"],
+        ["hint", "Dicho bajo la pregunta"],
+        ["kind", "<code>text</code> (una línea), <code>long</code> (un texto, por defecto), <code>date</code>, <code>time</code>, <code>choice</code> o <code>scale</code>"],
+        ["choices", "Para <code>choice</code> y <code>scale</code>: <code>{ value, label }</code>, siendo el valor lo que dice el turno de respuesta"],
+        ["multiple", "Para <code>choice</code>: se pueden marcar varias (una pregunta de opción múltiple), escritas una tras otra separadas por <code>; </code>"],
+        ["required", "<code>false</code> cuando no se pregunta a todo testigo"],
+        ["images", "<code>{ src, alt, caption? }</code>, mostradas bajo la pregunta: una rosa de los vientos, las alturas sobre el horizonte"],
+        ["feeds", "Lo que la respuesta puede llevar a la observación: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
+      ],
+      exampleHeading: "Un ejemplo",
+      exampleIntro: "Una plantilla, y luego la entrevista que da una vez rellenada: la segunda pregunta dejada vacía no tiene turno de respuesta."
+    },
+    it: {
+      heading: "I questionari",
+      concept: "Un'intervista può essere tenuta tramite <strong>questionario</strong>: un modulo che il testimone compila, da solo o con un investigatore. UFO@home non ne conosce nessuno in particolare. Un questionario è un <strong>modello</strong>, un file JSON che dice le sue domande, per sezioni, e il tipo di risposta che ciascuna chiede; il modulo ne è tratto. Quali questionari un nuovo caso chiede al suo testimone lo dice il modello di caso (<code>case-template</code>) che la pagina nomina, e nient'altro: senza, nessun caso riceve un questionario. Il questionario tecnico del GEIPAN è uno di questi modelli, fornito con UFO@home (<code>geipan-qt-2025</code>); qualsiasi altro può essere nominato con il suo indirizzo.",
+      exchanges: "Il modulo è una vista dell'intervista, non un file a parte. Ogni domanda è un turno dell'investigatore, con il suo <code>field</code>; ogni risposta è il turno del testimone subito dopo, con lo stesso <code>field</code>, nelle parole scritte o spuntate. Una domanda lasciata vuota non ha turno di risposta: resta senza risposta, mai un'assenza. Così il gruppo Scambi legge un questionario compilato come un dialogo, e un valore dell'osservazione tratto da una risposta cita quel turno (<code>source.said</code>).",
+      when: "Una data o un'ora è sempre proposta in due modi: <strong>precisa</strong>, con il selettore del browser, o <strong>imprecisa</strong>, nelle parole del testimone («verso le 21», «inizio luglio»), che un selettore forzerebbe in una cifra mai data. Solo ciò che si legge come una cifra è riportato nell'osservazione.",
+      techHeading: "Il modello di questionario",
+      techIntro: "Un modello è letto con il suo id quando UFO@home lo fornisce, altrimenti al suo indirizzo, con il <code>src</code> delle sue immagini relativo a questo.",
+      templateRows: [
+        ["id", "Ciò con cui un'intervista lo nomina (<code>questionnaire.id</code>)"],
+        ["version", "La sua versione, come la nomina il suo editore (<code>questionnaire.version</code>)"],
+        ["language", "La lingua delle sue domande"],
+        ["title", "Il suo nome, in quante lingue si vuole"],
+        ["intro", "Ciò che il testimone legge prima delle domande; una riga vuota separa i paragrafi. Senza, il modulo dice ciò che è"],
+        ["source", "<code>{ publisher, title, url, date }</code>: il questionario come pubblicato, collegato dal modulo"],
+        ["note", "Ciò che questo modello tiene o lascia del questionario pubblicato"],
+        ["stops", "I titoli delle parti di un questionario stampato che non chiedono nulla da mettere in un caso (dati personali, cessione di diritti): ciò che c'è sotto in uno compilato non è letto come risposte"],
+        ["sections", "<code>{ title, intro?, images?, fields }</code>, in ordine"]
+      ],
+      fieldHeading: "Una domanda",
+      fieldRows: [
+        ["id", "Il suo numero o nome, come lo dà il questionario: il <code>field</code> dei suoi turni"],
+        ["question", "Ciò che è chiesto"],
+        ["hint", "Detto sotto la domanda"],
+        ["kind", "<code>text</code> (una riga), <code>long</code> (un testo, predefinito), <code>date</code>, <code>time</code>, <code>choice</code> o <code>scale</code>"],
+        ["choices", "Per <code>choice</code> e <code>scale</code>: <code>{ value, label }</code>, il valore essendo ciò che dice il turno di risposta"],
+        ["multiple", "Per <code>choice</code>: se ne possono spuntare diverse (una domanda a scelta multipla), scritte una dopo l'altra separate da <code>; </code>"],
+        ["required", "<code>false</code> quando non è chiesta a ogni testimone"],
+        ["images", "<code>{ src, alt, caption? }</code>, mostrate sotto la domanda: una rosa dei venti, le altezze sopra l'orizzonte"],
+        ["feeds", "Ciò che la risposta può riportare nell'osservazione: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
+      ],
+      exampleHeading: "Un esempio",
+      exampleIntro: "Un modello, poi l'intervista che dà una volta compilato: la seconda domanda lasciata vuota non ha turno di risposta."
+    }
+  }
+
   render(language: SiteLanguage): string {
     const t = this.text[language]
+    const q = this.questionnaireText[language]
     const table = (rows: ReadonlyArray<[string, string]>): string => `
     <div class="table-scroll"><table>
       <tr><th>${t.field}</th><th>${t.meaning}</th></tr>
@@ -563,6 +741,11 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
     </ul>
     <p>${t.transcribeVoices}</p>
 
+    <h2>${q.heading}</h2>
+    <p>${q.concept}</p>
+    <p>${q.exchanges}</p>
+    <p>${q.when}</p>
+
     <h2>${t.techHeading}</h2>
     <p>${t.techIntro}</p>
 
@@ -578,6 +761,16 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
     <p class="small">${this.excerptNote(language)}</p>
     <h4>${t.exampleHeading}</h4>
     <pre data-schema="interview"><code>${EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+
+    <h3>${q.techHeading}</h3>
+    <p>${q.techIntro}</p>${table(q.templateRows)}
+
+    <h4>${q.fieldHeading}</h4>${table(q.fieldRows)}
+
+    <h4>${q.exampleHeading}</h4>
+    <p>${q.exampleIntro}</p>
+    <pre><code>${QUESTIONNAIRE_EXAMPLE.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
+    <pre><code>${QUESTIONNAIRE_EXCHANGES.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>
 
     <h3>${t.dataHeading}</h3>
     <p>${t.data}</p>${this.reader(language)}${this.component(language)}

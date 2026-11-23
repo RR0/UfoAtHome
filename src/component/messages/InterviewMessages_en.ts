@@ -23,7 +23,7 @@ export const interviewMessages_en: InterviewMessages = {
   invalid: "This text is not valid JSON yet: the interview keeps the last transcript it understood.",
   notATranscript: "That file is not an interview transcript (it has no segments).",
   questionnaireTab: "Questionnaire",
-  questionnaire: { intro: "Fill in the {title}: each answer is kept as the witness's words, and a question left empty stays unanswered.", source: "The questionnaire as {publisher} publishes it", other: "Other questions", required: "Asked of every witness" },
+  questionnaire: { intro: "Fill in the {title}: each answer is kept as the witness's words, and a question left empty stays unanswered.", source: "The questionnaire as {publisher} publishes it", other: "Other questions", required: "Asked of every witness", precise: "precise", imprecise: "imprecise", preciseHint: "Say it in your own words instead: a rough date or time, or one you are not sure of", impreciseHint: "Pick an exact date or time instead", impreciseDate: "e.g. early July 1965, a Saturday, I'm not sure of the day", impreciseTime: "e.g. around 9 pm, shortly after sunset" },
   feed: "Set in the observation",
   feedHint: "What the answers say of when, how long, the colour and where it was in the sky is set in the witness's observation, each value citing its answer",
   fed: "{n} values set in the observation, each citing its answer.",

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { readFile } from "node:fs/promises"
+import shipped from "../../../public/case-templates/testimony.json"
 import { CaseTemplates } from "../../../src/engine/questionnaire/CaseTemplate.js"
 
 describe("CaseTemplates", () => {
@@ -32,8 +32,7 @@ describe("CaseTemplates", () => {
   })
 
   it("ships a template offering GEIPAN's questionnaire or a blank observation, titled in four languages", async () => {
-    const json = JSON.parse(await readFile("public/case-templates/testimony.json", "utf8"))
-    const template = CaseTemplates.check(json, "https://ufoathome.org/case-templates/testimony.json")
+    const template = CaseTemplates.check(structuredClone(shipped), "https://ufoathome.org/case-templates/testimony.json")
     expect(template.starts.map(start => start.id)).toEqual(["geipan-qt", "blank"])
     for (const start of template.starts) expect(Object.keys(start.title as object).sort()).toEqual(["en", "es", "fr", "it"])
   })

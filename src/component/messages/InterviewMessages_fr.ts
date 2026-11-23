@@ -23,7 +23,7 @@ export const interviewMessages_fr: InterviewMessages = {
   invalid: "Ce texte n'est pas encore du JSON valide : l'interview garde la dernière transcription qu'elle a comprise.",
   notATranscript: "Ce fichier n'est pas une transcription d'interview (il n'a pas de tours de parole).",
   questionnaireTab: "Questionnaire",
-  questionnaire: { intro: "Remplissez le {title} : chaque réponse est gardée dans les mots du témoin, et une question laissée vide reste sans réponse.", source: "Le questionnaire tel que le publie {publisher}", other: "Autres questions", required: "Demandé à tout témoin" },
+  questionnaire: { intro: "Remplissez le {title} : chaque réponse est gardée dans les mots du témoin, et une question laissée vide reste sans réponse.", source: "Le questionnaire tel que le publie {publisher}", other: "Autres questions", required: "Demandé à tout témoin", precise: "précise", imprecise: "imprécise", preciseHint: "La dire plutôt dans vos mots : une date ou une heure approximative, ou dont vous n'êtes pas sûr", impreciseHint: "Choisir plutôt une date ou une heure exacte", impreciseDate: "ex. début juillet 1965, un samedi, je ne suis pas sûr du jour", impreciseTime: "ex. vers 21 h, peu après le coucher du soleil" },
   feed: "Reporter dans l'observation",
   feedHint: "Ce que les réponses disent du moment, de la durée, de la couleur et de la position dans le ciel est reporté dans l'observation du témoin, chaque valeur citant sa réponse",
   fed: "{n} valeurs reportées dans l'observation, chacune citant sa réponse.",

@@ -207,6 +207,14 @@ const TEMPLATE = `
   .form-field input:not([type="radio"]) { box-sizing: border-box; width: 100%; max-width: 32rem; }
   .form-choices { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 14px/1.3 var(--sans); }
   .form-choices label { display: inline-flex; align-items: center; gap: 4px; }
+  /* How a date or a time is said reads as part of its question, as in the case's date: a link, not a button. */
+  .form-when-mode { min-height: 0; padding: 0; border: 0; background: none; color: inherit; font: 400 13px/1.3 var(--sans); text-decoration: underline;
+    text-underline-offset: .15em; cursor: pointer; }
+  .form-when-mode:disabled { text-decoration: none; cursor: default; }
+  /* The questionnaire's pictures are drawn on white: on a dark page they keep the paper they were drawn for. */
+  .form-figure { margin: 0; justify-self: start; max-width: min(100%, 16rem); }
+  .form-figure img { display: block; max-width: 100%; height: auto; padding: 6px; border-radius: 6px; background: #fff; }
+  .form-figure figcaption { margin-top: 4px; color: var(--ink-dim); font: 400 12px/1.35 var(--sans); }
   .form-feed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans); }
   .turn-edit { display: flex; flex-direction: column; gap: 6px; }
   .turn-edit textarea { box-sizing: border-box; width: 100%; min-height: 6em; }

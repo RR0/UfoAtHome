@@ -6,6 +6,9 @@
     "fr": "Questionnaire technique GEIPAN",
     "en": "GEIPAN technical questionnaire"
   },
+  "intro": {
+    "fr": "Vous avez été témoin direct, sur le territoire français, d’un phénomène aérospatial qui vous a intrigué, et vous souhaitez confier cette observation au GEIPAN pour analyse.\n\nVotre témoignage est capital et unique. Il va consister à faire un récit de votre observation, à répondre à des questions précises, à réaliser des dessins et croquis ou joindre des photographies ou des vidéos pour affiner davantage votre description.\n\nIl est impératif que vous respectiez les consignes mentionnées à chaque étape afin que nous puissions réunir le plus grand nombre d’informations possible au sujet du phénomène observé.\n\nLe questionnaire doit être rempli par le témoin direct de l’observation (un questionnaire par témoin le cas échéant). Le questionnaire ne doit concerner qu’une seule observation à la fois."
+  },
   "source": {
     "publisher": "CNES / GEIPAN",
     "title": "Questionnaire technique GEIPAN",
@@ -279,7 +282,20 @@
           "question": {
             "fr": "Taille apparente : exprimez les dimensions du phénomène en millimètres/centimètres comptés sur une règle graduée portée à bout de bras. En l'absence de règle, sachez que la largeur du pouce est d'environ 2.54 cm, ce qui permet d'estimer la taille en distance angulaire (en degré °, selon schéma)."
           },
-          "kind": "text"
+          "kind": "text",
+          "images": [
+            {
+              "src": "angular-size.png",
+              "alt": {
+                "fr": "Un observateur bras tendu, le pouce entre deux étoiles distantes d'environ 2°",
+                "en": "An observer at arm's length, the thumb between two stars about 2° apart"
+              },
+              "caption": {
+                "fr": "Les deux étoiles ont, pour cet observateur, une distance angulaire d'environ 2°.",
+                "en": "For this observer, the two stars are about 2° apart."
+              }
+            }
+          ]
         },
         {
           "id": "C7",
@@ -308,7 +324,16 @@
             "fr": "Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel ou géographique local (bâtiment, village)"
           },
           "kind": "text",
-          "feeds": "startAzimuth"
+          "feeds": "startAzimuth",
+          "images": [
+            {
+              "src": "azimuth.png",
+              "alt": {
+                "fr": "Rose des vents : Nord azimut 0°, Nord-Est 45°, Est 90°, Sud-Est 135°, Sud 180°, Sud-Ouest 225°, Ouest 270°, Nord-Ouest 315°",
+                "en": "Compass rose: North azimuth 0°, North-East 45°, East 90°, South-East 135°, South 180°, South-West 225°, West 270°, North-West 315°"
+              }
+            }
+          ]
         },
         {
           "id": "C10",
@@ -316,7 +341,16 @@
             "fr": "Indiquer une hauteur en degrés par rapport à l'horizon, ou par rapport à un élément du paysage (ex: 2 fois plus haut que le clocher de l'église)"
           },
           "kind": "text",
-          "feeds": "startElevation"
+          "feeds": "startElevation",
+          "images": [
+            {
+              "src": "elevation.png",
+              "alt": {
+                "fr": "Hauteur au-dessus de l'horizon : 0° à l'horizon, 45°, 90° au zénith",
+                "en": "Height above the horizon: 0° at the horizon, 45°, 90° at the zenith"
+              }
+            }
+          ]
         }
       ]
     },
@@ -331,7 +365,16 @@
             "fr": "Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel ou géographique local (bâtiment, village)."
           },
           "kind": "text",
-          "feeds": "endAzimuth"
+          "feeds": "endAzimuth",
+          "images": [
+            {
+              "src": "azimuth.png",
+              "alt": {
+                "fr": "Rose des vents : Nord azimut 0°, Nord-Est 45°, Est 90°, Sud-Est 135°, Sud 180°, Sud-Ouest 225°, Ouest 270°, Nord-Ouest 315°",
+                "en": "Compass rose: North azimuth 0°, North-East 45°, East 90°, South-East 135°, South 180°, South-West 225°, West 270°, North-West 315°"
+              }
+            }
+          ]
         },
         {
           "id": "C12",
@@ -339,7 +382,16 @@
             "fr": "Indiquer une hauteur en degrés par rapport à l'horizon, ou par rapport à un élément du paysage (ex : 2 fois plus haut que le clocher de l'église)."
           },
           "kind": "text",
-          "feeds": "endElevation"
+          "feeds": "endElevation",
+          "images": [
+            {
+              "src": "elevation.png",
+              "alt": {
+                "fr": "Hauteur au-dessus de l'horizon : 0° à l'horizon, 45°, 90° au zénith",
+                "en": "Height above the horizon: 0° at the horizon, 45°, 90° at the zenith"
+              }
+            }
+          ]
         },
         {
           "id": "C13",
@@ -353,7 +405,16 @@
           "question": {
             "fr": "Portion du ciel parcourue par le PAN durant l'observation (ex : un quart du ciel ou de 30° à 40° par rapport à l'horizon, etc.)"
           },
-          "kind": "text"
+          "kind": "text",
+          "images": [
+            {
+              "src": "protractor.png",
+              "alt": {
+                "fr": "Rapporteur posé sur l'horizon, gradué de 0° à 180°",
+                "en": "A protractor on the horizon, marked from 0° to 180°"
+              }
+            }
+          ]
         },
         {
           "id": "C15",

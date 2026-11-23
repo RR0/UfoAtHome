@@ -1,4 +1,4 @@
-import type { QuestionnaireTemplate, QuestionnaireTemplateField } from "../engine/questionnaire/QuestionnaireTemplate.js"
+import type { QuestionnaireImage, QuestionnaireTemplate, QuestionnaireTemplateField } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import { QuestionnaireTemplates } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import type { InterviewJson } from "../engine/persistence/interviewJson.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
@@ -13,6 +13,17 @@ export interface QuestionnaireFormMessages {
   other: string
   /** Said of a field the questionnaire asks of every witness. */
   required: string
+  /**
+   * How a date or a time is said, before its field, which swaps them: `precise` (a picker), `imprecise` (the witness's own words: "around 9 pm"); the
+   * tooltip of each says what the other is for.
+   */
+  precise: string
+  imprecise: string
+  preciseHint: string
+  impreciseHint: string
+  /** What an imprecise date, or time, may read. */
+  impreciseDate: string
+  impreciseTime: string
 }
 
 /**
@@ -28,10 +39,14 @@ export class QuestionnaireForm {
   show(template: QuestionnaireTemplate, json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean): void {
     const text = (said: Parameters<typeof QuestionnaireTemplates.text>[0]) => QuestionnaireTemplates.text(said, language)
     const parts: Node[] = []
-    const intro = document.createElement("p")
-    intro.className = "form-intro"
-    intro.textContent = messages.intro.replace("{title}", text(template.title))
-    parts.push(intro)
+    // The questionnaire's own words to the witness, else what the form is.
+    const said = template.intro ? text(template.intro) : messages.intro.replace("{title}", text(template.title))
+    for (const paragraph of said.split(/\n\s*\n/)) {
+      const intro = document.createElement("p")
+      intro.className = "form-intro"
+      intro.textContent = paragraph.trim()
+      parts.push(intro)
+    }
     if (template.source?.url) {
       const source = document.createElement("p")
       source.className = "form-source"
@@ -44,7 +59,7 @@ export class QuestionnaireForm {
       parts.push(source)
     }
     const known = new Set(QuestionnaireTemplates.fields(template).map(field => field.id))
-    for (const section of template.sections) parts.push(this.section(text(section.title), section.intro ? text(section.intro) : undefined, section.fields, json, messages, language, readonly))
+    for (const section of template.sections) parts.push(this.section(text(section.title), section.intro ? text(section.intro) : undefined, section.fields, json, messages, language, readonly, section.images))
     // What the interview asks besides: its own questions, kept and answerable as text.
     const others = (json?.segments ?? [])
       .filter(segment => segment.field !== undefined && !known.has(segment.field) && json!.speakers[segment.speaker]?.role !== "witness")
@@ -53,7 +68,8 @@ export class QuestionnaireForm {
     this.container.replaceChildren(...parts)
   }
 
-  private section(title: string, intro: string | undefined, fields: QuestionnaireTemplateField[], json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean): HTMLElement {
+  private section(title: string, intro: string | undefined, fields: QuestionnaireTemplateField[], json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
+    images?: QuestionnaireImage[]): HTMLElement {
     const set = document.createElement("fieldset")
     set.className = "form-section"
     const legend = document.createElement("legend")
@@ -65,6 +81,7 @@ export class QuestionnaireForm {
       p.textContent = intro
       set.append(p)
     }
+    if (images) set.append(...QuestionnaireForm.figures(images, language))
     for (const field of fields) set.append(this.field(field, json ? QuestionnaireTemplates.answerOf(json, field.id) ?? "" : "", messages, language, readonly))
     return set
   }
@@ -93,22 +110,28 @@ export class QuestionnaireForm {
       hint.textContent = QuestionnaireTemplates.text(field.hint, language)
       row.append(hint)
     }
+    if (field.images) row.append(...QuestionnaireForm.figures(field.images, language))
     const say = (answer: string) => this.answered(field.id, answer, question)
     const kind = field.kind ?? "long"
     if ((kind === "choice" || kind === "scale") && field.choices) {
       const choices = document.createElement("div")
       choices.className = `form-choices ${kind}`
       choices.id = id
-      choices.setAttribute("role", "radiogroup")
+      const multiple = kind === "choice" && field.multiple === true
+      choices.setAttribute("role", multiple ? "group" : "radiogroup")
+      const ticked = multiple ? value.split(";").map(part => part.trim()) : [value.trim()]
       for (const choice of field.choices) {
         const option = document.createElement("label")
         const input = document.createElement("input")
-        input.type = "radio"
+        input.type = multiple ? "checkbox" : "radio"
         input.name = id
         input.value = choice.value
-        input.checked = value.trim() === choice.value
+        input.checked = ticked.includes(choice.value)
         input.disabled = readonly
-        input.addEventListener("change", () => { if (input.checked) say(choice.value) })
+        input.addEventListener("change", () => {
+          if (multiple) say([...choices.querySelectorAll<HTMLInputElement>("input:checked")].map(box => box.value).join("; "))
+          else if (input.checked) say(choice.value)
+        })
         option.append(input, ` ${QuestionnaireTemplates.text(choice.label, language)}`)
         choices.append(option)
       }
@@ -117,16 +140,62 @@ export class QuestionnaireForm {
     }
     const input = kind === "long" ? document.createElement("textarea") : document.createElement("input")
     input.id = id
-    if (input instanceof HTMLInputElement) {
-      // A date or a time the browser's picker writes as ISO when the answer reads as one; a witness's own words otherwise stay as text.
-      const iso = kind === "date" ? /^\d{4}-\d{2}-\d{2}$/.test(value) || value === "" : kind === "time" ? /^\d{2}:\d{2}(:\d{2})?$/.test(value) || value === "" : false
-      input.type = iso ? kind : "text"
-      if (kind === "time") input.step = "1"
-    }
     input.value = value
     input.disabled = readonly
     input.addEventListener("change", () => say(input.value))
-    row.append(input)
+    if (input instanceof HTMLInputElement && (kind === "date" || kind === "time")) row.append(this.when(input, kind, value, messages, label))
+    else row.append(input)
     return row
+  }
+
+  /**
+   * A date or a time, always offered two ways, as the editor offers the date of a case: `precise`, the browser's picker, which writes it as ISO; or
+   * `imprecise`, in the witness's own words ("around 9 pm", "early July"), which a precise picker would force into a figure they never gave. Opens
+   * on the way its answer is in. The link that says which, before the field, swaps them; the answer stays until it is changed.
+   */
+  private when(input: HTMLInputElement, kind: "date" | "time", value: string, messages: QuestionnaireFormMessages, label: HTMLLabelElement): HTMLElement {
+    const iso = kind === "date" ? /^\d{4}-\d{2}-\d{2}$/ : /^\d{2}:\d{2}(:\d{2})?$/
+    const box = document.createElement("div")
+    box.className = "form-when"
+    const mode = document.createElement("button")
+    mode.type = "button"
+    mode.className = "form-when-mode"
+    mode.disabled = input.disabled
+    const show = (precise: boolean) => {
+      const typed = input.value
+      input.type = precise ? kind : "text"
+      if (kind === "time") input.step = precise ? "1" : ""
+      input.placeholder = precise ? "" : kind === "date" ? messages.impreciseDate : messages.impreciseTime
+      // A picker cannot show words: what was said stays the answer, out of sight, until a figure is picked.
+      input.value = precise && !iso.test(typed) ? "" : typed
+      if (!precise && typed === "" && value !== "") input.value = value
+      box.dataset.mode = precise ? "precise" : "imprecise"
+      mode.textContent = precise ? messages.precise : messages.imprecise
+      mode.title = precise ? messages.preciseHint : messages.impreciseHint
+    }
+    mode.addEventListener("click", () => show(box.dataset.mode !== "precise"))
+    show(value === "" || iso.test(value.trim()))
+    label.append(" ", mode)
+    box.append(input)
+    return box
+  }
+
+  /** The pictures of a question or a section, each with what it shows for whoever cannot see it, and its caption. */
+  private static figures(images: QuestionnaireImage[], language: string): HTMLElement[] {
+    return images.map(image => {
+      const figure = document.createElement("figure")
+      figure.className = "form-figure"
+      const img = document.createElement("img")
+      img.src = image.src
+      img.alt = QuestionnaireTemplates.text(image.alt, language)
+      img.loading = "lazy"
+      figure.append(img)
+      if (image.caption) {
+        const caption = document.createElement("figcaption")
+        caption.textContent = QuestionnaireTemplates.text(image.caption, language)
+        figure.append(caption)
+      }
+      return figure
+    })
   }
 }

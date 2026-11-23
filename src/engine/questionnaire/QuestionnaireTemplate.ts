@@ -11,6 +11,17 @@ export type QuestionnaireFieldKind = "text" | "long" | "date" | "time" | "choice
  */
 export type QuestionnaireFeedTarget = "narrative" | "place" | "date" | "startTime" | "duration" | "color" | "startAzimuth" | "startElevation" | "endAzimuth" | "endElevation"
 
+/**
+ * A picture the questionnaire shows with a question or a section: a compass rose with the azimuths, the heights above the horizon, a thumb at arm's
+ * length. `src` is relative to the questionnaire's own file (see QuestionnaireTemplates.load).
+ */
+export interface QuestionnaireImage {
+  src: string
+  /** What it shows, for whoever cannot see it. */
+  alt: SaidText
+  caption?: SaidText
+}
+
 export interface QuestionnaireTemplateField {
   /** Its number or name, as the questionnaire gives it: what the interview's turns name (see InterviewSegment.field). */
   id: string
@@ -19,14 +30,20 @@ export interface QuestionnaireTemplateField {
   /** "long" when absent. */
   kind?: QuestionnaireFieldKind
   choices?: { value: string, label: SaidText }[]
+  /** For a choice: several may be ticked (a multiple-choice question), written one after another, separated by "; ". */
+  multiple?: boolean
   /** True when absent: the questionnaire asks it of every witness. */
   required?: boolean
   feeds?: QuestionnaireFeedTarget
+  /** Shown under the question, before the answer. */
+  images?: QuestionnaireImage[]
 }
 
 export interface QuestionnaireTemplateSection {
   title: SaidText
   intro?: SaidText
+  /** Shown under its intro, before its questions. */
+  images?: QuestionnaireImage[]
   fields: QuestionnaireTemplateField[]
 }
 
@@ -40,6 +57,8 @@ export interface QuestionnaireTemplate {
   version?: string
   language?: string
   title: SaidText
+  /** What the witness reads before the questions, paragraphs separated by a blank line; the form says what it is when there is none. */
+  intro?: SaidText
   source?: { publisher?: string, title?: string, url?: string, date?: string }
   note?: SaidText
   /**
@@ -56,8 +75,29 @@ export class QuestionnaireTemplates {
   /** The one UFO@home ships with, which a case template names by its id (see CaseTemplate). */
   static readonly DEFAULT = "geipan-qt-2025"
 
+  /** The pictures of the questionnaires UFO@home ships, each by an address the bundler knows (written whole, as it asks). */
+  private static readonly IMAGES: Record<string, Record<string, string>> = {
+    "geipan-qt-2025": {
+      "azimuth.png": new URL("../../assets/questionnaires/geipan-qt-2025/azimuth.png", import.meta.url).href,
+      "elevation.png": new URL("../../assets/questionnaires/geipan-qt-2025/elevation.png", import.meta.url).href,
+      "angular-size.png": new URL("../../assets/questionnaires/geipan-qt-2025/angular-size.png", import.meta.url).href,
+      "protractor.png": new URL("../../assets/questionnaires/geipan-qt-2025/protractor.png", import.meta.url).href
+    }
+  }
+
   private static readonly LOADERS: Record<string, () => Promise<QuestionnaireTemplate>> = {
-    "geipan-qt-2025": () => import("./templates/geipan-qt-2025.json").then(module => module.default as QuestionnaireTemplate)
+    "geipan-qt-2025": () => import("./templates/geipan-qt-2025.json").then(module => QuestionnaireTemplates.withImages(
+      structuredClone(module.default) as QuestionnaireTemplate, src => QuestionnaireTemplates.IMAGES["geipan-qt-2025"][src] ?? src))
+  }
+
+  /** `template`, each of its pictures at the address `where` gives its `src`. */
+  static withImages(template: QuestionnaireTemplate, where: (src: string) => string): QuestionnaireTemplate {
+    const move = (images?: QuestionnaireImage[]) => images?.forEach(image => { image.src = where(image.src) })
+    for (const section of template.sections) {
+      move(section.images)
+      for (const field of section.fields) move(field.images)
+    }
+    return template
   }
 
   private static readonly added = new Map<string, QuestionnaireTemplate>()
@@ -85,7 +125,7 @@ export class QuestionnaireTemplates {
     if (!reading) {
       reading = fetch(id).then(response => response.ok ? response.json() : undefined).then((json: QuestionnaireTemplate | undefined) => {
         if (!json || typeof json.id !== "string" || !Array.isArray(json.sections)) return undefined
-        QuestionnaireTemplates.add(json)
+        QuestionnaireTemplates.add(QuestionnaireTemplates.withImages(json, src => new URL(src, id).href))
         return json
       }).catch(() => undefined)
       QuestionnaireTemplates.fetched.set(id, reading)
