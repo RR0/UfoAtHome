@@ -8,14 +8,14 @@ import type { UfoLanguage } from "./index.js"
 export class InterviewMedia {
 
   private static readonly LABELS: Record<UfoLanguage, Record<InterviewMedium, string>> = {
-    en: { "in-person": "In person", phone: "Phone", video: "Video call", chat: "Chat", email: "Email", letter: "Letter", other: "Other" },
-    fr: { "in-person": "Face à face", phone: "Téléphone", video: "Visioconférence", chat: "Chat", email: "Mail", letter: "Courrier", other: "Autre" },
-    es: { "in-person": "En persona", phone: "Teléfono", video: "Videollamada", chat: "Chat", email: "Correo electrónico", letter: "Carta", other: "Otro" },
-    it: { "in-person": "Di persona", phone: "Telefono", video: "Videochiamata", chat: "Chat", email: "Email", letter: "Lettera", other: "Altro" }
+    en: { "in-person": "In person", phone: "Phone", video: "Video call", chat: "Chat", email: "Email", letter: "Letter", questionnaire: "Questionnaire", other: "Other" },
+    fr: { "in-person": "Face à face", phone: "Téléphone", video: "Visioconférence", chat: "Chat", email: "Mail", letter: "Courrier", questionnaire: "Questionnaire", other: "Autre" },
+    es: { "in-person": "En persona", phone: "Teléfono", video: "Videollamada", chat: "Chat", email: "Correo electrónico", letter: "Carta", questionnaire: "Cuestionario", other: "Otro" },
+    it: { "in-person": "Di persona", phone: "Telefono", video: "Videochiamata", chat: "Chat", email: "Email", letter: "Lettera", questionnaire: "Questionario", other: "Altro" }
   }
 
   /** The media, in the order they are offered. */
-  static readonly ALL: readonly InterviewMedium[] = ["in-person", "phone", "video", "chat", "email", "letter", "other"]
+  static readonly ALL: readonly InterviewMedium[] = ["in-person", "phone", "video", "chat", "email", "letter", "questionnaire", "other"]
 
   static label(medium: string, language: UfoLanguage): string {
     return (InterviewMedia.LABELS[language] as Record<string, string>)[medium] ?? medium

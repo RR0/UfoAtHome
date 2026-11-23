@@ -113,7 +113,7 @@ export class DocsInterviewPage extends DocsSection {
         ["time", "When it was held, as the case writes a time"],
         ["title", "What it is called, said in as many languages as you like"],
         ["summary", "What it established, in the same way"],
-        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code> or <code>other</code>"],
+        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> or <code>other</code>"],
         ["by", "Who held it: one agent, or several (<code>{ \"people\": \"…\" }</code> or <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "The <code>id</code> of the observation the interview was held with, or a list of them when there were several witnesses"],
         ["url", "The transcript file, when there is one, relative to the case"]
@@ -137,7 +137,8 @@ export class DocsInterviewPage extends DocsSection {
         ["text", "What was said, as plain text or HTML (a link, a title in italics, a foreign word in its language: what a page publishing it would write), escaped as any JSON string. The format says who speaks and when; the rest is HTML's"],
         ["redacted", "<code>{ reason }</code>: the whole turn was taken out of the published file. It then has no <code>text</code>"],
         ["parts", "Instead of <code>text</code>, when only a stretch was taken out: a list of <code>{ text }</code> and <code>{ redacted }</code>, in order"],
-        ["refs", "The moments of the observation this turn tells of (see “Its place in the case”)"]
+        ["refs", "The moments of the observation this turn tells of (see “Its place in the case”)"],
+        ["field", "In a questionnaire the witness filled in (<code>medium</code> <code>questionnaire</code>): the field this turn asks or answers, numbered or named as the questionnaire does. A field left empty has its question only; a “don’t know” is kept as said and is no answer to build on"]
       ],
       exampleHeading: "An example",
       redactionHeading: "Taking passages out",
@@ -186,7 +187,7 @@ export class DocsInterviewPage extends DocsSection {
         ["time", "Quand elle a eu lieu, comme le dossier écrit une date"],
         ["title", "Son nom, dit dans autant de langues qu'on veut"],
         ["summary", "Ce qu'elle a établi, de la même façon"],
-        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code> ou <code>other</code>"],
+        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> ou <code>other</code>"],
         ["by", "Qui l'a menée : un agent, ou plusieurs (<code>{ \"people\": \"…\" }</code> ou <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> de l'observation avec laquelle elle a eu lieu, ou une liste quand il y avait plusieurs témoins"],
         ["url", "Le fichier de transcription, s'il y en a un, relatif au dossier"]
@@ -210,7 +211,8 @@ export class DocsInterviewPage extends DocsSection {
         ["text", "Ce qui a été dit, en texte brut ou en HTML (un lien, un titre en italique, un mot étranger dans sa langue : ce qu'écrirait une page qui le publie), échappé comme toute chaîne JSON. Le format dit qui parle et quand ; le reste revient au HTML"],
         ["redacted", "<code>{ reason }</code> : le tour entier a été retiré du fichier publié. Il n'a alors pas de <code>text</code>"],
         ["parts", "À la place de <code>text</code>, quand seul un passage a été retiré : une liste de <code>{ text }</code> et de <code>{ redacted }</code>, dans l'ordre"],
-        ["refs", "Les moments de l'observation que ce tour raconte (voir « Sa place dans le dossier »)"]
+        ["refs", "Les moments de l'observation que ce tour raconte (voir « Sa place dans le dossier »)"],
+        ["field", "Dans un questionnaire rempli par le témoin (<code>medium</code> <code>questionnaire</code>) : le champ que ce tour pose ou auquel il répond, numéroté ou nommé comme le questionnaire le fait. Un champ laissé vide n'a que sa question ; un « je ne sais pas » est gardé tel qu'il a été dit et n'est pas une réponse sur laquelle bâtir"]
       ],
       exampleHeading: "Un exemple",
       redactionHeading: "Retirer des passages",
@@ -259,7 +261,7 @@ export class DocsInterviewPage extends DocsSection {
         ["time", "Cuándo se celebró, como el caso escribe una fecha"],
         ["title", "Cómo se llama, en tantos idiomas como se quiera"],
         ["summary", "Lo que estableció, del mismo modo"],
-        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code> u <code>other</code>"],
+        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> u <code>other</code>"],
         ["by", "Quién la realizó: un agente o varios (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "El <code>id</code> de la observación con la que se celebró, o una lista si hubo varios testigos"],
         ["url", "El archivo de transcripción, si lo hay, relativo al caso"]
@@ -283,7 +285,8 @@ export class DocsInterviewPage extends DocsSection {
         ["text", "Lo que se dijo, como texto plano o HTML (un enlace, un título en cursiva, una palabra extranjera en su idioma: lo que escribiría una página que lo publica), escapado como cualquier cadena JSON. El formato dice quién habla y cuándo; el resto es cosa del HTML"],
         ["redacted", "<code>{ reason }</code>: el turno entero se eliminó del archivo publicado. Entonces no tiene <code>text</code>"],
         ["parts", "En lugar de <code>text</code>, cuando solo se eliminó un tramo: una lista de <code>{ text }</code> y <code>{ redacted }</code>, en orden"],
-        ["refs", "Los momentos de la observación que cuenta este turno (véase «Su lugar en el caso»)"]
+        ["refs", "Los momentos de la observación que cuenta este turno (véase «Su lugar en el caso»)"],
+        ["field", "En un cuestionario rellenado por el testigo (<code>medium</code> <code>questionnaire</code>): el campo que este turno pregunta o responde, numerado o nombrado como lo hace el cuestionario. Un campo dejado vacío solo tiene su pregunta; un «no sé» se guarda tal como se dijo y no es una respuesta sobre la que construir"]
       ],
       exampleHeading: "Un ejemplo",
       redactionHeading: "Eliminar pasajes",
@@ -332,7 +335,7 @@ export class DocsInterviewPage extends DocsSection {
         ["time", "Quando si è tenuta, come il caso scrive una data"],
         ["title", "Come si chiama, in quante lingue si vuole"],
         ["summary", "Ciò che ha stabilito, allo stesso modo"],
-        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code> oppure <code>other</code>"],
+        ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> oppure <code>other</code>"],
         ["by", "Chi l'ha condotta: un agente o più (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> dell'osservazione con cui si è tenuta, o un elenco se c'erano più testimoni"],
         ["url", "Il file di trascrizione, se c'è, relativo al caso"]
@@ -356,7 +359,8 @@ export class DocsInterviewPage extends DocsSection {
         ["text", "Ciò che è stato detto, come testo semplice o HTML (un link, un titolo in corsivo, una parola straniera nella sua lingua: ciò che scriverebbe una pagina che lo pubblica), con l'escape di qualsiasi stringa JSON. Il formato dice chi parla e quando; il resto spetta all'HTML"],
         ["redacted", "<code>{ reason }</code>: l'intero turno è stato tolto dal file pubblicato. Non ha allora <code>text</code>"],
         ["parts", "Al posto di <code>text</code>, quando è stato tolto solo un tratto: un elenco di <code>{ text }</code> e <code>{ redacted }</code>, in ordine"],
-        ["refs", "I momenti dell'osservazione di cui parla questo turno (vedi «Il suo posto nel caso»)"]
+        ["refs", "I momenti dell'osservazione di cui parla questo turno (vedi «Il suo posto nel caso»)"],
+        ["field", "In un questionario compilato dal testimone (<code>medium</code> <code>questionnaire</code>): il campo che questo turno chiede o a cui risponde, numerato o nominato come fa il questionario. Un campo lasciato vuoto ha solo la domanda; un «non so» è conservato così com'è stato detto e non è una risposta su cui costruire"]
       ],
       exampleHeading: "Un esempio",
       redactionHeading: "Togliere dei passaggi",

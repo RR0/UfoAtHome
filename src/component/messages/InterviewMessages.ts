@@ -107,13 +107,15 @@ export interface InterviewMessages extends InputFileMessages {
   voiceNamed: string
   whoSpeaks: string
   importFile: string
-  /** What `importFile` leaves out, in its (?). */
+  /** What `importFile` reads, in its (?): a transcript, or a filled questionnaire when the interview is held through one. */
   importFileHint: string
   saveButton: string
   loading: string
   /** Said while the text of the transcript is not JSON the editor can read: the interview keeps the last text it understood. */
   invalid: string
   notATranscript: string
+  /** Said when the interview is a questionnaire and the file holds no field to read as a question and its answer. */
+  notAQuestionnaire: string
   loadFailed: string
   editorLabel: string
   /** What `by` may be filled with: the ids of people, separated by commas. */

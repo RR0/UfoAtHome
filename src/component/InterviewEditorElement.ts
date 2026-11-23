@@ -251,7 +251,7 @@ const TEMPLATE = `
     <label class="fill"><span id="label-url"></span> <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="interview-….json"/></label>
   </div>
   <div class="row toolbar">
-    <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,.txt,.md,.vtt,.srt,text/*" placeholder="https://…/interview.json"></rr0-input-file></span>
+    <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,.txt,.md,.vtt,.srt,.csv,.tsv,text/*" placeholder="https://…/interview.json"></rr0-input-file></span>
     <button id="save" type="button"></button>
   </div>
   <p id="file-note" class="file-note" hidden role="status"></p>
@@ -1583,15 +1583,15 @@ export class InterviewEditorElement extends HTMLElement {
       } catch {
         json = undefined
       }
+      const hints = this.importHints()
+      if (this.isQuestionnaire(json)) {
+        await this.takeQuestionnaire(json ?? text, file.name)
+        return
+      }
       // A file that is not ours (a transcript out of a recording tool, subtitles, a text with a name before each turn) is read as best it can be.
       if (typeof json !== "object" || json === null) {
         const { InterviewImport } = await import("../engine/persistence/interviewImport.js")
-        const event = this.current
-        const held = [event?.interviewOf].flat().filter((id): id is string => typeof id === "string")
-        const imported = InterviewImport.parse(text, {
-          by: (event?.by ?? []).map(agent => InterviewEditorElement.byText([agent])).filter(name => name !== ""),
-          witnesses: this.options.filter(witness => held.length === 0 || held.includes(witness.id))
-        })
+        const imported = InterviewImport.parse(text, hints)
         json = imported && { ...imported, transcription: { note: `Imported from ${file.name}: who speaks and when are as the file gave them, to be checked.` } }
       }
       if (json === undefined) this.note(this.messages.notATranscript, "error")
@@ -1601,9 +1601,39 @@ export class InterviewEditorElement extends HTMLElement {
     }
   }
 
+  /** Who the interview is held by and with, for an import to name its speakers. */
+  private importHints(): { by: string[], witnesses: { id: string, label: string }[] } {
+    const event = this.current
+    const held = [event?.interviewOf].flat().filter((id): id is string => typeof id === "string")
+    return {
+      by: (event?.by ?? []).map(agent => InterviewEditorElement.byText([agent])).filter(name => name !== ""),
+      witnesses: this.options.filter(witness => held.length === 0 || held.includes(witness.id))
+    }
+  }
+
+  /** Whether what was loaded is to be read as a filled questionnaire: the interview is held through one, and it is not a transcript of ours. */
+  private isQuestionnaire(json: unknown): boolean {
+    const ours = typeof json === "object" && json !== null && Array.isArray((json as { segments?: unknown }).segments)
+    return this.current?.medium === "questionnaire" && !ours
+  }
+
+  /** A questionnaire the witness filled in, each field a question and its answer whatever the questionnaire (see QuestionnaireImport). */
+  private async takeQuestionnaire(content: unknown, name: string): Promise<void> {
+    const { QuestionnaireImport } = await import("../engine/persistence/QuestionnaireImport.js")
+    const imported = QuestionnaireImport.parse(content, this.importHints())
+    if (!imported) {
+      this.note(this.messages.notAQuestionnaire, "error")
+      return
+    }
+    await this.take({ ...imported, transcription: { method: "manual", note: `Imported from ${name}: one question and its answer per field, as the witness filled it in.` } })
+  }
+
   private async importFromUrl(value: string): Promise<void> {
     try {
-      await this.take(await SightingFetch.json(new URL(value, this.base ?? location.href).href))
+      const href = new URL(value, this.base ?? location.href).href
+      const json = await SightingFetch.json(href)
+      if (this.isQuestionnaire(json)) await this.takeQuestionnaire(json, href.split("/").pop() ?? href)
+      else await this.take(json)
     } catch {
       this.note(this.messages.loadFailed, "error")
     }

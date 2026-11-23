@@ -136,6 +136,33 @@ describe("InterviewEditorElement's groups", () => {
     expect(changes).toEqual([])
   })
 
+  it("reads a filled questionnaire as an interview when it is held through one: a question and its answer per field, nothing for a field left empty", async () => {
+    files["https://example.org/d/qt.json"] = { fields: [{ number: 1, question: "Durée ?", answer: "Je ne sais pas" }, { number: 2, question: "Bruit ?", answer: "aucun" }, { number: 3, question: "Forme ?", answer: "" }] }
+    const { element } = await make({ ...event(), medium: "questionnaire" })
+    tabs(element)[2].click()
+    await wait(100)
+    ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/qt.json"
+    part(element, "import-url-button").click()
+    await wait(200)
+    const json = JSON.parse(element.transcriptText!) as { medium: string, segments: { speaker: string, field?: string, text?: string }[] }
+    expect(json.medium).toBe("questionnaire")
+    expect(json.segments.map(segment => [segment.speaker, segment.field, segment.text])).toEqual([
+      ["interviewer", "1", "Durée ?"], ["witness", "1", "Je ne sais pas"], ["interviewer", "2", "Bruit ?"], ["witness", "2", "aucun"], ["interviewer", "3", "Forme ?"]
+    ])
+  })
+
+  it("refuses, for an interview held through a questionnaire, a file with no field in it", async () => {
+    files["https://example.org/d/empty.json"] = { fields: [] }
+    const { element } = await make({ ...event(), medium: "questionnaire" })
+    tabs(element)[2].click()
+    await wait(100)
+    ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/empty.json"
+    part(element, "import-url-button").click()
+    await wait(100)
+    expect(part(element, "file-note").hidden).toBe(false)
+    expect(element.transcriptText).toBeUndefined()
+  })
+
   it("says so when the transcript at the interview's address cannot be read, and shows a blank one", async () => {
     const { element } = await make({ ...event(), url: "missing.json" })
     tabs(element)[2].click()
@@ -671,7 +698,7 @@ describe("What the summary shows is what the file holds, and the other way round
   it("says what the interview was held through, among the media, and not nothing once one is said", async () => {
     const { element } = await make({ ...event(), medium: "phone" })
     const select = part(element, "medium") as HTMLSelectElement
-    expect([...select.options].map(option => option.value)).toEqual(["in-person", "phone", "video", "chat", "email", "letter", "other"])
+    expect([...select.options].map(option => option.value)).toEqual(["in-person", "phone", "video", "chat", "email", "letter", "questionnaire", "other"])
     expect(select.value).toBe("phone")
     expect([...select.options].find(option => option.value === "video")!.textContent).toBe("Video call")
   })

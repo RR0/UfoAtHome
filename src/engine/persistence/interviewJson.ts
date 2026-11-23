@@ -2,8 +2,11 @@ import type { AgentRef } from "../interpretation/Interpretation.js"
 import type { SaidText } from "../model/SaidText.js"
 import { FormatVersion } from "./FormatVersion.js"
 
-/** What an interview was held through. */
-export type InterviewMedium = "in-person" | "phone" | "video" | "chat" | "email" | "letter" | "other"
+/**
+ * What an interview was held through. A `questionnaire` is one the witness filled in, a technical questionnaire or any other: each of its fields
+ * is a question and its answer, as a turn of the interviewer and one of the witness (see QuestionnaireImport).
+ */
+export type InterviewMedium = "in-person" | "phone" | "video" | "chat" | "email" | "letter" | "questionnaire" | "other"
 
 /** Who speaks in an interview. */
 export interface InterviewSpeaker {
@@ -78,6 +81,11 @@ export interface InterviewSegment {
   parts?: InterviewSegmentPart[]
   /** The moments of the observation this passage tells of. */
   refs?: InterviewSightingRef[]
+  /**
+   * In a questionnaire the witness filled in, the field this turn asks or answers: its number or its name as the questionnaire gives it ("12",
+   * "duration"). The question and its answer have the same, and a field nobody answered has only its question (see QuestionnaireImport).
+   */
+  field?: string
 }
 
 /**
@@ -118,7 +126,10 @@ export interface InterviewJson {
   title?: SaidText
   /** When it was held, as RR0 writes a time. */
   time?: string
-  /** What it was held through: face to face (`in-person`), by `phone`, in a `video` call, by `chat`, by `email`, by `letter`, or `other`. */
+  /**
+   * What it was held through: face to face (`in-person`), by `phone`, in a `video` call, by `chat`, by `email`, by `letter`, a `questionnaire` the
+   * witness filled in, or `other`.
+   */
   medium?: InterviewMedium
   /** Who held it. */
   by?: AgentRef[]
