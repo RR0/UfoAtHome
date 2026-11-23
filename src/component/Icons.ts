@@ -63,6 +63,8 @@ export class Icons {
   static readonly AURORA = Icons.draw(`<path d="M1.8 6.2c2-2.2 4.2.8 6.2-1.2s4.2.8 6.2-1.2"/><path d="M3.6 6v5.6M6.4 6v7M9.4 5.2v6.2M12.2 4.6v5"/>`)
   static readonly DRONE = Icons.draw(`<rect x="6" y="6.5" width="4" height="3" rx=".8"/><path d="M6 7 3.8 4.8M10 7l2.2-2.2M6 9l-2.2 2.2M10 9l2.2 2.2"/><path d="M2 4.8h3.6M10.4 4.8H14M2 11.2h3.6M10.4 11.2H14"/>`)
   static readonly LAUNCH = Icons.draw(`<path d="M8 1.8c2 1.6 3 3.9 3 6.6V11H5V8.4c0-2.7 1-5 3-6.6z"/><path d="M5 9.2 3.2 11v2.2L5 12M11 9.2l1.8 1.8v2.2L11 12"/><path d="M7 13.2 8 15l1-1.8"/><circle cx="8" cy="6.5" r="1.1"/>`)
+  /** Two beams fanned up from a lamp, a patch where each meets the clouds. */
+  static readonly SEARCHLIGHT = Icons.draw(`<path d="M7.2 12.2 4 4.2M8.8 12.2 12 4.2"/><ellipse cx="3.6" cy="3.2" rx="1.8" ry=".8"/><ellipse cx="12.4" cy="3.2" rx="1.8" ry=".8"/><path d="M6 12.4h4v1.8H6z"/>`)
   static readonly BEAM = Icons.draw(`<path d="M7.4 12.6 4.2 2M8.6 12.6 11.8 2"/><path d="M6.2 12.6h3.6v1.8H6.2z"/>`)
   static readonly SHAPES = Icons.draw(`<circle cx="5.6" cy="6" r="3.2"/><rect x="8.2" y="8.2" width="5.8" height="5.8" rx="1"/>`)
   static readonly BODIES = Icons.draw(`<path d="M8 1.8 13.5 4.8v6.4L8 14.2 2.5 11.2V4.8z"/><path d="M2.5 4.8 8 7.8l5.5-3M8 7.8v6.4"/>`)
@@ -116,7 +118,7 @@ export class Icons {
       "weather-precipitation": Icons.RAIN, "weather-clouds": Icons.SKY, "weather-wind": Icons.WIND, "weather-aircraft": Icons.AIRCRAFT,
       "interpretation-lanterns": Icons.LANTERN, "interpretation-birds": Icons.BIRD, "interpretation-drones": Icons.DRONE,
       "interpretation-balloons": Icons.BALLOON, "interpretation-airships": Icons.AIRSHIP,
-      "sky-event-launches": Icons.LAUNCH, "sky-event-beams": Icons.BEAM, "sky-event-reentries": Icons.FIREBALL, "sky-event-auroras": Icons.AURORA,
+      "sky-event-launches": Icons.LAUNCH, "sky-event-beams": Icons.BEAM, "sky-event-searchlights": Icons.SEARCHLIGHT, "sky-event-reentries": Icons.FIREBALL, "sky-event-auroras": Icons.AURORA,
       "shape-shapes": Icons.SHAPES, "shape-bodies": Icons.BODIES
     } as Record<string, string>)[panelId]
   }

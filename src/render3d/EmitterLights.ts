@@ -75,6 +75,7 @@ export class EmitterLights {
     ReentrySystem: "emitters: the heads of re-entries, far, from their magnitude",
     PhenomenonSystem: "none yet: a phenomenon states no luminance, only a colour as seen and a 0..1 dazzle, which say nothing of the light it gives",
     BeamSystem: "none: a laser beam is a thread of scattered light, too faint to light the ground; where it ends lit is in the sky",
+    SearchlightSystem: "none of the scene's lights: its beams light the clouds' base themselves, in the decks' shader (see SkyEventFrame.lightClouds); NOT YET the ground round the lamp",
     PlumeSystem: "none: a launch plume is lit by the Sun, it gives out no light of its own",
     AuroraSystem: "emitters: an aurora, far, as one source where it is brightest, of the magnitude its whole sky gives (see AuroraSimulation.lightGround)",
     CloudSystem: "none: clouds are lit, they do not give out light",

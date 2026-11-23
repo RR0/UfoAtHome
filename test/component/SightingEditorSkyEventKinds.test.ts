@@ -278,7 +278,7 @@ describe("a kind of event of the sky a module brings", () => {
     const shadow = element.shadowRoot!
     const tabs = [...shadow.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
     // The built-in kinds in the registry's order, then the module's.
-    expect(tabs.slice(-5)).toEqual(["sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-auroras", "sky-event-ballLightning"])
+    expect(tabs.slice(-6)).toEqual(["sky-event-launches", "sky-event-beams", "sky-event-searchlights", "sky-event-reentries", "sky-event-auroras", "sky-event-ballLightning"])
     const tab = shadow.querySelector<HTMLButtonElement>('[aria-controls="sky-event-ballLightning"]')!
     await waitFor(() => tab.textContent === "Ball lightning")
 
@@ -299,7 +299,7 @@ describe("a kind of event of the sky a module brings", () => {
     } })
     const element = await mount()
     const tabs = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#weather-tabs .subgroup-tab")].map(tab => tab.getAttribute("aria-controls"))
-    expect(tabs.slice(-11)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-balloons", "interpretation-airships", "interpretation-kites", "sky-event-launches", "sky-event-beams", "sky-event-reentries", "sky-event-auroras", "sky-event-ballLightning"])
+    expect(tabs.slice(-12)).toEqual(["interpretation-lanterns", "interpretation-birds", "interpretation-drones", "interpretation-balloons", "interpretation-airships", "interpretation-kites", "sky-event-launches", "sky-event-beams", "sky-event-searchlights", "sky-event-reentries", "sky-event-auroras", "sky-event-ballLightning"])
   })
 
   it("loses its part when the module is taken away, and the recording keeps its events", async () => {

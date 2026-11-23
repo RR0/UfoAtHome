@@ -168,3 +168,51 @@ describe("how far a deck says its clouds are", () => {
     expect(cloudTransmissionShader("a_")).not.toContain("projectionMatrix")
   })
 })
+
+describe("lit from below by a beam", () => {
+  // A searchlight 3 km off on the ground, its beam straight up into a deck at 1500 m, seen from the eye.
+  const lamp = { x: 3000, y: 0, z: 0, axis: { x: 0, y: 1, z: 0 }, fwhmRad: Math.PI / 180, rgb: [3e8, 3e8, 3e8] as [number, number, number] }
+  const lit = (lights = [lamp]) => {
+    const volume = new VolumetricCloudLayer(texture, 20000)
+    volume.update(layer, 1.6)
+    volume.setLights(lights, { x: 0, y: 1.6, z: 0 })
+    return volume
+  }
+  const toward = (p: { x: number, y: number, z: number }) => {
+    const length = Math.hypot(p.x, p.y, p.z)
+    return { x: p.x / length, y: p.y / length, z: p.z / length }
+  }
+
+  it("sends back what a matt cloud does of the beam where it meets the base: some 30 cd/m² for a skytracker's head 1.5 km off", () => {
+    const volume = lit()
+    const base = { x: 3000, y: 1500 - 1.6, z: 0 }
+    const [r] = volume.beamsLightAt(base, toward(base), 1)
+    // 3 × 10⁸ cd at 1.5 km is 133 lux; a cloud lit from below sends back some 0.2 to 0.3 of it a steradian, seen from the side.
+    expect(r).toBeGreaterThan(0.15 * 133)
+    expect(r).toBeLessThan(0.35 * 133)
+    volume.dispose()
+  })
+
+  it("is dark off the beam, dimmer deeper in, and wider than the beam as it goes in", () => {
+    const volume = lit()
+    const at = (x: number, upM: number) => volume.beamsLightAt({ x, y: 1500 + upM - 1.6, z: 0 }, toward({ x, y: 1500 + upM, z: 0 }), 1)[1]
+    const centre = at(3000, 1)
+    // Forty metres aside, at the base: past the beam (26 m wide there).
+    expect(at(3040, 1)).toBeLessThan(0.01 * centre)
+    expect(at(3000, 60)).toBeLessThan(0.5 * centre)
+    // Sixty metres in, the light spread round the beam reaches forty metres aside.
+    expect(at(3040, 60)).toBeGreaterThan(0.01 * at(3000, 60))
+    volume.dispose()
+  })
+
+  it("is as bright as what the clouds below its base let through, and nothing with no light", () => {
+    const half = lit([{ ...lamp, throughCloudsBelow: () => 0.5 }])
+    const full = lit()
+    const base = { x: 3000, y: 1500 - 1.6, z: 0 }
+    expect(half.beamsLightAt(base, toward(base), 1)[0]).toBeCloseTo(full.beamsLightAt(base, toward(base), 1)[0] / 2, 6)
+    const none = lit([])
+    expect(none.beamsLightAt(base, toward(base), 1)).toEqual([0, 0, 0])
+    expect(none.uniforms.lightCount.value).toBe(0)
+    for (const volume of [half, full, none]) volume.dispose()
+  })
+})

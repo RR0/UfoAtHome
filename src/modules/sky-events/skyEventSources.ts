@@ -5,6 +5,7 @@ import { BEAM_KIND } from "./beams/beamKind.js"
 import { LAUNCH_KIND } from "./launches/launchKind.js"
 import { REENTRY_KIND } from "./reentries/reentryKind.js"
 import { AURORA_KIND } from "./auroras/auroraKind.js"
+import { SEARCHLIGHT_KIND } from "./searchlights/searchlightKind.js"
 
 /**
  * Every kind of event of the sky that is drawn and edited through the extension point (see SkyEventKind): one folder each under
@@ -26,6 +27,13 @@ export const SKY_EVENT_SOURCES: DataSource<SkyEventKind>[] = ModuleRegistry.poin
     credit: "UFO@home",
     creditUrl: "https://ufoathome.org/docs/format/",
     create: () => BEAM_KIND as unknown as SkyEventKind
+  },
+  {
+    id: SEARCHLIGHT_KIND.key,
+    name: "Searchlights",
+    credit: "UFO@home",
+    creditUrl: "https://ufoathome.org/docs/format/",
+    create: () => SEARCHLIGHT_KIND as unknown as SkyEventKind
   },
   {
     id: REENTRY_KIND.key,

@@ -3,6 +3,7 @@ import type { BeamJson } from "../../modules/sky-events/beams/LaserBeam.js"
 import type { LaunchJson } from "../../modules/sky-events/launches/LaunchPlume.js"
 import type { ReentryJson } from "../../modules/sky-events/reentries/Reentry.js"
 import type { AuroraJson } from "../../modules/sky-events/auroras/Aurora.js"
+import type { SearchlightJson } from "../../modules/sky-events/searchlights/Searchlight.js"
 
 /**
  * What happened in the sky while the recording runs, as facts: a laser shot across a city, a rocket's launch, a re-entry. Each was there
@@ -20,6 +21,8 @@ export interface SkyEventsJson {
   launches?: LaunchJson[]
   /** Re-entries: placed on the Earth, not round the observer — see ReentryJson. */
   reentries?: ReentryJson[]
+  /** Searchlights on the ground (skytrackers, skyroses), their beams and the patches they light on the clouds — see SearchlightJson. */
+  searchlights?: SearchlightJson[]
   /** Aurorae: an oval of the upper air's light round the magnetic pole, as disturbed as the field was — see AuroraJson. */
   auroras?: AuroraJson[]
   /** The events of a kind a module brings (see SkyEventKind), under that kind's key: each with an `id` of its own. */

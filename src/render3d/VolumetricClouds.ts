@@ -278,25 +278,61 @@ uniform vec3 lightAxis[MAX_LIGHTS];
 uniform float lightSharpness[MAX_LIGHTS];
 uniform vec3 lightIntensity[MAX_LIGHTS];
 // What a sample of cloud of density d gives back towards the eye of the beams that reach it: the irradiance I / r² of each where it falls
-// within the beam, less what the cloud below the sample took of it on the way up (its depth above the base along the beam, at the sample's
-// own density: a cloud is lit to some hundred metres in, the base the most), turned towards the eye by the same two lobes the Sun's light is,
-// as a matt surface sends back what it receives (over pi). Seen from under the deck, it is the light thrown back: a bright patch moving on the
-// cloud base where the beam meets it, which is what a skytracker shows of itself from kilometres off where its beam is too faint to see.
-vec3 beamsLight(vec3 p, vec3 dir, float d) {
+// within the beam, less what the cloud below the sample took of it on the way up, turned towards the eye by the same two lobes the Sun's
+// light is, as a matt surface sends back what it receives (over pi). Seen from under the deck, it is the light thrown back: a bright patch
+// moving on the cloud base where the beam meets it, which is what a skytracker shows of itself from kilometres off where its beam is too
+// faint to see.
+// Two things of a real cloud the deck's own field does not have, without which the patch was a streak drawn up the beam, a comet's tail
+// half the deck high: how opaque a cloud really is to a beam (BEAM_OPACITY: a stratocumulus takes 30 to 50 of a light per kilometre, a mean
+// free path of 20 to 35 m, where the deck's field, drawn for how a cloud looks, lets a light through 170 m of it), and how the light the
+// droplets scatter, mostly forward, spreads round the beam as it goes in (BEAM_SPREAD: as wide as it is deep), which rounds the patch.
+// The beam's flux is kept as it spreads.
+const float BEAM_OPACITY = 5.0;
+const float BEAM_SPREAD = 0.7;
+// How far round a beam's axis its light on the clouds may reach, metres, besides its own spread: the light spread round it as it goes in
+// (BEAM_SPREAD), for as deep as a real cloud lets it go.
+const float BEAM_REACH_M = 250.0;
+// Which beams a ray from the eye passes near enough to be lit by, one bit each: the ray's closest approach to each axis, against how wide
+// the beam is there, its profile down to a thousandth, plus BEAM_REACH_M. Worked out once a pixel, so that the deck's samples far from every
+// beam (nearly all of them) cost nothing more.
+int beamsNear(vec3 dir) {
+  int near = 0;
+  for (int k = 0; k < MAX_LIGHTS; k++) {
+    if (k >= lightCount) break;
+    vec3 a = lightAxis[k];
+    vec3 w = lightOrigin[k];
+    float ad = dot(a, dir);
+    float denominator = max(1e-6, 1.0 - ad * ad);
+    // Along the axis, from its lamp, to the point nearest the ray; along the ray to its own.
+    float along = max(0.0, (ad * dot(dir, w) - dot(a, w)) / denominator);
+    vec3 onAxis = w + a * along;
+    float onRay = max(0.0, dot(onAxis, dir));
+    float miss = length(onAxis - dir * onRay);
+    if (miss < along * sqrt(6.9 / lightSharpness[k]) + BEAM_REACH_M) near |= 1 << k;
+  }
+  return near;
+}
+vec3 beamsLight(vec3 p, vec3 dir, float d, int near) {
   vec3 light = vec3(0.0);
   float above = max(0.0, altitude(p) - baseM);
   for (int k = 0; k < MAX_LIGHTS; k++) {
     if (k >= lightCount) break;
+    if ((near & (1 << k)) == 0) continue;
     vec3 fromSource = p - lightOrigin[k];
     float r = length(fromSource);
     vec3 way = fromSource / max(r, 1.0);
     float c = dot(way, lightAxis[k]);
     if (c <= 0.0) continue;
-    float profile = exp(-2.0 * (1.0 - c) * lightSharpness[k]);
+    float depth = above / max(0.05, way.y);
+    float through = exp(-d * depth * 0.006 * BEAM_OPACITY);
+    if (through < 0.001) continue;
+    float spread = BEAM_SPREAD * depth / max(r, 1.0);
+    float sharpness = 1.0 / (1.0 / lightSharpness[k] + spread * spread / 2.7725887);
+    float profile = exp(-2.0 * (1.0 - c) * sharpness) * sharpness / lightSharpness[k];
     if (profile < 0.001) continue;
-    float through = exp(-d * above / max(0.05, way.y) * 0.006);
     float cosTurn = -dot(dir, way);
-    float phase = mix(0.64 / pow(1.36 - 1.2 * cosTurn, 1.5), 0.91 / pow(1.09 + 0.6 * cosTurn, 1.5), 0.3);
+    float forward = 1.36 - 1.2 * cosTurn, backward = 1.09 + 0.6 * cosTurn;
+    float phase = mix(0.64 / (forward * sqrt(forward)), 0.91 / (backward * sqrt(backward)), 0.3);
     light += lightIntensity[k] * (profile * through * (0.12 + 0.8 * (0.5 + 0.5 * phase)) * 0.3183099 / max(r * r, 1.0));
   }
   return light;
@@ -324,6 +360,7 @@ void main() {
   float transmission = 1.0;
   vec3 radiance = vec3(0.0);
   float firstM = -1.0;
+  int near = lightCount > 0 ? beamsNear(dir) : 0;
   for (int i = 0; i < 48; i++) {
     vec3 p = dir * (start + (float(i) + 0.5) * ds);
     float d = densityAt(p);
@@ -354,7 +391,7 @@ void main() {
       vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
       float clear = exp(-length(p) / 55000.0);
       lit = mix(hazeColor, lit, clear);
-      if (lightCount > 0) lit += beamsLight(p, dir, d) * clear;
+      if (near != 0) lit += beamsLight(p, dir, d, near) * clear;
       lit *= mix(1.0, 0.32, darkness);
       float opacity = 1.0 - exp(-d * ds * 0.006);
       radiance += transmission * opacity * lit;
@@ -411,6 +448,9 @@ float transmissionAt(vec3 dir, float distanceM) {
  * The proxy is only a rasterization surface: ray/shell intersections set the cloud distance.
  */
 export class VolumetricCloudLayer {
+  /** The shader's BEAM_OPACITY and BEAM_SPREAD (see beamsLight). */
+  static readonly BEAM_OPACITY = 5
+  static readonly BEAM_SPREAD = 0.7
   readonly mesh: Mesh<SphereGeometry, ShaderMaterial>
   readonly uniforms
 
@@ -503,9 +543,12 @@ export class VolumetricCloudLayer {
       const axis = u.lightAxis.value[k]
       const c = way.x * axis.x + way.y * axis.y + way.z * axis.z
       if (c <= 0) continue
-      const profile = Math.exp(-2 * (1 - c) * u.lightSharpness.value[k])
+      const depth = above / Math.max(0.05, way.y)
+      const spread = VolumetricCloudLayer.BEAM_SPREAD * depth / Math.max(r, 1)
+      const sharpness = 1 / (1 / u.lightSharpness.value[k] + spread * spread / (4 * Math.LN2))
+      const profile = Math.exp(-2 * (1 - c) * sharpness) * sharpness / u.lightSharpness.value[k]
       if (profile < 0.001) continue
-      const through = Math.exp(-density * above / Math.max(0.05, way.y) * 0.006)
+      const through = Math.exp(-density * depth * 0.006 * VolumetricCloudLayer.BEAM_OPACITY)
       const cosTurn = -(direction.x * way.x + direction.y * way.y + direction.z * way.z)
       const phase = 0.7 * 0.64 / (1.36 - 1.2 * cosTurn) ** 1.5 + 0.3 * 0.91 / (1.09 + 0.6 * cosTurn) ** 1.5
       const factor = profile * through * (0.12 + 0.8 * (0.5 + 0.5 * phase)) / Math.PI / Math.max(r * r, 1)

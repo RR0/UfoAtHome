@@ -721,6 +721,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "skytracker",
+          src: "/demo-data/sky-test-skytracker.json",
+          title: { en: "A skytracker on the clouds", fr: "Un skytracker sur les nuages", es: "Un skytracker en las nubes", it: "Uno skytracker sulle nuvole" },
+          blurb: {
+            en: "East of Lyon on a November night, a deck of stratocumulus at 900 m: a four-headed xenon skytracker 3 km off sends its beams up in a cloverleaf. The beams are pale from here; what stands out are the four patches of light running over the base of the clouds, going out where a beam meets a gap. Place, searchlight and clouds are assumed.",
+            fr: "À l'est de Lyon une nuit de novembre, une couche de stratocumulus à 900 m : un skytracker au xénon à quatre têtes, à 3 km, envoie ses faisceaux en trèfle. D'ici les faisceaux sont pâles ; ce qui se voit, ce sont les quatre taches de lumière qui courent sur la base des nuages et s'éteignent là où un faisceau rencontre une trouée. Le lieu, le projecteur et les nuages sont supposés.",
+            es: "Al este de Lyon una noche de noviembre, una capa de estratocúmulos a 900 m: un skytracker de xenón de cuatro cabezales, a 3 km, envía sus haces en trébol. Desde aquí los haces son pálidos; lo que destaca son las cuatro manchas de luz que corren por la base de las nubes y se apagan donde un haz encuentra un claro. El lugar, el reflector y las nubes son supuestos.",
+            it: "A est di Lione una notte di novembre, uno strato di stratocumuli a 900 m: uno skytracker allo xeno a quattro teste, a 3 km, manda i suoi fasci a quadrifoglio. Da qui i fasci sono pallidi; ciò che si vede sono le quattro macchie di luce che corrono sulla base delle nuvole e si spengono dove un fascio incontra uno squarcio. Il luogo, il proiettore e le nuvole sono ipotizzati."
+          }
+        },
+        {
           id: "laser-meudon",
           src: "/demo-data/sky-test-laser-meudon.json",
           title: { en: "A laser beam", fr: "Un faisceau laser", es: "Un haz láser", it: "Un fascio laser" },

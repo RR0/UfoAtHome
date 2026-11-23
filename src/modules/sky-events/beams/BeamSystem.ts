@@ -295,9 +295,9 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
    * The beam a ray from the eye passes nearest, if it passes within `toleranceRad` of one, and how far along the ray: the angle a stretch of
    * beam is missed by, measured from the eye, so that a beam a centimetre wide is found a few pixels round its line wherever it is.
    */
-  pickAt(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string; distanceM: number } | undefined {
-    let best: { id: string; distanceM: number; angle: number } | undefined
-    for (const beam of this.drawn) {
+  pickAt(origin: Vector3, direction: Vector3, toleranceRad: number): { id: string; distanceM: number; line: number } | undefined {
+    let best: { id: string; distanceM: number; angle: number; line: number } | undefined
+    for (const [line, beam] of this.drawn.entries()) {
       for (let i = 0; i + 1 < beam.points.length; i++) {
         const a = beam.points[i]
         const b = beam.points[i + 1]
@@ -315,10 +315,11 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
         if (along <= 0) continue
         const off = Math.hypot(point.x - origin.x - direction.x * along, point.y - origin.y - direction.y * along, point.z - origin.z - direction.z * along)
         const angle = Math.atan2(off, along)
-        if (angle <= toleranceRad && (!best || angle < best.angle)) best = { id: beam.id, distanceM: Math.hypot(point.x - origin.x, point.y - origin.y, point.z - origin.z), angle }
+        if (angle <= toleranceRad && (!best || angle < best.angle)) best = { id: beam.id, distanceM: Math.hypot(point.x - origin.x, point.y - origin.y, point.z - origin.z), angle, line }
       }
     }
-    return best && { id: best.id, distanceM: best.distanceM }
+    // Which of the lines drawn (see drawLines), in their order: what tells apart the beams of one searchlight, which share its id.
+    return best && { id: best.id, distanceM: best.distanceM, line: best.line }
   }
 
   private cross(a: { x: number; y: number; z: number }, b: { x: number; y: number; z: number }) {
