@@ -168,6 +168,11 @@ export class AuroraSystem {
             for (int a = 0; a < ${AuroraSystem.MAX_ARCS}; a++) {
               if (a >= uArcCount) break;
               vec4 arc = uArcs[a];
+              // Its folds move it at most 0.75° from where it stands: a step whose field lines come down farther than that and five of its
+              // thicknesses away crosses nothing of it, and is passed over before its folds, its sheet and its rays are worked out.
+              float nominal = edge + arc.x;
+              float reach = 0.75 + 5.0 * ${f(H.ARC_THICKNESS_DEG)};
+              if (min(fieldA.x, fieldB.x) > nominal + reach || max(fieldA.x, fieldB.x) < nominal - reach) continue;
               // Where it stands here along its length: folded, the folds drifting.
               float phi = fm.y;
               float centre = edge + arc.x + 0.6 * sin(9.0 * phi + 0.004 * uTime + arc.z) + 0.15 * sin(37.0 * phi - 0.02 * uTime + 2.0 * arc.z);
