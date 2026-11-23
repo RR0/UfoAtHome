@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { ScenarioSweep } from "../../../src/engine/scenario/ScenarioSweep.js"
+import { ScenarioSweepWords } from "../../../src/component/ScenarioSweepWords.js"
 import { ScenarioReadings } from "../../../src/engine/scenario/ScenarioReadings.js"
 import type { WindProfile, WindSource } from "../../../src/engine/scenario/WindProfiles.js"
 import type { CaseJson } from "../../../src/engine/persistence/caseJson.js"
@@ -166,7 +167,7 @@ describe("The candidates of the sky over the scenarios", () => {
     expect(of("Venus").verdict.robustness).toBe("robust-plausible")
     expect(of("Venus").label).toBe("Vénus")
     expect(of("Mars").verdict.robustness).toBe("robust-exclusion")
-    expect(ScenarioSweep.grouped(sweep.alerts).find(alert => alert.candidate === "Venus")).toMatchObject({ robustness: "robust-plausible", accounts: ["w1"] })
+    expect(ScenarioSweepWords.grouped(sweep.alerts).find(alert => alert.candidate === "Venus")).toMatchObject({ robustness: "robust-plausible", accounts: ["w1"] })
   })
 
   it("finds Venus compatible only at the places where it was up then", async () => {

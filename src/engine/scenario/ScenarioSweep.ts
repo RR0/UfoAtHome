@@ -454,19 +454,6 @@ export class ScenarioSweep {
       date => passes.positionsAt(date, start.observer, -90).find(position => position.object.norad === iss.norad), start, t, this.sources.limitAt)
   }
 
-  /** The alerts grouped: one per candidate and verdict, with the accounts it is said of. */
-  static grouped(alerts: readonly SkyAlert[]): (SkyAlert & { accounts: string[] })[] {
-    const groups = new Map<string, SkyAlert & { accounts: string[] }>()
-    for (const alert of alerts) {
-      const key = `${alert.candidate}|${alert.robustness}|${JSON.stringify(alert.onlyIf ?? {})}`
-      const group = groups.get(key) ?? { ...alert, accounts: [] }
-      if (alert.eventId) group.accounts.push(alert.eventId)
-      groups.set(key, group)
-    }
-    const rank: Record<Robustness, number> = { "robust-plausible": 0, "conditional": 1, "robust-exclusion": 2 }
-    return [...groups.values()].sort((a, b) => rank[a.robustness] - rank[b.robustness])
-  }
-
   /**
    * The alerts of a sweep: the Moon, the planets and the ISS whose verdict is robust, plausible or excluded, or conditional; the stars only
    * where they are plausible at all, a star that is not being no news.

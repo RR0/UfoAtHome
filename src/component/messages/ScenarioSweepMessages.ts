@@ -68,6 +68,8 @@ export interface ScenarioSweepMessages {
   /** Keeps the scenarios ticked as readings of the case; says how many were added. */
   keep: string
   kept: string
+  /** What the candidates of the sky are called. */
+  bodies: { Moon: string, Venus: string, Mars: string, Jupiter: string, Saturn: string, ISS: string }
   /** The title of a reading played under a scenario: `{title}`, at `{place}`, on `{date}`. */
   scenarioTitle: string
 }

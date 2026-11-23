@@ -4,6 +4,9 @@
  *
  *   node --import tsx scripts/scenario-replay.ts western/scenarios/scenarios.json
  *
+ * Superseded by scripts/scenario-sweep.ts, which reads the candidates from the case itself and fetches the winds: kept as the script the
+ * first case was played with by hand (docs/uncertain-conditions.md).
+ *
  * The readings and accounts are read from public/demo-data (DIR=… for another directory). The scenarios file says the candidate
  * conditions, the wind each gives, and which readings to replay against which account.
  */

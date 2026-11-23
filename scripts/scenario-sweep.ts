@@ -36,18 +36,9 @@ import { scenarioSweepMessages_en } from "../src/component/messages/ScenarioSwee
 import { scenarioSweepMessages_fr } from "../src/component/messages/ScenarioSweepMessages_fr.js"
 import { scenarioSweepMessages_es } from "../src/component/messages/ScenarioSweepMessages_es.js"
 import { scenarioSweepMessages_it } from "../src/component/messages/ScenarioSweepMessages_it.js"
-import { witnessErrorMessages_en } from "../src/component/messages/WitnessErrorMessages_en.js"
-import { witnessErrorMessages_fr } from "../src/component/messages/WitnessErrorMessages_fr.js"
-import { witnessErrorMessages_es } from "../src/component/messages/WitnessErrorMessages_es.js"
-import { witnessErrorMessages_it } from "../src/component/messages/WitnessErrorMessages_it.js"
-
 const LANGUAGES = ["en", "fr", "es", "it"] as const
 type Language = typeof LANGUAGES[number]
 const WORDS: Record<Language, ScenarioSweepMessages> = { en: scenarioSweepMessages_en, fr: scenarioSweepMessages_fr, es: scenarioSweepMessages_es, it: scenarioSweepMessages_it }
-const BODIES: Record<Language, Record<string, string>> = {
-  en: witnessErrorMessages_en.candidates.bodies, fr: witnessErrorMessages_fr.candidates.bodies,
-  es: witnessErrorMessages_es.candidates.bodies, it: witnessErrorMessages_it.candidates.bodies
-}
 
 const args = process.argv.slice(2)
 const option = (name: string) => args.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3)
@@ -81,7 +72,7 @@ const load = async (url: string) => {
 const sweeper = new ScenarioSweep({
   wind, kinds, load, limitAt: sun => visibleMagnitudeLimit(sun),
   satellites: async date => (await tle.at(date))?.objects,
-  names: id => BODIES[language]?.[id] ?? (id === "ISS" ? "ISS" : undefined)
+  names: id => (m.bodies as Record<string, string>)[id]
 })
 
 const keep = option("keep") as ScenarioKeep | undefined
@@ -126,7 +117,7 @@ for (const account of result.accounts) {
   if (account.skyNote) console.log(`  (${account.skyNote})`)
 }
 console.log(`\n${m.alertsHeading}`)
-for (const alert of ScenarioSweep.grouped(result.alerts)) console.log(`  ${words.alert(alert)}: ${alert.accounts.join(", ")}`)
+for (const alert of ScenarioSweepWords.grouped(result.alerts)) console.log(`  ${words.alert(alert)}: ${alert.accounts.join(", ")}`)
 if (result.alerts.length === 0) console.log(`  ${m.noAlert}`)
 
 const out = option("json")

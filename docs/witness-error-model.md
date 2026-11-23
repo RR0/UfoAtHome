@@ -357,9 +357,9 @@ image in the reader (`rr0-sighting`, so `rr0-case`). The case report (HTML, JSON
 
 ## Not done yet
 
-- **Date shift and mirror in the search.** Both are laws of the model (a wrong day, month, year or
-  summer time; a heading's sense reversed), but `CandidateSearch` only turns the clock, the heading,
-  the elevation, the size, the duration and the sweep.
+- **Date shift and mirror in the search.** Done (2026-11-23) for a day either way and a heading mirrored east
+  for west, each a law's tail (see `CandidateSearch.DATE_SHIFT_SIGMA`, `MIRROR_SIGMA`); a wrong month or year,
+  and summer time, are not searched.
 - **Basis marks on every field.** The editor shows them on the start time, the duration, the heading
   and the apparent width only.
 - **The reader's scene** still confronts interpretations with the fixed tolerances, not the laws

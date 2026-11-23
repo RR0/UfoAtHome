@@ -16,6 +16,7 @@ import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import { ScenarioSweepElement } from "./ScenarioSweepElement.js"
 import { CaseExportElement } from "./CaseExportElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
 import { READING_CHECK_TEXTS } from "../engine/interpretation/messages/ReadingCheckTexts.js"
@@ -366,6 +367,7 @@ const TEMPLATE = `
       <p id="events-none" class="events-none" role="status" hidden></p>
       <ol id="event-list" class="event-list"></ol>
       <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
+      <rr0-scenario-sweep id="scenario-sweep"></rr0-scenario-sweep>
     </div>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
     <!-- Laid out as every list of the editor is (see ElementList): the picker, 🗑, "+", then the frame of the event picked. -->
@@ -1402,6 +1404,7 @@ export class CaseEditorElement extends HTMLElement {
     const events = this.eventsInTime(session)
     this.renderEvents(session, events)
     this.compareReadings(session)
+    this.sweepScenarios(session)
     const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
     const current = events[open]
     if (current) {
@@ -1989,6 +1992,36 @@ export class CaseEditorElement extends HTMLElement {
         .filter((track): track is CaseTrack => track !== undefined && !track.recording)
       await Promise.all([...new Set(needed)].map(track => this.loadTrack(track).catch(() => undefined)))
       return rowsOf()
+    })
+  }
+
+  /**
+   * Offers to play the case's readings over the scenarios its uncertain place and date give (see ScenarioSweepElement), under the events,
+   * for a case that states them: the readings kept are added to the case as readings of the accounts they read.
+   */
+  private sweepScenarios(session: CaseSession): void {
+    ScenarioSweepElement.register()
+    const panel = this.byId("scenario-sweep") as ScenarioSweepElement
+    panel.show({
+      caseJson: () => session.json,
+      load: async url => {
+        const track = session.tracks.find(candidate => candidate.event.url === url)
+        if (!track) throw new Error(`No event of the case lists ${url}`)
+        await this.loadTrack(track)
+        return track.recording!
+      },
+      keep: readings => {
+        let added = 0
+        for (const { recording, title, readingUrl } of readings) {
+          const reading = session.tracks.find(track => track.event.url === readingUrl)
+          const account = reading ? session.accountOf(reading) : undefined
+          if (!reading || !account) continue
+          session.addObservation(recording, this.today(), title, { account, ...(reading.event.by ? { by: reading.event.by } : {}) })
+          added++
+        }
+        if (added > 0) this.refreshOverview()
+        return added
+      }
     })
   }
 

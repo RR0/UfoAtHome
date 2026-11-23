@@ -46,5 +46,6 @@ export const scenarioSweepMessages_es = {
   windValue: "hacia {toward}°, {speed} m/s",
   keep: "Guardar como lecturas los escenarios marcados",
   kept: "{n} lecturas añadidas al caso.",
+  bodies: { Moon: "Luna", Venus: "Venus", Mars: "Marte", Jupiter: "Júpiter", Saturn: "Saturno", ISS: "ISS" },
   scenarioTitle: "{title}, jugada en {place} el {date}"
 } satisfies ScenarioSweepMessages

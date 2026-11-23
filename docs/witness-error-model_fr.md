@@ -390,9 +390,9 @@ avec les tolérances fixes.
 
 ## Pas encore fait
 
-- **Décalage de date et miroir dans la recherche.** Tous deux sont des lois du modèle (un jour, un
-  mois, un an ou une heure d'été faux ; le sens d'un cap inversé), mais `CandidateSearch` ne tourne
-  que l'horloge, le cap, la hauteur, la taille, la durée et le balayage.
+- **Décalage de date et miroir dans la recherche.** Fait (2026-11-23) pour un jour de part et d'autre et un
+  cap inversé est pour ouest, chacun une queue de loi (voir `CandidateSearch.DATE_SHIFT_SIGMA`, `MIRROR_SIGMA`) ;
+  un mois ou une année faux, et l'heure d'été, ne sont pas cherchés.
 - **Marques de fondement sur tous les champs.** L'éditeur ne les montre que sur l'heure de début, la
   durée, le cap et la largeur apparente.
 - **La scène du lecteur** confronte encore les interprétations avec les tolérances fixes, pas avec

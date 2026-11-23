@@ -1,8 +1,8 @@
 # Uncertain conditions: simulating over several scenarios
 
-Design note, 2026-11-19. Besides what [What exists](#what-exists) lists, only a first headless
-replay is built (`scripts/scenario-replay.ts`, wind only), tried on the
-[Western U.S. Event](#first-case-the-western-us-event-2026-11-19).
+Design note, 2026-11-19; the sweep built 2026-11-23 (see [The sweep](#the-sweep-2026-11-23)). The first case was played by hand
+before it, on the [Western U.S. Event](#first-case-the-western-us-event-2026-11-19), and again with the sweep
+([replayed](#the-western-us-event-replayed-by-the-sweep-2026-11-23)).
 
 ## The problem
 
@@ -111,8 +111,8 @@ and the editor can show it later, next to `rr0-reading-sensitivity`.
 
 ## Open questions
 
-- How to write a candidate place in the format: an alternative list on `place`, or a separate
-  `conditions` block of the case. Either way the format version moves.
+- ~~How to write a candidate place in the format~~: a `conditions` block of the case, or of one
+  recording (see [The sweep](#the-sweep-2026-11-23)). A field added, so no format version moved.
 - How the witness's own track follows a change of place: the directions they stated do not move,
   their position does, and the decor with it.
 - Whether a reading may pick its own scenario (the best case for it, as `BestCaseSearch` does for a
@@ -164,3 +164,115 @@ place: for the gossamer at Groom Lake, the separation in degrees is that of the 
 and only the strength of the wind carries over. The lantern reading is a best case written for this
 test (laminar air, one lantern per red orb, first seen where the witness first saw each), not a
 reading of the case.
+
+## The sweep (2026-11-23)
+
+What the first case did by hand is now general: `src/engine/scenario/`, `scripts/scenario-sweep.ts`,
+and a panel of the case editor.
+
+### The format
+
+A case states what it leaves open in `conditions` (`UncertainConditionsJson`); a recording may state its own, which override the
+case's field by field:
+
+```json
+"conditions": {
+  "time": { "from": "2023-10-14T12:00", "to": "2023-10-16T12:00", "rationale": "…" },
+  "places": { "candidates": [
+    { "id": "pahranagat", "place": { "name": "…", "locations": [{ "lat": 37.277, "lng": -115.118 }] },
+      "rationale": "…", "for": ["w3-1", "w2-1"] }
+  ] },
+  "keep": "telling"
+}
+```
+
+- `time` is in each account's legal time. With `each: "day"` (the default) only the date is open: an account keeps its time of
+  day, on each day that puts it within the interval (two evenings and the dawn after them are "from the first noon to the last").
+  With `each: "instant"` the time of day is open too.
+- `places.candidates` each have an `id`, a `PlaceJson`, a `rationale`, `sources`, and `for`, the accounts (event ids) they are a
+  candidate for; the account's own place is always played too (`own: false` to leave it out).
+- **How each is iterated** (`sweep`): `bounds` by default (the first and last date; every candidate place, each being a bound of
+  what the clues leave open); `points` (dates, instants, or candidate ids); `step` (`stepMinutes`, or `stepKm` for a grid over the
+  box the candidates span); `deltas` (`deltasMinutes` from the account's instant, `deltasKm` from its place). More than 200
+  scenarios for one account is refused rather than thinned.
+- `keep` says which scenarios become readings once all have been judged: `telling` (the default: for a robust verdict the scenario
+  nearest to turning it, for a conditional one the best where it holds and the worst where it fails), `robust`, `conditional`,
+  `all`, `none`. The others only serve the verdict.
+
+A reading written by the sweep carries `interpretation.scenario` (`{ id, of, verdict }`): its place and time `assumed` with the
+candidate's rationale, each wind it states `established` "given scenario … only", its `snapshots` and picture dropped when the
+place moved. The sweep never plays such a reading again. A body whose track drifts with the ground wind says so
+(`BodyJson.drifting`); a kind of interpretation the air carries says how to put an item in another wind
+(`InterpretationKind.inWind`: flares at the aircraft's height, lanterns and balloons at the ground and aloft).
+
+### What is played
+
+For each account and each of its scenarios (`ScenarioSweep`):
+
+- **The wind**: the Open-Meteo historical forecast at the scenario's place, 10 m and 850 to 300 hPa, interpolated between the two
+  hours around the instant (`OpenMeteoWindProfiles`; a day of a place is asked once, kept in a cache, and asked again later on a
+  429). Each reading that depends on it (a kind with `inWind`, a drifting body) is played in it; one that does not is the reading
+  as written in every scenario, and is said to depend on none of the conditions played.
+- **The judges**: as before, what the witness is on record as having said (`ReadingSensitivity.forAccount`) and what the timeline
+  draws every half second, both with the witness-error laws (`BodyConfrontation.lawsOf`). A reading is **plausible in a scenario**
+  when the directions of at least half of the comparisons are not contradicted: those of what was said, or, when the account traces
+  no direction to the witness, those the timeline draws. The direction only: it is what a scenario moves, and the default size law
+  refuses even a size equal to the one said (an open problem of `ReadingSensitivity`), which would exclude every reading alike.
+- **The sky**: the Moon, the planets, the six bright stars nearest the account's direction, and the ISS (its elements from the TLE
+  archive, since February 2021), searched for by `CandidateSearch` from the scenario's place at its instant. The date is not
+  shifted further (the dates are scenarios), nor the heading mirrored (a reading of the testimony, the same in every scenario).
+
+### The verdict
+
+Per reading, and per candidate of the sky: **robust plausible explanation** (plausible in every scenario played), **robust
+exclusion** (in none), or **conditional**, with where it holds (at some places whatever the date, on some dates whatever the
+place, or in a list of scenarios). Each is said with how it moved from the verdict as written: "plausible as written, becomes
+robust", "excluded in every scenario: only its own choice made it plausible", "becomes plausible under conditions"… The sky's
+verdicts are the **alerts**, grouped by candidate: "Venus incompatible in every scenario: w3-1, w2-1, …", the astronomical alert
+the GEIPAN considers for 2027, with its robustness to the place and the date.
+
+### Where it runs
+
+- `node --import tsx scripts/scenario-sweep.ts <case.json> [--lang=fr] [--keep=…] [--write] [--json=out.json]`: prints each
+  reading's verdict and its scenarios (`*` marks those kept), then the alerts; `--write` writes the kept scenarios as readings
+  beside the case and adds them after their account's readings. Behind a proxy (the sandbox), Node's `fetch` needs
+  `NODE_USE_ENV_PROXY=1`.
+- The case editor, under the events (`rr0-scenario-sweep`, shown only for a case that states `conditions`): a button plays every
+  scenario, each reading's verdict is shown with its scenarios, the telling ones ticked; the ticked ones are added to the case as
+  readings, titled in four languages.
+- `CandidateSearch` now also tries a **date shifted** by a day either way (2 % of witnesses, 2.05 σ, `single`) and a **heading
+  mirrored** east for west (argued, 2.5 σ): only when that brings the account nearer, and contested at best.
+
+### The Western U.S. Event replayed by the sweep (2026-11-23)
+
+The case's `conditions`: the evenings and the dawn anywhere from 14 October noon to 16 October noon, the Pahranagat refuge a
+candidate for the evening accounts and the Groom Lake Road for the dawn ones. 14 accounts, 4 scenarios each, 31 readings.
+
+| Reading | By hand (2026-11-19) | The sweep |
+|---|---|---|
+| Decoy flares (AARO and variants) | robust: separations unchanged within 0.1-0.2° | **robust plausible explanation**, medians unchanged (w3-1 0.8° said, 2.5° drawn; w4-1 0.4-0.5°) |
+| LUU-2 (witnesses 1 and 5) | robust: median 1.3-1.8°, worst 1.9-3.0° | **robust plausible**: median 1.3-1.8°, worst 1.9-3.0° |
+| Gossamer (witnesses 1 and 5) | conditional: Frenchman Flat 24-34°, Groom Lake Road 94-155° | medians Frenchman 19-31°, Groom 80-151°, wind Frenchman 2.2-2.3 m/s towards 149-156°, Groom 4.4-5.4 m/s towards 206-208°; but **robust exclusion**: witness 5 put the lights at 3.4-4.1° up, the reading at 5.8-6.6°, higher than said, which the one-sided elevation law refuses in every scenario |
+| Sky lanterns (witness 3, best case at 350 m) | robust failure: median 37-41°, worst 49-62° | **robust exclusion**: median 40-42°, worst 59-63° |
+| Lanterns in the wind they would need | plausible only in a fitted wind | "plausible as written, excluded in every scenario: only its own choice made it plausible" (median 2.6° as written, 37-60° in the archived winds) |
+| Jupiter (witnesses 2 and 3) | excluded on the height | **incompatible in every scenario** for both |
+| Black Mountain lights (witness 2) | conditional on the horizon | depends on none of the conditions played: the relief is not played (below) |
+
+The winds differ from the first replay by the hour only: it took the hour before the half hour (12:00 UTC for 05:30 PDT), the
+sweep interpolates between 12:00 and 13:00. The sweep says more than the first replay did on the gossamer: the separations do move
+with the place, but the reading is excluded as written already, and stays so.
+
+The alerts: the Moon, Venus, Mars and the ISS incompatible in every scenario for all 14 accounts; Jupiter and Saturn for 13, Jupiter
+compatible only on the 15th and Saturn in every scenario for witness 4's second evening; Arcturus, Capella,
+Antares and Fomalhaut compatible in every scenario for some evening accounts, Arcturus only on the 14th for
+witness 5 at 19:37. A compatible star is the laws' ±45° on a heading estimated by eye, not a finding.
+
+### Limits
+
+- The witness's own position, road and decor are not moved with the place, nor the relief: a horizon, an obstruction light hidden
+  by a ridge, is not played (the Black Mountain lights, Jupiter clearing the ranges). The relief at each candidate place is the next
+  dependency to add.
+- Only the wind is taken from the place and the date for what a reading places; what a kind computes from the date otherwise
+  (a satellite, a re-entry in a reading) is not replayed.
+- The size is not judged in a scenario's verdict (above).
+- Airships state their wind in their own way and are not put in another wind yet.

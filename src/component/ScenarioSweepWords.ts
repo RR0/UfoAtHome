@@ -47,6 +47,19 @@ export class ScenarioSweepWords {
     return (onlyIf?.scenarios ?? []).map(id => this.m.inScenarios.replace("{scenarios}", this.scenarioId(id))).join(this.m.or)
   }
 
+  /** The alerts grouped: one per candidate and verdict, with the accounts it is said of, the compatible first. */
+  static grouped(alerts: readonly SkyAlert[]): (SkyAlert & { accounts: string[] })[] {
+    const groups = new Map<string, SkyAlert & { accounts: string[] }>()
+    for (const alert of alerts) {
+      const key = `${alert.candidate}|${alert.robustness}|${JSON.stringify(alert.onlyIf ?? {})}`
+      const group = groups.get(key) ?? { ...alert, accounts: [] }
+      if (alert.eventId) group.accounts.push(alert.eventId)
+      groups.set(key, group)
+    }
+    const rank = { "robust-plausible": 0, "conditional": 1, "robust-exclusion": 2 }
+    return [...groups.values()].sort((a, b) => rank[a.robustness] - rank[b.robustness])
+  }
+
   /** An alert of the sky: "Venus incompatible in every scenario". */
   alert(alert: SkyAlert): string {
     const template = alert.robustness === "robust-exclusion" ? this.m.alertExcluded : alert.robustness === "robust-plausible" ? this.m.alertPlausible : this.m.alertConditional
