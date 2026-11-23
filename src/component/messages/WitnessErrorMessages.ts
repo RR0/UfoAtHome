@@ -63,8 +63,8 @@ export interface WitnessErrorMessages {
     backToAccount: string
     costNote: string
     scopeNote: string
-    fields: Record<"time" | "heading" | "elevation" | "size" | "duration" | "sweep", string>
-    biases: Record<"clock" | "heading" | "elevation" | "size" | "duration" | "sweep", string>
+    fields: Record<"date" | "time" | "heading" | "elevation" | "size" | "duration" | "sweep", string>
+    biases: Record<"date" | "mirror" | "clock" | "heading" | "elevation" | "size" | "duration" | "sweep", string>
     reasons: Record<"never-seen" | "direction" | "size" | "motion" | "growth", string>
     /** A structural reading a variant uses (see CandidateSearch's StructuralReading), and what heads its line. */
     readingTitle: string

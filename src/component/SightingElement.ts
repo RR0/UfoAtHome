@@ -1026,7 +1026,9 @@ export class SightingElement extends HTMLElement {
     if (!variant) return
     const degrees = new Intl.NumberFormat(this.language, { maximumFractionDigits: 1 })
     for (const moved of variant.moved) {
-      const [stated, read] = moved.field === "time"
+      const [stated, read] = moved.field === "date"
+        ? ["0 d", `${moved.variant > 0 ? "+" : ""}${degrees.format(moved.variant)} d`]
+        : moved.field === "time"
         ? ["0 min", `${moved.variant > 0 ? "+" : ""}${degrees.format(moved.variant)} min`]
         : moved.field === "duration" ? [`${degrees.format(moved.stated)} s`, `${degrees.format(moved.variant)} s`]
         : [`${degrees.format(moved.stated)}°`, `${degrees.format(moved.variant)}°`]

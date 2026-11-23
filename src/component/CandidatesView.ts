@@ -4,8 +4,9 @@ import type { WitnessConditions } from "../engine/model/Account.js"
 import type { ErrorModel, LeadStatus } from "../engine/witness/WitnessError.js"
 import { WitnessError } from "../engine/witness/WitnessError.js"
 import { CandidateSearch } from "../engine/witness/CandidateSearch.js"
+import { SkyCandidates } from "../engine/witness/SkyCandidates.js"
 import type { AccountStatement, CandidateTrack, MovedValue, StructuralReading, UsedReading, Variant } from "../engine/witness/CandidateSearch.js"
-import { computeBodyMagnitude, computeBodyPosition, equatorialToHorizontal } from "../engine/astronomy/CelestialPositions.js"
+import { computeBodyPosition } from "../engine/astronomy/CelestialPositions.js"
 import type { CelestialBody } from "../engine/astronomy/CelestialPositions.js"
 import { PoherAnswers, PoherMatrix } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts, PoherMatrixVersion, PoherRanking } from "../engine/witness/PoherMatrix.js"
@@ -14,7 +15,6 @@ import { ReentrySighting } from "../modules/sky-events/reentries/Reentry.js"
 import type { ReentryJson } from "../modules/sky-events/reentries/Reentry.js"
 import type { AircraftDescription, AircraftTrack } from "../engine/traffic/AircraftProvider.js"
 import type { BodyJson, InterpretationJson } from "../engine/interpretation/Interpretation.js"
-import { BRIGHT_STARS } from "../engine/astronomy/brightStarCatalog.js"
 
 /** What the view needs of the editor that holds it. */
 export interface CandidatesHost {
@@ -120,7 +120,7 @@ export class CandidatesView {
 .variant-badge button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: rgba(7, 10, 18, .85); color: #e8ecf4; font: 600 12px/1 var(--sans); }
 `
 
-  private static readonly PLANETS: readonly CelestialBody[] = ["Venus", "Mars", "Jupiter", "Saturn"]
+  private static readonly PLANETS = SkyCandidates.PLANETS
   /** How many stars are tried: those that shone nearest where the account puts its phenomenon, since a star is only ever mistaken there. */
   private static readonly STARS = 6
   /** The faintest star tried: the first-magnitude ones, which are what gets taken for something else; a fainter one nearer would win
@@ -156,27 +156,11 @@ export class CandidatesView {
   constructor(private readonly host: CandidatesHost, private readonly section: HTMLElement) {
   }
 
-  /** What the account states of its main phenomenon: the first shape, at its first keyframe. */
+  /** What the account states of its main phenomenon: the first shape, at its first keyframe (see SkyCandidates.statement). */
   private statement(): AccountStatement | undefined {
-    const sighting = this.host.sighting
-    const timeline = sighting.timeline
-    const first = timeline.sourceIds[0]
-    if (!first) return undefined
-    const t = timeline.allKeyframes.find(keyframe => keyframe.shapes.some(state => state.sourceId === first))?.t ?? 0
-    this.statementT = t
-    const shape = timeline.getInterpolatedShapeAt(t, first)
-    if (!shape?.aim) return undefined
-    const statement: AccountStatement = { aim: shape.aim, widthDeg: shape.angular?.widthDeg, timeHow: sighting.provenance.at("time")?.how }
-    // How it moved and grew: from the first instant it is placed to the last, when the account places it more than once.
-    const last = [...timeline.allKeyframes].reverse().find(keyframe => keyframe.t > t && timeline.getShapeAt(keyframe.t, first)?.aim)
-    const end = last ? timeline.getInterpolatedShapeAt(last.t, first) : undefined
-    if (last && end?.aim) {
-      statement.motion = { sweepDeg: CandidateSearch.separation(shape.aim, end.aim), spanMinutes: (last.t - t) / 60_000 }
-      const from = shape.angular?.widthDeg
-      const to = end.angular?.widthDeg
-      if (from && to) statement.growth = to / from
-    }
-    return statement
+    const found = SkyCandidates.statement(this.host.sighting)
+    this.statementT = found?.t ?? 0
+    return found?.statement
   }
 
   /** The candidates whose track can be computed, each as the phenomenon of the matrix it stands for. */
@@ -184,21 +168,7 @@ export class CandidatesView {
     const start = this.host.start()
     if (!start) return []
     const names = this.host.messages().candidates.bodies
-    const body = (name: CelestialBody): CandidateTrack => ({
-      id: name,
-      label: names[name] ?? name,
-      at: (offsetMinutes: number) => {
-        const date = new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000)
-        const position = computeBodyPosition(name, date, start.observer)
-        if (position.altitudeDeg < 0) return undefined
-        const sun = computeBodyPosition("Sun", date, start.observer).altitudeDeg
-        const magnitude = name === "Moon" ? -10 : computeBodyMagnitude(name, date)
-        if (magnitude > this.host.limitAt(sun)) return undefined
-        return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: name === "Moon" ? WitnessError.MOON_DEG : 0.01, magnitude }
-      },
-      // A body of the sky stands still against the horizon: seen moving, it is by the autokinetic effect, or behind drifting clouds.
-      readings: ["still-seen-moving"]
-    })
+    const body = (name: CelestialBody): CandidateTrack => SkyCandidates.body(name, names[name] ?? name, start, this.statementT, sunAltitudeDeg => this.host.limitAt(sunAltitudeDeg))
     this.phenomenonOf.clear()
     const tracks: CandidateTrack[] = [body("Moon")]
     this.phenomenonOf.set("Moon", "Moon")
@@ -243,35 +213,11 @@ export class CandidatesView {
    */
   private starTracks(start: { date: Date, observer: { lat: number, lng: number, elevationM: number } }, statement: AccountStatement): CandidateTrack[] {
     const m = this.host.messages().candidates
-    const dateAt = (offsetMinutes: number) => new Date(start.date.getTime() + this.statementT + offsetMinutes * 60_000)
-    const sunAt = (date: Date) => computeBodyPosition("Sun", date, start.observer).altitudeDeg
-    const limit = this.host.limitAt(sunAt(dateAt(0)))
-    const aim = statement.aim
-    const rad = Math.PI / 180
-    const away = (position: { azimuthDeg: number, altitudeDeg: number }) => !aim ? 0 : Math.acos(Math.min(1,
-      Math.sin(aim.altitudeDeg * rad) * Math.sin(position.altitudeDeg * rad)
-      + Math.cos(aim.altitudeDeg * rad) * Math.cos(position.altitudeDeg * rad) * Math.cos((position.azimuthDeg - aim.azimuthDeg) * rad))) / rad
-    const seen = BRIGHT_STARS
-      .filter(star => star.mag <= Math.min(limit, CandidatesView.STAR_MAG))
-      .map(star => ({ star, position: equatorialToHorizontal(star.raHours, star.decDeg, dateAt(0), start.observer) }))
-      .filter(({ position }) => position.altitudeDeg > 0)
-      .sort((a, b) => away(a.position) - away(b.position) || a.star.mag - b.star.mag)
-      .slice(0, CandidatesView.STARS)
-    return seen.map(({ star }) => {
-      const id = `star-${star.name}`
-      this.phenomenonOf.set(id, "Stars")
-      return {
-        id,
-        label: m.star.replace("{name}", this.host.starName(star.name)),
-        at: (offsetMinutes: number) => {
-          const date = dateAt(offsetMinutes)
-          const position = equatorialToHorizontal(star.raHours, star.decDeg, date, start.observer)
-          if (position.altitudeDeg < 0 || star.mag > this.host.limitAt(sunAt(date))) return undefined
-          return { aim: { azimuthDeg: position.azimuthDeg, altitudeDeg: position.altitudeDeg }, widthDeg: 0.01, magnitude: star.mag }
-        },
-        readings: ["still-seen-moving"] as StructuralReading[]
-      }
-    })
+    return SkyCandidates.stars(start, this.statementT, statement, sunAltitudeDeg => this.host.limitAt(sunAltitudeDeg), CandidatesView.STARS, CandidatesView.STAR_MAG)
+      .map(({ star, track }) => {
+        this.phenomenonOf.set(track.id, "Stars")
+        return { ...track, label: m.star.replace("{name}", this.host.starName(star.name)) }
+      })
   }
 
   /**
@@ -721,7 +667,7 @@ export class CandidatesView {
     const [stated, variant] = this.values(moved)
     const values = document.createElement("span")
     values.append(Object.assign(document.createElement("s"), { textContent: stated }), " → ", Object.assign(document.createElement("b"), { textContent: variant }))
-    const amount = moved.parameter === "clock" || moved.parameter === "heading" || moved.parameter === "sweep"
+    const amount = moved.parameter === "clock" || moved.parameter === "heading" || moved.parameter === "sweep" || moved.parameter === "date"
       ? `${moved.amount > 0 ? "+" : ""}${this.number(WitnessError.rounded(moved.amount))}`
       : this.number(WitnessError.rounded(moved.amount))
     row.append(Object.assign(document.createElement("span"), { textContent: m.candidates.fields[moved.field] }), values,
@@ -743,6 +689,12 @@ export class CandidatesView {
       if (!start) return ["", ""]
       const at = (date: Date) => date.toLocaleTimeString(document.documentElement.lang || undefined, { hour: "2-digit", minute: "2-digit" })
       return [at(start.date), at(new Date(start.date.getTime() + moved.variant * 60_000))]
+    }
+    if (moved.field === "date") {
+      const start = this.host.start()
+      if (!start) return ["", ""]
+      const on = (date: Date) => date.toLocaleDateString(document.documentElement.lang || undefined, { day: "numeric", month: "short" })
+      return [on(start.date), on(new Date(start.date.getTime() + moved.variant * 86_400_000))]
     }
     if (moved.field === "duration") {
       const seconds = (value: number) => `${this.number(WitnessError.rounded(value))} s`

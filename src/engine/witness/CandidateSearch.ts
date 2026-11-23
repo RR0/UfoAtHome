@@ -53,11 +53,11 @@ export type Verdict = "consolidated" | "contested" | "incompatible"
 
 /** One value of the account as the variant reads it: what the account said, what the candidate needs, and the bias that moves one to the other. */
 export interface MovedValue {
-  field: "time" | "heading" | "elevation" | "size" | "duration" | "sweep"
+  field: "date" | "time" | "heading" | "elevation" | "size" | "duration" | "sweep"
   stated: number
   variant: number
   /** The bias invoked, as the witness parameter it is (see WitnessParameter), and how far, in units of its law's spread. */
-  parameter: "clock" | "heading" | "elevation" | "size" | "duration" | "sweep"
+  parameter: "date" | "mirror" | "clock" | "heading" | "elevation" | "size" | "duration" | "sweep"
   amount: number
   z: number
   status: LeadStatus
@@ -74,7 +74,8 @@ export interface Variant {
   /** The distance from the account, in units of the laws' spread (σ), summed in quadrature. Not a probability. */
   cost: number
   /** `durationFactor`: how many times longer it lasted than the account says, when how it moved was confronted. */
-  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number }
+  /** `dateShiftDays`: the days the date is shifted by, when it is; `mirrored`: whether the heading's sense is reversed (east for west). */
+  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number, dateShiftDays?: number, mirrored?: boolean }
   moved: MovedValue[]
   /** The structural readings it uses: those the account needs of it and it declares. */
   readings: UsedReading[]
@@ -126,12 +127,80 @@ export class CandidateSearch {
   }
   /** The degrees an elevation outside its one-sided law is paid in, per σ. */
   private static readonly ELEVATION_SIGMA_DEG = 5
+  /**
+   * The days a date may be wrong by, each way: the wrong-date lead finds about 2 % of witnesses a day out (see the `date` witness parameter).
+   * A wrong month or year is a wrong date too, but no candidate of the sky is searched that far.
+   */
+  static readonly DATE_SHIFTS_DAYS: readonly number[] = [-1, 1]
+  /** What a wrong date costs, in σ: 2 % of witnesses, the tail of a normal law beyond 2.05 σ. Past TAIL_SIGMA, so "only by invoking" it. */
+  static readonly DATE_SHIFT_SIGMA = 2.05
+  /**
+   * What a heading's sense reversed costs, in σ (east said for west, or a sketch drawn as if seen from the other side): argued from cases,
+   * measured by no study, and rare enough to be past TAIL_SIGMA.
+   */
+  static readonly MIRROR_SIGMA = 2.5
 
-  constructor(private readonly model: ErrorModel, private readonly conditions?: WitnessConditions) {
+  private readonly dateShifts: readonly number[]
+  private readonly mirror: boolean
+
+  /**
+   * @param options.dateShiftDays The days the date may be shifted by (DATE_SHIFTS_DAYS when absent; none for a search whose dates are
+   *   played as scenarios, see ScenarioSweep). `mirror`: whether a heading's sense may be reversed, true when absent.
+   */
+  constructor(private readonly model: ErrorModel, private readonly conditions?: WitnessConditions,
+              options: { dateShiftDays?: readonly number[], mirror?: boolean } = {}) {
+    this.dateShifts = options.dateShiftDays ?? CandidateSearch.DATE_SHIFTS_DAYS
+    this.mirror = options.mirror ?? true
   }
 
-  /** The variant `candidate` makes of the account, the best its parameters can do. */
+  /**
+   * The variant `candidate` makes of the account, the best its parameters can do: with the date as given and the heading in its sense
+   * first, and with the date shifted or the heading mirrored only when that brings the account nearer, at what those cost.
+   */
   fit(statement: AccountStatement, candidate: CandidateTrack): Variant {
+    let best = this.fitAt(statement, candidate, 0, false)
+    const mirrored = statement.aim ? [false, true] : [false]
+    for (const shift of [0, ...this.dateShifts.filter(days => days !== 0)]) {
+      for (const mirror of this.mirror ? mirrored : [false]) {
+        if (shift === 0 && !mirror) continue
+        const variant = this.fitAt(statement, candidate, shift, mirror)
+        if (variant.cost < best.cost && (variant.verdict !== "incompatible" || best.verdict === "incompatible")) best = variant
+      }
+    }
+    return best
+  }
+
+  /** The variant `candidate` makes of the account with its date shifted by `shiftDays` and its headings mirrored or not. */
+  private fitAt(stated: AccountStatement, candidate: CandidateTrack, shiftDays: number, mirror: boolean): Variant {
+    const statement: AccountStatement = mirror && stated.aim
+      ? { ...stated, aim: { ...stated.aim, azimuthDeg: CandidateSearch.mirrored(stated.aim.azimuthDeg) } } : stated
+    const shiftMinutes = shiftDays * 1440
+    const shifted: CandidateTrack = shiftDays === 0 ? candidate : { ...candidate, at: offset => candidate.at(offset + shiftMinutes) }
+    const extra: MovedValue[] = []
+    if (shiftDays !== 0) {
+      extra.push({ field: "date", stated: 0, variant: shiftDays, parameter: "date", amount: shiftDays, z: CandidateSearch.DATE_SHIFT_SIGMA, status: "single" })
+    }
+    if (mirror && stated.aim) {
+      extra.push({ field: "heading", stated: stated.aim.azimuthDeg, variant: statement.aim!.azimuthDeg, parameter: "mirror", amount: 1, z: CandidateSearch.MIRROR_SIGMA, status: "argued" })
+    }
+    const variant = this.fitShifted(statement, shifted)
+    if (extra.length === 0) return variant
+    const moved = [...extra, ...variant.moved]
+    const cost = Math.sqrt(moved.reduce((sum, value) => sum + value.z * value.z, 0))
+    // A shift or a mirror is a law's tail: what it gives is contested at best.
+    const verdict: Verdict = variant.verdict === "incompatible" ? "incompatible" : "contested"
+    return {
+      ...variant, moved, cost: WitnessError.rounded(cost), verdict,
+      parameters: { ...variant.parameters, ...(shiftDays !== 0 ? { dateShiftDays: shiftDays } : {}), ...(mirror ? { mirrored: true } : {}) }
+    }
+  }
+
+  /** A heading with its sense reversed: east for west, the north–south line kept. */
+  static mirrored(azimuthDeg: number): number {
+    return (360 - azimuthDeg) % 360
+  }
+
+  private fitShifted(statement: AccountStatement, candidate: CandidateTrack): Variant {
     const timeLaw = this.model.law({ kind: "time", value: 0, how: statement.timeHow }, this.conditions)
     const timeSigma = Math.max(0.5, (timeLaw.high ?? 6) / 2)
     let best: Variant | undefined

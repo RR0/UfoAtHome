@@ -5,6 +5,61 @@
   "fr": "Cinq agents fédéraux voient, sur deux soirs d'octobre 2023 et à l'aube suivante, des orbes qui en lâchent d'autres, sur un site sensible de l'ouest des États-Unis dont le lieu n'est pas publié (AARO, FBI). Les scènes sont jouées à des positions de travail au Nevada (Desert Valley, NNSS), les dates tirées d'un train Starlink. Le lieu n'étant pas connu, les lectures qui dépendent du vent ou du relief sont aussi jouées aux bornes de ce qui reste ouvert : à chaque lieu candidat (la position de travail, le refuge de Pahranagat, la route de Groom Lake) et à chaque date (les deux soirs échangés, l'aube un jour plus tôt), chacune avec son vent archivé. Une lecture qui passe partout est une explication plausible robuste, une qui échoue partout une exclusion robuste, les autres sont conditionnelles. Ainsi les leurres restent une explication plausible robuste de la naissance des orbes rouges (pas de leur course vers le sud) ; les lanternes, d'abord écartées au seul lieu supposé, deviennent une exclusion robuste : il leur faudrait un vent vers le sud-sud-ouest qu'aucun lieu ni aucune date n'a ; les fils de la Vierge deviennent conditionnels (près de Frenchman Flat, pas sur la route de Groom Lake).",
   "en": "Five federal agents see, over two evenings of October 2023 and the following dawn, orbs that release other orbs, at a sensitive site of the western United States whose location is not published (AARO, FBI). The scenes are played at working positions in Nevada (Desert Valley, NNSS), the dates taken from a Starlink train. The place being unknown, the readings that depend on the wind or the relief are also played at the bounds of what is left open: at each candidate place (the working position, the Pahranagat refuge, the Groom Lake Road) and on each date (the two evenings swapped, the dawn a day earlier), each in its own archived wind. A reading that holds everywhere is a robust plausible explanation, one that fails everywhere a robust exclusion, the others are conditional. So the flares stay a robust plausible explanation of the red orbs' birth (not of their run south); the lanterns, first ruled out at the assumed place alone, become a robust exclusion: they would need a wind toward the south-south-west that no place or date has; the gossamer becomes conditional (near Frenchman Flat, not on the Groom Lake Road)."
  },
+ "conditions": {
+  "time": {
+   "from": "2023-10-14T12:00",
+   "to": "2023-10-16T12:00",
+   "rationale": "AARO gives \"two days in October 2023\" and the witnesses \"mid-Oct 2023\": the two evenings are taken as the 14th and the 15th and the dawn as the 16th, but either evening may be either day, and the dawn the one after either evening"
+  },
+  "places": {
+   "candidates": [
+    {
+     "id": "pahranagat",
+     "place": {
+      "name": "Alamo and Badger roads at US-93, Pahranagat National Wildlife Refuge, Nevada",
+      "locations": [
+       {
+        "lat": 37.277,
+        "lng": -115.118
+       }
+      ]
+     },
+     "rationale": "the place is withheld, and the clues of the narratives fit Desert Valley and the Nevada National Security Site best, the Pahranagat refuge and the road to Groom Lake not being excluded (see the case's summary): the evening teams' other candidate",
+     "for": [
+      "w3-1",
+      "w2-1",
+      "w5-1",
+      "w5-2",
+      "w5-3",
+      "w1-1",
+      "w1-2",
+      "w1-3",
+      "w4-1",
+      "w4-2"
+     ]
+    },
+    {
+     "id": "groom",
+     "place": {
+      "name": "Groom Lake Road, Nevada",
+      "locations": [
+       {
+        "lat": 37.3,
+        "lng": -115.7
+       }
+      ]
+     },
+     "rationale": "the place is withheld, and the clues of the narratives fit Desert Valley and the Nevada National Security Site best, the Pahranagat refuge and the road to Groom Lake not being excluded (see the case's summary): the dawn team's other candidate",
+     "for": [
+      "w5-4",
+      "w5-5",
+      "w1-4",
+      "w1-5"
+     ]
+    }
+   ]
+  }
+ },
  "events": [
   {
    "type": "event",

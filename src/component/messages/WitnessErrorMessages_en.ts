@@ -140,6 +140,7 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
     "costNote": "A cost is not a probability: it says which biases have to be invoked, and how far.",
     "scopeNote": "Poher matrix (1977) for the starting list; the Moon, the planets, satellite passes, re-entries, recorded fireballs and the aircraft of the traffic record are computed and confronted with the account.",
     "fields": {
+      "date": "Date",
       "time": "Time",
       "heading": "Azimuth",
       "elevation": "Elevation",
@@ -148,6 +149,8 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
       "sweep": "Sweep across the sky"
     },
     "biases": {
+      "date": "date shifted {x} d",
+      "mirror": "heading mirrored (east for west)",
       "clock": "clock offset {x} min",
       "heading": "heading rotation {x}°",
       "elevation": "elevation overestimated ×{x}",

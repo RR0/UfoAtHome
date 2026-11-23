@@ -140,6 +140,7 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
     "costNote": "Un coût n'est pas une probabilité : il dit quels biais il faut invoquer, et de combien.",
     "scopeNote": "Matrice de Poher (1977) pour la liste de départ ; la Lune, les planètes, les passages de satellites, les rentrées, les bolides enregistrés et les avions du relevé sont calculés et confrontés au récit.",
     "fields": {
+      "date": "Date",
       "time": "Heure",
       "heading": "Azimut",
       "elevation": "Hauteur sur l'horizon",
@@ -148,6 +149,8 @@ export const witnessErrorMessages_fr: WitnessErrorMessages = {
       "sweep": "Balayage dans le ciel"
     },
     "biases": {
+      "date": "date décalée de {x} j",
+      "mirror": "cap inversé (est pour ouest)",
       "clock": "décalage d'horloge {x} min",
       "heading": "rotation du cap {x}°",
       "elevation": "hauteur surestimée ×{x}",

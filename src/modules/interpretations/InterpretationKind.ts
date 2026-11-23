@@ -64,8 +64,21 @@ export interface InterpretationKind<J = unknown> {
    * kind no column stands for.
    */
   phenomenon?(item: J): string | undefined
+  /**
+   * One of them in another wind, for a kind the air carries: the same item, each wind it states (or would, were it not calm) replaced by
+   * `wind.at`'s at the height it applies at, metres above the ground at its site; `wind.levels` are the heights the wind is known at. What a
+   * scenario of another place or date plays a reading in (see ScenarioSweep). None for a kind the wind does not move.
+   */
+  inWind?(item: J, wind: KindWind): J
   /** The code of the editor's part; a kind without one is drawn and not edited. */
   editor?(): Promise<(container: HTMLElement, host: InterpretationEditorHost, language: string) => InterpretationEditor>
+}
+
+/** The wind an item is played in (see InterpretationKind.inWind): where it blows towards and how fast, at a height above the ground. */
+export interface KindWind {
+  at(aboveGroundM: number): { towardDeg: number, speedMS: number }
+  /** The heights above the ground the wind is known at, lowest first. */
+  levels: readonly number[]
 }
 
 /** The kinds of the registry, and what an interpretation states of them. */

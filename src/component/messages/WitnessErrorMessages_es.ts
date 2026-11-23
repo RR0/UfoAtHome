@@ -140,6 +140,7 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
     "costNote": "Un coste no es una probabilidad: dice qué sesgos hay que invocar, y cuánto.",
     "scopeNote": "Matriz de Poher (1977) para la lista de partida; la Luna, los planetas, los pasos de satélites, las reentradas, los bólidos registrados y los aviones del registro se calculan y se confrontan con el relato.",
     "fields": {
+      "date": "Fecha",
       "time": "Hora",
       "heading": "Acimut",
       "elevation": "Altura sobre el horizonte",
@@ -148,6 +149,8 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
       "sweep": "Recorrido en el cielo"
     },
     "biases": {
+      "date": "fecha desplazada {x} d",
+      "mirror": "rumbo invertido (este por oeste)",
       "clock": "desfase del reloj {x} min",
       "heading": "rotación del rumbo {x}°",
       "elevation": "altura sobreestimada ×{x}",

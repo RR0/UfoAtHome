@@ -140,6 +140,7 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "costNote": "Un costo non è una probabilità: dice quali distorsioni bisogna invocare, e di quanto.",
     "scopeNote": "Matrice di Poher (1977) per la lista di partenza; la Luna, i pianeti, i passaggi di satelliti, i rientri, i bolidi registrati e gli aerei del tracciato sono calcolati e confrontati con il racconto.",
     "fields": {
+      "date": "Data",
       "time": "Ora",
       "heading": "Azimut",
       "elevation": "Altezza sull'orizzonte",
@@ -148,6 +149,8 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
       "sweep": "Percorso nel cielo"
     },
     "biases": {
+      "date": "data spostata di {x} g",
+      "mirror": "direzione invertita (est per ovest)",
       "clock": "scarto dell'orologio {x} min",
       "heading": "rotazione della direzione {x}°",
       "elevation": "altezza sovrastimata ×{x}",

@@ -56,6 +56,13 @@ export interface InterpretationJson {
    */
   variant?: VariantJson
   /**
+   * When this interpretation is another reading played under one scenario of what the case leaves open (a candidate place, a candidate
+   * date: see UncertainConditionsJson): which scenario, and which reading it was played from. What it took from that place and date (the
+   * wind archived there) is established given the scenario, and only given it. Such a reading is a result of the scenario sweep
+   * (ScenarioSweep), which does not play it again.
+   */
+  scenario?: ScenarioRefJson
+  /**
    * What was found when the claim was set against what is known of the observation: each test it was put to and how it came out. A claim
    * that failed one is still a claim that was made, and is kept, with this, to show that it was examined and what that gave: see
    * ReadingVerdict for what the findings come to.
@@ -115,6 +122,16 @@ export interface ReadingFinding {
   path?: string
 }
 
+/** The scenario a reading was played under — see InterpretationJson.scenario. */
+export interface ScenarioRefJson {
+  /** The scenario's id: `<place>@<local instant>` ("pahranagat@2023-10-15T19:00"; "own" for the account's own place). */
+  id: string
+  /** The address of the reading it was played from, as the case lists it. */
+  of?: string
+  /** Which verdict of the sweep it shows, when it was kept for that (see ScenarioKeep). */
+  verdict?: "robust-plausible" | "robust-exclusion" | "conditional"
+}
+
 /** What makes an interpretation a variant of the account — see InterpretationJson.variant. */
 export interface VariantJson {
   /** Which candidate: a body of the sky ("Venus"), a satellite, a re-entry, an aircraft, or another interpretation. */
@@ -124,9 +141,9 @@ export interface VariantJson {
   /** The known phenomenon of Poher's matrix it is an instance of, when it is one. */
   phenomenon?: string
   /** The witness parameters applied: a clock offset in minutes, a rotation of the heading in degrees, factors on elevation and size. */
-  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number }
+  parameters: { clockMinutes: number, headingDeg: number, elevationFactor: number, sizeFactor: number, durationFactor?: number, dateShiftDays?: number, mirrored?: boolean }
   /** The values it moves: what the account says, what the variant reads, the bias and its status. */
-  moved: { field: "time" | "heading" | "elevation" | "size" | "duration" | "sweep", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
+  moved: { field: "date" | "time" | "heading" | "elevation" | "size" | "duration" | "sweep", stated: number, variant: number, parameter: string, amount: number, z: number, status: string }[]
   /** The structural readings it uses (see CandidateSearch's StructuralReading), each with what the studies say of it. */
   readings?: { reading: string, status: string }[]
   /** What it costs, in units of the laws' spread (σ), and the verdict it got. */
@@ -234,6 +251,12 @@ export interface BodyJson {
    * height of that ground is read from the relief as it is drawn.
    */
   altitudeFrom?: { eastM: number, northM: number }
+  /**
+   * Whether its track was written drifting with the ground wind, as gossamer or a leaf does: its drift is then that of its track's first
+   * and last keyframes, and a scenario of another place or date (see ScenarioSweep) moves it with that scenario's wind instead, its height,
+   * attitude and look kept. Absent, its track is where it is, whatever the wind.
+   */
+  drifting?: boolean
   /**
    * How much its light wavers, as a flame's does, as a share of it: 0.15 has it go some 15 % above and below what its track states, a few
    * times a second, alike every time the recording is played. Steady when absent.

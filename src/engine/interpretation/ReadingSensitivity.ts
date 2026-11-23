@@ -56,6 +56,8 @@ export interface ReadingComparison {
   separationDeg?: number
   /** Whether nothing said then contradicts it. */
   agrees: boolean
+  /** What of it is contradicted, when something is: its direction, its size. */
+  contradicted?: ("direction" | "size")[]
 }
 
 /** A reading set against the account under every turn of what it leaves free. */
@@ -397,7 +399,8 @@ export class ReadingSensitivity {
           ...(aspects.direction && reading.stated.aim ? { said: { azimuthDeg: reading.stated.aim.azimuthDeg, altitudeDeg: reading.stated.aim.altitudeDeg } } : {}),
           predicted: { azimuthDeg: reading.predicted.aim.azimuthDeg, altitudeDeg: reading.predicted.aim.altitudeDeg },
           ...(aspects.direction && reading.separationDeg !== undefined ? { separationDeg: reading.separationDeg } : {}),
-          agrees: counted.length === 0
+          agrees: counted.length === 0,
+          ...(counted.length > 0 ? { contradicted: [...new Set(counted)] as ("direction" | "size")[] } : {})
         })
       }
     }

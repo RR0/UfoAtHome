@@ -7,6 +7,7 @@ import type { ObserverVehicle } from "../model/Vehicle.js"
 import { Sighting } from "../model/Sighting.js"
 import { formatEdtfTime, parseEdtfTime, type SightingLocation, type SightingTime } from "../model/Sighting.js"
 import type { PlaceJson } from "@rr0/place"
+import type { UncertainConditionsJson } from "../scenario/UncertainConditions.js"
 import { Timeline } from "../model/Timeline.js"
 import type { TimelineJson } from "../model/Timeline.js"
 import { ObserverTrack } from "../model/ObserverTrack.js"
@@ -162,6 +163,9 @@ export interface SightingRecordingJson {
   /** What the observer took it to be, in metres — see InterpretationJson. Absent means they said
    * nothing a body could be made of, which is most of them. */
   interpretation?: InterpretationJson
+  /** The dates and places this account leaves open, when it says so itself rather than its case: field by field, they override the case's
+   * (see UncertainConditionsJson, ScenarioSweep). */
+  conditions?: UncertainConditionsJson
   /** The variants of the account that were kept: each an interpretation saying what the observer would have erred by for it to be a
    * misperception of a candidate (see InterpretationJson.variant). Absent means none was kept. */
   variants?: InterpretationJson[]

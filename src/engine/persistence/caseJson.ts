@@ -1,6 +1,7 @@
 import type { AgentRef, InterpretationEventJson, InterpretationJson } from "../interpretation/Interpretation.js"
 import type { InterviewMedium } from "./interviewJson.js"
 import { Provenance } from "./Provenance.js"
+import type { UncertainConditionsJson } from "../scenario/UncertainConditions.js"
 import { FormatVersion } from "./FormatVersion.js"
 import type { SaidText } from "../model/SaidText.js"
 import { InterpretationKinds } from "../../modules/interpretations/InterpretationKind.js"
@@ -33,6 +34,9 @@ export interface CaseJson {
   /** When it happened, as RR0 writes a time ("1948-07-24 02:45", "1954"). */
   time?: string
   events?: CaseEventJson[]
+  /** The dates and places the case leaves open, each candidate with what supports it: what its readings are played over to say how their
+   * verdicts depend on them (see UncertainConditionsJson, ScenarioSweep). Absent, every account is played where and when it says. */
+  conditions?: UncertainConditionsJson
 }
 
 /** One event of a case. A `sighting` points at a observer's recording by `url`; an

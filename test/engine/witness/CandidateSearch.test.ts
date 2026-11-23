@@ -136,3 +136,33 @@ describe("Variants kept in a recording", () => {
     expect(toSightingJson(fromSightingJson({ version: 4, timeline: { keyframes: [] } } as never)).variants).toBeUndefined()
   })
 })
+
+describe("CandidateSearch date shift and mirror", () => {
+  const search = new CandidateSearch(WitnessError.byId("consolidated"))
+  const account = { aim: { azimuthDeg: 100, altitudeDeg: 20 } }
+
+  it("finds a candidate that was there only the day before, at the cost of a wrong date, contested", () => {
+    // Where the account puts it a day earlier only: nowhere to be seen on the day given.
+    const yesterday: CandidateTrack = { id: "yesterday", label: "yesterday", at: offset => offset < -1000 ? { aim: { azimuthDeg: 100, altitudeDeg: 20 }, widthDeg: 0.01 } : undefined }
+    const variant = search.fit(account, yesterday)
+    expect(variant.verdict).toBe("contested")
+    expect(variant.parameters.dateShiftDays).toBe(-1)
+    expect(variant.moved[0]).toMatchObject({ field: "date", parameter: "date", variant: -1, status: "single" })
+    expect(new CandidateSearch(WitnessError.byId("consolidated"), undefined, { dateShiftDays: [] }).fit(account, yesterday).verdict).toBe("incompatible")
+  })
+
+  it("finds a candidate in the west for an account that says east, by a heading mirrored, contested", () => {
+    const variant = search.fit(account, still("west", 260, 18))
+    expect(variant.parameters.mirrored).toBe(true)
+    expect(variant.verdict).toBe("contested")
+    expect(variant.moved[0]).toMatchObject({ field: "heading", parameter: "mirror", stated: 100, variant: 260 })
+    expect(new CandidateSearch(WitnessError.byId("consolidated"), undefined, { mirror: false }).fit(account, still("west", 260, 18)).verdict).toBe("incompatible")
+  })
+
+  it("does not shift nor mirror what fits as given", () => {
+    const variant = search.fit(account, still("there", 105, 18))
+    expect(variant.verdict).toBe("consolidated")
+    expect(variant.parameters.dateShiftDays).toBeUndefined()
+    expect(variant.parameters.mirrored).toBeUndefined()
+  })
+})
