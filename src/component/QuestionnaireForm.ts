@@ -33,10 +33,6 @@ export interface QuestionnaireFormMessages {
   confidentialSealed: string
   confidentialSealedBefore: string
   confidentialNowhere: string
-  /** The buttons that go to the question before and after the one being answered, and where it stands: `{n}` of `{total}`. */
-  previousQuestion: string
-  nextQuestion: string
-  questionOf: string
   /** How many questions of a section are answered: `{n}` of `{total}`. */
   sectionAnswered: string
   /** Before the picker of a files question: what it adds. */
@@ -111,96 +107,19 @@ export class QuestionnaireForm {
     if (others.length > 0) parts.push(this.section(messages.other, undefined, undefined, others, json, messages, language, readonly))
     this.container.replaceChildren(...parts)
     this.messages = messages
-    this.step = this.stepper(messages)
     // A section answered already stays as it is shown; one that becomes so is closed (see place).
     this.complete = new WeakSet([...this.container.querySelectorAll<HTMLElement>(".form-section")].filter(QuestionnaireForm.isComplete))
-    this.current = this.rows()[0]
-    this.container.addEventListener("focusin", this.follow)
     this.place()
   }
 
-  /** The question being answered: the one last gone into, by its buttons or by hand; the first until then. */
-  private current?: HTMLElement
   private messages?: QuestionnaireFormMessages
-  /** The buttons that go from the question being answered to the one before or after, beside it. */
-  private step?: { box: HTMLElement, previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement }
   /** The sections whose every question has an answer, as last seen. */
   private complete = new WeakSet<HTMLElement>()
 
-  private readonly follow = (event: Event): void => {
-    const row = (event.target as HTMLElement).closest?.<HTMLElement>(".form-field")
-    if (!row || row === this.current) return
-    this.current = row
-    this.place()
-  }
-
-  /** Every question of the form, in order. */
-  private rows(): HTMLElement[] {
-    return [...this.container.querySelectorAll<HTMLElement>(".form-field")]
-  }
-
-  /**
-   * Goes to the question `step` after the one being answered (before it when negative): its section opened, the one left closed, the question brought
-   * into sight and its field focused.
-   */
-  go(step: number): void {
-    const rows = this.rows()
-    if (rows.length === 0) return
-    const at = this.current ? rows.indexOf(this.current) : -1
-    const to = rows[at < 0 ? (step > 0 ? 0 : rows.length - 1) : Math.min(rows.length - 1, Math.max(0, at + step))]
-    const left = this.current?.closest("details")
-    const entered = to.closest("details")
-    if (left && left !== entered) left.open = false
-    if (entered) entered.open = true
-    this.current = to
-    to.scrollIntoView?.({ block: "nearest", behavior: "smooth" })
-    to.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, button.form-when-mode, input[type=file]")?.focus({ preventScroll: true })
-    this.place()
-  }
-
-  /** The small buttons beside the question being answered, to the one before and the one after, and where it stands among them. */
-  private stepper(messages: QuestionnaireFormMessages): { box: HTMLElement, previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement } {
-    const box = document.createElement("span")
-    box.className = "form-step"
-    const button = (text: string, title: string, step: number) => {
-      const b = document.createElement("button")
-      b.type = "button"
-      b.textContent = text
-      b.title = title
-      b.setAttribute("aria-label", title)
-      // Pressed, it leaves the focus in the question: shown while the question has it, it would be hidden before it is clicked.
-      b.addEventListener("mousedown", event => event.preventDefault())
-      b.addEventListener("click", () => this.go(step))
-      return b
-    }
-    const previous = button("▲", messages.previousQuestion, -1)
-    previous.className = "form-step-previous"
-    const where = document.createElement("span")
-    where.className = "form-step-where"
-    const next = button("▼", messages.nextQuestion, 1)
-    next.className = "form-step-next"
-    box.append(previous, where, next)
-    return { box, previous, next, where }
-  }
-
-  /**
-   * Puts the buttons beside the question being answered, says where it stands, and how much of each section is answered; a section whose last question
-   * has just been answered is closed.
-   */
+  /** Says how much of each section is answered; a section whose last question has just been answered is closed. */
   private place(): void {
-    const step = this.step
     const messages = this.messages
-    if (!step || !messages) return
-    const rows = this.rows()
-    const at = this.current ? rows.indexOf(this.current) : -1
-    // On the question itself, over its edges: shown while it has the focus, in a margin every question keeps, so that nothing moves.
-    if (at >= 0 && step.box.parentElement !== this.current) this.current!.append(step.box)
-    step.previous.disabled = at <= 0
-    step.next.disabled = at >= rows.length - 1
-    // Where it stands, said to whoever asks (a tooltip, a screen reader) rather than shown.
-    const where = at < 0 ? "" : messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
-    step.box.title = where
-    step.where.textContent = where
+    if (!messages) return
     for (const section of this.container.querySelectorAll<HTMLDetailsElement>("details.form-section")) {
       const fields = [...section.querySelectorAll<HTMLElement>(".form-field")]
       const answered = fields.filter(QuestionnaireForm.isAnswered).length
