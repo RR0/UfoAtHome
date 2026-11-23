@@ -151,7 +151,7 @@ describe("QuestionnaireForm sections", () => {
     ]
   }
 
-  it("shows each section closed, named with its number and saying how much of it is answered, and goes from one question to the next by buttons beside it", () => {
+  it("shows each section closed, named with its number and saying how much of it is answered, and goes from one question to the next by ▲ and ▼ on its edges", () => {
     const container = document.createElement("div")
     document.body.append(container)
     const json = QuestionnaireTemplates.interview(two)
@@ -164,16 +164,16 @@ describe("QuestionnaireForm sections", () => {
     // The buttons are beside the question being answered, the first until another is gone into.
     const step = () => container.querySelector<HTMLElement>(".form-step")!
     const at = () => [step().closest<HTMLElement>(".form-field")!.dataset.field, step().querySelector(".form-step-where")!.textContent]
-    expect(at()).toEqual(["1", "1/3"])
+    expect(at()).toEqual(["1", "Question 1 sur 3"])
     expect(step().querySelector<HTMLButtonElement>(".form-step-previous")!.disabled).toBe(true)
     step().querySelector<HTMLButtonElement>(".form-step-next")!.click()
-    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "2/3"])
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "Question 2 sur 3"])
     step().querySelector<HTMLButtonElement>(".form-step-next")!.click()
-    expect([sections[0].open, sections[1].open, ...at()]).toEqual([false, true, "3", "3/3"])
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([false, true, "3", "Question 3 sur 3"])
     expect(step().querySelector<HTMLButtonElement>(".form-step-next")!.disabled).toBe(true)
     expect(document.activeElement?.id).toBe("form-3")
     step().querySelector<HTMLButtonElement>(".form-step-previous")!.click()
-    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "2/3"])
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "Question 2 sur 3"])
     container.remove()
   })
 

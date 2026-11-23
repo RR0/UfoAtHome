@@ -168,14 +168,16 @@ export class QuestionnaireForm {
       b.textContent = text
       b.title = title
       b.setAttribute("aria-label", title)
+      // Pressed, it leaves the focus in the question: shown while the question has it, it would be hidden before it is clicked.
+      b.addEventListener("mousedown", event => event.preventDefault())
       b.addEventListener("click", () => this.go(step))
       return b
     }
-    const previous = button("‹", messages.previousQuestion, -1)
+    const previous = button("▲", messages.previousQuestion, -1)
     previous.className = "form-step-previous"
     const where = document.createElement("span")
     where.className = "form-step-where"
-    const next = button("›", messages.nextQuestion, 1)
+    const next = button("▼", messages.nextQuestion, 1)
     next.className = "form-step-next"
     box.append(previous, where, next)
     return { box, previous, next, where }
@@ -191,13 +193,14 @@ export class QuestionnaireForm {
     if (!step || !messages) return
     const rows = this.rows()
     const at = this.current ? rows.indexOf(this.current) : -1
-    // In the question's label, at its end, on the right.
-    const host = this.current?.querySelector(":scope > label") ?? this.current
-    if (at >= 0 && host && step.box.parentElement !== host) host.append(step.box)
+    // On the question itself, over its edges: shown while it has the focus, in a margin every question keeps, so that nothing moves.
+    if (at >= 0 && step.box.parentElement !== this.current) this.current!.append(step.box)
     step.previous.disabled = at <= 0
     step.next.disabled = at >= rows.length - 1
-    step.where.textContent = at < 0 ? "" : `${at + 1}/${rows.length}`
-    step.where.title = at < 0 ? "" : messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
+    // Where it stands, said to whoever asks (a tooltip, a screen reader) rather than shown.
+    const where = at < 0 ? "" : messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
+    step.box.title = where
+    step.where.textContent = where
     for (const section of this.container.querySelectorAll<HTMLDetailsElement>("details.form-section")) {
       const fields = [...section.querySelectorAll<HTMLElement>(".form-field")]
       const answered = fields.filter(QuestionnaireForm.isAnswered).length

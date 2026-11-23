@@ -160,7 +160,7 @@ describe("InterviewEditorElement's groups", () => {
     expect(part(element, "group-form").hidden).toBe(false)
     const legends = [...element.shadowRoot!.querySelectorAll("#form-fields .form-section-title")].map(legend => legend.textContent)
     expect(legends[0]).toBe("Votre observation")
-    expect(legends).toContain("C. Description du phénomène")
+    expect(legends).toContain("Description du phénomène")
     const date = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="B4"] input')!
     expect(date.type).toBe("date")
     date.value = "2024-03-12"

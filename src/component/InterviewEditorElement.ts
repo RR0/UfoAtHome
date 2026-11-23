@@ -203,15 +203,26 @@ const TEMPLATE = `
   /* The questionnaire as a form: its sections one under the other, a question above its answer, the answer the width of the form. */
   .form-fields { display: grid; gap: 18px; }
   .form-intro, .form-source, .form-section-intro, .form-hint { margin: 0; color: var(--ink-dim); font: 400 14px/1.45 var(--sans); }
-  .form-section { display: grid; gap: 14px; margin: 0; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 8px; }
+  .form-section { display: grid; gap: var(--form-gap, 14px); margin: 0; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 8px; }
   .form-section:not([open]) { display: block; padding-bottom: 12px; }
   .form-section > summary { display: flex; align-items: baseline; gap: 10px; cursor: pointer; font: 600 15px/1.3 var(--sans); color: var(--ink); }
   .form-section-count { margin-left: auto; font: 400 12px/1.3 var(--sans); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  /* Beside the question being answered: to the one before and the one after, and where it stands. */
-  .form-step { order: 9; flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin: 0 0 0 auto; padding-left: 10px; color: var(--ink-faint); font: 400 12px/1 var(--sans); font-variant-numeric: tabular-nums; }
-  .form-step button { font: 600 14px/1 var(--sans); width: 24px; height: 22px; padding: 0; border: 1px solid var(--line-strong); border-radius: 6px; background: none; color: var(--ink); cursor: pointer; }
-  .form-step button:disabled { opacity: .35; cursor: default; }
-  .form-step button:not(:disabled):hover { border-color: var(--glow-dim); }
+  /*
+   * Between the questions, a line; the question that has the focus has ▲ on the line above it and ▼ on the line below, in a margin on the right that
+   * every question keeps, so that nothing moves when they show.
+   */
+  .form-section { --form-gap: 14px; }
+  .form-field + .form-field { border-top: 1px solid var(--line); padding-top: var(--form-gap); }
+  .form-field { position: relative; padding-right: 30px; }
+  .form-step { position: absolute; z-index: 3; top: 0; bottom: calc(-1 * var(--form-gap)); right: 0; width: 24px; visibility: hidden; pointer-events: none; }
+  .form-field:focus-within > .form-step { visibility: visible; pointer-events: auto; }
+  .form-step button { position: absolute; right: 0; width: 24px; height: 20px; padding: 0; font: 400 10px/1 var(--sans); border: 1px solid var(--line-strong); border-radius: 6px;
+    background: var(--ground, Canvas); color: var(--ink); cursor: pointer; }
+  .form-step .form-step-previous { top: 0; transform: translateY(-50%); }
+  .form-step .form-step-next { bottom: 0; transform: translateY(50%); }
+  .form-step button:disabled { visibility: hidden; }
+  .form-step button:hover { border-color: var(--glow-dim); }
+  .form-step-where { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .form-field { display: grid; gap: 6px; }
   .form-field > label { font: 600 14px/1.35 var(--sans); color: var(--ink); }
   .form-field .required { color: var(--ink-faint); }
