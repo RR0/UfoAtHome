@@ -42,6 +42,8 @@ export interface InterviewMessages extends InputFileMessages {
   recordingOffset: string
   recordingRemove: string
   recordingAdd: string
+  /** Why another cannot be added yet: the last one has no file. */
+  recordingAddFirst: string
   /** The ✕ of the recordings' window. */
   close: string
   noRecording: string

@@ -50,6 +50,7 @@ export const interviewMessages_fr: InterviewMessages = {
   recordingOffset: "Décalage",
   recordingRemove: "Retirer",
   recordingAdd: "Ajouter un enregistrement",
+  recordingAddFirst: "Donnez d'abord le fichier de l'enregistrement ci-dessus",
   close: "Fermer",
   noRecording: "Aucun enregistrement : ajoutez le fichier audio ou vidéo de l'entretien pour pouvoir l'écouter.",
   redactSelection: "Retirer la sélection",

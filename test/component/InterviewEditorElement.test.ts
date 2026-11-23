@@ -825,3 +825,30 @@ describe("A confidential answer sealed for a recipient", () => {
     expect(element.transcriptText ?? "").not.toContain("Lilas")
   })
 })
+
+describe("The recordings of an interview", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+  })
+
+  it("adds no recording after one left without its file, until it has one", async () => {
+    const { element } = await make({ type: "event", eventType: "interview", id: "interview-r", time: "2026-11-23", title: { en: "R" } })
+    const window = element.shadowRoot!.querySelector<HTMLDialogElement>(".recordings-window")!
+    element.shadowRoot!.querySelector<HTMLButtonElement>(".player-recordings")!.click()
+    const add = window.querySelector<HTMLButtonElement>(".recording-add")!
+    expect(add.disabled).toBe(false)
+    add.click()
+    await wait(100)
+    expect(window.querySelectorAll(".recording-row")).toHaveLength(1)
+    expect(add.disabled).toBe(true)
+    expect(add.title).not.toBe("")
+    const src = window.querySelector<HTMLInputElement>(".recording-row input[type='text']")!
+    src.value = "interview.mp3"
+    src.dispatchEvent(new Event("input"))
+    expect(add.disabled).toBe(false)
+    src.dispatchEvent(new Event("change"))
+    await wait(100)
+    expect(window.querySelector<HTMLButtonElement>(".recording-add")!.disabled).toBe(false)
+  })
+})

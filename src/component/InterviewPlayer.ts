@@ -265,6 +265,8 @@ export class InterviewPlayer {
       src.value = recording.src
       src.placeholder = "interview.mp3"
       src.addEventListener("change", () => this.edit(list => { list[index].src = src.value.trim() }))
+      // As it is typed: the last one given, another may be added.
+      if (index === this.recordings.length - 1) src.addEventListener("input", () => this.allowAdding(src.value.trim() !== ""))
       const disk = document.createElement("input")
       disk.type = "file"
       disk.accept = "audio/*,video/*"
@@ -312,6 +314,15 @@ export class InterviewPlayer {
       row.append(this.labelled(m.recordingKind, kind), this.labelled(m.recordingFile, file), this.labelled(m.recordingOffset, offset, "s"), remove, status)
       return row
     }))
+    const last = this.recordings[this.recordings.length - 1]
+    this.allowAdding(last === undefined || last.src !== "")
+  }
+
+  /** Another recording may be added once the last one has its file: a row left empty is not followed by another. */
+  private allowAdding(allowed: boolean): void {
+    const add = this.window.querySelector<HTMLButtonElement>(".recording-add")!
+    add.disabled = !allowed
+    add.title = allowed ? "" : this.messages.recordingAddFirst
   }
 
   /** A control with its name, and its unit after it. */
