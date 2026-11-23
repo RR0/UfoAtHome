@@ -134,9 +134,8 @@ if (flag("write")) {
         const profile = reading.depends.includes("wind") ? await wind.profile(scenario.lat, scenario.lng, scenario.date) : undefined
         const base = event.title ?? Provenance.strip(readingJson).recording.interpretation?.title
         const title = Object.fromEntries(LANGUAGES.map(lang => {
-          const w = wordsIn(lang)
           const text = typeof base === "string" ? base : (base as Record<string, string> | undefined)?.[lang] ?? (base as Record<string, string> | undefined)?.en ?? reading.url
-          return [lang, WORDS[lang].scenarioTitle.replace("{title}", text).replace("{place}", w.scenario(scenario).split(", ")[0]).replace("{date}", w.instant(scenario.local))]
+          return [lang, wordsIn(lang).title(text, scenario)]
         }))
         const candidate = candidates.get(scenario.placeId)
         const recording = ScenarioReadings.recording(readingJson, reading.url, scenario, profile, kinds, {

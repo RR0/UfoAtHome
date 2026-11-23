@@ -77,6 +77,7 @@ describe("The sweep of a case's uncertain place and date, in its editor", () => 
     const title = kept.find(k => k.recording.interpretation?.scenario?.id.startsWith("far"))!.recording.interpretation!.title as Record<string, string>
     expect(Object.keys(title).sort()).toEqual(["en", "es", "fr", "it"])
     expect(title.fr).toMatch(/^Gossamer, jouée à Far away le 16 avril 2020/)
+    expect(kept.find(k => k.recording.interpretation?.scenario?.id.startsWith("own"))!.recording.interpretation!.title).toMatchObject({ fr: expect.stringMatching(/^Gossamer, jouée au lieu supposé le 15 avril 2020/) })
     await expect.poll(() => element.shadowRoot!.textContent).toContain("2 readings added to the case.")
   })
 })

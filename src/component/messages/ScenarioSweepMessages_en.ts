@@ -47,5 +47,5 @@ export const scenarioSweepMessages_en = {
   keep: "Keep the ticked scenarios as readings",
   kept: "{n} readings added to the case.",
   bodies: { Moon: "Moon", Venus: "Venus", Mars: "Mars", Jupiter: "Jupiter", Saturn: "Saturn", ISS: "ISS" },
-  scenarioTitle: "{title}, played at {place} on {date}"
+  scenarioTitle: "{title}, played {place} on {date}"
 } satisfies ScenarioSweepMessages

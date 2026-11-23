@@ -70,6 +70,6 @@ export interface ScenarioSweepMessages {
   kept: string
   /** What the candidates of the sky are called. */
   bodies: { Moon: string, Venus: string, Mars: string, Jupiter: string, Saturn: string, ISS: string }
-  /** The title of a reading played under a scenario: `{title}`, at `{place}`, on `{date}`. */
+  /** The title of a reading played under a scenario: `{title}`, `{place}` with its preposition (see atPlaces, atOwnPlace), on `{date}`. */
   scenarioTitle: string
 }

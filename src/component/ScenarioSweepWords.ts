@@ -76,6 +76,12 @@ export class ScenarioSweepWords {
     return `${this.placeName(place)}, ${this.instant(local)}`
   }
 
+  /** The title of a reading played under `scenario`, from the title of the reading it was played from. */
+  title(base: string, scenario: Scenario): string {
+    const place = scenario.placeId === "own" ? this.m.atOwnPlace : this.m.atPlaces.replace("{places}", this.placeName(scenario.placeId))
+    return this.m.scenarioTitle.replace("{title}", base).replace("{place}", place).replace("{date}", this.instant(scenario.local))
+  }
+
   /** A local date, "15 October 2023". */
   date(date: string): string {
     return new Date(`${date}T12:00Z`).toLocaleDateString(this.language, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })

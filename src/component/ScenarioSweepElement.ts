@@ -172,9 +172,7 @@ ${HintElement.CSS}
           const base = (event?.title ?? readingJson.interpretation?.title) as SaidText | undefined
           const title = Object.fromEntries(languages.map(({ language, m }) => {
             const text = typeof base === "string" ? base : (base as Record<string, string> | undefined)?.[language] ?? (base as Record<string, string> | undefined)?.en ?? reading.url
-            const words = this.words(m, language)
-            const place = scenario.ownPlace ? m.ownPlace : json.conditions?.places?.candidates?.find(candidate => candidate.id === scenario.placeId)?.place.name ?? scenario.placeId
-            return [language, m.scenarioTitle.replace("{title}", text).replace("{place}", place).replace("{date}", words.instant(scenario.local))]
+            return [language, this.words(m, language).title(text, scenario)]
           })) as SaidText
           const candidate = json.conditions?.places?.candidates?.find(c => c.id === scenario.placeId)
           const recording = ScenarioReadings.recording(readingJson, reading.url, scenario, profile, kinds, {
