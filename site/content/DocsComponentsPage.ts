@@ -152,6 +152,13 @@ export class DocsComponentsPage extends DocsSection {
         <code>case.json</code> at a time: the witnesses' accounts and the readings of them. It adds, selects and
         deletes them, and exports the case.</li>
 
+      <li><strong><code>&lt;rr0-ufoathome&gt;</code> — the whole application.</strong>
+        What <a href="/app/">/app/</a> is: New, Open and the recent files, a case read or edited in place. Its
+        <code>case-template</code> attribute names the case template (a JSON file) that says what <em>New</em> offers: without one,
+        a blank observation; with one, its starts (the only one taken without asking), the questionnaires a new case asks its
+        witness to fill in, the modules they need (whose scripts run, since the page asked for them) and the recipient of the
+        confidential answers (see <a href="/docs/interview/">the interview</a>).</li>
+
       <li><strong><code>&lt;rr0-date-input&gt;</code> — a date, with its precision.</strong>
         A picker for a full instant, a text for anything less (EDTF), and how sure it is. The editors use it for an
         observation's start and end and for a case's date; it tells what it holds by a <code>datechange</code> event.</li>
@@ -274,6 +281,13 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
         <code>&lt;rr0-sighting-editor&gt;</code> et lui confie, un par un, les enregistrements d'un <code>case.json</code> :
         les comptes rendus des témoins et les lectures qu'on en fait. Il les ajoute, les sélectionne et les
         supprime, et exporte le dossier.</li>
+
+      <li><strong><code>&lt;rr0-ufoathome&gt;</code> — l'application entière.</strong>
+        Ce qu'est <a href="/app/">/app/</a> : Nouveau, Ouvrir et les fichiers récents, un dossier lu ou édité sur place. Son
+        attribut <code>case-template</code> nomme le modèle de dossier (un fichier JSON) qui dit ce que propose <em>Nouveau</em> :
+        sans lui, une observation vierge ; avec lui, ses débuts (le seul pris sans demander), les questionnaires qu'un nouveau
+        dossier demande à son témoin de remplir, les modules qu'il lui faut (leurs scripts s'exécutent, puisque la page les a
+        demandés) et le destinataire des réponses confidentielles (voir <a href="/docs/interview/">l'interview</a>).</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — une date, avec sa précision.</strong> Un sélecteur pour un instant
         complet, un champ texte pour une date moins précise (EDTF), et le degré de certitude. Les éditeurs s'en servent pour le début et la fin d'une
@@ -401,6 +415,13 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
         relatos de los testigos y las lecturas que se hacen de ellos. Los añade, los selecciona y los elimina, y
         exporta el caso.</li>
 
+      <li><strong><code>&lt;rr0-ufoathome&gt;</code> — la aplicación entera.</strong>
+        Lo que es <a href="/app/">/app/</a>: Nuevo, Abrir y los archivos recientes, un caso leído o editado en el sitio. Su
+        atributo <code>case-template</code> nombra la plantilla de caso (un archivo JSON) que dice lo que ofrece <em>Nuevo</em>:
+        sin ella, una observación en blanco; con ella, sus inicios (el único se toma sin preguntar), los cuestionarios que un
+        caso nuevo pide rellenar a su testigo, los módulos que necesita (cuyos scripts se ejecutan, ya que la página los pidió)
+        y el destinatario de las respuestas confidenciales (véase <a href="/docs/interview/">la entrevista</a>).</li>
+
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una fecha, con su precisión.</strong> Un selector para un instante
         completo, un texto para menos (EDTF), y el grado de certeza. Los editores lo usan para el inicio y el fin de una
         observación y para la fecha de un caso; dice lo que contiene con un evento <code>datechange</code>.</li>
@@ -525,6 +546,13 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
         <code>&lt;rr0-sighting-editor&gt;</code> e gli presenta una registrazione di un <code>case.json</code> alla volta: i
         resoconti dei testimoni e le letture che se ne fanno. Li aggiunge, li seleziona e li elimina, ed esporta il
         caso.</li>
+
+      <li><strong><code>&lt;rr0-ufoathome&gt;</code> — l'intera applicazione.</strong>
+        Ciò che è <a href="/app/">/app/</a>: Nuovo, Apri e i file recenti, un caso letto o modificato sul posto. Il suo
+        attributo <code>case-template</code> nomina il modello di caso (un file JSON) che dice cosa offre <em>Nuovo</em>:
+        senza, un'osservazione vuota; con esso, i suoi inizi (l'unico è preso senza chiedere), i questionari che un nuovo caso
+        chiede al testimone di compilare, i moduli che servono (i cui script vengono eseguiti, poiché la pagina li ha chiesti)
+        e il destinatario delle risposte riservate (vedi <a href="/docs/interview/">l'intervista</a>).</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una data, con la sua precisione.</strong> Un selettore per un istante
         completo, un testo per meno (EDTF), e il grado di certezza. Gli editor lo usano per l'inizio e la fine di
