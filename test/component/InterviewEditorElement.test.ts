@@ -612,17 +612,17 @@ describe("What the summary shows is what the file holds, and the other way round
       select.dispatchEvent(new Event("change"))
     }
 
-    it("says there is nothing to transcribe without a recording, and opens the window where one is added rather than being greyed out", async () => {
+    it("offers no transcription without a recording to transcribe, and offers it once there is one", async () => {
       fake()
       const { element } = await make(event())
       tabs(element)[1].click()
-      const start = part(element, "transcribe-start") as HTMLButtonElement
-      expect(start.disabled).toBe(false)
-      expect(part(element, "transcribe-note").textContent).toContain("There is no recording of the interview yet")
-      const window = element.shadowRoot!.querySelector<HTMLDialogElement>(".recordings-window")!
-      expect(window.hasAttribute("open")).toBe(false)
-      start.click()
-      expect(window.hasAttribute("open")).toBe(true)
+      expect(part(element, "transcribe").hidden).toBe(true)
+      document.body.innerHTML = ""
+      files["https://example.org/d/interview.json"] = withRecording
+      const { element: recorded } = await make({ ...event(), url: "interview.json" })
+      tabs(recorded)[1].click()
+      await wait(100)
+      expect(part(recorded, "transcribe").hidden).toBe(false)
     })
 
     it("says what each way does before anything goes: download a model, or send the recording to a service", async () => {

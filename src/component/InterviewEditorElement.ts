@@ -532,7 +532,7 @@ export class InterviewEditorElement extends HTMLElement {
     for (const box of this.shadow.querySelectorAll<HTMLInputElement>("#witness input")) box.disabled = readonly
     this.field("medium").disabled = readonly
     this.importInput.disabled = readonly
-    this.shadow.getElementById("transcribe")!.hidden = readonly
+    this.renderTranscribe()
   }
 
   /** What `by` says as one line: the ids of the people, the names of the organizations, separated by commas. */
@@ -1315,8 +1315,12 @@ export class InterviewEditorElement extends HTMLElement {
   /** What the last transcription came to, shown until another is asked for or another way is chosen. */
   private transcribeOutcome?: { text: string, kind: "info" | "warning" | "error" }
 
-  /** The way chosen, its credit and key, and what it will do: send the recording, or download a model; nothing when there is no recording. */
+  /**
+   * The way chosen, its credit and key, and what it will do: send the recording, or download a model. Not offered at all without a recording to
+   * transcribe (an interview typed, or filled in as a questionnaire), nor to a reader.
+   */
   private renderTranscribe(): void {
+    this.shadow.getElementById("transcribe")!.hidden = this.hasAttribute("readonly") || (!this.transcribing && !this.player?.recordingUrl())
     const m = this.messages
     if (!m) return
     const select = this.shadow.getElementById("transcribe-source") as HTMLSelectElement
