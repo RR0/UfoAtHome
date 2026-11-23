@@ -7,7 +7,7 @@ register()
 const results: OrientationResults = {
   provider: "tool",
   engine: { name: "Tool", version: "2.1" },
-  reference: { sha256: "ABC123", date: "2026-11-13" },
+  reference: { sha256: "ABC123", date: "2026-11-13", note: { en: "Scores of an earlier reference", fr: "Scores d'un référentiel antérieur" } },
   computed: "2026-11-20",
   profiles: [{
     id: "P1", title: { en: "Orange orb", fr: "Orbe orange" },
@@ -40,6 +40,7 @@ describe("OrientationsElement", () => {
     expect(text).toContain("ABC123")
     expect(text).toContain("2026-11-13")
     expect(text).toContain("Calculé le 2026-11-20")
+    expect(text).toContain("Scores d'un référentiel antérieur")
   })
 
   it("shows each setting's ranks and scores, a family by its name when the tool gives one", async () => {
@@ -53,6 +54,13 @@ describe("OrientationsElement", () => {
     const episodes = (await make("en")).shadowRoot!.querySelector(".episodes")!
     expect(episodes.textContent).toBe("Episodes: Witness 1, w2 (coded on a version of the recording that has changed since), w3 (the version coded is not known)")
     expect(episodes.querySelectorAll(".stale")).toHaveLength(1)
+  })
+
+  it("says of a profile with no ranks that it is not ranked yet", async () => {
+    const element = await make("en")
+    element.results = [{ ...results, profiles: [{ id: "P2", episodes: [{ event: "w1" }], configurations: [] }] }]
+    await element.ready
+    expect(element.shadowRoot!.querySelector(".profile")!.textContent).toContain("Not ranked yet.")
   })
 
   it("says when there is nothing to show", async () => {

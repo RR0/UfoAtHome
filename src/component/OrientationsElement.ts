@@ -110,6 +110,7 @@ export class OrientationsElement extends HTMLElement {
       const meta = [m.engine.replace("{engine}", result.engine.name).replace("{version}", result.engine.version ?? "?")]
       if (result.reference?.sha256) meta.push(`${m.reference.replace("{sha256}", result.reference.sha256)}${result.reference.date ? ` ${m.referenceDate.replace("{date}", result.reference.date)}` : ""}`)
       if (result.computed) meta.push(m.computed.replace("{date}", result.computed))
+      if (result.reference?.note) meta.push(read(result.reference.note))
       for (const line of meta) section.append(element("p", line, "meta"))
       if (result.caution) section.append(element("p", read(result.caution), "meta"))
       const stale = Orientation.stale(result, this.digestsValue)
@@ -144,7 +145,7 @@ export class OrientationsElement extends HTMLElement {
           }
           configurations.append(table)
         }
-        block.append(configurations)
+        block.append(profile.configurations.length > 0 ? configurations : element("p", m.unranked, "meta"))
         section.append(block)
       }
       parts.push(section)

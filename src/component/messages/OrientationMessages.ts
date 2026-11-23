@@ -24,6 +24,8 @@ export interface OrientationMessages {
   score: string
   /** `{population}` past cases a setting holds. */
   population: string
+  /** Said of a profile the tool has not ranked yet. */
+  unranked: string
   /** When there is nothing to show. */
   empty: string
 }

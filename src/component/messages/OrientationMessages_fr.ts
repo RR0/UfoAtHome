@@ -14,5 +14,6 @@ export const orientationMessages_fr: OrientationMessages = {
   family: "Famille",
   score: "Score",
   population: "{population} cas",
+  unranked: "Pas encore classé.",
   empty: "Aucun indicateur statistique pour ce dossier."
 }
