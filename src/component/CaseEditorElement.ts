@@ -2123,7 +2123,7 @@ export class CaseEditorElement extends HTMLElement {
     for (const id of asked) {
       const template = await QuestionnaireTemplates.load(id).catch(() => undefined)
       if (!template || this.session !== session) continue
-      added.push(session.addQuestionnaire(witness, this.today(), template) as InterviewEvent)
+      added.push(session.addQuestionnaire(witness, this.today(), template, this.caseStart?.recipient) as InterviewEvent)
     }
     if (added.length > 0) {
       this.refreshRow()

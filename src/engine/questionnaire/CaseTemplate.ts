@@ -1,4 +1,5 @@
 import type { SaidText } from "../model/SaidText.js"
+import type { SealRecipient } from "./QuestionnaireSeal.js"
 
 /**
  * Where a new case starts once made: on the form of its first questionnaire, for the witness to fill it in first; or on its observation.
@@ -24,6 +25,8 @@ export interface CaseStart {
   modules?: string[]
   /** Where it opens: on the first questionnaire's form when it has one, unless said otherwise. */
   start?: CaseStartStep
+  /** Who the confidential answers of its questionnaires are sealed for: its template's (see CaseTemplateJson.recipient). */
+  recipient?: SealRecipient
 }
 
 /**
@@ -46,6 +49,11 @@ export interface CaseTemplateJson {
    * gives is the page's word, so their scripts run (see ModuleSession.require); a template from elsewhere brings what their manifests state only.
    */
   modules?: string[]
+  /**
+   * Who receives the testimonies it starts (an organisation): the confidential answers of their questionnaires are sealed for it (see
+   * QuestionnaireSeal), its public key given here, so that nobody else can read them wherever the case goes, and nobody has to send a key to anybody.
+   */
+  recipient?: SealRecipient
   starts: CaseStart[]
 }
 
@@ -83,8 +91,10 @@ export class CaseTemplates {
     if (template === null || typeof template !== "object" || !Array.isArray(template.starts)) throw new Error(`${url}: not a UFO@home case template`)
     if (typeof template.format === "number" && template.format > CaseTemplates.FORMAT) throw new Error(`${url}: format ${template.format} is newer than ${CaseTemplates.FORMAT}`)
     const whole = (address: string) => new URL(address, url).href
+    const recipient = CaseTemplates.recipientOf(template.recipient, url)
     const starts = template.starts.filter(start => typeof start?.id === "string").map(start => ({
       ...start,
+      ...(recipient ? { recipient } : {}),
       ...(start.questionnaires ? { questionnaires: start.questionnaires.filter(entry => typeof entry === "string").map(entry => CaseTemplates.isAddress(entry) ? whole(entry) : entry) } : {}),
       ...(start.modules ? { modules: start.modules.filter(entry => typeof entry === "string").map(whole) } : {})
     }))
@@ -94,9 +104,20 @@ export class CaseTemplates {
       id: typeof template.id === "string" ? template.id : url,
       title: template.title ?? template.id ?? url,
       ...(template.modules ? { modules: template.modules.filter(entry => typeof entry === "string").map(whole) } : {}),
+      ...(recipient ? { recipient } : {}),
       starts,
       url
     }
+  }
+
+  /** `recipient` when it is one: an id and an RSA public key, nothing private. An error saying why otherwise. */
+  private static recipientOf(recipient: SealRecipient | undefined, url: string): SealRecipient | undefined {
+    if (recipient === undefined) return undefined
+    const key = recipient?.publicKey
+    if (typeof recipient.id !== "string" || !key || key.kty !== "RSA" || typeof key.n !== "string") throw new Error(`${url}: its recipient has no RSA public key`)
+    if (key.d !== undefined) throw new Error(`${url}: its recipient gives a private key, which must never be published`)
+    const { kty, n, e, alg } = key
+    return { id: recipient.id, name: recipient.name ?? recipient.id, publicKey: { kty, n, e, ...(alg ? { alg } : {}) } }
   }
 
   /** Whether a questionnaire is named by its address rather than by its id: a path or a URL, a file. */

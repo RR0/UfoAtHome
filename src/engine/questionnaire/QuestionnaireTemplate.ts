@@ -1,5 +1,6 @@
 import type { SaidText } from "../model/SaidText.js"
-import type { InterviewJson, InterviewSegment } from "../persistence/interviewJson.js"
+import type { InterviewJson, InterviewRedaction, InterviewSegment } from "../persistence/interviewJson.js"
+import type { SealRecipient } from "./QuestionnaireSeal.js"
 import type { InterviewImportHints } from "../persistence/interviewImport.js"
 
 /** What a field's answer is for the form that asks it: a line, a text, a date, a time, one of several choices, a mark on a scale. */
@@ -37,6 +38,11 @@ export interface QuestionnaireTemplateField {
   feeds?: QuestionnaireFeedTarget
   /** Shown under the question, before the answer. */
   images?: QuestionnaireImage[]
+  /**
+   * An answer nobody but the questionnaire's recipient may read (a precise address, a name): written taken out of the interview, `reason` saying why,
+   * and sealed for the recipient when the interview has one (see QuestionnaireSeal); kept in no file at all otherwise.
+   */
+  confidential?: { reason: SaidText }
 }
 
 export interface QuestionnaireTemplateSection {
@@ -154,14 +160,14 @@ export class QuestionnaireTemplates {
    * The interview a witness fills the questionnaire in as: held through it, naming it, a turn of the interviewer for each question and none yet of the
    * witness. Answering a field adds the witness's turn after its question (see QuestionnaireTemplates.answer).
    */
-  static interview(template: QuestionnaireTemplate, hints: InterviewImportHints = {}): InterviewJson {
+  static interview(template: QuestionnaireTemplate, hints: InterviewImportHints = {}, recipient?: SealRecipient): InterviewJson {
     const witness = hints.witnesses?.length === 1 ? hints.witnesses[0] : undefined
     return {
       version: 1,
       ...(template.language ? { language: template.language } : {}),
       title: template.title,
       medium: "questionnaire",
-      questionnaire: { id: template.id, ...(template.version ? { version: template.version } : {}) },
+      questionnaire: { id: template.id, ...(template.version ? { version: template.version } : {}), ...(recipient ? { recipient } : {}) },
       ...(witness ? { interviewOf: witness.id } : {}),
       speakers: {
         interviewer: { role: "interviewer", ...(hints.by?.[0] !== undefined ? { by: { people: hints.by[0] } } : {}) },
@@ -183,14 +189,19 @@ export class QuestionnaireTemplates {
    * Writes the witness's answer to `field`: its turn after the question, replaced when there was one, taken out when the answer is emptied (a field
    * left empty has its question only). A question the interview does not have yet is added at the end, with `question` as its text.
    */
-  static answer(json: InterviewJson, field: string, answer: string, question?: string): void {
+  static answer(json: InterviewJson, field: string, answer: string, question?: string, redacted?: InterviewRedaction): void {
     const witness = Object.entries(json.speakers).find(([, speaker]) => speaker.role === "witness")?.[0] ?? "witness"
     if (!json.speakers[witness]) json.speakers[witness] = { role: "witness" }
     const at = json.segments.findIndex(segment => segment.field === field && json.speakers[segment.speaker]?.role === "witness")
     const text = answer.trim()
+    // A confidential answer is written taken out, its text sealed or nowhere.
+    const said = (segment: InterviewSegment): InterviewSegment => {
+      const { text: _text, redacted: _redacted, ...rest } = segment
+      return redacted ? { ...rest, redacted } : { ...rest, text }
+    }
     if (at >= 0) {
       if (text === "") json.segments.splice(at, 1)
-      else json.segments[at] = { ...json.segments[at], text }
+      else json.segments[at] = said(json.segments[at])
       return
     }
     if (text === "") return
@@ -201,6 +212,6 @@ export class QuestionnaireTemplates {
       json.segments.push({ speaker: interviewer, field, text: question ?? field })
       asked = json.segments.length - 1
     }
-    json.segments.splice(asked + 1, 0, { speaker: witness, field, text })
+    json.segments.splice(asked + 1, 0, said({ speaker: witness, field }))
   }
 }

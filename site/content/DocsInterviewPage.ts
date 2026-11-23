@@ -54,6 +54,8 @@ interface QuestionnaireDocText {
   concept: string
   exchanges: string
   when: string
+  /** Confidential answers, sealed for the recipient. */
+  sealed: string
   techHeading: string
   techIntro: string
   templateRows: ReadonlyArray<[string, string]>
@@ -565,7 +567,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
       heading: "Questionnaires",
       concept: "An interview may be held through a <strong>questionnaire</strong>: a form the witness fills in, alone or with an investigator. UFO@home knows none in particular. A questionnaire is a <strong>template</strong>, a JSON file that says its questions, in sections, and the kind of answer each asks; the form is drawn from it. Which questionnaires a new case asks its witness to fill in is said by the case template (<code>case-template</code>) the page names, and by nothing else: without one, no case is given a questionnaire. GEIPAN's technical questionnaire is one such template, shipped with UFO@home (<code>geipan-qt-2025</code>); any other can be named by its address.",
       exchanges: "The form is a view of the interview, not a file of its own. Each question is a turn of the interviewer, with its <code>field</code>; each answer is the witness's turn right after it, with the same <code>field</code>, in the words typed or ticked. A question left empty has no answer turn: it stays unanswered, never an absence. So the Exchanges group reads a filled questionnaire as a dialogue, and a value of the observation set from an answer cites that turn (<code>source.said</code>).",
-      when: "A date or a time is always offered two ways: <strong>precise</strong>, the browser's picker, or <strong>imprecise</strong>, in the witness's own words (“around 9 pm”, “early July”), which a picker would force into a figure they never gave. Only what reads as a figure is set in the observation.",
+      when: "A date or a time is always offered two ways: <strong>precise</strong>, the browser's picker, or <strong>imprecise</strong>, in the witness's own words (“around 9 pm”, “early July”), which a picker would force into a figure they never gave. Only what reads as a figure is set in the observation.",,
+      sealed: "Some answers are for the organisation that receives the testimony only: a precise address, a name. Such a question is <code>confidential</code>. The case template names that organisation, its <code>recipient</code>, with its <strong>public</strong> key; the interview keeps it (<code>questionnaire.recipient</code>). Each confidential answer is then encrypted in the browser with a key drawn for it alone (AES-GCM), and that key with the recipient's public key (RSA-OAEP). The case can go anywhere, be shared or published: everybody sees that an answer was given and why it is confidential, only the holder of the private key reads it, and nobody had to send a key to anybody. In clear, the answer stays in the page it was typed in only; once reloaded, it can be replaced, not shown. Without a recipient, a confidential answer is kept in no file at all."
       techHeading: "The questionnaire template",
       techIntro: "A template is read by its id when UFO@home ships it, otherwise from its address, its pictures' <code>src</code> relative to it.",
       templateRows: [
@@ -589,6 +592,7 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["multiple", "For <code>choice</code>: several may be ticked (a multiple-choice question), written one after another separated by <code>; </code>"],
         ["required", "<code>false</code> when not every witness is asked it"],
         ["images", "<code>{ src, alt, caption? }</code>, shown under the question: a compass rose, heights above the horizon"],
+        ["confidential", "An answer only the recipient may read: <code>{ reason }</code>. It is written taken out (<code>redacted</code>, with that reason) and its text sealed for the recipient (<code>redacted.sealed</code>)"],
         ["feeds", "What the answer may set in the observation: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
       ],
       exampleHeading: "An example",
@@ -598,7 +602,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
       heading: "Les questionnaires",
       concept: "Une interview peut être tenue par <strong>questionnaire</strong> : un formulaire que le témoin remplit, seul ou avec un enquêteur. UFO@home n'en connaît aucun en particulier. Un questionnaire est un <strong>modèle</strong>, un fichier JSON qui dit ses questions, par sections, et le genre de réponse que chacune demande ; le formulaire en est tiré. Quels questionnaires un nouveau dossier demande à son témoin de remplir, c'est le modèle de dossier (<code>case-template</code>) que nomme la page qui le dit, et rien d'autre : sans lui, aucun dossier ne reçoit de questionnaire. Le questionnaire technique du GEIPAN est un tel modèle, livré avec UFO@home (<code>geipan-qt-2025</code>) ; tout autre peut être nommé par son adresse.",
       exchanges: "Le formulaire est une vue de l'interview, pas un fichier à part. Chaque question est un tour de l'enquêteur, avec son <code>field</code> ; chaque réponse est le tour du témoin juste après, avec le même <code>field</code>, dans les mots tapés ou cochés. Une question laissée vide n'a pas de tour de réponse : elle reste sans réponse, jamais une absence. Le groupe Échanges lit donc un questionnaire rempli comme un dialogue, et une valeur de l'observation tirée d'une réponse cite ce tour (<code>source.said</code>).",
-      when: "Une date ou une heure est toujours proposée de deux façons : <strong>précise</strong>, avec le sélecteur du navigateur, ou <strong>imprécise</strong>, dans les mots du témoin (« vers 21 h », « début juillet »), qu'un sélecteur forcerait en un chiffre qu'il n'a jamais donné. Seul ce qui se lit comme un chiffre est reporté dans l'observation.",
+      when: "Une date ou une heure est toujours proposée de deux façons : <strong>précise</strong>, avec le sélecteur du navigateur, ou <strong>imprécise</strong>, dans les mots du témoin (« vers 21 h », « début juillet »), qu'un sélecteur forcerait en un chiffre qu'il n'a jamais donné. Seul ce qui se lit comme un chiffre est reporté dans l'observation.",,
+      sealed: "Certaines réponses ne sont que pour l'organisme qui reçoit le témoignage : une adresse précise, un nom. Une telle question est <code>confidential</code>. Le modèle de dossier nomme cet organisme, son <code>recipient</code>, avec sa clé <strong>publique</strong> ; l'interview la garde (<code>questionnaire.recipient</code>). Chaque réponse confidentielle est alors chiffrée dans le navigateur avec une clé tirée pour elle seule (AES-GCM), et cette clé avec la clé publique du destinataire (RSA-OAEP). Le dossier peut aller partout, être partagé ou publié : chacun voit qu'une réponse a été donnée et pourquoi elle est confidentielle, seul le détenteur de la clé privée la lit, et personne n'a eu à envoyer de clé à personne. En clair, la réponse ne reste que dans la page où elle a été tapée ; une fois celle-ci rechargée, elle peut être remplacée, pas affichée. Sans destinataire, une réponse confidentielle n'est gardée dans aucun fichier."
       techHeading: "Le modèle de questionnaire",
       techIntro: "Un modèle est lu par son id quand UFO@home le livre, sinon à son adresse, le <code>src</code> de ses images étant relatif à celle-ci.",
       templateRows: [
@@ -622,6 +627,7 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["multiple", "Pour <code>choice</code> : plusieurs peuvent être cochés (un QCM), écrits à la suite séparés par <code>; </code>"],
         ["required", "<code>false</code> quand elle n'est pas posée à tout témoin"],
         ["images", "<code>{ src, alt, caption? }</code>, montrées sous la question : une rose des vents, les hauteurs au-dessus de l'horizon"],
+        ["confidential", "Une réponse que seul le destinataire peut lire : <code>{ reason }</code>. Elle est écrite caviardée (<code>redacted</code>, avec cette raison) et son texte scellé pour le destinataire (<code>redacted.sealed</code>)"],
         ["feeds", "Ce que la réponse peut reporter dans l'observation : <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
       ],
       exampleHeading: "Un exemple",
@@ -631,7 +637,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
       heading: "Los cuestionarios",
       concept: "Una entrevista puede hacerse mediante un <strong>cuestionario</strong>: un formulario que el testigo rellena, solo o con un investigador. UFO@home no conoce ninguno en particular. Un cuestionario es una <strong>plantilla</strong>, un archivo JSON que dice sus preguntas, por secciones, y el tipo de respuesta que pide cada una; el formulario se saca de ella. Qué cuestionarios pide un caso nuevo a su testigo lo dice la plantilla de caso (<code>case-template</code>) que nombra la página, y nada más: sin ella, ningún caso recibe cuestionario. El cuestionario técnico del GEIPAN es una de esas plantillas, incluida en UFO@home (<code>geipan-qt-2025</code>); cualquier otra puede nombrarse por su dirección.",
       exchanges: "El formulario es una vista de la entrevista, no un archivo aparte. Cada pregunta es un turno del investigador, con su <code>field</code>; cada respuesta es el turno del testigo justo después, con el mismo <code>field</code>, en las palabras escritas o marcadas. Una pregunta dejada vacía no tiene turno de respuesta: queda sin respuesta, nunca es una ausencia. Así el grupo Intercambios lee un cuestionario rellenado como un diálogo, y un valor de la observación sacado de una respuesta cita ese turno (<code>source.said</code>).",
-      when: "Una fecha o una hora se ofrece siempre de dos maneras: <strong>precisa</strong>, con el selector del navegador, o <strong>imprecisa</strong>, con las palabras del testigo («hacia las 21 h», «a principios de julio»), que un selector forzaría en una cifra que nunca dio. Solo lo que se lee como una cifra se lleva a la observación.",
+      when: "Una fecha o una hora se ofrece siempre de dos maneras: <strong>precisa</strong>, con el selector del navegador, o <strong>imprecisa</strong>, con las palabras del testigo («hacia las 21 h», «a principios de julio»), que un selector forzaría en una cifra que nunca dio. Solo lo que se lee como una cifra se lleva a la observación.",,
+      sealed: "Algunas respuestas son solo para el organismo que recibe el testimonio: una dirección precisa, un nombre. Una pregunta así es <code>confidential</code>. La plantilla de caso nombra ese organismo, su <code>recipient</code>, con su clave <strong>pública</strong>; la entrevista la conserva (<code>questionnaire.recipient</code>). Cada respuesta confidencial se cifra entonces en el navegador con una clave sacada solo para ella (AES-GCM), y esa clave con la clave pública del destinatario (RSA-OAEP). El caso puede ir a cualquier parte, compartirse o publicarse: todos ven que se dio una respuesta y por qué es confidencial, solo quien tiene la clave privada la lee, y nadie tuvo que enviar una clave a nadie. En claro, la respuesta solo queda en la página donde se escribió; una vez recargada, puede sustituirse, no mostrarse. Sin destinatario, una respuesta confidencial no se guarda en ningún archivo."
       techHeading: "La plantilla de cuestionario",
       techIntro: "Una plantilla se lee por su id cuando UFO@home la incluye, si no en su dirección, con el <code>src</code> de sus imágenes relativo a esta.",
       templateRows: [
@@ -655,6 +662,7 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["multiple", "Para <code>choice</code>: se pueden marcar varias (una pregunta de opción múltiple), escritas una tras otra separadas por <code>; </code>"],
         ["required", "<code>false</code> cuando no se pregunta a todo testigo"],
         ["images", "<code>{ src, alt, caption? }</code>, mostradas bajo la pregunta: una rosa de los vientos, las alturas sobre el horizonte"],
+        ["confidential", "Una respuesta que solo el destinatario puede leer: <code>{ reason }</code>. Se escribe eliminada (<code>redacted</code>, con esa razón) y su texto sellado para el destinatario (<code>redacted.sealed</code>)"],
         ["feeds", "Lo que la respuesta puede llevar a la observación: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
       ],
       exampleHeading: "Un ejemplo",
@@ -664,7 +672,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
       heading: "I questionari",
       concept: "Un'intervista può essere tenuta tramite <strong>questionario</strong>: un modulo che il testimone compila, da solo o con un investigatore. UFO@home non ne conosce nessuno in particolare. Un questionario è un <strong>modello</strong>, un file JSON che dice le sue domande, per sezioni, e il tipo di risposta che ciascuna chiede; il modulo ne è tratto. Quali questionari un nuovo caso chiede al suo testimone lo dice il modello di caso (<code>case-template</code>) che la pagina nomina, e nient'altro: senza, nessun caso riceve un questionario. Il questionario tecnico del GEIPAN è uno di questi modelli, fornito con UFO@home (<code>geipan-qt-2025</code>); qualsiasi altro può essere nominato con il suo indirizzo.",
       exchanges: "Il modulo è una vista dell'intervista, non un file a parte. Ogni domanda è un turno dell'investigatore, con il suo <code>field</code>; ogni risposta è il turno del testimone subito dopo, con lo stesso <code>field</code>, nelle parole scritte o spuntate. Una domanda lasciata vuota non ha turno di risposta: resta senza risposta, mai un'assenza. Così il gruppo Scambi legge un questionario compilato come un dialogo, e un valore dell'osservazione tratto da una risposta cita quel turno (<code>source.said</code>).",
-      when: "Una data o un'ora è sempre proposta in due modi: <strong>precisa</strong>, con il selettore del browser, o <strong>imprecisa</strong>, nelle parole del testimone («verso le 21», «inizio luglio»), che un selettore forzerebbe in una cifra mai data. Solo ciò che si legge come una cifra è riportato nell'osservazione.",
+      when: "Una data o un'ora è sempre proposta in due modi: <strong>precisa</strong>, con il selettore del browser, o <strong>imprecisa</strong>, nelle parole del testimone («verso le 21», «inizio luglio»), che un selettore forzerebbe in una cifra mai data. Solo ciò che si legge come una cifra è riportato nell'osservazione.",,
+      sealed: "Alcune risposte sono solo per l'organismo che riceve la testimonianza: un indirizzo preciso, un nome. Una tale domanda è <code>confidential</code>. Il modello di caso nomina quell'organismo, il suo <code>recipient</code>, con la sua chiave <strong>pubblica</strong>; l'intervista la conserva (<code>questionnaire.recipient</code>). Ogni risposta riservata è allora cifrata nel browser con una chiave estratta solo per lei (AES-GCM), e quella chiave con la chiave pubblica del destinatario (RSA-OAEP). Il caso può andare ovunque, essere condiviso o pubblicato: tutti vedono che una risposta è stata data e perché è riservata, solo chi detiene la chiave privata la legge, e nessuno ha dovuto inviare una chiave a nessuno. In chiaro, la risposta resta solo nella pagina in cui è stata scritta; una volta ricaricata, può essere sostituita, non mostrata. Senza destinatario, una risposta riservata non è conservata in nessun file."
       techHeading: "Il modello di questionario",
       techIntro: "Un modello è letto con il suo id quando UFO@home lo fornisce, altrimenti al suo indirizzo, con il <code>src</code> delle sue immagini relativo a questo.",
       templateRows: [
@@ -688,6 +697,7 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["multiple", "Per <code>choice</code>: se ne possono spuntare diverse (una domanda a scelta multipla), scritte una dopo l'altra separate da <code>; </code>"],
         ["required", "<code>false</code> quando non è chiesta a ogni testimone"],
         ["images", "<code>{ src, alt, caption? }</code>, mostrate sotto la domanda: una rosa dei venti, le altezze sopra l'orizzonte"],
+        ["confidential", "Una risposta che solo il destinatario può leggere: <code>{ reason }</code>. È scritta rimossa (<code>redacted</code>, con quel motivo) e il suo testo sigillato per il destinatario (<code>redacted.sealed</code>)"],
         ["feeds", "Ciò che la risposta può riportare nell'osservazione: <code>narrative</code>, <code>date</code>, <code>startTime</code>, <code>duration</code>, <code>color</code>, <code>startAzimuth</code>, <code>startElevation</code>, <code>endAzimuth</code>, <code>endElevation</code>"]
       ],
       exampleHeading: "Un esempio",
@@ -745,6 +755,7 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
     <p>${q.concept}</p>
     <p>${q.exchanges}</p>
     <p>${q.when}</p>
+    <p>${q.sealed}</p>
 
     <h2>${t.techHeading}</h2>
     <p>${t.techIntro}</p>

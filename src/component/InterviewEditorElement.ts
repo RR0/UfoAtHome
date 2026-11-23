@@ -214,6 +214,9 @@ const TEMPLATE = `
   /* The questionnaire's pictures are drawn on white: on a dark page they keep the paper they were drawn for. */
   .form-figure { margin: 0; justify-self: start; max-width: min(100%, 16rem); }
   .form-figure img { display: block; max-width: 100%; height: auto; padding: 6px; border-radius: 6px; background: #fff; }
+  .form-confidential { margin: 0; padding-left: 22px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans);
+    background: no-repeat left 2px / 15px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.6'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.5'/%3E%3Cpath d='M5.5 7V5a2.5 2.5 0 0 1 5 0v2'/%3E%3C/svg%3E"); }
+  .form-confidential.nowhere { color: var(--warn, #b26b00); }
   .form-figure figcaption { margin-top: 4px; color: var(--ink-dim); font: 400 12px/1.35 var(--sans); }
   .form-feed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans); }
   .turn-edit { display: flex; flex-direction: column; gap: 6px; }
@@ -716,7 +719,8 @@ export class InterviewEditorElement extends HTMLElement {
     const note = this.shadow.getElementById("form-note")!
     MessageStyle.show(note, template ? undefined : m.unknownQuestionnaire.replace("{id}", id), "warning")
     this.form ??= new QuestionnaireForm(this.shadow.getElementById("form-fields")!, (field, answer, question) => void this.answerField(field, answer, question))
-    this.form.show(template ?? { id, title: id, sections: [] }, json, m.questionnaire, this.language, this.hasAttribute("readonly"))
+    this.form.show(template ?? { id, title: id, sections: [] }, json, m.questionnaire, this.language, this.hasAttribute("readonly"),
+      field => this.confidentialAnswers.get(this.confidentialKey(event, field)))
     const feed = this.shadow.getElementById("form-feed") as HTMLButtonElement
     feed.disabled = this.hasAttribute("readonly")
   }
@@ -731,6 +735,20 @@ export class InterviewEditorElement extends HTMLElement {
     if (!event) return
     const asked = await this.transcriptJson(event)
     const template = await QuestionnaireTemplates.load(asked?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    // A confidential answer is written taken out, sealed for the interview's recipient when it has one; in clear, it stays in this page only.
+    const confidential = template ? QuestionnaireTemplates.field(template, field)?.confidential : undefined
+    let redacted: InterviewRedaction | undefined
+    if (confidential) {
+      const key = this.confidentialKey(event, field)
+      const text = answer.trim()
+      if (text === "") this.confidentialAnswers.delete(key)
+      else {
+        this.confidentialAnswers.set(key, text)
+        const recipient = asked?.questionnaire?.recipient
+        const { QuestionnaireSeal } = await import("../engine/questionnaire/QuestionnaireSeal.js")
+        redacted = { reason: confidential.reason, ...(recipient ? { sealed: await QuestionnaireSeal.seal(text, recipient) } : {}) }
+      }
+    }
     await this.editTranscript(json => {
       if (template && !json.segments.some(segment => segment.field !== undefined)) {
         const blank = QuestionnaireTemplates.interview(template)
@@ -740,8 +758,15 @@ export class InterviewEditorElement extends HTMLElement {
         for (const [id, speaker] of Object.entries(blank.speakers)) json.speakers[id] ??= speaker
       }
       json.medium = "questionnaire"
-      QuestionnaireTemplates.answer(json, field, answer, question)
+      QuestionnaireTemplates.answer(json, field, answer, question, redacted)
     })
+  }
+
+  /** The confidential answers typed in this page, in clear: never written to a file (see answerField). */
+  private readonly confidentialAnswers = new Map<string, string>()
+
+  private confidentialKey(event: InterviewEvent, field: string): string {
+    return `${event.id ?? event.url ?? ""}\u0000${field}`
   }
 
   /** Asks the host to set in the witness's observation what the answers say of it, and says what it did. */

@@ -66,7 +66,15 @@
             "fr": "Adresse précise du lieu d'observation (commune, département, rue, …)"
           },
           "kind": "text",
-          "feeds": "place"
+          "feeds": "place",
+          "confidential": {
+            "reason": {
+              "fr": "Adresse précise",
+              "en": "Precise address",
+              "es": "Dirección precisa",
+              "it": "Indirizzo preciso"
+            }
+          }
         },
         {
           "id": "A3",

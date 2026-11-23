@@ -1,3 +1,4 @@
+import type { InterviewSeal, SealRecipient } from "../questionnaire/QuestionnaireSeal.js"
 import type { AgentRef } from "../interpretation/Interpretation.js"
 import type { SaidText } from "../model/SaidText.js"
 import { FormatVersion } from "./FormatVersion.js"
@@ -39,6 +40,11 @@ export interface InterviewRedaction {
   reason: SaidText
   /** How many words were taken out: what a reader can be told of a passage whose text is gone ("passage taken out · 10 words"). */
   words?: number
+  /**
+   * The passage itself, sealed for the one who may read it (a confidential answer to a questionnaire, see QuestionnaireSeal): taken out for everybody
+   * else, kept for them.
+   */
+  sealed?: InterviewSeal
 }
 
 /**
@@ -135,7 +141,12 @@ export interface InterviewJson {
    * The questionnaire it was filled in on, when it was held through one: the id of its template (see QuestionnaireTemplate) and its version. What lets
    * it be shown and filled in again as a form, each field as the questionnaire asks it.
    */
-  questionnaire?: { id: string, version?: string }
+  questionnaire?: {
+    id: string
+    version?: string
+    /** Who its confidential answers are sealed for (see QuestionnaireSeal): none, and a confidential answer is kept in no file at all. */
+    recipient?: SealRecipient
+  }
   /** Who held it. */
   by?: AgentRef[]
   /** The `id`, or the ids, of the sighting events of the case it was held with. */

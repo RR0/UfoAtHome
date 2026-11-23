@@ -63,3 +63,27 @@ describe("QuestionnaireForm", () => {
     expect(said.at(-1)).toEqual(["3", "nothing; hum"])
   })
 })
+
+describe("QuestionnaireForm confidential answers", () => {
+  const secret: QuestionnaireTemplate = {
+    id: "s", title: { en: "S" },
+    sections: [{ title: { en: "Where" }, fields: [{ id: "A1", question: { en: "Address" }, kind: "text", confidential: { reason: { en: "Precise address" } } }] }]
+  }
+  const shown = (recipient: boolean, sealedBefore: boolean, recalled?: string) => {
+    const container = document.createElement("div")
+    const json = QuestionnaireTemplates.interview(secret, {}, recipient ? { id: "geipan", name: "GEIPAN", publicKey: { kty: "RSA", n: "x", e: "AQAB" } } : undefined)
+    if (sealedBefore) QuestionnaireTemplates.answer(json, "A1", "x", undefined, { reason: { en: "Precise address" }, sealed: { for: "geipan", alg: "RSA-OAEP-256+A256GCM", key: "", iv: "", data: "" } })
+    new QuestionnaireForm(container, () => undefined).show(secret, json, messages, "en", false, () => recalled)
+    return container
+  }
+
+  it("says a confidential answer is sealed for the recipient, shows it only while typed in this page, and says when it is kept nowhere", () => {
+    expect(shown(true, false).querySelector(".form-confidential")!.textContent).toBe(messages.confidentialSealed.replace("{name}", "GEIPAN"))
+    const before = shown(true, true)
+    expect(before.querySelector(".form-confidential")!.textContent).toBe(messages.confidentialSealedBefore.replace("{name}", "GEIPAN"))
+    expect(before.querySelector<HTMLInputElement>("[data-field='A1'] input")!.value).toBe("")
+    expect(shown(true, true, "12 rue des Lilas").querySelector<HTMLInputElement>("[data-field='A1'] input")!.value).toBe("12 rue des Lilas")
+    const nowhere = shown(false, false).querySelector(".form-confidential")!
+    expect([nowhere.textContent, nowhere.classList.contains("nowhere")]).toEqual([messages.confidentialNowhere, true])
+  })
+})

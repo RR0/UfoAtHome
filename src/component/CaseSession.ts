@@ -1,3 +1,4 @@
+import type { SealRecipient } from "../engine/questionnaire/QuestionnaireSeal.js"
 import { FormatVersion } from "../engine/persistence/FormatVersion.js"
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
@@ -147,11 +148,11 @@ export class CaseSession {
    * Adds a questionnaire for a witness to fill in: an interview held through it (see QuestionnaireTemplates.interview), its transcript the questions
    * with no answer yet, in a file of its own beside the case.
    */
-  addQuestionnaire(witness: CaseTrack | undefined, when: string, template: QuestionnaireTemplate): CaseEventJson & { by?: AgentRef[] } {
+  addQuestionnaire(witness: CaseTrack | undefined, when: string, template: QuestionnaireTemplate, recipient?: SealRecipient): CaseEventJson & { by?: AgentRef[] } {
     const event = this.addInterview(witness, when, template.title, undefined, "questionnaire")
     event.url = `${event.id}.json`
     const held = [event.interviewOf].flat().filter((id): id is string => typeof id === "string")
-    const json = QuestionnaireTemplates.interview(template, { witnesses: held.map(id => ({ id, label: id })) })
+    const json = QuestionnaireTemplates.interview(template, { witnesses: held.map(id => ({ id, label: id })) }, recipient)
     // The witness is named by the case, not by an id written as a name.
     delete json.speakers.witness.title
     this.keepTranscript(event, `${JSON.stringify({ ...json, id: event.id, time: when }, null, 2)}\n`)

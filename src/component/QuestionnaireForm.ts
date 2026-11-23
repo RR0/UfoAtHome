@@ -24,6 +24,13 @@ export interface QuestionnaireFormMessages {
   /** What an imprecise date, or time, may read. */
   impreciseDate: string
   impreciseTime: string
+  /**
+   * Under a confidential question (see QuestionnaireTemplateField.confidential): sealed for its recipient `{name}`; an answer sealed already, which
+   * cannot be shown again and another replaces; no recipient to seal it for, so that it is kept in no file.
+   */
+  confidentialSealed: string
+  confidentialSealedBefore: string
+  confidentialNowhere: string
 }
 
 /**
@@ -33,10 +40,20 @@ export interface QuestionnaireFormMessages {
  */
 export class QuestionnaireForm {
 
+  private json?: InterviewJson
+  private recalled: (field: string) => string | undefined = () => undefined
+
   constructor(private readonly container: HTMLElement, private readonly answered: (field: string, answer: string, question: string) => void) {
   }
 
-  show(template: QuestionnaireTemplate, json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean): void {
+  /**
+   * `recalled` gives a confidential answer typed in this page, which no file holds in clear: once the page is reloaded, a sealed answer cannot be
+   * shown again.
+   */
+  show(template: QuestionnaireTemplate, json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
+    recalled: (field: string) => string | undefined = () => undefined): void {
+    this.json = json
+    this.recalled = recalled
     const text = (said: Parameters<typeof QuestionnaireTemplates.text>[0]) => QuestionnaireTemplates.text(said, language)
     const parts: Node[] = []
     // The questionnaire's own words to the witness, else what the form is.
@@ -82,7 +99,10 @@ export class QuestionnaireForm {
       set.append(p)
     }
     if (images) set.append(...QuestionnaireForm.figures(images, language))
-    for (const field of fields) set.append(this.field(field, json ? QuestionnaireTemplates.answerOf(json, field.id) ?? "" : "", messages, language, readonly))
+    for (const field of fields) {
+      const value = field.confidential ? this.recalled(field.id) ?? "" : json ? QuestionnaireTemplates.answerOf(json, field.id) ?? "" : ""
+      set.append(this.field(field, value, messages, language, readonly))
+    }
     return set
   }
 
@@ -111,6 +131,7 @@ export class QuestionnaireForm {
       row.append(hint)
     }
     if (field.images) row.append(...QuestionnaireForm.figures(field.images, language))
+    if (field.confidential) row.append(this.confidentialNote(field, value, messages, language))
     const say = (answer: string) => this.answered(field.id, answer, question)
     const kind = field.kind ?? "long"
     if ((kind === "choice" || kind === "scale") && field.choices) {
@@ -178,6 +199,22 @@ export class QuestionnaireForm {
     label.append(" ", mode)
     box.append(input)
     return box
+  }
+
+  /** What becomes of a confidential answer: sealed for the recipient the interview names, or kept nowhere. */
+  private confidentialNote(field: QuestionnaireTemplateField, value: string, messages: QuestionnaireFormMessages, language: string): HTMLElement {
+    const note = document.createElement("p")
+    note.className = "form-confidential"
+    const recipient = this.json?.questionnaire?.recipient
+    const sealedBefore = value === "" && this.json?.segments.some(segment => segment.field === field.id && segment.redacted?.sealed !== undefined)
+    if (recipient) {
+      const name = QuestionnaireTemplates.text(recipient.name, language)
+      note.textContent = (sealedBefore ? messages.confidentialSealedBefore : messages.confidentialSealed).replace("{name}", name)
+    } else {
+      note.textContent = messages.confidentialNowhere
+      note.classList.add("nowhere")
+    }
+    return note
   }
 
   /** The pictures of a question or a section, each with what it shows for whoever cannot see it, and its caption. */
