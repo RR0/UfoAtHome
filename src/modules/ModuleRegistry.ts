@@ -16,6 +16,7 @@ import type { InterpretationKind } from "./interpretations/InterpretationKind.js
 import type { ObserverProvider } from "../engine/observer/ObserverProvider.js"
 import type { TranscriptionProvider } from "../engine/transcription/TranscriptionProvider.js"
 import type { ReentryType } from "./sky-events/reentries/types/ReentryType.js"
+import type { OrientationProvider } from "../engine/orientation/OrientationProvider.js"
 
 /**
  * What each extension point of UFO@home is a list of: the interface an implementation of that point gives.
@@ -60,6 +61,11 @@ export interface ExtensionPointTypes {
   transcription: TranscriptionProvider
   /** The types of re-entry an author picks from, a meteor or a rocket stage, each with its nature and what a new one is (see ReentryType): its `id` is the type's key. */
   reentryTypes: ReentryType
+  /**
+   * A tool of statistical orientation the accounts of a case are sent to, and whose ranks come back as indicators, apart from what a simulation
+   * finds (see OrientationProvider). None is built in.
+   */
+  orientation: OrientationProvider
 }
 
 export type ExtensionPointId = keyof ExtensionPointTypes

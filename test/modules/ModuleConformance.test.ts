@@ -25,12 +25,20 @@ import type { ExtensionPointId, ModuleContributions } from "../../src/modules/Mo
 const POINTS: Record<ExtensionPointId, true> = {
   weather: true, place: true, timeZone: true, narrative: true, assessment: true, lightPollution: true, aircraft: true, upperAir: true,
   elevation: true, imagery: true, surroundings: true, decorModels: true, skyEvents: true, interpretations: true, perception: true,
-  transcription: true, reentryTypes: true
+  transcription: true, reentryTypes: true, orientation: true
 }
 
 const entry = (id: string, built: unknown) => ({ id, name: id, credit: "© ACME", creditUrl: "https://acme.example", create: () => built })
 const failed = (findings: ConformanceFinding[]): ConformanceCode[] => findings.filter(finding => finding.level === "failed").map(finding => finding.code)
 const check = (contributes: unknown, context?: ConformanceContext) => ModuleConformance.check({ module: { contributes: contributes as ModuleContributions } }, context)
+
+describe("ModuleConformance of a tool of statistical orientation", () => {
+  it("passes one that says what it is and exports and reads, and fails one that does not read back", async () => {
+    const tool = { engine: "Tool", exportCase: () => ({ fileName: "x.json", mediaType: "application/json", text: "{}", codings: [] }), readResults: () => ({ provider: "t", engine: { name: "Tool" }, profiles: [] }) }
+    expect(failed(await check({ orientation: [entry("t", tool)] }))).toEqual([])
+    expect(failed(await check({ orientation: [entry("t", { engine: "Tool", exportCase: tool.exportCase })] }))).toEqual(["missingMember"])
+  })
+})
 
 const QUERY = { points: [{ lat: 48.8, lng: 2.2, time: new Date("2026-10-09T18:00:00Z") }, { lat: 48.8, lng: 2.2, time: new Date("2026-10-09T19:00:00Z") }] }
 const CALM = { cloudCover: 0.5, cloudDarkness: 0.2, precipitationType: "none", precipitationIntensity: 0, windSpeed: 4, windDirectionDeg: 90, storm: false }
@@ -50,7 +58,9 @@ const kindOf = (overrides: object = {}, build: () => unknown = () => simulation(
 describe("ModuleConformance", () => {
   it("passes every implementation UFO@home is built with, at every point", async () => {
     const points = Object.keys(POINTS) as ExtensionPointId[]
-    for (const point of points) expect(ModuleRegistry.point(point).sources.length, point).toBeGreaterThan(0)
+    // Nothing in UFO@home ranks explanations by frequency: a tool of statistical orientation only ever comes from a module.
+    const NONE_BUILT_IN: ExtensionPointId[] = ["orientation"]
+    for (const point of points) expect(ModuleRegistry.point(point).sources.length, point)[NONE_BUILT_IN.includes(point) ? "toBe" : "toBeGreaterThan"](0)
     const contributes = Object.fromEntries(points.map(point => [point, ModuleRegistry.point(point).sources]))
     const lanterns = lanternsDemo.interpretation
     expect(lanterns.lanterns.length).toBeGreaterThan(0)
