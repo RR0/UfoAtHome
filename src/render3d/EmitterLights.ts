@@ -76,6 +76,7 @@ export class EmitterLights {
     PhenomenonSystem: "none yet: a phenomenon states no luminance, only a colour as seen and a 0..1 dazzle, which say nothing of the light it gives",
     BeamSystem: "none: a laser beam is a thread of scattered light, too faint to light the ground; where it ends lit is in the sky",
     PlumeSystem: "none: a launch plume is lit by the Sun, it gives out no light of its own",
+    AuroraSystem: "emitters: an aurora, far, as one source where it is brightest, of the magnitude its whole sky gives (see AuroraSimulation.lightGround)",
     CloudSystem: "none: clouds are lit, they do not give out light",
     LayeredCloudSystem: "none: clouds are lit, they do not give out light",
     DecorSystem: "own lights: the streetlamps, with shadows for the nearest (SceneRenderer.addStreetlightLight); NOT YET its lesser lamps (traffic lights, a car's rear lights), drawn lit but lighting nothing",

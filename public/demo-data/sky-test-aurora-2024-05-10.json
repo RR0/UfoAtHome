@@ -1,0 +1,79 @@
+{
+ "version": 4,
+ "id": "sky-test-aurora-2024-05-10",
+ "tags": [
+  "aurora",
+  "misidentification"
+ ],
+ "description": {
+  "en": "The great storm of 10 May 2024, from a beach of northern Brittany at a quarter to one in the morning: Kp at 9, the GFZ's open-ended Hp60 at 10⅔, the oval's edge a degree or two of latitude north of Brittany; to the eye adapted to the night, a pale grey glow over the northern horizon, its red too faint for the cones. No aurora is stated: the scene shows the one the index implies.",
+  "fr": "Le grand orage du 10 mai 2024, depuis une plage du nord de la Bretagne à une heure moins le quart : Kp à 9, l'indice Hp60 du GFZ, sans plafond, à 10⅔, le bord de l'ovale à un ou deux degrés de latitude au nord de la Bretagne ; pour l'œil adapté à la nuit, une lueur gris pâle au-dessus de l'horizon nord, son rouge trop faible pour les cônes. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice.",
+  "es": "La gran tormenta del 10 de mayo de 2024, desde una playa del norte de Bretaña a la una menos cuarto de la madrugada: Kp en 9, el índice Hp60 del GFZ, sin techo, en 10⅔, el borde del óvalo a uno o dos grados de latitud al norte de Bretaña; para el ojo adaptado a la noche, un resplandor gris pálido sobre el horizonte norte, su rojo demasiado débil para los conos. No se indica ninguna aurora: la escena muestra la que implica Kp.",
+  "it": "La grande tempesta del 10 maggio 2024, da una spiaggia della Bretagna settentrionale all'una meno un quarto: Kp a 9, l'indice Hp60 del GFZ, senza tetto, a 10⅔, il bordo dell'ovale a uno o due gradi di latitudine a nord della Bretagna; per l'occhio adattato alla notte, un bagliore grigio pallido sopra l'orizzonte nord, il suo rosso troppo debole per i coni. Nessuna aurora è indicata: la scena mostra quella che Kp implica."
+ },
+ "time": "2024-05-11T00:45:00",
+ "utcOffsetHours": 2,
+ "durationSeconds": 600,
+ "place": {
+  "name": "Plage de Trestraou, Perros-Guirec (assumed)",
+  "locations": [
+   {
+    "lat": 48.8205,
+    "lng": -3.4545
+   }
+  ]
+ },
+ "instrument": "eye",
+ "lightPollution": 20.8,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed for the demo."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2500,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 2,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 48.8205,
+     "lng": -3.4545,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 18,
+     "fovDeg": 90
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ }
+}

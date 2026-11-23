@@ -5,6 +5,9 @@ import { HostLocale } from "../i18n/locale.js"
 /** Who recorded the fireballs a scene draws — see FireballArchive. */
 const FIREBALL_CREDIT = "Global Meteor Network"
 const FIREBALL_CREDIT_URL = "https://globalmeteornetwork.org/data/"
+/** Who measured the geomagnetic activity the aurora a scene draws is computed from — see GeomagneticArchive. */
+const GEOMAGNETIC_CREDIT = "GFZ, Kp and Hp60 indices"
+const GEOMAGNETIC_CREDIT_URL = "https://kp.gfz.de/"
 /**
  * The thunder recording every scene carries, bundled whether or not a storm is drawn — see
  * CREDITS.md.
@@ -79,6 +82,12 @@ export class SceneCredits {
     if (scene.fireballState.status === "ready" && scene.fireballState.records.length > 0) {
       const item = document.createElement("li")
       item.append(SceneCredits.link(FIREBALL_CREDIT_URL, FIREBALL_CREDIT), document.createTextNode(" (CC BY 4.0)"))
+      add(item)
+    }
+    // The observatories' measure of the field, whose aurora this sky draws when the recording states none (CC BY 4.0).
+    if (scene.archivedAuroraShown) {
+      const item = document.createElement("li")
+      item.append(SceneCredits.link(GEOMAGNETIC_CREDIT_URL, GEOMAGNETIC_CREDIT), document.createTextNode(" (CC BY 4.0)"))
       add(item)
     }
     // Where the aircraft this sky draws were recorded, when it draws any: an open database whose licence

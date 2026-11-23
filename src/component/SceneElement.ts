@@ -121,6 +121,9 @@ import { DecorAircraft, resolveDecorSeatAt } from "../engine/model/Decor.js"
 import { ObserverRide } from "../engine/place/ObserverRide.js"
 import type { DataSource } from "../engine/source/DataSource.js"
 import { FireballArchive } from "../engine/astronomy/FireballArchive.js"
+import { GeomagneticArchive } from "../engine/astronomy/GeomagneticArchive.js"
+import { Geomagnetism } from "../engine/astronomy/Geomagnetism.js"
+import type { AuroraJson } from "../modules/sky-events/auroras/Aurora.js"
 import type { FireballRecord } from "../engine/astronomy/FireballArchive.js"
 import type { BodyState } from "../engine/interpretation/BodyPlacement.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
@@ -255,7 +258,7 @@ export interface BodyReading {
  */
 /** What is under a point of the picture: what kind of thing, which one, and what it is called. */
 export interface ScenePick {
-  kind: "sky" | "body" | "decor" | "beam" | "skyEvent" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "reentry" | "optics" | "star"
+  kind: "sky" | "body" | "decor" | "beam" | "skyEvent" | "ghost" | "afterimage" | "drop" | "railway" | "traffic" | "plume" | "satellite" | "reentry" | "aurora" | "optics" | "star"
   /** The sky body's key, the interpretation body's id or the decor object's id, when it has one. */
   id?: string
   name: string
@@ -381,6 +384,10 @@ export class SceneElement extends HTMLElement {
   /** The fireballs on record during this recording, for the start and span they were asked for:
    * `records` once they came (empty for none), absent while loading or when nothing could be asked. */
   private fireballs?: { key: string; status: "loading" | "ready" | "outside" | "unavailable"; records?: FireballRecord[]; reentries: ReentryJson[] }
+  /** One archive of the planetary index Kp for every scene on the page — see GeomagneticArchive. */
+  private static readonly geomagneticArchive = new GeomagneticArchive()
+  /** The aurora the archived Kp implies over this recording, for the start, span and place it was asked for (see ensureAurora). */
+  private archivedAurora?: { key: string; aurora?: AuroraJson }
   /** One provider per source for every scene on the page, so two embedded recordings of the same hour
    * share the tiles they fetched. */
   private static readonly aircraftProviders = new Map<string, AircraftProvider>()
@@ -823,15 +830,18 @@ export class SceneElement extends HTMLElement {
   /** The real instant the recording on show starts at, as the last tick read it. */
   private skyEventsStartDate?: Date
 
-  private skyEventsMerged?: { stated?: SkyEventsJson, fireballs?: readonly ReentryJson[], shown?: SkyEventsJson }
+  private skyEventsMerged?: { stated?: SkyEventsJson, fireballs?: readonly ReentryJson[], aurora?: AuroraJson, shown?: SkyEventsJson }
 
   private skyEventsOf(sighting: Sighting): SkyEventsJson | undefined {
     const stated = sighting.skyEvents
     const fireballs = this.fireballs?.reentries
+    // The archive's aurora only where the recording states none: one it states is what was there.
+    const aurora = stated?.auroras?.length ? undefined : this.archivedAurora?.aurora
     const merged = this.skyEventsMerged
-    if (merged && merged.stated === stated && merged.fireballs === fireballs) return merged.shown
-    const shown = !fireballs?.length ? stated : { ...stated, reentries: [...(stated?.reentries ?? []), ...fireballs] }
-    this.skyEventsMerged = { stated, fireballs, shown }
+    if (merged && merged.stated === stated && merged.fireballs === fireballs && merged.aurora === aurora) return merged.shown
+    let shown = !fireballs?.length ? stated : { ...stated, reentries: [...(stated?.reentries ?? []), ...fireballs] }
+    if (aurora) shown = { ...shown, auroras: [aurora] }
+    this.skyEventsMerged = { stated, fireballs, aurora, shown }
     return shown
   }
 
@@ -2533,6 +2543,7 @@ export class SceneElement extends HTMLElement {
     // The re-entries every instant too: a piece crosses degrees a second. Placed on the Earth, so seen from the observer's real place, not
     // the scene's origin. And the fireballs a camera network recorded during it, drawn the same way at their real instant.
     this.ensureFireballs(startDate)
+    this.ensureAurora(startDate, lat, lng)
     const sky = this.skyEventsOf(sighting)
     const burning = sky?.reentries ?? []
     // And what they were at any earlier instant, for the eye's afterimages to be replayed after a jump (see SceneRenderer.setRetinaHistory):
@@ -2744,6 +2755,31 @@ export class SceneElement extends HTMLElement {
       if (this.fireballs !== asked || !this.isConnected) return
       this.dispatchEvent(new CustomEvent(FIREBALLS_CHANGE_EVENT))
       if (asked.reentries.length > 0) this.updateAstronomy(this.lastTimeMs)
+    })
+  }
+
+  /**
+   * Fetches the planetary index Kp that the GFZ archived over this recording, once per start, span and place, and makes it the aurora the
+   * scene shows where the recording states none (see GeomagneticArchive). Nothing is asked within twenty degrees of the magnetic equator,
+   * where no storm on record ever brought an aurora into sight, nor for a sky entered by hand (see Sighting.skySources), nor for a recording
+   * in daylight from start to end.
+   */
+  private ensureAurora(startDate: Date | undefined, lat: number, lng: number): void {
+    const sighting = this.ufoElement.sighting
+    const spanMs = Math.max((sighting.event.durationSeconds ?? 0) * 1000, this.ufoElement.seekableDuration)
+    const startMs = startDate?.getTime()
+    const key = startMs === undefined || sighting.skySources === false ? "" : `${startMs}+${spanMs}@${lat.toFixed(1)},${lng.toFixed(1)}`
+    if (this.archivedAurora?.key === key) return
+    const asked: NonNullable<SceneElement["archivedAurora"]> = { key }
+    this.archivedAurora = asked
+    if (startMs === undefined || key === "" || !GeomagneticArchive.mayCover(startMs + spanMs) || Math.abs(Geomagnetism.latitudeOf(lat, lng, startDate!)) < 20) return
+    // Nor in daylight from start to end, where no aurora is drawn (see AuroraSimulation.DAYLIGHT_DEG).
+    const dark = (ms: number) => computeBodyPosition("Sun", new Date(ms), { lat, lng, elevationM: 0 }).altitudeDeg < -4
+    if (!dark(startMs) && !dark(startMs + spanMs)) return
+    void SceneElement.geomagneticArchive.between(startMs, startMs + spanMs).then(keys => {
+      if (this.archivedAurora !== asked || !this.isConnected || !keys) return
+      asked.aurora = GeomagneticArchive.asAurora(keys, startMs)
+      this.updateAstronomy(this.lastTimeMs)
     })
   }
 
@@ -3435,6 +3471,11 @@ export class SceneElement extends HTMLElement {
    * What is known of the fireballs recorded during this recording, for a readout: `outside` the
    * archive's dates, still `loading`, `unavailable`, or `ready` with the records (possibly none).
    */
+  /** Whether the scene shows the aurora the archived geomagnetic activity implies (see ensureAurora): what owes the GFZ its credit. */
+  get archivedAuroraShown(): boolean {
+    return this.archivedAurora?.aurora !== undefined && !this.ufoElement.sighting.skyEvents?.auroras?.length
+  }
+
   get fireballState(): { status: "none" | "loading" | "ready" | "outside" | "unavailable"; records: readonly FireballRecord[] } {
     return { status: this.fireballs?.status ?? "none", records: this.fireballs?.records ?? [] }
   }

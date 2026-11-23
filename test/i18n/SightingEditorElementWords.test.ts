@@ -175,6 +175,21 @@ vi.mock("../../src/modules/providers/narrative/messages/ClaudeNarrativeTexts_en.
   const actual = await original<typeof import("../../src/modules/providers/narrative/messages/ClaudeNarrativeTexts_en.js")>()
   return { ...actual, claudeNarrativeTexts_en: WordsAudit.pseudo(actual.claudeNarrativeTexts_en) }
 })
+vi.mock("../../src/modules/sky-events/auroras/messages/AuroraEditorMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/auroras/messages/AuroraEditorMessages_en.js")>()
+  return { ...actual, auroraEditorMessages_en: WordsAudit.pseudo(actual.auroraEditorMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/auroras/messages/AuroraKindMessages_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/auroras/messages/AuroraKindMessages_en.js")>()
+  return { ...actual, auroraKindMessages_en: WordsAudit.pseudo(actual.auroraKindMessages_en) }
+})
+vi.mock("../../src/modules/sky-events/auroras/messages/AuroraParameterTexts_en.js", async original => {
+  const { WordsAudit } = await import("./WordsAudit.js")
+  const actual = await original<typeof import("../../src/modules/sky-events/auroras/messages/AuroraParameterTexts_en.js")>()
+  return { ...actual, auroraParameterTexts_en: WordsAudit.pseudo(actual.auroraParameterTexts_en) }
+})
 vi.mock("../../src/modules/sky-events/beams/messages/BeamEditorMessages_en.js", async original => {
   const { WordsAudit } = await import("./WordsAudit.js")
   const actual = await original<typeof import("../../src/modules/sky-events/beams/messages/BeamEditorMessages_en.js")>()

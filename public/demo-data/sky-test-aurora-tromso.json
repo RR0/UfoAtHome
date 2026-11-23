@@ -1,0 +1,79 @@
+{
+ "version": 4,
+ "id": "sky-test-aurora-tromso",
+ "tags": [
+  "aurora",
+  "misidentification"
+ ],
+ "description": {
+  "en": "Near Tromsø, 1 January 2025 at nine in the evening, a moonless night: the field disturbed (the GFZ's Hp60 at 5⅓), the oval come over the fjords, its arcs and curtains across the sky. No aurora is stated: the scene shows the one the index implies; its arcs' details are assumed.",
+  "fr": "Près de Tromsø, le 1er janvier 2025 à vingt et une heures, une nuit sans Lune : le champ agité (l'indice Hp60 du GFZ à 5⅓), l'ovale venu au-dessus des fjords, ses arcs et ses draperies à travers le ciel. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice ; le détail de ses arcs est supposé.",
+  "es": "Cerca de Tromsø, el 1 de enero de 2025 a las nueve de la noche, sin luna: el campo agitado (el índice Hp60 del GFZ en 5⅓), el óvalo llegado sobre los fiordos, sus arcos y cortinas a través del cielo. No se indica ninguna aurora: la escena muestra la que implica el índice; el detalle de sus arcos es supuesto.",
+  "it": "Vicino a Tromsø, il 1º gennaio 2025 alle nove di sera, una notte senza luna: il campo agitato (l'indice Hp60 del GFZ a 5⅓), l'ovale giunto sopra i fiordi, i suoi archi e drappeggi attraverso il cielo. Nessuna aurora è indicata: la scena mostra quella che l'indice implica; il dettaglio dei suoi archi è ipotizzato."
+ },
+ "time": "2025-01-01T21:00:00",
+ "utcOffsetHours": 1,
+ "durationSeconds": 600,
+ "place": {
+  "name": "Ersfjordbotn, near Tromsø (assumed)",
+  "locations": [
+   {
+    "lat": 69.6955,
+    "lng": 18.6248
+   }
+  ]
+ },
+ "instrument": "eye",
+ "lightPollution": 21.5,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed for the demo."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2500,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 2,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 69.6955,
+     "lng": 18.6248,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ }
+}

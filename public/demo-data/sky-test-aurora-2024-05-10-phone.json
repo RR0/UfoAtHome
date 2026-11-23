@@ -1,0 +1,80 @@
+{
+ "version": 4,
+ "id": "sky-test-aurora-2024-05-10-phone",
+ "tags": [
+  "aurora",
+  "misidentification"
+ ],
+ "description": {
+  "en": "The same storm of 10 May 2024 from the same beach, by a phone's night mode: what the eye saw grey comes out pink and red, the high red line the phone records and the eye's rods do not.",
+  "fr": "Le même orage du 10 mai 2024 depuis la même plage, par le mode nuit d'un téléphone : ce que l'œil voyait gris sort rose et rouge, la raie rouge haute que le téléphone enregistre et que les bâtonnets de l'œil ne voient pas.",
+  "es": "La misma tormenta del 10 de mayo de 2024 desde la misma playa, con el modo noche de un teléfono: lo que el ojo veía gris sale rosa y rojo, la línea roja alta que el teléfono registra y que los bastones del ojo no ven.",
+  "it": "La stessa tempesta del 10 maggio 2024 dalla stessa spiaggia, con la modalità notte di un telefono: ciò che l'occhio vedeva grigio esce rosa e rosso, la riga rossa alta che il telefono registra e che i bastoncelli dell'occhio non vedono."
+ },
+ "time": "2024-05-11T00:45:00",
+ "utcOffsetHours": 2,
+ "durationSeconds": 600,
+ "place": {
+  "name": "Plage de Trestraou, Perros-Guirec (assumed)",
+  "locations": [
+   {
+    "lat": 48.8205,
+    "lng": -3.4545
+   }
+  ]
+ },
+ "instrument": "phone-landscape",
+ "exposureSeconds": 3,
+ "lightPollution": 20.8,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed for the demo."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2500,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 2,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 48.8205,
+     "lng": -3.4545,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 18,
+     "fovDeg": 67
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ }
+}

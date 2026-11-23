@@ -2,6 +2,7 @@ import type { InterpretationJson } from "../interpretation/Interpretation.js"
 import type { BeamJson } from "../../modules/sky-events/beams/LaserBeam.js"
 import type { LaunchJson } from "../../modules/sky-events/launches/LaunchPlume.js"
 import type { ReentryJson } from "../../modules/sky-events/reentries/Reentry.js"
+import type { AuroraJson } from "../../modules/sky-events/auroras/Aurora.js"
 
 /**
  * What happened in the sky while the recording runs, as facts: a laser shot across a city, a rocket's launch, a re-entry. Each was there
@@ -19,6 +20,8 @@ export interface SkyEventsJson {
   launches?: LaunchJson[]
   /** Re-entries: placed on the Earth, not round the observer — see ReentryJson. */
   reentries?: ReentryJson[]
+  /** Aurorae: an oval of the upper air's light round the magnetic pole, as disturbed as the field was — see AuroraJson. */
+  auroras?: AuroraJson[]
   /** The events of a kind a module brings (see SkyEventKind), under that kind's key: each with an `id` of its own. */
   [kind: string]: unknown[] | undefined
 }

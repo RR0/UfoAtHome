@@ -674,6 +674,39 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "aurora-2024-05-10",
+          src: "/demo-data/sky-test-aurora-2024-05-10.json",
+          title: { en: "The aurora of 10 May 2024", fr: "L'aurore du 10 mai 2024", es: "La aurora del 10 de mayo de 2024", it: "L'aurora del 10 maggio 2024" },
+          blurb: {
+            en: "The great storm of 10 May 2024, from a beach of northern Brittany at a quarter to one in the morning: the GFZ's Hp60 index at 10⅔, past Kp's ceiling of 9, and the oval's edge a degree or two of latitude north of Brittany. To the eye adapted to the night, pale grey pillars over the northern sky, their red too faint for the cones. No aurora is stated: the scene shows the one the archived index implies, as it would for any recording of that night. Place assumed.",
+            fr: "Le grand orage magnétique du 10 mai 2024, depuis une plage du nord de la Bretagne à une heure moins le quart : l'indice Hp60 du GFZ à 10⅔, au-delà du plafond de 9 de Kp, et le bord de l'ovale à un ou deux degrés de latitude au nord de la Bretagne. Pour l'œil adapté à la nuit, des colonnes gris pâle sur le ciel nord, leur rouge trop faible pour les cônes. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice archivé, comme elle le ferait pour tout enregistrement de cette nuit. Lieu supposé.",
+            es: "La gran tormenta magnética del 10 de mayo de 2024, desde una playa del norte de Bretaña a la una menos cuarto de la madrugada: el índice Hp60 del GFZ en 10⅔, más allá del techo de 9 de Kp, y el borde del óvalo a uno o dos grados de latitud al norte de Bretaña. Para el ojo adaptado a la noche, columnas gris pálido sobre el cielo norte, su rojo demasiado débil para los conos. No se indica ninguna aurora: la escena muestra la que implica el índice archivado, como lo haría para cualquier grabación de esa noche. Lugar supuesto.",
+            it: "La grande tempesta magnetica del 10 maggio 2024, da una spiaggia della Bretagna settentrionale all'una meno un quarto: l'indice Hp60 del GFZ a 10⅔, oltre il tetto di 9 di Kp, e il bordo dell'ovale a uno o due gradi di latitudine a nord della Bretagna. Per l'occhio adattato alla notte, colonne grigio pallido sul cielo nord, il loro rosso troppo debole per i coni. Nessuna aurora è indicata: la scena mostra quella che l'indice archiviato implica, come farebbe per qualsiasi registrazione di quella notte. Luogo ipotizzato."
+          }
+        },
+        {
+          id: "aurora-2024-05-10-phone",
+          src: "/demo-data/sky-test-aurora-2024-05-10-phone.json",
+          title: { en: "The same aurora, by a phone", fr: "La même aurore, au téléphone", es: "La misma aurora, con un teléfono", it: "La stessa aurora, con un telefono" },
+          blurb: {
+            en: "The same night from the same beach, by a phone in night mode, a pose of three seconds: what the eye saw grey comes out green near the horizon and red above, the high red line of a storm that the phone records and the eye's rods do not. Why so many saw the photographs of that night more vividly than the sky.",
+            fr: "La même nuit depuis la même plage, au téléphone en mode nuit, une pose de trois secondes : ce que l'œil voyait gris sort vert près de l'horizon et rouge au-dessus, la raie rouge haute d'un orage que le téléphone enregistre et que les bâtonnets de l'œil ne voient pas. Pourquoi tant de gens ont vu les photos de cette nuit plus vives que le ciel.",
+            es: "La misma noche desde la misma playa, con un teléfono en modo noche, una exposición de tres segundos: lo que el ojo veía gris sale verde cerca del horizonte y rojo por encima, la línea roja alta de una tormenta que el teléfono registra y que los bastones del ojo no ven. Por qué tantos vieron las fotos de esa noche más vivas que el cielo.",
+            it: "La stessa notte dalla stessa spiaggia, con un telefono in modalità notte, una posa di tre secondi: ciò che l'occhio vedeva grigio esce verde vicino all'orizzonte e rosso sopra, la riga rossa alta di una tempesta che il telefono registra e che i bastoncelli dell'occhio non vedono. Perché tanti hanno visto le foto di quella notte più vivide del cielo."
+          }
+        },
+        {
+          id: "aurora-tromso",
+          src: "/demo-data/sky-test-aurora-tromso.json",
+          title: { en: "An aurora near Tromsø", fr: "Une aurore près de Tromsø", es: "Una aurora cerca de Tromsø", it: "Un'aurora vicino a Tromsø" },
+          blurb: {
+            en: "New Year's evening 2025 at a fjord's end near Tromsø, a moonless night with the field disturbed (the GFZ's Hp60 at 5⅓): an arc of rays across the northern sky, grey to the eye with a trace of green, drifting and brightening over minutes. The index is the archive's; where the oval stands follows from it, the details of its arcs are assumed.",
+            fr: "Le soir du Nouvel An 2025 au fond d'un fjord près de Tromsø, une nuit sans Lune, le champ agité (l'indice Hp60 du GFZ à 5⅓) : un arc à rayons à travers le ciel nord, gris pour l'œil avec une trace de vert, qui dérive et s'avive en quelques minutes. L'indice est celui de l'archive ; la position de l'ovale s'en déduit, le détail de ses arcs est supposé.",
+            es: "La noche de Año Nuevo de 2025 al fondo de un fiordo cerca de Tromsø, una noche sin luna con el campo agitado (el índice Hp60 del GFZ en 5⅓): un arco de rayos a través del cielo norte, gris para el ojo con un rastro de verde, que deriva y se aviva en unos minutos. El índice es el del archivo; de él se deduce dónde está el óvalo, el detalle de sus arcos es supuesto.",
+            it: "La sera di Capodanno 2025 in fondo a un fiordo vicino a Tromsø, una notte senza luna con il campo agitato (l'indice Hp60 del GFZ a 5⅓): un arco di raggi attraverso il cielo nord, grigio per l'occhio con una traccia di verde, che deriva e si ravviva in pochi minuti. L'indice è quello dell'archivio; ne discende dove si trova l'ovale, il dettaglio dei suoi archi è ipotizzato."
+          }
+        },
+        {
           id: "csg2",
           src: "/demo-data/observer-csg2-nassau.json",
           // The case, for the player: the same upper stage at its launch and at its end, an hour and a half and 2 500 km apart.

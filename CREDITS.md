@@ -30,6 +30,19 @@ attribution for.
   <https://imbrium.mit.edu/DATA/LOLA_GDR/CYLINDRICAL/IMG/>. It draws the Moon's ragged edge, which is
   Baily's beads, in an eclipse (`scripts/build-lunar-limb.ts`).
 
+## Geomagnetic data (`public/kp/`, `src/engine/astronomy/igrfCoefficients.ts`)
+
+- **Geomagnetic activity** — the planetary index Kp every three hours since 1932 and Hp60 every hour
+  since 1985, GFZ German Research Centre for Geosciences: Matzka, J. et al. (2021), "The geomagnetic Kp
+  index and derived indices of geomagnetic activity", *Space Weather* 19, doi:10.1029/2020SW002641
+  (data doi:10.5880/Kp.0001); Yamazaki, Y. et al. (2022), "Geomagnetic activity index Hpo",
+  *Geophysical Research Letters* 49 (data doi:10.5880/Hpo.0003). CC BY 4.0. Source:
+  <https://kp.gfz.de/> (`scripts/build-kp-archive.ts`). The aurora a scene draws when its recording
+  states none is computed from it, and credited in the player when it is.
+- **The Earth's main field** — IAGA, International Geomagnetic Reference Field, 14th generation (Alken,
+  P. et al. 2025), free to use with credit. Source: <https://www.ngdc.noaa.gov/IAGA/vmod/igrf.html>
+  (`scripts/build-igrf.ts`). It gives a place's apex latitude, which places it against the aurora's oval.
+
 ## Published models, computed rather than bundled
 
 The Milky Way and the zodiacal light are not images and no data is shipped for either: both are

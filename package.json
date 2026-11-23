@@ -67,7 +67,9 @@
     "build:aircraft-sound-reference": "node --import tsx scripts/build-aircraft-sound-reference.ts",
     "build:aircraft": "node --import tsx scripts/build-aircraft-archive.ts",
     "build:aircraft-demo": "node --import tsx scripts/build-aircraft-demo-slice.ts",
-    "fetch:aircraft": "node --import tsx scripts/fetch-aircraft-release.ts"
+    "fetch:aircraft": "node --import tsx scripts/fetch-aircraft-release.ts",
+    "build:igrf": "node --import tsx scripts/build-igrf.ts",
+    "build:kp": "node --import tsx scripts/build-kp-archive.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

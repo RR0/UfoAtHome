@@ -57,6 +57,10 @@ export class Icons {
   static readonly AIRCRAFT = Icons.draw(`<path d="M8 1.8c.6 0 .9.8.9 1.8v3l5.1 2.9v1.3L8.9 9.4v2.8l1.6 1.2v1.1L8 13.8l-2.5.7v-1.1l1.6-1.2V9.4L2 10.8V9.5l5.1-2.9v-3c0-1 .3-1.8.9-1.8z"/>`)
   static readonly LANTERN = Icons.draw(`<path d="M5.2 4.6h5.6l-.9 7.2H6.1z"/><path d="M6.5 4.6V3h3v1.6"/><path d="M8 11.8v2.4"/><path d="M8 7.2c.7.6.7 1.5 0 2.1-.7-.6-.7-1.5 0-2.1z"/>`)
   static readonly BIRD = Icons.draw(`<path d="M1.8 7.8c2-1.8 4-1.6 6.2.9 2.2-2.5 4.2-2.7 6.2-.9"/>`)
+  static readonly BALLOON = Icons.draw(`<path d="M8 1.8c2.6 0 4.3 2 4.3 4.4 0 2.7-2.3 4.8-4.3 5.6-2-.8-4.3-2.9-4.3-5.6 0-2.4 1.7-4.4 4.3-4.4z"/><path d="M8 11.8c-.6 1-.2 1.6.4 2.4"/>`)
+  static readonly AIRSHIP = Icons.draw(`<ellipse cx="7.4" cy="6.8" rx="5.6" ry="2.9"/><path d="M12.4 5.4 14.6 3.8v6l-2.2-1.6"/><path d="M6 9.7h2.8v1.6H6z"/>`)
+  /** A curtain of rays, folded. */
+  static readonly AURORA = Icons.draw(`<path d="M1.8 6.2c2-2.2 4.2.8 6.2-1.2s4.2.8 6.2-1.2"/><path d="M3.6 6v5.6M6.4 6v7M9.4 5.2v6.2M12.2 4.6v5"/>`)
   static readonly DRONE = Icons.draw(`<rect x="6" y="6.5" width="4" height="3" rx=".8"/><path d="M6 7 3.8 4.8M10 7l2.2-2.2M6 9l-2.2 2.2M10 9l2.2 2.2"/><path d="M2 4.8h3.6M10.4 4.8H14M2 11.2h3.6M10.4 11.2H14"/>`)
   static readonly LAUNCH = Icons.draw(`<path d="M8 1.8c2 1.6 3 3.9 3 6.6V11H5V8.4c0-2.7 1-5 3-6.6z"/><path d="M5 9.2 3.2 11v2.2L5 12M11 9.2l1.8 1.8v2.2L11 12"/><path d="M7 13.2 8 15l1-1.8"/><circle cx="8" cy="6.5" r="1.1"/>`)
   static readonly BEAM = Icons.draw(`<path d="M7.4 12.6 4.2 2M8.6 12.6 11.8 2"/><path d="M6.2 12.6h3.6v1.8H6.2z"/>`)
@@ -111,7 +115,8 @@ export class Icons {
     return ({
       "weather-precipitation": Icons.RAIN, "weather-clouds": Icons.SKY, "weather-wind": Icons.WIND, "weather-aircraft": Icons.AIRCRAFT,
       "interpretation-lanterns": Icons.LANTERN, "interpretation-birds": Icons.BIRD, "interpretation-drones": Icons.DRONE,
-      "sky-event-launches": Icons.LAUNCH, "sky-event-beams": Icons.BEAM, "sky-event-reentries": Icons.FIREBALL,
+      "interpretation-balloons": Icons.BALLOON, "interpretation-airships": Icons.AIRSHIP,
+      "sky-event-launches": Icons.LAUNCH, "sky-event-beams": Icons.BEAM, "sky-event-reentries": Icons.FIREBALL, "sky-event-auroras": Icons.AURORA,
       "shape-shapes": Icons.SHAPES, "shape-bodies": Icons.BODIES
     } as Record<string, string>)[panelId]
   }

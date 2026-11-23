@@ -193,6 +193,9 @@ class SiteBuilder {
     // The fireballs the Global Meteor Network recorded, one file per month, which a scene draws in a
     // recording since December 2018 (see FireballArchive, and `npm run build:fireballs`).
     await cp(join(this.root, "public", "fireballs"), join(this.out, "fireballs"), { recursive: true })
+    // The GFZ's planetary index of geomagnetic activity, one file per year since 1932, from which a scene draws the aurora of its night
+    // (see GeomagneticArchive, and `npm run build:kp`).
+    await cp(join(this.root, "public", "kp"), join(this.out, "kp"), { recursive: true })
 
     // A slice of the aircraft archive, one hour round Gonesse: what the air traffic demonstration reads, beside the page (see
     // AdsbLolArchiveProvider.defaultIndexUrls, and `npm run build:aircraft-demo`). The archive itself is not hosted.
@@ -227,7 +230,7 @@ class SiteBuilder {
         const path = join(directory, entry.name)
         // The bundles, the recordings and the models hold no page of the site.
         if (entry.isDirectory()) {
-          if (!["lib", "demo-data", "models", "roads", "water", "railways", "tle", "aircraft", "fireballs", "reentries", "light-pollution"].includes(entry.name)) await walk(path)
+          if (!["lib", "demo-data", "models", "roads", "water", "railways", "tle", "aircraft", "fireballs", "reentries", "kp", "light-pollution"].includes(entry.name)) await walk(path)
         } else if (entry.name.endsWith(".html")) pages.push(path)
       }
     }
@@ -469,6 +472,11 @@ ${retired}
 
 # The recorded fireballs: fetched by scenes embedded anywhere, a day of cache for the same reason.
 /fireballs/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+
+# The archived geomagnetic activity: fetched by scenes embedded anywhere, a day of cache for the same reason.
+/kp/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=86400
 `, "utf8")
