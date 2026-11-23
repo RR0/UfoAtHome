@@ -27,6 +27,28 @@ interface Demo {
   exposureSeconds?: number
   lightPollution: number
   tags: string[]
+  /**
+   * Where the witness looks, in turn, as one looking about the sky: [seconds, heading, pitch], gone round again until the end. Without it, the one
+   * direction of headingDeg and pitchDeg.
+   */
+  gaze?: [number, number, number][]
+}
+
+/** The poses of a gaze going round the sky again and again until `durationSeconds`, ms by ms as the track counts. */
+function gazeKeyframes(demo: Demo): unknown[] {
+  const pose = (headingDeg: number, pitchDeg: number) => ({ lat: demo.lat, lng: demo.lng, elevationM: 0, headingDeg, pitchDeg, fovDeg: demo.fovDeg })
+  if (!demo.gaze) return [{ t: 0, pose: pose(demo.headingDeg, demo.pitchDeg) }]
+  const round = demo.gaze[demo.gaze.length - 1][0]
+  const keyframes: unknown[] = []
+  for (let start = 0; start < demo.durationSeconds; start += round) {
+    for (const [seconds, heading, pitch] of demo.gaze) {
+      if (start > 0 && seconds === 0) continue
+      const t = start + seconds
+      if (t > demo.durationSeconds) break
+      keyframes.push({ t: t * 1000, pose: pose(heading, pitch) })
+    }
+  }
+  return keyframes
 }
 
 const assumed = { basis: "assumed", rationale: "Assumed for the demo." }
@@ -54,9 +76,7 @@ function recording(demo: Demo): unknown {
       }]
     },
     timeline: { keyframes: [{ t: 0, shapes: [] }], order: [], groups: [] },
-    observerTrack: {
-      keyframes: [{ t: 0, pose: { lat: demo.lat, lng: demo.lng, elevationM: 0, headingDeg: demo.headingDeg, pitchDeg: demo.pitchDeg, fovDeg: demo.fovDeg } }]
-    },
+    observerTrack: { keyframes: gazeKeyframes(demo) },
     soundTrack: { keyframes: [] }
   }
 }
@@ -74,6 +94,20 @@ const demos: Demo[] = [
     time: "2025-01-01T21:00:00", utcOffsetHours: 1, durationSeconds: 600,
     place: "Ersfjordbotn, near Tromsø (assumed)", lat: 69.6955, lng: 18.6248,
     headingDeg: 0, pitchDeg: 50, fovDeg: 100, lightPollution: 21.5
+  },
+  {
+    id: "sky-test-aurora-2023-03-23",
+    tags: ["aurora", "misidentification"],
+    description: {
+      en: "Ekerö, west of Stockholm, 23 March 2023 at eleven in the evening, during the storm of 23 and 24 March: the GFZ's Hp60 at 6⅓, the oval's edge come down to the latitude of the Mälaren, its brightest arcs across the eastern and south-eastern sky, the two-day-old Moon set. The witness looks about the whole sky, again and again: the north, up to the zenith, the east, the south, the west. Seen by an eye adapted to the night, the brightest arcs are a pale green, the fainter ones grey. No aurora is stated: the scene shows the one the index implies; its arcs' details are assumed.",
+      fr: "Ekerö, à l'ouest de Stockholm, le 23 mars 2023 à vingt-trois heures, pendant l'orage des 23 et 24 mars : l'indice Hp60 du GFZ à 6⅓, le bord de l'ovale descendu à la latitude du lac Mälar, ses arcs les plus vifs à travers le ciel de l'est et du sud-est, la Lune de deux jours couchée. Le témoin regarde tout le ciel, encore et encore : le nord, jusqu'au zénith, l'est, le sud, l'ouest. Vus par un œil adapté à la nuit, les arcs les plus vifs sont d'un vert pâle, les plus faibles gris. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice ; le détail de ses arcs est supposé.",
+      es: "Ekerö, al oeste de Estocolmo, el 23 de marzo de 2023 a las once de la noche, durante la tormenta del 23 y 24 de marzo: el índice Hp60 del GFZ en 6⅓, el borde del óvalo bajado hasta la latitud del lago Mälaren, sus arcos más vivos a través del cielo del este y del sureste, la Luna de dos días ya puesta. El testigo mira todo el cielo, una y otra vez: el norte, hasta el cénit, el este, el sur, el oeste. Vistos por un ojo adaptado a la noche, los arcos más vivos son de un verde pálido, los más débiles grises. No se indica ninguna aurora: la escena muestra la que implica el índice; el detalle de sus arcos es supuesto.",
+      it: "Ekerö, a ovest di Stoccolma, il 23 marzo 2023 alle undici di sera, durante la tempesta del 23 e 24 marzo: l'indice Hp60 del GFZ a 6⅓, il bordo dell'ovale sceso alla latitudine del lago Mälaren, i suoi archi più vivi attraverso il cielo dell'est e del sud-est, la Luna di due giorni tramontata. Il testimone guarda tutto il cielo, più e più volte: il nord, fino allo zenit, l'est, il sud, l'ovest. Visti da un occhio adattato alla notte, gli archi più vivi sono di un verde pallido, i più deboli grigi. Nessuna aurora è indicata: la scena mostra quella che l'indice implica; il dettaglio dei suoi archi è ipotizzato."
+    },
+    time: "2023-03-23T23:00:00", utcOffsetHours: 1, durationSeconds: 600,
+    place: "Ekerö, west of Stockholm (assumed)", lat: 59.29, lng: 17.81,
+    headingDeg: 0, pitchDeg: 20, fovDeg: 100, lightPollution: 21.0,
+    gaze: [[0, 0, 20], [8, 0, 55], [16, 20, 85], [24, 90, 50], [34, 180, 35], [44, 270, 40], [54, 360, 20]]
   },
   {
     id: "sky-test-aurora-2024-05-10",

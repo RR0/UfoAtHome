@@ -1,0 +1,805 @@
+{
+ "version": 4,
+ "id": "sky-test-aurora-2023-03-23",
+ "tags": [
+  "aurora",
+  "misidentification"
+ ],
+ "description": {
+  "en": "Ekerö, west of Stockholm, 23 March 2023 at eleven in the evening, during the storm of 23 and 24 March: the GFZ's Hp60 at 6⅓, the oval's edge come down to the latitude of the Mälaren, its brightest arcs across the eastern and south-eastern sky, the two-day-old Moon set. The witness looks about the whole sky, again and again: the north, up to the zenith, the east, the south, the west. Seen by an eye adapted to the night, the brightest arcs are a pale green, the fainter ones grey. No aurora is stated: the scene shows the one the index implies; its arcs' details are assumed.",
+  "fr": "Ekerö, à l'ouest de Stockholm, le 23 mars 2023 à vingt-trois heures, pendant l'orage des 23 et 24 mars : l'indice Hp60 du GFZ à 6⅓, le bord de l'ovale descendu à la latitude du lac Mälar, ses arcs les plus vifs à travers le ciel de l'est et du sud-est, la Lune de deux jours couchée. Le témoin regarde tout le ciel, encore et encore : le nord, jusqu'au zénith, l'est, le sud, l'ouest. Vus par un œil adapté à la nuit, les arcs les plus vifs sont d'un vert pâle, les plus faibles gris. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice ; le détail de ses arcs est supposé.",
+  "es": "Ekerö, al oeste de Estocolmo, el 23 de marzo de 2023 a las once de la noche, durante la tormenta del 23 y 24 de marzo: el índice Hp60 del GFZ en 6⅓, el borde del óvalo bajado hasta la latitud del lago Mälaren, sus arcos más vivos a través del cielo del este y del sureste, la Luna de dos días ya puesta. El testigo mira todo el cielo, una y otra vez: el norte, hasta el cénit, el este, el sur, el oeste. Vistos por un ojo adaptado a la noche, los arcos más vivos son de un verde pálido, los más débiles grises. No se indica ninguna aurora: la escena muestra la que implica el índice; el detalle de sus arcos es supuesto.",
+  "it": "Ekerö, a ovest di Stoccolma, il 23 marzo 2023 alle undici di sera, durante la tempesta del 23 e 24 marzo: l'indice Hp60 del GFZ a 6⅓, il bordo dell'ovale sceso alla latitudine del lago Mälaren, i suoi archi più vivi attraverso il cielo dell'est e del sud-est, la Luna di due giorni tramontata. Il testimone guarda tutto il cielo, più e più volte: il nord, fino allo zenit, l'est, il sud, l'ovest. Visti da un occhio adattato alla notte, gli archi più vivi sono di un verde pallido, i più deboli grigi. Nessuna aurora è indicata: la scena mostra quella che l'indice implica; il dettaglio dei suoi archi è ipotizzato."
+ },
+ "time": "2023-03-23T23:00:00",
+ "utcOffsetHours": 1,
+ "durationSeconds": 600,
+ "place": {
+  "name": "Ekerö, west of Stockholm (assumed)",
+  "locations": [
+   {
+    "lat": 59.29,
+    "lng": 17.81
+   }
+  ]
+ },
+ "instrument": "eye",
+ "lightPollution": 21,
+ "weatherTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "weather": {
+     "cloudCover": {
+      "value": 0,
+      "basis": "assumed",
+      "rationale": "Assumed for the demo."
+     },
+     "cloudDarkness": 0,
+     "cloudBaseM": 2500,
+     "lowerCloudCover": 0,
+     "highCloudCover": 0,
+     "precipitationType": "none",
+     "precipitationIntensity": 0,
+     "windDirectionDeg": 0,
+     "windSpeed": 2,
+     "storm": false
+    }
+   }
+  ]
+ },
+ "timeline": {
+  "keyframes": [
+   {
+    "t": 0,
+    "shapes": []
+   }
+  ],
+  "order": [],
+  "groups": []
+ },
+ "observerTrack": {
+  "keyframes": [
+   {
+    "t": 0,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 8000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 16000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 24000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 34000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 44000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 54000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 62000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 70000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 78000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 88000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 98000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 108000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 116000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 124000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 132000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 142000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 152000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 162000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 170000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 178000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 186000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 196000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 206000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 216000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 224000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 232000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 240000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 250000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 260000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 270000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 278000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 286000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 294000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 304000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 314000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 324000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 332000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 340000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 348000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 358000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 368000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 378000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 386000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 394000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 402000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 412000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 422000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 432000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 440000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 448000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 456000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 466000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 476000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 486000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 494000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 502000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 510000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 520000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 530000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 540000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 548000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 0,
+     "pitchDeg": 55,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 556000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 20,
+     "pitchDeg": 85,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 564000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 90,
+     "pitchDeg": 50,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 574000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 180,
+     "pitchDeg": 35,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 584000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 270,
+     "pitchDeg": 40,
+     "fovDeg": 100
+    }
+   },
+   {
+    "t": 594000,
+    "pose": {
+     "lat": 59.29,
+     "lng": 17.81,
+     "elevationM": 0,
+     "headingDeg": 360,
+     "pitchDeg": 20,
+     "fovDeg": 100
+    }
+   }
+  ]
+ },
+ "soundTrack": {
+  "keyframes": []
+ }
+}

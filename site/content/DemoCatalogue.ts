@@ -696,6 +696,17 @@ export class DemoCatalogue {
           }
         },
         {
+          id: "aurora-2023-03-23",
+          src: "/demo-data/sky-test-aurora-2023-03-23.json",
+          title: { en: "Looking round an aurora", fr: "Le tour d'une aurore", es: "Mirar alrededor de una aurora", it: "Guardarsi intorno sotto un'aurora" },
+          blurb: {
+            en: "The storm of 23 March 2023 from Ekerö, west of Stockholm, at eleven in the evening: the GFZ's Hp60 at 6⅓, the oval come down to the Mälaren. The witness looks about the whole sky, again and again, north, up to the zenith, east, south and west: to the eye adapted to the night the brightest arcs are a pale green, the fainter ones grey; the vivid greens of photographs are a long pose's. No aurora is stated: the scene shows the one the archived index implies. Place assumed.",
+            fr: "L'orage du 23 mars 2023 depuis Ekerö, à l'ouest de Stockholm, à vingt-trois heures : l'indice Hp60 du GFZ à 6⅓, l'ovale descendu jusqu'au lac Mälar. Le témoin regarde tout le ciel, encore et encore, le nord, jusqu'au zénith, l'est, le sud et l'ouest : pour l'œil adapté à la nuit les arcs les plus vifs sont d'un vert pâle, les plus faibles gris ; les verts vifs des photographies sont ceux d'une longue pose. Aucune aurore n'est donnée : la scène montre celle qu'implique l'indice archivé. Lieu supposé.",
+            es: "La tormenta del 23 de marzo de 2023 desde Ekerö, al oeste de Estocolmo, a las once de la noche: el índice Hp60 del GFZ en 6⅓, el óvalo bajado hasta el lago Mälaren. El testigo mira todo el cielo, una y otra vez, el norte, hasta el cénit, el este, el sur y el oeste: para el ojo adaptado a la noche los arcos más vivos son de un verde pálido, los más débiles grises; los verdes vivos de las fotografías son los de una larga exposición. No se indica ninguna aurora: la escena muestra la que implica el índice archivado. Lugar supuesto.",
+            it: "La tempesta del 23 marzo 2023 da Ekerö, a ovest di Stoccolma, alle undici di sera: l'indice Hp60 del GFZ a 6⅓, l'ovale sceso fino al lago Mälaren. Il testimone guarda tutto il cielo, più e più volte, il nord, fino allo zenit, l'est, il sud e l'ovest: per l'occhio adattato alla notte gli archi più vivi sono di un verde pallido, i più deboli grigi; i verdi vivi delle fotografie sono quelli di una lunga posa. Nessuna aurora è indicata: la scena mostra quella che l'indice archiviato implica. Luogo ipotizzato."
+          }
+        },
+        {
           id: "aurora-tromso",
           src: "/demo-data/sky-test-aurora-tromso.json",
           title: { en: "An aurora near Tromsø", fr: "Une aurore près de Tromsø", es: "Una aurora cerca de Tromsø", it: "Un'aurora vicino a Tromsø" },
