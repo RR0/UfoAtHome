@@ -18,12 +18,6 @@ export const EDIT_EVENT = "rr0-edit"
  */
 export const IN_PLACE_ATTRIBUTE = "in-place"
 
-/**
- * On a `<rr0-case-editor>` with no `src`: the new observation is a testimony, told by its witness, so the editor makes a case around it with the
- * questionnaires a new case asks its witness to fill in, the first open (see CaseEditorElement.startTestimony).
- */
-export const TESTIMONY_ATTRIBUTE = "testimony"
-
 /** Fired by `<rr0-case-editor in-place>` when it switches, `detail` a ReadEditMode: what a page puts in its address or its title. */
 export const MODE_CHANGE_EVENT = "rr0-mode"
 

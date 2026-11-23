@@ -334,12 +334,22 @@ describe("CaseEditorElement", () => {
     expect(JSON.parse(written[1].content).description).toBe("Edited, not saved")
   })
 
-  it("adds to a case made around a recording the questionnaire its witness is asked to fill in, held with them", async () => {
+  it("adds to a case made around a recording the questionnaire its case template asks its witness to fill in, held with them; none without a template", async () => {
     files["https://example.org/d/plain.json"] = { version: 4, id: "1965-07-01-Plain", observer: { id: "Plain", title: "A witness" }, time: "1965-07-01T05:00", timeline: { keyframes: [] } }
     vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+    const bare = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(bare)
+    bare.setAttribute("src", "https://example.org/d/plain.json")
+    await wait()
+    ;(bare.shadowRoot!.getElementById("make-case") as HTMLButtonElement).click()
+    await until(() => bare.caseSession !== undefined)
+    await wait(200)
+    expect(bare.caseSession!.interviews).toHaveLength(0)
+    bare.remove()
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
-    document.body.appendChild(element)
+    element.caseStart = { id: "qt", title: "QT", questionnaires: ["geipan-qt-2025"] }
     element.setAttribute("src", "https://example.org/d/plain.json")
+    document.body.appendChild(element)
     await wait()
     ;(element.shadowRoot!.getElementById("make-case") as HTMLButtonElement).click()
     await until(() => element.caseSession!.interviews.length === 1)
@@ -1565,8 +1575,47 @@ describe("Opening files in the app", () => {
     expect(editor.caseSession?.url).toBe("https://example.org/d/case.json")
   })
 
-  it("starts a testimony on New: a case around a blank observation, the witness's questionnaire open on its form, its answers set in the observation", async () => {
+  /** The app on a blank editor, New offering the starts of the case template served at `url`. */
+  const templated = async (starts: unknown[], url = "https://example.org/templates/t.json"): Promise<UfoAtHomeElement> => {
+    const template = { format: 1, id: "t", title: { en: "Start" }, starts }
+    const served = globalThis.fetch
+    vi.stubGlobal("fetch", vi.fn(async (asked: string, init?: unknown) => asked === url
+      ? { ok: true, json: () => Promise.resolve(structuredClone(template)) }
+      : (served as (asked: string, init?: unknown) => Promise<unknown>)(asked, init)))
+    registerUfoAtHome()
+    const element = document.createElement("rr0-ufoathome") as UfoAtHomeElement
+    element.setAttribute("case-template", url)
+    document.body.appendChild(element)
+    await element.ready
+    return element
+  }
+  const qtStart = { id: "qt", title: { en: "Fill in the questionnaire" }, questionnaires: ["geipan-qt-2025"], start: "questionnaire" }
+
+  it("starts a blank observation on New when the page names no case template: no case, no questionnaire", async () => {
     const element = await app()
+    const before = element.querySelector("rr0-case-editor") as CaseEditorElement
+    ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
+    await until(() => element.querySelector("rr0-case-editor") !== before && element.querySelector("rr0-case-editor") !== null, 3000)
+    await wait(200)
+    const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
+    expect(editor.caseStart).toBeUndefined()
+    expect(editor.caseSession).toBeUndefined()
+  })
+
+  it("offers on New the starts of the page's case template, and starts the one chosen", async () => {
+    const element = await templated([qtStart, { id: "blank", title: { en: "A blank observation" }, description: { en: "No questionnaire." } }])
+    ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
+    await until(() => element.shadowRoot!.querySelectorAll("#starts button").length === 2, 3000)
+    const buttons = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#starts button")]
+    expect(buttons.map(button => button.textContent)).toEqual(["Fill in the questionnaire", "A blank observationNo questionnaire."])
+    buttons[1].click()
+    await until(() => (element.querySelector("rr0-case-editor") as CaseEditorElement | null)?.caseStart?.id === "blank", 3000)
+    await wait(200)
+    expect((element.querySelector("rr0-case-editor") as CaseEditorElement).caseSession).toBeUndefined()
+  })
+
+  it("starts a testimony on New when the case template offers only that: a case around a blank observation, the witness's questionnaire open on its form, its answers set in the observation", async () => {
+    const element = await templated([qtStart], "https://example.org/templates/testimony.json")
     ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
     await until(() => (element.querySelector("rr0-case-editor") as CaseEditorElement | null)?.caseSession?.interviews.length === 1, 3000)
     const editor = element.querySelector("rr0-case-editor") as CaseEditorElement

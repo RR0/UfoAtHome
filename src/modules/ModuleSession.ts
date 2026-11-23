@@ -95,8 +95,11 @@ export class ModuleSession {
   /**
    * Loads the modules a recording names, its addresses read from `base` (the recording's own address). Returns once each is installed or
    * has failed, so that what the recording draws from them can be drawn.
+   *
+   * `trusted` when the page itself asks for them (a case template it gives, see CaseTemplateJson.modules): their scripts run, as for a module the
+   * person added. Never for what a file names.
    */
-  async require(urls: readonly string[] | undefined, base?: string): Promise<void> {
+  async require(urls: readonly string[] | undefined, base?: string, trusted = false): Promise<void> {
     if (!urls?.length) return
     await this.start()
     await Promise.all(urls.map(async url => {
@@ -107,7 +110,9 @@ export class ModuleSession {
         return
       }
       const known = this.states.get(absolute)
-      if (known && known.status !== "off") return known.status === "loading" ? this.pending.get(absolute) : undefined
+      const trust = trusted && !this.trusted.has(absolute)
+      if (trusted) this.trusted.add(absolute)
+      if (known && known.status !== "off" && !(trust && known.loaded && !known.loaded.scriptRun)) return known.status === "loading" ? this.pending.get(absolute) : undefined
       this.named.add(absolute)
       await this.reload(absolute)
     }))
@@ -115,6 +120,8 @@ export class ModuleSession {
 
   /** The addresses recordings of this page named. */
   private readonly named = new Set<string>()
+  /** The addresses the page itself asked for, whose scripts run. */
+  private readonly trusted = new Set<string>()
   private readonly pending = new Map<string, Promise<ModuleState>>()
 
   private async applyConfig(config: ModuleConfigJson): Promise<void> {
@@ -144,7 +151,7 @@ export class ModuleSession {
     if (addedByPerson && !enabled && !this.named.has(url)) return this.set({ url, addedByPerson, enabled, status: "off" })
     this.set({ url, addedByPerson, enabled, status: "loading" })
     try {
-      const loaded = await this.loader.load(url, { runScript: addedByPerson && enabled })
+      const loaded = await this.loader.load(url, { runScript: (addedByPerson && enabled) || (!addedByPerson && this.trusted.has(url)) })
       ModuleRegistry.install(loaded.module)
       return this.set({ url, addedByPerson, enabled, status: "installed", loaded })
     } catch (error) {

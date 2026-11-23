@@ -17,5 +17,6 @@ export const ufoAtHomeMessages_fr: UfoAtHomeMessages = {
   recentCopy: "copie gardée dans ce navigateur",
   recentRemove: "Retirer de la liste",
   noJson: "Aucun des fichiers choisis n'est une reconstitution (.json).",
-  openFailed: "Cela n'a pas pu être ouvert."
+  openFailed: "Cela n'a pas pu être ouvert.",
+  caseTemplateFailed: "Le modèle de dossier n'a pas pu être lu : rien n'a été commencé."
 }

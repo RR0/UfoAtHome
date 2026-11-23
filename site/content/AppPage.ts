@@ -5,7 +5,8 @@ import type { PageMeta, SiteLanguage, SitePage } from "../SitePage.js"
  *
  * Where the manifest opens it (see OfflineKit.manifest): on a blank editor, the reader coming the first time something is read. Given
  * a file (`?file=` and its whole address, as every "open it" link of the site), it opens on that file's reader, the editor coming the
- * first time the pencil is used; `mode=edit` opens it in the editor, `track=` on one recording of a case. Kept out of the navigation and
+ * first time the pencil is used; `mode=edit` opens it in the editor, `track=` on one recording of a case. `case-template=` names the case template
+ * New offers (see CaseTemplate), one of this site's only: the modules a template names run their scripts, which a link from elsewhere must not decide. Kept out of the navigation and
  * the footer: the site's own pages are the player and the editor; this is the tool that a home screen opens. A file the system opens
  * with the installed app ("Open with") comes through launchQueue (see OfflineKit.manifest's file_handlers).
  */
@@ -46,6 +47,16 @@ if (file && /^https?:[/][/]/i.test(file)) app.setAttribute("src", file)
 for (const name of ["track", "mode"]) {
   const value = asked.get(name)
   if (value) app.setAttribute(name, value)
+}
+/* A case template of this site only (see CaseTemplate): the modules it names run their scripts. */
+const template = asked.get("case-template")
+if (template) {
+  try {
+    const url = new URL(template, location.href)
+    if (url.origin === location.origin) app.setAttribute("case-template", url.href)
+  } catch {
+    /* Not an address. */
+  }
 }
 /* Which of the two is on show is in the address, so that it is the one a reload or a link opens again. */
 app.addEventListener("rr0-mode", event => {

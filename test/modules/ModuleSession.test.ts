@@ -101,6 +101,18 @@ describe("ModuleSession", () => {
     expect(IMAGERY_SOURCES.map(source => source.id)).toContain("acme-ortho")
   })
 
+  it("runs the script of a module the page itself asks for (a case template it gives), even one a recording named first without it", async () => {
+    const modules = session()
+    await modules.require(["ufo/ufoathome-module.json"], "https://acme.example/sighting.json")
+    expect(modules.state(MANIFEST)!.loaded?.scriptRun).toBe(false)
+    await modules.require([MANIFEST], undefined, true)
+    const state = modules.state(MANIFEST)!
+    expect(state.status).toBe("installed")
+    expect(state.addedByPerson).toBe(false)
+    expect(state.loaded?.scriptRun).toBe(true)
+    expect(scriptRuns.length).toBeGreaterThan(0)
+  })
+
   it("turns a module off and on again, and loads what is on from what the browser keeps", async () => {
     const storage = new MemoryStorage()
     await session(storage).add(MANIFEST)

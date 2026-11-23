@@ -31,7 +31,7 @@ import type { DateInputElement } from "./DateInputElement.js"
 import type { SightingTime } from "../engine/model/Sighting.js"
 import type { CaseTrack } from "./CaseSession.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
-import { CaseTemplate } from "../engine/questionnaire/CaseTemplate.js"
+import { CaseTemplates, type CaseStart } from "../engine/questionnaire/CaseTemplate.js"
 import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { SourceChoices } from "./BasisInputElement.js"
@@ -49,7 +49,7 @@ import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { InterpretationKinds } from "../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../modules/interpretations/interpretationSources.js"
-import { IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT, TESTIMONY_ATTRIBUTE, READ_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditEvents.js"
+import { IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT, READ_EVENT, ReadEdit, type ReadEditDetail } from "./ReadEditEvents.js"
 import { ReadEditSwitch } from "./ReadEditSwitch.js"
 import { OpenFiles, type OpenFile } from "../engine/net/OpenFiles.js"
 
@@ -730,18 +730,27 @@ export class CaseEditorElement extends HTMLElement {
     const src = this.getAttribute("src")
     if (src && this.editor.getAttribute("src") !== src) this.editor.setAttribute("src", src)
     this.ready = this.loadLocale()
-    // A new observation told by its witness (see TESTIMONY_ATTRIBUTE): the case around it, and its questionnaire open to fill in.
-    if (!src && this.hasAttribute(TESTIMONY_ATTRIBUTE) && !this.session) this.ready = this.ready.then(() => this.startTestimony())
+    // A new observation started as a case template says (see caseStart): the case around it, and its questionnaires.
+    const start = this.caseStart
+    if (!src && start && !this.session) this.ready = this.ready.then(() => this.startCase(start))
   }
 
   /**
-   * Starts a testimony: a case around the blank observation on show, with the questionnaires a new case asks its witness to fill in (see CaseTemplate),
-   * the first of them open. Their answers are what the observation is then given (see QuestionnaireFeed).
+   * How a case started blank here is to start (see CaseTemplate), set before the editor is placed: the questionnaires its witness is asked to fill
+   * in, and where it opens. None: a blank observation, and a case made around it later given no questionnaire.
    */
-  async startTestimony(): Promise<void> {
-    this.makeCase()
-    const added = await this.addDefaultQuestionnaires()
-    if (added[0]) await this.showInterview(added[0])
+  caseStart?: CaseStart
+
+  /**
+   * Starts a case as `start` says: around the blank observation on show when it asks questionnaires, each an interview of the case, the first one's
+   * form open when it starts there. Their answers are what the observation is then given (see QuestionnaireFeed).
+   */
+  async startCase(start: CaseStart): Promise<void> {
+    this.caseStart = start
+    if (!start.questionnaires?.length) return
+    this.makeCase(false)
+    const added = await this.addStartQuestionnaires()
+    if (added[0] && CaseTemplates.step(start) === "questionnaire") await this.showInterview(added[0])
   }
 
   /** The recording on show, whichever it is. */
@@ -2060,7 +2069,7 @@ export class CaseEditorElement extends HTMLElement {
    * Makes a case around the recording on show, which stays exactly where it is: the editor is not given it again, so what is
    * being edited is not lost, and the case appears above it. Nothing is written anywhere: the case is the one an export makes.
    */
-  private makeCase(): void {
+  private makeCase(withQuestionnaires = true): void {
     if (this.session) return
     const recording = this.editor.sightingData
     // Stated with what it says of where it came from, the time is its value.
@@ -2076,18 +2085,22 @@ export class CaseEditorElement extends HTMLElement {
     this.session.keep(this.current, recording)
     this.dateModeFor = undefined
     this.refreshRow()
-    if (!this.hasAttribute(TESTIMONY_ATTRIBUTE)) void this.addDefaultQuestionnaires()
+    if (withQuestionnaires) void this.addStartQuestionnaires()
   }
 
-  /** Adds to the case the questionnaires a new case asks its first witness to fill in (see CaseTemplate), and lists them. */
-  private async addDefaultQuestionnaires(): Promise<InterviewEvent[]> {
+  /**
+   * Adds to the case the questionnaires its start asks its first witness to fill in (see caseStart), and lists them: none when this editor was not
+   * started from a case template.
+   */
+  private async addStartQuestionnaires(): Promise<InterviewEvent[]> {
     const session = this.session
     const witness = session?.tracks.find(track => track.kind === "observer")
-    if (!session || !witness) return []
+    const asked = this.caseStart?.questionnaires ?? []
+    if (!session || !witness || asked.length === 0) return []
     const { QuestionnaireTemplates } = await import("../engine/questionnaire/QuestionnaireTemplate.js")
     const added: InterviewEvent[] = []
-    for (const id of CaseTemplate.questionnaires) {
-      const template = await QuestionnaireTemplates.load(id)
+    for (const id of asked) {
+      const template = await QuestionnaireTemplates.load(id).catch(() => undefined)
       if (!template || this.session !== session) continue
       added.push(session.addQuestionnaire(witness, this.today(), template) as InterviewEvent)
     }

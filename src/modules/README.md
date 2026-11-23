@@ -71,12 +71,23 @@ shape as `public/models/index.json`) and, for what needs code, a `script` whose 
 - `ModuleLoader` fetches and checks a manifest, and imports its script only when asked to.
 - `ModuleSession.shared` is the page's set of modules: those the person added (kept by `ModuleConfig` in localStorage,
   exported and imported as a file) and those a recording names (`SightingRecordingJson.modules`). A script runs only for a
-  module the person added and has on, never for one a recording names.
+  module the person added and has on, never for one a recording names — or one the page itself asks for: the modules of a
+  case template it gives (see below).
 - `models/ModelCatalogues` resolves a model id in every catalogue, the one browsed first: a recording's models are drawn
   whichever module's catalogue they come from. After an edit, the editor makes the recording name the module a model it uses
   comes from (`SightingEditorElement.nameModulesOfModels`, addresses written by `ModuleAddress`), never on mere opening.
 - In the editor: the **Modules** item of the Files group (`component/ModulesPanelElement.ts`). On the site:
   `/docs/modules/` (`site/content/DocsModulesPage.ts`).
+
+## Case templates
+
+What New offers to start is a case template (`engine/questionnaire/CaseTemplate.ts`), named by the page:
+`<rr0-ufoathome case-template="…/template.json">`, or `/app/?case-template=` for a template of the site itself. Without one,
+New starts a blank observation. With one, New offers its `starts` (the only one taken without asking): each names the
+questionnaires its witness is asked to fill in (an id, or the address of a questionnaire template), each an interview of the
+case, and where it opens (`start`: the first questionnaire's form, or the observation), the first step of what may become a
+process. The template's `modules` (and a start's own) load when New is used, their scripts run since the page asked for them.
+`public/case-templates/testimony.json` offers GEIPAN's technical questionnaire or a blank observation.
 
 ## Kinds of events of the sky
 

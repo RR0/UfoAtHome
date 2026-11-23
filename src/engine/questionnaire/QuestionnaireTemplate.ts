@@ -53,7 +53,7 @@ export interface QuestionnaireTemplate {
 /** The questionnaires UFO@home knows, each a file of its own loaded when first asked for. */
 export class QuestionnaireTemplates {
 
-  /** The one a case asks its witness to fill in when nothing says otherwise (see CaseTemplate). */
+  /** The one UFO@home ships with, which a case template names by its id (see CaseTemplate). */
   static readonly DEFAULT = "geipan-qt-2025"
 
   private static readonly LOADERS: Record<string, () => Promise<QuestionnaireTemplate>> = {
@@ -72,9 +72,25 @@ export class QuestionnaireTemplates {
     QuestionnaireTemplates.added.set(template.id, template)
   }
 
-  /** The questionnaire `id`, or undefined when none is known by it. */
+  private static readonly fetched = new Map<string, Promise<QuestionnaireTemplate | undefined>>()
+
+  /**
+   * The questionnaire `id`, or undefined when none is known by it. An address (see CaseTemplates.isAddress) is the file of one, read once and made
+   * known by its own id.
+   */
   static async load(id: string): Promise<QuestionnaireTemplate | undefined> {
-    return QuestionnaireTemplates.added.get(id) ?? await QuestionnaireTemplates.LOADERS[id]?.()
+    const known = QuestionnaireTemplates.added.get(id) ?? await QuestionnaireTemplates.LOADERS[id]?.()
+    if (known || !/[/:]|\.json$/i.test(id)) return known
+    let reading = QuestionnaireTemplates.fetched.get(id)
+    if (!reading) {
+      reading = fetch(id).then(response => response.ok ? response.json() : undefined).then((json: QuestionnaireTemplate | undefined) => {
+        if (!json || typeof json.id !== "string" || !Array.isArray(json.sections)) return undefined
+        QuestionnaireTemplates.add(json)
+        return json
+      }).catch(() => undefined)
+      QuestionnaireTemplates.fetched.set(id, reading)
+    }
+    return reading
   }
 
   /** Every field, in order. */

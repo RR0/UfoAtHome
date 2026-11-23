@@ -24,4 +24,6 @@ export interface UfoAtHomeMessages extends InputFileMessages {
   noJson: string
   /** When what was asked could not be opened. */
   openFailed: string
+  /** When the case template the page names (see UfoAtHomeElement's `case-template`) could not be read: New starts nothing. */
+  caseTemplateFailed: string
 }

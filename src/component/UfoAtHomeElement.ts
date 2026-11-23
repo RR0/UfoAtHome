@@ -6,6 +6,8 @@ import { OpenFiles } from "../engine/net/OpenFiles.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EditorTheme } from "./EditorTheme.js"
 import { MessageStyle } from "./MessageStyle.js"
+import { CaseTemplates, type CaseStart, type CaseTemplate } from "../engine/questionnaire/CaseTemplate.js"
+import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadUfoAtHomeMessages, UFO_SUPPORTED_LANGUAGES, type UfoLanguage } from "./messages/index.js"
 import type { UfoAtHomeMessages } from "./messages/UfoAtHomeMessages.js"
@@ -44,10 +46,20 @@ ${MessageStyle.CSS}
 .recent .remove { flex: none; width: 28px; height: 28px; border: 0; border-radius: 6px; background: none; color: var(--ink-dim); cursor: pointer; font-size: 16px; }
 .recent .remove:is(:hover, :focus-visible) { background: var(--neutral-bg); color: var(--ink); }
 .recent-none { margin: 0; color: var(--ink-dim); font-size: .78em; }
+.starts { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.starts button { width: 100%; display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: none; color: inherit;
+  font: inherit; text-align: left; cursor: pointer; }
+.starts button:is(:hover, :focus-visible) { background: var(--neutral-bg); border-color: var(--line-strong); }
+.starts .name { font-weight: 600; }
+.starts .what { color: var(--ink-dim); font-size: .78em; }
 </style>
 <div class="bar">
   <p id="status" class="status" role="status" hidden></p>
   <button id="new" type="button" class="pill-btn">${ICON_NEW}<span id="label-new"></span></button>
+  <div id="new-menu" class="open-menu" popover>
+    <h2 id="starts-heading"></h2>
+    <ul id="starts" class="starts"></ul>
+  </div>
   <button id="open" type="button" class="pill-btn" popovertarget="open-menu">${ICON_OPEN}<span id="label-open"></span></button>
 </div>
 <div id="open-menu" class="open-menu" popover>
@@ -73,6 +85,9 @@ ${MessageStyle.CSS}
  * without `src`), whose Read turns it into the reader. `track` names the recording of a case to open on. Says which is on show, and on
  * what, by MODE_CHANGE_EVENT, for the page to put it in its address.
  *
+ * `case-template` is the address of a case template (see CaseTemplate): what New offers to start, the only start taken without asking, and the
+ * modules the template names loaded, their scripts run since the page asked for them. Without it, New starts a blank observation.
+ *
  * It holds the reader or the editor as children of its own, in the page's light: what the page says of `rr0-case-editor`, `rr0-case` or
  * `rr0-sighting` applies to them here as anywhere.
  */
@@ -90,7 +105,7 @@ export class UfoAtHomeElement extends HTMLElement {
     registerInputFile()
     this.shadow = this.attachShadow({ mode: "open" })
     this.shadow.innerHTML = TEMPLATE
-    this.byId("new").addEventListener("click", () => void this.switcher.startNew())
+    this.byId("new").addEventListener("click", () => void this.startNew())
     this.byId("open").addEventListener("click", () => {
       this.placeMenu()
       void this.showRecent()
@@ -195,6 +210,80 @@ export class UfoAtHomeElement extends HTMLElement {
       else await this.openFiles((await RecentFiles.files(file))!, file.kind === "handles" ? file.handles : undefined)
     } catch {
       this.say(this.messages?.openFailed, "error")
+    }
+  }
+
+  /**
+   * New: a blank observation without a case template (see `case-template`); with one, its only start, or the menu of its starts. The modules the
+   * template names are loaded first, the page having asked for them.
+   */
+  async startNew(): Promise<void> {
+    const address = this.getAttribute("case-template")
+    if (!address) return this.switcher.startNew()
+    let template: CaseTemplate
+    try {
+      template = await CaseTemplates.load(address)
+    } catch {
+      this.say(this.messages?.caseTemplateFailed, "error")
+      return
+    }
+    this.say(undefined)
+    const { ModuleSession } = await import("../modules/ModuleSession.js")
+    void ModuleSession.shared.require(template.modules, template.url, true)
+    if (template.starts.length === 1) return this.start(template.starts[0])
+    this.showStarts(template)
+  }
+
+  /** Starts the new observation as `start` says, once the modules it names are there. */
+  private async start(start: CaseStart): Promise<void> {
+    this.closeStarts()
+    if (start.modules?.length) {
+      const { ModuleSession } = await import("../modules/ModuleSession.js")
+      await ModuleSession.shared.require(start.modules, undefined, true)
+    }
+    await this.switcher.startNew(start)
+  }
+
+  /** Opens the menu of what `template` offers to start, under New. */
+  private showStarts(template: CaseTemplate): void {
+    const said = new SaidTexts(HostLocale.preferencesFor(this))
+    this.byId("starts-heading").textContent = said.read(template.title) ?? ""
+    this.byId("starts").replaceChildren(...template.starts.map(start => {
+      const item = document.createElement("li")
+      const button = document.createElement("button")
+      button.type = "button"
+      button.dataset.start = start.id
+      const name = document.createElement("span")
+      name.className = "name"
+      name.textContent = said.read(start.title) ?? ""
+      button.append(name)
+      if (start.description) {
+        const what = document.createElement("span")
+        what.className = "what"
+        what.textContent = said.read(start.description) ?? ""
+        button.append(what)
+      }
+      button.addEventListener("click", () => void this.start(start))
+      item.append(button)
+      return item
+    }))
+    const menu = this.byId("new-menu") as HTMLElement & { showPopover?: () => void }
+    const button = this.byId("new").getBoundingClientRect()
+    menu.style.top = `${Math.round(button.bottom + 6)}px`
+    menu.style.right = `${Math.max(8, Math.round(window.innerWidth - button.right))}px`
+    try {
+      menu.showPopover?.()
+    } catch {
+      // Open already.
+    }
+  }
+
+  private closeStarts(): void {
+    const menu = this.byId("new-menu") as HTMLElement & { hidePopover?: () => void }
+    try {
+      menu.hidePopover?.()
+    } catch {
+      // Not open.
     }
   }
 

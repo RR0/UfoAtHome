@@ -17,5 +17,6 @@ export const ufoAtHomeMessages_es: UfoAtHomeMessages = {
   recentCopy: "copia guardada en este navegador",
   recentRemove: "Quitar de la lista",
   noJson: "Ninguno de los archivos elegidos es una reconstrucción (.json).",
-  openFailed: "No se ha podido abrir."
+  openFailed: "No se ha podido abrir.",
+  caseTemplateFailed: "No se pudo leer la plantilla de caso: no se ha empezado nada."
 }
