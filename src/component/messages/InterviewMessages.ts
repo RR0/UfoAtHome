@@ -1,4 +1,5 @@
 import type { InputFileMessages } from "../InputFileElement.js"
+import type { QuestionnaireFormMessages } from "../QuestionnaireForm.js"
 /** What an interview of a case says — see InterviewEditorElement. */
 export interface InterviewMessages extends InputFileMessages {
   title: string
@@ -114,6 +115,17 @@ export interface InterviewMessages extends InputFileMessages {
   /** Said while the text of the transcript is not JSON the editor can read: the interview keeps the last text it understood. */
   invalid: string
   notATranscript: string
+  /** The group that shows a questionnaire the interview was held through as a form, to fill in (see QuestionnaireForm). */
+  questionnaireTab: string
+  questionnaire: QuestionnaireFormMessages
+  /** The button that sets in the witness's observation what their answers say of it (see QuestionnaireFeed), its (?) and what it did: `{n}` values. */
+  feed: string
+  feedHint: string
+  fed: string
+  /** When the answers say nothing the observation can be given yet. */
+  fedNothing: string
+  /** When the questionnaire it was filled in on is not one this version knows: `{id}`. */
+  unknownQuestionnaire: string
   /** Said when the interview is a questionnaire and the file holds no field to read as a question and its answer. */
   notAQuestionnaire: string
   loadFailed: string

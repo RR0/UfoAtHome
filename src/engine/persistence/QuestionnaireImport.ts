@@ -2,6 +2,8 @@ import type { InterviewJson, InterviewSegment, InterviewSpeaker } from "./interv
 import { InterviewFile } from "./interviewJson.js"
 import type { InterviewImportHints } from "./interviewImport.js"
 import type { ValueSource } from "./Provenance.js"
+import type { QuestionnaireTemplate } from "../questionnaire/QuestionnaireTemplate.js"
+import { QuestionnaireTemplates } from "../questionnaire/QuestionnaireTemplate.js"
 
 /** One field of a questionnaire as it was filled in: what it asks, and what the witness wrote, if anything. */
 export interface QuestionnaireField {
@@ -61,10 +63,12 @@ export class QuestionnaireImport {
    * The interview a filled questionnaire is, or undefined when the file holds no field. `hints` name those who sent it (the interviewer) and the
    * witness who filled it in, as for any interview (see InterviewImportHints).
    */
-  static parse(content: string | unknown, hints: InterviewImportHints = {}): InterviewJson | undefined {
-    const read = typeof content === "string" ? QuestionnaireImport.fromText(content) : QuestionnaireImport.fromJson(content)
+  static parse(content: string | unknown, hints: InterviewImportHints = {}, template?: QuestionnaireTemplate): InterviewJson | undefined {
+    const read = typeof content === "string" ? QuestionnaireImport.fromText(content, template) : QuestionnaireImport.fromJson(content)
     if (!read || read.fields.length === 0) return undefined
-    return QuestionnaireImport.interview(read.fields, hints, read.about)
+    const json = QuestionnaireImport.interview(read.fields, hints, read.about)
+    if (template) json.questionnaire = { id: template.id, ...(template.version ? { version: template.version } : {}) }
+    return json
   }
 
   /** The interview of `fields`, in their order. */
@@ -167,7 +171,7 @@ export class QuestionnaireImport {
     return text.trim() === "" ? {} : { answer: text.trim() }
   }
 
-  private static fromText(text: string): { fields: QuestionnaireField[], about: object } | undefined {
+  private static fromText(text: string, template?: QuestionnaireTemplate): { fields: QuestionnaireField[], about: object } | undefined {
     // Only the blank lines round it are taken off: a last cell left empty is a tab or a comma at the end of its line.
     const clean = text.replace(/^﻿/, "").replace(/\r\n?/g, "\n").replace(/^(?:[ \t]*\n)+|(?:\n[ \t]*)+$/g, "")
     if (clean.trim() === "") return undefined
@@ -180,7 +184,7 @@ export class QuestionnaireImport {
     }
     const table = QuestionnaireImport.table(clean)
     if (table) return { fields: table, about: {} }
-    return { fields: QuestionnaireImport.lines(clean), about: {} }
+    return { fields: QuestionnaireImport.lines(clean, template), about: {} }
   }
 
   /** CSV or TSV, when every line has the same number of cells, two or more. A first line that names the columns is left out. */
@@ -223,45 +227,123 @@ export class QuestionnaireImport {
     return cells
   }
 
-  /** A numbered question, or one that ends with a question mark, then its answer; else `Question: answer` on each line. */
-  private static lines(text: string): QuestionnaireField[] {
-    const fields: QuestionnaireField[] = []
-    const numbered = /^(?:q(?:uestion)?\s*)?(\d+[a-z]?)\s*[.)\-–:]\s*(.+)$/iu
-    let current: QuestionnaireField | undefined
-    const add = (field: QuestionnaireField): void => {
-      fields.push(field)
-      current = field
-    }
-    const asks = (line: string): { question: string, answer?: string } | undefined => {
-      const mark = line.search(/\?(\s|$)/)
-      if (mark < 0) return undefined
-      const after = line.slice(mark + 1).trim()
-      return { question: line.slice(0, mark + 1).trim(), ...(after !== "" ? { answer: after } : {}) }
-    }
+  /**
+   * A numbered question (`12.`, `Q12`, `B5.`, `E1'.`), or one that ends with a question mark, then its answer, on the lines after it or after it on the
+   * same line; else `Question: answer` on each line. A page's footer (`page : 3`) is not part of an answer.
+   *
+   * With the questionnaire's `template`, a question is read as the template words it, however many lines it takes in the file, and what follows it
+   * is the answer: the only way to tell where a question that ends with neither "?" nor ":" ends. A field the template asks without a number (a
+   * free account) is found by its question; a title of the template's sections is no answer.
+   */
+  private static lines(text: string, template?: QuestionnaireTemplate): QuestionnaireField[] {
+    const plain = (value: string): string => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "")
+    const fields = template ? QuestionnaireTemplates.fields(template) : []
+    const unnumbered = fields.filter(field => !/^[A-Za-z]?\d/.test(field.id)).map(field => ({ id: field.id, key: plain(QuestionnaireTemplates.text(field.question, template?.language)) }))
+    const stops = (template?.stops ?? []).map(said => plain(QuestionnaireTemplates.text(said, template?.language))).filter(stop => stop !== "")
+    const headings = new Set((template?.sections ?? []).flatMap(section => [section.title, section.intro]).filter(said => said !== undefined).map(said => plain(QuestionnaireTemplates.text(said, template?.language))))
+    const numbered = /^(?:q(?:uestion)?\s*)?([A-Za-z]?\d+[a-z]?['’]?)\s*[.)\-–:]\s*(.*)$/u
+    const footer = /\bpage\s*:?\s*\d+(?:\s*\/\s*\d+)?\s*$/i
+    const blocks: { id: string, lines: string[] }[] = []
+    let current: { id: string, lines: string[] } | undefined
+    const loose: QuestionnaireField[] = []
     for (const raw of text.split("\n")) {
       const line = raw.trim()
-      if (line === "") {
+      if (footer.test(line)) continue
+      if (stops.some(stop => plain(line).startsWith(stop))) {
         current = undefined
         continue
       }
-      const number = numbered.exec(line)
-      if (number) {
-        const asked = asks(number[2])
-        add({ id: number[1], question: asked?.question ?? number[2].trim(), ...(asked?.answer ? { answer: asked.answer } : {}) })
+      // With a template, only its own numbers start a field: a numbered list in an answer, or in a part that asks nothing, does not.
+      const found = numbered.exec(line)
+      const number = found && (!template || QuestionnaireTemplates.field(template, QuestionnaireImport.idOf(found[1]))) ? found : null
+      const named = number ? undefined : unnumbered.find(field => field.key !== "" && plain(line).startsWith(field.key))
+      if (number || named) {
+        current = { id: number ? QuestionnaireImport.idOf(number[1]) : named!.id, lines: [number ? number[2] : line] }
+        blocks.push(current)
         continue
       }
-      const asked = asks(line)
-      if (asked) {
-        add({ id: String(fields.length + 1), ...asked })
+      if (headings.has(plain(line)) && line !== "") continue
+      if (current) {
+        current.lines.push(line)
         continue
       }
-      const colon = /^([^:]{1,80}?)\s*:\s*(.*)$/u.exec(line)
-      if (!current && colon) {
-        fields.push({ id: String(fields.length + 1), question: colon[1].trim(), ...QuestionnaireImport.answerOf(colon[2]) })
-        continue
-      }
-      if (current) current.answer = current.answer ? `${current.answer} ${line}` : line
+      if (line === "" || template) continue
+      const asked = QuestionnaireImport.split(line)
+      if (asked) loose.push({ id: String(loose.length + 1), ...asked })
     }
-    return fields
+    if (blocks.length === 0) return loose
+    return blocks.map(block => {
+      const body = block.lines.join("\n")
+      const field = template ? QuestionnaireTemplates.field(template, block.id) ?? QuestionnaireTemplates.field(template, block.id.toLowerCase()) : undefined
+      const id = field?.id ?? block.id
+      const read = (field ? QuestionnaireImport.after(body, QuestionnaireTemplates.text(field.question, template?.language), plain, field.hint === undefined ? undefined : QuestionnaireTemplates.text(field.hint, template?.language)) : undefined) ?? QuestionnaireImport.asked(block.lines)
+      const answer = field?.choices ? QuestionnaireImport.chosen(read.answer, field.choices.map(choice => choice.value)) : read.answer
+      return { id, question: field ? QuestionnaireTemplates.text(field.question, template?.language) : read.question, ...QuestionnaireImport.answerOf(answer) }
+    })
+  }
+
+  /**
+   * What follows `question` in `body`, the question read letter by letter whatever spaces, stars and line breaks the file puts in it; and what follows
+   * the `hint` printed after it, when it is.
+   */
+  private static after(body: string, question: string, plain: (value: string) => string, hint?: string): { question: string, answer?: string } | undefined {
+    const consume = (from: number, words: string): number | undefined => {
+      const wanted = plain(words)
+      let matched = 0
+      let at = from
+      for (; at < body.length && matched < wanted.length; at++) {
+        const letter = plain(body[at])
+        if (letter === "") continue
+        if (letter !== wanted[matched]) return undefined
+        matched++
+      }
+      return matched < wanted.length ? undefined : at
+    }
+    const asked = consume(0, question)
+    if (asked === undefined) return undefined
+    const end = (hint !== undefined ? consume(asked, hint) : undefined) ?? asked
+    // What the printed form puts round its question (stars, colons, the end of a parenthesis, an ellipsis) is not the witness's.
+    const answer = body.slice(end).replace(/^[\s*:?.,;…)\]]+/u, "").replace(/\s+/g, " ").trim()
+    return { question, ...(answer !== "" ? { answer } : {}) }
+  }
+
+  /**
+   * The answer to a field of choices: the boxes ticked (☒, ☑, ✓, [x]) when the form has boxes, else what was written. A label the form prints before a
+   * box to fill (`1:`) is no answer.
+   */
+  private static chosen(answer: string | undefined, choices: string[]): string | undefined {
+    if (answer === undefined) return undefined
+    const ticked = [...answer.matchAll(/(?:[☒☑✓✔]|\[[xX]\])\s*([^\s☐☒☑✓✔[\]]+)/gu)].map(match => match[1]).filter(value => choices.includes(value))
+    if (ticked.length > 0) return ticked.join(", ")
+    if (/[☐]/u.test(answer)) return undefined
+    if (/^\S+:$/.test(answer.trim())) return undefined
+    return answer
+  }
+
+  /** A field's number as the questionnaire writes it: `b5` is `B5`, `Q12` is `12`, `E1’` is `E1'`. */
+  private static idOf(number: string): string {
+    return number.replace("’", "'").toUpperCase().replace(/^Q(?=\d)/, "")
+  }
+
+  /** A question and its answer when nothing says where the question ends: at its first line that ends with "?", ":" or "*", else at its first " : " or "? ". */
+  private static asked(lines: string[]): { question: string, answer?: string } {
+    const end = lines.findIndex(line => /[?:*]\s*$/.test(line))
+    if (end >= 0 && end < 3) {
+      const answer = lines.slice(end + 1).join(" ").replace(/\s+/g, " ").trim()
+      return { question: lines.slice(0, end + 1).join(" ").replace(/[\s*:]+$/, "").replace(/\s+/g, " ").trim(), ...(answer !== "" ? { answer } : {}) }
+    }
+    const first = QuestionnaireImport.split(lines[0]) ?? { question: lines[0].trim() }
+    const rest = lines.slice(1).join(" ").replace(/\s+/g, " ").trim()
+    const answer = [first.answer, rest].filter(part => part !== undefined && part !== "").join(" ")
+    return { question: first.question, ...(answer !== "" ? { answer } : {}) }
+  }
+
+  /** `Question ? answer` or `Question : answer` on one line. */
+  private static split(line: string): { question: string, answer?: string } | undefined {
+    const mark = /\?(?:\s*\*)?(\s|$)|\s?:\s*\*?(\s|$)/.exec(line)
+    if (!mark || mark.index === 0) return undefined
+    const question = line.slice(0, mark.index + (line[mark.index] === "?" ? 1 : 0)).replace(/[\s*]+$/, "").trim()
+    const answer = line.slice(mark.index + mark[0].length).trim()
+    return { question, ...(answer !== "" ? { answer } : {}) }
   }
 }

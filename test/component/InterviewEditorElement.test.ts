@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { register, INTERVIEW_CHANGE_EVENT } from "../../src/component/InterviewEditorElement.js"
+import { QUESTIONNAIRE_FEED_EVENT } from "../../src/component/interviewEvents.js"
 import type { InterviewEditorElement, InterviewEvent } from "../../src/component/InterviewEditorElement.js"
 import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
 import { TranscriptionError } from "../../src/engine/transcription/TranscriptionError.js"
@@ -37,7 +38,7 @@ const make = async (event: InterviewEvent, prepare?: (element: InterviewEditorEl
   return { element, changes }
 }
 const part = (element: InterviewEditorElement, id: string) => element.shadowRoot!.getElementById(id) as HTMLElement
-const tabs = (element: InterviewEditorElement) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#tabs .group-tab")]
+const tabs = (element: InterviewEditorElement) => [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#tabs .group-tab:not([hidden])")]
 const shown = (element: InterviewEditorElement): string => element.shadowRoot!.querySelector("#file-editor .cm-content")?.textContent ?? ""
 
 describe("InterviewEditorElement's groups", () => {
@@ -139,7 +140,8 @@ describe("InterviewEditorElement's groups", () => {
   it("reads a filled questionnaire as an interview when it is held through one: a question and its answer per field, nothing for a field left empty", async () => {
     files["https://example.org/d/qt.json"] = { fields: [{ number: 1, question: "Durée ?", answer: "Je ne sais pas" }, { number: 2, question: "Bruit ?", answer: "aucun" }, { number: 3, question: "Forme ?", answer: "" }] }
     const { element } = await make({ ...event(), medium: "questionnaire" })
-    tabs(element)[2].click()
+    // Summary, Questionnaire, Exchanges, File.
+    tabs(element)[3].click()
     await wait(100)
     ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/qt.json"
     part(element, "import-url-button").click()
@@ -151,10 +153,65 @@ describe("InterviewEditorElement's groups", () => {
     ])
   })
 
+  it("opens an interview held through a questionnaire on its form, the questions of the default questionnaire by section, and writes an answer after its question", async () => {
+    const { element, changes } = await make({ ...event(), medium: "questionnaire" })
+    await wait(50)
+    await element.formShown
+    expect(part(element, "group-form").hidden).toBe(false)
+    const legends = [...element.shadowRoot!.querySelectorAll("#form-fields legend")].map(legend => legend.textContent)
+    expect(legends[0]).toBe("Votre observation")
+    expect(legends).toContain("Description du phénomène")
+    const date = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="B4"] input')!
+    expect(date.type).toBe("date")
+    date.value = "2024-03-12"
+    date.dispatchEvent(new Event("change"))
+    await wait(100)
+    const json = JSON.parse(element.transcriptText!) as { medium: string, questionnaire: { id: string }, segments: { speaker: string, field?: string, text?: string }[] }
+    expect(json.medium).toBe("questionnaire")
+    expect(json.questionnaire.id).toBe("geipan-qt-2025")
+    const at = json.segments.findIndex(segment => segment.field === "B4" && segment.speaker === "interviewer")
+    expect(json.segments[at + 1]).toEqual({ speaker: "witness", field: "B4", text: "2024-03-12" })
+    expect(json.segments.filter(segment => segment.speaker === "interviewer").length).toBeGreaterThan(40)
+    expect(changes.map(change => change.field)).toContain("transcript")
+    // A choice is a set of buttons, one of which is the answer.
+    const discontinuous = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="B9"] input[value="Discontinue"]')!
+    discontinuous.checked = true
+    discontinuous.dispatchEvent(new Event("change"))
+    await wait(100)
+    expect(JSON.parse(element.transcriptText!).segments.find((segment: { field?: string, speaker: string }) => segment.field === "B9" && segment.speaker === "witness").text).toBe("Discontinue")
+  })
+
+  it("asks its host to set the answers in the observation, and says what it did", async () => {
+    const { element } = await make({ ...event(), medium: "questionnaire" })
+    await wait(50)
+    await element.formShown
+    const answer = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="C3"] input')!
+    answer.value = "orange"
+    answer.dispatchEvent(new Event("change"))
+    await wait(100)
+    const asked: { field?: string, text?: string }[][] = []
+    element.addEventListener(QUESTIONNAIRE_FEED_EVENT, e => {
+      const detail = (e as CustomEvent<{ json: { segments: { field?: string, text?: string }[] }, report: (n: number) => void }>).detail
+      asked.push(detail.json.segments)
+      detail.report(1)
+    })
+    part(element, "form-feed").click()
+    await wait(50)
+    expect(asked[0].some(segment => segment.field === "C3" && segment.text === "orange")).toBe(true)
+    expect(part(element, "form-fed").hidden).toBe(false)
+    expect(part(element, "form-fed").textContent).toContain("1")
+  })
+
+  it("has no form for an interview held otherwise", async () => {
+    const { element } = await make(event())
+    expect(part(element, "form-tab").hidden).toBe(true)
+  })
+
   it("refuses, for an interview held through a questionnaire, a file with no field in it", async () => {
     files["https://example.org/d/empty.json"] = { fields: [] }
     const { element } = await make({ ...event(), medium: "questionnaire" })
-    tabs(element)[2].click()
+    // Summary, Questionnaire, Exchanges, File.
+    tabs(element)[3].click()
     await wait(100)
     ;(part(element, "import-url") as HTMLInputElement).value = "https://example.org/d/empty.json"
     part(element, "import-url-button").click()

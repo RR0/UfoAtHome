@@ -11,3 +11,9 @@ export const INTERVIEW_CHANGE_EVENT = "interviewchange"
  * `id` of the observer's account, or the interview's own when the passage names none) and `at`, in seconds since the beginning of the observation.
  */
 export const INTERVIEW_SEEK_EVENT = "interviewseek"
+
+/**
+ * Sent, and bubbling, when the author asks that a questionnaire's answers be set in the witness's observation (see QuestionnaireFeed): `detail` holds
+ * the interview's `event` and its transcript `json`; the host that does it calls `detail.report` with how many values it set.
+ */
+export const QUESTIONNAIRE_FEED_EVENT = "questionnairefeed"

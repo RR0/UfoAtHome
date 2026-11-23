@@ -1,0 +1,463 @@
+{
+  "id": "geipan-qt-2025",
+  "version": "DTN/DA/GP 2025.0001275",
+  "language": "fr",
+  "title": {
+    "fr": "Questionnaire technique GEIPAN",
+    "en": "GEIPAN technical questionnaire"
+  },
+  "source": {
+    "publisher": "CNES / GEIPAN",
+    "title": "Questionnaire technique GEIPAN",
+    "url": "https://www.cnes-geipan.fr/sites/default/files/2025-10/GEIPAN_Questionnaire%20Technique.pdf",
+    "date": "2025-10"
+  },
+  "note": {
+    "fr": "Les questions du questionnaire technique public du GEIPAN, numérotées comme lui, sans la page d'état civil ni la concession de droits : celles-ci vont au GEIPAN, pas dans un dossier.",
+    "en": "The questions of GEIPAN's public technical questionnaire, numbered as it numbers them, without its page of personal details nor its grant of rights: those go to GEIPAN, not into a case."
+  },
+  "stops": [
+    {
+      "fr": "État civil et coordonnées"
+    },
+    {
+      "fr": "Informations complémentaires"
+    },
+    {
+      "fr": "Reconstitution en images de votre observation"
+    },
+    {
+      "fr": "Dessin/croquis/photo"
+    },
+    {
+      "fr": "Concession des droits d’auteur pour les œuvres"
+    }
+  ],
+  "sections": [
+    {
+      "title": {
+        "fr": "Votre observation"
+      },
+      "intro": {
+        "fr": "Restituez le maximum d'informations : ce sont souvent les détails qui permettent de résoudre les enquêtes. Si vous n'êtes plus très sûr d'un détail, dites-le, mais n'omettez rien."
+      },
+      "fields": [
+        {
+          "id": "recit",
+          "question": {
+            "fr": "Votre récit libre de l'observation"
+          },
+          "kind": "long",
+          "feeds": "narrative"
+        }
+      ]
+    },
+    {
+      "title": {
+        "fr": "Conditions d'observation du phénomène"
+      },
+      "fields": [
+        {
+          "id": "A1",
+          "question": {
+            "fr": "Adresse précise du lieu d'observation (commune, département, rue, …)"
+          },
+          "kind": "text",
+          "feeds": "place"
+        },
+        {
+          "id": "A3",
+          "question": {
+            "fr": "Si l'observation a eu lieu pendant un déplacement : nom du bateau, de la route ou référence du vol"
+          },
+          "kind": "text",
+          "required": false
+        },
+        {
+          "id": "B1",
+          "question": {
+            "fr": "Quelles étaient vos occupations juste avant votre observation ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B2",
+          "question": {
+            "fr": "Où vous trouviez-vous exactement ? (Extérieur ou intérieur d'un bâtiment ? quel étage ? si vous regardiez à travers une vitre ? si vous étiez dans un véhicule ? le cas échéant à quelle vitesse rouliez-vous ?)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B3",
+          "question": {
+            "fr": "Description de la scène d'observation (ville, campagne, sur route, en mer, dans les airs, présence de bâtiments, d'antennes, de fils électriques...)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B4",
+          "question": {
+            "fr": "Date de l'observation"
+          },
+          "kind": "date",
+          "feeds": "date"
+        },
+        {
+          "id": "B5",
+          "question": {
+            "fr": "Heure précise de début (en heure locale HH:MM:ss)"
+          },
+          "kind": "time",
+          "feeds": "startTime"
+        },
+        {
+          "id": "B6",
+          "question": {
+            "fr": "Durée de l'observation ou heure de fin (en heures, minutes, secondes)"
+          },
+          "kind": "text",
+          "feeds": "duration"
+        },
+        {
+          "id": "B7",
+          "question": {
+            "fr": "D'autres témoins ont-ils vu le même phénomène que vous ? Si oui, combien ?"
+          },
+          "kind": "text",
+          "hint": {
+            "fr": "Le cas échéant, merci de leur demander de nous contacter."
+          }
+        },
+        {
+          "id": "B8",
+          "question": {
+            "fr": "Le cas échéant relation entre ces témoins et vous-même (enfant, conjoint, parent, ami, famille…)"
+          },
+          "kind": "text",
+          "required": false
+        },
+        {
+          "id": "B9",
+          "question": {
+            "fr": "L'observation s'est faite de façon"
+          },
+          "kind": "choice",
+          "choices": [
+            {
+              "value": "Continue",
+              "label": {
+                "fr": "Continue"
+              }
+            },
+            {
+              "value": "Discontinue",
+              "label": {
+                "fr": "Discontinue"
+              }
+            }
+          ]
+        },
+        {
+          "id": "B10",
+          "question": {
+            "fr": "Si l'observation s'est faite de façon discontinue, précisez pourquoi elle s'est interrompue et a repris"
+          },
+          "kind": "long",
+          "required": false
+        },
+        {
+          "id": "B11",
+          "question": {
+            "fr": "Qu'est-ce qui a provoqué la fin de l'observation ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B12",
+          "question": {
+            "fr": "Avez-vous vu le phénomène directement de vos yeux ?"
+          },
+          "kind": "choice",
+          "choices": [
+            {
+              "value": "Oui",
+              "label": {
+                "fr": "Oui"
+              }
+            },
+            {
+              "value": "Non",
+              "label": {
+                "fr": "Non"
+              }
+            }
+          ]
+        },
+        {
+          "id": "B13",
+          "question": {
+            "fr": "Le phénomène a-t-il été observé également au travers d'un instrument (lunettes de vue ou de soleil, jumelles, caméra, appareil photo, smartphone, télescope...) ? Si oui merci de préciser le modèle"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B14",
+          "question": {
+            "fr": "Conditions météorologiques (ciel dégagé, nuages, vent, orage, brume, brouillard, neige, pluie, changement des conditions durant l'observation)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B15",
+          "question": {
+            "fr": "Conditions astronomiques (position de la Lune, du Soleil, présence ou non d'étoiles ou de planètes etc...)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B16",
+          "question": {
+            "fr": "Equipements allumés ou actifs pendant l'observation (phares, radio, TV, lumières...)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "B17",
+          "question": {
+            "fr": "Bruits dans l'environnement lors de l'observation (TV ou radio allumées, passage de véhicules, moteur d'avion, tonnerre...)"
+          },
+          "kind": "long"
+        }
+      ]
+    },
+    {
+      "title": {
+        "fr": "Description du phénomène"
+      },
+      "intro": {
+        "fr": "Dans vos descriptions, vous pouvez aussi faire des comparaisons avec des objets connus."
+      },
+      "fields": [
+        {
+          "id": "C1",
+          "question": {
+            "fr": "Nombre de phénomènes (unique, multiples ou unique puis se divise... )"
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C2",
+          "question": {
+            "fr": "Forme"
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C3",
+          "question": {
+            "fr": "Couleur"
+          },
+          "kind": "text",
+          "feeds": "color"
+        },
+        {
+          "id": "C4",
+          "question": {
+            "fr": "Luminosité du phénomène (sombre, faible, forte, aveuglante, ainsi que pulsante, clignotante, constante) ou en comparaison avec des astres connus (comme Vénus, la Lune), l'éclairage d'un lampadaire, des lumières de voiture, de maison, etc..."
+          },
+          "kind": "long"
+        },
+        {
+          "id": "C5",
+          "question": {
+            "fr": "Présence d'une trainée ou d'un halo ? Si oui, de quelle couleur ?"
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C6",
+          "question": {
+            "fr": "Taille apparente : exprimez les dimensions du phénomène en millimètres/centimètres comptés sur une règle graduée portée à bout de bras. En l'absence de règle, sachez que la largeur du pouce est d'environ 2.54 cm, ce qui permet d'estimer la taille en distance angulaire (en degré °, selon schéma)."
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C7",
+          "question": {
+            "fr": "Bruit provenant du phénomène (sifflement, bourdonnement, détonation, comparaison avec un bruit connu ...)"
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C8",
+          "question": {
+            "fr": "Distance entre vous et le phénomène observé, estimée grossièrement, précisez également s'il est passé devant ou derrière un élément du paysage, une construction, un nuage…"
+          },
+          "kind": "long"
+        }
+      ]
+    },
+    {
+      "title": {
+        "fr": "Début d'observation (position initiale du PAN dans le ciel)"
+      },
+      "fields": [
+        {
+          "id": "C9",
+          "question": {
+            "fr": "Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel ou géographique local (bâtiment, village)"
+          },
+          "kind": "text",
+          "feeds": "startAzimuth"
+        },
+        {
+          "id": "C10",
+          "question": {
+            "fr": "Indiquer une hauteur en degrés par rapport à l'horizon, ou par rapport à un élément du paysage (ex: 2 fois plus haut que le clocher de l'église)"
+          },
+          "kind": "text",
+          "feeds": "startElevation"
+        }
+      ]
+    },
+    {
+      "title": {
+        "fr": "Fin d'observation (position finale du PAN dans le ciel)"
+      },
+      "fields": [
+        {
+          "id": "C11",
+          "question": {
+            "fr": "Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel ou géographique local (bâtiment, village)."
+          },
+          "kind": "text",
+          "feeds": "endAzimuth"
+        },
+        {
+          "id": "C12",
+          "question": {
+            "fr": "Indiquer une hauteur en degrés par rapport à l'horizon, ou par rapport à un élément du paysage (ex : 2 fois plus haut que le clocher de l'église)."
+          },
+          "kind": "text",
+          "feeds": "endElevation"
+        },
+        {
+          "id": "C13",
+          "question": {
+            "fr": "Trajectoire du phénomène (ligne droite, montante, descendante, avec ou sans changement de direction, courbe, etc.)"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "C14",
+          "question": {
+            "fr": "Portion du ciel parcourue par le PAN durant l'observation (ex : un quart du ciel ou de 30° à 40° par rapport à l'horizon, etc.)"
+          },
+          "kind": "text"
+        },
+        {
+          "id": "C15",
+          "question": {
+            "fr": "Effet(s) sur l'environnement (trace(s) au sol, effet(s) sur les êtres vivants (animaux) ou le matériel)"
+          },
+          "kind": "long"
+        }
+      ]
+    },
+    {
+      "title": {
+        "fr": "Et maintenant ?"
+      },
+      "fields": [
+        {
+          "id": "E1",
+          "question": {
+            "fr": "Décrivez les émotions que vous avez ressenties pendant et après l'observation"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E1'",
+          "question": {
+            "fr": "Quelle est votre perception du niveau d'étrangeté de votre observation de 1 à 5 (1 peu étrange, 5 très étrange)"
+          },
+          "kind": "scale",
+          "choices": [
+            {
+              "value": "1",
+              "label": {
+                "fr": "1"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "fr": "2"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "fr": "3"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "fr": "4"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "fr": "5"
+              }
+            }
+          ]
+        },
+        {
+          "id": "E2",
+          "question": {
+            "fr": "Qu'avez-vous fait après votre observation ? En avez-vous parlé ? Comment vos interlocuteurs ont réagi ? Avez-vous fait des recherches pour comprendre ce que vous avez vu ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E3",
+          "question": {
+            "fr": "Quelle interprétation donnez-vous à ce que vous avez observé ? Avez-vous pensé à un phénomène connu ? Quels sont les éléments qui permettent de justifier votre interprétation ? Si vous ne savez pas, avez-vous renoncé à comprendre ? Si oui, quand et pourquoi ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E4",
+          "question": {
+            "fr": "Avant votre observation, quel intérêt portiez-vous aux phénomènes aérospatiaux étranges ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E5",
+          "question": {
+            "fr": "Cette observation a-t-elle changé votre avis sur les PAN ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E6",
+          "question": {
+            "fr": "Pensez-vous que la science permettra de donner une explication à votre observation ?"
+          },
+          "kind": "long"
+        },
+        {
+          "id": "E7",
+          "question": {
+            "fr": "Pensez-vous que l'expérience que vous avez vécue a modifié quelque chose dans votre vie ? Qu'il peut y avoir un avant et un après ? Expliquez ce que vous ressentez"
+          },
+          "kind": "long"
+        }
+      ]
+    }
+  ]
+}

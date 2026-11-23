@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { QuestionnaireImport } from "../../../src/engine/persistence/QuestionnaireImport.js"
 import { InterviewFile } from "../../../src/engine/persistence/interviewJson.js"
+import { QuestionnaireTemplates } from "../../../src/engine/questionnaire/QuestionnaireTemplate.js"
 
 describe("QuestionnaireImport", () => {
   it("makes each field a question of the interviewer and the witness's answer, both naming the field", () => {
@@ -84,6 +85,46 @@ describe("QuestionnaireImport", () => {
     expect(QuestionnaireImport.sourceOf(json, "noise")).toEqual({ said: { segment: 3 } })
     expect(QuestionnaireImport.sourceOf(json, "duration")).toBeUndefined()
     expect(QuestionnaireImport.sourceOf(json, "shape")).toBeUndefined()
+  })
+
+  it("reads a questionnaire numbered by section (B5., C13., E1'.), its footers left out, a question over two lines told from its answer by the template", async () => {
+    const filled = [
+      "                                 Votre récit libre de l’observation :*",
+      "J'ai vu une boule orange au-dessus des arbres.",
+      "",
+      " Selon DTN/DA/GP 2025. 0001275                                                                   page : 3",
+      "                        Conditions d’observation du phénomène",
+      "B2. Où vous trouviez-vous exactement ?* (Extérieur ou intérieur d’un bâtiment ? quel étage ? si vous regardiez à",
+      "travers une vitre? si vous étiez dans un véhicule? le cas échéant à quelle vitesse rouliez-vous?):* Dans mon jardin",
+      "B4. Date de l’observation* : 12/03/2024",
+      "B5. Heure précise de début* (en heure locale HH:MM:ss) : 21:10",
+      "B6. Durée de l’observation ou heure de fin* (en heures, minutes, secondes) :",
+      "Je ne sais pas",
+      "C3. Couleur *:",
+      "orange",
+      "                           Début d’observation (position initiale du PAN dans le ciel)",
+      "C9. Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel",
+      "ou géographique local (bâtiment, village) *",
+      "Sud-Ouest",
+      "E1’. Quelle est votre perception du niveau d’étrangeté de votre observation de 1 à 5 (1 peu étrange, 5",
+      "très étrange)*",
+      "             4"
+    ].join("\n")
+    const template = (await QuestionnaireTemplates.load("geipan-qt-2025"))!
+    const json = QuestionnaireImport.parse(filled, {}, template)!
+    expect(json.questionnaire).toEqual({ id: "geipan-qt-2025", version: "DTN/DA/GP 2025.0001275" })
+    const answers = Object.fromEntries([...QuestionnaireImport.answers(json)].map(([field, answer]) => [field, answer.text]))
+    expect(answers).toEqual({ recit: "J'ai vu une boule orange au-dessus des arbres.", B2: "Dans mon jardin", B4: "12/03/2024", B5: "21:10", C3: "orange", C9: "Sud-Ouest", "E1'": "4" })
+    // The witness's "don't know" is kept as said, and the question as the template words it.
+    expect(json.segments.find(segment => segment.field === "B6" && segment.speaker === "witness")?.text).toBe("Je ne sais pas")
+    expect(json.segments.find(segment => segment.field === "C9")?.text).toMatch(/^Indiquer un point cardinal/)
+    const boxes = QuestionnaireImport.parse("B9. L’observation s’est faite de façon :* ☐ Continue ☒ Discontinue\nB12. Avez-vous vu le phénomène directement de vos yeux ?* ☐ Oui ☐ Non", {}, template)!
+    expect(Object.fromEntries([...QuestionnaireImport.answers(boxes)].map(([field, answer]) => [field, answer.text]))).toEqual({ B9: "Discontinue" })
+  })
+
+  it("reads a questionnaire numbered by section with no template, a question ending at its line's \"?\", \":\" or \"*\"", () => {
+    const json = QuestionnaireImport.parse("B4. Date de l’observation* : 12/03/2024\nC2. Forme *:\nune boule\npage : 5\nC7. Bruit ? aucun")!
+    expect(json.segments.map(segment => [segment.field, segment.text])).toEqual([["B4", "Date de l’observation"], ["B4", "12/03/2024"], ["C2", "Forme"], ["C2", "une boule"], ["C7", "Bruit ?"], ["C7", "aucun"]])
   })
 
   it("reads nothing from a file with no field", () => {

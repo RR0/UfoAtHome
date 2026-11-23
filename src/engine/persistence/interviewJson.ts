@@ -131,6 +131,11 @@ export interface InterviewJson {
    * witness filled in, or `other`.
    */
   medium?: InterviewMedium
+  /**
+   * The questionnaire it was filled in on, when it was held through one: the id of its template (see QuestionnaireTemplate) and its version. What lets
+   * it be shown and filled in again as a form, each field as the questionnaire asks it.
+   */
+  questionnaire?: { id: string, version?: string }
   /** Who held it. */
   by?: AgentRef[]
   /** The `id`, or the ids, of the sighting events of the case it was held with. */

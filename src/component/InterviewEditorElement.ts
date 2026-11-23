@@ -12,7 +12,8 @@ import type { UfoLanguage } from "./messages/index.js"
 import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
-import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
+import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT } from "./interviewEvents.js"
+import type { QuestionnaireForm } from "./QuestionnaireForm.js"
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
 import type { InterviewJson, InterviewRedaction, InterviewSegment } from "../engine/persistence/interviewJson.js"
@@ -33,7 +34,7 @@ export const INTERVIEW_EDITOR_ELEMENT_NAME = "rr0-interview-editor"
 
 export { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT }
 
-type InterviewGroup = "summary" | "exchanges" | "file"
+type InterviewGroup = "summary" | "form" | "exchanges" | "file"
 
 /** An observer of the case an interview may have been held with. */
 export interface InterviewWitness {
@@ -194,6 +195,19 @@ const TEMPLATE = `
   #exchanges .turn .ref { display: inline-block; max-width: calc(100% - 2em); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #exchanges .turn .ref .moment-letter { display: inline-grid; place-items: center; width: 1.4em; height: 1.4em; margin-right: 4px; border-radius: 50%; background: var(--glow-solid); color: var(--glow-on-solid); font: 700 11px/1 var(--sans); }
   #exchanges .turn .ref-unlink { min-height: 0; padding: 0 4px; border: 0; background: none; color: var(--ink-faint); font: 600 13px/1 var(--sans); }
+  /* The questionnaire as a form: its sections one under the other, a question above its answer, the answer the width of the form. */
+  .form-fields { display: grid; gap: 18px; }
+  .form-intro, .form-source, .form-section-intro, .form-hint { margin: 0; color: var(--ink-dim); font: 400 14px/1.45 var(--sans); }
+  .form-section { display: grid; gap: 14px; margin: 0; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 8px; }
+  .form-section > legend { padding: 0 6px; font: 600 15px/1.3 var(--sans); color: var(--ink); }
+  .form-field { display: grid; gap: 6px; }
+  .form-field > label { font: 600 14px/1.35 var(--sans); color: var(--ink); }
+  .form-field .required { color: var(--ink-faint); }
+  .form-field textarea { box-sizing: border-box; width: 100%; min-height: 4.5em; resize: vertical; }
+  .form-field input:not([type="radio"]) { box-sizing: border-box; width: 100%; max-width: 32rem; }
+  .form-choices { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 14px/1.3 var(--sans); }
+  .form-choices label { display: inline-flex; align-items: center; gap: 4px; }
+  .form-feed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans); }
   .turn-edit { display: flex; flex-direction: column; gap: 6px; }
   .turn-edit textarea { box-sizing: border-box; width: 100%; min-height: 6em; }
   .turn-edit .hint { font-size: 12px; color: var(--ink-faint); }
@@ -204,6 +218,7 @@ const TEMPLATE = `
 <div id="player"></div>
 <div id="tabs" class="group-tabs">
   <button class="group-tab" type="button" aria-controls="group-summary" aria-expanded="true">${Icons.SUMMARY}<span id="label-summary-group"></span></button>
+  <button id="form-tab" class="group-tab" type="button" aria-controls="group-form" aria-expanded="false" hidden>${Icons.SUMMARY}<span id="label-form-group"></span></button>
   <button class="group-tab" type="button" aria-controls="group-exchanges" aria-expanded="false">${Icons.INTERVIEW}<span id="label-exchanges-group"></span></button>
   <button class="group-tab" type="button" aria-controls="group-transcript" aria-expanded="false">${Icons.FILES}<span id="label-file-group"></span></button>
 </div>
@@ -220,6 +235,12 @@ const TEMPLATE = `
   <div class="row">
     <label class="wide"><span id="label-summary"></span> <textarea id="summary"></textarea></label>
   </div>
+</section>
+<section class="group-panel" id="group-form" aria-labelledby="label-form-group" hidden>
+  <p id="form-note" class="file-note" role="status" hidden></p>
+  <div id="form-fields" class="form-fields"></div>
+  <div class="form-feed"><button id="form-feed" type="button" class="pill-btn primary"></button> <span id="form-feed-hint"></span></div>
+  <p id="form-fed" class="file-note" role="status" hidden></p>
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
   <!-- Transcribing the recording (see TranscriptionProvider): what with, what it sends or downloads, how far it has got. -->
@@ -345,6 +366,7 @@ export class InterviewEditorElement extends HTMLElement {
       else void this.importFromUrl(pick.url)
     })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
+    this.shadow.getElementById("form-feed")!.addEventListener("click", () => this.feedObservation())
     this.shadow.getElementById("transcribe-start")!.addEventListener("click", () => void this.transcribe())
     this.shadow.getElementById("transcribe-stop")!.addEventListener("click", () => this.transcribing?.abort())
     this.shadow.getElementById("transcribe-source")!.addEventListener("change", event => {
@@ -390,7 +412,7 @@ export class InterviewEditorElement extends HTMLElement {
     })
   }
 
-  private static readonly GROUPS: Record<string, InterviewGroup> = { "group-summary": "summary", "group-exchanges": "exchanges", "group-transcript": "file" }
+  private static readonly GROUPS: Record<string, InterviewGroup> = { "group-summary": "summary", "group-form": "form", "group-exchanges": "exchanges", "group-transcript": "file" }
 
   static get observedAttributes(): string[] {
     return ["readonly"]
@@ -435,9 +457,13 @@ export class InterviewEditorElement extends HTMLElement {
   }
 
   set event(event: InterviewEvent | undefined) {
-    if (event !== this.current) this.shownFor = undefined
+    const other = event !== this.current
+    if (other) this.shownFor = undefined
     this.current = event
     this.render()
+    // A questionnaire opens on its form: what a witness filling it in is there for.
+    if (other && this.heldThroughQuestionnaire) this.openGroup("form")
+    else if (this.group === "form") this.formShown = this.showForm()
     this.takenOut.clear()
     if (this.group === "file") void this.showTranscript()
     // Loaded whichever group is open, for the player over them — once the host has said, in the same breath, what it kept of it.
@@ -514,6 +540,13 @@ export class InterviewEditorElement extends HTMLElement {
     text("label-summary-group", m.summaryTab)
     text("label-file-group", m.fileTab)
     text("label-exchanges-group", m.exchangesTab)
+    text("label-form-group", m.questionnaireTab)
+    text("form-feed", m.feed)
+    HintElement.say(this.shadow.getElementById("form-feed-hint")!, "", m.feedHint)
+    // The form is a group of an interview held through a questionnaire only.
+    const formTab = this.shadow.getElementById("form-tab")!
+    formTab.hidden = !this.heldThroughQuestionnaire
+    if (!this.heldThroughQuestionnaire && this.group === "form") this.openGroup("summary")
     text("label-title", m.title)
     text("label-witness", m.witness)
     text("label-medium", m.medium)
@@ -635,13 +668,87 @@ export class InterviewEditorElement extends HTMLElement {
 
   private openGroup(group: InterviewGroup): void {
     this.group = group
-    const panels: Record<InterviewGroup, string> = { summary: "group-summary", exchanges: "group-exchanges", file: "group-transcript" }
+    const panels: Record<InterviewGroup, string> = { summary: "group-summary", form: "group-form", exchanges: "group-exchanges", file: "group-transcript" }
     for (const tab of this.shadow.querySelectorAll<HTMLButtonElement>("#tabs .group-tab")) {
       tab.setAttribute("aria-expanded", String(tab.getAttribute("aria-controls") === panels[group]))
     }
     for (const [name, id] of Object.entries(panels)) this.shadow.getElementById(id)!.hidden = name !== group
     if (group === "file") void this.showTranscript()
     if (group === "exchanges") void this.showExchanges()
+    if (group === "form") this.formShown = this.showForm()
+  }
+
+  // -- The questionnaire -----------------------------------------------------------------------------
+
+  private form?: QuestionnaireForm
+  private formToken = 0
+  /** Settles once the form shows the questionnaire as the transcript has it. */
+  formShown: Promise<void> = Promise.resolve()
+
+  /** Whether the interview was held through a questionnaire: then it is also a form to fill in. */
+  private get heldThroughQuestionnaire(): boolean {
+    return this.current?.medium === "questionnaire"
+  }
+
+  /**
+   * Shows the questionnaire the interview was filled in on as a form: its template (the one the transcript names, else the default one), each
+   * question with the witness's answer in its field. What is typed is the witness's answer, written in the transcript (see answerField).
+   */
+  private async showForm(): Promise<void> {
+    const event = this.current
+    if (!event || !this.heldThroughQuestionnaire) return
+    const token = ++this.formToken
+    const [{ QuestionnaireForm }, { QuestionnaireTemplates }, json] = await Promise.all([
+      import("./QuestionnaireForm.js"), import("../engine/questionnaire/QuestionnaireTemplate.js"), this.transcriptJson(event)])
+    await this.ready
+    const id = json?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT
+    const template = await QuestionnaireTemplates.load(id)
+    if (token !== this.formToken || this.current !== event) return
+    const m = this.messages
+    const note = this.shadow.getElementById("form-note")!
+    MessageStyle.show(note, template ? undefined : m.unknownQuestionnaire.replace("{id}", id), "warning")
+    this.form ??= new QuestionnaireForm(this.shadow.getElementById("form-fields")!, (field, answer, question) => void this.answerField(field, answer, question))
+    this.form.show(template ?? { id, title: id, sections: [] }, json, m.questionnaire, this.language, this.hasAttribute("readonly"))
+    const feed = this.shadow.getElementById("form-feed") as HTMLButtonElement
+    feed.disabled = this.hasAttribute("readonly")
+  }
+
+  /**
+   * Writes the witness's answer to a field of the questionnaire in the transcript: a transcript with no question yet is first given every question of
+   * the questionnaire, in its order, so that the answers come each after its own.
+   */
+  private async answerField(field: string, answer: string, question: string): Promise<void> {
+    const { QuestionnaireTemplates } = await import("../engine/questionnaire/QuestionnaireTemplate.js")
+    const event = this.current
+    if (!event) return
+    const asked = await this.transcriptJson(event)
+    const template = await QuestionnaireTemplates.load(asked?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    await this.editTranscript(json => {
+      if (template && !json.segments.some(segment => segment.field !== undefined)) {
+        const blank = QuestionnaireTemplates.interview(template)
+        json.segments = blank.segments
+        json.questionnaire = blank.questionnaire
+        if (blank.language && !json.language) json.language = blank.language
+        for (const [id, speaker] of Object.entries(blank.speakers)) json.speakers[id] ??= speaker
+      }
+      json.medium = "questionnaire"
+      QuestionnaireTemplates.answer(json, field, answer, question)
+    })
+  }
+
+  /** Asks the host to set in the witness's observation what the answers say of it, and says what it did. */
+  private feedObservation(): void {
+    const event = this.current
+    if (!event) return
+    void this.transcriptJson(event).then(json => {
+      const fed = this.shadow.getElementById("form-fed")!
+      const report = (count: number): void => MessageStyle.show(fed, count > 0 ? this.messages.fed.replace("{n}", String(count)) : this.messages.fedNothing, count > 0 ? "info" : "warning")
+      if (!json) {
+        report(0)
+        return
+      }
+      this.dispatchEvent(new CustomEvent(QUESTIONNAIRE_FEED_EVENT, { bubbles: true, composed: true, detail: { event, json, report } }))
+    })
   }
 
   // -- The exchanges --------------------------------------------------------------------------------
@@ -1619,8 +1726,11 @@ export class InterviewEditorElement extends HTMLElement {
 
   /** A questionnaire the witness filled in, each field a question and its answer whatever the questionnaire (see QuestionnaireImport). */
   private async takeQuestionnaire(content: unknown, name: string): Promise<void> {
-    const { QuestionnaireImport } = await import("../engine/persistence/QuestionnaireImport.js")
-    const imported = QuestionnaireImport.parse(content, this.importHints())
+    const [{ QuestionnaireImport }, { QuestionnaireTemplates }] = await Promise.all([import("../engine/persistence/QuestionnaireImport.js"), import("../engine/questionnaire/QuestionnaireTemplate.js")])
+    // The questionnaire it is filled in on tells where each printed question ends and its answer begins.
+    const known = this.current ? await this.transcriptJson(this.current) : undefined
+    const template = await QuestionnaireTemplates.load(known?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    const imported = QuestionnaireImport.parse(content, this.importHints(), template)
     if (!imported) {
       this.note(this.messages.notAQuestionnaire, "error")
       return
