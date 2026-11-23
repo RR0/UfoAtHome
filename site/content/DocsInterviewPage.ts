@@ -114,6 +114,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "What it is called, said in as many languages as you like"],
         ["summary", "What it established, in the same way"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> or <code>other</code>"],
+        ["questionnaire", "For an interview held through a questionnaire: <code>{ id, version }</code> of the questionnaire it was filled in on (<code>geipan-qt-2025</code>, GEIPAN’s technical questionnaire, is the default one). It is then also a form to fill in, each answer the witness’s turn after its question"],
         ["by", "Who held it: one agent, or several (<code>{ \"people\": \"…\" }</code> or <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "The <code>id</code> of the observation the interview was held with, or a list of them when there were several witnesses"],
         ["url", "The transcript file, when there is one, relative to the case"]
@@ -188,6 +189,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Son nom, dit dans autant de langues qu'on veut"],
         ["summary", "Ce qu'elle a établi, de la même façon"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> ou <code>other</code>"],
+        ["questionnaire", "Pour une interview tenue par questionnaire : <code>{ id, version }</code> du questionnaire sur lequel elle a été remplie (<code>geipan-qt-2025</code>, le questionnaire technique du GEIPAN, par défaut). Elle est alors aussi un formulaire à remplir, chaque réponse étant le tour du témoin après sa question"],
         ["by", "Qui l'a menée : un agent, ou plusieurs (<code>{ \"people\": \"…\" }</code> ou <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> de l'observation avec laquelle elle a eu lieu, ou une liste quand il y avait plusieurs témoins"],
         ["url", "Le fichier de transcription, s'il y en a un, relatif au dossier"]
@@ -262,6 +264,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Cómo se llama, en tantos idiomas como se quiera"],
         ["summary", "Lo que estableció, del mismo modo"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> u <code>other</code>"],
+        ["questionnaire", "Para una entrevista hecha mediante cuestionario: <code>{ id, version }</code> del cuestionario en el que se rellenó (<code>geipan-qt-2025</code>, el cuestionario técnico del GEIPAN, por defecto). Es entonces también un formulario que rellenar, cada respuesta el turno del testigo tras su pregunta"],
         ["by", "Quién la realizó: un agente o varios (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "El <code>id</code> de la observación con la que se celebró, o una lista si hubo varios testigos"],
         ["url", "El archivo de transcripción, si lo hay, relativo al caso"]
@@ -336,6 +339,7 @@ export class DocsInterviewPage extends DocsSection {
         ["title", "Come si chiama, in quante lingue si vuole"],
         ["summary", "Ciò che ha stabilito, allo stesso modo"],
         ["medium", "<code>in-person</code>, <code>phone</code>, <code>video</code>, <code>chat</code>, <code>email</code>, <code>letter</code>, <code>questionnaire</code> oppure <code>other</code>"],
+        ["questionnaire", "Per un'intervista tenuta tramite questionario: <code>{ id, version }</code> del questionario su cui è stata compilata (<code>geipan-qt-2025</code>, il questionario tecnico del GEIPAN, per impostazione predefinita). È allora anche un modulo da compilare, ogni risposta il turno del testimone dopo la sua domanda"],
         ["by", "Chi l'ha condotta: un agente o più (<code>{ \"people\": \"…\" }</code> o <code>{ \"org\": \"…\" }</code>)"],
         ["interviewOf", "L'<code>id</code> dell'osservazione con cui si è tenuta, o un elenco se c'erano più testimoni"],
         ["url", "Il file di trascrizione, se c'è, relativo al caso"]

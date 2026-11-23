@@ -4,6 +4,8 @@ import { CaseFile } from "../engine/persistence/caseJson.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import type { SaidText } from "../engine/model/SaidText.js"
+import type { QuestionnaireTemplate } from "../engine/questionnaire/QuestionnaireTemplate.js"
+import { QuestionnaireTemplates } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
 
 /** One recording a case lists: an observer's account, or a reading of one. */
@@ -138,6 +140,21 @@ export class CaseSession {
     }
     this.json.events = [...(this.json.events ?? []), event]
     this.caseChanged = true
+    return event
+  }
+
+  /**
+   * Adds a questionnaire for a witness to fill in: an interview held through it (see QuestionnaireTemplates.interview), its transcript the questions
+   * with no answer yet, in a file of its own beside the case.
+   */
+  addQuestionnaire(witness: CaseTrack | undefined, when: string, template: QuestionnaireTemplate): CaseEventJson & { by?: AgentRef[] } {
+    const event = this.addInterview(witness, when, template.title, undefined, "questionnaire")
+    event.url = `${event.id}.json`
+    const held = [event.interviewOf].flat().filter((id): id is string => typeof id === "string")
+    const json = QuestionnaireTemplates.interview(template, { witnesses: held.map(id => ({ id, label: id })) })
+    // The witness is named by the case, not by an id written as a name.
+    delete json.speakers.witness.title
+    this.keepTranscript(event, `${JSON.stringify({ ...json, id: event.id, time: when }, null, 2)}\n`)
     return event
   }
 

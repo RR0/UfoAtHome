@@ -334,6 +334,22 @@ describe("CaseEditorElement", () => {
     expect(JSON.parse(written[1].content).description).toBe("Edited, not saved")
   })
 
+  it("adds to a case made around a recording the questionnaire its witness is asked to fill in, held with them", async () => {
+    files["https://example.org/d/plain.json"] = { version: 4, id: "1965-07-01-Plain", observer: { id: "Plain", title: "A witness" }, time: "1965-07-01T05:00", timeline: { keyframes: [] } }
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, json: () => Promise.resolve(structuredClone(files[url])), arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) })))
+    const element = document.createElement("rr0-case-editor") as CaseEditorElement
+    document.body.appendChild(element)
+    element.setAttribute("src", "https://example.org/d/plain.json")
+    await wait()
+    ;(element.shadowRoot!.getElementById("make-case") as HTMLButtonElement).click()
+    await until(() => element.caseSession!.interviews.length === 1)
+    const interview = element.caseSession!.interviews[0]
+    expect(interview).toMatchObject({ medium: "questionnaire", interviewOf: element.caseSession!.tracks[0].event.id, url: `${interview.id}.json` })
+    const transcript = JSON.parse(element.caseSession!.transcriptText(interview)!)
+    expect(transcript.questionnaire.id).toBe("geipan-qt-2025")
+    expect(transcript.segments.every((segment: { speaker: string }) => segment.speaker === "interviewer")).toBe(true)
+  })
+
   it("gives an event no field for its id: one is made from its title when the case gives none, and is written in the case's file only", async () => {
     const element = await open()
     const root = element.shadowRoot!
@@ -1547,6 +1563,35 @@ describe("Opening files in the app", () => {
     await until(() => editor.caseSession?.url === "https://example.org/d/case.json")
     expect(element.querySelector("rr0-case-editor")).toBe(editor)
     expect(editor.caseSession?.url).toBe("https://example.org/d/case.json")
+  })
+
+  it("starts a testimony on New: a case around a blank observation, the witness's questionnaire open on its form, its answers set in the observation", async () => {
+    const element = await app()
+    ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
+    await until(() => (element.querySelector("rr0-case-editor") as CaseEditorElement | null)?.caseSession?.interviews.length === 1, 3000)
+    const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
+    const session = editor.caseSession!
+    const interview = session.interviews[0]
+    expect(interview).toMatchObject({ eventType: "interview", medium: "questionnaire", interviewOf: session.tracks[0].event.id })
+    const form = editor.shadowRoot!.getElementById("interview") as HTMLElement & { formShown: Promise<void> }
+    await until(() => form.shadowRoot!.querySelector('[data-field="B5"]') !== null, 3000)
+    expect(form.shadowRoot!.getElementById("group-form")!.hidden).toBe(false)
+    for (const [field, answer] of [["B4", "2024-03-12"], ["B5", "21:10:00"], ["C3", "orange"], ["C9", "sud-ouest"], ["C10", "30°"]]) {
+      const input = form.shadowRoot!.querySelector<HTMLInputElement>(`[data-field="${field}"] input`)!
+      input.value = answer
+      input.dispatchEvent(new Event("change"))
+      await wait(60)
+    }
+    ;(form.shadowRoot!.getElementById("form-feed") as HTMLButtonElement).click()
+    await until(() => !form.shadowRoot!.getElementById("form-fed")!.hidden, 3000)
+    expect(form.shadowRoot!.getElementById("form-fed")!.textContent).toMatch(/^3 /)
+    const recording = session.tracks[0].recording as unknown as { time: { value: string, source: { said: { interview: string } } }, timeline: { keyframes: { shapes: { shape: { aim: { value: unknown } } }[] }[] } }
+    expect(recording.time.value).toBe("2024-03-12T21:10:00")
+    expect(recording.time.source.said.interview).toBe(interview.id)
+    expect(recording.timeline.keyframes[0].shapes[0].shape.aim.value).toEqual({ azimuthDeg: 225, altitudeDeg: 30 })
+    // The case is written with the questionnaire's file beside it, the answers in it.
+    const written = session.files().map(file => file.path)
+    expect(written).toContain(`${interview.id}.json`)
   })
 
   it("says nothing was picked that could be opened when no file is a reconstruction", async () => {

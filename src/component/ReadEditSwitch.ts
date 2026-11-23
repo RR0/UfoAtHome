@@ -2,7 +2,7 @@ import { CaseFile } from "../engine/persistence/caseJson.js"
 import { OpenFiles } from "../engine/net/OpenFiles.js"
 import { SightingFetch } from "../engine/net/SightingFetch.js"
 
-import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, READ_EVENT, type ReadEditDetail, type ReadEditMode } from "./ReadEditEvents.js"
+import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, READ_EVENT, TESTIMONY_ATTRIBUTE, type ReadEditDetail, type ReadEditMode } from "./ReadEditEvents.js"
 
 /** The editor's side of it: what the switch needs of `<rr0-case-editor>`. */
 export interface SwitchedEditor extends HTMLElement {
@@ -101,7 +101,7 @@ export class ReadEditSwitch {
    * Shows the editor: the one there was, as it was left, on the recording asked for; else one made now on `src` (none for a blank one),
    * loaded the first time it is asked for.
    */
-  async edit(detail?: Partial<ReadEditDetail>): Promise<void> {
+  async edit(detail?: Partial<ReadEditDetail> & { testimony?: boolean }): Promise<void> {
     const editor = this.editor
     if (editor) {
       this.dropReader()
@@ -124,6 +124,7 @@ export class ReadEditSwitch {
     // Read by the same paths as the reader read it: what was handed over stays held until the next reading replaces it (see OpenFiles).
     if (detail?.track) made.setAttribute("track", detail.track)
     if (detail?.src) made.setAttribute("src", detail.src)
+    else if (detail?.testimony) made.setAttribute(TESTIMONY_ATTRIBUTE, "")
     this.dropReader()
     this.place(made)
     this.changed({ mode: "edit" })
@@ -147,15 +148,18 @@ export class ReadEditSwitch {
     editor.setAttribute("src", src)
   }
 
-  /** A blank editor, in place of the one there was once its author agreed to lose what was not saved; the reader put away. */
+  /**
+   * A new observation, in place of what the editor held once its author agreed to lose what was not saved; the reader put away. A new observation is
+   * a testimony: a case around it, its witness's questionnaire open to fill in (see TESTIMONY_ATTRIBUTE).
+   */
   async startNew(): Promise<void> {
     const editor = this.editor
-    if (!editor) return this.edit()
+    if (!editor) return this.edit({ testimony: true })
     if (this.reading) await this.edit()
     editor.askBeforeReplacing(() => {
       editor.remove()
       this.editor = undefined
-      void this.edit()
+      void this.edit({ testimony: true })
     })
   }
 
