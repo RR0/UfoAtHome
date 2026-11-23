@@ -21,11 +21,33 @@ export interface OrientationAccount {
   interviews: { id?: string, json: InterviewJson }[]
 }
 
-/** What a tool is asked to code: the accounts of a case, each an episode, several of which may make one profile (see OrientationProfile). */
+/**
+ * An episode of a profile: an account, or the part of it between two instants. Repeats of one phenomenon are one profile for a statistic and two
+ * recordings for a geometry, each with its own direction and time; and one recording may hold two phenomena a statistic tells apart.
+ */
+export interface OrientationEpisode {
+  /** The `id` of the case's sighting event. */
+  event: string
+  /** The SHA-256 of its recording as coded (see RecordingDigest). */
+  digest?: string
+  /** The part of it, as `[from, to)` seconds since the beginning of the observation: the whole of it when omitted. */
+  within?: [number, number]
+}
+
+/** How the investigator groups the episodes of a case into the profiles a tool codes, each by an id of theirs: never inferred. */
+export interface OrientationGrouping {
+  id: string
+  title?: SaidText
+  episodes: OrientationEpisode[]
+}
+
+/** What a tool is asked to code: the accounts of a case, and the profiles they make (see OrientationProfile). */
 export interface OrientationRequest {
   /** The case's `id`, when it has one. */
   case?: string
   accounts: OrientationAccount[]
+  /** The profiles to code: one per account, under its event's id, when omitted. */
+  profiles?: OrientationGrouping[]
 }
 
 /** Where one coded value came from, from the strongest to the weakest. */
@@ -57,8 +79,8 @@ export interface OrientationExport {
   fileName: string
   mediaType: string
   text: string
-  /** Per episode, what was coded and why, for a person to check before sending it. */
-  codings: { event: string, digest: string, values: OrientationCoding[] }[]
+  /** Per profile, what was coded and why, for a person to check before sending it. */
+  codings: { profile: string, episodes: OrientationEpisode[], values: OrientationCoding[] }[]
 }
 
 /** One family of explanation a tool ranks, and its score. A score of compatibility with past cases, never a probability of the cause. */
@@ -90,7 +112,7 @@ export interface OrientationConfiguration {
 export interface OrientationProfile {
   id: string
   title?: SaidText
-  episodes: { event: string, digest?: string }[]
+  episodes: OrientationEpisode[]
   configurations: OrientationConfiguration[]
 }
 
@@ -144,6 +166,11 @@ export class Orientation {
       }
     }
     return stale
+  }
+
+  /** The profiles to code for `request`: those it names, else one per account. */
+  static profilesTo(request: OrientationRequest): OrientationGrouping[] {
+    return request.profiles ?? request.accounts.map(account => ({ id: account.event, episodes: [{ event: account.event, digest: account.digest }] }))
   }
 
   /** The profiles an episode is in. */

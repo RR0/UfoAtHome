@@ -18,6 +18,13 @@ describe("Orientation", () => {
     expect(Orientation.stale(results, new Map())).toEqual([])
   })
 
+  it("codes the profiles the investigator grouped, else one per account", () => {
+    const accounts = [{ event: "a", recording: {}, digest: "1", interviews: [] }, { event: "b", recording: {}, digest: "2", interviews: [] }]
+    expect(Orientation.profilesTo({ accounts })).toEqual([{ id: "a", episodes: [{ event: "a", digest: "1" }] }, { id: "b", episodes: [{ event: "b", digest: "2" }] }])
+    const profiles = [{ id: "T1", episodes: [{ event: "a", within: [0, 600] as [number, number] }] }]
+    expect(Orientation.profilesTo({ accounts, profiles })).toBe(profiles)
+  })
+
   it("lists the profiles an episode is in", () => {
     expect(Orientation.profilesOf(results, "b").map(profile => profile.id)).toEqual(["P1"])
     expect(Orientation.profilesOf(results, "z")).toEqual([])
