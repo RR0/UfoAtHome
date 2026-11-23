@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest"
 import { Group, Vector3 } from "three"
 import { CLOUD_EARTH_RADIUS_M as R, cloudRayInterval, cloudSeed, cloudTransmissionShader, createCloudNoise, VolumetricCloudLayer } from "../../src/render3d/VolumetricClouds.js"
+import type { CloudLight } from "../../src/render3d/VolumetricClouds.js"
 import { LayeredCloudSystem } from "../../src/render3d/LayeredCloudSystem.js"
 import { DEFAULT_WEATHER } from "../../src/engine/model/Weather.js"
 import type { CloudLayer } from "../../src/engine/model/CloudLayer.js"
@@ -172,7 +173,7 @@ describe("how far a deck says its clouds are", () => {
 describe("lit from below by a beam", () => {
   // A searchlight 3 km off on the ground, its beam straight up into a deck at 1500 m, seen from the eye.
   const lamp = { x: 3000, y: 0, z: 0, axis: { x: 0, y: 1, z: 0 }, fwhmRad: Math.PI / 180, rgb: [3e8, 3e8, 3e8] as [number, number, number] }
-  const lit = (lights = [lamp]) => {
+  const lit = (lights: CloudLight[] = [lamp]) => {
     const volume = new VolumetricCloudLayer(texture, 20000)
     volume.update(layer, 1.6)
     volume.setLights(lights, { x: 0, y: 1.6, z: 0 })
