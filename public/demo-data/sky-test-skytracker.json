@@ -6,10 +6,10 @@
   "misidentification"
  ],
  "description": {
-  "en": "East of Lyon, 15 November 2025 at half past eleven at night, no Moon, a deck of stratocumulus at 900 m: a four-headed xenon skytracker 3 km off, over a night club, sends its beams up in a cloverleaf. From here its beams are pale; what stands out are the four patches of light running over the base of the clouds, going out where a beam meets a gap. Place, searchlight and clouds are assumed.",
-  "fr": "À l'est de Lyon, le 15 novembre 2025 à vingt-trois heures trente, sans Lune, une couche de stratocumulus à 900 m : un skytracker au xénon à quatre têtes, à 3 km, au-dessus d'une discothèque, envoie ses faisceaux en trèfle. D'ici les faisceaux sont pâles ; ce qui se voit, ce sont les quatre taches de lumière qui courent sur la base des nuages et s'éteignent là où un faisceau rencontre une trouée. Le lieu, le projecteur et les nuages sont supposés.",
-  "es": "Al este de Lyon, el 15 de noviembre de 2025 a las once y media de la noche, sin luna, una capa de estratocúmulos a 900 m: un skytracker de xenón de cuatro cabezales, a 3 km, sobre una discoteca, envía sus haces en trébol. Desde aquí los haces son pálidos; lo que destaca son las cuatro manchas de luz que corren por la base de las nubes y se apagan donde un haz encuentra un claro. El lugar, el reflector y las nubes son supuestos.",
-  "it": "A est di Lione, il 15 novembre 2025 alle undici e mezza di sera, senza luna, uno strato di stratocumuli a 900 m: uno skytracker allo xeno a quattro teste, a 3 km, sopra una discoteca, manda i suoi fasci a quadrifoglio. Da qui i fasci sono pallidi; ciò che si vede sono le quattro macchie di luce che corrono sulla base delle nuvole e si spengono dove un fascio incontra uno squarcio. Il luogo, il proiettore e le nuvole sono ipotizzati."
+  "en": "East of Lyon, 15 November 2025 at half past eleven at night, no Moon, an overcast of stratocumulus at 900 m: a four-headed xenon skytracker 3 km off, over a night club, sends its beams up in a cloverleaf. From here its beams are pale; what stands out are the four patches of light running over the base of the clouds. Place, searchlight and clouds are assumed.",
+  "fr": "À l'est de Lyon, le 15 novembre 2025 à vingt-trois heures trente, sans Lune, un plafond couvert de stratocumulus à 900 m : un skytracker au xénon à quatre têtes, à 3 km, au-dessus d'une discothèque, envoie ses faisceaux en trèfle. D'ici les faisceaux sont pâles ; ce qui se voit, ce sont les quatre taches de lumière qui courent sur la base des nuages. Le lieu, le projecteur et les nuages sont supposés.",
+  "es": "Al este de Lyon, el 15 de noviembre de 2025 a las once y media de la noche, sin luna, un cielo cubierto de estratocúmulos a 900 m: un skytracker de xenón de cuatro cabezales, a 3 km, sobre una discoteca, envía sus haces en trébol. Desde aquí los haces son pálidos; lo que destaca son las cuatro manchas de luz que corren por la base de las nubes. El lugar, el reflector y las nubes son supuestos.",
+  "it": "A est di Lione, il 15 novembre 2025 alle undici e mezza di sera, senza luna, un cielo coperto di stratocumuli a 900 m: uno skytracker allo xeno a quattro teste, a 3 km, sopra una discoteca, manda i suoi fasci a quadrifoglio. Da qui i fasci sono pallidi; ciò che si vede sono le quattro macchie di luce che corrono sulla base delle nuvole. Il luogo, il proiettore e le nuvole sono ipotizzati."
  },
  "time": "2025-11-15T23:30:00",
  "utcOffsetHours": 1,
@@ -31,13 +31,13 @@
     "t": 0,
     "weather": {
      "cloudCover": {
-      "value": 0.8,
+      "value": 1,
       "basis": "assumed",
       "rationale": "Assumed for the demo."
      },
      "cloudDarkness": 0.3,
      "cloudBaseM": 900,
-     "lowerCloudCover": 0.8,
+     "lowerCloudCover": 1,
      "highCloudCover": 0,
      "precipitationType": "none",
      "precipitationIntensity": 0,
@@ -49,10 +49,10 @@
        "id": "low",
        "type": "stratocumulus",
        "baseM": 900,
-       "thicknessM": 500,
-       "coverage": 0.8,
+       "thicknessM": 800,
+       "coverage": 1,
        "sizeM": 1200,
-       "density": 1,
+       "density": 2,
        "darkness": 0.3
       }
      ]
