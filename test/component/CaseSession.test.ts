@@ -303,4 +303,20 @@ describe("The transcripts of a case's interviews", () => {
     expect(session.deleteInterview(session.interviews[0])).toBe(true)
     expect(session.files(true).map(file => file.path)).toEqual(["case.json"])
   })
+
+  it("writes beside an interview the files its witness gave in this page, those it still holds only, and none given elsewhere", async () => {
+    const { InterviewAttachments } = await import("../../src/engine/persistence/InterviewAttachments.js")
+    Object.assign(URL, { createObjectURL: () => "blob:x", revokeObjectURL: () => undefined })
+    InterviewAttachments.clear()
+    const json = caseJson()
+    json.events!.push({ type: "event", eventType: "interview", title: "Interview", url: "interviews/interview-qb.json" })
+    const session = new CaseSession(json, url)
+    const interviewUrl = new URL("interviews/interview-qb.json", url).href
+    const sketch = new File(["png"], "sketch.png", { type: "image/png" })
+    const held = InterviewAttachments.add(sketch, interviewUrl)
+    InterviewAttachments.add(new File(["x"], "taken-out.png"), interviewUrl)
+    session.keepTranscript(session.interviews[0], JSON.stringify({ version: 1, speakers: { witness: { role: "witness" } },
+      segments: [{ speaker: "witness", field: "plan", text: "sketch.png; mine.kml", files: [held, { src: "https://maps.example/mine.kml" }] }] }))
+    expect(session.attachments()).toEqual([{ path: "interviews/interview-qb-files/sketch.png", blob: sketch }])
+  })
 })

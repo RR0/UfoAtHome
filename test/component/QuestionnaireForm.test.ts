@@ -87,3 +87,57 @@ describe("QuestionnaireForm confidential answers", () => {
     expect([nowhere.textContent, nowhere.classList.contains("nowhere")]).toEqual([messages.confidentialNowhere, true])
   })
 })
+
+describe("QuestionnaireForm files", () => {
+  const withFiles: QuestionnaireTemplate = {
+    id: "f", title: { en: "F" },
+    sections: [{ title: { en: "Pictures" }, fields: [{ id: "plan", question: { en: "A map" }, kind: "files", accept: "image/*,.kml", required: false }] }]
+  }
+  const interviewUrl = "https://a.example/case/interview-qb.json"
+
+  it("gives a witness's files in answer, each named in their turn and held by it, a picture shown as one, and takes one out", async () => {
+    const { InterviewAttachments } = await import("../../src/engine/persistence/InterviewAttachments.js")
+    // jsdom has no object URLs.
+    let made = 0
+    Object.assign(URL, { createObjectURL: () => `blob:given/${++made}`, revokeObjectURL: () => undefined })
+    InterviewAttachments.clear()
+    const container = document.createElement("div")
+    const json = QuestionnaireTemplates.interview(withFiles)
+    const form = new QuestionnaireForm(container, () => undefined, (field, files, question) => QuestionnaireTemplates.answerFiles(json, field, files, question))
+    const files = { add: (file: File) => InterviewAttachments.add(file, interviewUrl), shown: (file: { src: string }) => InterviewAttachments.shown(file, interviewUrl), messages: interviewMessages_fr }
+    form.show(withFiles, json, messages, "en", false, undefined, files)
+    const picker = container.querySelector("[data-field='plan'] rr0-input-file")!
+    expect(picker.getAttribute("accept")).toBe("image/*,.kml")
+    const sketch = new File(["png"], "sketch 1.png", { type: "image/png" })
+    picker.dispatchEvent(new CustomEvent("filepick", { detail: { file: sketch, files: [sketch, new File(["<kml/>"], "route.kml")] } }))
+    picker.dispatchEvent(new CustomEvent("filepick", { detail: { url: "https://maps.example/mine.kml" } }))
+    const turn = json.segments.find(segment => segment.field === "plan" && segment.speaker === "witness")!
+    expect(turn.text).toBe("sketch 1.png; route.kml; mine.kml")
+    expect(turn.files).toEqual([
+      { src: "interview-qb-files/sketch 1.png", name: "sketch 1.png", type: "image/png" },
+      { src: "interview-qb-files/route.kml", name: "route.kml" },
+      { src: "https://maps.example/mine.kml" }
+    ])
+    // Kept in the page until the case is saved, at the address it will have beside the interview.
+    expect(InterviewAttachments.blob("https://a.example/case/interview-qb-files/sketch%201.png")).toBe(sketch)
+    expect([...container.querySelectorAll<HTMLImageElement>(".form-file-list img")].map(img => img.getAttribute("src"))).toEqual(["blob:given/1"])
+    // Shown again from the interview, and one taken out.
+    form.show(withFiles, json, messages, "en", false, undefined, files)
+    const removes = container.querySelectorAll<HTMLButtonElement>(".form-file-remove")
+    expect([...removes].map(button => button.title)).toEqual(["Retirer sketch 1.png de la réponse", "Retirer route.kml de la réponse", "Retirer mine.kml de la réponse"])
+    removes[1].click()
+    expect(json.segments.find(segment => segment.field === "plan" && segment.speaker === "witness")!.text).toBe("sketch 1.png; mine.kml")
+    container.querySelectorAll<HTMLButtonElement>(".form-file-remove")[0].click()
+    container.querySelectorAll<HTMLButtonElement>(".form-file-remove")[0].click()
+    expect(json.segments.some(segment => segment.field === "plan" && segment.speaker === "witness")).toBe(false)
+  })
+
+  it("shows the files of a read-only interview without a picker", () => {
+    const container = document.createElement("div")
+    const json = QuestionnaireTemplates.interview(withFiles)
+    QuestionnaireTemplates.answerFiles(json, "plan", [{ src: "https://maps.example/mine.kml" }])
+    new QuestionnaireForm(container, () => undefined).show(withFiles, json, messages, "en", true)
+    expect(container.querySelector(".form-file-list a")!.getAttribute("href")).toBe("https://maps.example/mine.kml")
+    expect(container.querySelector("rr0-input-file, .form-file-remove")).toBeNull()
+  })
+})

@@ -2555,17 +2555,20 @@ export class CaseEditorElement extends HTMLElement {
       }
     }
     const files = session.files(withRecordings, true)
+    // The files the witnesses gave in this page (a map, a sketch, a photo), written beside their interview.
+    const given = withRecordings ? session.attachments() : []
     session.markExported(withRecordings)
     this.fileEditor?.markSaved()
     this.refreshDirty()
     // The case alone is the one file it is: no archive around it.
-    if (files.length === 1) {
+    if (files.length === 1 && given.length === 0) {
       this.download(new Blob([files[0].content], { type: "application/json" }), files[0].path)
       return true
     }
     const { zipSync, strToU8 } = await import("fflate")
     const archive: Record<string, Uint8Array> = {}
     for (const file of files) archive[file.path] = strToU8(file.content)
+    for (const file of given) archive[file.path] = new Uint8Array(await file.blob.arrayBuffer())
     this.download(new Blob([zipSync(archive) as BlobPart], { type: "application/zip" }), `${session.json.id ?? "case"}.zip`)
     return true
   }

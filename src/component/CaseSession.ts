@@ -7,7 +7,8 @@ import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import type { SaidText } from "../engine/model/SaidText.js"
 import type { QuestionnaireTemplate } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import { QuestionnaireTemplates } from "../engine/questionnaire/QuestionnaireTemplate.js"
-import type { InterviewMedium } from "../engine/persistence/interviewJson.js"
+import type { InterviewJson, InterviewMedium } from "../engine/persistence/interviewJson.js"
+import { InterviewAttachments } from "../engine/persistence/InterviewAttachments.js"
 
 /** One recording a case lists: an observer's account, or a reading of one. */
 export interface CaseTrack {
@@ -487,5 +488,30 @@ export class CaseSession {
     const transcribed = [...this.transcripts].filter(([event, entry]) => withRecordings && event.url !== undefined && (every || this.transcriptChanged(entry)))
       .map(([event, entry]) => ({ path: relative(new URL(event.url!, this.url).href), content: entry.text }))
     return [{ path: name, content: JSON.stringify(this.json, null, 2) + "\n" }, ...written, ...transcribed]
+  }
+
+  /**
+   * The files the witnesses gave in this page to the interviews of the case (a map, a sketch, a photo: see InterviewSegment.files), by their path from
+   * the case: what is written beside their interview with it. Those at an address of their own, or already beside the case, are not.
+   */
+  attachments(): { path: string, blob: Blob }[] {
+    const directory = this.url.replace(/[^/]*$/, "")
+    const found = new Map<string, Blob>()
+    for (const [event, entry] of this.transcripts) {
+      if (event.url === undefined) continue
+      let json: InterviewJson
+      try {
+        json = JSON.parse(entry.text) as InterviewJson
+      } catch {
+        continue
+      }
+      const interviewUrl = new URL(event.url, this.url).href
+      for (const file of (json.segments ?? []).flatMap(segment => segment.files ?? [])) {
+        const url = InterviewAttachments.url(file, interviewUrl)
+        const blob = InterviewAttachments.blob(url)
+        if (blob && url.startsWith(directory)) found.set(decodeURIComponent(url.slice(directory.length)), blob)
+      }
+    }
+    return [...found].map(([path, blob]) => ({ path, blob }))
   }
 }

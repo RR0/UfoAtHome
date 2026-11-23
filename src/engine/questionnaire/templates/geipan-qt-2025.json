@@ -435,6 +435,52 @@
     },
     {
       "title": {
+        "fr": "Reconstitution en images de votre observation"
+      },
+      "intro": {
+        "fr": "Pour que nous puissions reconstituer le « film » de votre observation, nous devons disposer du maximum d'informations, pour cela choisissez au moins deux des méthodes exposées ci-dessous."
+      },
+      "fields": [
+        {
+          "id": "plan",
+          "question": {
+            "fr": "Reconstitution de l'observation sur plan"
+          },
+          "hint": {
+            "fr": "Trouvez ou imprimez une carte de votre lieu d'observation sur Google Maps ou Géoportail. Reportez vos différentes positions, celles du phénomène observé ainsi que ses déplacements. Une image, un PDF, ou le fichier KML ou KMZ d'un outil de carte."
+          },
+          "kind": "files",
+          "accept": "image/*,.pdf,.kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz",
+          "required": false
+        },
+        {
+          "id": "croquis",
+          "question": {
+            "fr": "Dessins ou croquis de l'observation"
+          },
+          "hint": {
+            "fr": "Faites un ou plusieurs dessins/croquis de votre observation depuis votre point de vue, en incluant l'environnement (habitations, rues, routes…). Donnez le plus d'éléments possibles (y compris en écrivant sur les dessins/croquis) afin de nous permettre une bonne compréhension de la scène. La précision des couleurs est importante, surtout si le niveau de contraste entre le phénomène observé et l'environnement est faible. Aucun talent en dessin n'est nécessaire. L'essentiel est de nous faire comprendre ce que vous avez vu de manière schématique."
+          },
+          "kind": "files",
+          "accept": "image/*,.pdf",
+          "required": false
+        },
+        {
+          "id": "photo",
+          "question": {
+            "fr": "Photo de l'environnement"
+          },
+          "hint": {
+            "fr": "Prenez une photo de l'environnement, comme si l'appareil photo était vos yeux lors de l'observation. Dessinez ce que vous avez observé directement sur les photos (en reportant les positions du phénomène observé ainsi que ses déplacements et sa forme)."
+          },
+          "kind": "files",
+          "accept": "image/*,.pdf",
+          "required": false
+        }
+      ]
+    },
+    {
+      "title": {
         "fr": "Et maintenant ?"
       },
       "fields": [

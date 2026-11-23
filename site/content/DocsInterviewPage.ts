@@ -183,7 +183,8 @@ export class DocsInterviewPage extends DocsSection {
         ["redacted", "<code>{ reason }</code>: the whole turn was taken out of the published file. It then has no <code>text</code>"],
         ["parts", "Instead of <code>text</code>, when only a stretch was taken out: a list of <code>{ text }</code> and <code>{ redacted }</code>, in order"],
         ["refs", "The moments of the observation this turn tells of (see “Its place in the case”)"],
-        ["field", "In a questionnaire the witness filled in (<code>medium</code> <code>questionnaire</code>): the field this turn asks or answers, numbered or named as the questionnaire does. A field left empty has its question only; a “don’t know” is kept as said and is no answer to build on"]
+        ["field", "In a questionnaire the witness filled in (<code>medium</code> <code>questionnaire</code>): the field this turn asks or answers, numbered or named as the questionnaire does. A field left empty has its question only; a “don’t know” is kept as said and is no answer to build on"],
+        ["files", "The files the turn gives (a field of kind <code>files</code>): <code>{ src, name?, type? }</code>, <code>src</code> relative to the interview's file. Its <code>text</code> names them. A file given from the witness's disk is written, when the case is saved, in a folder named after the interview (<code>interview-qb-files/</code>)"]
       ],
       exampleHeading: "An example",
       redactionHeading: "Taking passages out",
@@ -258,7 +259,8 @@ export class DocsInterviewPage extends DocsSection {
         ["redacted", "<code>{ reason }</code> : le tour entier a été retiré du fichier publié. Il n'a alors pas de <code>text</code>"],
         ["parts", "À la place de <code>text</code>, quand seul un passage a été retiré : une liste de <code>{ text }</code> et de <code>{ redacted }</code>, dans l'ordre"],
         ["refs", "Les moments de l'observation que ce tour raconte (voir « Sa place dans le dossier »)"],
-        ["field", "Dans un questionnaire rempli par le témoin (<code>medium</code> <code>questionnaire</code>) : le champ que ce tour pose ou auquel il répond, numéroté ou nommé comme le questionnaire le fait. Un champ laissé vide n'a que sa question ; un « je ne sais pas » est gardé tel qu'il a été dit et n'est pas une réponse sur laquelle bâtir"]
+        ["field", "Dans un questionnaire rempli par le témoin (<code>medium</code> <code>questionnaire</code>) : le champ que ce tour pose ou auquel il répond, numéroté ou nommé comme le questionnaire le fait. Un champ laissé vide n'a que sa question ; un « je ne sais pas » est gardé tel qu'il a été dit et n'est pas une réponse sur laquelle bâtir"],
+        ["files", "Les fichiers que le tour donne (un champ de sorte <code>files</code>) : <code>{ src, name?, type? }</code>, <code>src</code> relatif au fichier de l'interview. Son <code>text</code> les nomme. Un fichier donné depuis le disque du témoin est écrit, quand le dossier est sauvé, dans un dossier au nom de l'interview (<code>interview-qb-files/</code>)"]
       ],
       exampleHeading: "Un exemple",
       redactionHeading: "Retirer des passages",
@@ -333,7 +335,8 @@ export class DocsInterviewPage extends DocsSection {
         ["redacted", "<code>{ reason }</code>: el turno entero se eliminó del archivo publicado. Entonces no tiene <code>text</code>"],
         ["parts", "En lugar de <code>text</code>, cuando solo se eliminó un tramo: una lista de <code>{ text }</code> y <code>{ redacted }</code>, en orden"],
         ["refs", "Los momentos de la observación que cuenta este turno (véase «Su lugar en el caso»)"],
-        ["field", "En un cuestionario rellenado por el testigo (<code>medium</code> <code>questionnaire</code>): el campo que este turno pregunta o responde, numerado o nombrado como lo hace el cuestionario. Un campo dejado vacío solo tiene su pregunta; un «no sé» se guarda tal como se dijo y no es una respuesta sobre la que construir"]
+        ["field", "En un cuestionario rellenado por el testigo (<code>medium</code> <code>questionnaire</code>): el campo que este turno pregunta o responde, numerado o nombrado como lo hace el cuestionario. Un campo dejado vacío solo tiene su pregunta; un «no sé» se guarda tal como se dijo y no es una respuesta sobre la que construir"],
+        ["files", "Los archivos que da el turno (un campo de tipo <code>files</code>): <code>{ src, name?, type? }</code>, <code>src</code> relativo al archivo de la entrevista. Su <code>text</code> los nombra. Un archivo dado desde el disco del testigo se escribe, al guardar el caso, en una carpeta con el nombre de la entrevista (<code>interview-qb-files/</code>)"]
       ],
       exampleHeading: "Un ejemplo",
       redactionHeading: "Eliminar pasajes",
@@ -408,7 +411,8 @@ export class DocsInterviewPage extends DocsSection {
         ["redacted", "<code>{ reason }</code>: l'intero turno è stato tolto dal file pubblicato. Non ha allora <code>text</code>"],
         ["parts", "Al posto di <code>text</code>, quando è stato tolto solo un tratto: un elenco di <code>{ text }</code> e <code>{ redacted }</code>, in ordine"],
         ["refs", "I momenti dell'osservazione di cui parla questo turno (vedi «Il suo posto nel caso»)"],
-        ["field", "In un questionario compilato dal testimone (<code>medium</code> <code>questionnaire</code>): il campo che questo turno chiede o a cui risponde, numerato o nominato come fa il questionario. Un campo lasciato vuoto ha solo la domanda; un «non so» è conservato così com'è stato detto e non è una risposta su cui costruire"]
+        ["field", "In un questionario compilato dal testimone (<code>medium</code> <code>questionnaire</code>): il campo che questo turno chiede o a cui risponde, numerato o nominato come fa il questionario. Un campo lasciato vuoto ha solo la domanda; un «non so» è conservato così com'è stato detto e non è una risposta su cui costruire"],
+        ["files", "I file che il turno fornisce (un campo di tipo <code>files</code>): <code>{ src, name?, type? }</code>, <code>src</code> relativo al file dell'intervista. Il suo <code>text</code> li nomina. Un file dato dal disco del testimone è scritto, quando il caso è salvato, in una cartella col nome dell'intervista (<code>interview-qb-files/</code>)"]
       ],
       exampleHeading: "Un esempio",
       redactionHeading: "Togliere dei passaggi",
@@ -587,7 +591,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["id", "Its number or name, as the questionnaire gives it: the <code>field</code> of its turns"],
         ["question", "What is asked"],
         ["hint", "Said under the question"],
-        ["kind", "<code>text</code> (a line), <code>long</code> (a text, the default), <code>date</code>, <code>time</code>, <code>choice</code> or <code>scale</code>"],
+        ["kind", "<code>text</code> (a line), <code>long</code> (a text, the default), <code>date</code>, <code>time</code>, <code>choice</code>, <code>scale</code> or <code>files</code> (files the witness gives: a map they marked, a sketch, a photo drawn over)"],
+        ["accept", "For <code>files</code>: the kinds of file it takes, as a file picker says them (<code>image/*,.pdf,.kml</code>)"],
         ["choices", "For <code>choice</code> and <code>scale</code>: <code>{ value, label }</code>, the value being what the answer turn says"],
         ["multiple", "For <code>choice</code>: several may be ticked (a multiple-choice question), written one after another separated by <code>; </code>"],
         ["required", "<code>false</code> when not every witness is asked it"],
@@ -622,7 +627,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["id", "Son numéro ou son nom, comme le questionnaire le donne : le <code>field</code> de ses tours"],
         ["question", "Ce qui est demandé"],
         ["hint", "Dit sous la question"],
-        ["kind", "<code>text</code> (une ligne), <code>long</code> (un texte, par défaut), <code>date</code>, <code>time</code>, <code>choice</code> ou <code>scale</code>"],
+        ["kind", "<code>text</code> (une ligne), <code>long</code> (un texte, par défaut), <code>date</code>, <code>time</code>, <code>choice</code>, <code>scale</code> ou <code>files</code> (des fichiers que le témoin donne : un plan qu'il a annoté, un croquis, une photo dessinée par-dessus)"],
+        ["accept", "Pour <code>files</code> : les sortes de fichier qu'il prend, comme un sélecteur de fichier les dit (<code>image/*,.pdf,.kml</code>)"],
         ["choices", "Pour <code>choice</code> et <code>scale</code> : <code>{ value, label }</code>, la valeur étant ce que dit le tour de réponse"],
         ["multiple", "Pour <code>choice</code> : plusieurs peuvent être cochés (un QCM), écrits à la suite séparés par <code>; </code>"],
         ["required", "<code>false</code> quand elle n'est pas posée à tout témoin"],
@@ -657,7 +663,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["id", "Su número o su nombre, como lo da el cuestionario: el <code>field</code> de sus turnos"],
         ["question", "Lo que se pregunta"],
         ["hint", "Dicho bajo la pregunta"],
-        ["kind", "<code>text</code> (una línea), <code>long</code> (un texto, por defecto), <code>date</code>, <code>time</code>, <code>choice</code> o <code>scale</code>"],
+        ["kind", "<code>text</code> (una línea), <code>long</code> (un texto, por defecto), <code>date</code>, <code>time</code>, <code>choice</code>, <code>scale</code> o <code>files</code> (archivos que da el testigo: un plano que anotó, un croquis, una foto dibujada encima)"],
+        ["accept", "Para <code>files</code>: los tipos de archivo que acepta, como los dice un selector de archivos (<code>image/*,.pdf,.kml</code>)"],
         ["choices", "Para <code>choice</code> y <code>scale</code>: <code>{ value, label }</code>, siendo el valor lo que dice el turno de respuesta"],
         ["multiple", "Para <code>choice</code>: se pueden marcar varias (una pregunta de opción múltiple), escritas una tras otra separadas por <code>; </code>"],
         ["required", "<code>false</code> cuando no se pregunta a todo testigo"],
@@ -692,7 +699,8 @@ interview.addEventListener("interviewchange", event => console.log(event.detail.
         ["id", "Il suo numero o nome, come lo dà il questionario: il <code>field</code> dei suoi turni"],
         ["question", "Ciò che è chiesto"],
         ["hint", "Detto sotto la domanda"],
-        ["kind", "<code>text</code> (una riga), <code>long</code> (un testo, predefinito), <code>date</code>, <code>time</code>, <code>choice</code> o <code>scale</code>"],
+        ["kind", "<code>text</code> (una riga), <code>long</code> (un testo, predefinito), <code>date</code>, <code>time</code>, <code>choice</code>, <code>scale</code> o <code>files</code> (file che il testimone fornisce: una mappa annotata, uno schizzo, una foto disegnata sopra)"],
+        ["accept", "Per <code>files</code>: i tipi di file che accetta, come li dice un selettore di file (<code>image/*,.pdf,.kml</code>)"],
         ["choices", "Per <code>choice</code> e <code>scale</code>: <code>{ value, label }</code>, il valore essendo ciò che dice il turno di risposta"],
         ["multiple", "Per <code>choice</code>: se ne possono spuntare diverse (una domanda a scelta multipla), scritte una dopo l'altra separate da <code>; </code>"],
         ["required", "<code>false</code> quando non è chiesta a ogni testimone"],

@@ -92,6 +92,23 @@ export interface InterviewSegment {
    * "duration"). The question and its answer have the same, and a field nobody answered has only its question (see QuestionnaireImport).
    */
   field?: string
+  /**
+   * The files this turn gives: a map the witness marked their positions on, a sketch, a photo drawn over. Its text names them, so that whoever reads the
+   * turn without its files knows what was given.
+   */
+  files?: InterviewAttachment[]
+}
+
+/**
+ * A file a turn gives (see InterviewSegment.files): `src` relative to the interview's own file (the file written beside it when the case is saved), or
+ * a whole address.
+ */
+export interface InterviewAttachment {
+  src: string
+  /** Its name as it was given, when `src` does not say it. */
+  name?: string
+  /** Its media type ("image/jpeg", "application/vnd.google-earth.kml+xml"), when known. */
+  type?: string
 }
 
 /**

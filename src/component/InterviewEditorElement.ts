@@ -20,7 +20,8 @@ import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT 
 import type { QuestionnaireForm } from "./QuestionnaireForm.js"
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
-import type { InterviewJson, InterviewRedaction, InterviewSegment } from "../engine/persistence/interviewJson.js"
+import type { InterviewAttachment, InterviewJson, InterviewRedaction, InterviewSegment } from "../engine/persistence/interviewJson.js"
+import { InterviewAttachments } from "../engine/persistence/InterviewAttachments.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
 import { InterviewEdits } from "../engine/persistence/InterviewEdits.js"
 import { InterviewPlayer } from "./InterviewPlayer.js"
@@ -226,6 +227,14 @@ const TEMPLATE = `
     background: no-repeat left 2px / 15px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.6'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.5'/%3E%3Cpath d='M5.5 7V5a2.5 2.5 0 0 1 5 0v2'/%3E%3C/svg%3E"); }
   .form-confidential.nowhere { color: var(--warn, #b26b00); }
   .form-figure figcaption { margin-top: 4px; color: var(--ink-dim); font: 400 12px/1.35 var(--sans); }
+  /* The files a witness gives (a map, a sketch, a photo drawn over), a picture shown as one, each taken out by its ×; the picker under them. */
+  .form-file-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .form-file-list li { display: flex; align-items: flex-start; gap: 4px; max-width: 12rem; }
+  .form-file-list a { display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; font: 400 12px/1.35 var(--sans); }
+  .form-file-list img { display: block; max-width: 100%; max-height: 8rem; object-fit: contain; border-radius: 4px; background: #fff; }
+  .form-file-remove { font: inherit; line-height: 1; padding: 2px 6px; cursor: pointer; }
+  .form-file-add { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; }
+  .form-file-add .input-file-mode { white-space: nowrap; }
   .form-feed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans); }
   .turn-edit { display: flex; flex-direction: column; gap: 6px; }
   .turn-edit textarea { box-sizing: border-box; width: 100%; min-height: 6em; }
@@ -726,9 +735,12 @@ export class InterviewEditorElement extends HTMLElement {
     const m = this.messages
     const note = this.shadow.getElementById("form-note")!
     MessageStyle.show(note, template ? undefined : m.unknownQuestionnaire.replace("{id}", id), "warning")
-    this.form ??= new QuestionnaireForm(this.shadow.getElementById("form-fields")!, (field, answer, question) => void this.answerField(field, answer, question))
+    this.form ??= new QuestionnaireForm(this.shadow.getElementById("form-fields")!, (field, answer, question) => void this.answerField(field, answer, question),
+      (field, files, question) => void this.giveFiles(field, files, question))
+    const interviewUrl = this.transcriptUrl(event) ?? new URL(`${event.id ?? "interview"}.json`, this.base ?? location.href).href
     this.form.show(template ?? { id, title: id, sections: [] }, json, m.questionnaire, this.language, this.hasAttribute("readonly"),
-      field => this.confidentialAnswers.get(this.confidentialKey(event, field)))
+      field => this.confidentialAnswers.get(this.confidentialKey(event, field)),
+      { add: file => InterviewAttachments.add(file, interviewUrl), shown: file => InterviewAttachments.shown(file, interviewUrl), messages: m })
     const feed = this.shadow.getElementById("form-feed") as HTMLButtonElement
     feed.disabled = this.hasAttribute("readonly")
   }
@@ -737,7 +749,7 @@ export class InterviewEditorElement extends HTMLElement {
    * Writes the witness's answer to a field of the questionnaire in the transcript: a transcript with no question yet is first given every question of
    * the questionnaire, in its order, so that the answers come each after its own.
    */
-  private async answerField(field: string, answer: string, question: string): Promise<void> {
+  private async answerField(field: string, answer: string, question: string, write?: (json: InterviewJson) => void): Promise<void> {
     const { QuestionnaireTemplates } = await import("../engine/questionnaire/QuestionnaireTemplate.js")
     const event = this.current
     if (!event) return
@@ -766,8 +778,16 @@ export class InterviewEditorElement extends HTMLElement {
         for (const [id, speaker] of Object.entries(blank.speakers)) json.speakers[id] ??= speaker
       }
       json.medium = "questionnaire"
-      QuestionnaireTemplates.answer(json, field, answer, question, redacted)
+      if (write) write(json)
+      else QuestionnaireTemplates.answer(json, field, answer, question, redacted)
     })
+  }
+
+  /** Writes the files the witness gives in answer to a field of the questionnaire (see QuestionnaireTemplates.answerFiles), as answerField writes words. */
+  private async giveFiles(field: string, files: InterviewAttachment[], question: string): Promise<void> {
+    const { QuestionnaireTemplates } = await import("../engine/questionnaire/QuestionnaireTemplate.js")
+    if (!this.current) return
+    await this.answerField(field, "", question, json => QuestionnaireTemplates.answerFiles(json, field, files, question))
   }
 
   /** The opener of each module's seals, made once (see SealOpener). */

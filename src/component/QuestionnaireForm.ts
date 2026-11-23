@@ -1,7 +1,8 @@
 import type { QuestionnaireImage, QuestionnaireTemplate, QuestionnaireTemplateField } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import { QuestionnaireTemplates } from "../engine/questionnaire/QuestionnaireTemplate.js"
-import type { InterviewJson } from "../engine/persistence/interviewJson.js"
+import type { InterviewAttachment, InterviewJson } from "../engine/persistence/interviewJson.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
+import { register as registerInputFile, type InputFileElement, type InputFileMessages, type InputFilePick } from "./InputFileElement.js"
 
 /** The words of the form (see InterviewMessages.questionnaire). */
 export interface QuestionnaireFormMessages {
@@ -31,6 +32,21 @@ export interface QuestionnaireFormMessages {
   confidentialSealed: string
   confidentialSealedBefore: string
   confidentialNowhere: string
+  /** Before the picker of a files question: what it adds. */
+  addFile: string
+  /** The tooltip of the button that takes a file out of the answer: `{name}`. */
+  removeFile: string
+}
+
+/**
+ * Where the files a witness gives are kept (see QuestionnaireForm.show): a file of theirs made a file of the interview, kept in the page until the case
+ * is saved; and where one of the interview's files is shown from.
+ */
+export interface QuestionnaireFormFiles {
+  add(file: File): InterviewAttachment
+  shown(file: InterviewAttachment): string
+  /** The picker's words. */
+  messages: InputFileMessages
 }
 
 /**
@@ -42,8 +58,11 @@ export class QuestionnaireForm {
 
   private json?: InterviewJson
   private recalled: (field: string) => string | undefined = () => undefined
+  private files?: QuestionnaireFormFiles
 
-  constructor(private readonly container: HTMLElement, private readonly answered: (field: string, answer: string, question: string) => void) {
+  /** @param gave Says the files now given in answer to a files question: all of them, after one is added or taken out. */
+  constructor(private readonly container: HTMLElement, private readonly answered: (field: string, answer: string, question: string) => void,
+    private readonly gave: (field: string, files: InterviewAttachment[], question: string) => void = () => undefined) {
   }
 
   /**
@@ -51,9 +70,10 @@ export class QuestionnaireForm {
    * shown again.
    */
   show(template: QuestionnaireTemplate, json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
-    recalled: (field: string) => string | undefined = () => undefined): void {
+    recalled: (field: string) => string | undefined = () => undefined, files?: QuestionnaireFormFiles): void {
     this.json = json
     this.recalled = recalled
+    this.files = files
     const text = (said: Parameters<typeof QuestionnaireTemplates.text>[0]) => QuestionnaireTemplates.text(said, language)
     const parts: Node[] = []
     // The questionnaire's own words to the witness, else what the form is.
@@ -134,6 +154,10 @@ export class QuestionnaireForm {
     if (field.confidential) row.append(this.confidentialNote(field, value, messages, language))
     const say = (answer: string) => this.answered(field.id, answer, question)
     const kind = field.kind ?? "long"
+    if (kind === "files") {
+      row.append(this.attached(field, id, question, messages, readonly))
+      return row
+    }
     if ((kind === "choice" || kind === "scale") && field.choices) {
       const choices = document.createElement("div")
       choices.className = `form-choices ${kind}`
@@ -198,6 +222,81 @@ export class QuestionnaireForm {
     show(value === "" || iso.test(value.trim()))
     label.append(" ", mode)
     box.append(input)
+    return box
+  }
+
+  /**
+   * A question answered by files (a map, a sketch, a photo drawn over): those given, each shown (a picture as a picture) with what takes it out, and a
+   * picker that adds others, from the witness's disk or from an address.
+   */
+  private attached(field: QuestionnaireTemplateField, id: string, question: string, messages: QuestionnaireFormMessages, readonly: boolean): HTMLElement {
+    const box = document.createElement("div")
+    box.className = "form-files"
+    const given = this.json ? [...QuestionnaireTemplates.filesOf(this.json, field.id)] : []
+    const list = document.createElement("ul")
+    list.className = "form-file-list"
+    const draw = () => {
+      list.replaceChildren(...given.map((file, index) => {
+        const item = document.createElement("li")
+        const name = QuestionnaireTemplates.fileName(file)
+        const where = this.files?.shown(file) ?? file.src
+        const link = document.createElement("a")
+        link.href = where
+        link.target = "_blank"
+        link.rel = "noopener noreferrer"
+        if ((file.type ?? "").startsWith("image/") || /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(name)) {
+          const img = document.createElement("img")
+          img.src = where
+          img.alt = name
+          img.loading = "lazy"
+          link.append(img)
+        }
+        link.append(name)
+        item.append(link)
+        if (!readonly) {
+          const remove = document.createElement("button")
+          remove.type = "button"
+          remove.className = "form-file-remove"
+          remove.textContent = "×"
+          remove.title = messages.removeFile.replace("{name}", name)
+          remove.setAttribute("aria-label", remove.title)
+          remove.addEventListener("click", () => {
+            given.splice(index, 1)
+            draw()
+            this.gave(field.id, [...given], question)
+          })
+          item.append(remove)
+        }
+        return item
+      }))
+      list.hidden = given.length === 0
+    }
+    draw()
+    box.append(list)
+    if (readonly || !this.files) return box
+    registerInputFile()
+    const add = document.createElement("label")
+    add.className = "form-file-add"
+    const picker = document.createElement("rr0-input-file") as InputFileElement
+    picker.setAttribute("name", id)
+    picker.setAttribute("multiple", "")
+    picker.setAttribute("no-button", "")
+    if (field.accept) picker.setAttribute("accept", field.accept)
+    picker.build()
+    picker.messages = this.files.messages
+    const files = this.files
+    picker.addEventListener("filepick", event => {
+      const pick = (event as CustomEvent<InputFilePick>).detail
+      if (pick.url !== undefined) {
+        if (pick.url.trim() === "") return
+        given.push({ src: pick.url.trim() })
+        picker.url = ""
+      } else for (const file of pick.files ?? [pick.file]) given.push(files.add(file))
+      draw()
+      this.gave(field.id, [...given], question)
+    })
+    add.append(`${messages.addFile} `, picker)
+    box.append(add)
     return box
   }
 

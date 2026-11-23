@@ -1,10 +1,13 @@
 import type { SaidText } from "../model/SaidText.js"
-import type { InterviewJson, InterviewRedaction, InterviewSegment } from "../persistence/interviewJson.js"
+import type { InterviewAttachment, InterviewJson, InterviewRedaction, InterviewSegment } from "../persistence/interviewJson.js"
 import type { SealRecipient } from "./QuestionnaireSeal.js"
 import type { InterviewImportHints } from "../persistence/interviewImport.js"
 
-/** What a field's answer is for the form that asks it: a line, a text, a date, a time, one of several choices, a mark on a scale. */
-export type QuestionnaireFieldKind = "text" | "long" | "date" | "time" | "choice" | "scale"
+/**
+ * What a field's answer is for the form that asks it: a line, a text, a date, a time, one of several choices, a mark on a scale, or files (a map, a
+ * sketch, a photo drawn over: see InterviewSegment.files).
+ */
+export type QuestionnaireFieldKind = "text" | "long" | "date" | "time" | "choice" | "scale" | "files"
 
 /**
  * What a field's answer may set in the recording of the observation, once the witness has answered (see QuestionnaireFeed): the witness's account
@@ -31,6 +34,8 @@ export interface QuestionnaireTemplateField {
   /** "long" when absent. */
   kind?: QuestionnaireFieldKind
   choices?: { value: string, label: SaidText }[]
+  /** For files: the kinds of file it takes, as a file picker's `accept` says them ("image/*,.pdf,.kml"). */
+  accept?: string
   /** For a choice: several may be ticked (a multiple-choice question), written one after another, separated by "; ". */
   multiple?: boolean
   /** True when absent: the questionnaire asks it of every witness. */
@@ -181,23 +186,44 @@ export class QuestionnaireTemplates {
 
   /** The witness's answer to `field` in `json`, as written; undefined when there is none. */
   static answerOf(json: InterviewJson, field: string): string | undefined {
-    const segment = json.segments.find(candidate => candidate.field === field && json.speakers[candidate.speaker]?.role === "witness")
-    return segment?.text
+    return QuestionnaireTemplates.answerTurn(json, field)?.text
+  }
+
+  /** The files the witness gave in answer to `field` in `json` (see InterviewSegment.files). */
+  static filesOf(json: InterviewJson, field: string): InterviewAttachment[] {
+    return QuestionnaireTemplates.answerTurn(json, field)?.files ?? []
+  }
+
+  private static answerTurn(json: InterviewJson, field: string): InterviewSegment | undefined {
+    return json.segments.find(candidate => candidate.field === field && json.speakers[candidate.speaker]?.role === "witness")
+  }
+
+  /** The name a file goes by: its own, else the end of its address. */
+  static fileName(file: InterviewAttachment): string {
+    return file.name ?? (decodeURIComponent(file.src.replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/^.*\//, "")) || file.src)
+  }
+
+  /**
+   * Writes the files the witness gives in answer to `field`: its turn names them, one after another separated by "; ", and holds them; taken out when
+   * there are none left.
+   */
+  static answerFiles(json: InterviewJson, field: string, files: InterviewAttachment[], question?: string): void {
+    QuestionnaireTemplates.answer(json, field, files.map(file => QuestionnaireTemplates.fileName(file)).join("; "), question, undefined, files)
   }
 
   /**
    * Writes the witness's answer to `field`: its turn after the question, replaced when there was one, taken out when the answer is emptied (a field
    * left empty has its question only). A question the interview does not have yet is added at the end, with `question` as its text.
    */
-  static answer(json: InterviewJson, field: string, answer: string, question?: string, redacted?: InterviewRedaction): void {
+  static answer(json: InterviewJson, field: string, answer: string, question?: string, redacted?: InterviewRedaction, files?: InterviewAttachment[]): void {
     const witness = Object.entries(json.speakers).find(([, speaker]) => speaker.role === "witness")?.[0] ?? "witness"
     if (!json.speakers[witness]) json.speakers[witness] = { role: "witness" }
     const at = json.segments.findIndex(segment => segment.field === field && json.speakers[segment.speaker]?.role === "witness")
     const text = answer.trim()
     // A confidential answer is written taken out, its text sealed or nowhere.
     const said = (segment: InterviewSegment): InterviewSegment => {
-      const { text: _text, redacted: _redacted, ...rest } = segment
-      return redacted ? { ...rest, redacted } : { ...rest, text }
+      const { text: _text, redacted: _redacted, files: _files, ...rest } = segment
+      return redacted ? { ...rest, redacted } : { ...rest, text, ...(files?.length ? { files } : {}) }
     }
     if (at >= 0) {
       if (text === "") json.segments.splice(at, 1)
