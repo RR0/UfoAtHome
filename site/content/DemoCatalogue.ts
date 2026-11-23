@@ -582,14 +582,18 @@ export class DemoCatalogue {
           }
         },
         {
-          id: "birds-night",
-          src: "/demo-data/sky-test-birds-night.json",
-          title: { en: "Birds lit from below", fr: "Des oiseaux éclairés par-dessous", es: "Aves iluminadas desde abajo", it: "Uccelli illuminati dal basso" },
+          id: "lubbock",
+          // The ducks of the Air Force's conclusion as Dr Robinson would have seen them; the player opens the case, the four professors and both bird readings.
+          src: "/demo-data/interpretation-lubbock-robinson-ducks.json",
+          playSrc: "/demo-data/case-lubbock.json",
+          openEvents: "interpretation-lubbock-robinson-ducks",
+          title: { en: "Lubbock, 1951", fr: "Lubbock, 1951", es: "Lubbock, 1951", it: "Lubbock, 1951" },
+          titleIsName: true,
           blurb: {
-            en: "Snow geese in a V over a town at night, their white bellies lit by its street lamps: a silent arc of pale lights crossing the sky. Then a flock of plovers that flies itself, each bird heeding its seven nearest. Place, date and lighting assumed.",
-            fr: "Des oies des neiges en V au-dessus d'une ville la nuit, leur ventre blanc éclairé par les lampadaires : un arc silencieux de lumières pâles qui traverse le ciel. Puis une nuée de pluviers qui vole d'elle-même, chaque oiseau suivant ses sept plus proches voisins. Lieu, date et éclairage supposés.",
-            es: "Gansos nivales en V sobre una ciudad de noche, el vientre blanco iluminado por las farolas: un arco silencioso de luces pálidas que cruza el cielo. Después, una bandada de chorlitos que vuela por sí sola, cada ave atenta a sus siete vecinas más cercanas. Lugar, fecha e iluminación supuestos.",
-            it: "Oche delle nevi in V sopra una città di notte, il ventre bianco illuminato dai lampioni: un arco silenzioso di luci pallide che attraversa il cielo. Poi uno stormo di pivieri che vola da sé, ogni uccello attento ai suoi sette vicini più prossimi. Luogo, data e illuminazione ipotizzati."
+            en: "25 August 1951, 21:20. Four Texas Tech professors drinking tea in a back yard look up as a semicircle of bluish green lights crosses the sky over their heads in three seconds, without a sound. Replayed for each of them with the Air Force's reading: ducks flying low, their bellies lit from below by the mercury-vapour lamps of the boulevard near by — and Ruppelt's plovers. Yard, seats and flight assumed.",
+            fr: "25 août 1951, 21 h 20. Quatre professeurs de Texas Tech prenant le thé dans un jardin lèvent les yeux quand un demi-cercle de lumières bleu-vert traverse le ciel au-dessus de leurs têtes en trois secondes, sans un bruit. Rejoué pour chacun d'eux avec la lecture de l'Air Force : des canards volant bas, le ventre éclairé par en dessous par les lampes à vapeur de mercure du boulevard voisin — et les pluviers de Ruppelt. Jardin, places et vol supposés.",
+            es: "25 de agosto de 1951, 21:20. Cuatro profesores de Texas Tech que toman té en un jardín alzan la vista cuando un semicírculo de luces verdiazules cruza el cielo sobre sus cabezas en tres segundos, sin un ruido. Reproducido para cada uno con la lectura de la Air Force: patos que vuelan bajo, el vientre iluminado desde abajo por las lámparas de vapor de mercurio del bulevar cercano — y los chorlitos de Ruppelt. Jardín, asientos y vuelo supuestos.",
+            it: "25 agosto 1951, 21:20. Quattro professori della Texas Tech che prendono il tè in un giardino alzano gli occhi quando un semicerchio di luci verde-azzurre attraversa il cielo sopra le loro teste in tre secondi, senza un rumore. Riprodotto per ciascuno di loro con la lettura della Air Force: anatre in volo basso, il ventre illuminato dal basso dalle lampade a vapori di mercurio del viale vicino — e i pivieri di Ruppelt. Giardino, posti e volo ipotizzati."
           }
         },
         {

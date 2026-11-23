@@ -78,3 +78,11 @@ whole must credit davidmarton1987 wherever it is shared. See `davidmarton-a320-c
 
 The chief steward of flight AF 3532, standing in his uniform: `man-jacket.glb` (above), given a neck and head skeleton by `scripts/people/split_head.py` so that his head turns, the colour of his clothes
 stated by the recording (a navy blue). CC0 1.0 like the figure it is made from. Nothing says what he looked like: a stand-in.
+
+## seated-man-1951-a.glb, seated-man-1951-b.glb, seated-man-1951-c.glb, seated-man-1951-d.glb
+
+Four men seated on a garden chair, built by `scripts/people/build_seated.py` from the MakeHuman system assets (CC0 1.0,
+https://www.makehumancommunity.org/) with MPFB, like the other people here: the four Texas Tech professors of the Lubbock case (25 August
+1951), of whom nothing is drawn but that they were men sitting in a back yard. Their ages, builds, hair and clothes are assumed: a shirt and plain
+trousers of the time, copies of the pack's `male_casualsuit01` whose shirt and jeans islands are repainted one colour with a little grain (see
+`scripts/people/README.md`). The chair, a plain wooden garden chair, is made of boxes by the script itself (CC0 1.0, UFO@home).

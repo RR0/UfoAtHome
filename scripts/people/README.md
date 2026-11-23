@@ -140,3 +140,17 @@ python3 -I scripts/people/split_head.py public/models/makehuman-people/man-jacke
 
 MakeHuman's own rig (MPFB) has a neck and a head with their weights, and exporting it posed would give the same; these figures are baked without it, so this one is made
 from the baked meshes. A model that changes must change its name (see `build_pilot.py`): the `-gaze` of the captain is that.
+
+## Seated men of 1951 (`build_seated.py`)
+
+Four men seated on a garden chair (`seated-man-1951-{a,b,c,d}.glb`), for the Lubbock case. Same setup as above, plus four garments in the system
+assets, `clothes/male_shirt1951{a,b,c,d}/`: `male_casualsuit01` copied under that name (files renamed, the old name replaced inside the `.mhclo`
+and `.mhmat`), its shirt islands and its jeans island painted one colour each with the same `magick` command as the pilot's shirt above, with
+these colours (shirt, trousers): a `#e6e4dc` `#5b5a57`, b `#bccbd8` `#8a7a5c`, c `#d8cdb4` `#3c3d40`, d `#ecebe6` `#5a4636`.
+
+```
+MH_ASSETS=/path/to/makehuman_system_assets_cc0 BLENDER_USER_RESOURCES=/path/to/scratch/res \
+  /Applications/Blender.app/Contents/MacOS/Blender -b --python scripts/people/build_seated.py -- <output dir>
+```
+
+It prints each figure's size and the height of its eyes above the floor (1.33 to 1.37 m), which a seated observer's `elevationM` follows.

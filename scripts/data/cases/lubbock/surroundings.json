@@ -1,0 +1,5160 @@
+{
+ "version": 1,
+ "provider": {
+  "id": "osm-buildings",
+  "name": "OpenStreetMap buildings",
+  "attribution": "Buildings © OpenStreetMap contributors (ODbL), as drawn on the day of the data, which a recording is not",
+  "creditUrl": "https://www.openstreetmap.org/copyright"
+ },
+ "centre": {
+  "lat": 33.57722,
+  "lng": -101.87836
+ },
+ "radiusM": 250,
+ "fetchedOn": "2026-11-23",
+ "dates": {
+  "map": "2026-11-23"
+ },
+ "decor": [
+  {
+   "id": "osm-buildings-1",
+   "kind": "building",
+   "title": "Building 1",
+   "eastM": -2.2,
+   "northM": 2.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.5,
+    "lengthM": 11.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc4b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-2",
+   "kind": "building",
+   "title": "Building 2",
+   "eastM": -0.7,
+   "northM": 20.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cfc6b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-3",
+   "kind": "building",
+   "title": "Building 3",
+   "eastM": 12.5,
+   "northM": -22.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-4",
+   "kind": "building",
+   "title": "Building 4",
+   "eastM": -1.2,
+   "northM": 29.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-5",
+   "kind": "building",
+   "title": "Building 5",
+   "eastM": -4.7,
+   "northM": -30.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-6",
+   "kind": "building",
+   "title": "Building 6",
+   "eastM": 3.4,
+   "northM": -33.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-7",
+   "kind": "building",
+   "title": "Building 7",
+   "eastM": 0,
+   "northM": 36.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-8",
+   "kind": "building",
+   "title": "Building 8",
+   "eastM": -11.6,
+   "northM": -38.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-9",
+   "kind": "building",
+   "title": "Building 9",
+   "eastM": 7.3,
+   "northM": -41.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-10",
+   "kind": "building",
+   "title": "Building 10",
+   "eastM": 42.4,
+   "northM": 7.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-11",
+   "kind": "building",
+   "title": "Building 11",
+   "eastM": -29.9,
+   "northM": 32.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d7cebc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-12",
+   "kind": "building",
+   "title": "Building 12",
+   "eastM": -39.1,
+   "northM": 22.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-13",
+   "kind": "building",
+   "title": "Building 13",
+   "eastM": 26.1,
+   "northM": -38.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dcc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-14",
+   "kind": "building",
+   "title": "Building 14",
+   "eastM": 38.3,
+   "northM": 30.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22.6,
+    "lengthM": 14.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c2baa9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-15",
+   "kind": "building",
+   "title": "Building 15",
+   "eastM": 47.7,
+   "northM": 18.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 29.7,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c8bfae"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-16",
+   "kind": "building",
+   "title": "Building 16",
+   "eastM": -29,
+   "northM": -42.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 10,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-17",
+   "kind": "building",
+   "title": "Building 17",
+   "eastM": -51.2,
+   "northM": 7.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 9.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-18",
+   "kind": "building",
+   "title": "Building 18",
+   "eastM": -38,
+   "northM": 36.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c1b9a8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-19",
+   "kind": "building",
+   "title": "Building 19",
+   "eastM": -43.6,
+   "northM": 29.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bfb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-20",
+   "kind": "building",
+   "title": "Building 20",
+   "eastM": -51.1,
+   "northM": 19.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-21",
+   "kind": "building",
+   "title": "Building 21",
+   "eastM": 48.3,
+   "northM": -31.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25,
+    "lengthM": 13.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-22",
+   "kind": "building",
+   "title": "Building 22",
+   "eastM": -50,
+   "northM": -40.9,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 26.2,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-23",
+   "kind": "building",
+   "title": "Building 23",
+   "eastM": -48.9,
+   "northM": -47.8,
+   "headingDeg": 6,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-24",
+   "kind": "building",
+   "title": "Building 24",
+   "eastM": 76.3,
+   "northM": -33.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-25",
+   "kind": "building",
+   "title": "Building 25",
+   "eastM": 85,
+   "northM": 1.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 11.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-26",
+   "kind": "building",
+   "title": "Building 26",
+   "eastM": -24,
+   "northM": -81.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c9c0af"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-27",
+   "kind": "building",
+   "title": "Building 27",
+   "eastM": -3.7,
+   "northM": -88.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dcc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-28",
+   "kind": "building",
+   "title": "Building 28",
+   "eastM": 15,
+   "northM": -89.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.5,
+    "lengthM": 13,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-29",
+   "kind": "building",
+   "title": "Building 29",
+   "eastM": 76.8,
+   "northM": -49.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ded4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-30",
+   "kind": "building",
+   "title": "Building 30",
+   "eastM": 82.6,
+   "northM": -42,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cac2b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-31",
+   "kind": "building",
+   "title": "Building 31",
+   "eastM": -92.4,
+   "northM": 10.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d0c7b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-32",
+   "kind": "building",
+   "title": "Building 32",
+   "eastM": -25.6,
+   "northM": -91.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-33",
+   "kind": "building",
+   "title": "Building 33",
+   "eastM": 33.3,
+   "northM": -88.8,
+   "headingDeg": 87.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.3,
+    "lengthM": 11.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-34",
+   "kind": "building",
+   "title": "Building 34",
+   "eastM": 45.1,
+   "northM": -84.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-35",
+   "kind": "building",
+   "title": "Building 35",
+   "eastM": -95.2,
+   "northM": 25.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24.7,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-36",
+   "kind": "building",
+   "title": "Building 36",
+   "eastM": 101.8,
+   "northM": 15.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cac1b0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-37",
+   "kind": "building",
+   "title": "Building 37",
+   "eastM": -100.2,
+   "northM": -30.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dad1be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-38",
+   "kind": "building",
+   "title": "Building 38",
+   "eastM": 47.6,
+   "northM": -94.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-39",
+   "kind": "building",
+   "title": "Building 39",
+   "eastM": 103.1,
+   "northM": 24.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 29.7,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c9c0af"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-40",
+   "kind": "building",
+   "title": "Building 40",
+   "eastM": -62.3,
+   "northM": -86.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-41",
+   "kind": "building",
+   "title": "Building 41",
+   "eastM": -53.2,
+   "northM": -92.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd1bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-42",
+   "kind": "building",
+   "title": "Building 42",
+   "eastM": -100.2,
+   "northM": -39.5,
+   "headingDeg": 3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-43",
+   "kind": "building",
+   "title": "Building 43",
+   "eastM": 21.1,
+   "northM": -106.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-44",
+   "kind": "building",
+   "title": "Building 44",
+   "eastM": -20,
+   "northM": -109.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dfd6c3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-45",
+   "kind": "building",
+   "title": "Building 45",
+   "eastM": -10.5,
+   "northM": -112,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dfd6c3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-46",
+   "kind": "building",
+   "title": "Building 46",
+   "eastM": -109,
+   "northM": 29.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddca"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-47",
+   "kind": "building",
+   "title": "Building 47",
+   "eastM": -103.1,
+   "northM": -47.1,
+   "headingDeg": 3,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-48",
+   "kind": "building",
+   "title": "Building 48",
+   "eastM": 56,
+   "northM": -99,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dbc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-49",
+   "kind": "building",
+   "title": "Building 49",
+   "eastM": 28.5,
+   "northM": -112.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dbc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-50",
+   "kind": "building",
+   "title": "Building 50",
+   "eastM": 115.2,
+   "northM": 17.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c0b8a8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-51",
+   "kind": "building",
+   "title": "Building 51",
+   "eastM": -115.2,
+   "northM": 24.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9cfbd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-52",
+   "kind": "building",
+   "title": "Building 52",
+   "eastM": 114.4,
+   "northM": -43.9,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bfb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-53",
+   "kind": "building",
+   "title": "Building 53",
+   "eastM": -89.2,
+   "northM": -84.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-54",
+   "kind": "building",
+   "title": "Building 54",
+   "eastM": -122.7,
+   "northM": 9.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 5.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-55",
+   "kind": "building",
+   "title": "Building 55",
+   "eastM": 83.1,
+   "northM": -90.9,
+   "headingDeg": 88.5,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.8,
+    "lengthM": 12.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-56",
+   "kind": "building",
+   "title": "Building 56",
+   "eastM": -115.7,
+   "northM": -42.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 10.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-57",
+   "kind": "building",
+   "title": "Building 57",
+   "eastM": 113.1,
+   "northM": -49.8,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cbc2b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-58",
+   "kind": "building",
+   "title": "Building 58",
+   "eastM": 48.8,
+   "northM": -113.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.5,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-59",
+   "kind": "building",
+   "title": "Building 59",
+   "eastM": -120.8,
+   "northM": 30.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-60",
+   "kind": "building",
+   "title": "Building 60",
+   "eastM": 124.5,
+   "northM": -6.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-61",
+   "kind": "building",
+   "title": "Building 61",
+   "eastM": -59.5,
+   "northM": -112,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd2c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-62",
+   "kind": "building",
+   "title": "Building 62",
+   "eastM": 125.8,
+   "northM": -19,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec6b4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-63",
+   "kind": "building",
+   "title": "Building 63",
+   "eastM": 120.6,
+   "northM": -49,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ccc3b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-64",
+   "kind": "building",
+   "title": "Building 64",
+   "eastM": 5.5,
+   "northM": -133.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-65",
+   "kind": "building",
+   "title": "Building 65",
+   "eastM": 14.8,
+   "northM": -134.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c8c0af"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-66",
+   "kind": "building",
+   "title": "Building 66",
+   "eastM": 134.7,
+   "northM": 9.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-67",
+   "kind": "building",
+   "title": "Building 67",
+   "eastM": -47,
+   "northM": -128.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7,
+    "lengthM": 5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bfb7a7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-68",
+   "kind": "building",
+   "title": "Building 68",
+   "eastM": -103.3,
+   "northM": -90.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 38.2,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-69",
+   "kind": "building",
+   "title": "Building 69",
+   "eastM": -98.8,
+   "northM": -95.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-70",
+   "kind": "building",
+   "title": "Building 70",
+   "eastM": -132,
+   "northM": -39.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-71",
+   "kind": "building",
+   "title": "Building 71",
+   "eastM": 105,
+   "northM": -91.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c5bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-72",
+   "kind": "building",
+   "title": "Building 72",
+   "eastM": 76.8,
+   "northM": -116.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-73",
+   "kind": "building",
+   "title": "Building 73",
+   "eastM": -58,
+   "northM": -128,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-74",
+   "kind": "building",
+   "title": "Building 74",
+   "eastM": -138.2,
+   "northM": 28,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 14.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cfc6b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-75",
+   "kind": "building",
+   "title": "Building 75",
+   "eastM": -30.2,
+   "northM": -138.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c2baa9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-76",
+   "kind": "building",
+   "title": "Building 76",
+   "eastM": 140,
+   "northM": 22.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.8,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0bd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-77",
+   "kind": "building",
+   "title": "Building 77",
+   "eastM": 137.3,
+   "northM": -41.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bbb3a3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-78",
+   "kind": "building",
+   "title": "Building 78",
+   "eastM": 143.5,
+   "northM": -3.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-79",
+   "kind": "building",
+   "title": "Building 79",
+   "eastM": 146.3,
+   "northM": 9.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-80",
+   "kind": "building",
+   "title": "Building 80",
+   "eastM": 37.5,
+   "northM": -142.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-81",
+   "kind": "building",
+   "title": "Building 81",
+   "eastM": -147.3,
+   "northM": 17.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-82",
+   "kind": "building",
+   "title": "Building 82",
+   "eastM": -110.4,
+   "northM": -100.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-83",
+   "kind": "building",
+   "title": "Building 83",
+   "eastM": 96.8,
+   "northM": -114.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-84",
+   "kind": "building",
+   "title": "Building 84",
+   "eastM": -146.7,
+   "northM": -31.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-85",
+   "kind": "building",
+   "title": "Building 85",
+   "eastM": 49.4,
+   "northM": -142,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-86",
+   "kind": "building",
+   "title": "Building 86",
+   "eastM": -13,
+   "northM": -150.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22,
+    "lengthM": 11,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e4dac7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-87",
+   "kind": "building",
+   "title": "Building 87",
+   "eastM": -151.7,
+   "northM": -2.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.5,
+    "lengthM": 7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c1b9a8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-88",
+   "kind": "building",
+   "title": "Building 88",
+   "eastM": 1.3,
+   "northM": -152.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-89",
+   "kind": "building",
+   "title": "Building 89",
+   "eastM": -28,
+   "northM": -151.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 13.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ccc4b2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-90",
+   "kind": "building",
+   "title": "Building 90",
+   "eastM": 148.9,
+   "northM": -41.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c2baaa"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-91",
+   "kind": "building",
+   "title": "Building 91",
+   "eastM": 19.5,
+   "northM": -155.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 10,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-92",
+   "kind": "building",
+   "title": "Building 92",
+   "eastM": 122.8,
+   "northM": -97.3,
+   "headingDeg": 88.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22.8,
+    "lengthM": 10.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-93",
+   "kind": "building",
+   "title": "Building 93",
+   "eastM": -152.1,
+   "northM": -38,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c7bead"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-94",
+   "kind": "building",
+   "title": "Building 94",
+   "eastM": 46.8,
+   "northM": -150.5,
+   "headingDeg": 87,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-95",
+   "kind": "building",
+   "title": "Building 95",
+   "eastM": -41.9,
+   "northM": -153.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.3,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-96",
+   "kind": "building",
+   "title": "Building 96",
+   "eastM": 32.3,
+   "northM": -155.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 9.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc4b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-97",
+   "kind": "building",
+   "title": "Building 97",
+   "eastM": 156,
+   "northM": -33.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24.7,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-98",
+   "kind": "building",
+   "title": "Building 98",
+   "eastM": -89.9,
+   "northM": -132,
+   "headingDeg": 175.2,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.8,
+    "lengthM": 10.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-99",
+   "kind": "building",
+   "title": "Building 99",
+   "eastM": 160,
+   "northM": -7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7,
+    "lengthM": 6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-100",
+   "kind": "building",
+   "title": "Building 100",
+   "eastM": 74.9,
+   "northM": -143.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 29.7,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-101",
+   "kind": "building",
+   "title": "Building 101",
+   "eastM": 159.8,
+   "northM": 35.4,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cbc2b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-102",
+   "kind": "building",
+   "title": "Building 102",
+   "eastM": -57.2,
+   "northM": -153.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 9.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-103",
+   "kind": "building",
+   "title": "Building 103",
+   "eastM": 157.2,
+   "northM": -47.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d8c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-104",
+   "kind": "building",
+   "title": "Building 104",
+   "eastM": 163,
+   "northM": 27.1,
+   "headingDeg": 168,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-105",
+   "kind": "building",
+   "title": "Building 105",
+   "eastM": -48.6,
+   "northM": -159.6,
+   "headingDeg": 84,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cfc6b4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-106",
+   "kind": "building",
+   "title": "Building 106",
+   "eastM": 120,
+   "northM": -118.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-107",
+   "kind": "building",
+   "title": "Building 107",
+   "eastM": 144.3,
+   "northM": -90,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 13.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dfd6c3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-108",
+   "kind": "building",
+   "title": "Building 108",
+   "eastM": 171,
+   "northM": -7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-109",
+   "kind": "building",
+   "title": "Building 109",
+   "eastM": -147.7,
+   "northM": -88.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 10.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e9dfcb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-110",
+   "kind": "building",
+   "title": "Building 110",
+   "eastM": 169.1,
+   "northM": -34,
+   "headingDeg": 87.9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.3,
+    "lengthM": 11.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-111",
+   "kind": "building",
+   "title": "Building 111",
+   "eastM": 80.3,
+   "northM": -153.6,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-112",
+   "kind": "building",
+   "title": "Building 112",
+   "eastM": -111,
+   "northM": -135.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 9.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e0d6c3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-113",
+   "kind": "building",
+   "title": "Building 113",
+   "eastM": -96.2,
+   "northM": -147.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c7bfae"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-114",
+   "kind": "building",
+   "title": "Building 114",
+   "eastM": 91,
+   "northM": -151.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.5,
+    "lengthM": 9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cbc2b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-115",
+   "kind": "building",
+   "title": "Building 115",
+   "eastM": -174.5,
+   "northM": 32,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e3dac6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-116",
+   "kind": "building",
+   "title": "Building 116",
+   "eastM": 176.1,
+   "northM": 26,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e8decb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-117",
+   "kind": "building",
+   "title": "Building 117",
+   "eastM": -92.3,
+   "northM": -157,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 14.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-118",
+   "kind": "building",
+   "title": "Building 118",
+   "eastM": 161.8,
+   "northM": -88.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d8c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-119",
+   "kind": "building",
+   "title": "Building 119",
+   "eastM": -183.5,
+   "northM": 25.1,
+   "headingDeg": 177,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-120",
+   "kind": "building",
+   "title": "Building 120",
+   "eastM": -181.4,
+   "northM": -39.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bfb7a7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-121",
+   "kind": "building",
+   "title": "Building 121",
+   "eastM": -163.3,
+   "northM": -88.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec6b4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-122",
+   "kind": "building",
+   "title": "Building 122",
+   "eastM": -160.1,
+   "northM": -94.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-123",
+   "kind": "building",
+   "title": "Building 123",
+   "eastM": 107.3,
+   "northM": -152.4,
+   "headingDeg": 87,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.8,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-124",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall",
+   "eastM": 90.2,
+   "northM": 166.4,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.5,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-125",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall",
+   "eastM": -91.3,
+   "northM": 166.6,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.5,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdad"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-126",
+   "kind": "building",
+   "title": "Building 124",
+   "eastM": 120.8,
+   "northM": -150,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d0c7b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-127",
+   "kind": "building",
+   "title": "Building 125",
+   "eastM": 137.8,
+   "northM": -136,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e4dbc7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-128",
+   "kind": "building",
+   "title": "Building 126",
+   "eastM": -117.6,
+   "northM": -155.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-129",
+   "kind": "building",
+   "title": "Building 127",
+   "eastM": 169.7,
+   "northM": -95.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24.7,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-130",
+   "kind": "building",
+   "title": "Building 128",
+   "eastM": -133.2,
+   "northM": -143.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-131",
+   "kind": "building",
+   "title": "Building 129",
+   "eastM": 6.4,
+   "northM": -196.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0bd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-132",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (2)",
+   "eastM": 70.9,
+   "northM": 184.2,
+   "headingDeg": 9,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e4dac7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-133",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (2)",
+   "eastM": -69.9,
+   "northM": 185.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e4dac6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-134",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (3)",
+   "eastM": -77,
+   "northM": 182.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-135",
+   "kind": "building",
+   "title": "Building 130",
+   "eastM": 31.2,
+   "northM": -195.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-136",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (4)",
+   "eastM": -46.7,
+   "northM": 192.6,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c2baa9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-137",
+   "kind": "building",
+   "title": "Building 131",
+   "eastM": 196.5,
+   "northM": -30.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e3dac6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-138",
+   "kind": "building",
+   "title": "Building 132",
+   "eastM": 147.8,
+   "northM": -134.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-139",
+   "kind": "building",
+   "title": "Building 133",
+   "eastM": -15.2,
+   "northM": -199.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-140",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (3)",
+   "eastM": 78.1,
+   "northM": 185.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-141",
+   "kind": "building",
+   "title": "Building 134",
+   "eastM": 141.4,
+   "northM": -143,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-142",
+   "kind": "building",
+   "title": "Building 135",
+   "eastM": -176.5,
+   "northM": -97.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.6,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-143",
+   "kind": "building",
+   "title": "Building 136",
+   "eastM": -27.7,
+   "northM": -199.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-144",
+   "kind": "building",
+   "title": "Building 137",
+   "eastM": -9.5,
+   "northM": -202,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-145",
+   "kind": "building",
+   "title": "Building 138",
+   "eastM": 197.8,
+   "northM": -43.2,
+   "headingDeg": 24,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc4b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-146",
+   "kind": "building",
+   "title": "Building 139",
+   "eastM": 201.8,
+   "northM": -19.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-147",
+   "kind": "building",
+   "title": "Building 140",
+   "eastM": 2.9,
+   "northM": -203.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-148",
+   "kind": "building",
+   "title": "Building 141",
+   "eastM": -186,
+   "northM": -87.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cac2b0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-149",
+   "kind": "building",
+   "title": "Building 142",
+   "eastM": 33.6,
+   "northM": -202.9,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-150",
+   "kind": "building",
+   "title": "Building 143",
+   "eastM": -43,
+   "northM": -201.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 10,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ccc4b2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-151",
+   "kind": "building",
+   "title": "Building 144",
+   "eastM": 17.3,
+   "northM": -205.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.5,
+    "lengthM": 9.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bbab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-152",
+   "kind": "building",
+   "title": "Building 145",
+   "eastM": 204.5,
+   "northM": -29.7,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.6,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0bd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-153",
+   "kind": "building",
+   "title": "Building 146",
+   "eastM": -137.7,
+   "northM": -154.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 15.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-154",
+   "kind": "building",
+   "title": "Building 147",
+   "eastM": 137.8,
+   "northM": -155,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-155",
+   "kind": "building",
+   "title": "Building 148",
+   "eastM": -58,
+   "northM": -199.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15,
+    "lengthM": 11,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d0c7b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-156",
+   "kind": "building",
+   "title": "Building 149",
+   "eastM": -207.7,
+   "northM": -16.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-157",
+   "kind": "building",
+   "title": "Building 150",
+   "eastM": 145.3,
+   "northM": -151.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-158",
+   "kind": "building",
+   "title": "Building 151",
+   "eastM": -209.1,
+   "northM": 21.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c9c0af"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-159",
+   "kind": "building",
+   "title": "Building 152",
+   "eastM": 206.8,
+   "northM": -41.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdad"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-160",
+   "kind": "building",
+   "title": "Building 153",
+   "eastM": -206.4,
+   "northM": -43.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c7bead"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-161",
+   "kind": "building",
+   "title": "Building 154",
+   "eastM": 158.9,
+   "northM": -139.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dad0be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-162",
+   "kind": "building",
+   "title": "Building 155",
+   "eastM": 49.8,
+   "northM": -206.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.5,
+    "lengthM": 11.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-163",
+   "kind": "building",
+   "title": "Building 156",
+   "eastM": -188.9,
+   "northM": -97,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 5.7,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-164",
+   "kind": "building",
+   "title": "Building 157",
+   "eastM": 213.1,
+   "northM": -16.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 4.2,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-165",
+   "kind": "building",
+   "title": "Building 158",
+   "eastM": 212.5,
+   "northM": -27,
+   "headingDeg": 117,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-166",
+   "kind": "building",
+   "title": "Building 159",
+   "eastM": -183.9,
+   "northM": -110.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-167",
+   "kind": "building",
+   "title": "Building 160",
+   "eastM": -147.6,
+   "northM": -156.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dbc7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-168",
+   "kind": "building",
+   "title": "Building 161",
+   "eastM": -213,
+   "northM": 33,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 32.5,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bab2a2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-169",
+   "kind": "building",
+   "title": "Building 162",
+   "eastM": -8.5,
+   "northM": -215.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 5.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e5dbc8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-170",
+   "kind": "building",
+   "title": "Building 163",
+   "eastM": 71.2,
+   "northM": -204.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd3c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-171",
+   "kind": "building",
+   "title": "Building 164",
+   "eastM": 169,
+   "northM": -136,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.5,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#beb6a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-172",
+   "kind": "building",
+   "title": "Building 165",
+   "eastM": -2.7,
+   "northM": -217.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.5,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdad"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-173",
+   "kind": "building",
+   "title": "Building 166",
+   "eastM": -213.8,
+   "northM": -42.7,
+   "headingDeg": 63,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dad1be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-174",
+   "kind": "building",
+   "title": "Building 167",
+   "eastM": -84.7,
+   "northM": -201.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-175",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (4)",
+   "eastM": 59.1,
+   "northM": 210.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22.6,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-176",
+   "kind": "building",
+   "title": "Building 168",
+   "eastM": -195.7,
+   "northM": -99.2,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 32.5,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dfd6c3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-177",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (5)",
+   "eastM": -60,
+   "northM": 211.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-178",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (6)",
+   "eastM": -122.9,
+   "northM": 183.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 84.9,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-179",
+   "kind": "building",
+   "title": "Building 169",
+   "eastM": 219.2,
+   "northM": 31.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 38.9,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-180",
+   "kind": "building",
+   "title": "Building 170",
+   "eastM": 218.5,
+   "northM": 38.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 3.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ece1cd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-181",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (5)",
+   "eastM": 124.8,
+   "northM": 183.6,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 83.4,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-182",
+   "kind": "building",
+   "title": "Building 171",
+   "eastM": -90.4,
+   "northM": -203.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cfc6b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-183",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (6)",
+   "eastM": 76,
+   "northM": 209.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-184",
+   "kind": "building",
+   "title": "Building 172",
+   "eastM": 67.7,
+   "northM": -212.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-185",
+   "kind": "building",
+   "title": "Building 173",
+   "eastM": 197.7,
+   "northM": -105.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.9,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d0c7b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-186",
+   "kind": "building",
+   "title": "Building 174",
+   "eastM": 78.7,
+   "northM": -210.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.9,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-187",
+   "kind": "building",
+   "title": "Building 175",
+   "eastM": 165.6,
+   "northM": -152.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17.7,
+    "lengthM": 15.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c3bbaa"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-188",
+   "kind": "building",
+   "title": "Building 176",
+   "eastM": -225.7,
+   "northM": 18.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 7.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-189",
+   "kind": "building",
+   "title": "Building 177",
+   "eastM": 101.3,
+   "northM": -203.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d2c9b7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-190",
+   "kind": "building",
+   "title": "Building 178",
+   "eastM": -104,
+   "northM": -202.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 16.5,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d9c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-191",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (7)",
+   "eastM": 155.8,
+   "northM": 166.4,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.5,
+    "lengthM": 11.3,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-192",
+   "kind": "building",
+   "title": "Building 179",
+   "eastM": 203.7,
+   "northM": -104,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.5,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-193",
+   "kind": "building",
+   "title": "Building 180",
+   "eastM": 45.3,
+   "northM": -224.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d9d0bd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-194",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (7)",
+   "eastM": -157,
+   "northM": 166.5,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 25.5,
+    "lengthM": 12.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bdb5a5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-195",
+   "kind": "building",
+   "title": "Building 181",
+   "eastM": -229.5,
+   "northM": -16.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e7ddc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-196",
+   "kind": "building",
+   "title": "Building 182",
+   "eastM": -211.7,
+   "northM": -90.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.5,
+    "lengthM": 12.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ccc3b2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-197",
+   "kind": "building",
+   "title": "Building 183",
+   "eastM": -118.5,
+   "northM": -199.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d7cebb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-198",
+   "kind": "building",
+   "title": "Building 184",
+   "eastM": -171.5,
+   "northM": -156.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 11,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-199",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (8)",
+   "eastM": 97.2,
+   "northM": 210.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-200",
+   "kind": "building",
+   "title": "Building 185",
+   "eastM": 120.5,
+   "northM": -198.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 15.6,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c1b9a8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-201",
+   "kind": "building",
+   "title": "Building 186",
+   "eastM": -84,
+   "northM": -216.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ded4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-202",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (9)",
+   "eastM": 122.7,
+   "northM": 197.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 152.7,
+    "lengthM": 21.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-203",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (8)",
+   "eastM": -98.8,
+   "northM": 211.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-204",
+   "kind": "building",
+   "title": "Building 187",
+   "eastM": 217.3,
+   "northM": -86.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12.7,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c5bcac"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-205",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (9)",
+   "eastM": -124.3,
+   "northM": 198.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 152.7,
+    "lengthM": 22.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-206",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (10)",
+   "eastM": 93,
+   "northM": 215,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-207",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (10)",
+   "eastM": -93.4,
+   "northM": 215.2,
+   "headingDeg": 171,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-208",
+   "kind": "building",
+   "title": "Building 188",
+   "eastM": -230.6,
+   "northM": -44,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd3c0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-209",
+   "kind": "building",
+   "title": "Building 189",
+   "eastM": 232,
+   "northM": -44.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14,
+    "lengthM": 12,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d4cbb9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-210",
+   "kind": "building",
+   "title": "Building 190",
+   "eastM": -236.5,
+   "northM": -3.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.5,
+    "lengthM": 9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c8bfae"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-211",
+   "kind": "building",
+   "title": "Building 191",
+   "eastM": 66,
+   "northM": -227.8,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e2d8c5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-212",
+   "kind": "building",
+   "title": "Building 192",
+   "eastM": 115.9,
+   "northM": -207.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-213",
+   "kind": "building",
+   "title": "Building 193",
+   "eastM": 124.9,
+   "northM": -205.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-214",
+   "kind": "building",
+   "title": "Building 194",
+   "eastM": -127.5,
+   "northM": -205.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 20.5,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc4b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-215",
+   "kind": "building",
+   "title": "Building 195",
+   "eastM": -238.6,
+   "northM": -43,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 13.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-216",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (11)",
+   "eastM": 105.7,
+   "northM": 218.8,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bfb7a6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-217",
+   "kind": "building",
+   "title": "Building 196",
+   "eastM": -241.4,
+   "northM": -33.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.8,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-218",
+   "kind": "building",
+   "title": "Building 197",
+   "eastM": 136.1,
+   "northM": -202.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 10.6,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c4bcab"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-219",
+   "kind": "building",
+   "title": "Building 198",
+   "eastM": 39,
+   "northM": -240.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6,
+    "lengthM": 4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-220",
+   "kind": "building",
+   "title": "Building 199",
+   "eastM": -186.9,
+   "northM": -157.2,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-221",
+   "kind": "building",
+   "title": "Building 200",
+   "eastM": 230.9,
+   "northM": -86.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d5ccba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-222",
+   "kind": "building",
+   "title": "Building 201",
+   "eastM": -21.7,
+   "northM": -245.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.5,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6ccba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-223",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (11)",
+   "eastM": -107.2,
+   "northM": 222.3,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ccc3b2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-224",
+   "kind": "building",
+   "title": "Building 202",
+   "eastM": -42,
+   "northM": -243.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8,
+    "lengthM": 8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c8c0af"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-225",
+   "kind": "building",
+   "title": "Building 203",
+   "eastM": -144.7,
+   "northM": -201.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.5,
+    "lengthM": 10.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-226",
+   "kind": "building",
+   "title": "Building 204",
+   "eastM": 202.5,
+   "northM": -142.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 27.5,
+    "lengthM": 10,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ddd4c1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-227",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (12)",
+   "eastM": -168.3,
+   "northM": 182.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dad1be"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-228",
+   "kind": "building",
+   "title": "Building 205",
+   "eastM": -195.4,
+   "northM": -154.1,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 10.6,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e8deca"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-229",
+   "kind": "building",
+   "title": "Building 206",
+   "eastM": 18.2,
+   "northM": -248.5,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 9.2,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c7bead"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-230",
+   "kind": "building",
+   "title": "Building 207",
+   "eastM": 141.7,
+   "northM": -205,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 17,
+    "lengthM": 7.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#bcb4a4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-231",
+   "kind": "building",
+   "title": "Building 208",
+   "eastM": -99.7,
+   "northM": -228.7,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 6.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#eae0cc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-232",
+   "kind": "building",
+   "title": "Building 209",
+   "eastM": 231.3,
+   "northM": -94.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 6.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-233",
+   "kind": "building",
+   "title": "Building 210",
+   "eastM": 246.5,
+   "northM": -42,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13,
+    "lengthM": 9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c7bead"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-234",
+   "kind": "building",
+   "title": "Building 211",
+   "eastM": -250.5,
+   "northM": 11.5,
+   "headingDeg": 4.4,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.8,
+    "lengthM": 10.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ded5c2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-235",
+   "kind": "building",
+   "title": "Building 212",
+   "eastM": -114.7,
+   "northM": -225.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 5.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dbd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-236",
+   "kind": "building",
+   "title": "Building 213",
+   "eastM": 121.3,
+   "northM": -222.4,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 14.1,
+    "lengthM": 9.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d3cab8"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-237",
+   "kind": "building",
+   "title": "Building 214",
+   "eastM": -237.7,
+   "northM": -89.9,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.5,
+    "lengthM": 13.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cbc3b1"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-238",
+   "kind": "building",
+   "title": "Building 215",
+   "eastM": 68,
+   "northM": -245.1,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8,
+    "lengthM": 7.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c0b8a7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-239",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (12)",
+   "eastM": 122.7,
+   "northM": 224.6,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 32.5,
+    "lengthM": 31.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d0c7b5"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-240",
+   "kind": "building",
+   "title": "Building 216",
+   "eastM": -60.7,
+   "northM": -249,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.5,
+    "lengthM": 8.5,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e6dcc9"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-241",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (13)",
+   "eastM": -177.3,
+   "northM": 185.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-242",
+   "kind": "building",
+   "title": "Building 217",
+   "eastM": 16,
+   "northM": -256.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 6.4,
+    "lengthM": 4.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cec5b4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-243",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (13)",
+   "eastM": 177.9,
+   "northM": 185.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 22.6,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-244",
+   "kind": "building",
+   "title": "Building 218",
+   "eastM": 154.1,
+   "northM": -205.8,
+   "headingDeg": 93,
+   "lit": false,
+   "sizeM": {
+    "widthM": 12,
+    "lengthM": 9.9,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#e1d7c4"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-245",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (14)",
+   "eastM": -124.3,
+   "northM": 225.3,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 31.1,
+    "lengthM": 31.1,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dcd2bf"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-246",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (14)",
+   "eastM": 148.2,
+   "northM": 210.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c6bdac"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-247",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (15)",
+   "eastM": -149.8,
+   "northM": 212.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 19.8,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-248",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (16)",
+   "eastM": -141.3,
+   "northM": 219.7,
+   "headingDeg": 99,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d8cfbc"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-249",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (15)",
+   "eastM": 139.8,
+   "northM": 222.3,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 18.4,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cdc5b3"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-250",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (16)",
+   "eastM": 153.8,
+   "northM": 215,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d1c8b6"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-251",
+   "kind": "building",
+   "title": "Building 219",
+   "eastM": 23.8,
+   "northM": -266.2,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 13.4,
+    "lengthM": 13.4,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#cac1b0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-252",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (17)",
+   "eastM": 170.8,
+   "northM": 209.3,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c0b8a7"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-253",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (17)",
+   "eastM": -173.9,
+   "northM": 210.8,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 7.1,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#c9c1b0"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-254",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (18)",
+   "eastM": 200.3,
+   "northM": 192.5,
+   "headingDeg": 81,
+   "lit": false,
+   "sizeM": {
+    "widthM": 11.3,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#ebe1cd"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-255",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (18)",
+   "eastM": -202.1,
+   "northM": 192.4,
+   "headingDeg": 90,
+   "lit": false,
+   "sizeM": {
+    "widthM": 8.5,
+    "lengthM": 2.8,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdba"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-256",
+   "kind": "building",
+   "title": "Wall/Gates Residence Hall (19)",
+   "eastM": 187,
+   "northM": 210.7,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 21.2,
+    "lengthM": 5.7,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#dfd5c2"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  },
+  {
+   "id": "osm-buildings-257",
+   "kind": "building",
+   "title": "Hulen/Clement Residence Hall (19)",
+   "eastM": -188.7,
+   "northM": 211.5,
+   "headingDeg": 0,
+   "lit": false,
+   "sizeM": {
+    "widthM": 24,
+    "lengthM": 4.2,
+    "heightM": 6
+   },
+   "floors": 2,
+   "facade": {
+    "color": "#d6cdbb"
+   },
+   "origin": "osm-buildings",
+   "surveyedOn": "2026-11-23"
+  }
+ ]
+}
