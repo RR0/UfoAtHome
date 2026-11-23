@@ -212,10 +212,10 @@ export class QuestionnaireForm {
     summary.append(named, count)
     set.append(summary)
     set.addEventListener("change", () => this.place())
-    if (intro) {
+    for (const paragraph of intro?.split(/\n\s*\n/) ?? []) {
       const p = document.createElement("p")
       p.className = "form-section-intro"
-      p.textContent = intro
+      p.textContent = paragraph.trim()
       set.append(p)
     }
     if (images) set.append(...QuestionnaireForm.figures(images, language))
