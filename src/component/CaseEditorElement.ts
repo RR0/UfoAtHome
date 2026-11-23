@@ -1430,6 +1430,7 @@ export class CaseEditorElement extends HTMLElement {
     this.sweepScenarios(session)
     const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
     const current = events[open]
+    this.revealOpenEvent(overview, current?.item.interview ?? current?.item.track)
     if (current) {
       const kind = this.kindOf(current.item)
       const pill = this.byId("crumb-kind")
@@ -1437,6 +1438,26 @@ export class CaseEditorElement extends HTMLElement {
       pill.dataset.kind = kind
       this.byId("crumb-title").textContent = this.optionLabel(current.item, current.index)
     }
+  }
+
+  /** The event last brought into sight in the history (see revealOpenEvent). */
+  private revealed?: unknown
+
+  /**
+   * Brings the event open beside the history into sight in it, centred, when it is not: one opened from elsewhere (a reading the sweep of scenarios
+   * plays, a link) may be far down a long case. Only when the open event changes: the history scrolled by hand stays where it was put.
+   */
+  private revealOpenEvent(overview: HTMLElement, event: unknown): void {
+    if (this.listShown || event === undefined || event === this.revealed) return
+    this.revealed = event
+    requestAnimationFrame(() => {
+      const row = overview.querySelector<HTMLElement>("[data-open]")
+      if (!row) return
+      const box = overview.getBoundingClientRect()
+      const at = row.getBoundingClientRect()
+      if (at.top >= box.top && at.bottom <= box.bottom) return
+      overview.scrollTo({ top: overview.scrollTop + at.top - box.top - Math.max(0, (box.height - at.height) / 2), behavior: "smooth" })
+    })
   }
 
   /** What one of an event's authors is called: the entry it names on RR0, or the name it was described with (see AgentRef). */
