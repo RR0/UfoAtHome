@@ -48,6 +48,13 @@ export interface InterviewMessages extends InputFileMessages {
   /** The editor's exchanges: taking passages out and back, editing and deleting a turn, who has proofread, and links to moments. */
   redactSelection: string
   redactedWords: string
+  /**
+   * On a confidential answer sealed for a recipient whose module is installed (see SealOpener): what opens it, `{name}` the module; what is said of
+   * the answer opened, kept in the page only; and when the key given is not the one it was sealed for.
+   */
+  sealOpen: string
+  sealOpened: string
+  sealFailed: string
   redactAll: string
   redactRestore: string
   restoreAll: string

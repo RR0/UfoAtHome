@@ -1,3 +1,7 @@
+import type { DataSource } from "../engine/source/DataSource.js"
+import { ModuleRegistry } from "../modules/ModuleRegistry.js"
+import type { InterviewSeal } from "../engine/questionnaire/QuestionnaireSeal.js"
+import type { SealOpener } from "../engine/questionnaire/SealOpener.js"
 import type { CaseEventJson } from "../engine/persistence/caseJson.js"
 import { EditorTheme } from "./EditorTheme.js"
 import { HintElement } from "./HintElement.js"
@@ -214,6 +218,10 @@ const TEMPLATE = `
   /* The questionnaire's pictures are drawn on white: on a dark page they keep the paper they were drawn for. */
   .form-figure { margin: 0; justify-self: start; max-width: min(100%, 16rem); }
   .form-figure img { display: block; max-width: 100%; height: auto; padding: 6px; border-radius: 6px; background: #fff; }
+  #exchanges .sealed-open { grid-column: 2 / -1; display: grid; gap: 4px; justify-items: start; margin-top: 4px; }
+  #exchanges .sealed-open .opened { margin: 0; padding: 4px 8px; border-left: 3px solid var(--glow-dim); background: var(--neutral-bg); }
+  #exchanges .sealed-open .opened-note { margin: 0; color: var(--ink-faint); font: 400 12px/1.35 var(--sans); }
+  #exchanges .sealed-open .opened-note:empty { display: none; }
   .form-confidential { margin: 0; padding-left: 22px; color: var(--ink-dim); font: 400 13px/1.4 var(--sans);
     background: no-repeat left 2px / 15px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23888' stroke-width='1.6'%3E%3Crect x='3' y='7' width='10' height='7' rx='1.5'/%3E%3Cpath d='M5.5 7V5a2.5 2.5 0 0 1 5 0v2'/%3E%3C/svg%3E"); }
   .form-confidential.nowhere { color: var(--warn, #b26b00); }
@@ -762,6 +770,62 @@ export class InterviewEditorElement extends HTMLElement {
     })
   }
 
+  /** The opener of each module's seals, made once (see SealOpener). */
+  private static readonly openers = new Map<DataSource<SealOpener>, SealOpener>()
+
+  /** The installed module that opens what is sealed for `recipient`, if one is. */
+  private static openerFor(recipient: string): { source: DataSource<SealOpener>, opener: SealOpener } | undefined {
+    for (const source of ModuleRegistry.point("sealed").sources) {
+      let opener = InterviewEditorElement.openers.get(source)
+      if (!opener) InterviewEditorElement.openers.set(source, opener = source.create())
+      if (opener.recipient === recipient) return { source, opener }
+    }
+    return undefined
+  }
+
+  /**
+   * Under a turn sealed for a recipient whose module is installed: what opens it, the module asking for its key if it has none yet. The answer opened
+   * is shown under it and kept for the form (see confidentialAnswers), in this page only.
+   */
+  private offerOpening(turn: HTMLElement, segment: InterviewSegment, sealed: InterviewSeal): void {
+    const found = InterviewEditorElement.openerFor(sealed.for)
+    const event = this.current
+    if (!found || !event) return
+    const m = this.messages
+    const key = segment.field !== undefined ? this.confidentialKey(event, segment.field) : undefined
+    const shown = document.createElement("div")
+    shown.className = "sealed-open"
+    const say = (text: string) => {
+      const said = document.createElement("p")
+      said.className = "opened"
+      said.textContent = text
+      const note = document.createElement("p")
+      note.className = "opened-note"
+      note.textContent = m.sealOpened.replace("{name}", found.source.name)
+      shown.replaceChildren(said, note)
+    }
+    const known = key !== undefined ? this.confidentialAnswers.get(key) : undefined
+    if (known !== undefined) say(known)
+    else {
+      const open = document.createElement("button")
+      open.type = "button"
+      open.className = "pill-btn"
+      open.textContent = m.sealOpen.replace("{name}", found.source.name)
+      open.addEventListener("click", () => {
+        // Called at once, in the click: the module may ask for its key's file, which the browser lets a click do only.
+        found.opener.open(sealed).then(text => {
+          if (text === undefined) return
+          if (key !== undefined) this.confidentialAnswers.set(key, text)
+          say(text)
+        }, () => MessageStyle.show(note, m.sealFailed, "error"))
+      })
+      const note = document.createElement("p")
+      note.className = "opened-note"
+      shown.replaceChildren(open, note)
+    }
+    turn.append(shown)
+  }
+
   /** The confidential answers typed in this page, in clear: never written to a file (see answerField). */
   private readonly confidentialAnswers = new Map<string, string>()
 
@@ -960,6 +1024,9 @@ export class InterviewEditorElement extends HTMLElement {
         const key = segment.redacted ? `${index}:all` : `${index}:${nth}`
         if (this.takenOut.has(key)) bar.dataset.restorable = key
       })
+      // A confidential answer sealed for a recipient whose module is here: opened on a click, shown in this page only.
+      const sealed = segment.redacted?.sealed
+      if (sealed) this.offerOpening(turn, segment, sealed)
       // The links to moments, named after the moment rather than its time, each with its own way out.
       const moments = this.momentsOf(json, segment.speaker)
       turn.querySelectorAll<HTMLButtonElement>(".ref").forEach((button, k) => {

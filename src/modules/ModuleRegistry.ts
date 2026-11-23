@@ -17,6 +17,7 @@ import type { ObserverProvider } from "../engine/observer/ObserverProvider.js"
 import type { TranscriptionProvider } from "../engine/transcription/TranscriptionProvider.js"
 import type { ReentryType } from "./sky-events/reentries/types/ReentryType.js"
 import type { OrientationProvider } from "../engine/orientation/OrientationProvider.js"
+import type { SealOpener } from "../engine/questionnaire/SealOpener.js"
 
 /**
  * What each extension point of UFO@home is a list of: the interface an implementation of that point gives.
@@ -66,6 +67,8 @@ export interface ExtensionPointTypes {
    * finds (see OrientationProvider). None is built in.
    */
   orientation: OrientationProvider
+  /** What opens the answers sealed for a recipient, with its private key (see SealOpener). None is built in. */
+  sealed: SealOpener
 }
 
 export type ExtensionPointId = keyof ExtensionPointTypes

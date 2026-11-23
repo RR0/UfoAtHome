@@ -25,7 +25,7 @@ import type { ExtensionPointId, ModuleContributions } from "../../src/modules/Mo
 const POINTS: Record<ExtensionPointId, true> = {
   weather: true, place: true, timeZone: true, narrative: true, assessment: true, lightPollution: true, aircraft: true, upperAir: true,
   elevation: true, imagery: true, surroundings: true, decorModels: true, skyEvents: true, interpretations: true, perception: true,
-  transcription: true, reentryTypes: true, orientation: true
+  transcription: true, reentryTypes: true, orientation: true, sealed: true
 }
 
 const entry = (id: string, built: unknown) => ({ id, name: id, credit: "© ACME", creditUrl: "https://acme.example", create: () => built })
@@ -59,7 +59,7 @@ describe("ModuleConformance", () => {
   it("passes every implementation UFO@home is built with, at every point", async () => {
     const points = Object.keys(POINTS) as ExtensionPointId[]
     // Nothing in UFO@home ranks explanations by frequency: a tool of statistical orientation only ever comes from a module.
-    const NONE_BUILT_IN: ExtensionPointId[] = ["orientation"]
+    const NONE_BUILT_IN: ExtensionPointId[] = ["orientation", "sealed"]
     for (const point of points) expect(ModuleRegistry.point(point).sources.length, point)[NONE_BUILT_IN.includes(point) ? "toBe" : "toBeGreaterThan"](0)
     const contributes = Object.fromEntries(points.map(point => [point, ModuleRegistry.point(point).sources]))
     const lanterns = lanternsDemo.interpretation

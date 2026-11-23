@@ -67,7 +67,8 @@ export class ModuleConformance {
     perception: ["id", "messages", "sources", "settings", "perceive"],
     transcription: ["sendsAudio", "engine", "transcribe"],
     reentryTypes: ["key", "nature", "messages", "template"],
-    orientation: ["engine", "exportCase", "readResults"]
+    orientation: ["engine", "exportCase", "readResults"],
+    sealed: ["recipient", "open"]
   }
 
   /** The fields of a weather that go from 0 to 1, when they are there. */

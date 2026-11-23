@@ -786,3 +786,42 @@ describe("What the summary shows is what the file holds, and the other way round
   })
 })
 
+
+describe("A confidential answer sealed for a recipient", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""
+    vi.unstubAllGlobals()
+    ModuleRegistry.uninstall("test-sealed")
+    for (const key of Object.keys(files)) delete files[key]
+  })
+
+  const sealed = { version: 1, medium: "questionnaire", questionnaire: { id: "q", recipient: { id: "org", name: "Org", publicKey: { kty: "RSA", n: "x", e: "AQAB" } } },
+    speakers: { interviewer: { role: "interviewer" }, witness: { role: "witness" } },
+    segments: [{ speaker: "interviewer", field: "A1", text: "Address" },
+      { speaker: "witness", field: "A1", redacted: { reason: { en: "Precise address" }, sealed: { for: "org", alg: "RSA-OAEP-256+A256GCM", key: "k", iv: "i", data: "d" } } }] }
+  const event = (): InterviewEvent => ({ type: "event", eventType: "interview", id: "interview-q", url: "interview-q.json", time: "2026-11-23", title: { en: "Q" } })
+  const opening = (element: InterviewEditorElement) => element.shadowRoot!.querySelector<HTMLElement>("#exchanges .sealed-open")
+
+  it("is opened in the exchanges by the module of its recipient, shown in the page only, and offers nothing without that module", async () => {
+    files["https://example.org/d/interview-q.json"] = sealed
+    const { element: bare } = await make(event())
+    tabs(bare)[1].click()
+    await wait(100)
+    expect(opening(bare)).toBeNull()
+    document.body.innerHTML = ""
+    const opened: unknown[] = []
+    ModuleRegistry.install({ id: "test-sealed", name: "Test", contributes: { sealed: [{ id: "org-sealed", name: "Org", credit: "", creditUrl: "",
+      create: () => ({ recipient: "org", open: async (seal: unknown) => { opened.push(seal); return "12 rue des Lilas" } }) }] } })
+    const { element, changes } = await make(event())
+    tabs(element)[1].click()
+    await wait(100)
+    const button = opening(element)!.querySelector("button")!
+    expect(button.textContent).toContain("Org")
+    button.click()
+    await wait(50)
+    expect(opened).toHaveLength(1)
+    expect(opening(element)!.querySelector(".opened")!.textContent).toBe("12 rue des Lilas")
+    expect(changes).toEqual([])
+    expect(element.transcriptText ?? "").not.toContain("Lilas")
+  })
+})
