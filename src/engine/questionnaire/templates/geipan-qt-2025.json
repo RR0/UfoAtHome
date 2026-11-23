@@ -56,6 +56,7 @@
       ]
     },
     {
+      "number": "A–B",
       "title": {
         "fr": "Conditions d'observation du phénomène"
       },
@@ -242,6 +243,7 @@
       ]
     },
     {
+      "number": "C",
       "title": {
         "fr": "Description du phénomène"
       },
@@ -322,6 +324,7 @@
       ]
     },
     {
+      "number": "C9–C10",
       "title": {
         "fr": "Début d'observation (position initiale du PAN dans le ciel)"
       },
@@ -363,6 +366,7 @@
       ]
     },
     {
+      "number": "C11–C15",
       "title": {
         "fr": "Fin d'observation (position finale du PAN dans le ciel)"
       },
@@ -480,6 +484,7 @@
       ]
     },
     {
+      "number": "E",
       "title": {
         "fr": "Et maintenant ?"
       },

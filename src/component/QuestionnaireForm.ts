@@ -103,22 +103,29 @@ export class QuestionnaireForm {
       parts.push(source)
     }
     const known = new Set(QuestionnaireTemplates.fields(template).map(field => field.id))
-    for (const section of template.sections) parts.push(this.section(text(section.title), section.intro ? text(section.intro) : undefined, section.fields, json, messages, language, readonly, section.images))
+    for (const section of template.sections) parts.push(this.section(text(section.title), section.number, section.intro ? text(section.intro) : undefined, section.fields, json, messages, language, readonly, section.images))
     // What the interview asks besides: its own questions, kept and answerable as text.
     const others = (json?.segments ?? [])
       .filter(segment => segment.field !== undefined && !known.has(segment.field) && json!.speakers[segment.speaker]?.role !== "witness")
       .map((segment): QuestionnaireTemplateField => ({ id: segment.field!, question: InterviewFile.plain(segment.text ?? segment.field!), kind: "long", required: false }))
-    if (others.length > 0) parts.push(this.section(messages.other, undefined, others, json, messages, language, readonly))
-    parts.push(this.navigation(messages))
+    if (others.length > 0) parts.push(this.section(messages.other, undefined, undefined, others, json, messages, language, readonly))
     this.container.replaceChildren(...parts)
-    this.current = undefined
+    this.messages = messages
+    this.step = this.stepper(messages)
+    // A section answered already stays as it is shown; one that becomes so is closed (see place).
+    this.complete = new WeakSet([...this.container.querySelectorAll<HTMLElement>(".form-section")].filter(QuestionnaireForm.isComplete))
+    this.current = this.rows()[0]
     this.container.addEventListener("focusin", this.follow)
     this.place()
   }
 
-  /** The question being answered: the one last gone into, by the navigation or by hand. */
+  /** The question being answered: the one last gone into, by its buttons or by hand; the first until then. */
   private current?: HTMLElement
-  private navigationShown?: { previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement, messages: QuestionnaireFormMessages }
+  private messages?: QuestionnaireFormMessages
+  /** The buttons that go from the question being answered to the one before or after, beside it. */
+  private step?: { box: HTMLElement, previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement }
+  /** The sections whose every question has an answer, as last seen. */
+  private complete = new WeakSet<HTMLElement>()
 
   private readonly follow = (event: Event): void => {
     const row = (event.target as HTMLElement).closest?.<HTMLElement>(".form-field")
@@ -133,8 +140,8 @@ export class QuestionnaireForm {
   }
 
   /**
-   * Goes to the question `step` after the one being answered (before it when negative; the first when none is): its section opened, the one left
-   * closed, the question brought into sight and its field focused.
+   * Goes to the question `step` after the one being answered (before it when negative): its section opened, the one left closed, the question brought
+   * into sight and its field focused.
    */
   go(step: number): void {
     const rows = this.rows()
@@ -146,48 +153,67 @@ export class QuestionnaireForm {
     if (left && left !== entered) left.open = false
     if (entered) entered.open = true
     this.current = to
-    to.scrollIntoView?.({ block: "center", behavior: "smooth" })
-    to.querySelector<HTMLElement>("input:not([type=hidden]), textarea, button.form-when-mode")?.focus({ preventScroll: true })
+    to.scrollIntoView?.({ block: "nearest", behavior: "smooth" })
+    to.querySelector<HTMLElement>("input:not([type=hidden]):not([type=file]), textarea, button.form-when-mode, input[type=file]")?.focus({ preventScroll: true })
     this.place()
   }
 
-  /** The navigation from one question to the next, kept in sight under the form. */
-  private navigation(messages: QuestionnaireFormMessages): HTMLElement {
-    const bar = document.createElement("nav")
-    bar.className = "form-nav"
-    const previous = document.createElement("button")
-    previous.type = "button"
-    previous.className = "form-nav-previous"
-    previous.textContent = `‹ ${messages.previousQuestion}`
-    previous.addEventListener("click", () => this.go(-1))
+  /** The small buttons beside the question being answered, to the one before and the one after, and where it stands among them. */
+  private stepper(messages: QuestionnaireFormMessages): { box: HTMLElement, previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement } {
+    const box = document.createElement("span")
+    box.className = "form-step"
+    const button = (text: string, title: string, step: number) => {
+      const b = document.createElement("button")
+      b.type = "button"
+      b.textContent = text
+      b.title = title
+      b.setAttribute("aria-label", title)
+      b.addEventListener("click", () => this.go(step))
+      return b
+    }
+    const previous = button("‹", messages.previousQuestion, -1)
+    previous.className = "form-step-previous"
     const where = document.createElement("span")
-    where.className = "form-nav-where"
-    const next = document.createElement("button")
-    next.type = "button"
-    next.className = "form-nav-next"
-    next.textContent = `${messages.nextQuestion} ›`
-    next.addEventListener("click", () => this.go(1))
-    bar.append(previous, where, next)
-    this.navigationShown = { previous, next, where, messages }
-    return bar
+    where.className = "form-step-where"
+    const next = button("›", messages.nextQuestion, 1)
+    next.className = "form-step-next"
+    box.append(previous, where, next)
+    return { box, previous, next, where }
   }
 
-  /** Says where the question being answered stands, and what can be gone to from it; and how much of each section is answered. */
+  /**
+   * Puts the buttons beside the question being answered, says where it stands, and how much of each section is answered; a section whose last question
+   * has just been answered is closed.
+   */
   private place(): void {
-    const shown = this.navigationShown
+    const step = this.step
+    const messages = this.messages
+    if (!step || !messages) return
     const rows = this.rows()
-    if (shown) {
-      const at = this.current ? rows.indexOf(this.current) : -1
-      shown.previous.disabled = at <= 0
-      shown.next.disabled = at >= rows.length - 1
-      shown.where.textContent = at < 0 ? "" : shown.messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
-    }
-    for (const section of this.container.querySelectorAll<HTMLElement>(".form-section")) {
-      const count = section.querySelector<HTMLElement>(".form-section-count")
-      if (!count || !shown) continue
+    const at = this.current ? rows.indexOf(this.current) : -1
+    // In the question's label, at its end, on the right.
+    const host = this.current?.querySelector(":scope > label") ?? this.current
+    if (at >= 0 && host && step.box.parentElement !== host) host.append(step.box)
+    step.previous.disabled = at <= 0
+    step.next.disabled = at >= rows.length - 1
+    step.where.textContent = at < 0 ? "" : `${at + 1}/${rows.length}`
+    step.where.title = at < 0 ? "" : messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
+    for (const section of this.container.querySelectorAll<HTMLDetailsElement>("details.form-section")) {
       const fields = [...section.querySelectorAll<HTMLElement>(".form-field")]
-      count.textContent = shown.messages.sectionAnswered.replace("{n}", String(fields.filter(QuestionnaireForm.isAnswered).length)).replace("{total}", String(fields.length))
+      const answered = fields.filter(QuestionnaireForm.isAnswered).length
+      const count = section.querySelector<HTMLElement>(".form-section-count")
+      if (count) count.textContent = messages.sectionAnswered.replace("{n}", String(answered)).replace("{total}", String(fields.length))
+      if (answered < fields.length) this.complete.delete(section)
+      else if (!this.complete.has(section)) {
+        this.complete.add(section)
+        section.open = false
+      }
     }
+  }
+
+  /** Whether every question of a section has an answer. */
+  private static isComplete(section: HTMLElement): boolean {
+    return [...section.querySelectorAll<HTMLElement>(".form-field")].every(QuestionnaireForm.isAnswered)
   }
 
   /** Whether a question shows an answer: something typed, ticked or given. */
@@ -198,7 +224,7 @@ export class QuestionnaireForm {
       .some(input => input.value.trim() !== "")
   }
 
-  private section(title: string, intro: string | undefined, fields: QuestionnaireTemplateField[], json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
+  private section(title: string, number: string | undefined, intro: string | undefined, fields: QuestionnaireTemplateField[], json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
     images?: QuestionnaireImage[]): HTMLElement {
     // Closed until it is gone into, so that the whole questionnaire reads as its sections, each saying how much of it is answered.
     const set = document.createElement("details")
@@ -206,7 +232,7 @@ export class QuestionnaireForm {
     const summary = document.createElement("summary")
     const named = document.createElement("span")
     named.className = "form-section-title"
-    named.textContent = title
+    named.textContent = number ? `${number}. ${title}` : title
     const count = document.createElement("span")
     count.className = "form-section-count"
     summary.append(named, count)

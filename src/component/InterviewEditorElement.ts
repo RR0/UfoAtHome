@@ -207,10 +207,11 @@ const TEMPLATE = `
   .form-section:not([open]) { display: block; padding-bottom: 12px; }
   .form-section > summary { display: flex; align-items: baseline; gap: 10px; cursor: pointer; font: 600 15px/1.3 var(--sans); color: var(--ink); }
   .form-section-count { margin-left: auto; font: 400 12px/1.3 var(--sans); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  /* The way from one question to the next, kept in sight at the bottom of what scrolls. */
-  .form-nav { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 8px 0; background: var(--ground, Canvas);
-    border-top: 1px solid var(--line); }
-  .form-nav-where { flex: 1; text-align: center; color: var(--ink-dim); font: 400 12px/1.3 var(--sans); font-variant-numeric: tabular-nums; }
+  /* Beside the question being answered: to the one before and the one after, and where it stands. */
+  .form-step { order: 9; flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin: 0 0 0 auto; padding-left: 10px; color: var(--ink-faint); font: 400 12px/1 var(--sans); font-variant-numeric: tabular-nums; }
+  .form-step button { font: 600 14px/1 var(--sans); width: 24px; height: 22px; padding: 0; border: 1px solid var(--line-strong); border-radius: 6px; background: none; color: var(--ink); cursor: pointer; }
+  .form-step button:disabled { opacity: .35; cursor: default; }
+  .form-step button:not(:disabled):hover { border-color: var(--glow-dim); }
   .form-field { display: grid; gap: 6px; }
   .form-field > label { font: 600 14px/1.35 var(--sans); color: var(--ink); }
   .form-field .required { color: var(--ink-faint); }

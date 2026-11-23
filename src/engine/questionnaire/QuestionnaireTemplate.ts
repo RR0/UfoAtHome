@@ -52,6 +52,8 @@ export interface QuestionnaireTemplateField {
 }
 
 export interface QuestionnaireTemplateSection {
+  /** What it is numbered by, as the questionnaire numbers its questions ("A", "C9–C10"), said before its title. */
+  number?: string
   title: SaidText
   intro?: SaidText
   /** Shown under its intro, before its questions. */

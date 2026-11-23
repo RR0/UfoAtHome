@@ -146,12 +146,12 @@ describe("QuestionnaireForm sections", () => {
   const two: QuestionnaireTemplate = {
     id: "n", title: { en: "N" },
     sections: [
-      { title: { en: "First" }, fields: [{ id: "1", question: { en: "One" }, kind: "text" }, { id: "2", question: { en: "Two" }, kind: "text" }] },
+      { number: "A", title: { en: "First" }, fields: [{ id: "1", question: { en: "One" }, kind: "text" }, { id: "2", question: { en: "Two" }, kind: "text" }] },
       { title: { en: "Second" }, fields: [{ id: "3", question: { en: "Three" }, kind: "text" }] }
     ]
   }
 
-  it("shows each section closed, saying how much of it is answered, and goes from one question to the next, opening the section it enters and closing the one it leaves", () => {
+  it("shows each section closed, named with its number and saying how much of it is answered, and goes from one question to the next by buttons beside it", () => {
     const container = document.createElement("div")
     document.body.append(container)
     const json = QuestionnaireTemplates.interview(two)
@@ -159,18 +159,40 @@ describe("QuestionnaireForm sections", () => {
     const form = new QuestionnaireForm(container, () => undefined)
     form.show(two, json, messages, "en", false)
     const sections = [...container.querySelectorAll<HTMLDetailsElement>("details.form-section")]
-    expect(sections.map(section => [section.open, section.querySelector(".form-section-count")!.textContent])).toEqual([[false, "1/2 répondues"], [false, "0/1 répondues"]])
-    const where = () => container.querySelector(".form-nav-where")!.textContent
-    const previous = container.querySelector<HTMLButtonElement>(".form-nav-previous")!
-    const next = container.querySelector<HTMLButtonElement>(".form-nav-next")!
-    next.click()
-    expect([sections[0].open, sections[1].open, where(), previous.disabled]).toEqual([true, false, "Question 1 sur 3", true])
-    next.click()
-    next.click()
-    expect([sections[0].open, sections[1].open, where(), next.disabled]).toEqual([false, true, "Question 3 sur 3", true])
-    expect(container.getRootNode() === document && document.activeElement?.id).toBe("form-3")
-    previous.click()
-    expect([sections[0].open, sections[1].open, where()]).toEqual([true, false, "Question 2 sur 3"])
+    expect(sections.map(section => [section.open, section.querySelector(".form-section-title")!.textContent, section.querySelector(".form-section-count")!.textContent]))
+      .toEqual([[false, "A. First", "1/2 répondues"], [false, "Second", "0/1 répondues"]])
+    // The buttons are beside the question being answered, the first until another is gone into.
+    const step = () => container.querySelector<HTMLElement>(".form-step")!
+    const at = () => [step().closest<HTMLElement>(".form-field")!.dataset.field, step().querySelector(".form-step-where")!.textContent]
+    expect(at()).toEqual(["1", "1/3"])
+    expect(step().querySelector<HTMLButtonElement>(".form-step-previous")!.disabled).toBe(true)
+    step().querySelector<HTMLButtonElement>(".form-step-next")!.click()
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "2/3"])
+    step().querySelector<HTMLButtonElement>(".form-step-next")!.click()
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([false, true, "3", "3/3"])
+    expect(step().querySelector<HTMLButtonElement>(".form-step-next")!.disabled).toBe(true)
+    expect(document.activeElement?.id).toBe("form-3")
+    step().querySelector<HTMLButtonElement>(".form-step-previous")!.click()
+    expect([sections[0].open, sections[1].open, ...at()]).toEqual([true, false, "2", "2/3"])
+    container.remove()
+  })
+
+  it("closes a section once its last question is answered", () => {
+    const container = document.createElement("div")
+    document.body.append(container)
+    const json = QuestionnaireTemplates.interview(two)
+    QuestionnaireTemplates.answer(json, "2", "yes")
+    new QuestionnaireForm(container, () => undefined).show(two, json, messages, "en", false)
+    const first = container.querySelector<HTMLDetailsElement>("details.form-section")!
+    first.open = true
+    const one = container.querySelector<HTMLInputElement>("#form-1")!
+    one.value = "Here"
+    one.dispatchEvent(new Event("change", { bubbles: true }))
+    expect([first.open, first.querySelector(".form-section-count")!.textContent]).toEqual([false, "2/2 répondues"])
+    // Opened again to change an answer, it stays open while it is answered.
+    first.open = true
+    one.dispatchEvent(new Event("change", { bubbles: true }))
+    expect(first.open).toBe(true)
     container.remove()
   })
 })
