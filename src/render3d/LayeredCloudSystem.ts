@@ -7,6 +7,7 @@ import type { Weather } from "../engine/model/Weather.js"
 import { buildCloudGeometry, buildCloudMaterial, CloudField } from "./CloudSystem.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { CLOUD_EARTH_RADIUS_M, CloudDepth, cloudSeed, createCloudNoise, VolumetricCloudLayer } from "./VolumetricClouds.js"
+import type { CloudLight } from "./VolumetricClouds.js"
 import { RainbowEffect } from "./RainbowEffect.js"
 import type { IceHaloEffect } from "./IceHaloEffect.js"
 
@@ -18,6 +19,9 @@ export class LayeredCloudSystem {
   private readonly decks = new Map<string, Deck>()
   private noise?: ReturnType<typeof createCloudNoise>
   private halo?: IceHaloEffect
+  /** The beams the decks are lit by from below, and the eye they were placed from (see setLights). */
+  private lights: readonly CloudLight[] = []
+  private lightsEye = { x: 0, y: 0, z: 0 }
 
   constructor(private readonly group: Group, private readonly radius: number, private readonly mode: CloudRendering) {}
 
@@ -91,6 +95,20 @@ export class LayeredCloudSystem {
     })
     // The strongest ice deck may be another one now, or a new one.
     if (this.halo) this.hostHalo(this.halo)
+    // A deck built or moved since keeps the beams' light, as bright as what is under its base now lets through.
+    if (this.lights.length > 0) this.setLights(this.lights, this.lightsEye)
+  }
+
+  /**
+   * Lights the volumetric decks from below with these beams (see CloudLight), placed from `eye`; what was given before is replaced. A surface
+   * deck (the cirrus, or every deck when the page asks for the light rendering) is not lit by them: a beam lights the base of a cloud, which a
+   * surface does not have.
+   */
+  setLights(lights: readonly CloudLight[], eye: { x: number, y: number, z: number }): void {
+    if (lights.length === 0 && this.lights.length === 0) return
+    this.lights = lights
+    this.lightsEye = { x: eye.x, y: eye.y, z: eye.z }
+    for (const deck of this.decks.values()) deck.volume?.setLights(lights, this.lightsEye)
   }
 
   /**

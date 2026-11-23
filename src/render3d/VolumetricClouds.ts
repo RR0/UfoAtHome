@@ -6,6 +6,28 @@ const NOISE_SIZE = 64
 /** How many of a layer's own individual clouds its field can be carved around — a uniform array's
  * size, fixed at compile time. */
 export const MAX_HOLES = 8
+/** How many beams of light sent up from the ground a deck can be lit by at once (see CloudLight) — a uniform array's size, fixed at compile
+ * time. A four-headed skytracker and two roses of four are twelve. */
+export const MAX_CLOUD_LIGHTS = 16
+
+/**
+ * A beam of light sent up at the clouds from the ground (a searchlight, a skytracker), as a deck is lit by it from below: where it leaves,
+ * which way it goes, how it spreads, and how bright it is. In the scene's metres, relative to nothing: a deck takes it relative to the eye.
+ */
+export interface CloudLight {
+  x: number
+  y: number
+  z: number
+  /** Which way its axis goes, a unit vector of the scene. */
+  axis: { x: number, y: number, z: number }
+  /** How wide its beam is, full width at half its peak intensity, radians. */
+  fwhmRad: number
+  /** Its peak intensity, per channel, in the scene's own light (candelas × the scene's relative scale × its colour, of unit luminance, × what
+   * the air lets through of it to the clouds). */
+  rgb: readonly [number, number, number]
+  /** What the clouds below a height of the scene let through of it along its axis, when something lower may have taken some: 1 when absent. */
+  throughCloudsBelow?(y: number): number
+}
 
 /**
  * Whether a deck says how far its clouds really are. A deck is drawn on a shell round the eye, some twenty kilometres out, and its fragments
@@ -247,6 +269,38 @@ float densityAt(vec3 p) {
 #ifdef CLOUDS_BELOW_EYE
 uniform mat4 projectionMatrix;
 #endif
+// The beams sent up at the deck from the ground (see CloudLight): where each leaves, relative to the eye, its axis, how sharp its profile is
+// (4 ln 2 over its full width at half maximum squared, a Gaussian), and its peak intensity in the scene's light.
+const int MAX_LIGHTS = 16;
+uniform int lightCount;
+uniform vec3 lightOrigin[MAX_LIGHTS];
+uniform vec3 lightAxis[MAX_LIGHTS];
+uniform float lightSharpness[MAX_LIGHTS];
+uniform vec3 lightIntensity[MAX_LIGHTS];
+// What a sample of cloud of density d gives back towards the eye of the beams that reach it: the irradiance I / r² of each where it falls
+// within the beam, less what the cloud below the sample took of it on the way up (its depth above the base along the beam, at the sample's
+// own density: a cloud is lit to some hundred metres in, the base the most), turned towards the eye by the same two lobes the Sun's light is,
+// as a matt surface sends back what it receives (over pi). Seen from under the deck, it is the light thrown back: a bright patch moving on the
+// cloud base where the beam meets it, which is what a skytracker shows of itself from kilometres off where its beam is too faint to see.
+vec3 beamsLight(vec3 p, vec3 dir, float d) {
+  vec3 light = vec3(0.0);
+  float above = max(0.0, altitude(p) - baseM);
+  for (int k = 0; k < MAX_LIGHTS; k++) {
+    if (k >= lightCount) break;
+    vec3 fromSource = p - lightOrigin[k];
+    float r = length(fromSource);
+    vec3 way = fromSource / max(r, 1.0);
+    float c = dot(way, lightAxis[k]);
+    if (c <= 0.0) continue;
+    float profile = exp(-2.0 * (1.0 - c) * lightSharpness[k]);
+    if (profile < 0.001) continue;
+    float through = exp(-d * above / max(0.05, way.y) * 0.006);
+    float cosTurn = -dot(dir, way);
+    float phase = mix(0.64 / pow(1.36 - 1.2 * cosTurn, 1.5), 0.91 / pow(1.09 + 0.6 * cosTurn, 1.5), 0.3);
+    light += lightIntensity[k] * (profile * through * (0.12 + 0.8 * (0.5 + 0.5 * phase)) * 0.3183099 / max(r * r, 1.0));
+  }
+  return light;
+}
 void main() {
   vec3 dir = normalize(vCloudDirection);
   vec2 outer = roots(dir.y, baseM + thicknessM);
@@ -298,7 +352,9 @@ void main() {
       // plus 0.22 of the Sun in every sample, the shaded side already reached three quarters of the
       // lit one, and a low Sun's reddened cloud saturated to one flat cream from any side.
       vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
-      lit = mix(hazeColor, lit, exp(-length(p) / 55000.0));
+      float clear = exp(-length(p) / 55000.0);
+      lit = mix(hazeColor, lit, clear);
+      if (lightCount > 0) lit += beamsLight(p, dir, d) * clear;
       lit *= mix(1.0, 0.32, darkness);
       float opacity = 1.0 - exp(-d * ds * 0.006);
       radiance += transmission * opacity * lit;
@@ -370,7 +426,12 @@ export class VolumetricCloudLayer {
       holeSize: { value: Array.from({ length: MAX_HOLES }, () => new Vector3()) },
       holeRotation: { value: new Array<number>(MAX_HOLES).fill(0) },
       baseM: { value: 1000 }, thicknessM: { value: 650 }, eyeM: { value: 1.6 },
-      coverage: { value: 0.5 }, sizeM: { value: 1400 }, density: { value: 1 }, darkness: { value: 0 }, flatness: { value: 0 }
+      coverage: { value: 0.5 }, sizeM: { value: 1400 }, density: { value: 1 }, darkness: { value: 0 }, flatness: { value: 0 },
+      lightCount: { value: 0 },
+      lightOrigin: { value: Array.from({ length: MAX_CLOUD_LIGHTS }, () => new Vector3()) },
+      lightAxis: { value: Array.from({ length: MAX_CLOUD_LIGHTS }, () => new Vector3(0, 1, 0)) },
+      lightSharpness: { value: new Array<number>(MAX_CLOUD_LIGHTS).fill(1) },
+      lightIntensity: { value: Array.from({ length: MAX_CLOUD_LIGHTS }, () => new Vector3()) }
     }
     const material = new ShaderMaterial({ uniforms: this.uniforms, vertexShader: VERTEX, fragmentShader: FRAGMENT,
       transparent: true, depthWrite: false, depthTest: true, side: BackSide })
@@ -404,6 +465,56 @@ export class VolumetricCloudLayer {
     // An individual cloud stands whatever its layer's cover, nought included.
     this.mesh.visible = u.density.value > 0 && (instance !== undefined || u.coverage.value > 0)
     CloudDepth.below(this.mesh.material, layer.baseM < eyeM)
+  }
+
+  /**
+   * Lights the deck from below with `lights` (see CloudLight), seen from `eye`: the first MAX_CLOUD_LIGHTS, each as bright as what the
+   * clouds under this deck's base let through of it. None turns the lighting off, which costs nothing then.
+   */
+  setLights(lights: readonly CloudLight[], eye: { x: number, y: number, z: number }): void {
+    const u = this.uniforms
+    const shown = lights.slice(0, MAX_CLOUD_LIGHTS)
+    u.lightCount.value = shown.length
+    shown.forEach((light, i) => {
+      u.lightOrigin.value[i].set(light.x - eye.x, light.y - eye.y, light.z - eye.z)
+      u.lightAxis.value[i].set(light.axis.x, light.axis.y, light.axis.z).normalize()
+      u.lightSharpness.value[i] = 4 * Math.LN2 / Math.max(1e-6, light.fwhmRad) ** 2
+      const through = light.throughCloudsBelow?.(u.baseM.value) ?? 1
+      u.lightIntensity.value[i].set(light.rgb[0] * through, light.rgb[1] * through, light.rgb[2] * through)
+    })
+  }
+
+  /**
+   * The CPU twin of what the deck gives back of `lights` at a point relative to the eye, per channel (see beamsLight in the shader), for the
+   * tests: what a cloud of density `density` there sends towards `direction`.
+   */
+  beamsLightAt(point: { x: number, y: number, z: number }, direction: { x: number, y: number, z: number }, density: number): [number, number, number] {
+    const u = this.uniforms
+    const y = u.eyeM.value + point.y
+    const delta = 2 * CLOUD_EARTH_RADIUS_M * y + point.x ** 2 + y ** 2 + point.z ** 2
+    const altitude = delta / (Math.sqrt(CLOUD_EARTH_RADIUS_M ** 2 + delta) + CLOUD_EARTH_RADIUS_M)
+    const above = Math.max(0, altitude - u.baseM.value)
+    const light: [number, number, number] = [0, 0, 0]
+    for (let k = 0; k < u.lightCount.value; k++) {
+      const origin = u.lightOrigin.value[k]
+      const from = { x: point.x - origin.x, y: point.y - origin.y, z: point.z - origin.z }
+      const r = Math.hypot(from.x, from.y, from.z)
+      const way = { x: from.x / Math.max(r, 1), y: from.y / Math.max(r, 1), z: from.z / Math.max(r, 1) }
+      const axis = u.lightAxis.value[k]
+      const c = way.x * axis.x + way.y * axis.y + way.z * axis.z
+      if (c <= 0) continue
+      const profile = Math.exp(-2 * (1 - c) * u.lightSharpness.value[k])
+      if (profile < 0.001) continue
+      const through = Math.exp(-density * above / Math.max(0.05, way.y) * 0.006)
+      const cosTurn = -(direction.x * way.x + direction.y * way.y + direction.z * way.z)
+      const phase = 0.7 * 0.64 / (1.36 - 1.2 * cosTurn) ** 1.5 + 0.3 * 0.91 / (1.09 + 0.6 * cosTurn) ** 1.5
+      const factor = profile * through * (0.12 + 0.8 * (0.5 + 0.5 * phase)) / Math.PI / Math.max(r * r, 1)
+      const intensity = u.lightIntensity.value[k]
+      light[0] += intensity.x * factor
+      light[1] += intensity.y * factor
+      light[2] += intensity.z * factor
+    }
+    return light
   }
 
   /** The shader's own coverageThreshold. */

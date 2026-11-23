@@ -1,4 +1,4 @@
-import type { Object3D, Vector3 } from "three"
+import type { Material, Object3D, Vector3 } from "three"
 import type { AerialPerspective, Rgb } from "../../engine/atmosphere/AerialPerspective.js"
 import type { Sighting } from "../../engine/model/Sighting.js"
 import type { SaidText } from "../../engine/model/SaidText.js"
@@ -53,6 +53,41 @@ export interface SkyEventFrame {
   lightFrom(sources: readonly { position: HorizontalPosition, magnitude: number }[]): void
   /** Dazzles the eye round these bright sources, as a star or the Moon does (see Veil); what this kind said before is replaced. */
   glareFrom(sources: readonly { key: string, position: HorizontalPosition, magnitude: number, fade: number }[]): void
+  /**
+   * Lights the base of the clouds from below with these beams, as a searchlight does (see SkyEventCloudLight); what this kind said before is
+   * replaced. Absent where the scene draws no cloud in volume.
+   */
+  lightClouds?(lights: readonly SkyEventCloudLight[]): void
+  /** The clouds of the scene as a volume, where it draws them so: what a light sent through them loses, and what hides what is behind them. */
+  clouds?: SkyEventClouds
+}
+
+/**
+ * A beam of light sent up at the clouds from the ground, as the clouds are lit by it from below: in the scene's metres (see SkyEventFrame).
+ * Its intensity is in the scene's own light: candelas × `relativeScale` × its colour of unit luminance × what the air lets through of it.
+ */
+export interface SkyEventCloudLight {
+  x: number
+  y: number
+  z: number
+  /** Which way its axis goes, a unit vector of the scene. */
+  axis: { x: number, y: number, z: number }
+  /** How wide it is, full width at half its peak, radians. */
+  fwhmRad: number
+  rgb: readonly [number, number, number]
+  /** What the clouds below a height of the scene let through of it along its axis. */
+  throughCloudsBelow?(y: number): number
+}
+
+/** The clouds of a scene drawn in volume, for what crosses them (see SkyEventFrame.clouds). */
+export interface SkyEventClouds {
+  /** How much of a light the clouds take per metre at a point of the scene: their extinction there. */
+  extinctionAt(x: number, y: number, z: number): number
+  /** The lowest base and the highest top of the decks, as heights of the scene: nothing outside is cloud. */
+  readonly bottomY: number
+  readonly topY: number
+  /** Dims a material, fragment by fragment, by the clouds between the eye and it (see CloudDimming); called again, does nothing new. */
+  dim(material: Material): void
 }
 
 /** What a simulation is given to say what is under the pointer. */

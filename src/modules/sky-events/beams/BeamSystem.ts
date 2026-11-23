@@ -3,12 +3,14 @@ import type { Vector3 } from "three"
 import type { AerialPerspective } from "../../../engine/atmosphere/AerialPerspective.js"
 import type { SkyEventFrame, SkyEventPickContext, SkyEventSimulation } from "../SkyEventKind.js"
 import { LaserBeamSighting } from "./LaserBeam.js"
+import { AtmosphereProfile } from "../../../engine/atmosphere/AtmosphereProfile.js"
 import type { BeamJson, BeamView } from "./LaserBeam.js"
 
 /** What the beams are drawn against, at one instant: the frame every event of the sky is drawn in (see SkyEventFrame). */
 export type BeamFrame = Pick<SkyEventFrame, "reference" | "origin" | "eastScale" | "siteElevationM" | "eye" | "pixelRad" | "relativeScale" | "air" | "transmittanceTo" | "groundYAt" | "wind">
 
-interface Placed {
+/** A point of a beam in the scene, as it is drawn (see BeamSystem.drawLines). */
+export interface BeamPlaced {
   x: number
   y: number
   z: number
@@ -17,6 +19,23 @@ interface Placed {
   powerW: number
   /** How much denser than its mean the haze is there, now (see LaserBeamSighting.patchAt). */
   haze: number
+}
+type Placed = BeamPlaced
+
+/**
+ * What a beam's light is, as the air turns it towards the eye: per channel, the lumens a metre of it sends there per steradian for each unit
+ * of its `powerW` (a watt of a laser, a lumen of a lamp), in its colour of unit luminance. A laser's is its one wavelength's (its efficacy and its
+ * spectral colour, see LaserBeamSighting); a lamp's white is three channels, each scattered at its own wavelength (see BeamSystem.white).
+ */
+export interface BeamSpectrum {
+  scatteredAt(air: AerialPerspective, altitudeM: number, haze: number, cosTurn: number): [number, number, number]
+}
+
+/** A beam to draw: its id, its points in the scene, and its light. */
+export interface BeamLine {
+  id: string
+  points: BeamPlaced[]
+  spectrum: BeamSpectrum
 }
 
 /**
@@ -31,6 +50,35 @@ interface Placed {
  * far below what the eye resolves, and is seen as a line as wide as its acuity, as bright as all its light shared over that.
  */
 export class BeamSystem implements SkyEventSimulation<BeamJson> {
+  /** The light of a laser of one wavelength: its power in watts, turned into lumens by its efficacy, in its spectral colour. */
+  static laser(wavelengthNm: number): BeamSpectrum {
+    const colour = LaserBeamSighting.colourOf(wavelengthNm)
+    const efficacy = LaserBeamSighting.efficacy(wavelengthNm)
+    return {
+      scatteredAt: (air, altitudeM, haze, cosTurn) => {
+        const coefficients = LaserBeamSighting.coefficientsAt(air, wavelengthNm, altitudeM)
+        const scattered = efficacy * LaserBeamSighting.phasedScattering({ ...coefficients, aerosolPerM: coefficients.aerosolPerM * haze }, cosTurn)
+        return [scattered * colour[0], scattered * colour[1], scattered * colour[2]]
+      }
+    }
+  }
+
+  /**
+   * The light of a lamp of a broad spectrum (a xenon arc, a metal halide), its power in lumens, of `rgb` (linear, of unit luminance): each
+   * channel scattered by the air at its own wavelength, as the sky is (see AerialPerspective's channels), so that a white beam seen from the
+   * side through clean air is bluer than the lamp, where the molecules scatter most, and as white as the lamp through haze.
+   */
+  static white(rgb: readonly [number, number, number]): BeamSpectrum {
+    return {
+      scatteredAt: (air, altitudeM, haze, cosTurn) => {
+        const rayleighDensity = AtmosphereProfile.rayleighDensity(altitudeM)
+        const aerosolDensity = AtmosphereProfile.aerosolDensity(altitudeM) * haze
+        return [0, 1, 2].map(c => rgb[c] * LaserBeamSighting.phasedScattering(
+          { rayleighPerM: air.rayleigh[c] * rayleighDensity, aerosolPerM: air.aerosol[c] * aerosolDensity }, cosTurn)) as [number, number, number]
+      }
+    }
+  }
+
   private static readonly MAX_SEGMENTS = 12000
   /** The least a ribbon is drawn across, in pixels, edge to edge (see ContrailSystem.MIN_PIXELS). */
   private static readonly MIN_PIXELS = 2
@@ -90,17 +138,25 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
 
   /** Draws `beams` as they are at `t` (ms of the recording). */
   update(beams: readonly BeamJson[], t: number, frame: BeamFrame): void {
-    const views = this.viewsOf(beams, t, frame)
+    this.drawLines(this.viewsOf(beams, t, frame).map(view => ({ id: view.id, points: this.place(view, t, frame), spectrum: BeamSystem.laser(view.wavelengthNm) })), frame)
+  }
+
+  /** The material the beams are drawn with: what another drawing that uses this one may dim by the clouds (see SkyEventClouds.dim). */
+  get material(): MeshBasicMaterial {
+    return this.mesh.material as MeshBasicMaterial
+  }
+
+  /** Draws these beams, already placed in the scene, in place of what was drawn: what update does, and what another kind of beam uses. */
+  drawLines(lines: readonly BeamLine[], frame: BeamFrame): void {
     let vertex = 0
     this.segments = 0
     this.drawn = []
-    for (const view of views) {
-      const colour = LaserBeamSighting.colourOf(view.wavelengthNm)
-      const placed = this.place(view, t, frame)
-      this.drawn.push({ id: view.id, points: placed })
+    for (const line of lines) {
+      const placed = line.points
+      this.drawn.push({ id: line.id, points: placed })
       for (let i = 0; i + 1 < placed.length; i++) {
         if (this.segments >= BeamSystem.MAX_SEGMENTS) break
-        const next = this.pushSegment(vertex, placed[i], placed[i + 1], view.wavelengthNm, colour, frame)
+        const next = this.pushSegment(vertex, placed[i], placed[i + 1], line.spectrum, frame)
         if (next > vertex) this.segments++
         vertex = next
       }
@@ -155,7 +211,7 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
   private static readonly SMOOTH_RATIO = 1.08
   private static readonly MAX_HALVINGS = 6
 
-  private pushSegment(vertex: number, a: Placed, b: Placed, wavelengthNm: number, colour: readonly [number, number, number], frame: BeamFrame, halvings = 0): number {
+  private pushSegment(vertex: number, a: Placed, b: Placed, spectrum: BeamSpectrum, frame: BeamFrame, halvings = 0): number {
     const along = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z }
     const length = Math.hypot(along.x, along.y, along.z)
     if (length < 1e-6) return vertex
@@ -170,8 +226,7 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
       const cosTurn = (direction.x * toEye.x + direction.y * toEye.y + direction.z * toEye.z) / distance
       const sinTurn = Math.sqrt(Math.max(0, 1 - cosTurn * cosTurn))
       // The haze's share as uneven as the haze is there (see LaserBeamSighting.patchAt); the air's own, even.
-      const coefficients = LaserBeamSighting.coefficientsAt(frame.air, wavelengthNm, point.altitudeM)
-      const scattered = LaserBeamSighting.phasedScattering({ ...coefficients, aerosolPerM: coefficients.aerosolPerM * point.haze }, cosTurn)
+      const scattered = spectrum.scatteredAt(frame.air, point.altitudeM, point.haze, cosTurn)
       return { sinTurn, scattered, through: frame.transmittanceTo(point.x, point.y, point.z) }
     }
     const minShownAt = (point: Placed): number => BeamSystem.MIN_PIXELS * frame.pixelRad * Math.hypot(point.x - frame.eye.x, point.y - frame.eye.y, point.z - frame.eye.z)
@@ -189,8 +244,9 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
       const shown = Math.max(widthM, minShownAt(point))
       const { sinTurn, scattered, through } = lights.get(point)!
       // A ribbon that fades from its middle to nothing at its edges carries half the light of a flat one as wide: its middle is twice as bright.
-      const luminance = 2 * share * LaserBeamSighting.luminanceCdM2(point.powerW, wavelengthNm, scattered, shown, sinTurn)
-      const level = colour.map((channel, c) => Math.min(BeamSystem.BRIGHTEST_RELATIVE, luminance * frame.relativeScale * channel * through[c])) as [number, number, number]
+      // Its luminance, cd/m²: its light per metre and per steradian towards the eye over the area a metre of it covers (see LaserBeamSighting.luminanceCdM2).
+      const luminance = (2 * share * point.powerW) / (shown * Math.max(sinTurn, 1e-3))
+      const level = scattered.map((channel, c) => Math.min(BeamSystem.BRIGHTEST_RELATIVE, luminance * channel * frame.relativeScale * through[c])) as [number, number, number]
       const toPoint = { x: frame.eye.x - point.x, y: frame.eye.y - point.y, z: frame.eye.z - point.z }
       const across = this.normalise(this.cross(direction, toPoint))
       return { point, half: shown / 2, level, across }
@@ -205,7 +261,7 @@ export class BeamSystem implements SkyEventSimulation<BeamJson> {
         x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2, altitudeM: (a.altitudeM + b.altitudeM) / 2,
         widthM: (a.widthM + b.widthM) / 2, powerW: Math.sqrt(a.powerW * b.powerW), haze: (a.haze + b.haze) / 2
       }
-      return this.pushSegment(this.pushSegment(vertex, a, middle, wavelengthNm, colour, frame, halvings + 1), middle, b, wavelengthNm, colour, frame, halvings + 1)
+      return this.pushSegment(this.pushSegment(vertex, a, middle, spectrum, frame, halvings + 1), middle, b, spectrum, frame, halvings + 1)
     }
     // Nothing past what the buffers hold, however finely the stretches near the eye were cut.
     if ((vertex + BeamSystem.VERTICES_PER_SEGMENT) * 3 > this.positions.length) return vertex

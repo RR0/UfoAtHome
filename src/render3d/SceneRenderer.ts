@@ -97,7 +97,8 @@ import type { TraceSystem } from "./TraceSystem.js"
 import type { ContrailSystem } from "./ContrailSystem.js"
 import { SKY_EVENT_SOURCES } from "../modules/sky-events/skyEventSources.js"
 import { SkyEventKinds } from "../modules/sky-events/SkyEventKind.js"
-import type { SkyEventFrame, SkyEventHit, SkyEventJson, SkyEventKind, SkyEventPickContext, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
+import type { SkyEventCloudLight, SkyEventClouds, SkyEventFrame, SkyEventHit, SkyEventJson, SkyEventKind, SkyEventPickContext, SkyEventSimulation } from "../modules/sky-events/SkyEventKind.js"
+import { CloudDimming } from "./CloudDimming.js"
 import type { SkyEventsJson } from "../engine/model/SkyEvents.js"
 import type { ContrailTrail } from "../engine/traffic/AircraftContrails.js"
 import { geoToLocalMeters } from "./terrain/GeoProjection.js"
@@ -1125,6 +1126,8 @@ export class SceneRenderer {
   private skyEventsStart?: Date
   /** Each kind of event of the sky the scene has had an event of: its events, and its drawing once its code has come. */
   private readonly skyEventLayers = new Map<string, { kind: SkyEventKind, events: readonly SkyEventJson[], simulation?: SkyEventSimulation, loading?: Promise<void> }>()
+  /** The beams each kind of event of the sky lights the clouds with from below (see SkyEventFrame.lightClouds), by kind. */
+  private readonly skyEventCloudLights = new Map<string, readonly SkyEventCloudLight[]>()
   /** Where the Sun stands for each trail, by the id of its aircraft — see setContrailSunlight. */
   private contrailSunlight: ReadonlyMap<string, DecorSunlight> = new Map()
   /** The Sun's beam on the ground the scene stands on, per channel, in the units of its lights: what the scene's own
@@ -2819,6 +2822,36 @@ export class SceneRenderer {
     this.skyEventLayers.delete(key)
     this.skyEventLight(key, [])
     this.skyEventGlare(key, [])
+    this.skyEventCloudLight(key, [])
+  }
+
+  /** Lights the clouds from below with the beams a kind of event of the sky gives (see SkyEventFrame.lightClouds). */
+  private skyEventCloudLight(key: string, lights: readonly SkyEventCloudLight[]): void {
+    if (lights.length === 0) this.skyEventCloudLights.delete(key)
+    else this.skyEventCloudLights.set(key, lights)
+    this.layeredClouds?.setLights([...this.skyEventCloudLights.values()].flat(), this.camera.position)
+  }
+
+  /** The clouds drawn in volume, as the events of the sky see them (see SkyEventClouds); undefined without any. */
+  private skyEventClouds(): SkyEventClouds | undefined {
+    const volumes = this.layeredClouds?.volumes ?? []
+    if (volumes.length === 0) return undefined
+    const eye = this.camera.position
+    const point = { x: 0, y: 0, z: 0 }
+    return {
+      bottomY: Math.min(...volumes.map(volume => volume.uniforms.baseM.value)),
+      topY: Math.max(...volumes.map(volume => volume.uniforms.baseM.value + volume.uniforms.thicknessM.value)),
+      // The decks' own extinction (see VolumetricClouds: 0.006 a metre per unit of density), at a point taken relative to the eye they are drawn round.
+      extinctionAt: (x, y, z) => {
+        point.x = x - eye.x
+        point.y = y - eye.y
+        point.z = z - eye.z
+        let density = 0
+        for (const volume of volumes) density += volume.densityAt(point)
+        return density * 0.006
+      },
+      dim: material => CloudDimming.apply(material, volumes)
+    }
   }
 
   /** Lights the ground and the sky with the far sources a kind of event of the sky gives (see SkyEventFrame.lightFrom). */
@@ -2871,7 +2904,7 @@ export class SceneRenderer {
     }
     const date = this.skyEventsStart ? new Date(this.skyEventsStart.getTime() + this.decorTime) : undefined
     const magnitudeLimit = this.lastAstronomy ? this.magnitudeLimitOf(this.lastAstronomy) : visibleMagnitudeLimit(-90, this.instrumentMagnitudeGain)
-    let frame: Omit<SkyEventFrame, "lightFrom" | "glareFrom"> | undefined
+    let frame: Omit<SkyEventFrame, "lightFrom" | "glareFrom" | "lightClouds"> | undefined
     for (const [key, layer] of this.skyEventLayers) {
       if (!layer.simulation) continue
       frame ??= {
@@ -2889,6 +2922,7 @@ export class SceneRenderer {
         air: this.air,
         transmittanceTo: (x, y, z) => this.transmittanceTo(x, y, z),
         groundYAt: (x, z) => this.groundYUnder(x, z),
+        clouds: this.skyEventClouds(),
         // Towards where it blows (see Weather.windDirectionDeg).
         wind: {
           eastMS: Math.sin(this.weather.windDirectionDeg * DEG_TO_RAD) * this.weather.windSpeed,
@@ -2898,7 +2932,8 @@ export class SceneRenderer {
       layer.simulation.update(layer.events, this.decorTime, {
         ...frame,
         lightFrom: sources => this.skyEventLight(key, sources),
-        glareFrom: sources => this.skyEventGlare(key, sources)
+        glareFrom: sources => this.skyEventGlare(key, sources),
+        lightClouds: lights => this.skyEventCloudLight(key, lights)
       })
     }
     this.render()
@@ -8452,6 +8487,7 @@ export class SceneRenderer {
       this.layeredClouds.hostHalo(this.iceHalos)
       this.layeredClouds.update(this.weather, this.observerElevationM + 1.6)
       this.layeredClouds.setOffsets(this.cloudOffsetM, this.cloudLayerOffsetsM)
+      if (this.skyEventCloudLights.size > 0) this.layeredClouds.setLights([...this.skyEventCloudLights.values()].flat(), this.camera.position)
       if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
       return
     }
