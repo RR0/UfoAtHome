@@ -61,6 +61,8 @@ float fromLightness(float lightness) {
   return f > 6.0 / 29.0 ? f * f * f : 3.0 * (6.0 / 29.0) * (6.0 / 29.0) * (f - 4.0 / 29.0);
 }
 const float ROD_HALF_LUMINANCE = ${EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2.toFixed(4)};
+const float WARMTH_FLOOR = ${EyeAdaptation.WARMTH_FLOOR.toFixed(4)};
+const float WARMTH_EXPONENT = ${EyeAdaptation.WARMTH_EXPONENT.toFixed(4)};
 
 /**
  * Purkinje's shift, on the whole picture at once: the luminance the eye goes by moves towards the
@@ -80,8 +82,10 @@ vec3 purkinje(vec3 rgb) {
   float scotopic = clamp(y * (1.33 * (1.0 + (y + xyz.z) / xyz.x) - 1.68), 0.0, 4.0 * y);
   // No more than a light this bright would leave the rods: a lamp, a bright star, the Moon's disc
   // are seen by the cones even by an eye adapted to the dark, and keep their colour.
+  // A warm light keeps its colour sooner than a white or a blue: the photochromatic interval (see EyeAdaptation.colourHalfLuminance).
   float luminance = y / max(uRelativeScale, 1e-30);
-  float rods = min(uRodShare, ROD_HALF_LUMINANCE / (ROD_HALF_LUMINANCE + luminance));
+  float rodHalf = ROD_HALF_LUMINANCE * pow(clamp(xyz.z / y, WARMTH_FLOOR, 1.0), WARMTH_EXPONENT);
+  float rods = min(uRodShare, rodHalf / (rodHalf + luminance));
   float seen = mix(y, scotopic, rods);
   vec3 tint = SCOTOPIC_TINT / dot(SCOTOPIC_TINT, vec3(0.2126, 0.7152, 0.0722));
   return mix(rgb / y, tint, rods) * seen;

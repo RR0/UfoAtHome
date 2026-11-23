@@ -106,6 +106,31 @@ export class EyeAdaptation {
     return day / EyeAdaptation.DAYLIGHT_ANCHOR_CD_M2 ** EyeAdaptation.ADAPTATION_EXPONENT
   }
 
+  /**
+   * How much less bright than a white a light of chromaticity `xyz` has to be for its colour to be seen by an eye adapted to the dark: the
+   * photochromatic interval, the gap between the light the rods first see and the light the cones first give a colour to, is nothing for a red,
+   * about half a decade for a yellow-green and widest for a blue and a violet. Krawczyk's half luminance is a white's; a warm light, whose
+   * blue (Z) is a smaller share of its luminance (Y), is taken over by the cones sooner, as Z/Y to the power 0.8. A blue keeps the white's.
+   *
+   * Set on the aurora's green line (557.7 nm), which the International Brightness Coefficient's classes describe: some 10 kR, class II, "may have
+   * a slight greenish colour", colour "barely identifiable"; class III, 100 kR, a plain green. With Krawczyk's white threshold alone, 10 kR kept 5 %
+   * of its colour and 100 kR a third; with this, 17 % and two thirds.
+   */
+  static colourHalfLuminance(xyz: readonly [number, number, number]): number {
+    const warmth = xyz[1] > 0 ? Math.min(1, Math.max(EyeAdaptation.WARMTH_FLOOR, xyz[2] / xyz[1])) : 1
+    return EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2 * warmth ** EyeAdaptation.WARMTH_EXPONENT
+  }
+
+  /** See colourHalfLuminance. */
+  static readonly WARMTH_EXPONENT = 0.8
+  static readonly WARMTH_FLOOR = 0.1
+
+  /** The rods' share of how a light of luminance `luminance` (cd/m²) and tristimulus `xyz` is seen: what is left of its colour is the rest. */
+  static colourRodShare(luminance: number, xyz: readonly [number, number, number], adaptingLuminance: number): number {
+    const half = EyeAdaptation.colourHalfLuminance(xyz)
+    return Math.min(EyeAdaptation.rodShare(adaptingLuminance), half / (half + Math.max(luminance, 0)))
+  }
+
   static rodShare(adaptingLuminance: number): number {
     return EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2 / (EyeAdaptation.ROD_HALF_LUMINANCE_CD_M2 + Math.max(adaptingLuminance, 0))
   }
