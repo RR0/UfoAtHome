@@ -30,6 +30,16 @@ export class InterviewAttachments {
     return given.shown
   }
 
+  /** The name a file goes by: its own, else the end of its address. */
+  static fileName(file: InterviewAttachment): string {
+    return file.name ?? (decodeURIComponent(file.src.replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/^.*\//, "")) || file.src)
+  }
+
+  /** Whether `file` is a picture, to be shown as one. */
+  static isImage(file: InterviewAttachment): boolean {
+    return (file.type ?? "").startsWith("image/") || /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(InterviewAttachments.fileName(file))
+  }
+
   /** The whole address of `file`, held by the interview at `interviewUrl`. */
   static url(file: InterviewAttachment, interviewUrl: string | undefined): string {
     try {

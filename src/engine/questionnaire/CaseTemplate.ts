@@ -117,7 +117,8 @@ export class CaseTemplates {
     if (typeof recipient.id !== "string" || !key || key.kty !== "RSA" || typeof key.n !== "string") throw new Error(`${url}: its recipient has no RSA public key`)
     if (key.d !== undefined) throw new Error(`${url}: its recipient gives a private key, which must never be published`)
     const { kty, n, e, alg } = key
-    return { id: recipient.id, name: recipient.name ?? recipient.id, publicKey: { kty, n, e, ...(alg ? { alg } : {}) } }
+    return { id: recipient.id, name: recipient.name ?? recipient.id, publicKey: { kty, n, e, ...(alg ? { alg } : {}) },
+      ...(typeof recipient.email === "string" && /^[^@\s]+@[^@\s]+$/.test(recipient.email) ? { email: recipient.email } : {}) }
   }
 
   /** Whether a questionnaire is named by its address rather than by its id: a path or a URL, a file. */

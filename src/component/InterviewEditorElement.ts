@@ -1,6 +1,6 @@
 import type { DataSource } from "../engine/source/DataSource.js"
 import { ModuleRegistry } from "../modules/ModuleRegistry.js"
-import type { InterviewSeal } from "../engine/questionnaire/QuestionnaireSeal.js"
+import type { InterviewSeal, SealRecipient } from "../engine/questionnaire/QuestionnaireSeal.js"
 import type { SealOpener } from "../engine/questionnaire/SealOpener.js"
 import type { CaseEventJson } from "../engine/persistence/caseJson.js"
 import { EditorTheme } from "./EditorTheme.js"
@@ -16,7 +16,7 @@ import type { UfoLanguage } from "./messages/index.js"
 import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import type { SightingFileEditor } from "./SightingFileEditor.js"
 import { InterviewMedia } from "./messages/InterviewMedia.js"
-import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT } from "./interviewEvents.js"
+import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT, QUESTIONNAIRE_SEND_EVENT, type QuestionnaireSend } from "./interviewEvents.js"
 import type { QuestionnaireForm } from "./QuestionnaireForm.js"
 import { register as registerInterview } from "./InterviewElement.js"
 import type { InterviewElement } from "./InterviewElement.js"
@@ -204,7 +204,13 @@ const TEMPLATE = `
   .form-fields { display: grid; gap: 18px; }
   .form-intro, .form-source, .form-section-intro, .form-hint { margin: 0; color: var(--ink-dim); font: 400 14px/1.45 var(--sans); }
   .form-section { display: grid; gap: 14px; margin: 0; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 8px; }
-  .form-section > legend { padding: 0 6px; font: 600 15px/1.3 var(--sans); color: var(--ink); }
+  .form-section:not([open]) { display: block; padding-bottom: 12px; }
+  .form-section > summary { display: flex; align-items: baseline; gap: 10px; cursor: pointer; font: 600 15px/1.3 var(--sans); color: var(--ink); }
+  .form-section-count { margin-left: auto; font: 400 12px/1.3 var(--sans); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* The way from one question to the next, kept in sight at the bottom of what scrolls. */
+  .form-nav { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 8px 0; background: var(--ground, Canvas);
+    border-top: 1px solid var(--line); }
+  .form-nav-where { flex: 1; text-align: center; color: var(--ink-dim); font: 400 12px/1.3 var(--sans); font-variant-numeric: tabular-nums; }
   .form-field { display: grid; gap: 6px; }
   .form-field > label { font: 600 14px/1.35 var(--sans); color: var(--ink); }
   .form-field .required { color: var(--ink-faint); }
@@ -268,6 +274,8 @@ const TEMPLATE = `
   <p id="form-note" class="file-note" role="status" hidden></p>
   <div id="form-fields" class="form-fields"></div>
   <div class="form-feed"><button id="form-feed" type="button" class="pill-btn primary"></button> <span id="form-feed-hint"></span></div>
+  <div class="form-feed"><button id="form-send" type="button" class="pill-btn"></button> <span id="form-send-hint"></span></div>
+  <p id="form-sent" class="file-note" role="status" hidden></p>
   <p id="form-fed" class="file-note" role="status" hidden></p>
 </section>
 <section class="group-panel" id="group-exchanges" aria-labelledby="label-exchanges-group" hidden>
@@ -395,6 +403,7 @@ export class InterviewEditorElement extends HTMLElement {
     })
     this.shadow.getElementById("save")!.addEventListener("click", () => this.save())
     this.shadow.getElementById("form-feed")!.addEventListener("click", () => this.feedObservation())
+    this.shadow.getElementById("form-send")!.addEventListener("click", () => this.sendQuestionnaire())
     this.shadow.getElementById("transcribe-start")!.addEventListener("click", () => void this.transcribe())
     this.shadow.getElementById("transcribe-stop")!.addEventListener("click", () => this.transcribing?.abort())
     this.shadow.getElementById("transcribe-source")!.addEventListener("change", event => {
@@ -743,6 +752,14 @@ export class InterviewEditorElement extends HTMLElement {
       { add: file => InterviewAttachments.add(file, interviewUrl), shown: file => InterviewAttachments.shown(file, interviewUrl), messages: m })
     const feed = this.shadow.getElementById("form-feed") as HTMLButtonElement
     feed.disabled = this.hasAttribute("readonly")
+    // Send, to whom the questionnaire is for when the case template names them; else a message prepared for the witness to address.
+    this.formRecipient = json?.questionnaire?.recipient
+    this.formTitle = template ? QuestionnaireTemplates.text(template.title, this.language) : id
+    const send = this.shadow.getElementById("form-send") as HTMLButtonElement
+    const to = this.formRecipient ? (this.said.read(this.formRecipient.name) ?? "") : undefined
+    send.textContent = to ? m.send.replace("{name}", to) : m.sendPrepare
+    send.disabled = this.hasAttribute("readonly")
+    HintElement.say(this.shadow.getElementById("form-send-hint")!, "", to && this.formRecipient?.email ? m.sendHint.replace("{email}", this.formRecipient.email) : m.sendPrepareHint)
   }
 
   /**
@@ -851,6 +868,30 @@ export class InterviewEditorElement extends HTMLElement {
 
   private confidentialKey(event: InterviewEvent, field: string): string {
     return `${event.id ?? event.url ?? ""}\u0000${field}`
+  }
+
+  /** Who the questionnaire shown is for, as its interview names them (see SealRecipient), once the form is shown. */
+  private formRecipient?: SealRecipient
+  private formTitle = ""
+
+  /**
+   * Asks the host to send the case to whom the questionnaire is for (see QUESTIONNAIRE_SEND_EVENT), at once, in the click: a device shares files for a
+   * click only. Says how it went.
+   */
+  private sendQuestionnaire(): void {
+    const m = this.messages
+    const recipient = this.formRecipient
+    const name = recipient ? (this.said.read(recipient.name) ?? "") : ""
+    const sent = this.shadow.getElementById("form-sent")!
+    const send: QuestionnaireSend = {
+      ...(recipient?.email ? { email: recipient.email } : {}),
+      subject: m.sendSubject.replace("{title}", this.formTitle),
+      body: m.sendBody.replace("{title}", this.formTitle) + (recipient ? `\n\n${m.sendSealed.replace("{name}", name)}` : ""),
+      attach: m.sendAttach,
+      report: (outcome, detail) => MessageStyle.show(sent, (outcome === "shared" ? m.sent : outcome === "prepared" ? m.sendPrepared : m.sendFailed).replace("{file}", detail).replace("{error}", detail),
+        outcome === "failed" ? "error" : "info")
+    }
+    this.dispatchEvent(new CustomEvent(QUESTIONNAIRE_SEND_EVENT, { bubbles: true, composed: true, detail: send }))
   }
 
   /** Asks the host to set in the witness's observation what the answers say of it, and says what it did. */

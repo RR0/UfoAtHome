@@ -32,7 +32,7 @@ import type { SightingTime } from "../engine/model/Sighting.js"
 import type { CaseTrack } from "./CaseSession.js"
 import type { AgentRef } from "../engine/interpretation/Interpretation.js"
 import { CaseTemplates, type CaseStart } from "../engine/questionnaire/CaseTemplate.js"
-import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT } from "./interviewEvents.js"
+import { INTERVIEW_CHANGE_EVENT, INTERVIEW_SEEK_EVENT, QUESTIONNAIRE_FEED_EVENT, QUESTIONNAIRE_SEND_EVENT, type QuestionnaireSend } from "./interviewEvents.js"
 import type { InterviewJson, InterviewMedium, InterviewPassage } from "../engine/persistence/interviewJson.js"
 import type { SourceChoices } from "./BasisInputElement.js"
 import { FormatVersion, FormatVersionError } from "../engine/persistence/FormatVersion.js"
@@ -522,6 +522,7 @@ export class CaseEditorElement extends HTMLElement {
       ColumnResize.PROPERTY, 44)
     this.interviewElement = this.shadow.getElementById("interview") as InterviewEditorElement
     this.interviewElement.addEventListener(INTERVIEW_CHANGE_EVENT, event => this.interviewChanged((event as CustomEvent<{ field: string, text?: string }>).detail))
+    this.interviewElement.addEventListener(QUESTIONNAIRE_SEND_EVENT, event => void this.sendCase((event as CustomEvent<QuestionnaireSend>).detail))
     this.interviewElement.addEventListener(QUESTIONNAIRE_FEED_EVENT, event => void this.feedObservation((event as CustomEvent<{ event: InterviewEvent, json: InterviewJson, report: (count: number) => void }>).detail))
     this.interviewElement.addEventListener(INTERVIEW_SEEK_EVENT, event => void this.followToObservation((event as CustomEvent<{ sighting?: string, at: number }>).detail))
     this.editor.addEventListener("caseloaded", event => {
@@ -2554,23 +2555,65 @@ export class CaseEditorElement extends HTMLElement {
         return false
       }
     }
-    const files = session.files(withRecordings, true)
-    // The files the witnesses gave in this page (a map, a sketch, a photo), written beside their interview.
-    const given = withRecordings ? session.attachments() : []
+    const written = await this.archive(withRecordings)
     session.markExported(withRecordings)
     this.fileEditor?.markSaved()
     this.refreshDirty()
-    // The case alone is the one file it is: no archive around it.
-    if (files.length === 1 && given.length === 0) {
-      this.download(new Blob([files[0].content], { type: "application/json" }), files[0].path)
-      return true
-    }
+    this.download(written.blob, written.name)
+    return true
+  }
+
+  /**
+   * The case as it is written: with `withRecordings`, every recording, transcript and file a witness gave in this page beside it, as one zip laid out
+   * as the case is; the case alone as the plain file when it is all there is.
+   */
+  private async archive(withRecordings: boolean): Promise<{ blob: Blob, name: string }> {
+    const session = this.session!
+    const files = session.files(withRecordings, true)
+    // The files the witnesses gave in this page (a map, a sketch, a photo), written beside their interview.
+    const given = withRecordings ? session.attachments() : []
+    if (files.length === 1 && given.length === 0) return { blob: new Blob([files[0].content], { type: "application/json" }), name: files[0].path }
     const { zipSync, strToU8 } = await import("fflate")
     const archive: Record<string, Uint8Array> = {}
     for (const file of files) archive[file.path] = strToU8(file.content)
     for (const file of given) archive[file.path] = new Uint8Array(await file.blob.arrayBuffer())
-    this.download(new Blob([zipSync(archive) as BlobPart], { type: "application/zip" }), `${session.json.id ?? "case"}.zip`)
-    return true
+    return { blob: new Blob([zipSync(archive) as BlobPart], { type: "application/zip" }), name: `${session.json.id ?? "case"}.zip` }
+  }
+
+  /**
+   * Sends the case, every file of it, to whom its questionnaire is for (see QuestionnaireSend): through the device's own sharing where it takes files
+   * (a phone's mail, with the case attached), else the case saved and a message prepared in the reader's mail, to attach it to.
+   */
+  private async sendCase(send: QuestionnaireSend): Promise<void> {
+    const session = this.session
+    if (!session) return
+    this.commit()
+    let written: { blob: Blob, name: string }
+    try {
+      for (const track of session.tracks) await this.loadTrack(track)
+      written = await this.archive(true)
+    } catch (error) {
+      send.report("failed", error instanceof Error ? error.message : String(error))
+      return
+    }
+    const file = new File([written.blob], written.name, { type: written.blob.type })
+    const body = send.body.replaceAll("{file}", written.name)
+    const share = navigator as Navigator & { canShare?: (data: ShareData) => boolean }
+    if (typeof share.share === "function" && share.canShare?.({ files: [file] })) {
+      try {
+        await share.share({ files: [file], title: send.subject, text: body })
+        send.report("shared", written.name)
+        return
+      } catch (error) {
+        // Dismissed by the reader: nothing else is done.
+        if (error instanceof DOMException && error.name === "AbortError") return
+      }
+    }
+    this.download(written.blob, written.name)
+    const mail = document.createElement("a")
+    mail.href = `mailto:${send.email ? encodeURIComponent(send.email).replace("%40", "@") : ""}?subject=${encodeURIComponent(send.subject)}&body=${encodeURIComponent(`${body}\n\n${send.attach.replaceAll("{file}", written.name)}`)}`
+    mail.click()
+    send.report("prepared", written.name)
   }
 
   private download(blob: Blob, name: string): void {

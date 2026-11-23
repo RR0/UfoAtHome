@@ -1,6 +1,7 @@
 import type { SaidText } from "../model/SaidText.js"
 import type { InterviewAttachment, InterviewJson, InterviewRedaction, InterviewSegment } from "../persistence/interviewJson.js"
 import type { SealRecipient } from "./QuestionnaireSeal.js"
+import { InterviewAttachments } from "../persistence/InterviewAttachments.js"
 import type { InterviewImportHints } from "../persistence/interviewImport.js"
 
 /**
@@ -200,7 +201,7 @@ export class QuestionnaireTemplates {
 
   /** The name a file goes by: its own, else the end of its address. */
   static fileName(file: InterviewAttachment): string {
-    return file.name ?? (decodeURIComponent(file.src.replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/^.*\//, "")) || file.src)
+    return InterviewAttachments.fileName(file)
   }
 
   /**

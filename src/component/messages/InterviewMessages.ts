@@ -130,6 +130,24 @@ export interface InterviewMessages extends InputFileMessages {
   /** The button that sets in the witness's observation what their answers say of it (see QuestionnaireFeed), its (?) and what it did: `{n}` values. */
   feed: string
   feedHint: string
+  /**
+   * The button that sends the filled questionnaire, the case with every file of it, to whom it is for: `send` naming them (`{name}`), `sendHint` their
+   * address (`{email}`); `sendPrepare` and its hint when the case template names nobody, the witness then addressing it.
+   */
+  send: string
+  sendHint: string
+  sendPrepare: string
+  sendPrepareHint: string
+  /** The message: its subject and body (`{title}` the questionnaire's), what is said of the confidential answers sealed for `{name}`. */
+  sendSubject: string
+  sendBody: string
+  sendSealed: string
+  /** Added to a message prepared in the mail, which cannot attach a file itself: `{file}`, just saved, to attach. */
+  sendAttach: string
+  /** How it went: shared by the device; saved as `{file}` and the message prepared; or why it could not be (`{error}`). */
+  sent: string
+  sendPrepared: string
+  sendFailed: string
   fed: string
   /** When the answers say nothing the observation can be given yet. */
   fedNothing: string

@@ -2,6 +2,7 @@ import type { QuestionnaireImage, QuestionnaireTemplate, QuestionnaireTemplateFi
 import { QuestionnaireTemplates } from "../engine/questionnaire/QuestionnaireTemplate.js"
 import type { InterviewAttachment, InterviewJson } from "../engine/persistence/interviewJson.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
+import { InterviewAttachments } from "../engine/persistence/InterviewAttachments.js"
 import { register as registerInputFile, type InputFileElement, type InputFileMessages, type InputFilePick } from "./InputFileElement.js"
 
 /** The words of the form (see InterviewMessages.questionnaire). */
@@ -32,6 +33,12 @@ export interface QuestionnaireFormMessages {
   confidentialSealed: string
   confidentialSealedBefore: string
   confidentialNowhere: string
+  /** The buttons that go to the question before and after the one being answered, and where it stands: `{n}` of `{total}`. */
+  previousQuestion: string
+  nextQuestion: string
+  questionOf: string
+  /** How many questions of a section are answered: `{n}` of `{total}`. */
+  sectionAnswered: string
   /** Before the picker of a files question: what it adds. */
   addFile: string
   /** The tooltip of the button that takes a file out of the answer: `{name}`. */
@@ -102,16 +109,109 @@ export class QuestionnaireForm {
       .filter(segment => segment.field !== undefined && !known.has(segment.field) && json!.speakers[segment.speaker]?.role !== "witness")
       .map((segment): QuestionnaireTemplateField => ({ id: segment.field!, question: InterviewFile.plain(segment.text ?? segment.field!), kind: "long", required: false }))
     if (others.length > 0) parts.push(this.section(messages.other, undefined, others, json, messages, language, readonly))
+    parts.push(this.navigation(messages))
     this.container.replaceChildren(...parts)
+    this.current = undefined
+    this.container.addEventListener("focusin", this.follow)
+    this.place()
+  }
+
+  /** The question being answered: the one last gone into, by the navigation or by hand. */
+  private current?: HTMLElement
+  private navigationShown?: { previous: HTMLButtonElement, next: HTMLButtonElement, where: HTMLElement, messages: QuestionnaireFormMessages }
+
+  private readonly follow = (event: Event): void => {
+    const row = (event.target as HTMLElement).closest?.<HTMLElement>(".form-field")
+    if (!row || row === this.current) return
+    this.current = row
+    this.place()
+  }
+
+  /** Every question of the form, in order. */
+  private rows(): HTMLElement[] {
+    return [...this.container.querySelectorAll<HTMLElement>(".form-field")]
+  }
+
+  /**
+   * Goes to the question `step` after the one being answered (before it when negative; the first when none is): its section opened, the one left
+   * closed, the question brought into sight and its field focused.
+   */
+  go(step: number): void {
+    const rows = this.rows()
+    if (rows.length === 0) return
+    const at = this.current ? rows.indexOf(this.current) : -1
+    const to = rows[at < 0 ? (step > 0 ? 0 : rows.length - 1) : Math.min(rows.length - 1, Math.max(0, at + step))]
+    const left = this.current?.closest("details")
+    const entered = to.closest("details")
+    if (left && left !== entered) left.open = false
+    if (entered) entered.open = true
+    this.current = to
+    to.scrollIntoView?.({ block: "center", behavior: "smooth" })
+    to.querySelector<HTMLElement>("input:not([type=hidden]), textarea, button.form-when-mode")?.focus({ preventScroll: true })
+    this.place()
+  }
+
+  /** The navigation from one question to the next, kept in sight under the form. */
+  private navigation(messages: QuestionnaireFormMessages): HTMLElement {
+    const bar = document.createElement("nav")
+    bar.className = "form-nav"
+    const previous = document.createElement("button")
+    previous.type = "button"
+    previous.className = "form-nav-previous"
+    previous.textContent = `‹ ${messages.previousQuestion}`
+    previous.addEventListener("click", () => this.go(-1))
+    const where = document.createElement("span")
+    where.className = "form-nav-where"
+    const next = document.createElement("button")
+    next.type = "button"
+    next.className = "form-nav-next"
+    next.textContent = `${messages.nextQuestion} ›`
+    next.addEventListener("click", () => this.go(1))
+    bar.append(previous, where, next)
+    this.navigationShown = { previous, next, where, messages }
+    return bar
+  }
+
+  /** Says where the question being answered stands, and what can be gone to from it; and how much of each section is answered. */
+  private place(): void {
+    const shown = this.navigationShown
+    const rows = this.rows()
+    if (shown) {
+      const at = this.current ? rows.indexOf(this.current) : -1
+      shown.previous.disabled = at <= 0
+      shown.next.disabled = at >= rows.length - 1
+      shown.where.textContent = at < 0 ? "" : shown.messages.questionOf.replace("{n}", String(at + 1)).replace("{total}", String(rows.length))
+    }
+    for (const section of this.container.querySelectorAll<HTMLElement>(".form-section")) {
+      const count = section.querySelector<HTMLElement>(".form-section-count")
+      if (!count || !shown) continue
+      const fields = [...section.querySelectorAll<HTMLElement>(".form-field")]
+      count.textContent = shown.messages.sectionAnswered.replace("{n}", String(fields.filter(QuestionnaireForm.isAnswered).length)).replace("{total}", String(fields.length))
+    }
+  }
+
+  /** Whether a question shows an answer: something typed, ticked or given. */
+  private static isAnswered(row: HTMLElement): boolean {
+    if (row.querySelector(".form-file-list li")) return true
+    if (row.querySelector("input:checked")) return true
+    return [...row.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("textarea, input:not([type=radio]):not([type=checkbox]):not([type=file]):not([type=url])")]
+      .some(input => input.value.trim() !== "")
   }
 
   private section(title: string, intro: string | undefined, fields: QuestionnaireTemplateField[], json: InterviewJson | undefined, messages: QuestionnaireFormMessages, language: string, readonly: boolean,
     images?: QuestionnaireImage[]): HTMLElement {
-    const set = document.createElement("fieldset")
+    // Closed until it is gone into, so that the whole questionnaire reads as its sections, each saying how much of it is answered.
+    const set = document.createElement("details")
     set.className = "form-section"
-    const legend = document.createElement("legend")
-    legend.textContent = title
-    set.append(legend)
+    const summary = document.createElement("summary")
+    const named = document.createElement("span")
+    named.className = "form-section-title"
+    named.textContent = title
+    const count = document.createElement("span")
+    count.className = "form-section-count"
+    summary.append(named, count)
+    set.append(summary)
+    set.addEventListener("change", () => this.place())
     if (intro) {
       const p = document.createElement("p")
       p.className = "form-section-intro"
@@ -244,7 +344,7 @@ export class QuestionnaireForm {
         link.href = where
         link.target = "_blank"
         link.rel = "noopener noreferrer"
-        if ((file.type ?? "").startsWith("image/") || /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(name)) {
+        if (InterviewAttachments.isImage(file)) {
           const img = document.createElement("img")
           img.src = where
           img.alt = name
@@ -264,6 +364,7 @@ export class QuestionnaireForm {
             given.splice(index, 1)
             draw()
             this.gave(field.id, [...given], question)
+            this.place()
           })
           item.append(remove)
         }
@@ -294,6 +395,7 @@ export class QuestionnaireForm {
       } else for (const file of pick.files ?? [pick.file]) given.push(files.add(file))
       draw()
       this.gave(field.id, [...given], question)
+      this.place()
     })
     add.append(`${messages.addFile} `, picker)
     box.append(add)

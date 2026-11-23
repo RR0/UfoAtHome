@@ -10,6 +10,8 @@ export interface SealRecipient {
   name: SaidText
   /** Its public key, RSA-OAEP with SHA-256, as a JSON Web Key. Its private key never comes near UFO@home. */
   publicKey: JsonWebKey
+  /** Where the testimonies it receives are sent, when it receives them by mail: what Send addresses (see QUESTIONNAIRE_SEND_EVENT). */
+  email?: string
 }
 
 /**

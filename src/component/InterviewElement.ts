@@ -7,7 +7,8 @@ import type { UfoLanguage } from "./messages/index.js"
 import type { InterviewMessages } from "./messages/InterviewMessages.js"
 import { INTERVIEW_SEEK_EVENT } from "./interviewEvents.js"
 import { InterviewFile } from "../engine/persistence/interviewJson.js"
-import type { InterviewSegment, InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
+import type { InterviewAttachment, InterviewSegment, InterviewJson, InterviewSightingRef } from "../engine/persistence/interviewJson.js"
+import { InterviewAttachments } from "../engine/persistence/InterviewAttachments.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 
 export const INTERVIEW_ELEMENT_NAME = "rr0-interview"
@@ -41,6 +42,10 @@ rr0-interview .bar { position: relative; display: inline-block; width: 3em; heig
 rr0-interview .bar::after { content: attr(data-tip); display: none; position: absolute; left: 0; top: 1.4em; z-index: 3; width: max-content; max-width: 22em; padding: .3em .5em;
   border-radius: 4px; background: #222; color: #fff; font-size: .85em; line-height: 1.3; white-space: normal; }
 rr0-interview .bar:hover::after, rr0-interview .bar:focus::after { display: block; }
+/* The files a turn gives: a picture shown as one, at most a third of a screen high, opening whole. */
+rr0-interview .turn .files { display: flex; flex-wrap: wrap; gap: .5em; margin: .3em 0; }
+rr0-interview .turn .file { display: inline-flex; flex-direction: column; gap: .2em; max-width: min(100%, 24em); font-size: .85em; overflow-wrap: anywhere; color: inherit; }
+rr0-interview .turn .file img { display: block; max-width: 100%; max-height: 33vh; object-fit: contain; border-radius: 4px; background: #fff; }
 rr0-interview .turn .refs { display: flex; flex-wrap: wrap; gap: .25em; }
 rr0-interview .turn .ref { font: inherit; font-size: .8em; cursor: pointer; border: 1px solid var(--rr0-interview-line); border-radius: 999px; background: transparent; color: inherit;
   padding: 0 .35em; font-variant-numeric: tabular-nums; white-space: nowrap; display: inline-flex; align-items: center; gap: .15em; }
@@ -310,6 +315,7 @@ export class InterviewElement extends HTMLElement {
         previous = undefined
         turn.append(who, said)
       }
+      if (segment.files?.length && !segment.redacted) turn.append(this.given(segment.files))
       if (segment.refs?.length) {
         const refs = document.createElement("div")
         refs.className = "refs"
@@ -328,6 +334,40 @@ export class InterviewElement extends HTMLElement {
       this.blocks.set(index, turn)
     })
     this.turns.replaceChildren(...interventions)
+  }
+
+  /**
+   * The files a turn gives (a map, a sketch, a photo drawn over: see InterviewSegment.files), a picture shown as one, each opening whole; a file given
+   * in this page and not saved yet is shown from memory (see InterviewAttachments).
+   */
+  private given(files: InterviewAttachment[]): HTMLElement {
+    const list = document.createElement("div")
+    list.className = "files"
+    for (const file of files) {
+      const name = InterviewAttachments.fileName(file)
+      const where = InterviewAttachments.shown(file, this.base)
+      const link = document.createElement("a")
+      link.className = "file"
+      link.href = where
+      link.target = "_blank"
+      link.rel = "noopener noreferrer"
+      if (InterviewAttachments.isImage(file)) {
+        const img = document.createElement("img")
+        img.src = where
+        img.alt = name
+        img.loading = "lazy"
+        link.title = name
+        link.append(img)
+      }
+      // A picture is named by its turn already; another file by its name.
+      else {
+        const caption = document.createElement("span")
+        caption.textContent = name
+        link.append(caption)
+      }
+      list.append(link)
+    }
+    return list
   }
 
   /**

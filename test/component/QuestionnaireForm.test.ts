@@ -141,3 +141,36 @@ describe("QuestionnaireForm files", () => {
     expect(container.querySelector("rr0-input-file, .form-file-remove")).toBeNull()
   })
 })
+
+describe("QuestionnaireForm sections", () => {
+  const two: QuestionnaireTemplate = {
+    id: "n", title: { en: "N" },
+    sections: [
+      { title: { en: "First" }, fields: [{ id: "1", question: { en: "One" }, kind: "text" }, { id: "2", question: { en: "Two" }, kind: "text" }] },
+      { title: { en: "Second" }, fields: [{ id: "3", question: { en: "Three" }, kind: "text" }] }
+    ]
+  }
+
+  it("shows each section closed, saying how much of it is answered, and goes from one question to the next, opening the section it enters and closing the one it leaves", () => {
+    const container = document.createElement("div")
+    document.body.append(container)
+    const json = QuestionnaireTemplates.interview(two)
+    QuestionnaireTemplates.answer(json, "2", "yes")
+    const form = new QuestionnaireForm(container, () => undefined)
+    form.show(two, json, messages, "en", false)
+    const sections = [...container.querySelectorAll<HTMLDetailsElement>("details.form-section")]
+    expect(sections.map(section => [section.open, section.querySelector(".form-section-count")!.textContent])).toEqual([[false, "1/2 répondues"], [false, "0/1 répondues"]])
+    const where = () => container.querySelector(".form-nav-where")!.textContent
+    const previous = container.querySelector<HTMLButtonElement>(".form-nav-previous")!
+    const next = container.querySelector<HTMLButtonElement>(".form-nav-next")!
+    next.click()
+    expect([sections[0].open, sections[1].open, where(), previous.disabled]).toEqual([true, false, "Question 1 sur 3", true])
+    next.click()
+    next.click()
+    expect([sections[0].open, sections[1].open, where(), next.disabled]).toEqual([false, true, "Question 3 sur 3", true])
+    expect(container.getRootNode() === document && document.activeElement?.id).toBe("form-3")
+    previous.click()
+    expect([sections[0].open, sections[1].open, where()]).toEqual([true, false, "Question 2 sur 3"])
+    container.remove()
+  })
+})
