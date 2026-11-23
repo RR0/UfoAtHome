@@ -22,6 +22,10 @@ export interface ScenarioSweepMessages {
   onDates: string
   inScenarios: string
   or: string
+  /** What sets a verdict apart from how it moved, with the spaces the language puts round it. */
+  colon: string
+  /** At the account's own place, where a conditional verdict holds. */
+  atOwnPlace: string
   /** The account's own place, where it is played as written. */
   ownPlace: string
   /** How a verdict moved from the verdict as written. */

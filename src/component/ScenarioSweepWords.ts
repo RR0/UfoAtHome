@@ -37,14 +37,14 @@ export class ScenarioSweepWords {
   /** The whole verdict, with how many scenarios it holds in. */
   sentence(verdict: RobustnessVerdict): string {
     const held = verdict.independent ? "" : ` (${this.m.holdsIn.replace("{holds}", String(verdict.holds)).replace("{played}", String(verdict.played))})`
-    return `${this.robustness(verdict)}: ${this.evolution(verdict)}${held}`
+    return `${this.robustness(verdict)}${this.m.colon}${this.evolution(verdict)}${held}`
   }
 
   /** Where a conditional verdict holds. */
   where(onlyIf: OnlyIf | undefined): string {
-    if (onlyIf?.places) return this.m.atPlaces.replace("{places}", onlyIf.places.map(id => this.placeName(id)).join(this.m.or))
-    if (onlyIf?.dates) return this.m.onDates.replace("{dates}", onlyIf.dates.map(date => this.date(date)).join(this.m.or))
-    return this.m.inScenarios.replace("{scenarios}", (onlyIf?.scenarios ?? []).map(id => this.scenarioId(id)).join(this.m.or))
+    if (onlyIf?.places) return onlyIf.places.map(id => id === "own" ? this.m.atOwnPlace : this.m.atPlaces.replace("{places}", this.placeName(id))).join(this.m.or)
+    if (onlyIf?.dates) return onlyIf.dates.map(date => this.m.onDates.replace("{dates}", this.date(date))).join(this.m.or)
+    return (onlyIf?.scenarios ?? []).map(id => this.m.inScenarios.replace("{scenarios}", this.scenarioId(id))).join(this.m.or)
   }
 
   /** An alert of the sky: "Venus incompatible in every scenario". */

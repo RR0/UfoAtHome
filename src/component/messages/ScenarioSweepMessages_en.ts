@@ -15,6 +15,8 @@ export const scenarioSweepMessages_en = {
   onDates: "on {dates}",
   inScenarios: "in {scenarios}",
   or: " or ",
+  colon: ": ",
+  atOwnPlace: "at the place assumed",
   ownPlace: "the place assumed",
   asWrittenPlausible: "plausible as written",
   asWrittenExcluded: "excluded as written",
