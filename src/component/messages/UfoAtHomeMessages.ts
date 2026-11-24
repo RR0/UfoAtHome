@@ -38,4 +38,12 @@ export interface UfoAtHomeMessages extends InputFileMessages {
   templateForget: string
   templateKept: string
   templateModulesWithoutScripts: string
+  /** The reader's template read at an address (`{url}`); that the modules it names run their code, the reader having agreed. */
+  templateFromAddress: string
+  templateModulesRun: string
+  /** The app's own dialog asking whether to run the code of modules from the sites listed under it: heading, text, the two answers. */
+  consentHeading: string
+  consentText: string
+  consentRun: string
+  consentWithout: string
 }

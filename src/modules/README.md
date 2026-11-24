@@ -88,7 +88,10 @@ New starts a blank observation. With one, New offers its `starts` (the only one 
 questionnaires its witness is asked to fill in (an id, or the address of a questionnaire template), each an interview of the
 case, and where it opens (`start`: the first questionnaire's form, or the observation), the first step of what may become a
 process. The template's `modules` (and a start's own) load when New is used, their scripts run since the page asked for them.
-A template may bring its questionnaires whole (`questionnaires`), named by their id in its starts: one file that needs no other. UFO@home ships none. The reader may also pick a template of their own from a file, in the app's Open menu (`LocalCaseTemplate`, kept in the browser's localStorage until they forget it): it goes before the page's, and its modules come without their scripts, as a file's own word runs no code. The editor opened blank applies the template as New would.
+A template may bring its questionnaires whole (`questionnaires`), named by their id in its starts: one file that needs no other. UFO@home ships none. The reader may also pick a template of their own from a file, in the app's Open menu (`LocalCaseTemplate`, kept in the browser's localStorage until they forget it): it goes before the page's, and its modules come without their scripts, as a file's own word runs no code. The editor opened blank applies the template as New would. A template may also be read at an address the reader types there, on any site: it is kept with that address, against which its
+relative questionnaires and modules are read. That site answers `Access-Control-Allow-Origin: *` (or the app's origin) for the template, its
+questionnaires, and its modules' manifests and scripts (the pictures need none). The modules of a template the reader gave run their code only once
+they agree, in the app's own dialog naming the sites that code comes from (`LocalCaseTemplate.allowScripts`), never a native one.
 
 ## Kinds of events of the sky
 

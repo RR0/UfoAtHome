@@ -55,6 +55,9 @@ ${MessageStyle.CSS}
 .template-now { margin: 0 0 6px; }
 .template-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .template-row[hidden], .template-forget[hidden] { display: none; }
+.consent:popover-open { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(32em, calc(100vw - 2em)); }
+.consent ul { margin: 6px 0 10px; padding-left: 1.2em; font-family: var(--mono, monospace); font-size: .85em; overflow-wrap: anywhere; }
+.consent .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 </style>
 <div class="bar">
   <p id="status" class="status" role="status" hidden></p>
@@ -78,6 +81,15 @@ ${MessageStyle.CSS}
     <button id="template-forget" type="button" class="pill-btn template-forget" hidden></button>
   </div>
   <p id="template-hint" class="hint"></p>
+</div>
+<div id="consent" class="open-menu consent" popover="manual" role="dialog" aria-labelledby="consent-heading">
+  <h2 id="consent-heading"></h2>
+  <p id="consent-text"></p>
+  <ul id="consent-origins"></ul>
+  <div class="actions">
+    <button id="consent-without" type="button" class="pill-btn"></button>
+    <button id="consent-run" type="button" class="pill-btn primary"></button>
+  </div>
 </div>
 <slot></slot>
 `
@@ -266,7 +278,7 @@ export class UfoAtHomeElement extends HTMLElement {
     await CaseTemplates.install(template)
     const { ModuleSession } = await import("../modules/ModuleSession.js")
     // The page's word runs their scripts; a file of the reader's brings what their manifests state only.
-    void ModuleSession.shared.require(template.modules, template.url, template.origin === "page")
+    void ModuleSession.shared.require(template.modules, template.url, UfoAtHomeElement.runsScripts(template))
     if (template.starts.length === 1) return this.start(template.starts[0], template)
     this.showStarts(template)
   }
@@ -288,26 +300,97 @@ export class UfoAtHomeElement extends HTMLElement {
     this.closeStarts()
     if (start.modules?.length) {
       const { ModuleSession } = await import("../modules/ModuleSession.js")
-      await ModuleSession.shared.require(start.modules, undefined, template?.origin !== "file")
+      await ModuleSession.shared.require(start.modules, undefined, template ? UfoAtHomeElement.runsScripts(template) : true)
     }
     await this.switcher.startNew(start)
   }
 
-  /** Keeps the case template the reader picked (a file of theirs, or an address read once) in this browser, and says so. */
+  /** Whether the modules `template` names run their code: the page's word, or the reader's own agreement to a template they gave. */
+  private static runsScripts(template: CaseTemplate): boolean {
+    return template.origin === "page" || template.scripts === true
+  }
+
+  /** Where the code of the modules `template` names would come from: their sites. */
+  private static moduleOrigins(template: CaseTemplate): string[] {
+    const addresses = [...template.modules ?? [], ...template.starts.flatMap(start => start.modules ?? [])]
+    return [...new Set(addresses.map(address => {
+      try {
+        return new URL(address).origin
+      } catch {
+        return address
+      }
+    }))]
+  }
+
+  /**
+   * Keeps the case template the reader picked (a file of theirs, or what is at an address, from any site that lets this page read it) in this
+   * browser. When it names modules, asks the reader, in a dialog of the app's own that says where their code comes from, whether to run it; then
+   * loads them, so that what they bring is there at once, and says what was kept.
+   */
   private async keepTemplate(pick: InputFilePick): Promise<void> {
     await this.localeLoaded
     const m = this.messages
+    let template: CaseTemplate
     try {
-      const text = pick.url !== undefined ? await (await fetch(pick.url)).text() : await UfoAtHomeElement.textOf(pick.file)
-      const name = pick.url !== undefined ? decodeURIComponent(pick.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) : pick.file.name
-      const template = LocalCaseTemplate.keep(text, name)
-      const said = new SaidTexts(HostLocale.preferencesFor(this))
-      const title = said.read(template.title) ?? template.id
-      this.say([m?.templateKept.replace("{title}", title), template.modules?.length ? m?.templateModulesWithoutScripts : undefined].filter(Boolean).join(" "))
+      if (pick.url !== undefined) {
+        const url = new URL(pick.url, location.href).href
+        const response = await fetch(url)
+        if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`)
+        template = LocalCaseTemplate.keep(await response.text(), decodeURIComponent(url.replace(/[?#].*$/, "").replace(/^.*\//, "")), undefined, url)
+      } else template = LocalCaseTemplate.keep(await UfoAtHomeElement.textOf(pick.file), pick.file.name)
     } catch {
       this.say(m?.caseTemplateFailed, "error")
+      await this.showTemplate()
+      return
+    }
+    const origins = UfoAtHomeElement.moduleOrigins(template)
+    const scripts = origins.length > 0 && await this.askScripts(origins)
+    if (origins.length > 0) LocalCaseTemplate.allowScripts(scripts)
+    template = LocalCaseTemplate.read() ?? template
+    const said = new SaidTexts(HostLocale.preferencesFor(this))
+    const title = said.read(template.title) ?? template.id
+    this.say([m?.templateKept.replace("{title}", title), origins.length === 0 ? undefined : scripts ? m?.templateModulesRun : m?.templateModulesWithoutScripts]
+      .filter(Boolean).join(" "))
+    // What it brings, there at once: its questionnaires, its modules.
+    await CaseTemplates.install(template).catch(() => undefined)
+    if (origins.length > 0) {
+      const { ModuleSession } = await import("../modules/ModuleSession.js")
+      void ModuleSession.shared.require(template.modules, template.url, scripts)
     }
     await this.showTemplate()
+  }
+
+  /** Asks the reader, in the app's own dialog, whether to run the code that would come from `origins`; never the browser's own dialog. */
+  private askScripts(origins: string[]): Promise<boolean> {
+    const m = this.messages
+    const dialog = this.byId("consent") as HTMLElement & { showPopover?: () => void, hidePopover?: () => void }
+    this.byId("consent-heading").textContent = m?.consentHeading ?? ""
+    this.byId("consent-text").textContent = m?.consentText ?? ""
+    this.byId("consent-origins").replaceChildren(...origins.map(origin => Object.assign(document.createElement("li"), { textContent: origin })))
+    const run = this.byId("consent-run") as HTMLButtonElement
+    const without = this.byId("consent-without") as HTMLButtonElement
+    run.textContent = m?.consentRun ?? ""
+    without.textContent = m?.consentWithout ?? ""
+    return new Promise(resolve => {
+      const answer = (allowed: boolean) => {
+        run.onclick = null
+        without.onclick = null
+        try {
+          dialog.hidePopover?.()
+        } catch {
+          // Closed already.
+        }
+        resolve(allowed)
+      }
+      run.onclick = () => answer(true)
+      without.onclick = () => answer(false)
+      try {
+        dialog.showPopover?.()
+      } catch {
+        // Shown already.
+      }
+      without.focus()
+    })
   }
 
   /** Says, in the Open menu, which case template New goes by, and offers to forget the reader's own. */
@@ -324,8 +407,9 @@ export class UfoAtHomeElement extends HTMLElement {
     }
     const title = template ? said.read(template.title) ?? template.id : ""
     this.byId("template-now").textContent = !template ? m.templateNone
-      : template.origin === "file" ? m.templateFromFile.replace("{title}", title).replace("{file}", template.fileName ?? "") : m.templateFromPage.replace("{title}", title)
-    this.byId("template-forget").hidden = template?.origin !== "file"
+      : template.origin === "file" ? m.templateFromFile.replace("{title}", title).replace("{file}", template.fileName ?? "")
+      : template.origin === "address" ? m.templateFromAddress.replace("{title}", title).replace("{url}", template.url) : m.templateFromPage.replace("{title}", title)
+    this.byId("template-forget").hidden = template === undefined || template.origin === "page"
   }
 
   /** Opens the menu of what `template` offers to start, under New. */

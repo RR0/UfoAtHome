@@ -1656,6 +1656,9 @@ describe("Opening files in the app", () => {
       starts: [qtStart, { id: "blank", title: { en: "A blank observation" } }] })
     element.shadowRoot!.getElementById("template-file")!.dispatchEvent(new CustomEvent("filepick", { detail: { file: new File([text], "mine.json") } }))
     await until(() => LocalCaseTemplate.read() !== undefined, 3000)
+    // It names a module: the app's own dialog asks whether to run its code, saying where it would come from.
+    await until(() => element.shadowRoot!.getElementById("consent-origins")!.textContent === "https://cdn.example", 3000)
+    ;(element.shadowRoot!.getElementById("consent-without") as HTMLButtonElement).click()
     expect([LocalCaseTemplate.read()!.origin, LocalCaseTemplate.read()!.fileName]).toEqual(["file", "mine.json"])
     const said: string[] = []
     await until(() => {
@@ -1670,6 +1673,27 @@ describe("Opening files in the app", () => {
     ;(element.shadowRoot!.getElementById("template-forget") as HTMLButtonElement).click()
     await until(() => element.shadowRoot!.getElementById("template-now")!.textContent === "None: New starts a blank observation.", 3000)
     expect(LocalCaseTemplate.read()).toBeUndefined()
+  })
+
+  it("keeps a case template read at an address of another site, its questionnaires read there too, and runs its modules' code once the reader agrees", async () => {
+    LocalCaseTemplate.forget()
+    const site = "https://other.example/pack/"
+    const template = { format: 1, id: "pack", title: { en: "Pack" }, modules: ["module/ufoathome-module.json"], starts: [{ ...qtStart, questionnaires: ["form/questionnaire.json"] }] }
+    const served = globalThis.fetch
+    vi.stubGlobal("fetch", vi.fn(async (asked: string, init?: unknown) => asked === `${site}case-template.json`
+      ? { ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(template)), json: () => Promise.resolve(structuredClone(template)) }
+      : asked === `${site}form/questionnaire.json` ? { ok: true, status: 200, json: () => Promise.resolve({ ...structuredClone(sightingForm), id: "pack-form" }) }
+      : (served as (asked: string, init?: unknown) => Promise<unknown>)(asked, init)))
+    const element = await app()
+    element.shadowRoot!.getElementById("template-file")!.dispatchEvent(new CustomEvent("filepick", { detail: { url: `${site}case-template.json` } }))
+    await until(() => element.shadowRoot!.getElementById("consent-origins")!.textContent === "https://other.example", 3000)
+    ;(element.shadowRoot!.getElementById("consent-run") as HTMLButtonElement).click()
+    await until(() => LocalCaseTemplate.read()?.scripts === true, 3000)
+    const kept = LocalCaseTemplate.read()!
+    expect([kept.origin, kept.url, kept.starts[0].questionnaires]).toEqual(["address", `${site}case-template.json`, [`${site}form/questionnaire.json`]])
+    expect((await QuestionnaireTemplates.load(`${site}form/questionnaire.json`))?.id).toBe("pack-form")
+    await until(() => /Pack, read at https:\/\/other\.example\/pack\/case-template\.json/.test(element.shadowRoot!.getElementById("template-now")!.textContent ?? ""), 3000)
+    LocalCaseTemplate.forget()
   })
 
   it("says nothing was picked that could be opened when no file is a reconstruction", async () => {
