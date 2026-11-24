@@ -2147,7 +2147,8 @@ export class CaseEditorElement extends HTMLElement {
     this.commit()
     await this.loadTrack(track)
     const [{ QuestionnaireFeed }, { QuestionnaireTemplates }] = await Promise.all([import("../engine/questionnaire/QuestionnaireFeed.js"), import("../engine/questionnaire/QuestionnaireTemplate.js")])
-    const template = await QuestionnaireTemplates.load(detail.json.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    const named = detail.json.questionnaire?.id
+    const template = named ? await QuestionnaireTemplates.load(named) : undefined
     if (!template || !track.recording) {
       detail.report(0)
       return

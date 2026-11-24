@@ -153,39 +153,48 @@ describe("InterviewEditorElement's groups", () => {
     ])
   })
 
-  it("opens an interview held through a questionnaire on its form, the questions of the default questionnaire by section, and writes an answer after its question", async () => {
-    const { element, changes } = await make({ ...event(), medium: "questionnaire" })
+  /** An interview held through the neutral questionnaire a case template would bring, nothing answered yet. */
+  const heldThroughForm = async () => {
+    const { QuestionnaireTemplates } = await import("../../src/engine/questionnaire/QuestionnaireTemplate.js")
+    const form = (await import("../fixtures/questionnaires/sighting-form.json")).default as never
+    QuestionnaireTemplates.add(form)
+    files["https://example.org/d/form.json"] = QuestionnaireTemplates.interview(form)
+    return { ...event(), medium: "questionnaire" as const, url: "form.json" }
+  }
+
+  it("opens an interview held through a questionnaire on its form, the questions of the questionnaire it names by section, and writes an answer after its question", async () => {
+    const { element, changes } = await make(await heldThroughForm())
     await wait(50)
     await element.formShown
     expect(part(element, "group-form").hidden).toBe(false)
     const legends = [...element.shadowRoot!.querySelectorAll("#form-fields .form-section-title")].map(legend => legend.textContent)
-    expect(legends[0]).toBe("Votre observation")
-    expect(legends).toContain("Description du phénomène")
-    const date = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="B4"] input')!
+    expect(legends[0]).toBe("Your observation")
+    expect(legends).toContain("The phenomenon")
+    const date = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="Q3"] input')!
     expect(date.type).toBe("date")
     date.value = "2024-03-12"
     date.dispatchEvent(new Event("change"))
     await wait(100)
     const json = JSON.parse(element.transcriptText!) as { medium: string, questionnaire: { id: string }, segments: { speaker: string, field?: string, text?: string }[] }
     expect(json.medium).toBe("questionnaire")
-    expect(json.questionnaire.id).toBe("geipan-qt-2025")
-    const at = json.segments.findIndex(segment => segment.field === "B4" && segment.speaker === "interviewer")
-    expect(json.segments[at + 1]).toEqual({ speaker: "witness", field: "B4", text: "2024-03-12" })
-    expect(json.segments.filter(segment => segment.speaker === "interviewer").length).toBeGreaterThan(40)
+    expect(json.questionnaire.id).toBe("sighting-form")
+    const at = json.segments.findIndex(segment => segment.field === "Q3" && segment.speaker === "interviewer")
+    expect(json.segments[at + 1]).toEqual({ speaker: "witness", field: "Q3", text: "2024-03-12" })
+    expect(json.segments.filter(segment => segment.speaker === "interviewer").length).toBe(14)
     expect(changes.map(change => change.field)).toContain("transcript")
-    // A choice is a set of buttons, one of which is the answer.
-    const discontinuous = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="B9"] input[value="Discontinue"]')!
-    discontinuous.checked = true
-    discontinuous.dispatchEvent(new Event("change"))
+    // A choice is a set of buttons, the ticked ones the answer.
+    const hum = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="Q8"] input[value="hum"]')!
+    hum.checked = true
+    hum.dispatchEvent(new Event("change"))
     await wait(100)
-    expect(JSON.parse(element.transcriptText!).segments.find((segment: { field?: string, speaker: string }) => segment.field === "B9" && segment.speaker === "witness").text).toBe("Discontinue")
+    expect(JSON.parse(element.transcriptText!).segments.find((segment: { field?: string, speaker: string }) => segment.field === "Q8" && segment.speaker === "witness").text).toBe("hum")
   })
 
   it("asks its host to set the answers in the observation, and says what it did", async () => {
-    const { element } = await make({ ...event(), medium: "questionnaire" })
+    const { element } = await make(await heldThroughForm())
     await wait(50)
     await element.formShown
-    const answer = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="C3"] input')!
+    const answer = element.shadowRoot!.querySelector<HTMLInputElement>('[data-field="Q7"] input')!
     answer.value = "orange"
     answer.dispatchEvent(new Event("change"))
     await wait(100)
@@ -197,7 +206,7 @@ describe("InterviewEditorElement's groups", () => {
     })
     part(element, "form-feed").click()
     await wait(50)
-    expect(asked[0].some(segment => segment.field === "C3" && segment.text === "orange")).toBe(true)
+    expect(asked[0].some(segment => segment.field === "Q7" && segment.text === "orange")).toBe(true)
     expect(part(element, "form-fed").hidden).toBe(false)
     expect(part(element, "form-fed").textContent).toContain("1")
   })

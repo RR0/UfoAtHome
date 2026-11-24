@@ -86,24 +86,6 @@ export interface QuestionnaireTemplate {
 /** The questionnaires UFO@home knows, each a file of its own loaded when first asked for. */
 export class QuestionnaireTemplates {
 
-  /** The one UFO@home ships with, which a case template names by its id (see CaseTemplate). */
-  static readonly DEFAULT = "geipan-qt-2025"
-
-  /** The pictures of the questionnaires UFO@home ships, each by an address the bundler knows (written whole, as it asks). */
-  private static readonly IMAGES: Record<string, Record<string, string>> = {
-    "geipan-qt-2025": {
-      "azimuth.png": new URL("../../assets/questionnaires/geipan-qt-2025/azimuth.png", import.meta.url).href,
-      "elevation.png": new URL("../../assets/questionnaires/geipan-qt-2025/elevation.png", import.meta.url).href,
-      "angular-size.png": new URL("../../assets/questionnaires/geipan-qt-2025/angular-size.png", import.meta.url).href,
-      "protractor.png": new URL("../../assets/questionnaires/geipan-qt-2025/protractor.png", import.meta.url).href
-    }
-  }
-
-  private static readonly LOADERS: Record<string, () => Promise<QuestionnaireTemplate>> = {
-    "geipan-qt-2025": () => import("./templates/geipan-qt-2025.json").then(module => QuestionnaireTemplates.withImages(
-      structuredClone(module.default) as QuestionnaireTemplate, src => QuestionnaireTemplates.IMAGES["geipan-qt-2025"][src] ?? src))
-  }
-
   /** `template`, each of its pictures at the address `where` gives its `src`. */
   static withImages(template: QuestionnaireTemplate, where: (src: string) => string): QuestionnaireTemplate {
     const move = (images?: QuestionnaireImage[]) => images?.forEach(image => { image.src = where(image.src) })
@@ -116,9 +98,9 @@ export class QuestionnaireTemplates {
 
   private static readonly added = new Map<string, QuestionnaireTemplate>()
 
-  /** The ids of the questionnaires known, the default first. */
+  /** The ids of the questionnaires known: those a case template brought, a module or a page added, or read from their address. UFO@home ships none. */
   static ids(): string[] {
-    return [...new Set([...Object.keys(QuestionnaireTemplates.LOADERS), ...QuestionnaireTemplates.added.keys()])]
+    return [...QuestionnaireTemplates.added.keys()]
   }
 
   /** Makes a questionnaire known: one a module or a page brings. */
@@ -133,7 +115,7 @@ export class QuestionnaireTemplates {
    * known by its own id.
    */
   static async load(id: string): Promise<QuestionnaireTemplate | undefined> {
-    const known = QuestionnaireTemplates.added.get(id) ?? await QuestionnaireTemplates.LOADERS[id]?.()
+    const known = QuestionnaireTemplates.added.get(id)
     if (known || !/[/:]|\.json$/i.test(id)) return known
     let reading = QuestionnaireTemplates.fetched.get(id)
     if (!reading) {

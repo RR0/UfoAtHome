@@ -153,6 +153,8 @@ export interface InterviewMessages extends InputFileMessages {
   fedNothing: string
   /** When the questionnaire it was filled in on is not one this version knows: `{id}`. */
   unknownQuestionnaire: string
+  /** An interview held through a questionnaire that names none: only the questions it has are shown. */
+  noQuestionnaire: string
   /** Said when the interview is a questionnaire and the file holds no field to read as a question and its answer. */
   notAQuestionnaire: string
   loadFailed: string

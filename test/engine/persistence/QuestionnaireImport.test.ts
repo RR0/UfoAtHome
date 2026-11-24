@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { QuestionnaireImport } from "../../../src/engine/persistence/QuestionnaireImport.js"
 import { InterviewFile } from "../../../src/engine/persistence/interviewJson.js"
-import { QuestionnaireTemplates } from "../../../src/engine/questionnaire/QuestionnaireTemplate.js"
+import type { QuestionnaireTemplate } from "../../../src/engine/questionnaire/QuestionnaireTemplate.js"
 
 describe("QuestionnaireImport", () => {
   it("makes each field a question of the interviewer and the witness's answer, both naming the field", () => {
@@ -87,44 +87,62 @@ describe("QuestionnaireImport", () => {
     expect(QuestionnaireImport.sourceOf(json, "shape")).toBeUndefined()
   })
 
-  it("reads a questionnaire numbered by section (B5., C13., E1'.), its footers left out, a question over two lines told from its answer by the template", async () => {
+  it("reads a questionnaire numbered by section (B5., C13., E1'.), its footers left out, a question over two lines told from its answer by the template", () => {
+    const template: QuestionnaireTemplate = {
+      id: "numbered-form", version: "2025.1", language: "en", title: { en: "Numbered form" },
+      sections: [
+        { title: { en: "Your observation" }, fields: [{ id: "narrative", question: { en: "Your own account of the observation" } }] },
+        { title: { en: "Conditions" }, fields: [
+          { id: "B2", question: { en: "Where were you exactly? (Outdoors or inside a building? which floor? were you looking through a window? were you in a vehicle? if so, how fast were you going?)" } },
+          { id: "B4", question: { en: "Date of the observation" }, kind: "date" },
+          { id: "B5", question: { en: "Time it began (local time HH:MM:ss)" }, kind: "time" },
+          { id: "B6", question: { en: "How long it lasted, or when it ended (hours, minutes, seconds)" } },
+          { id: "B9", question: { en: "The observation was" }, kind: "choice", choices: [{ value: "Continuous", label: { en: "Continuous" } }, { value: "Discontinuous", label: { en: "Discontinuous" } }] },
+          { id: "B12", question: { en: "Did you see it with your own eyes?" }, kind: "choice", choices: [{ value: "Yes", label: { en: "Yes" } }, { value: "No", label: { en: "No" } }] }
+        ] },
+        { title: { en: "The phenomenon" }, fields: [
+          { id: "C3", question: { en: "Colour" } },
+          { id: "C9", question: { en: "A cardinal point (North, South …), an azimuth in degrees from North, or a visual or local geographical landmark (building, village)" } }
+        ] },
+        { title: { en: "Afterwards" }, fields: [{ id: "E1'", question: { en: "How strange was your observation, from 1 to 5 (1 hardly strange, 5 very strange)" }, kind: "scale" }] }
+      ]
+    }
     const filled = [
-      "                                 Votre récit libre de l’observation :*",
-      "J'ai vu une boule orange au-dessus des arbres.",
+      "                                 Your own account of the observation:*",
+      "I saw an orange ball above the trees.",
       "",
-      " Selon DTN/DA/GP 2025. 0001275                                                                   page : 3",
-      "                        Conditions d’observation du phénomène",
-      "B2. Où vous trouviez-vous exactement ?* (Extérieur ou intérieur d’un bâtiment ? quel étage ? si vous regardiez à",
-      "travers une vitre? si vous étiez dans un véhicule? le cas échéant à quelle vitesse rouliez-vous?):* Dans mon jardin",
-      "B4. Date de l’observation* : 12/03/2024",
-      "B5. Heure précise de début* (en heure locale HH:MM:ss) : 21:10",
-      "B6. Durée de l’observation ou heure de fin* (en heures, minutes, secondes) :",
-      "Je ne sais pas",
-      "C3. Couleur *:",
+      " Form 2025.1                                                                   page : 3",
+      "                        Conditions",
+      "B2. Where were you exactly?* (Outdoors or inside a building? which floor? were you looking through a",
+      "window? were you in a vehicle? if so, how fast were you going?):* In my garden",
+      "B4. Date of the observation* : 12/03/2024",
+      "B5. Time it began* (local time HH:MM:ss) : 21:10",
+      "B6. How long it lasted, or when it ended* (hours, minutes, seconds) :",
+      "I don't know",
+      "C3. Colour *:",
       "orange",
-      "                           Début d’observation (position initiale du PAN dans le ciel)",
-      "C9. Indiquer un point cardinal (Nord, Sud …), ou un azimut en degrés par rapport au Nord, ou un repère visuel",
-      "ou géographique local (bâtiment, village) *",
-      "Sud-Ouest",
-      "E1’. Quelle est votre perception du niveau d’étrangeté de votre observation de 1 à 5 (1 peu étrange, 5",
-      "très étrange)*",
+      "                           The phenomenon",
+      "C9. A cardinal point (North, South …), an azimuth in degrees from North, or a visual",
+      "or local geographical landmark (building, village) *",
+      "South-West",
+      "E1’. How strange was your observation, from 1 to 5 (1 hardly strange, 5",
+      "very strange)*",
       "             4"
     ].join("\n")
-    const template = (await QuestionnaireTemplates.load("geipan-qt-2025"))!
     const json = QuestionnaireImport.parse(filled, {}, template)!
-    expect(json.questionnaire).toEqual({ id: "geipan-qt-2025", version: "DTN/DA/GP 2025.0001275" })
+    expect(json.questionnaire).toEqual({ id: "numbered-form", version: "2025.1" })
     const answers = Object.fromEntries([...QuestionnaireImport.answers(json)].map(([field, answer]) => [field, answer.text]))
-    expect(answers).toEqual({ recit: "J'ai vu une boule orange au-dessus des arbres.", B2: "Dans mon jardin", B4: "12/03/2024", B5: "21:10", C3: "orange", C9: "Sud-Ouest", "E1'": "4" })
+    expect(answers).toEqual({ narrative: "I saw an orange ball above the trees.", B2: "In my garden", B4: "12/03/2024", B5: "21:10", C3: "orange", C9: "South-West", "E1'": "4" })
     // The witness's "don't know" is kept as said, and the question as the template words it.
-    expect(json.segments.find(segment => segment.field === "B6" && segment.speaker === "witness")?.text).toBe("Je ne sais pas")
-    expect(json.segments.find(segment => segment.field === "C9")?.text).toMatch(/^Indiquer un point cardinal/)
-    const boxes = QuestionnaireImport.parse("B9. L’observation s’est faite de façon :* ☐ Continue ☒ Discontinue\nB12. Avez-vous vu le phénomène directement de vos yeux ?* ☐ Oui ☐ Non", {}, template)!
-    expect(Object.fromEntries([...QuestionnaireImport.answers(boxes)].map(([field, answer]) => [field, answer.text]))).toEqual({ B9: "Discontinue" })
+    expect(json.segments.find(segment => segment.field === "B6" && segment.speaker === "witness")?.text).toBe("I don't know")
+    expect(json.segments.find(segment => segment.field === "C9")?.text).toMatch(/^A cardinal point/)
+    const boxes = QuestionnaireImport.parse("B9. The observation was:* ☐ Continuous ☒ Discontinuous\nB12. Did you see it with your own eyes?* ☐ Yes ☐ No", {}, template)!
+    expect(Object.fromEntries([...QuestionnaireImport.answers(boxes)].map(([field, answer]) => [field, answer.text]))).toEqual({ B9: "Discontinuous" })
   })
 
   it("reads a questionnaire numbered by section with no template, a question ending at its line's \"?\", \":\" or \"*\"", () => {
-    const json = QuestionnaireImport.parse("B4. Date de l’observation* : 12/03/2024\nC2. Forme *:\nune boule\npage : 5\nC7. Bruit ? aucun")!
-    expect(json.segments.map(segment => [segment.field, segment.text])).toEqual([["B4", "Date de l’observation"], ["B4", "12/03/2024"], ["C2", "Forme"], ["C2", "une boule"], ["C7", "Bruit ?"], ["C7", "aucun"]])
+    const json = QuestionnaireImport.parse("B4. Date of the observation* : 12/03/2024\nC2. Shape *:\na ball\npage : 5\nC7. Sound ? none")!
+    expect(json.segments.map(segment => [segment.field, segment.text])).toEqual([["B4", "Date of the observation"], ["B4", "12/03/2024"], ["C2", "Shape"], ["C2", "a ball"], ["C7", "Sound ?"], ["C7", "none"]])
   })
 
   it("reads nothing from a file with no field", () => {

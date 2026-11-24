@@ -18,5 +18,13 @@ export const ufoAtHomeMessages_it: UfoAtHomeMessages = {
   recentRemove: "Togli dall'elenco",
   noJson: "Nessuno dei file scelti è una ricostruzione (.json).",
   openFailed: "Non è stato possibile aprirlo.",
-  caseTemplateFailed: "Non è stato possibile leggere il modello di caso: non è stato avviato nulla."
+  caseTemplateFailed: "Non è stato possibile leggere il modello di caso: non è stato avviato nulla.",
+  templateHeading: "Modello di caso",
+  templateNone: "Nessuno: Nuovo avvia un'osservazione vuota.",
+  templateFromPage: "{title}, dato da questa pagina.",
+  templateFromFile: "{title}, dal file {file}, conservato in questo browser.",
+  templateLoadHint: "Un modello di caso suo (un file .json): ciò che Nuovo propone di avviare, conservato in questo browser finché non lo dimentica.",
+  templateForget: "Dimenticare questo modello",
+  templateKept: "Il modello di caso {title} è conservato: Nuovo lo propone.",
+  templateModulesWithoutScripts: "I moduli che nomina arrivano con ciò che dicono i loro manifest, senza i loro script: un suo file non esegue alcun codice.",
 }

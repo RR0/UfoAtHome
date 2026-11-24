@@ -88,7 +88,7 @@ New starts a blank observation. With one, New offers its `starts` (the only one 
 questionnaires its witness is asked to fill in (an id, or the address of a questionnaire template), each an interview of the
 case, and where it opens (`start`: the first questionnaire's form, or the observation), the first step of what may become a
 process. The template's `modules` (and a start's own) load when New is used, their scripts run since the page asked for them.
-`public/case-templates/testimony.json` offers GEIPAN's technical questionnaire or a blank observation.
+A template may bring its questionnaires whole (`questionnaires`), named by their id in its starts: one file that needs no other. UFO@home ships none. The reader may also pick a template of their own from a file, in the app's Open menu (`LocalCaseTemplate`, kept in the browser's localStorage until they forget it): it goes before the page's, and its modules come without their scripts, as a file's own word runs no code. The editor opened blank applies the template as New would.
 
 ## Kinds of events of the sky
 

@@ -18,5 +18,13 @@ export const ufoAtHomeMessages_en: UfoAtHomeMessages = {
   recentRemove: "Remove from the list",
   noJson: "None of the files picked is a reconstruction (.json).",
   openFailed: "This could not be opened.",
-  caseTemplateFailed: "The case template could not be read: nothing was started."
+  caseTemplateFailed: "The case template could not be read: nothing was started.",
+  templateHeading: "Case template",
+  templateNone: "None: New starts a blank observation.",
+  templateFromPage: "{title}, given by this page.",
+  templateFromFile: "{title}, from the file {file}, kept in this browser.",
+  templateLoadHint: "A case template of your own (a .json file): what New offers to start, kept in this browser until you forget it.",
+  templateForget: "Forget this template",
+  templateKept: "The case template {title} is kept: New offers it.",
+  templateModulesWithoutScripts: "The modules it names come with what their manifests state, without their scripts: a file of yours runs no code.",
 }

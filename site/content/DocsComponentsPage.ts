@@ -157,7 +157,7 @@ export class DocsComponentsPage extends DocsSection {
         <code>case-template</code> attribute names the case template (a JSON file) that says what <em>New</em> offers: without one,
         a blank observation; with one, its starts (the only one taken without asking), the questionnaires a new case asks its
         witness to fill in, the modules they need (whose scripts run, since the page asked for them) and the recipient of the
-        confidential answers (see <a href="/docs/interview/">the interview</a>).</li>
+        confidential answers (see <a href="/docs/interview/">the interview</a>). The reader may pick one of their own from a file, in its Open menu: kept in their browser until they forget it, it goes before the page's, its modules without their scripts. Opened blank, it starts as <em>New</em> would.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — a date, with its precision.</strong>
         A picker for a full instant, a text for anything less (EDTF), and how sure it is. The editors use it for an
@@ -287,7 +287,7 @@ import "@rr0/ufoathome/editor"   // registers &lt;rr0-sighting-editor&gt;</code>
         attribut <code>case-template</code> nomme le modèle de dossier (un fichier JSON) qui dit ce que propose <em>Nouveau</em> :
         sans lui, une observation vierge ; avec lui, ses débuts (le seul pris sans demander), les questionnaires qu'un nouveau
         dossier demande à son témoin de remplir, les modules qu'il lui faut (leurs scripts s'exécutent, puisque la page les a
-        demandés) et le destinataire des réponses confidentielles (voir <a href="/docs/interview/">l'interview</a>).</li>
+        demandés) et le destinataire des réponses confidentielles (voir <a href="/docs/interview/">l'interview</a>). Le lecteur peut en choisir un à lui depuis un fichier, dans son menu Ouvrir : gardé dans son navigateur jusqu'à ce qu'il l'oublie, il passe avant celui de la page, ses modules sans leurs scripts. Ouverte à vide, l'application commence comme le ferait <em>Nouveau</em>.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — une date, avec sa précision.</strong> Un sélecteur pour un instant
         complet, un champ texte pour une date moins précise (EDTF), et le degré de certitude. Les éditeurs s'en servent pour le début et la fin d'une
@@ -420,7 +420,7 @@ import "@rr0/ufoathome/editor"   // enregistre &lt;rr0-sighting-editor&gt;</code
         atributo <code>case-template</code> nombra la plantilla de caso (un archivo JSON) que dice lo que ofrece <em>Nuevo</em>:
         sin ella, una observación en blanco; con ella, sus inicios (el único se toma sin preguntar), los cuestionarios que un
         caso nuevo pide rellenar a su testigo, los módulos que necesita (cuyos scripts se ejecutan, ya que la página los pidió)
-        y el destinatario de las respuestas confidenciales (véase <a href="/docs/interview/">la entrevista</a>).</li>
+        y el destinatario de las respuestas confidenciales (véase <a href="/docs/interview/">la entrevista</a>). El lector puede elegir una suya desde un archivo, en su menú Abrir: guardada en su navegador hasta que la olvide, va antes que la de la página, sus módulos sin sus scripts. Abierta en blanco, la aplicación empieza como lo haría <em>Nuevo</em>.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una fecha, con su precisión.</strong> Un selector para un instante
         completo, un texto para menos (EDTF), y el grado de certeza. Los editores lo usan para el inicio y el fin de una
@@ -552,7 +552,7 @@ import "@rr0/ufoathome/editor"   // registra &lt;rr0-sighting-editor&gt;</code><
         attributo <code>case-template</code> nomina il modello di caso (un file JSON) che dice cosa offre <em>Nuovo</em>:
         senza, un'osservazione vuota; con esso, i suoi inizi (l'unico è preso senza chiedere), i questionari che un nuovo caso
         chiede al testimone di compilare, i moduli che servono (i cui script vengono eseguiti, poiché la pagina li ha chiesti)
-        e il destinatario delle risposte riservate (vedi <a href="/docs/interview/">l'intervista</a>).</li>
+        e il destinatario delle risposte riservate (vedi <a href="/docs/interview/">l'intervista</a>). Il lettore può sceglierne uno suo da un file, nel menu Apri: conservato nel suo browser finché non lo dimentica, passa prima di quello della pagina, i suoi moduli senza i loro script. Aperta vuota, l'applicazione comincia come farebbe <em>Nuovo</em>.</li>
 
       <li><strong><code>&lt;rr0-date-input&gt;</code> — una data, con la sua precisione.</strong> Un selettore per un istante
         completo, un testo per meno (EDTF), e il grado di certezza. Gli editor lo usano per l'inizio e la fine di

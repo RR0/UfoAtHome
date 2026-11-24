@@ -1,7 +1,7 @@
 import type { SaidText } from "../model/SaidText.js"
 
 /**
- * Who the confidential answers of a questionnaire are for (an organisation that receives testimonies: GEIPAN), as a case template names it (see
+ * Who the confidential answers of a questionnaire are for (an organisation that receives testimonies), as a case template names it (see
  * CaseTemplateJson.recipient) and as the interview then keeps it (see InterviewJson.questionnaire): the key that seals them for it.
  */
 export interface SealRecipient {

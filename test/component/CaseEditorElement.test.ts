@@ -8,6 +8,9 @@ import { EDIT_EVENT, IN_PLACE_ATTRIBUTE, MODE_CHANGE_EVENT } from "../../src/com
 import { OpenFiles } from "../../src/engine/net/OpenFiles.js"
 import { register as registerUfoAtHome, type UfoAtHomeElement } from "../../src/component/UfoAtHomeElement.js"
 import { SightingFetch } from "../../src/engine/net/SightingFetch.js"
+import { QuestionnaireTemplates, type QuestionnaireTemplate } from "../../src/engine/questionnaire/QuestionnaireTemplate.js"
+import { LocalCaseTemplate } from "../../src/engine/questionnaire/CaseTemplate.js"
+import sightingForm from "../fixtures/questionnaires/sighting-form.json"
 
 register()
 
@@ -347,7 +350,8 @@ describe("CaseEditorElement", () => {
     expect(bare.caseSession!.interviews).toHaveLength(0)
     bare.remove()
     const element = document.createElement("rr0-case-editor") as CaseEditorElement
-    element.caseStart = { id: "qt", title: "QT", questionnaires: ["geipan-qt-2025"] }
+    QuestionnaireTemplates.add(sightingForm as QuestionnaireTemplate)
+    element.caseStart = { id: "qt", title: "QT", questionnaires: ["sighting-form"] }
     element.setAttribute("src", "https://example.org/d/plain.json")
     document.body.appendChild(element)
     await wait()
@@ -356,7 +360,7 @@ describe("CaseEditorElement", () => {
     const interview = element.caseSession!.interviews[0]
     expect(interview).toMatchObject({ medium: "questionnaire", interviewOf: element.caseSession!.tracks[0].event.id, url: `${interview.id}.json` })
     const transcript = JSON.parse(element.caseSession!.transcriptText(interview)!)
-    expect(transcript.questionnaire.id).toBe("geipan-qt-2025")
+    expect(transcript.questionnaire.id).toBe("sighting-form")
     expect(transcript.segments.every((segment: { speaker: string }) => segment.speaker === "interviewer")).toBe(true)
   })
 
@@ -1577,7 +1581,8 @@ describe("Opening files in the app", () => {
 
   /** The app on a blank editor, New offering the starts of the case template served at `url`. */
   const templated = async (starts: unknown[], url = "https://example.org/templates/t.json"): Promise<UfoAtHomeElement> => {
-    const template = { format: 1, id: "t", title: { en: "Start" }, starts }
+    // The questionnaire its starts name, brought by the template itself.
+    const template = { format: 1, id: "t", title: { en: "Start" }, questionnaires: [sightingForm], starts }
     const served = globalThis.fetch
     vi.stubGlobal("fetch", vi.fn(async (asked: string, init?: unknown) => asked === url
       ? { ok: true, json: () => Promise.resolve(structuredClone(template)) }
@@ -1589,7 +1594,7 @@ describe("Opening files in the app", () => {
     await element.ready
     return element
   }
-  const qtStart = { id: "qt", title: { en: "Fill in the questionnaire" }, questionnaires: ["geipan-qt-2025"], start: "questionnaire" }
+  const qtStart = { id: "qt", title: { en: "Fill in the questionnaire" }, questionnaires: ["sighting-form"], start: "questionnaire" }
 
   it("starts a blank observation on New when the page names no case template: no case, no questionnaire", async () => {
     const element = await app()
@@ -1602,8 +1607,10 @@ describe("Opening files in the app", () => {
     expect(editor.caseSession).toBeUndefined()
   })
 
-  it("offers on New the starts of the page's case template, and starts the one chosen", async () => {
+  it("offers the starts of the page's case template on a blank start as on New, and starts the one chosen", async () => {
     const element = await templated([qtStart, { id: "blank", title: { en: "A blank observation" }, description: { en: "No questionnaire." } }])
+    // Arrived on the blank editor, the template's starts are offered in place of a blank observation.
+    await until(() => element.shadowRoot!.querySelectorAll("#starts button").length === 2, 3000)
     ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
     await until(() => element.shadowRoot!.querySelectorAll("#starts button").length === 2, 3000)
     const buttons = [...element.shadowRoot!.querySelectorAll<HTMLButtonElement>("#starts button")]
@@ -1614,18 +1621,17 @@ describe("Opening files in the app", () => {
     expect((element.querySelector("rr0-case-editor") as CaseEditorElement).caseSession).toBeUndefined()
   })
 
-  it("starts a testimony on New when the case template offers only that: a case around a blank observation, the witness's questionnaire open on its form, its answers set in the observation", async () => {
+  it("starts a testimony on arriving when the case template offers only that: a case around a blank observation, the witness's questionnaire open on its form, its answers set in the observation", async () => {
     const element = await templated([qtStart], "https://example.org/templates/testimony.json")
-    ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
     await until(() => (element.querySelector("rr0-case-editor") as CaseEditorElement | null)?.caseSession?.interviews.length === 1, 3000)
     const editor = element.querySelector("rr0-case-editor") as CaseEditorElement
     const session = editor.caseSession!
     const interview = session.interviews[0]
     expect(interview).toMatchObject({ eventType: "interview", medium: "questionnaire", interviewOf: session.tracks[0].event.id })
     const form = editor.shadowRoot!.getElementById("interview") as HTMLElement & { formShown: Promise<void> }
-    await until(() => form.shadowRoot!.querySelector('[data-field="B5"]') !== null, 3000)
+    await until(() => form.shadowRoot!.querySelector('[data-field="Q4"]') !== null, 3000)
     expect(form.shadowRoot!.getElementById("group-form")!.hidden).toBe(false)
-    for (const [field, answer] of [["B4", "2024-03-12"], ["B5", "21:10:00"], ["C3", "orange"], ["C9", "sud-ouest"], ["C10", "30°"]]) {
+    for (const [field, answer] of [["Q3", "2024-03-12"], ["Q4", "21:10:00"], ["Q7", "orange"], ["Q9", "sud-ouest"], ["Q10", "30°"]]) {
       const input = form.shadowRoot!.querySelector<HTMLInputElement>(`[data-field="${field}"] input`)!
       input.value = answer
       input.dispatchEvent(new Event("change"))
@@ -1641,6 +1647,29 @@ describe("Opening files in the app", () => {
     // The case is written with the questionnaire's file beside it, the answers in it.
     const written = session.files().map(file => file.path)
     expect(written).toContain(`${interview.id}.json`)
+  })
+
+  it("keeps a case template the reader picks from a file of theirs, offers it on New, and forgets it", async () => {
+    LocalCaseTemplate.forget()
+    const element = await app()
+    const text = JSON.stringify({ format: 1, id: "mine", title: { en: "My template" }, modules: ["https://cdn.example/m.json"], questionnaires: [sightingForm],
+      starts: [qtStart, { id: "blank", title: { en: "A blank observation" } }] })
+    element.shadowRoot!.getElementById("template-file")!.dispatchEvent(new CustomEvent("filepick", { detail: { file: new File([text], "mine.json") } }))
+    await until(() => LocalCaseTemplate.read() !== undefined, 3000)
+    expect([LocalCaseTemplate.read()!.origin, LocalCaseTemplate.read()!.fileName]).toEqual(["file", "mine.json"])
+    const said: string[] = []
+    await until(() => {
+      said.push(element.shadowRoot!.getElementById("status")!.textContent ?? "")
+      return /My template/.test(said[said.length - 1])
+    }, 3000)
+    // Its modules come without their scripts, and it says so.
+    expect(said[said.length - 1]).toMatch(/without their scripts/)
+    expect(element.shadowRoot!.getElementById("template-now")!.textContent).toBe("My template, from the file mine.json, kept in this browser.")
+    ;(element.shadowRoot!.getElementById("new") as HTMLButtonElement).click()
+    await until(() => element.shadowRoot!.querySelectorAll("#starts button").length === 2, 3000)
+    ;(element.shadowRoot!.getElementById("template-forget") as HTMLButtonElement).click()
+    await until(() => element.shadowRoot!.getElementById("template-now")!.textContent === "None: New starts a blank observation.", 3000)
+    expect(LocalCaseTemplate.read()).toBeUndefined()
   })
 
   it("says nothing was picked that could be opened when no file is a reconstruction", async () => {

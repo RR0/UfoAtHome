@@ -18,5 +18,13 @@ export const ufoAtHomeMessages_es: UfoAtHomeMessages = {
   recentRemove: "Quitar de la lista",
   noJson: "Ninguno de los archivos elegidos es una reconstrucción (.json).",
   openFailed: "No se ha podido abrir.",
-  caseTemplateFailed: "No se pudo leer la plantilla de caso: no se ha empezado nada."
+  caseTemplateFailed: "No se pudo leer la plantilla de caso: no se ha empezado nada.",
+  templateHeading: "Plantilla de caso",
+  templateNone: "Ninguna: Nuevo empieza una observación en blanco.",
+  templateFromPage: "{title}, dada por esta página.",
+  templateFromFile: "{title}, del archivo {file}, guardada en este navegador.",
+  templateLoadHint: "Una plantilla de caso suya (un archivo .json): lo que Nuevo ofrece empezar, guardada en este navegador hasta que la olvide.",
+  templateForget: "Olvidar esta plantilla",
+  templateKept: "La plantilla de caso {title} queda guardada: Nuevo la ofrece.",
+  templateModulesWithoutScripts: "Los módulos que nombra vienen con lo que dicen sus manifiestos, sin sus scripts: un archivo suyo no ejecuta ningún código.",
 }

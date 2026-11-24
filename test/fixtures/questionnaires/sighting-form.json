@@ -1,0 +1,46 @@
+{
+  "id": "sighting-form",
+  "version": "1",
+  "language": "en",
+  "title": { "en": "Sighting form" },
+  "intro": { "en": "Tell us what you saw.\n\nAnswer what you can; leave the rest empty." },
+  "stops": [{ "en": "Your details" }],
+  "sections": [
+    {
+      "title": { "en": "Your observation" },
+      "fields": [{ "id": "narrative", "question": { "en": "Your account, in your own words" }, "kind": "long", "feeds": "narrative" }]
+    },
+    {
+      "title": { "en": "When and where" },
+      "fields": [
+        { "id": "Q1", "question": { "en": "Precise address of where you were" }, "kind": "text", "confidential": { "reason": { "en": "Precise address" } } },
+        { "id": "Q2", "question": { "en": "Where were you exactly?" }, "kind": "long" },
+        { "id": "Q3", "question": { "en": "Date of the observation" }, "kind": "date", "feeds": "date" },
+        { "id": "Q4", "question": { "en": "Time it began (local time)" }, "kind": "time", "feeds": "startTime" },
+        { "id": "Q5", "question": { "en": "How long it lasted, or when it ended" }, "kind": "text", "feeds": "duration" },
+        { "id": "Q6", "question": { "en": "The sky" }, "kind": "text" }
+      ]
+    },
+    {
+      "title": { "en": "The phenomenon" },
+      "fields": [
+        { "id": "Q7", "question": { "en": "Its colour" }, "kind": "text", "feeds": "color" },
+        { "id": "Q8", "question": { "en": "Did you hear anything?" }, "kind": "choice", "multiple": true, "required": false,
+          "choices": [{ "value": "nothing", "label": { "en": "Nothing" } }, { "value": "hum", "label": { "en": "A hum" } }] }
+      ]
+    },
+    {
+      "title": { "en": "Where in the sky" },
+      "fields": [
+        { "id": "Q9", "question": { "en": "Direction at the beginning" }, "kind": "text", "feeds": "startAzimuth" },
+        { "id": "Q10", "question": { "en": "Height at the beginning" }, "kind": "text", "feeds": "startElevation" },
+        { "id": "Q11", "question": { "en": "Direction at the end" }, "kind": "text", "feeds": "endAzimuth" },
+        { "id": "Q12", "question": { "en": "Height at the end" }, "kind": "text", "feeds": "endElevation" }
+      ]
+    },
+    {
+      "title": { "en": "Pictures" },
+      "fields": [{ "id": "sketch", "question": { "en": "A sketch of what you saw" }, "kind": "files", "accept": "image/*,.pdf", "required": false }]
+    }
+  ]
+}

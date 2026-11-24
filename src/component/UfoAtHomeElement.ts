@@ -6,7 +6,7 @@ import { OpenFiles } from "../engine/net/OpenFiles.js"
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { EditorTheme } from "./EditorTheme.js"
 import { MessageStyle } from "./MessageStyle.js"
-import { CaseTemplates, type CaseStart, type CaseTemplate } from "../engine/questionnaire/CaseTemplate.js"
+import { CaseTemplates, LocalCaseTemplate, type CaseStart, type CaseTemplate } from "../engine/questionnaire/CaseTemplate.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadUfoAtHomeMessages, UFO_SUPPORTED_LANGUAGES, type UfoLanguage } from "./messages/index.js"
@@ -52,6 +52,9 @@ ${MessageStyle.CSS}
 .starts button:is(:hover, :focus-visible) { background: var(--neutral-bg); border-color: var(--line-strong); }
 .starts .name { font-weight: 600; }
 .starts .what { color: var(--ink-dim); font-size: .78em; }
+.template-now { margin: 0 0 6px; }
+.template-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.template-row[hidden], .template-forget[hidden] { display: none; }
 </style>
 <div class="bar">
   <p id="status" class="status" role="status" hidden></p>
@@ -68,6 +71,13 @@ ${MessageStyle.CSS}
   <h2 id="recent-heading"></h2>
   <ul id="recent" class="recent"></ul>
   <p id="recent-none" class="recent-none" hidden></p>
+  <h2 id="template-heading"></h2>
+  <p id="template-now" class="template-now"></p>
+  <div class="template-row">
+    <rr0-input-file id="template-file" name="template" accept=".json,application/json"></rr0-input-file>
+    <button id="template-forget" type="button" class="pill-btn template-forget" hidden></button>
+  </div>
+  <p id="template-hint" class="hint"></p>
 </div>
 <slot></slot>
 `
@@ -86,7 +96,9 @@ ${MessageStyle.CSS}
  * what, by MODE_CHANGE_EVENT, for the page to put it in its address.
  *
  * `case-template` is the address of a case template (see CaseTemplate): what New offers to start, the only start taken without asking, and the
- * modules the template names loaded, their scripts run since the page asked for them. Without it, New starts a blank observation.
+ * modules the template names loaded, their scripts run since the page asked for them. The reader may give one of their own instead, from a file
+ * of theirs, in the Open menu: kept in this browser until they forget it (see LocalCaseTemplate), its modules loaded without their scripts. Without
+ * either, New starts a blank observation. The editor opened blank, with no file, starts as New would under the template.
  *
  * It holds the reader or the editor as children of its own, in the page's light: what the page says of `rr0-case-editor`, `rr0-case` or
  * `rr0-sighting` applies to them here as anywhere.
@@ -109,10 +121,16 @@ export class UfoAtHomeElement extends HTMLElement {
     this.byId("open").addEventListener("click", () => {
       this.placeMenu()
       void this.showRecent()
+      void this.showTemplate()
     })
     this.byId("open-file").addEventListener("filepick", event => {
       this.closeMenu()
       void this.openPick((event as CustomEvent<InputFilePick>).detail)
+    })
+    this.byId("template-file").addEventListener("filepick", event => void this.keepTemplate((event as CustomEvent<InputFilePick>).detail))
+    this.byId("template-forget").addEventListener("click", () => {
+      LocalCaseTemplate.forget()
+      void this.showTemplate()
     })
   }
 
@@ -121,13 +139,15 @@ export class UfoAtHomeElement extends HTMLElement {
     this.fitHeight()
     if (this.started) return
     this.started = true
-    void this.loadLocale()
+    this.localeLoaded = this.loadLocale()
     const src = this.getAttribute("src") ?? undefined
     const track = this.getAttribute("track") ?? undefined
     const opened = src && this.getAttribute("mode") !== "edit"
       ? this.switcher.read({ src, ...(track ? { track } : {}) })
       : this.switcher.edit({ ...(src ? { src } : {}), ...(track ? { track } : {}) })
     this.ready = opened.catch(() => this.say(this.messages?.openFailed, "error"))
+    // A blank start, with no file: as New would under the case template, when there is one.
+    if (!src) void this.ready.then(() => this.startUnderTemplate())
     // Again once the page around is laid out: its header may not have been when this was connected.
     void this.ready.then(this.fitHeight)
   }
@@ -218,30 +238,94 @@ export class UfoAtHomeElement extends HTMLElement {
    * template names are loaded first, the page having asked for them.
    */
   async startNew(): Promise<void> {
-    const address = this.getAttribute("case-template")
-    if (!address) return this.switcher.startNew()
-    let template: CaseTemplate
+    let template: CaseTemplate | undefined
     try {
-      template = await CaseTemplates.load(address)
+      template = await this.template()
     } catch {
       this.say(this.messages?.caseTemplateFailed, "error")
       return
     }
+    if (!template) return this.switcher.startNew()
     this.say(undefined)
+    await this.offer(template)
+  }
+
+  /**
+   * The case template in use: the reader's own, kept in this browser, when they gave one; else the page's (its `case-template`); undefined when
+   * neither is. An error when the page's cannot be read.
+   */
+  async template(): Promise<CaseTemplate | undefined> {
+    const kept = LocalCaseTemplate.read()
+    if (kept) return kept
+    const address = this.getAttribute("case-template")
+    return address ? CaseTemplates.load(address) : undefined
+  }
+
+  /** What `template` offers: its questionnaires known and its modules loaded, then its only start taken, or the menu of its starts opened. */
+  private async offer(template: CaseTemplate): Promise<void> {
+    await CaseTemplates.install(template)
     const { ModuleSession } = await import("../modules/ModuleSession.js")
-    void ModuleSession.shared.require(template.modules, template.url, true)
-    if (template.starts.length === 1) return this.start(template.starts[0])
+    // The page's word runs their scripts; a file of the reader's brings what their manifests state only.
+    void ModuleSession.shared.require(template.modules, template.url, template.origin === "page")
+    if (template.starts.length === 1) return this.start(template.starts[0], template)
     this.showStarts(template)
   }
 
+  /** The blank start, under the case template when there is one: its only start taken, or its starts offered, in place of a blank observation. */
+  private async startUnderTemplate(): Promise<void> {
+    let template: CaseTemplate | undefined
+    try {
+      template = await this.template()
+    } catch {
+      this.say(this.messages?.caseTemplateFailed, "error")
+      return
+    }
+    if (template) await this.offer(template)
+  }
+
   /** Starts the new observation as `start` says, once the modules it names are there. */
-  private async start(start: CaseStart): Promise<void> {
+  private async start(start: CaseStart, template?: CaseTemplate): Promise<void> {
     this.closeStarts()
     if (start.modules?.length) {
       const { ModuleSession } = await import("../modules/ModuleSession.js")
-      await ModuleSession.shared.require(start.modules, undefined, true)
+      await ModuleSession.shared.require(start.modules, undefined, template?.origin !== "file")
     }
     await this.switcher.startNew(start)
+  }
+
+  /** Keeps the case template the reader picked (a file of theirs, or an address read once) in this browser, and says so. */
+  private async keepTemplate(pick: InputFilePick): Promise<void> {
+    await this.localeLoaded
+    const m = this.messages
+    try {
+      const text = pick.url !== undefined ? await (await fetch(pick.url)).text() : await UfoAtHomeElement.textOf(pick.file)
+      const name = pick.url !== undefined ? decodeURIComponent(pick.url.replace(/[?#].*$/, "").replace(/^.*\//, "")) : pick.file.name
+      const template = LocalCaseTemplate.keep(text, name)
+      const said = new SaidTexts(HostLocale.preferencesFor(this))
+      const title = said.read(template.title) ?? template.id
+      this.say([m?.templateKept.replace("{title}", title), template.modules?.length ? m?.templateModulesWithoutScripts : undefined].filter(Boolean).join(" "))
+    } catch {
+      this.say(m?.caseTemplateFailed, "error")
+    }
+    await this.showTemplate()
+  }
+
+  /** Says, in the Open menu, which case template New goes by, and offers to forget the reader's own. */
+  private async showTemplate(): Promise<void> {
+    await this.localeLoaded
+    const m = this.messages
+    if (!m) return
+    const said = new SaidTexts(HostLocale.preferencesFor(this))
+    let template: CaseTemplate | undefined
+    try {
+      template = await this.template()
+    } catch {
+      template = undefined
+    }
+    const title = template ? said.read(template.title) ?? template.id : ""
+    this.byId("template-now").textContent = !template ? m.templateNone
+      : template.origin === "file" ? m.templateFromFile.replace("{title}", title).replace("{file}", template.fileName ?? "") : m.templateFromPage.replace("{title}", title)
+    this.byId("template-forget").hidden = template?.origin !== "file"
   }
 
   /** Opens the menu of what `template` offers to start, under New. */
@@ -263,7 +347,7 @@ export class UfoAtHomeElement extends HTMLElement {
         what.textContent = said.read(start.description) ?? ""
         button.append(what)
       }
-      button.addEventListener("click", () => void this.start(start))
+      button.addEventListener("click", () => void this.start(start, template))
       item.append(button)
       return item
     }))
@@ -345,6 +429,8 @@ export class UfoAtHomeElement extends HTMLElement {
   }
 
   private language: UfoLanguage = "en"
+  /** Its words, loaded: what speaks waits for them. */
+  private localeLoaded: Promise<void> = Promise.resolve()
 
   private async loadLocale(): Promise<void> {
     this.language = selectLocale(HostLocale.preferencesFor(this), UFO_SUPPORTED_LANGUAGES) as UfoLanguage
@@ -357,6 +443,10 @@ export class UfoAtHomeElement extends HTMLElement {
     this.byId("recent-heading").textContent = m.recentHeading
     this.byId("recent-none").textContent = m.recentNone
     ;(this.byId("open-file") as InputFileElement).messages = m
+    ;(this.byId("template-file") as InputFileElement).messages = m
+    this.byId("template-heading").textContent = m.templateHeading
+    this.byId("template-hint").textContent = m.templateLoadHint
+    this.byId("template-forget").textContent = m.templateForget
   }
 
   private byId(id: string): HTMLElement {

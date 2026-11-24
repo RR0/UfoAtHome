@@ -26,4 +26,16 @@ export interface UfoAtHomeMessages extends InputFileMessages {
   openFailed: string
   /** When the case template the page names (see UfoAtHomeElement's `case-template`) could not be read: New starts nothing. */
   caseTemplateFailed: string
+  /**
+   * The case template in use, in the Open menu (see LocalCaseTemplate): its heading; none; the page's (`{title}`); the reader's, from the file
+   * `{file}` kept in this browser; the picker's hint; what forgets it; that it was kept; that the modules a file names come without their scripts.
+   */
+  templateHeading: string
+  templateNone: string
+  templateFromPage: string
+  templateFromFile: string
+  templateLoadHint: string
+  templateForget: string
+  templateKept: string
+  templateModulesWithoutScripts: string
 }

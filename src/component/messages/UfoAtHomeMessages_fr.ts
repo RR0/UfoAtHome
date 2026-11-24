@@ -18,5 +18,13 @@ export const ufoAtHomeMessages_fr: UfoAtHomeMessages = {
   recentRemove: "Retirer de la liste",
   noJson: "Aucun des fichiers choisis n'est une reconstitution (.json).",
   openFailed: "Cela n'a pas pu être ouvert.",
-  caseTemplateFailed: "Le modèle de dossier n'a pas pu être lu : rien n'a été commencé."
+  caseTemplateFailed: "Le modèle de dossier n'a pas pu être lu : rien n'a été commencé.",
+  templateHeading: "Modèle de dossier",
+  templateNone: "Aucun : Nouveau commence une observation vierge.",
+  templateFromPage: "{title}, donné par cette page.",
+  templateFromFile: "{title}, du fichier {file}, gardé dans ce navigateur.",
+  templateLoadHint: "Un modèle de dossier à vous (un fichier .json) : ce que Nouveau propose de commencer, gardé dans ce navigateur jusqu'à ce que vous l'oubliiez.",
+  templateForget: "Oublier ce modèle",
+  templateKept: "Le modèle de dossier {title} est gardé : Nouveau le propose.",
+  templateModulesWithoutScripts: "Les modules qu'il nomme viennent avec ce que leurs manifestes disent, sans leurs scripts : un fichier à vous n'exécute aucun code.",
 }

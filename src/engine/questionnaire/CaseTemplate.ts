@@ -1,5 +1,6 @@
 import type { SaidText } from "../model/SaidText.js"
 import type { SealRecipient } from "./QuestionnaireSeal.js"
+import { QuestionnaireTemplates, type QuestionnaireTemplate } from "./QuestionnaireTemplate.js"
 
 /**
  * Where a new case starts once made: on the form of its first questionnaire, for the witness to fill it in first; or on its observation.
@@ -17,8 +18,9 @@ export interface CaseStart {
   /** What it is for, under its title. */
   description?: SaidText
   /**
-   * The questionnaires its witness is asked to fill in, each an interview of the case held through it: the id of one UFO@home knows (see
-   * QuestionnaireTemplates), or the address of one, relative to the template's. None: a blank observation, and no case around it until one is made.
+   * The questionnaires its witness is asked to fill in, each an interview of the case held through it: the id of one its template brings (see
+   * CaseTemplateJson.questionnaires) or the page knows (see QuestionnaireTemplates), or the address of one, relative to the template's. None: a
+   * blank observation, and no case around it until one is made.
    */
   questionnaires?: string[]
   /** Its modules (see `CaseTemplateJson.modules`), loaded when it is chosen. */
@@ -36,7 +38,8 @@ export interface CaseStart {
  * ```json
  * { "format": 1, "id": "testimony", "title": { "en": "Testimony" },
  *   "modules": ["https://example.org/module/ufoathome-module.json"],
- *   "starts": [{ "id": "questionnaire", "title": { "en": "I saw something" }, "questionnaires": ["geipan-qt-2025"], "start": "questionnaire" }] }
+ *   "questionnaires": [{ "id": "sighting-form", "title": { "en": "Sighting form" }, "sections": [] }],
+ *   "starts": [{ "id": "questionnaire", "title": { "en": "I saw something" }, "questionnaires": ["sighting-form"], "start": "questionnaire" }] }
  * ```
  */
 export interface CaseTemplateJson {
@@ -54,13 +57,25 @@ export interface CaseTemplateJson {
    * QuestionnaireSeal), its public key given here, so that nobody else can read them wherever the case goes, and nobody has to send a key to anybody.
    */
   recipient?: SealRecipient
+  /**
+   * The questionnaires it brings itself, whole (see QuestionnaireTemplate), named by their id in its starts: what makes a template one file that
+   * needs no other, as one read from the reader's own disk has to be (its pictures then whole addresses or `data:` ones).
+   */
+  questionnaires?: QuestionnaireTemplate[]
   starts: CaseStart[]
 }
 
 /** A template read, its addresses made whole. */
 export interface CaseTemplate extends CaseTemplateJson {
-  /** Where it was read from. */
+  /** Where it was read from: an address, or the page's own for one read from a file. */
   url: string
+  /**
+   * Who gave it: the page (its `case-template`), whose word runs the scripts of the modules it names; or the reader, from a file of theirs kept in
+   * this browser (see LocalCaseTemplate), whose modules bring what their manifests state, never their code.
+   */
+  origin: "page" | "file"
+  /** The name of the file it was read from, for one the reader gave. */
+  fileName?: string
 }
 
 /** Reads case templates. */
@@ -68,6 +83,16 @@ export class CaseTemplates {
   static readonly FORMAT = 1
 
   private static readonly read = new Map<string, Promise<CaseTemplate>>()
+
+  /**
+   * Makes the questionnaires `template` brings known to the page (see QuestionnaireTemplates.add), and those it names by address read: what the
+   * starts it offers and the interviews it made need, a case saved under it opened again included.
+   */
+  static async install(template: CaseTemplate): Promise<void> {
+    for (const questionnaire of template.questionnaires ?? []) QuestionnaireTemplates.add(questionnaire)
+    const addressed = template.starts.flatMap(start => start.questionnaires ?? []).filter(entry => CaseTemplates.isAddress(entry))
+    await Promise.all([...new Set(addressed)].map(address => QuestionnaireTemplates.load(address)))
+  }
 
   /** The template at `url`, read once per page; an error saying why when there is none there. */
   static load(url: string, fetchImpl: typeof fetch = fetch.bind(globalThis)): Promise<CaseTemplate> {
@@ -77,7 +102,7 @@ export class CaseTemplates {
       reading = (async () => {
         const response = await fetchImpl(absolute)
         if (!response.ok) throw new Error(`${absolute}: HTTP ${response.status}`)
-        return CaseTemplates.check(await response.json(), absolute)
+        return CaseTemplates.check(await response.json(), absolute, "page")
       })()
       reading.catch(() => CaseTemplates.read.delete(absolute))
       CaseTemplates.read.set(absolute, reading)
@@ -86,7 +111,7 @@ export class CaseTemplates {
   }
 
   /** `json` as a template read at `url`, its addresses made whole; an error saying what is wrong with it otherwise. */
-  static check(json: unknown, url: string): CaseTemplate {
+  static check(json: unknown, url: string, origin: CaseTemplate["origin"] = "page", fileName?: string): CaseTemplate {
     const template = json as Partial<CaseTemplateJson> | null
     if (template === null || typeof template !== "object" || !Array.isArray(template.starts)) throw new Error(`${url}: not a UFO@home case template`)
     if (typeof template.format === "number" && template.format > CaseTemplates.FORMAT) throw new Error(`${url}: format ${template.format} is newer than ${CaseTemplates.FORMAT}`)
@@ -99,14 +124,22 @@ export class CaseTemplates {
       ...(start.modules ? { modules: start.modules.filter(entry => typeof entry === "string").map(whole) } : {})
     }))
     if (starts.length === 0) throw new Error(`${url}: a case template offers no start`)
+    // Its own questionnaires, their relative pictures read against it (a file's own have none: theirs are whole or `data:`).
+    const questionnaires = Array.isArray(template.questionnaires)
+      ? template.questionnaires.filter(questionnaire => typeof questionnaire?.id === "string" && Array.isArray(questionnaire.sections))
+        .map(questionnaire => QuestionnaireTemplates.withImages(structuredClone(questionnaire), src => /^[a-z][a-z0-9+.-]*:/i.test(src) ? src : whole(src)))
+      : undefined
     return {
       format: 1,
       id: typeof template.id === "string" ? template.id : url,
       title: template.title ?? template.id ?? url,
       ...(template.modules ? { modules: template.modules.filter(entry => typeof entry === "string").map(whole) } : {}),
       ...(recipient ? { recipient } : {}),
+      ...(questionnaires?.length ? { questionnaires } : {}),
       starts,
-      url
+      url,
+      origin,
+      ...(fileName ? { fileName } : {})
     }
   }
 
@@ -129,5 +162,56 @@ export class CaseTemplates {
   /** Where `start` opens. */
   static step(start: CaseStart): CaseStartStep {
     return start.start ?? (start.questionnaires?.length ? "questionnaire" : "observation")
+  }
+}
+
+/**
+ * The case template the reader gave from a file of their own, kept in this browser (localStorage) so that New offers it on every visit, until
+ * they forget it. One at a time; nothing of it leaves the browser. Every access in a try: storage may be refused (a private window, a full disk).
+ */
+export class LocalCaseTemplate {
+  static readonly KEY = "rr0-case-template"
+
+  /** The template kept, read; undefined when none is, or what is kept is no template any more. */
+  static read(storage: Storage | undefined = LocalCaseTemplate.storage()): CaseTemplate | undefined {
+    try {
+      const kept = storage?.getItem(LocalCaseTemplate.KEY)
+      if (!kept) return undefined
+      const { name, text } = JSON.parse(kept) as { name?: string, text: string }
+      return LocalCaseTemplate.parse(text, name)
+    } catch {
+      return undefined
+    }
+  }
+
+  /** `text`, the file `name`, as a template; an error saying why when it is none. */
+  static parse(text: string, name?: string): CaseTemplate {
+    const base = typeof location === "undefined" ? "https://localhost/" : location.href
+    return CaseTemplates.check(JSON.parse(text), base, "file", name)
+  }
+
+  /** Keeps the file `name` of text `text` as the reader's template, once it reads as one; returns it. An error when it is none, or cannot be kept. */
+  static keep(text: string, name: string, storage: Storage | undefined = LocalCaseTemplate.storage()): CaseTemplate {
+    const template = LocalCaseTemplate.parse(text, name)
+    if (!storage) throw new Error("No storage in this browser")
+    storage.setItem(LocalCaseTemplate.KEY, JSON.stringify({ name, text }))
+    return template
+  }
+
+  /** Forgets the template kept. */
+  static forget(storage: Storage | undefined = LocalCaseTemplate.storage()): void {
+    try {
+      storage?.removeItem(LocalCaseTemplate.KEY)
+    } catch {
+      // Nothing kept, nothing to forget.
+    }
+  }
+
+  private static storage(): Storage | undefined {
+    try {
+      return typeof localStorage === "undefined" ? undefined : localStorage
+    } catch {
+      return undefined
+    }
   }
 }

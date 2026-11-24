@@ -737,12 +737,13 @@ export class InterviewEditorElement extends HTMLElement {
     const [{ QuestionnaireForm }, { QuestionnaireTemplates }, json] = await Promise.all([
       import("./QuestionnaireForm.js"), import("../engine/questionnaire/QuestionnaireTemplate.js"), this.transcriptJson(event)])
     await this.ready
-    const id = json?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT
-    const template = await QuestionnaireTemplates.load(id)
+    // The questionnaire the interview names, if this page knows it (a case template brought it, or its address): none is chosen silently.
+    const id = json?.questionnaire?.id ?? ""
+    const template = id ? await QuestionnaireTemplates.load(id) : undefined
     if (token !== this.formToken || this.current !== event) return
     const m = this.messages
     const note = this.shadow.getElementById("form-note")!
-    MessageStyle.show(note, template ? undefined : m.unknownQuestionnaire.replace("{id}", id), "warning")
+    MessageStyle.show(note, template ? undefined : id ? m.unknownQuestionnaire.replace("{id}", id) : m.noQuestionnaire, "warning")
     this.form ??= new QuestionnaireForm(this.shadow.getElementById("form-fields")!, (field, answer, question) => void this.answerField(field, answer, question),
       (field, files, question) => void this.giveFiles(field, files, question))
     const interviewUrl = this.transcriptUrl(event) ?? new URL(`${event.id ?? "interview"}.json`, this.base ?? location.href).href
@@ -770,7 +771,8 @@ export class InterviewEditorElement extends HTMLElement {
     const event = this.current
     if (!event) return
     const asked = await this.transcriptJson(event)
-    const template = await QuestionnaireTemplates.load(asked?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    const named = asked?.questionnaire?.id
+    const template = named ? await QuestionnaireTemplates.load(named) : undefined
     // A confidential answer is written taken out, sealed for the interview's recipient when it has one; in clear, it stays in this page only.
     const confidential = template ? QuestionnaireTemplates.field(template, field)?.confidential : undefined
     let redacted: InterviewRedaction | undefined
@@ -1893,7 +1895,8 @@ export class InterviewEditorElement extends HTMLElement {
     const [{ QuestionnaireImport }, { QuestionnaireTemplates }] = await Promise.all([import("../engine/persistence/QuestionnaireImport.js"), import("../engine/questionnaire/QuestionnaireTemplate.js")])
     // The questionnaire it is filled in on tells where each printed question ends and its answer begins.
     const known = this.current ? await this.transcriptJson(this.current) : undefined
-    const template = await QuestionnaireTemplates.load(known?.questionnaire?.id ?? QuestionnaireTemplates.DEFAULT)
+    const named = known?.questionnaire?.id
+    const template = named ? await QuestionnaireTemplates.load(named) : undefined
     const imported = QuestionnaireImport.parse(content, this.importHints(), template)
     if (!imported) {
       this.note(this.messages.notAQuestionnaire, "error")
