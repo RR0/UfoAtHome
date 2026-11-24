@@ -22,6 +22,8 @@ export class LayeredCloudSystem {
   /** The beams the decks are lit by from below, and the eye they were placed from (see setLights). */
   private lights: readonly CloudLight[] = []
   private lightsEye = { x: 0, y: 0, z: 0 }
+  /** The towns' light on the decks' base (see setLightFromBelow). */
+  private below: [number, number, number] = [0, 0, 0]
 
   constructor(private readonly group: Group, private readonly radius: number, private readonly mode: CloudRendering) {}
 
@@ -97,6 +99,7 @@ export class LayeredCloudSystem {
     if (this.halo) this.hostHalo(this.halo)
     // A deck built or moved since keeps the beams' light, as bright as what is under its base now lets through.
     if (this.lights.length > 0) this.setLights(this.lights, this.lightsEye)
+    this.setLightFromBelow(this.below)
   }
 
   /**
@@ -198,6 +201,15 @@ export class LayeredCloudSystem {
       uniforms.ambientColor.value.copy(ambient)
       deck.volume?.uniforms.hazeColor.value.copy(haze)
     }
+  }
+
+  /**
+   * The light of the towns on the base of the volumetric decks, as a luminance in the scene's light (see SceneRenderer.townsUnderClouds):
+   * black for none. A surface deck is not lit by it.
+   */
+  setLightFromBelow(rgb: readonly [number, number, number]): void {
+    this.below = [rgb[0], rgb[1], rgb[2]]
+    for (const deck of this.decks.values()) deck.volume?.uniforms.belowColor.value.setRGB(rgb[0], rgb[1], rgb[2])
   }
 
   /** The strongest cirrus veil drives the existing single-veil halo approximation. */

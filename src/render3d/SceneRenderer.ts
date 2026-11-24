@@ -110,6 +110,7 @@ import { buildCloudGeometry, buildCloudMaterial } from "./CloudSystem.js"
 import { SkyGlowEffect } from "./SkyGlowEffect.js"
 import { SkyFrames } from "../engine/astronomy/SkyFrames.js"
 import { NightSkyBrightness } from "../engine/atmosphere/NightSkyBrightness.js"
+import { LampColour } from "./LampColour.js"
 import type { CloudUniforms } from "./CloudSystem.js"
 import { CloudField } from "./CloudSystem.js"
 import { buildLensFlare } from "./LensFlareEffect.js"
@@ -5032,6 +5033,8 @@ export class SceneRenderer {
     if (lightPollution === this.lightPollution) return
     this.lightPollution = lightPollution
     if (this.lastAstronomy) this.scatteredSky?.update(this.scatteredSkyState(this.lastAstronomy))
+    // The towns light the base of the clouds too (see townsUnderClouds).
+    if (this.lastSunPosition) this.updateCloudLighting(this.lastSunPosition, this.baseFogColor)
   }
 
   setInstrumentGain(gain: number, recordsOnMedium = false, filterDensity = 0): void {
@@ -8646,6 +8649,7 @@ export class SceneRenderer {
     // The layered decks are not scaled by the height of the source: a cloud's side faces it, and
     // only the Earth's curve takes a low Sun from it (see LayeredCloudSystem.sunVisibility).
     this.layeredClouds?.setLighting(direction.clone(), new Color(r, g, b), ambient, ambient)
+    this.layeredClouds?.setLightFromBelow(this.townsUnderClouds())
     const level = Math.max(0, direction.y)
     for (const deck of decks) {
       deck.sunDir.value.copy(direction)
@@ -8655,6 +8659,29 @@ export class SceneRenderer {
   }
 
 
+
+  /**
+   * How many times brighter than the towns' glow of a clear zenith the base of a low overcast over them is. Kyba et al. (2011), "Cloud coverage
+   * acts as an amplifier for ecological light pollution in urban ecosystems", PLoS ONE 6(3): e17307, measured overcast skies over Berlin up to
+   * ten times as bright as clear ones; the same follows from the light itself: the clear zenith is what a few tenths of an optical depth of
+   * air scatter back of the towns' light going up, the base of a cloud is what a surface of albedo 0.7 sends back of all of it.
+   */
+  static readonly TOWNS_UNDER_OVERCAST = 10
+  /** The colour the towns' glow is drawn in (see ScatteredSky.artificialXyzs): their lamps' mix, a 3 000 K white. */
+  private static readonly TOWNS_KELVINS = 3000
+
+  /**
+   * The light of the towns on the base of the clouds, as the base shows it, in the scene's light: the recording's light pollution (see
+   * Sighting.lightPollution), its artificial zenith made TOWNS_UNDER_OVERCAST times brighter, in the towns' colour. Black for a natural sky.
+   * Without it, a low overcast over the suburbs of a city was drawn black at night, and a searchlight's patches lit a cloud nobody could see.
+   */
+  private townsUnderClouds(): [number, number, number] {
+    const candelas = NightSkyBrightness.artificialZenithNanolamberts(this.lightPollution) * ScatteredSky.CANDELAS_PER_NANOLAMBERT
+    if (candelas <= 0) return [0, 0, 0]
+    const level = candelas * SceneRenderer.TOWNS_UNDER_OVERCAST * this.relativeScale
+    const colour = LampColour.ofTemperature(SceneRenderer.TOWNS_KELVINS)
+    return [colour[0] * level, colour[1] * level, colour[2] * level]
+  }
 
   private disposeCloudSystem(): void {
     this.layeredClouds?.dispose()

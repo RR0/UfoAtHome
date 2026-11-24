@@ -289,6 +289,13 @@ uniform vec3 lightIntensity[MAX_LIGHTS];
 // The beam's flux is kept as it spreads.
 const float BEAM_OPACITY = 5.0;
 const float BEAM_SPREAD = 0.7;
+// The light the towns send up at the deck, as the base of a cloud lit by it from below shows it (a luminance in the scene's light, see
+// LayeredCloudSystem.setLightFromBelow): what makes a low overcast over a town an orange grey and not a black. It goes into the cloud as a
+// beam does, the base the most lit.
+uniform vec3 belowColor;
+// The beams' light is read at this many points of each step of the march (see beamsLightOver): the patch a beam lights is some tens of metres
+// deep in the cloud, where a step looking slantwise at the deck is hundreds, and read once a step it came out in bands, a stair.
+const int BEAM_SUBSTEPS = 6;
 // How far round a beam's axis its light on the clouds may reach, metres, besides its own spread: the light spread round it as it goes in
 // (BEAM_SPREAD), for as deep as a real cloud lets it go.
 const float BEAM_REACH_M = 250.0;
@@ -336,6 +343,13 @@ vec3 beamsLight(vec3 p, vec3 dir, float d, int near) {
     light += lightIntensity[k] * (profile * through * (0.12 + 0.8 * (0.5 + 0.5 * phase)) * 0.3183099 / max(r * r, 1.0));
   }
   return light;
+}
+vec3 beamsLightOver(vec3 p, vec3 dir, float d, int near, float ds) {
+  vec3 light = vec3(0.0);
+  for (int j = 0; j < BEAM_SUBSTEPS; j++) {
+    light += beamsLight(p + dir * (ds * ((float(j) + 0.5) / float(BEAM_SUBSTEPS) - 0.5)), dir, d, near);
+  }
+  return light / float(BEAM_SUBSTEPS);
 }
 void main() {
   vec3 dir = normalize(vCloudDirection);
@@ -389,14 +403,17 @@ void main() {
       // plus 0.22 of the Sun in every sample, the shaded side already reached three quarters of the
       // lit one, and a low Sun's reddened cloud saturated to one flat cream from any side.
       vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
+      lit += belowColor * exp(-d * max(0.0, altitude(p) - baseM) * 0.006 * BEAM_OPACITY);
       float clear = exp(-length(p) / 55000.0);
       lit = mix(hazeColor, lit, clear);
-      if (near != 0) lit += beamsLight(p, dir, d, near) * clear;
+      if (near != 0) lit += beamsLightOver(p, dir, d, near, ds) * clear;
       lit *= mix(1.0, 0.32, darkness);
       float opacity = 1.0 - exp(-d * ds * 0.006);
       radiance += transmission * opacity * lit;
       transmission *= 1.0 - opacity;
-      if (transmission < 0.015) break;
+      // What is left past here is taken as cloud, all of it: a ray that stopped with 1.5% of the sky still behind it showed a star of
+      // magnitude 0 at +4.6 through an overcast, which no overcast lets through.
+      if (transmission < 0.015) { transmission = 0.0; break; }
     }
   }
   float alpha = 1.0 - transmission;
@@ -436,7 +453,7 @@ float transmissionAt(vec3 dir, float distanceM) {
   float transmission = 1.0;
   for (int i = 0; i < 48; i++) {
     transmission *= exp(-densityAt(dir * (start + (float(i) + 0.5) * ds)) * ds * 0.006);
-    if (transmission < 0.015) break;
+    if (transmission < 0.015) return 0.0;
   }
   return transmission;
 }`
@@ -467,6 +484,7 @@ export class VolumetricCloudLayer {
       holeRotation: { value: new Array<number>(MAX_HOLES).fill(0) },
       baseM: { value: 1000 }, thicknessM: { value: 650 }, eyeM: { value: 1.6 },
       coverage: { value: 0.5 }, sizeM: { value: 1400 }, density: { value: 1 }, darkness: { value: 0 }, flatness: { value: 0 },
+      belowColor: { value: new Color(0, 0, 0) },
       lightCount: { value: 0 },
       lightOrigin: { value: Array.from({ length: MAX_CLOUD_LIGHTS }, () => new Vector3()) },
       lightAxis: { value: Array.from({ length: MAX_CLOUD_LIGHTS }, () => new Vector3(0, 1, 0)) },
@@ -660,7 +678,8 @@ export class VolumetricCloudLayer {
     for (let i = 0; i < 48; i++) {
       const d = start + (i + 0.5) * ds
       transmission *= Math.exp(-this.densityAt({ x: direction.x * d, y: direction.y * d, z: direction.z * d }) * ds * 0.006)
-      if (transmission < 0.015) break
+      // As the drawn deck: past this, all cloud.
+      if (transmission < 0.015) return 0
     }
     return transmission
   }

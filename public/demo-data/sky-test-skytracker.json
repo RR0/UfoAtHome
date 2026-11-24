@@ -109,5 +109,38 @@
     "periodS": 12
    }
   ]
+ },
+ "sources": [
+  {
+   "title": "LiDAR HD, canopy height model and classification (the trees, the heights and the roofs of what stands round the spot), flown 2021-09-24",
+   "url": "https://geoservices.ign.fr/lidarhd",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2021-09-24"
+   }
+  },
+  {
+   "title": "BD TOPO (the buildings with their heights and materials, the bridges and the lines round the spot), edited 2025-05-06",
+   "url": "https://geoservices.ign.fr/bdtopo",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2025-05-06"
+   }
+  },
+  {
+   "title": "Aerial photograph of the IGN (the colour of the roofs), flown 2024-08-10",
+   "url": "https://geoservices.ign.fr/bdortho",
+   "publication": {
+    "publisher": "IGN",
+    "time": "2024-08-10"
+   }
+  }
+ ],
+ "snapshots": {
+  "decor": {
+   "src": "sky-test-skytracker.decor.json",
+   "takenOn": "2026-11-23",
+   "attribution": "Canopy © IGN, LiDAR HD; buildings, bridges and lines © IGN, BD TOPO (Licence Ouverte 2.0), as surveyed on days the services do not give"
+  }
  }
 }

@@ -217,3 +217,23 @@ describe("lit from below by a beam", () => {
     for (const volume of [half, full, none]) volume.dispose()
   })
 })
+
+describe("an overcast at night", () => {
+  it("lets no star through: a ray stopped by the cloud is all cloud past there", () => {
+    const volume = new VolumetricCloudLayer(texture, 20000)
+    volume.update({ id: "overcast", type: "stratocumulus", baseM: 900, thicknessM: 800, coverage: 1, sizeM: 1200, density: 2 }, 1.6)
+    expect(volume.transmissionAt({ x: 0, y: 1, z: 0 })).toBe(0)
+    volume.dispose()
+  })
+
+  it("keeps the towns' light on its base through a change of the decks", () => {
+    const group = new Group()
+    const system = new LayeredCloudSystem(group, 20000, "volume")
+    const weather = { ...DEFAULT_WEATHER, cloudLayers: [layer] }
+    system.update(weather, 1.6)
+    system.setLightFromBelow([0.2, 0.1, 0.03])
+    system.update({ ...weather, cloudLayers: [layer, { ...layer, id: "second", baseM: 3000 }] }, 1.6)
+    for (const volume of system.volumes) expect(volume.uniforms.belowColor.value.toArray()).toEqual([0.2, 0.1, 0.03])
+    system.dispose()
+  })
+})
