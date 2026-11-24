@@ -290,8 +290,7 @@ uniform vec3 lightIntensity[MAX_LIGHTS];
 const float BEAM_OPACITY = 5.0;
 const float BEAM_SPREAD = 0.7;
 // The light the towns send up at the deck, as the base of a cloud lit by it from below shows it (a luminance in the scene's light, see
-// LayeredCloudSystem.setLightFromBelow): what makes a low overcast over a town an orange grey and not a black. It goes into the cloud as a
-// beam does, the base the most lit.
+// LayeredCloudSystem.setLightFromBelow): what makes a low overcast over a town an orange grey and not a black, the base the most lit.
 uniform vec3 belowColor;
 // The beams' light is read at this many points of each step of the march (see beamsLightOver): the patch a beam lights is some tens of metres
 // deep in the cloud, where a step looking slantwise at the deck is hundreds, and read once a step it came out in bands, a stair.
@@ -403,11 +402,16 @@ void main() {
       // plus 0.22 of the Sun in every sample, the shaded side already reached three quarters of the
       // lit one, and a low Sun's reddened cloud saturated to one flat cream from any side.
       vec3 lit = ambientColor * 0.35 + sunColor * sunUp * (0.12 + sunTransmission * 0.8 * (0.5 + 0.5 * phase));
-      lit += belowColor * exp(-d * max(0.0, altitude(p) - baseM) * 0.006 * BEAM_OPACITY);
       float clear = exp(-length(p) / 55000.0);
       lit = mix(hazeColor, lit, clear);
       if (near != 0) lit += beamsLightOver(p, dir, d, near, ds) * clear;
       lit *= mix(1.0, 0.32, darkness);
+      // The towns' light, after the deck's darkness, which is how the Sun's light is drawn and would take a fifth of it: what the base
+      // shows of the towns is what a cloud's base sends back of them, belowColor itself (see SceneRenderer.TOWNS_UNDER_OVERCAST). Seen from
+      // under the deck, the whole of it: what the eye sees first of a cloud from below IS its base, however deep in the march's first sample
+      // falls (a step looking slantwise is a hundred metres; attenuated from where it fell, the base came out black, the clouds darker than the
+      // sky between them). Seen from above, the light that went through the cloud from below, which the cloud's own depth there takes.
+      lit += eyeM < baseM ? belowColor : belowColor * exp(-d * max(0.0, altitude(p) - baseM) * 0.006);
       float opacity = 1.0 - exp(-d * ds * 0.006);
       radiance += transmission * opacity * lit;
       transmission *= 1.0 - opacity;

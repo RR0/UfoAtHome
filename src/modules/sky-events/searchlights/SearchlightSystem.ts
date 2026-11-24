@@ -6,7 +6,6 @@ import { LaserBeamSighting } from "../beams/LaserBeam.js"
 import { ReentrySighting } from "../reentries/Reentry.js"
 import { LampColour } from "../../../render3d/LampColour.js"
 import { CloudDimming } from "../../../render3d/CloudDimming.js"
-import { VolumetricCloudLayer } from "../../../render3d/VolumetricClouds.js"
 import { SearchlightSighting } from "./Searchlight.js"
 import type { SearchlightJson } from "./Searchlight.js"
 
@@ -142,8 +141,9 @@ export class SearchlightSystem implements SkyEventSimulation<SearchlightJson> {
           s += Math.max(1, into)
           continue
         }
-        // As opaque to the beam as the decks' light from below has it (see VolumetricCloudLayer.BEAM_OPACITY): a real cloud's.
-        opticalDepth += clouds.extinctionAt(x + axis.x * step / 2, y + axis.y * step / 2, z + axis.z * step / 2) * step * VolumetricCloudLayer.BEAM_OPACITY
+        // Exactly as opaque as the cloud is drawn: a beam stops only in a cloud that is seen to stop it. Five times more (a real cloud's, as
+        // the patches' shape is worked out with) stopped beams in wisps the picture showed nearly clear.
+        opticalDepth += clouds.extinctionAt(x + axis.x * step / 2, y + axis.y * step / 2, z + axis.z * step / 2) * step
       }
       s += step
     }

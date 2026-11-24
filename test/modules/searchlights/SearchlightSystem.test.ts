@@ -62,7 +62,10 @@ describe("SearchlightSystem", () => {
       expect(luminance).toBeLessThan(3e9)
       // Nothing under the deck to take any of it; past its base, what the deck took.
       expect(light.throughCloudsBelow!(900)).toBe(1)
-      expect(light.throughCloudsBelow!(1000)).toBeLessThan(0.1)
+      // A hundred metres up into the deck, slantwise: what a deck as opaque as it is drawn takes over that path, and no more.
+      const slant = 100 / light.axis.y
+      expect(light.throughCloudsBelow!(1000)).toBeLessThan(Math.exp(-0.01 * 100) + 0.01)
+      expect(light.throughCloudsBelow!(1000)).toBeGreaterThan(Math.exp(-0.01 * (slant + 25)) - 0.01)
     }
     // The beams in the air dimmed by the clouds between the eye and them.
     expect(dimmed).toHaveLength(1)
