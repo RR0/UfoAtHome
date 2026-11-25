@@ -72,13 +72,11 @@ export interface CaseTemplate extends CaseTemplateJson {
   /**
    * Who gave it: the page (its `case-template`), whose word runs the scripts of the modules it names; or the reader, from a file of theirs or from
    * an address they typed, kept in this browser (see LocalCaseTemplate), whose modules bring what their manifests state, their code only once the
-   * reader has agreed to it (`scripts`).
+   * reader has agreed to the sites it comes from (see ModuleConsent).
    */
   origin: "page" | "file" | "address"
   /** The name of the file it was read from, for one the reader gave. */
   fileName?: string
-  /** For one the reader gave: whether they agreed to run the code of the modules it names, which come from where it says, not from this site. */
-  scripts?: boolean
 }
 
 /** Reads case templates. */
@@ -114,7 +112,7 @@ export class CaseTemplates {
   }
 
   /** `json` as a template read at `url`, its addresses made whole; an error saying what is wrong with it otherwise. */
-  static check(json: unknown, url: string, origin: CaseTemplate["origin"] = "page", fileName?: string, scripts?: boolean): CaseTemplate {
+  static check(json: unknown, url: string, origin: CaseTemplate["origin"] = "page", fileName?: string): CaseTemplate {
     const template = json as Partial<CaseTemplateJson> | null
     if (template === null || typeof template !== "object" || !Array.isArray(template.starts)) throw new Error(`${url}: not a UFO@home case template`)
     if (typeof template.format === "number" && template.format > CaseTemplates.FORMAT) throw new Error(`${url}: format ${template.format} is newer than ${CaseTemplates.FORMAT}`)
@@ -142,8 +140,7 @@ export class CaseTemplates {
       starts,
       url,
       origin,
-      ...(fileName ? { fileName } : {}),
-      ...(scripts !== undefined ? { scripts } : {})
+      ...(fileName ? { fileName } : {})
     }
   }
 
@@ -180,7 +177,7 @@ export class LocalCaseTemplate {
   static read(storage: Storage | undefined = LocalCaseTemplate.storage()): CaseTemplate | undefined {
     try {
       const kept = LocalCaseTemplate.record(storage)
-      return kept ? LocalCaseTemplate.parse(kept.text, kept.name, kept.url, kept.scripts) : undefined
+      return kept ? LocalCaseTemplate.parse(kept.text, kept.name, kept.url) : undefined
     } catch {
       return undefined
     }
@@ -190,30 +187,20 @@ export class LocalCaseTemplate {
    * `text` as a template: the file `name`, or what was read at `url`, against which its relative addresses (its questionnaires, its modules) are
    * then read. An error saying why when it is none.
    */
-  static parse(text: string, name?: string, url?: string, scripts?: boolean): CaseTemplate {
+  static parse(text: string, name?: string, url?: string): CaseTemplate {
     const base = url ?? (typeof location === "undefined" ? "https://localhost/" : location.href)
-    return CaseTemplates.check(JSON.parse(text), base, url ? "address" : "file", name, scripts)
+    return CaseTemplates.check(JSON.parse(text), base, url ? "address" : "file", name)
   }
 
   /**
    * Keeps `text` as the reader's template (the file `name`, or what was read at `url`) once it reads as one, its modules' code not run until the
-   * reader agrees to it (see allowScripts); returns it. An error when it is none, or cannot be kept.
+   * reader agrees to the sites it comes from (see ModuleConsent); returns it. An error when it is none, or cannot be kept.
    */
   static keep(text: string, name: string, storage: Storage | undefined = LocalCaseTemplate.storage(), url?: string): CaseTemplate {
-    const template = LocalCaseTemplate.parse(text, name, url, false)
+    const template = LocalCaseTemplate.parse(text, name, url)
     if (!storage) throw new Error("No storage in this browser")
-    storage.setItem(LocalCaseTemplate.KEY, JSON.stringify({ name, text, ...(url ? { url } : {}), scripts: false }))
+    storage.setItem(LocalCaseTemplate.KEY, JSON.stringify({ name, text, ...(url ? { url } : {}) }))
     return template
-  }
-
-  /** Records whether the reader agreed to run the code of the modules the kept template names. */
-  static allowScripts(allowed: boolean, storage: Storage | undefined = LocalCaseTemplate.storage()): void {
-    try {
-      const kept = LocalCaseTemplate.record(storage)
-      if (kept) storage!.setItem(LocalCaseTemplate.KEY, JSON.stringify({ ...kept, scripts: allowed }))
-    } catch {
-      // Not kept: asked again next time.
-    }
   }
 
   /** Forgets the template kept. */
@@ -225,7 +212,7 @@ export class LocalCaseTemplate {
     }
   }
 
-  private static record(storage: Storage | undefined): { name?: string, text: string, url?: string, scripts?: boolean } | undefined {
+  private static record(storage: Storage | undefined): { name?: string, text: string, url?: string } | undefined {
     const kept = storage?.getItem(LocalCaseTemplate.KEY)
     return kept ? JSON.parse(kept) : undefined
   }

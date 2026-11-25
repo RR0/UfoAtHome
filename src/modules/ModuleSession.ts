@@ -3,6 +3,7 @@ import type { ModuleConfigJson } from "./ModuleConfig.js"
 import { ModuleLoader } from "./ModuleLoader.js"
 import type { LoadedModule } from "./ModuleLoader.js"
 import { ModuleRegistry } from "./ModuleRegistry.js"
+import { ModuleConsent } from "./ModuleConsent.js"
 
 /** Where one module stands on this page. */
 export interface ModuleState {
@@ -63,11 +64,21 @@ export class ModuleSession {
     return this.reload(absolute)
   }
 
-  /** Forgets a module the person added. One a recording still names stays, without its script. */
+  /**
+   * Forgets a module the person added, and the agreement to its site when no other module they keep comes from it: it is not loaded again. One a
+   * recording still names stays, without its script.
+   */
   async remove(url: string): Promise<void> {
     this.config = { ...this.config, modules: this.config.modules.filter(entry => entry.url !== url) }
     this.save()
+    // Kept for a site whose modules this page still asks for: the person's others, a template's, a recording's.
+    ModuleConsent.revokeUnused([url], [...this.config.modules.map(entry => entry.url), ...this.named])
     await this.reload(url)
+  }
+
+  /** Loads `url` again, as it is now asked for: after the person agreed to its site, its code. */
+  refresh(url: string): Promise<ModuleState> {
+    return this.reload(url)
   }
 
   /** Turns a module the person added on or off. */
@@ -112,8 +123,9 @@ export class ModuleSession {
       const known = this.states.get(absolute)
       const trust = trusted && !this.trusted.has(absolute)
       if (trusted) this.trusted.add(absolute)
-      if (known && known.status !== "off" && !(trust && known.loaded && !known.loaded.scriptRun)) return known.status === "loading" ? this.pending.get(absolute) : undefined
+      // Asked for, even when it is here already: what keeps it, and the agreement to its site, when the person removes theirs.
       this.named.add(absolute)
+      if (known && known.status !== "off" && !(trust && known.loaded && !known.loaded.scriptRun)) return known.status === "loading" ? this.pending.get(absolute) : undefined
       await this.reload(absolute)
     }))
   }
@@ -151,7 +163,8 @@ export class ModuleSession {
     if (addedByPerson && !enabled && !this.named.has(url)) return this.set({ url, addedByPerson, enabled, status: "off" })
     this.set({ url, addedByPerson, enabled, status: "loading" })
     try {
-      const loaded = await this.loader.load(url, { runScript: (addedByPerson && enabled) || (!addedByPerson && this.trusted.has(url)) })
+      // The person's own module runs its code once they agreed to its site (see ConsentDialog); one the page asked for, on the page's word.
+      const loaded = await this.loader.load(url, { runScript: (addedByPerson && enabled && ModuleConsent.granted(url)) || this.trusted.has(url) })
       ModuleRegistry.install(loaded.module)
       return this.set({ url, addedByPerson, enabled, status: "installed", loaded })
     } catch (error) {

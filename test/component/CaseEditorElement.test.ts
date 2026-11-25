@@ -10,6 +10,7 @@ import { register as registerUfoAtHome, type UfoAtHomeElement } from "../../src/
 import { SightingFetch } from "../../src/engine/net/SightingFetch.js"
 import { QuestionnaireTemplates, type QuestionnaireTemplate } from "../../src/engine/questionnaire/QuestionnaireTemplate.js"
 import { LocalCaseTemplate } from "../../src/engine/questionnaire/CaseTemplate.js"
+import { ModuleConsent } from "../../src/modules/ModuleConsent.js"
 import sightingForm from "../fixtures/questionnaires/sighting-form.json"
 
 register()
@@ -1657,7 +1658,7 @@ describe("Opening files in the app", () => {
     element.shadowRoot!.getElementById("template-file")!.dispatchEvent(new CustomEvent("filepick", { detail: { file: new File([text], "mine.json") } }))
     await until(() => LocalCaseTemplate.read() !== undefined, 3000)
     // It names a module: the app's own dialog asks whether to run its code, saying where it would come from.
-    await until(() => element.shadowRoot!.getElementById("consent-origins")!.textContent === "https://cdn.example", 3000)
+    await until(() => element.shadowRoot!.getElementById("consent-origins")?.textContent === "https://cdn.example", 3000)
     ;(element.shadowRoot!.getElementById("consent-without") as HTMLButtonElement).click()
     expect([LocalCaseTemplate.read()!.origin, LocalCaseTemplate.read()!.fileName]).toEqual(["file", "mine.json"])
     const said: string[] = []
@@ -1686,14 +1687,17 @@ describe("Opening files in the app", () => {
       : (served as (asked: string, init?: unknown) => Promise<unknown>)(asked, init)))
     const element = await app()
     element.shadowRoot!.getElementById("template-file")!.dispatchEvent(new CustomEvent("filepick", { detail: { url: `${site}case-template.json` } }))
-    await until(() => element.shadowRoot!.getElementById("consent-origins")!.textContent === "https://other.example", 3000)
+    await until(() => element.shadowRoot!.getElementById("consent-origins")?.textContent === "https://other.example", 3000)
     ;(element.shadowRoot!.getElementById("consent-run") as HTMLButtonElement).click()
-    await until(() => LocalCaseTemplate.read()?.scripts === true, 3000)
+    await until(() => ModuleConsent.granted("https://other.example/pack/module/ufoathome-module.json"), 3000)
     const kept = LocalCaseTemplate.read()!
     expect([kept.origin, kept.url, kept.starts[0].questionnaires]).toEqual(["address", `${site}case-template.json`, [`${site}form/questionnaire.json`]])
     expect((await QuestionnaireTemplates.load(`${site}form/questionnaire.json`))?.id).toBe("pack-form")
     await until(() => /Pack, read at https:\/\/other\.example\/pack\/case-template\.json/.test(element.shadowRoot!.getElementById("template-now")!.textContent ?? ""), 3000)
-    LocalCaseTemplate.forget()
+    // Forgotten, it takes the agreement to its site with it: nothing else the reader keeps comes from there.
+    ;(element.shadowRoot!.getElementById("template-forget") as HTMLButtonElement).click()
+    await until(() => !ModuleConsent.granted("https://other.example/x.json"), 3000)
+    expect(LocalCaseTemplate.read()).toBeUndefined()
   })
 
   it("says nothing was picked that could be opened when no file is a reconstruction", async () => {

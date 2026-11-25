@@ -8,6 +8,8 @@ import { EditorTheme } from "./EditorTheme.js"
 import { MessageStyle } from "./MessageStyle.js"
 import { CaseTemplates, LocalCaseTemplate, type CaseStart, type CaseTemplate } from "../engine/questionnaire/CaseTemplate.js"
 import { SaidTexts } from "../engine/model/SaidText.js"
+import { ConsentDialog } from "./ConsentDialog.js"
+import { ModuleConsent } from "../modules/ModuleConsent.js"
 import { HostLocale, selectLocale } from "../i18n/locale.js"
 import { loadUfoAtHomeMessages, UFO_SUPPORTED_LANGUAGES, type UfoLanguage } from "./messages/index.js"
 import type { UfoAtHomeMessages } from "./messages/UfoAtHomeMessages.js"
@@ -55,9 +57,6 @@ ${MessageStyle.CSS}
 .template-now { margin: 0 0 6px; }
 .template-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .template-row[hidden], .template-forget[hidden] { display: none; }
-.consent:popover-open { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(32em, calc(100vw - 2em)); }
-.consent ul { margin: 6px 0 10px; padding-left: 1.2em; font-family: var(--mono, monospace); font-size: .85em; overflow-wrap: anywhere; }
-.consent .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 </style>
 <div class="bar">
   <p id="status" class="status" role="status" hidden></p>
@@ -81,15 +80,6 @@ ${MessageStyle.CSS}
     <button id="template-forget" type="button" class="pill-btn template-forget" hidden></button>
   </div>
   <p id="template-hint" class="hint"></p>
-</div>
-<div id="consent" class="open-menu consent" popover="manual" role="dialog" aria-labelledby="consent-heading">
-  <h2 id="consent-heading"></h2>
-  <p id="consent-text"></p>
-  <ul id="consent-origins"></ul>
-  <div class="actions">
-    <button id="consent-without" type="button" class="pill-btn"></button>
-    <button id="consent-run" type="button" class="pill-btn primary"></button>
-  </div>
 </div>
 <slot></slot>
 `
@@ -140,10 +130,7 @@ export class UfoAtHomeElement extends HTMLElement {
       void this.openPick((event as CustomEvent<InputFilePick>).detail)
     })
     this.byId("template-file").addEventListener("filepick", event => void this.keepTemplate((event as CustomEvent<InputFilePick>).detail))
-    this.byId("template-forget").addEventListener("click", () => {
-      LocalCaseTemplate.forget()
-      void this.showTemplate()
-    })
+    this.byId("template-forget").addEventListener("click", () => void this.forgetTemplate())
   }
 
   connectedCallback(): void {
@@ -158,6 +145,8 @@ export class UfoAtHomeElement extends HTMLElement {
       ? this.switcher.read({ src, ...(track ? { track } : {}) })
       : this.switcher.edit({ ...(src ? { src } : {}), ...(track ? { track } : {}) })
     this.ready = opened.catch(() => this.say(this.messages?.openFailed, "error"))
+    // What the reader keeps, back at once: the modules of their template, from the sites they agreed to.
+    void this.loadKeptTemplate()
     // A blank start, with no file: as New would under the case template, when there is one.
     if (!src) void this.ready.then(() => this.startUnderTemplate())
     // Again once the page around is laid out: its header may not have been when this was connected.
@@ -305,21 +294,35 @@ export class UfoAtHomeElement extends HTMLElement {
     await this.switcher.startNew(start)
   }
 
-  /** Whether the modules `template` names run their code: the page's word, or the reader's own agreement to a template they gave. */
+  /** Whether the modules `template` names run their code: the page's word, or the reader's agreement to every site that code comes from. */
   private static runsScripts(template: CaseTemplate): boolean {
-    return template.origin === "page" || template.scripts === true
+    return template.origin === "page" || UfoAtHomeElement.moduleUrls(template).every(url => ModuleConsent.granted(url))
   }
 
-  /** Where the code of the modules `template` names would come from: their sites. */
-  private static moduleOrigins(template: CaseTemplate): string[] {
-    const addresses = [...template.modules ?? [], ...template.starts.flatMap(start => start.modules ?? [])]
-    return [...new Set(addresses.map(address => {
-      try {
-        return new URL(address).origin
-      } catch {
-        return address
-      }
-    }))]
+  /** The modules `template` names, its own and its starts'. */
+  private static moduleUrls(template: CaseTemplate): string[] {
+    return [...new Set([...template.modules ?? [], ...template.starts.flatMap(start => start.modules ?? [])])]
+  }
+
+  /** At launch, the modules of the template the reader keeps, loaded again: their code only from sites they agreed to, nothing asked. */
+  private async loadKeptTemplate(): Promise<void> {
+    const kept = LocalCaseTemplate.read()
+    if (!kept) return
+    await CaseTemplates.install(kept).catch(() => undefined)
+    if (!kept.modules?.length) return
+    const { ModuleSession } = await import("../modules/ModuleSession.js")
+    void ModuleSession.shared.require(kept.modules, kept.url, UfoAtHomeElement.runsScripts(kept))
+  }
+
+  /** Forgets the reader's template, and the agreement to the sites of its modules that nothing else they keep comes from. */
+  private async forgetTemplate(): Promise<void> {
+    const kept = LocalCaseTemplate.read()
+    LocalCaseTemplate.forget()
+    if (kept) {
+      const { ModuleSession } = await import("../modules/ModuleSession.js")
+      ModuleConsent.revokeUnused(UfoAtHomeElement.moduleUrls(kept), ModuleSession.shared.list().filter(state => state.addedByPerson).map(state => state.url))
+    }
+    await this.showTemplate()
   }
 
   /**
@@ -343,54 +346,20 @@ export class UfoAtHomeElement extends HTMLElement {
       await this.showTemplate()
       return
     }
-    const origins = UfoAtHomeElement.moduleOrigins(template)
-    const scripts = origins.length > 0 && await this.askScripts(origins)
-    if (origins.length > 0) LocalCaseTemplate.allowScripts(scripts)
-    template = LocalCaseTemplate.read() ?? template
+    const modules = UfoAtHomeElement.moduleUrls(template)
+    // Asked in the one dialog of agreement, once per site: one agreed to already is not asked about again.
+    const scripts = modules.length > 0 && await ConsentDialog.ask(this.shadow, m, modules)
     const said = new SaidTexts(HostLocale.preferencesFor(this))
     const title = said.read(template.title) ?? template.id
-    this.say([m?.templateKept.replace("{title}", title), origins.length === 0 ? undefined : scripts ? m?.templateModulesRun : m?.templateModulesWithoutScripts]
+    this.say([m?.templateKept.replace("{title}", title), modules.length === 0 ? undefined : scripts ? m?.templateModulesRun : m?.templateModulesWithoutScripts]
       .filter(Boolean).join(" "))
     // What it brings, there at once: its questionnaires, its modules.
     await CaseTemplates.install(template).catch(() => undefined)
-    if (origins.length > 0) {
+    if (modules.length > 0) {
       const { ModuleSession } = await import("../modules/ModuleSession.js")
       void ModuleSession.shared.require(template.modules, template.url, scripts)
     }
     await this.showTemplate()
-  }
-
-  /** Asks the reader, in the app's own dialog, whether to run the code that would come from `origins`; never the browser's own dialog. */
-  private askScripts(origins: string[]): Promise<boolean> {
-    const m = this.messages
-    const dialog = this.byId("consent") as HTMLElement & { showPopover?: () => void, hidePopover?: () => void }
-    this.byId("consent-heading").textContent = m?.consentHeading ?? ""
-    this.byId("consent-text").textContent = m?.consentText ?? ""
-    this.byId("consent-origins").replaceChildren(...origins.map(origin => Object.assign(document.createElement("li"), { textContent: origin })))
-    const run = this.byId("consent-run") as HTMLButtonElement
-    const without = this.byId("consent-without") as HTMLButtonElement
-    run.textContent = m?.consentRun ?? ""
-    without.textContent = m?.consentWithout ?? ""
-    return new Promise(resolve => {
-      const answer = (allowed: boolean) => {
-        run.onclick = null
-        without.onclick = null
-        try {
-          dialog.hidePopover?.()
-        } catch {
-          // Closed already.
-        }
-        resolve(allowed)
-      }
-      run.onclick = () => answer(true)
-      without.onclick = () => answer(false)
-      try {
-        dialog.showPopover?.()
-      } catch {
-        // Shown already.
-      }
-      without.focus()
-    })
   }
 
   /** Says, in the Open menu, which case template New goes by, and offers to forget the reader's own. */

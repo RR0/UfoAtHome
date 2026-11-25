@@ -1,7 +1,8 @@
 import type { InputFileMessages } from "../InputFileElement.js"
+import type { ConsentMessages } from "./ConsentMessages.js"
 
 /** What the application element says around the reader and the editor it holds — see UfoAtHomeElement. */
-export interface UfoAtHomeMessages extends InputFileMessages {
+export interface UfoAtHomeMessages extends InputFileMessages, ConsentMessages {
   /** What starts a new observation, in a blank editor; and its tooltip. */
   newFile: string
   newFileHint: string
@@ -41,9 +42,4 @@ export interface UfoAtHomeMessages extends InputFileMessages {
   /** The reader's template read at an address (`{url}`); that the modules it names run their code, the reader having agreed. */
   templateFromAddress: string
   templateModulesRun: string
-  /** The app's own dialog asking whether to run the code of modules from the sites listed under it: heading, text, the two answers. */
-  consentHeading: string
-  consentText: string
-  consentRun: string
-  consentWithout: string
 }

@@ -1,6 +1,14 @@
 import type { ModulesPanelMessages } from "./ModulesPanelMessages.js"
+import { consentMessages_es } from "./ConsentMessages_es.js"
 
 export const modulesPanelMessages_es: ModulesPanelMessages = {
+  ...consentMessages_es,
+  consentedHeading: "Sitios cuyo código de módulos aceptó ejecutar:",
+  consentedNone: "No ha aceptado el código de módulos de ningún otro sitio.",
+  consentRevoke: "Retirar el acuerdo",
+  consentRevoked: "Acuerdo retirado para {origin}: sus módulos llegan sin su código (recargue la página para descartar el código ya ejecutado).",
+  allowCode: "Ejecutar su código…",
+
   intro: "Un módulo añade fuentes (imágenes, relieve, meteorología…) y modelos 3D publicados por otros. Los módulos que añade se guardan en este navegador; guárdelos en un archivo para usarlos en otro lugar.",
   codeWarning: "Un módulo que contiene código se ejecuta con todos los derechos de esta página: añada solo aquellos cuyo autor conozca.",
   urlPlaceholder: "https://…/ufoathome-module.json",
@@ -17,7 +25,7 @@ export const modulesPanelMessages_es: ModulesPanelMessages = {
   brings: "Aporta: {points}",
   bringsNothing: "No aporta nada.",
   runsCode: "Ejecuta código.",
-  codeNotRun: "Su código no se ejecutó: añádalo a sus módulos para ejecutarlo.",
+  codeNotRun: "Su código no se ha ejecutado: añádalo a sus módulos, y acepte el código de su sitio, para ejecutarlo.",
   exportConfig: "Guardar mis módulos",
   importConfig: "Cargar módulos",
   imported: "{count} módulo(s) leído(s) del archivo.",

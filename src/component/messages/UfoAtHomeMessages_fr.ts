@@ -1,6 +1,8 @@
 import type { UfoAtHomeMessages } from "./UfoAtHomeMessages.js"
+import { consentMessages_fr } from "./ConsentMessages_fr.js"
 
 export const ufoAtHomeMessages_fr: UfoAtHomeMessages = {
+  ...consentMessages_fr,
   inputFileFromFile: "depuis votre disque",
   inputFileFromUrl: "depuis une adresse",
   inputFileModeHint: "Cliquez pour le donner autrement : un fichier à vous, ou une adresse",
@@ -29,8 +31,4 @@ export const ufoAtHomeMessages_fr: UfoAtHomeMessages = {
   templateModulesWithoutScripts: "Les modules qu'il nomme viennent avec ce que leurs manifestes disent, sans leurs scripts : un fichier à vous n'exécute aucun code.",
   templateFromAddress: "{title}, lu à {url}, gardé dans ce navigateur.",
   templateModulesRun: "Le code des modules qu'il nomme s'exécute, comme vous l'avez accepté.",
-  consentHeading: "Exécuter le code de ses modules ?",
-  consentText: "Ce modèle de dossier nomme des modules dont le code viendrait des sites ci-dessous, pas de celui-ci. Ce code s'exécuterait dans cette page, avec tout ce qu'elle peut faire. Ne l'exécutez que si vous leur faites confiance ; sans lui, les modules apportent ce que disent leurs manifestes (questionnaires, modèles, données), rien qui calcule.",
-  consentRun: "Exécuter leur code",
-  consentWithout: "Sans leur code",
 }

@@ -7,6 +7,8 @@ import { MessageStyle } from "./MessageStyle.js"
 import { HostLocale } from "../i18n/locale.js"
 import type { ModulesPanelMessages } from "./messages/ModulesPanelMessages.js"
 import { MODULES_PANEL_MESSAGES } from "./messages/ModulesPanelMessages.js"
+import { ConsentDialog } from "./ConsentDialog.js"
+import { ModuleConsent } from "../modules/ModuleConsent.js"
 
 export const MODULES_PANEL_ELEMENT_NAME = "rr0-modules-panel"
 
@@ -23,6 +25,9 @@ rr0-modules-panel .mp-head .mp-remove { margin-left: auto; }
 rr0-modules-panel .mp-module p { margin: .2em 0; }
 rr0-modules-panel .mp-findings { margin: .3em 0; padding-left: 1.2em; }
 rr0-modules-panel .mp-files { display: flex; gap: .6em; flex-wrap: wrap; align-items: center; margin-top: .6em; }
+rr0-modules-panel .mp-consents { list-style: none; margin: .3em 0; padding: 0; }
+rr0-modules-panel .mp-consents li { display: flex; gap: .6em; align-items: center; flex-wrap: wrap; }
+rr0-modules-panel .mp-consents code { overflow-wrap: anywhere; }
 `
 
 /**
@@ -150,7 +155,7 @@ export class ModulesPanelElement extends HTMLElement {
       const url = input.value.trim()
       if (!url) return
       this.draft = ""
-      void this.session.add(url)
+      void this.addAsked(url)
     })
     const warning = doc.createElement("p")
     warning.className = MessageStyle.WARNING
@@ -197,7 +202,49 @@ export class ModulesPanelElement extends HTMLElement {
     note.setAttribute("role", "status")
     MessageStyle.show(note, this.note?.text, this.note?.kind)
 
-    this.replaceChildren(style, intro, add, warning, list, empty, files, note)
+    // The sites whose code the reader agreed to run, each agreement withdrawable.
+    const consentHeading = doc.createElement("p")
+    consentHeading.className = "mp-consents-heading"
+    const agreed = ModuleConsent.list()
+    consentHeading.textContent = agreed.length ? m.consentedHeading : m.consentedNone
+    const consents = doc.createElement("ul")
+    consents.className = "mp-consents"
+    consents.append(...agreed.map(origin => {
+      const item = doc.createElement("li")
+      const code = doc.createElement("code")
+      code.textContent = origin
+      const revoke = doc.createElement("button")
+      revoke.type = "button"
+      revoke.className = "mp-revoke"
+      revoke.textContent = m.consentRevoke
+      revoke.addEventListener("click", () => void this.revoke(origin))
+      item.append(code, revoke)
+      return item
+    }))
+
+    this.replaceChildren(style, intro, add, warning, list, empty, consentHeading, consents, files, note)
+  }
+
+  /** Adds `url` to the person's modules, its code run once they agreed to its site in the one dialog of agreement (see ConsentDialog). */
+  private async addAsked(url: string): Promise<void> {
+    let absolute: string
+    try {
+      absolute = new URL(url, location.href).href
+    } catch {
+      return
+    }
+    await ConsentDialog.ask(this, this.messages, [absolute])
+    await this.session.add(absolute)
+    this.render()
+  }
+
+  /** Withdraws the agreement to `origin`: its modules load again without their code (what has run stays in this page until it is reloaded). */
+  private async revoke(origin: string): Promise<void> {
+    ModuleConsent.revoke(origin)
+    const affected = this.session.list().filter(state => ModuleConsent.originOf(state.url) === origin)
+    await Promise.all(affected.map(state => this.session.refresh(state.url)))
+    this.note = { text: this.messages?.consentRevoked.replace("{origin}", origin), kind: "info" }
+    this.render()
   }
 
   private item(state: ModuleState): HTMLLIElement {
@@ -243,7 +290,16 @@ export class ModulesPanelElement extends HTMLElement {
       action.addEventListener("click", () => void this.session.remove(state.url))
     } else {
       action.textContent = m.addToMine
-      action.addEventListener("click", () => void this.session.add(state.url))
+      action.addEventListener("click", () => void this.addAsked(state.url))
+    }
+    // A module of the person's whose code did not run, its site not agreed to: what asks for the agreement.
+    if (state.addedByPerson && state.enabled && loaded?.hasScript && !loaded.scriptRun) {
+      const allow = doc.createElement("button")
+      allow.type = "button"
+      allow.className = "mp-allow"
+      allow.textContent = m.allowCode
+      allow.addEventListener("click", () => void ConsentDialog.ask(this, this.messages, [state.url]).then(allowed => allowed ? this.session.refresh(state.url) : undefined))
+      head.append(allow)
     }
     if (state.status === "installed" && loaded) {
       const checkButton = doc.createElement("button")

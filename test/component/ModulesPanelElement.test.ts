@@ -3,6 +3,7 @@ import { ModulesPanelElement, register } from "../../src/component/ModulesPanelE
 import { ModuleLoader } from "../../src/modules/ModuleLoader.js"
 import { ModuleRegistry } from "../../src/modules/ModuleRegistry.js"
 import { ModuleSession } from "../../src/modules/ModuleSession.js"
+import { ModuleConsent } from "../../src/modules/ModuleConsent.js"
 
 register()
 
@@ -30,16 +31,19 @@ const until = async (check: () => boolean): Promise<void> => {
 afterEach(() => {
   document.body.replaceChildren()
   sessionStorage.clear()
+  localStorage.removeItem(ModuleConsent.KEY)
   for (const module of ModuleRegistry.installed()) ModuleRegistry.uninstall(module.id)
 })
 
 describe("ModulesPanelElement", () => {
-  it("adds a module by its address and says what it brings and that it runs code", async () => {
+  it("adds a module by its address, its code run once the reader agrees to its site in the dialog of agreement, and says what it brings", async () => {
     const panel = await mount(session())
     const input = panel.querySelector<HTMLInputElement>("#module-url")!
     input.value = MANIFEST
     input.dispatchEvent(new Event("input"))
     panel.querySelector("form")!.requestSubmit()
+    await until(() => panel.querySelector("#consent-origins")?.textContent === "https://acme.example")
+    panel.querySelector<HTMLButtonElement>("#consent-run")!.click()
     await until(() => panel.querySelector(`.mp-module[data-url="${MANIFEST}"] .mp-name`)?.textContent === "ACME")
 
     const item = panel.querySelector<HTMLElement>(`.mp-module[data-url="${MANIFEST}"]`)!
@@ -47,6 +51,26 @@ describe("ModulesPanelElement", () => {
     expect(item.querySelector(".mp-status")!.textContent).toBe("Brings: imagery (1)")
     expect(item.querySelector(".mp-code")!.textContent).toBe("Runs code.")
     expect(panel.querySelector<HTMLInputElement>("#module-url")!.value).toBe("")
+    // The agreement is kept, listed, and withdrawn there.
+    expect(ModuleConsent.list()).toEqual(["https://acme.example"])
+    expect(panel.querySelector(".mp-consents code")!.textContent).toBe("https://acme.example")
+    panel.querySelector<HTMLButtonElement>(".mp-revoke")!.click()
+    await until(() => ModuleConsent.list().length === 0 && panel.querySelector(`.mp-module[data-url="${MANIFEST}"] .mp-allow`) !== null)
+    expect(panel.querySelector(`.mp-module[data-url="${MANIFEST}"] .mp-allow`)).not.toBeNull()
+  })
+
+  it("asks no agreement again for a site agreed to, and removes a module with its agreement", async () => {
+    ModuleConsent.grant([MANIFEST])
+    const modules = session()
+    const panel = await mount(modules)
+    const input = panel.querySelector<HTMLInputElement>("#module-url")!
+    input.value = MANIFEST
+    panel.querySelector("form")!.requestSubmit()
+    await until(() => panel.querySelector(`.mp-module[data-url="${MANIFEST}"] .mp-code`)?.textContent === "Runs code.")
+    expect(panel.querySelector("#consent")).toBeNull()
+    panel.querySelector<HTMLButtonElement>(`.mp-module[data-url="${MANIFEST}"] .mp-remove`)!.click()
+    await until(() => panel.querySelector(`.mp-module[data-url="${MANIFEST}"]`) === null)
+    expect(ModuleConsent.list()).toEqual([])
   })
 
   it("lists what the recording names, without running its code, and lets the recording stop naming it", async () => {
@@ -58,7 +82,7 @@ describe("ModulesPanelElement", () => {
     await settle()
 
     const item = panel.querySelector<HTMLElement>(`.mp-module[data-url="${MANIFEST}"]`)!
-    expect(item.querySelector(".mp-code")!.textContent).toBe("Its code was not run: add it to your modules to run it.")
+    expect(item.querySelector(".mp-code")!.textContent).toBe("Its code did not run: add it to your modules, and agree to its site's code, to run it.")
     expect(item.querySelector(".mp-remove")!.textContent).toBe("Add to my modules")
     const named = item.querySelector<HTMLInputElement>(".mp-named")!
     expect(named.checked).toBe(true)
@@ -100,6 +124,7 @@ describe("ModulesPanelElement", () => {
     }
     const added = async (modules: ModuleSession): Promise<{ panel: ModulesPanelElement, item: () => HTMLElement }> => {
       const panel = await mount(modules)
+      ModuleConsent.grant([SCRIPTED])
       await modules.add(SCRIPTED)
       const item = () => panel.querySelector<HTMLElement>(`.mp-module[data-url="${SCRIPTED}"]`)!
       await until(() => item()?.querySelector(".mp-check") !== null)

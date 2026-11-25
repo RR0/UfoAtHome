@@ -8,6 +8,7 @@ import { ModelCatalogues } from "../../src/modules/models/ModelCatalogues.js"
 import { IMAGERY_SOURCES, ELEVATION_SOURCES } from "../../src/modules/providers/terrain/terrainSources.js"
 import { DECOR_MODEL_SOURCES } from "../../src/modules/models/decorModelSources.js"
 import { XyzImageryProvider } from "../../src/modules/providers/terrain/XyzImageryProvider.js"
+import { ModuleConsent } from "../../src/modules/ModuleConsent.js"
 
 const MANIFEST = "https://acme.example/ufo/ufoathome-module.json"
 const manifest = {
@@ -48,6 +49,7 @@ const session = (storage = new MemoryStorage()) => new ModuleSession(new ModuleL
 afterEach(() => {
   for (const module of ModuleRegistry.installed()) ModuleRegistry.uninstall(module.id)
   scriptRuns.length = 0
+  localStorage.removeItem(ModuleConsent.KEY)
 })
 
 describe("ModuleManifest", () => {
@@ -70,9 +72,28 @@ describe("ModuleManifest", () => {
 })
 
 describe("ModuleSession", () => {
-  it("installs a module the person adds, runs its script, keeps its address, and forgets it when removed", async () => {
+  it("runs the script of a module the person adds only once they agreed to its site, the agreement kept for the next time", async () => {
+    const modules = session()
+    const state = await modules.add(MANIFEST)
+    expect([state.status, state.loaded?.scriptRun, scriptRuns]).toEqual(["installed", false, []])
+    ModuleConsent.grant([MANIFEST])
+    expect((await modules.refresh(MANIFEST)).loaded?.scriptRun).toBe(true)
+    expect(ModuleConsent.granted("https://acme.example/other/ufoathome-module.json")).toBe(true)
+  })
+
+  it("keeps the agreement to a site whose module the page still asks for when the person removes theirs", async () => {
+    const modules = session()
+    ModuleConsent.grant([MANIFEST])
+    await modules.add(MANIFEST)
+    await modules.require([MANIFEST], undefined, true)
+    await modules.remove(MANIFEST)
+    expect(ModuleConsent.granted(MANIFEST)).toBe(true)
+  })
+
+  it("installs a module the person adds, runs its script, keeps its address, and forgets it and the agreement to its site when removed", async () => {
     const storage = new MemoryStorage()
     const modules = session(storage)
+    ModuleConsent.grant([MANIFEST])
     const state = await modules.add(MANIFEST)
 
     expect(state.status).toBe("installed")
@@ -84,6 +105,7 @@ describe("ModuleSession", () => {
     expect(ModuleConfig.read(storage).modules).toEqual([{ url: MANIFEST, enabled: true }])
 
     await modules.remove(MANIFEST)
+    expect(ModuleConsent.granted(MANIFEST)).toBe(false)
     expect(IMAGERY_SOURCES.map(source => source.id)).not.toContain("acme-ortho")
     expect(ModuleConfig.read(storage).modules).toEqual([])
   })

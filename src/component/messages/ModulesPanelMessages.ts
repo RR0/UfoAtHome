@@ -1,7 +1,15 @@
 import { Messages } from "../../i18n/MessageCatalog.js"
+import type { ConsentMessages } from "./ConsentMessages.js"
 import type { ConformanceCode } from "../../modules/ModuleConformance.js"
 /** What the Modules item of the Files group says — see ModulesPanelElement. */
-export interface ModulesPanelMessages {
+export interface ModulesPanelMessages extends ConsentMessages {
+  /** The sites whose code the reader agreed to run: over their list; when there are none; what withdraws one; what says it was withdrawn (`{origin}`). */
+  consentedHeading: string
+  consentedNone: string
+  consentRevoke: string
+  consentRevoked: string
+  /** The button of a module of the reader's whose code did not run, its site not agreed to: what asks for the agreement. */
+  allowCode: string
   /** What a module is, above the list. */
   intro: string
   /** Under the address field: that a module with code runs with everything this page can do. */

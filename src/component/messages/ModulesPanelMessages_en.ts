@@ -1,6 +1,14 @@
 import type { ModulesPanelMessages } from "./ModulesPanelMessages.js"
+import { consentMessages_en } from "./ConsentMessages_en.js"
 
 export const modulesPanelMessages_en: ModulesPanelMessages = {
+  ...consentMessages_en,
+  consentedHeading: "Sites whose module code you agreed to run:",
+  consentedNone: "You have agreed to run no other site's module code.",
+  consentRevoke: "Withdraw",
+  consentRevoked: "Agreement to {origin} withdrawn: its modules come without their code (reload the page to drop code already run).",
+  allowCode: "Run its code…",
+
   intro: "A module adds sources (imagery, relief, weather…) and 3D models that others published. The modules you add are kept in this browser; save them to a file to take them elsewhere.",
   codeWarning: "A module that contains code runs with everything this page can do: only add those whose author you know.",
   urlPlaceholder: "https://…/ufoathome-module.json",
@@ -17,7 +25,7 @@ export const modulesPanelMessages_en: ModulesPanelMessages = {
   brings: "Brings: {points}",
   bringsNothing: "Brings nothing.",
   runsCode: "Runs code.",
-  codeNotRun: "Its code was not run: add it to your modules to run it.",
+  codeNotRun: "Its code did not run: add it to your modules, and agree to its site's code, to run it.",
   exportConfig: "Save my modules",
   importConfig: "Load modules",
   imported: "{count} module(s) loaded from the file.",
