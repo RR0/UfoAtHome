@@ -44,7 +44,7 @@ export interface Figure {
  *
  * One place, and two writers over it (see KmlExport, GeoJsonExport), because the hard part is not
  * the syntax of either format: it is deciding what may honestly leave the tool. Asked for by the
- * GEIPAN (A. Cousyn, November 2026), whose own geometry is measured in SVH, in QGIS and in Google
+ * GEIPAN (A. Cousyn, November 2026), whose own geometry is measured in QGIS and in Google
  * Earth, and who can only compare a reconstruction with it if it comes out.
  *
  * Three things are refused here, once, rather than in each writer. A line of sight is a DIRECTION:

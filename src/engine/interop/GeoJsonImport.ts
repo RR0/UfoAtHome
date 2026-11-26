@@ -17,7 +17,7 @@ interface GeoJsonObject {
 }
 
 /**
- * Reads the points, lines and outlines out of a GeoJSON file — what QGIS, PANs Detector, SVH and
+ * Reads the points, lines and outlines out of a GeoJSON file — what QGIS, PANs Detector and
  * every other GIS writes when asked for geometry.
  *
  * The same contract as the Google Earth reader (see KmlImport): geometry only, coordinates exactly

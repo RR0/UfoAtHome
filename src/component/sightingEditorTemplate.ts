@@ -421,7 +421,7 @@ export const html = `
     <div class="toolbar">
       <span class="input-file-row"><span id="label-import-file"></span> <rr0-input-file id="import" name="import" accept="application/json,.json,application/zip,.zip" placeholder="https://…/sighting.json"></rr0-input-file></span>
       <button id="export" type="button"></button>
-      <!-- What the reconstruction holds geographically, for Google Earth, SVH or QGIS: see GeographicFigures. -->
+      <!-- What the reconstruction holds geographically, for Google Earth or QGIS: see GeographicFigures. -->
       <button id="export-kml" type="button"></button>
       <button id="export-geojson" type="button"></button>
       <!-- How the keyframes are written, in the text below and in the file saved: see RecordingText.of. -->

@@ -89,7 +89,7 @@ export const sightingEditorMessages_fr: SightingEditorMessages = {
   exportKml: "Exporter en KML",
   exportGeoJson: "Exporter en GeoJSON",
   exportGeoJsonHint: "La même chose, dans le GeoJSON que lit tout SIG : WGS 84, chaque figure disant à quel groupe elle appartient et depuis quoi ses hauteurs sont comptées.",
-  exportKmlHint: "Où se tenait le témoin, les directions énoncées, ce qu'une lecture place et les tracés importés — pour Google Earth, SVH ou QGIS.",
+  exportKmlHint: "Où se tenait le témoin, les directions énoncées, ce qu'une lecture place et les tracés importés — pour Google Earth ou QGIS.",
   export: "Sauver",
   snapshotTitle: "Instantanés",
   snapshotHint: "Ce que la scène demanderait sinon à des tiers à chaque lecture (relief, photo du sol, routes, eau, voies ferrées, haute atmosphère), relevé à la sauvegarde et gardé dans des fichiers à côté de l'enregistrement, pour qu'il se rejoue à l'identique sans rien demander à personne.",

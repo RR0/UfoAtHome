@@ -176,7 +176,7 @@ describe("Provenance.free", () => {
 })
 
 describe("Provenance and what a value rests on", () => {
-  /** A duration the observer first said, corrected in a second interview; a distance measured in SVH on a
+  /** A duration the observer first said, corrected in a second interview; a distance measured in QGIS on a
    * registered photograph; a crane's height taken from the works permit. */
   const recording = () => ({
     version: 4,
@@ -185,7 +185,7 @@ describe("Provenance and what a value rests on", () => {
       keyframes: [{
         t: 0,
         pose: {
-          headingDeg: { value: 112, basis: "measured", how: "instrument", source: { tool: "SVH", picture: "ref-1" } },
+          headingDeg: { value: 112, basis: "measured", how: "instrument", source: { tool: "QGIS", picture: "ref-1" } },
           elevationM: { value: 31, basis: "established", source: { document: "Permis de construire PC 075-2024", at: "p. 4", url: "https://example.org/pc.pdf" } },
           // Never revisited: it goes on citing the first interview, which is what says it did not change.
           pitchDeg: { value: 3, source: { said: { interview: "itw-1", segment: 7 } } }

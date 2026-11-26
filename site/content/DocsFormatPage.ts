@@ -329,7 +329,7 @@ if (movedTo) {
       interview of the case it was said in, <code>interview</code> being that event's <code>id</code>
       and <code>segment</code> which turn of speech), <code>document</code> with <code>at</code> (a
       page, a question's number) and <code>url</code>, <code>picture</code> (the <code>id</code> of a
-      picture of the recording it was measured on) or <code>tool</code> (SVH, IPACO, QGIS, a
+      picture of the recording it was measured on) or <code>tool</code> (IPACO, QGIS, a
       theodolite). A working hypothesis names none, which is what <code>assumed</code> and
       <code>fitted</code> already say, and giving it one would be the one lie the field exists to
       prevent.</p>
@@ -627,7 +627,7 @@ if (movedTo) {
       événement et <code>segment</code> le tour de parole), <code>document</code> avec
       <code>at</code> (une page, un numéro de question) et <code>url</code>, <code>picture</code>
       (l'<code>id</code> d'une photo de l'enregistrement sur laquelle elle a été mesurée) ou
-      <code>tool</code> (SVH, IPACO, QGIS, un théodolite). Une hypothèse de travail n'en nomme
+      <code>tool</code> (IPACO, QGIS, un théodolite). Une hypothèse de travail n'en nomme
       aucune (c'est déjà ce que disent <code>assumed</code> et <code>fitted</code>) : lui en donner une
       serait précisément le mensonge que ce champ existe pour empêcher.</p>
     <p>Une source <code>said</code> est aussi tout l'historique de ce que le témoin a déclaré. Un
@@ -927,8 +927,7 @@ if (movedTo) {
       expediente en que se dijo, siendo <code>interview</code> el <code>id</code> de ese evento y
       <code>segment</code> el turno de palabra), <code>document</code> con <code>at</code> (una
       página, el número de una pregunta) y <code>url</code>, <code>picture</code> (el
-      <code>id</code> de una foto de la grabación sobre la que se midió) o <code>tool</code> (SVH,
-      IPACO, QGIS, un teodolito). Una hipótesis de trabajo no nombra ninguna, que es lo que ya dicen
+      <code>id</code> de una foto de la grabación sobre la que se midió) o <code>tool</code> (IPACO, QGIS, un teodolito). Una hipótesis de trabajo no nombra ninguna, que es lo que ya dicen
       <code>assumed</code> y <code>fitted</code>, y darle una sería la única mentira que este campo
       existe para impedir.</p>
     <p>Una fuente <code>said</code> es además todo el historial de lo que dijo el testigo. A un
@@ -1227,7 +1226,7 @@ if (movedTo) {
       di quell'evento e <code>segment</code> il turno di parola), <code>document</code> con
       <code>at</code> (una pagina, il numero di una domanda) e <code>url</code>, <code>picture</code>
       (l'<code>id</code> di una foto della registrazione su cui è stato misurato) o <code>tool</code>
-      (SVH, IPACO, QGIS, un teodolite). Un'ipotesi di lavoro non ne nomina alcuna, che è ciò che
+      (IPACO, QGIS, un teodolite). Un'ipotesi di lavoro non ne nomina alcuna, che è ciò che
       <code>assumed</code> e <code>fitted</code> già dicono, e dargliene una sarebbe l'unica bugia
       che questo campo esiste per impedire.</p>
     <p>Una fonte <code>said</code> è anche tutta la storia di ciò che il testimone ha detto. Un

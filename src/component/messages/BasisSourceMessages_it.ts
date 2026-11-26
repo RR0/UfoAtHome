@@ -15,7 +15,7 @@ export const basisSourceMessages_it: BasisSourceMessages = {
   atField: "Dove (pagina, domanda)",
   urlField: "Indirizzo",
   pictureField: "Foto",
-  toolField: "Strumento (SVH, IPACO, QGIS, un teodolito)",
+  toolField: "Strumento (IPACO, QGIS, un teodolito)",
   free: "Un'ipotesi di lavoro non si basa su nulla: è ciò che dice questa base.",
   segmentUnnamed: "Turno di parola {n}",
   interviewOnly: "L'intervista del dossier"

@@ -90,7 +90,7 @@ export interface ValueSource {
   /** The `id` of a picture of the recording it was measured on (see Reference): a photograph lined
    * up on the scene, which is a measurement and not an illustration. */
   picture?: string
-  /** The tool the measurement or the calculation was made in: "SVH", "IPACO", "QGIS", "a theodolite". */
+  /** The tool the measurement or the calculation was made in: "IPACO", "QGIS", "a theodolite". */
   tool?: string
 }
 

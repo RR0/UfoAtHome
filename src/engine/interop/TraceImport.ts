@@ -16,7 +16,7 @@ export interface TraceImportResult {
  * Google Earth's (KML, KMZ) or the one every GIS writes (GeoJSON).
  *
  * The two were asked for together by the GEIPAN (A. Cousyn, November 2026), and for one reason: an
- * investigator's lines live in whichever tool measured them — Google Earth, SVH, QGIS — and
+ * investigator's lines live in whichever tool measured them — Google Earth, QGIS — and
  * retyping coordinates is how coordinates get changed. Which format a file is in is read off the
  * file and not off its name: a zip is a KMZ, text that starts an object or an array is GeoJSON, and
  * anything else is tried as KML.
