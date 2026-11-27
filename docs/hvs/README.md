@@ -42,7 +42,7 @@ d'environ 3,6′ à 15°, 0,5° à l'horizon. Un export HVS devra soit retirer l
 | `cs_brute`, `cs_discriminante`, `hvs.prefere`, `hvs.enveloppe` | calculés, jamais saisis |
 | jalons | « dominante » calculée ; `milestone` : `identified`, `proven` |
 
-L'hypothèse « avion » n'est pas dans l'exemple de Baron : elle n'est là que pour qu'un élément sépare deux hypothèses. L'exemple ne
+L'hypothèse « avion » n'est pas dans l'exemple de Baron : elle n'est là que pour qu'un élément sépare deux hypothèses, et ses cotes (0,9, 0,9, 0,8) sont illustratives. Très plausible (PS 0,87) mais sans rien expliquer de ce qui sépare les hypothèses, elle obtient HVS = 0. L'exemple ne
 donne que PS = 0,70 ; sa décomposition en trois cotes de 0,7 est pour l'illustration.
 
 ### Choix faits ici, à confirmer avec Stéphane Baron

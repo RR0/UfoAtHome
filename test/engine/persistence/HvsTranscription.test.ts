@@ -31,5 +31,8 @@ describe("The fictitious HVS case in the format", () => {
     expect(lantern.hvs!.preferred).toBeCloseTo(0.7)
     expect(lantern.hvs!.envelope).toEqual([0.6, 0.8].map(value => expect.closeTo(value)) as never)
     expect(aircraft).toMatchObject({ retained: true, dominant: false, csDiscriminating: { preferred: 0 } })
+    // Plausible, and explaining nothing that tells them apart: its product says so.
+    expect(aircraft.ps!.preferred).toBeCloseTo(2.6 / 3)
+    expect(aircraft.hvs!.preferred).toBe(0)
   })
 })

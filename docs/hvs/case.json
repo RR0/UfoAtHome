@@ -40,7 +40,13 @@
       {
         "id": "aircraft",
         "title": { "fr": "feux d'un avion (pour l'illustration)", "en": "an aircraft's lights (for the illustration)" },
-        "explains": ["E1", "E2", "E3", "E4"]
+        "explains": ["E1", "E2", "E3", "E4"],
+        "plausibility": {
+          "existence": { "value": 0.9, "range": [0.8, 1], "rationale": { "fr": "cotes illustratives, pas celles de la grille de S. Baron", "en": "ratings for the illustration, not those of S. Baron's grid" } },
+          "frequency": { "value": 0.9, "range": [0.8, 1] },
+          "compatibility": { "value": 0.8, "range": [0.7, 0.9] },
+          "context": 1
+        }
       }
     ]
   }
