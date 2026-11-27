@@ -58,16 +58,28 @@ export class HvsElement extends HTMLElement {
 summary { cursor: pointer; list-style-position: inside; font: 600 12px/1.4 var(--rr0-sans, system-ui, sans-serif); letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
 h4 { margin: 10px 0 4px; font-size: 12px; font-weight: 600; opacity: .8; }
 .scroll { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; }
+table { border-collapse: collapse; width: max-content; min-width: 100%; }
+/* What a row is stays where it is, the hypotheses scroll beside it: as many as there are, each a column of the elements' table and a row
+   of the hypotheses'. Opaque, on the panel's own ground, so that what scrolls under them does not show through. */
+table.elements th:nth-child(-n+3), table.elements td:nth-child(-n+3),
+table.hypotheses th:nth-child(-n+2), table.hypotheses td:nth-child(-n+2) {
+  position: sticky; z-index: 1; box-sizing: border-box; background: var(--rr0-hvs-ground, var(--ground-raised, Canvas));
+}
+table.elements :is(th, td):nth-child(1) { left: 0; width: 3em; min-width: 3em; }
+table.elements :is(th, td):nth-child(2) { left: 3em; width: 12em; min-width: 12em; max-width: 12em; }
+table.elements :is(th, td):nth-child(3) { left: 15em; width: 7.5em; min-width: 7.5em; box-shadow: inset -1px 0 color-mix(in srgb, currentColor 25%, transparent); }
+table.elements :is(th, td):nth-child(n+4) { min-width: 5em; }
+table.hypotheses :is(th, td):nth-child(1) { left: 0; width: 4em; min-width: 4em; }
+table.hypotheses :is(th, td):nth-child(2) { left: 4em; width: 11em; min-width: 11em; max-width: 11em; box-shadow: inset -1px 0 color-mix(in srgb, currentColor 25%, transparent); }
 th, td { padding: 4px 8px; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); text-align: left; vertical-align: top; }
-th { font-weight: 600; opacity: .75; white-space: nowrap; }
+th { font-weight: 600; color: color-mix(in srgb, currentColor 75%, transparent); white-space: nowrap; }
 td.number, td.mark { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 td.number { text-align: right; }
 td.mark[data-explained="true"] { color: var(--ok, #2e8b3e); }
-td.mark[data-explained="false"] { opacity: .6; }
+td.mark[data-explained="false"] { color: color-mix(in srgb, currentColor 60%, transparent); }
 td.mark[data-by="confrontation"] { font-weight: 700; }
 tr[data-discriminating] td:first-child::after { content: " ◆"; font-size: 10px; opacity: .7; }
-tr[data-counted="false"] { opacity: .55; }
+tr[data-counted="false"] td { color: color-mix(in srgb, currentColor 55%, transparent); }
 tr[data-dominant] td { font-weight: 600; }
 td.readings { min-width: 8em; }
 td.readings .how { opacity: .65; font-size: 12px; }
@@ -342,6 +354,7 @@ ${HintElement.CSS}
   private elementsTable(elements: CaseElementJson[], hypotheses: HvsHypothesisJson[], result: HvsResult, m: HvsMessages): HTMLElement {
     const e = m.elements
     const table = document.createElement("table")
+    table.className = "elements"
     const head = table.createTHead().insertRow()
     for (const label of [e.id, e.element, e.status, ...hypotheses.map(hypothesis => hypothesis.code ?? this.titleOf(hypothesis))]) {
       const cell = document.createElement("th")
@@ -381,6 +394,7 @@ ${HintElement.CSS}
   private hypothesesTable(hypotheses: HvsHypothesisJson[], result: HvsResult, readings: LoadedReading[], m: HvsMessages): HTMLElement {
     const h = m.hypotheses
     const table = document.createElement("table")
+    table.className = "hypotheses"
     const head = table.createTHead().insertRow()
     for (const label of [h.code, h.hypothesis, h.readings, h.csRaw, h.csDiscriminating, h.ps, h.hvs, h.standing]) {
       const cell = document.createElement("th")
