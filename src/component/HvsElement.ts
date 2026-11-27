@@ -86,6 +86,24 @@ button.link { padding: 0; border: 0; background: none; color: inherit; font: inh
 ${HintElement.CSS}
 `
 
+  /**
+   * The section of a host that folds it, and its title: in the observation editor, a sub-section like every other, folded by the
+   * editor's own title (see SectionFolds), the table then drawing no fold of its own. It is hidden with the table, and titled in the
+   * table's words.
+   */
+  frame?: { section: HTMLElement, title: HTMLElement }
+
+  private frameWatch?: MutationObserver
+
+  /** Draws the table again when its host's section is unfolded: what it loads, it loads then. */
+  private watchFrame(): void {
+    if (this.frameWatch || !this.frame) return
+    this.frameWatch = new MutationObserver(() => {
+      if (this.frame?.section.hasAttribute("data-unfolded") && this.loaded.size === 0) void this.loadRecordings()
+    })
+    this.frameWatch.observe(this.frame.section, { attributes: true, attributeFilter: ["data-unfolded"] })
+  }
+
   private messages?: HvsMessages
   private language: UfoLanguage = "en"
   private said = new SaidTexts(["en"])
@@ -184,12 +202,24 @@ ${HintElement.CSS}
     const elements = json?.elements ?? []
     const hypotheses = json?.hvs?.hypotheses ?? []
     this.hidden = !json || (elements.length === 0 && hypotheses.length === 0)
+    if (this.frame) this.frame.section.hidden = this.hidden
     if (!m || !json || this.hidden) {
       this.shadowRoot!.replaceChildren()
       return
     }
     const style = document.createElement("style")
     style.textContent = HvsElement.CSS
+    if (this.frame) {
+      // Folded by its host's title: its recordings are asked for the first time it is unfolded (see SectionFolds), not before.
+      this.frame.title.replaceChildren(m.heading, HintElement.of(this.input?.account === undefined ? m.hintCase : m.hint))
+      this.watchFrame()
+      if (this.loaded.size === 0 && this.frame.section.hasAttribute("data-unfolded")) void this.loadRecordings()
+      const body = document.createElement("div")
+      body.append(...(this.loaded.size === 0 ? [this.paragraph(m.loading, "note")]
+        : this.input!.account !== undefined ? this.observation(json, this.input!.account, m) : this.caseLines(json, m)), this.credit(json, m))
+      this.shadowRoot!.replaceChildren(style, body)
+      return
+    }
     const details = document.createElement("details")
     details.open = this.opened
     details.addEventListener("toggle", () => {

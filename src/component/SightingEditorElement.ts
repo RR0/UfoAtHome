@@ -7442,10 +7442,18 @@ export class SightingEditorElement extends HTMLElement {
     }, candidates)
     // The same hypotheses weighed by Stéphane Baron's HVS protocol, for this observation, beside Poher's (see HvsElement): shown only
     // in a case that lists elements or hypotheses, which the case editor gives (see hvs).
+    // A sub-section like the candidates': folded by its title, as every section of the editor is (see SectionFolds).
     HvsElement.register()
+    const hvsSection = document.createElement("div")
+    hvsSection.className = "form-section hvs-section"
+    hvsSection.dataset.icon = "candidates"
+    hvsSection.hidden = true
+    const hvsTitle = document.createElement("h3")
+    hvsTitle.className = "section-title"
     this.hvsElement = document.createElement(HvsElement.TAG) as HvsElement
-    this.hvsElement.classList.add("form-section", "hvs-section")
-    this.shadow.getElementById("group-observation")!.append(this.hvsElement)
+    this.hvsElement.frame = { section: hvsSection, title: hvsTitle }
+    hvsSection.append(hvsTitle, this.hvsElement)
+    this.shadow.getElementById("group-observation")!.append(hvsSection)
     this.hvsElement.show(this.hvsInput)
   }
 
