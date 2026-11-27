@@ -30,6 +30,14 @@ describe("CandidateSearch", () => {
     expect(variant).toMatchObject({ verdict: "incompatible", reason: "never-seen" })
   })
 
+  it("does not prefer a date shifted to one the candidate is never seen at: the shift's cost does not make it nearer", () => {
+    // Seen only on the day given, where it is too big for the account; on any other day, nowhere.
+    const today: CandidateTrack = { id: "today", label: "today", at: offset => Math.abs(offset) < 600 ? { aim: { azimuthDeg: 205, altitudeDeg: 12 }, widthDeg: 2 } : undefined }
+    const variant = search.fit({ ...account, widthDeg: 0.05 }, today)
+    expect(variant.parameters.dateShiftDays).toBeUndefined()
+    expect(variant.reason).not.toBe("never-seen")
+  })
+
   it("calls a size that needs the arm's-length overestimate contested", () => {
     const variant = search.fit({ ...account, widthDeg: 2 }, still("moon", 205, 10, 0.52))
     expect(variant.moved.find(value => value.field === "size")!.status).toBe("contested")

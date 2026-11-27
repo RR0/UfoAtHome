@@ -134,6 +134,16 @@ describe("Provenance expiry", () => {
     expect(Provenance.restore(recording, provenance)).toEqual({ version: 4, durationSeconds: 300 })
   })
 
+  it("keeps it for a value only a rounding away, as a change of unit writes it back", () => {
+    const { recording, provenance } = Provenance.strip<Record<string, unknown>>({
+      angular: { value: { widthDeg: 0.05, heightDeg: 0.05 }, basis: "assumed" }
+    })
+    recording.angular = { widthDeg: 0.049999999999999996, heightDeg: 0.049999999999999996 }
+    expect(Provenance.restore(recording, provenance)).toMatchObject({ angular: { basis: "assumed" } })
+    recording.angular = { widthDeg: 0.06, heightDeg: 0.05 }
+    expect(Provenance.restore(recording, provenance)).toEqual({ angular: { widthDeg: 0.06, heightDeg: 0.05 } })
+  })
+
   it("keeps it while the value is still the one it was said about", () => {
     const { recording, provenance } = Provenance.strip({
       durationSeconds: { value: 120, basis: "assumed" }

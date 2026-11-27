@@ -186,7 +186,8 @@ export class CandidateSearch {
     const variant = this.fitShifted(statement, shifted)
     if (extra.length === 0) return variant
     const moved = [...extra, ...variant.moved]
-    const cost = Math.sqrt(moved.reduce((sum, value) => sum + value.z * value.z, 0))
+    // A candidate never seen at that date is no nearer for the shift's own cost: it stays as far as it was, out of reach.
+    const cost = variant.cost === Infinity ? Infinity : Math.sqrt(moved.reduce((sum, value) => sum + value.z * value.z, 0))
     // A shift or a mirror is a law's tail: what it gives is contested at best.
     const verdict: Verdict = variant.verdict === "incompatible" ? "incompatible" : "contested"
     return {

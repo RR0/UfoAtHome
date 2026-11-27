@@ -1,3 +1,4 @@
+import { Provenance } from "../persistence/Provenance.js"
 import type { Sighting } from "../model/Sighting.js"
 import type { AccountStatement, CandidateTrack, StructuralReading } from "./CandidateSearch.js"
 import { CandidateSearch } from "./CandidateSearch.js"
@@ -36,17 +37,21 @@ export class SkyCandidates {
     const timeline = sighting.timeline
     const first = timeline.sourceIds[0]
     if (!first) return undefined
-    const t = timeline.allKeyframes.find(keyframe => keyframe.shapes.some(state => state.sourceId === first))?.t ?? 0
+    const k = timeline.allKeyframes.findIndex(keyframe => keyframe.shapes.some(state => state.sourceId === first))
+    const t = timeline.allKeyframes[k]?.t ?? 0
     const shape = timeline.getInterpolatedShapeAt(t, first)
     if (!shape?.aim) return undefined
-    const statement: AccountStatement = { aim: shape.aim, widthDeg: shape.angular?.widthDeg, timeHow: sighting.provenance.at("time")?.how }
+    // A size the account only supposes says nothing a candidate could be too big or too small for.
+    const n = k >= 0 ? timeline.allKeyframes[k].shapes.findIndex(state => state.sourceId === first) : -1
+    const sizeSupposed = n >= 0 && Provenance.free(sighting.provenance.at(`timeline.keyframes.${k}.shapes.${n}.shape.angular`))
+    const statement: AccountStatement = { aim: shape.aim, ...(sizeSupposed ? {} : { widthDeg: shape.angular?.widthDeg }), timeHow: sighting.provenance.at("time")?.how }
     const last = [...timeline.allKeyframes].reverse().find(keyframe => keyframe.t > t && timeline.getShapeAt(keyframe.t, first)?.aim)
     const end = last ? timeline.getInterpolatedShapeAt(last.t, first) : undefined
     if (last && end?.aim) {
       statement.motion = { sweepDeg: CandidateSearch.separation(shape.aim, end.aim), spanMinutes: (last.t - t) / 60_000 }
       const from = shape.angular?.widthDeg
       const to = end.angular?.widthDeg
-      if (from && to) statement.growth = to / from
+      if (from && to && !sizeSupposed) statement.growth = to / from
     }
     return { statement, t }
   }

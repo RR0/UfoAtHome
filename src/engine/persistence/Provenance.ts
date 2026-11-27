@@ -189,6 +189,20 @@ export class Provenance {
    * against such a value (see ReadingCheck), which is the whole point of marking it — a likeness obtained by turning knobs is a
    * likeness and no more.
    */
+  /**
+   * Whether two values are the same, a number being the same as another a rounding away: what a value is read and written back as through a
+   * change of unit (0.05° read as 0.049999999999999996) was not typed over, and keeps what was said of it.
+   */
+  static same(a: unknown, b: unknown): boolean {
+    if (typeof a === "number" && typeof b === "number") return a === b || Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
+    if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((item, index) => Provenance.same(item, b[index]))
+    if (typeof a === "object" && a !== null && typeof b === "object" && b !== null && !Array.isArray(a) && !Array.isArray(b)) {
+      const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+      return [...keys].every(key => Provenance.same((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+    }
+    return a === b
+  }
+
   static free(entry: ProvenanceEntry | undefined): boolean {
     return entry?.basis === "assumed" || entry?.basis === "fitted"
   }
@@ -304,7 +318,7 @@ export class Provenance {
       }
       // The value this basis was said about has been replaced since — by an author typing over it,
       // most likely. It is theirs now, and it goes out bare. See ProvenanceEntry.of.
-      if (entry.of !== undefined && JSON.stringify(entry.of) !== JSON.stringify(value)) {
+      if (entry.of !== undefined && !Provenance.same(entry.of, value)) {
         continue
       }
       holder[last] = {
