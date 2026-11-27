@@ -345,8 +345,8 @@ class JsonSchemaExport {
                 type: "string"
               },
               range: {
-                description: "How far what is known lets it be: a number's least and greatest, or a time's EDTF interval (\"1976-06/1976-07\"). What a reading of the observation may move it within.",
-                anyOf: [{ type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 }, { type: "string" }]
+                description: "How far what is known lets it be: a number's least and greatest, null for a side nothing bounds ([350, null], at least 350), or a time's EDTF interval (\"1976-06/1976-07\"). What a reading of the observation may move it within.",
+                anyOf: [{ type: "array", items: { type: ["number", "null"] }, minItems: 2, maxItems: 2 }, { type: "string" }]
               },
               source: {
                 description: "What the value rests on, named: the passage of an interview it was said in, a document and where in it, a picture of the recording it was measured on, or the tool it was measured in. One of these at a time; a working hypothesis has none, which is what \"assumed\" and \"fitted\" say.",

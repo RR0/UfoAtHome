@@ -1,7 +1,7 @@
 import { computeBodyPosition, sightingTimeToDate } from "../astronomy/CelestialPositions.js"
 import { parseEdtfTime, type SightingTime } from "../model/Sighting.js"
 import { TimeSpan } from "../model/TimeSpan.js"
-import { Provenance, type ProvenanceEntry } from "../persistence/Provenance.js"
+import { Provenance, type NumberRange, type ProvenanceEntry } from "../persistence/Provenance.js"
 import type { SightingLighting, SightingRecordingJson } from "../persistence/sightingJson.js"
 import { BestCaseSearch } from "./BestCaseSearch.js"
 import type { FindingGround, ReadingFinding } from "./Interpretation.js"
@@ -95,9 +95,9 @@ export class ReadingCheck {
     if (typeof accountValue !== "number" || typeof readingValue !== "number" || Math.abs(accountValue - readingValue) < 1e-9) return undefined
     if (Array.isArray(entry?.range)) {
       const [min, max] = entry.range
-      const within = readingValue >= min && readingValue <= max
+      const within = (min === null || readingValue >= min) && (max === null || readingValue <= max)
       return {
-        text: ReadingCheck.fill(within ? this.words.valueWithin : this.words.valueOutside, { what, value: readingValue, min, max }),
+        text: ReadingCheck.fill(within ? this.words.valueWithin : this.words.valueOutside, { what, value: readingValue, bounds: this.boundsOf(entry.range) }),
         outcome: within ? "holds" : "fails", against: "established"
       }
     }
@@ -205,6 +205,13 @@ export class ReadingCheck {
 
   private static at(json: unknown, path: string): unknown {
     return path.split(".").reduce<unknown>((value, step) => (value as Record<string, unknown> | undefined)?.[step], json)
+  }
+
+  /** What is known of a number, in words: "350 to 400", "at least 350", "at most 400". */
+  private boundsOf([min, max]: NumberRange): string {
+    if (min === null) return ReadingCheck.fill(this.words.atMost, { max: max ?? "" })
+    if (max === null) return ReadingCheck.fill(this.words.atLeast, { min })
+    return ReadingCheck.fill(this.words.between, { min, max })
   }
 
   private static fill(template: string, values: Record<string, string | number>): string {

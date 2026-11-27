@@ -3,6 +3,7 @@ import { LensGhosts, type LensStateJson } from "../engine/instrument/LensGhost.j
 import type { BasisSourceMessages, SourceChoices } from "./BasisInputElement.js"
 import { PlayerIcons } from "./PlayerIcons.js"
 import { RecordingText } from "../engine/persistence/RecordingText.js"
+import type { NumberRange } from "../engine/persistence/Provenance.js"
 import { setupCloudEditor } from "./CloudEditor.js"
 import { Icons } from "./Icons.js"
 import { WindowClose } from "./WindowClose.js"
@@ -838,7 +839,7 @@ export class SightingEditorElement extends HTMLElement {
    * back to the nearer bound before it is applied. What the bounds alone cannot say (the Sun the date, the place and the heading put
    * together) is for markBeyondKnown. None given, a field is free again.
    */
-  setReadingBounds(bounds: { time?: string, hour?: (time: SightingTime) => SightingTime | undefined, lat?: [number, number], lng?: [number, number] }): void {
+  setReadingBounds(bounds: { time?: string, hour?: (time: SightingTime) => SightingTime | undefined, lat?: NumberRange, lng?: NumberRange }): void {
     const date = this.shadow.querySelector<DateInputElement>('rr0-date-input[name="obs-time"]')
     const span = bounds.time ? TimeSpan.boundsOf(bounds.time) : undefined
     date?.setBounds(span ? { ...span, ...(bounds.hour ? { adjust: bounds.hour } : {}) } : undefined)
@@ -846,8 +847,8 @@ export class SightingEditorElement extends HTMLElement {
       const field = this.shadow.getElementById(id) as HTMLInputElement | null
       if (!field) continue
       this.numberBounds.set(field, range)
-      field.min = range ? String(range[0]) : ""
-      field.max = range ? String(range[1]) : ""
+      field.min = range?.[0] != null ? String(range[0]) : ""
+      field.max = range?.[1] != null ? String(range[1]) : ""
       if (!this.boundedFields.has(field)) {
         this.boundedFields.add(field)
         // Before whatever applies it: a listener of the target's capture runs first.
@@ -855,7 +856,7 @@ export class SightingEditorElement extends HTMLElement {
           const limits = this.numberBounds.get(field)
           const value = Number(field.value)
           if (!limits || field.value === "" || !Number.isFinite(value)) return
-          const clamped = Math.min(Math.max(value, limits[0]), limits[1])
+          const clamped = Math.min(Math.max(value, limits[0] ?? -Infinity), limits[1] ?? Infinity)
           if (clamped !== value) field.value = String(clamped)
         }
         field.addEventListener("change", clamp, { capture: true })
@@ -863,7 +864,7 @@ export class SightingEditorElement extends HTMLElement {
     }
   }
 
-  private readonly numberBounds = new WeakMap<HTMLInputElement, [number, number] | undefined>()
+  private readonly numberBounds = new WeakMap<HTMLInputElement, NumberRange | undefined>()
   private readonly boundedFields = new WeakSet<HTMLInputElement>()
 
   /** The fields markBeyondKnown marked, each with the title it had before. */

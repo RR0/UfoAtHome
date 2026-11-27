@@ -100,6 +100,18 @@ describe("A reading set against the observation it reads", () => {
     expect(Check.nearestLit(lighting, afternoon, turned)!.hour).toBeLessThan(16)
   })
 
+  it("bounds a value on one side only when the range leaves the other open", () => {
+    const open = (range: unknown) => ({ ...account(), lighting: undefined, place: { name: "Southern England", locations: [{ lat: { value: 51, basis: "assumed", range }, lng: -1.5 }] } as never })
+    const moved = (lat: number) => ({ ...open(null), place: { name: "Southern England", locations: [{ lat: { value: lat, basis: "assumed" }, lng: -1.5 }] } as never })
+    const atLeast = ReadingCheck.findingsOf(open([50.5, null]), moved(60))
+    expect(atLeast[0]).toMatchObject({ outcome: "holds", against: "established" })
+    expect(english(atLeast[0])).toContain("at least 50.5")
+    expect(ReadingCheck.findingsOf(open([50.5, null]), moved(50))[0]).toMatchObject({ outcome: "fails" })
+    const atMost = ReadingCheck.findingsOf(open([null, 51.6]), moved(52))
+    expect(atMost[0]).toMatchObject({ outcome: "fails" })
+    expect(english(atMost[0])).toContain("at most 51.6")
+  })
+
   it("reads an EDTF interval each end as wide as it is said", () => {
     expect(Check.withinInterval(new Date(Date.UTC(1976, 6, 31, 23, 0)), "1976-06/1976-07")).toBe(true)
     expect(Check.withinInterval(new Date(Date.UTC(1976, 7, 1, 0, 30)), "1976-06/1976-07")).toBe(false)

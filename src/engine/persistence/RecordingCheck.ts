@@ -55,6 +55,7 @@ export class RecordingCheck {
     // Any value may be written with its provenance beside it (see Provenance): what is checked is
     // the value inside.
     if (RecordingCheck.isStated(value)) {
+      this.range((value as { range?: unknown }).range, `${path}.range`, issues)
       this.field(value.value, field, path, issues)
       return
     }
@@ -88,6 +89,18 @@ export class RecordingCheck {
         } else if (typeof value === "number" && ((field.minimum !== undefined && value < field.minimum) || (field.maximum !== undefined && value > field.maximum))) {
           issues.push({ kind: "out-of-range", path, expected: `${field.minimum ?? "−∞"}–${field.maximum ?? "∞"}`, found: String(value) })
         }
+    }
+  }
+
+  /** A provenance's range (see StatedValue.range): an EDTF interval, or a least and a greatest, `null` on a side nothing bounds but
+   * not on both, and the least not above the greatest. */
+  private range(range: unknown, path: string, issues: RecordingIssue[]): void {
+    if (range === undefined || typeof range === "string") return
+    const bound = (end: unknown) => end === null || (typeof end === "number" && Number.isFinite(end))
+    if (!Array.isArray(range) || range.length !== 2 || !range.every(bound) || (range[0] === null && range[1] === null)) {
+      issues.push({ kind: "wrong-type", path, expected: "[least, greatest], null for an open side, or an EDTF interval", found: JSON.stringify(range) })
+    } else if (range[0] !== null && range[1] !== null && range[0] > range[1]) {
+      issues.push({ kind: "out-of-range", path, expected: "least ≤ greatest", found: JSON.stringify(range) })
     }
   }
 

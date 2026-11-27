@@ -10,6 +10,10 @@ export interface ReadingCheckTexts {
   timeChanged: string
   valueWithin: string
   valueOutside: string
+  /** What is known of a value bounded both ways, at least, or at most: {min}, {max}. */
+  between: string
+  atLeast: string
+  atMost: string
   valueChanged: string
   lightingHolds: string
   lightingFails: string

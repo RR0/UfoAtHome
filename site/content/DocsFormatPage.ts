@@ -357,7 +357,8 @@ if (movedTo) {
       <code>triangulation</code> or <code>estimated</code>. <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
 
     <p><code>range</code> says how far what is known lets a value be, when that is more than the value: a number's least and greatest
-      (<code>[50, 52]</code>), or a time's EDTF interval (<code>"1976-06/1976-07"</code>). The value is the one chosen within it to draw the
+      (<code>[50, 52]</code>), <code>null</code> on a side nothing bounds (<code>[350, null]</code>: at least 350, a distance behind the
+      first obstacle, open beyond it), or a time's EDTF interval (<code>"1976-06/1976-07"</code>). The value is the one chosen within it to draw the
       scene. A reading of the observation may move it anywhere within its range, and contradicts what is known beyond it; a stated or
       derived value with no range is what is known, an assumed one with none is free.</p>
 
@@ -658,7 +659,8 @@ if (movedTo) {
       <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
 
     <p><code>range</code> dit jusqu'où ce qu'on sait permet d'aller pour une valeur, quand ce qu'on sait ne se réduit pas à cette valeur : le plus petit et le plus
-      grand d'un nombre (<code>[50, 52]</code>), ou l'intervalle EDTF d'une date (<code>"1976-06/1976-07"</code>). La valeur est celle choisie
+      grand d'un nombre (<code>[50, 52]</code>), <code>null</code> du côté que rien ne borne (<code>[350, null]</code> : au moins 350, une
+      distance au-delà du premier obstacle, ouverte derrière lui), ou l'intervalle EDTF d'une date (<code>"1976-06/1976-07"</code>). La valeur est celle choisie
       dedans pour dessiner la scène. Une lecture de l'observation peut la déplacer n'importe où dans cette plage ; au-delà, elle contredit ce qu'on sait.
       Sans plage, une valeur énoncée (<code>stated</code>) ou déduite (<code>derived</code>) est exactement ce qu'on sait, et une valeur supposée (<code>assumed</code>) est libre.</p>
 
@@ -956,7 +958,8 @@ if (movedTo) {
       <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
 
     <p><code>range</code> dice hasta dónde lo que se sabe deja ir un valor, cuando es más que el valor: el menor y el mayor de un número
-      (<code>[50, 52]</code>), o el intervalo EDTF de una fecha (<code>"1976-06/1976-07"</code>). El valor es el elegido dentro para dibujar
+      (<code>[50, 52]</code>), <code>null</code> del lado que nada acota (<code>[350, null]</code>: al menos 350, una distancia más allá
+      del primer obstáculo, abierta detrás de él), o el intervalo EDTF de una fecha (<code>"1976-06/1976-07"</code>). El valor es el elegido dentro para dibujar
       la escena. Una lectura de la observación puede desplazarlo a cualquier punto de su intervalo, y contradice lo que se sabe más allá;
       un valor indicado o deducido sin intervalo es lo que se sabe, uno supuesto sin intervalo es libre.</p>
 
@@ -1255,7 +1258,8 @@ if (movedTo) {
       <code>{ "value": { "widthDeg": 0.52, "heightDeg": 0.52 }, "basis": "stated", "how": "recalled-object" }</code></p>
 
     <p><code>range</code> dice fin dove ciò che si sa lascia andare un valore, quando è più del valore: il minimo e il massimo di un
-      numero (<code>[50, 52]</code>), o l'intervallo EDTF di una data (<code>"1976-06/1976-07"</code>). Il valore è quello scelto al suo
+      numero (<code>[50, 52]</code>), <code>null</code> dal lato che nulla limita (<code>[350, null]</code>: almeno 350, una distanza oltre il
+      primo ostacolo, aperta dietro di esso), o l'intervallo EDTF di una data (<code>"1976-06/1976-07"</code>). Il valore è quello scelto al suo
       interno per disegnare la scena. Una lettura dell'osservazione può spostarlo ovunque nel suo intervallo, e contraddice ciò che si sa
       oltre; un valore indicato o dedotto senza intervallo è ciò che si sa, uno supposto senza intervallo è libero.</p>
 

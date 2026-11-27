@@ -59,6 +59,14 @@ describe("recording issues", () => {
     expect(check.issues(recording({ durationSeconds: { value: "15", basis: "derived" } }))[0].kind).toBe("wrong-type")
   })
 
+  it("takes a range open on one side, and reports one open on both or upside down", () => {
+    const duration = (range: unknown) => check.issues(recording({ durationSeconds: { value: 400, basis: "assumed", range } }))
+    expect(duration([350, null])).toEqual([])
+    expect(duration([null, 600])).toEqual([])
+    expect(duration([null, null])[0]).toMatchObject({ kind: "wrong-type", path: "durationSeconds.range" })
+    expect(duration([600, 350])[0]).toMatchObject({ kind: "out-of-range", path: "durationSeconds.range" })
+  })
+
   it("reports keys inside a list's elements", () => {
     expect(check.issues(recording({ milestones: [{ t: 0, lable: "A" }] }))).toEqual([{ kind: "unknown-key", path: "milestones.0.lable" }])
   })

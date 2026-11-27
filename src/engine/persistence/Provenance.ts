@@ -116,7 +116,9 @@ export interface StatedValue<T = unknown> {
   how?: string
   /**
    * How far what is known lets it be, when that is less than nothing and more than the value: a number's least and greatest
-   * (`[50.5, 51.6]`), or a time's EDTF interval (`"1976-06/1976-07"`, the sources' June or July). The value is the one chosen within it
+   * (`[50.5, 51.6]`), or a time's EDTF interval (`"1976-06/1976-07"`, the sources' June or July). A bound nothing sets is `null`:
+   * `[350, null]` is "at least 350", a distance behind the first obstacle, open to infinity and never brought back onto it (S. Baron's
+   * HVS protocol, November 2026). Not both. The value is the one chosen within it
    * to draw the scene; a reading of the observation may move it anywhere within it, and contradicts what is known beyond (see
    * ReadingCheck). Absent: a stated, derived or measured value is what is known; an assumed one is free.
    */
@@ -126,7 +128,10 @@ export interface StatedValue<T = unknown> {
 }
 
 /** See StatedValue.range. */
-export type ValueRange = [number, number] | string
+export type ValueRange = NumberRange | string
+
+/** A number's least and greatest, either of them `null` when nothing bounds it on that side (see StatedValue.range). */
+export type NumberRange = [number | null, number | null]
 
 /** What is known about one path, once the value has been taken out of it. */
 export interface ProvenanceEntry {
