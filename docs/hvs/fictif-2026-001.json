@@ -7,9 +7,20 @@
   "durationSeconds": 180,
   "place": {
     "name": "Cas fictif FICTIF-2026-001 (HVS 7.0, S. Baron)",
-    "locations": [{ "lat": 48.879, "lng": 2.588 }]
+    "locations": [
+      {
+        "lat": 48.879,
+        "lng": 2.588
+      }
+    ]
   },
-  "observer": { "id": "temoin", "title": { "fr": "Le témoin", "en": "The witness" } },
+  "observer": {
+    "id": "temoin",
+    "title": {
+      "fr": "Le témoin",
+      "en": "The witness"
+    }
+  },
   "description": {
     "fr": "Cas fictif proposé par Stéphane Baron pour comparer le protocole HVS au format d'UFO@home : un point lumineux orangé monte de l'azimut 245° à 252° et de 15° à 22° de hauteur en trois minutes, puis s'éteint d'un coup.",
     "en": "A fictitious case Stéphane Baron put forward to set the HVS protocol beside UFO@home's format: an orange point of light climbs from azimuth 245° to 252° and from 15° to 22° high in three minutes, then goes out at once."
@@ -17,19 +28,38 @@
   "instrument": "eye",
   "observerTrack": {
     "keyframes": [
-      { "t": 0, "pose": { "lat": 48.879, "lng": 2.588, "elevationM": 0, "headingDeg": 248, "pitchDeg": 18, "fovDeg": 60 } }
+      {
+        "t": 0,
+        "pose": {
+          "lat": 48.879,
+          "lng": 2.588,
+          "elevationM": 0,
+          "headingDeg": 248,
+          "pitchDeg": 18,
+          "fovDeg": 60
+        }
+      }
     ]
   },
   "decor": [
     {
       "id": "premier-obstacle",
       "kind": "building",
-      "title": { "fr": "Premier obstacle, à 350 m", "en": "First obstacle, 350 m away" },
+      "title": {
+        "fr": "Premier obstacle, à 350 m",
+        "en": "First obstacle, 350 m away"
+      },
       "eastM": -317.2,
       "northM": -147.9,
       "headingDeg": 245,
-      "sizeM": { "widthM": 20, "lengthM": 10, "heightM": 10 },
-      "occludesSourceIds": ["lumiere"]
+      "sizeM": {
+        "widthM": 20,
+        "lengthM": 10,
+        "heightM": 10
+      },
+      "occludesSourceIds": [
+        "lumiere"
+      ]
     }
   ],
   "timeline": {
@@ -41,29 +71,59 @@
             "sourceId": "lumiere",
             "shape": {
               "kind": "oval",
-              "bounds": { "x": 0, "y": 0, "width": 10, "height": 10 },
+              "bounds": {
+                "x": 0,
+                "y": 0,
+                "width": 10,
+                "height": 10
+              },
               "color": "#ff9a3c",
               "angle": 0,
               "transparency": 0,
               "haloScale": 1.5,
               "brightness": 0.6,
               "selected": false,
-              "title": { "fr": "Un point lumineux orangé", "en": "An orange point of light" },
-              "angular": { "widthDeg": 0.05, "heightDeg": 0.05 },
+              "title": {
+                "fr": "Un point lumineux orangé",
+                "en": "An orange point of light"
+              },
+              "angular": {
+                "value": {
+                  "widthDeg": 0.05,
+                  "heightDeg": 0.05
+                },
+                "basis": "assumed",
+                "rationale": {
+                  "fr": "l'exemple ne dit pas la taille du point lumineux : un point, supposé",
+                  "en": "the example does not say how big the point of light was: a point, supposed"
+                }
+              },
               "aim": {
                 "azimuthDeg": {
                   "value": 245,
                   "basis": "derived",
                   "how": "landmark",
-                  "range": [242, 248],
-                  "rationale": { "fr": "reconstitué depuis un repère de terrain photographié", "en": "worked out from a landmark photographed on the spot" }
+                  "range": [
+                    242,
+                    248
+                  ],
+                  "rationale": {
+                    "fr": "reconstitué depuis un repère de terrain photographié",
+                    "en": "worked out from a landmark photographed on the spot"
+                  }
                 },
                 "altitudeDeg": {
                   "value": 15,
                   "basis": "stated",
                   "how": "estimated",
-                  "range": [12, 18],
-                  "rationale": { "fr": "élévation initiale déclarée par le témoin", "en": "the first elevation the witness gave" }
+                  "range": [
+                    12,
+                    18
+                  ],
+                  "rationale": {
+                    "fr": "élévation initiale déclarée par le témoin",
+                    "en": "the first elevation the witness gave"
+                  }
                 }
               }
             }
@@ -73,17 +133,33 @@
       {
         "t": 180000,
         "shapes": [
-          { "sourceId": "lumiere", "shape": { "aim": { "azimuthDeg": 252, "altitudeDeg": 22 } } }
+          {
+            "sourceId": "lumiere",
+            "shape": {
+              "aim": {
+                "azimuthDeg": 252,
+                "altitudeDeg": 22
+              }
+            }
+          }
         ]
       },
       {
         "t": 180100,
         "shapes": [
-          { "sourceId": "lumiere", "shape": { "brightness": 0, "transparency": 1 } }
+          {
+            "sourceId": "lumiere",
+            "shape": {
+              "brightness": 0,
+              "transparency": 1
+            }
+          }
         ]
       }
     ],
-    "order": ["lumiere"],
+    "order": [
+      "lumiere"
+    ],
     "groups": []
   }
 }

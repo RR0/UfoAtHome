@@ -2,12 +2,20 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_fr = {
   heading: "Hypothèses pesées (HVS)",
-  hint: "Le protocole HVS de Stéphane Baron pèse chaque hypothèse par sa couverture (CS), la part des éléments du dossier qu'elle explique, et par sa plausibilité (PS), indépendante du cas : HVS = CS × PS, une valeur préférée et son enveloppe, jamais une probabilité. La CS brute porte sur tous les éléments comptés (les inférences d'association ne le sont pas), la CS discriminante sur ceux qui séparent les hypothèses ; c'est elle qui désigne l'hypothèse dominante. Une hypothèse n'est recevable que si elle couvre au moins la moitié des éléments. Une direction ou une taille qu'une lecture reconstitue est expliquée ou non selon sa confrontation au témoignage ; le reste, comme le déclare l'analyste. La plausibilité et le facteur de contexte sont ceux de l'analyste : UFO@home ne fournit aucune probabilité a priori.",
+  hint: "Le protocole HVS de Stéphane Baron pèse, pour cette observation, chaque hypothèse par sa couverture (CS), la part des éléments du dossier qu'elle explique, et par sa plausibilité (PS), indépendante du cas : HVS = CS × PS, une valeur préférée et son enveloppe, jamais une probabilité. La CS brute porte sur tous les éléments comptés (les inférences d'association ne le sont pas), la CS discriminante sur ceux qui séparent les hypothèses ; c'est elle qui désigne l'hypothèse dominante. Une hypothèse n'est recevable que si elle couvre au moins la moitié des éléments. Une direction ou une taille qu'une lecture reconstitue est expliquée ou non selon sa confrontation au témoignage ; le reste, comme le déclare l'analyste. La plausibilité et le facteur de contexte sont ceux de l'analyste : UFO@home ne fournit aucune probabilité a priori.",
+  hintCase: "Le protocole HVS de Stéphane Baron pèse les hypothèses du dossier observation par observation : chaque témoin a ses propres éléments, et donc sa propre évaluation, détaillée dans le résumé de son observation. Ici, ce qui domine pour chacune.",
   credit: "Protocole HVS {protocol} de Stéphane Baron",
   taxonomy: "taxonomie {taxonomy}",
   notSealed: "La liste des éléments n'est pas arrêtée : elle doit l'être avant de peser les hypothèses.",
   noElements: "Aucun élément : le dossier n'en liste pas.",
   noHypotheses: "Aucune hypothèse pesée.",
+  unassigned: "Les éléments {ids} ne disent pas de quelle observation ils sont : ils ne comptent dans aucune évaluation.",
+  caseLine: {
+    intro: "Une évaluation par observation, détaillée dans chacune :",
+    item: "{observation} : {verdict}",
+    dominant: "dominante {hypothesis} (HVS {hvs})",
+    none: "aucune hypothèse dominante"
+  },
   iqi: {
     heading: "Qualité de l'information (IQI)",
     item: "{group} : {level}",
@@ -27,12 +35,21 @@ export const hvsMessages_fr = {
     explainedByReading: "expliqué : la lecture le reproduit",
     notExplainedByReading: "non expliqué : la lecture ne le reproduit pas",
     explainedDeclared: "expliqué, selon l'analyste",
-    notExplainedDeclared: "non expliqué, selon l'analyste"
+    notExplainedDeclared: "non expliqué, selon l'analyste",
+    variants: "la meilleure de {n} lectures confrontées"
   },
   hypotheses: {
     heading: "Hypothèses",
     code: "Code",
     hypothesis: "Hypothèse",
+    readings: "Lectures",
+    noReading: "aucune",
+    byPhenomenon: "d'après le phénomène {phenomenon}",
+    chosen: "choisies à la main",
+    noPhenomenon: "aucun phénomène nommé",
+    choose: "Choisir…",
+    keepChoice: "Garder ce choix",
+    automatic: "D'après le phénomène",
     csRaw: "CS brute",
     csDiscriminating: "CS discriminante",
     ps: "PS",

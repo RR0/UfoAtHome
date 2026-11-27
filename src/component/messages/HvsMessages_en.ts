@@ -2,12 +2,20 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_en = {
   heading: "Hypotheses weighed (HVS)",
-  hint: "Stéphane Baron's HVS protocol weighs each hypothesis by its coverage (CS), the share of the file's elements it explains, and by its plausibility (PS), apart from the case: HVS = CS × PS, a value preferred and its envelope, never a probability. The raw CS is over every element counted (inferences of association are not), the discriminating CS over those that tell the hypotheses apart; that one names the dominant hypothesis. A hypothesis is admissible only if it covers at least half of the elements. A direction or a size a reading reconstructs is explained or not by its confrontation with the testimony; the rest, as the analyst declares. The plausibility and the context factor are the analyst's: UFO@home supplies no prior probability.",
+  hint: "Stéphane Baron's HVS protocol weighs, for this observation, each hypothesis by its coverage (CS), the share of the file's elements it explains, and by its plausibility (PS), apart from the case: HVS = CS × PS, a value preferred and its envelope, never a probability. The raw CS is over every element counted (inferences of association are not), the discriminating CS over those that tell the hypotheses apart; that one names the dominant hypothesis. A hypothesis is admissible only if it covers at least half of the elements. A direction or a size a reading reconstructs is explained or not by its confrontation with the testimony; the rest, as the analyst declares. The plausibility and the context factor are the analyst's: UFO@home supplies no prior probability.",
+  hintCase: "Stéphane Baron's HVS protocol weighs the case's hypotheses observation by observation: each witness has their own elements, and so their own evaluation, detailed in the summary of their observation. Here, what dominates for each.",
   credit: "Stéphane Baron's HVS protocol {protocol}",
   taxonomy: "taxonomy {taxonomy}",
   notSealed: "The list of elements is not frozen: it has to be before the hypotheses are weighed.",
   noElements: "No elements: the file lists none.",
   noHypotheses: "No hypothesis weighed.",
+  unassigned: "The elements {ids} do not say which observation they are of: they count in no evaluation.",
+  caseLine: {
+    intro: "One evaluation per observation, detailed in each:",
+    item: "{observation}: {verdict}",
+    dominant: "dominant {hypothesis} (HVS {hvs})",
+    none: "no dominant hypothesis"
+  },
   iqi: {
     heading: "Information quality (IQI)",
     item: "{group}: {level}",
@@ -27,12 +35,21 @@ export const hvsMessages_en = {
     explainedByReading: "explained: the reading reproduces it",
     notExplainedByReading: "not explained: the reading does not reproduce it",
     explainedDeclared: "explained, as the analyst judges",
-    notExplainedDeclared: "not explained, as the analyst judges"
+    notExplainedDeclared: "not explained, as the analyst judges",
+    variants: "the best of {n} readings confronted"
   },
   hypotheses: {
     heading: "Hypotheses",
     code: "Code",
     hypothesis: "Hypothesis",
+    readings: "Readings",
+    noReading: "none",
+    byPhenomenon: "by the phenomenon {phenomenon}",
+    chosen: "chosen by hand",
+    noPhenomenon: "no phenomenon named",
+    choose: "Choose…",
+    keepChoice: "Keep this choice",
+    automatic: "By the phenomenon",
     csRaw: "Raw CS",
     csDiscriminating: "Discriminating CS",
     ps: "PS",

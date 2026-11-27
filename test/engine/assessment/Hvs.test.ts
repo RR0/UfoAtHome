@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest"
-import { Hvs } from "../../../src/engine/assessment/hvs/Hvs.js"
+import { Hvs, type HvsReading } from "../../../src/engine/assessment/hvs/Hvs.js"
 import { Iqi } from "../../../src/engine/assessment/hvs/Iqi.js"
 import type { CaseElementJson, HvsJson } from "../../../src/engine/assessment/hvs/HvsJson.js"
 import type { SightingRecordingJson } from "../../../src/engine/persistence/sightingJson.js"
 
 const element = (id: string, status: CaseElementJson["status"] = "observed", more: Partial<CaseElementJson> = {}): CaseElementJson => ({ id, status, ...more })
 const five = ["E1", "E2", "E3", "E4", "E5"].map(id => element(id))
-const none = () => undefined
+const one = (elements: CaseElementJson[], hvs: HvsJson, readings: HvsReading[] = []) => Hvs.of(elements, hvs, "a", readings, true)
+const reading = (id: string, phenomena: string[], outcomes?: Record<string, boolean>): HvsReading => ({ id, phenomena: new Set(phenomena), ...(outcomes ? { outcomes } : {}) })
 
 describe("Weighing a case's hypotheses by the HVS protocol", () => {
   it("gives the figures of Stéphane Baron's example: raw coverage 0.80, discriminating 0.67, PS 0.70, HVS 0.47", () => {
@@ -16,7 +17,7 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
         { id: "aircraft", explains: ["E1", "E2", "E5"] }
       ]
     }
-    const result = Hvs.of(five, hvs, none, none)
+    const result = one(five, hvs)
     expect(result.discriminating).toEqual(["E3", "E4", "E5"])
     const lantern = result.hypotheses[0]
     expect(lantern.csRaw.preferred).toBeCloseTo(0.8)
@@ -31,13 +32,13 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
 
   it("counts no inference of association, and counts an inference only in the upper end of a coverage", () => {
     const elements = [element("E1"), element("E2", "inferred"), element("E3", "association"), element("E4")]
-    const result = Hvs.of(elements, { hypotheses: [{ id: "h", explains: ["E1", "E2", "E3"] }] }, none, none)
+    const result = one(elements, { hypotheses: [{ id: "h", explains: ["E1", "E2", "E3"] }] })
     expect(result.counted).toEqual(["E1", "E2", "E4"])
     expect(result.hypotheses[0].csRaw).toEqual({ preferred: 2 / 3, envelope: [1 / 3, 2 / 3] })
   })
 
   it("admits no hypothesis that covers less than half the elements, and has it dominate nothing", () => {
-    const result = Hvs.of(five, { hypotheses: [{ id: "h", explains: ["E1", "E2"] }] }, none, none)
+    const result = one(five, { hypotheses: [{ id: "h", explains: ["E1", "E2"] }] })
     expect(result.hypotheses[0]).toMatchObject({ admissible: false, dominant: false })
     expect(result.hypotheses[0].csDiscriminating).toBeUndefined()
   })
@@ -45,8 +46,7 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
   it("settles a direction by the reading's confrontation with the account, whatever is declared", () => {
     const elements = [element("E1"), element("E2", "observed", { phenomenon: { sourceId: "light", t: 0 } }), element("E3", "observed", { phenomenon: { sourceId: "light" } })]
     const outcomes = { "0/light": true, "180000/light": false }
-    const result = Hvs.of(elements, { hypotheses: [{ id: "h", readings: ["r"], explains: ["E1", "E3"] }] },
-      id => id === "r" ? outcomes : undefined, id => id === "r" ? "account" : undefined, "account")
+    const result = one(elements, { hypotheses: [{ id: "h", readings: ["r"], explains: ["E1", "E3"] }] }, [reading("r", [], outcomes)])
     expect(result.hypotheses[0].explanations).toEqual({
       E1: { explained: true, by: "declared" },
       E2: { explained: true, by: "confrontation" },
@@ -57,17 +57,17 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
 
   it("falls back on what is declared for a phenomenon no reading of the hypothesis compared", () => {
     const elements = [element("E1", "observed", { phenomenon: { sourceId: "light" } })]
-    const result = Hvs.of(elements, { hypotheses: [{ id: "et", explains: ["E1"] }] }, none, none)
+    const result = one(elements, { hypotheses: [{ id: "et", explains: ["E1"] }] })
     expect(result.hypotheses[0].explanations.E1).toEqual({ explained: true, by: "declared" })
   })
 
   it("takes the geometric mean when a rating collapses under a strong one, and draws the envelope from the ranges", () => {
-    const result = Hvs.of(five, {
+    const result = one(five, {
       hypotheses: [{
         id: "ball-lightning", explains: ["E1", "E2", "E3"],
         plausibility: { existence: 0.8, frequency: 0.05, compatibility: { value: 0.5, range: [0.3, null] }, context: { value: 1, range: [0.9, 1] } }
       }]
-    }, none, none)
+    })
     const h = result.hypotheses[0]
     expect(h.geometric).toBe(true)
     expect(h.ps!.preferred).toBeCloseTo(Math.cbrt(0.8 * 0.05 * 0.5))
@@ -77,9 +77,54 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
   })
 
   it("says which ratings were not given, the context counting as 1", () => {
-    const result = Hvs.of(five, { hypotheses: [{ id: "h", explains: ["E1", "E2", "E3"], plausibility: { existence: 0.9, frequency: 0.6 } }] }, none, none)
+    const result = one(five, { hypotheses: [{ id: "h", explains: ["E1", "E2", "E3"], plausibility: { existence: 0.9, frequency: 0.6 } }] })
     expect(result.hypotheses[0].missing).toEqual(["compatibility", "context"])
     expect(result.hypotheses[0].ps!.preferred).toBeCloseTo(0.75)
+  })
+})
+
+describe("One evaluation per observation", () => {
+  const lantern = { id: "lantern", phenomenon: "SkyLantern", explains: ["A1", "B1"] }
+
+  it("weighs the same hypotheses against each witness's own elements, two witnesses being two evaluations", () => {
+    const elements = [element("A1", "observed", { of: "a" }), element("A2", "observed", { of: "a" }), element("B1", "observed", { of: "b" })]
+    const a = Hvs.of(elements, { hypotheses: [lantern] }, "a", [], false)
+    const b = Hvs.of(elements, { hypotheses: [lantern] }, "b", [], false)
+    expect(a.counted).toEqual(["A1", "A2"])
+    expect(a.hypotheses[0].csRaw.preferred).toBe(0.5)
+    expect(b.counted).toEqual(["B1"])
+    expect(b.hypotheses[0].csRaw.preferred).toBe(1)
+  })
+
+  it("says which elements of a case of several witnesses belong to none, and takes them for the only account of a case of one", () => {
+    const elements = [element("E1"), element("A1", "observed", { of: "a" })]
+    expect(Hvs.unassigned(elements, false).map(found => found.id)).toEqual(["E1"])
+    expect(Hvs.elementsOf(elements, "a", true).map(found => found.id)).toEqual(["E1", "A1"])
+  })
+
+  it("finds the readings that test a hypothesis by the phenomenon it names, a combined one by all of its phenomena", () => {
+    const readings = [reading("r1", ["SkyLantern"]), reading("r2", ["SkyLantern", "Aircraft"]), reading("r3", [])]
+    expect(Hvs.readingsOf({ id: "l", phenomenon: "SkyLantern" }, readings)).toEqual({ readings: [readings[0]], linkedBy: "phenomenon" })
+    expect(Hvs.readingsOf({ id: "c", phenomenon: ["Aircraft", "SkyLantern"] }, readings).readings).toEqual([readings[1]])
+    // Chosen by hand: a reading of bodies of no kind, which no phenomenon finds, or none at all.
+    expect(Hvs.readingsOf({ id: "l", phenomenon: "SkyLantern", readings: ["r3"] }, readings)).toEqual({ readings: [readings[2]], linkedBy: "chosen" })
+    expect(Hvs.readingsOf({ id: "l", phenomenon: "SkyLantern", readings: [] }, readings).readings).toEqual([])
+  })
+
+  it("explains an element when one of several variants reproduces it, and says how many were confronted", () => {
+    const elements = [element("E1", "observed", { phenomenon: { sourceId: "light" } })]
+    const result = one(elements, { hypotheses: [{ id: "l", phenomenon: "SkyLantern" }] },
+      [reading("v1", ["SkyLantern"], { "0/light": false }), reading("v2", ["SkyLantern"], { "0/light": true })])
+    expect(result.hypotheses[0].explanations.E1).toEqual({ explained: true, by: "confrontation", readings: 2 })
+  })
+
+  it("takes the context factor said for an observation in place of the hypothesis's own", () => {
+    const hvs: HvsJson = {
+      hypotheses: [{ id: "drone", explains: ["E1", "E2", "E3"], plausibility: { existence: 0.8, frequency: 0.8, compatibility: 0.8, context: 0.5 } }],
+      observations: { a: { context: { drone: 0 } } }
+    }
+    expect(one(five, hvs).hypotheses[0].ps!.preferred).toBe(0)
+    expect(Hvs.of(five, hvs, "b", [], true).hypotheses[0].ps!.preferred).toBeCloseTo(0.4)
   })
 })
 

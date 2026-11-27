@@ -2193,6 +2193,8 @@ ${EditorTheme.fields(".app")}
   border: 0;
   border-top: 1px solid var(--line);
 }
+/* The HVS weighing is one element, its tables its own: the whole width of the section, not one of its columns (see HvsElement). */
+.form-section.hvs-section:not([hidden]) { display: block; }
 /* The first section of a panel opens it: no rule above it, the chips row stands there. */
 .group-panel > .toolbar:first-child > .form-section:first-child, .group-panel > .form-section:first-child,
 #observer-principal > .form-section:first-child, .element-list-body > .form-section:first-child { border-top: 0; padding-top: 4px; }

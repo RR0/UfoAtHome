@@ -110,6 +110,14 @@ export interface WitnessErrorMessages {
     poherTag: string
     poherStatePossible: string
     poherStateExcluded: string
+    /** Under a reading: where the matrix, asked about what the reading itself shows, puts the reading's own phenomenon (see PoherSelfCheck). */
+    selfCheck: string
+    /** `{n}` other phenomena ranked equal with it. */
+    selfCheckTied: string
+    /** The matrix rules out the reading's own phenomenon on what the reading shows: `{questions}`. */
+    selfCheckExcluded: string
+    /** The version of the matrix read does not know the reading's phenomenon. */
+    selfCheckUnknown: string
     answersTitle: string
     firm: string
     soft: string

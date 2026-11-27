@@ -16,7 +16,7 @@ import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
-import { HvsElement } from "./HvsElement.js"
+import { HvsElement, type HvsInput } from "./HvsElement.js"
 import { ScenarioSweepElement } from "./ScenarioSweepElement.js"
 import { CaseExportElement } from "./CaseExportElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
@@ -1109,7 +1109,9 @@ export class CaseEditorElement extends HTMLElement {
         this.layMostFavourable(reading)
       }
       this.editor.readings = readings.filter(reading => reading.recording?.interpretation?.bodies.length || InterpretationKinds.computes(reading.recording?.interpretation, InterpretationRegistry.kinds()))
-        .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: reading.recording!.interpretation! }))
+        // Its plain values: a kind computes from numbers, and a value written with its provenance ({ value, basis }) is not one.
+        .map(reading => ({ id: reading.event.id ?? session.proposedId(reading), label: this.labelOf(reading, session.tracks.indexOf(reading)), interpretation: Provenance.strip(reading.recording!).recording.interpretation! }))
+      this.editor.hvs = track.kind === "observer" ? this.hvsOf(session, track) : undefined
       this.editor.sightingData = structuredClone(track.recording!)
       // Loaded again, the editor's fields hold no marks: checked whatever was checked before.
       this.checked = undefined
@@ -2044,20 +2046,53 @@ export class CaseEditorElement extends HTMLElement {
     })
   }
 
-  /** Weighs the case's hypotheses by the HVS protocol under its readings compared (see HvsElement), as the case's player does. */
+  /**
+   * The case's hypotheses weighed by the HVS protocol, one line per observation, under its readings compared (see HvsElement), as the
+   * case's player does: an observation opens its own weighing, in its Summary.
+   */
   private weighHypotheses(session: CaseSession): void {
     HvsElement.register()
     const panel = this.byId("hvs") as HvsElement
     panel.toggleAttribute("data-filtered", !this.kindsShown.has("reading"))
     panel.show({
       caseJson: () => session.json,
-      recording: async id => {
-        const track = session.tracks.find(candidate => candidate.event.id === id)
-        if (!track) return undefined
-        if (!track.recording) await this.loadTrack(track).catch(() => undefined)
-        return track.recording
+      recording: id => this.recordingOf(session, id),
+      open: account => {
+        const track = session.tracks.find(candidate => candidate.event.id === account)
+        if (track) void this.showTrack(track)
       }
     })
+  }
+
+  /** The recording of the event `id` of the case, as it is being edited: loaded first if it was not. */
+  private async recordingOf(session: CaseSession, id: string): Promise<SightingRecordingJson | undefined> {
+    const track = session.tracks.find(candidate => candidate.event.id === id)
+    if (!track) return undefined
+    if (!track.recording) await this.loadTrack(track).catch(() => undefined)
+    return track === this.current ? this.editor.sightingData : track.recording
+  }
+
+  /**
+   * What the observation `track` is weighed by the HVS protocol with, in its Summary: the case, its recordings, and the choice by hand of
+   * the readings that test a hypothesis, written in the case (see HvsHypothesisJson.readings).
+   */
+  private hvsOf(session: CaseSession, track: CaseTrack): HvsInput | undefined {
+    const account = track.event.id
+    if (account === undefined) return undefined
+    return {
+      caseJson: () => session.json,
+      recording: id => this.recordingOf(session, id),
+      account,
+      choose: (hypothesis, readings) => {
+        const found = session.json.hvs?.hypotheses?.find(candidate => candidate.id === hypothesis)
+        if (!found) return
+        if (readings === undefined) delete found.readings
+        else found.readings = readings
+        session.touch()
+        this.scheduleDirtyCheck()
+        this.editor.redrawHvs()
+      }
+    }
   }
 
   /**

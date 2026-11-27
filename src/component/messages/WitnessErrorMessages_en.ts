@@ -210,6 +210,10 @@ export const witnessErrorMessages_en: WitnessErrorMessages = {
     "poherTag": "Poher: {state}",
     "poherStatePossible": "possible, score {x}",
     "poherStateExcluded": "ruled out",
+    "selfCheck": "Consistency of the reading: asked about what the reading itself shows, the matrix ranks “{phenomenon}” {rank} of {of}{tied}.",
+    "selfCheckTied": " (tied with {n})",
+    "selfCheckExcluded": "Consistency of the reading: asked about what the reading itself shows, the matrix rules out “{phenomenon}” ({questions}): the reading does not look like what it says it is, or the matrix is wrong.",
+    "selfCheckUnknown": "Consistency of the reading: this version of the matrix does not know “{phenomenon}”.",
     "answersTitle": "Answers drawn from the recording ({n})",
     "firm": "firm",
     "soft": "an estimate, rules nothing out alone"

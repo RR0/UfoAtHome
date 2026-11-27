@@ -6,15 +6,24 @@ export interface HvsScore {
   envelope: [number, number]
 }
 
-/** How a hypothesis was found to explain an element, or not: by a reading's confrontation with the account, or as the analyst declares. */
+/**
+ * How a hypothesis was found to explain an element, or not: by the confrontation of a reading that tests it with the account, or as the
+ * analyst declares. `readings` says how many readings were confronted on it: more than one is several variants, and the element is
+ * explained when one of them reproduces it, which is choosing the variant that fits and is said beside it.
+ */
 export interface HvsExplanation {
   explained: boolean
   by: "confrontation" | "declared"
+  readings?: number
 }
 
-/** What a hypothesis is worth against its case. */
+/** What a hypothesis is worth against one observation. */
 export interface HvsHypothesisResult {
   id: string
+  /** The readings of the observation that test it, by their event's `id`. */
+  readings: string[]
+  /** How they were found: by the phenomenon it names, or chosen by hand (see HvsHypothesisJson.readings). */
+  linkedBy: "phenomenon" | "chosen"
   /** Element by element, for those counted: how it explains each. */
   explanations: Record<string, HvsExplanation>
   /** The coverage over every counted element. */
@@ -40,9 +49,11 @@ export interface HvsHypothesisResult {
   milestone?: HvsMilestone
 }
 
-/** What the protocol makes of a case's hypotheses. */
+/** What the protocol makes of a case's hypotheses against one of its observations. */
 export interface HvsResult {
-  /** The elements counted: every element but the inferences of association. */
+  /** The `id` of the observation's account event. */
+  account: string
+  /** The elements of the observation counted: all of them but the inferences of association. */
   counted: string[]
   /** Those of them that tell the hypotheses apart: explained by some and not by others. */
   discriminating: string[]
@@ -55,10 +66,23 @@ export interface HvsResult {
  */
 export type ReadingOutcomes = Readonly<Record<string, boolean>>
 
+/** A reading of the observation, as the weighing needs it: what it is a reading of, and what its confrontation found once it is had. */
+export interface HvsReading {
+  /** Its event's `id`. */
+  id: string
+  /** The phenomena its bodies are instances of (see InterpretationKinds.phenomena). */
+  phenomena: ReadonlySet<string>
+  outcomes?: ReadingOutcomes
+}
+
 /**
- * Weighs a case's hypotheses as Stéphane Baron's HVS protocol (Hypothesis Validity Score, version 7.0) does: how much of the case's
- * elements each covers (CS), how plausible it is apart from the case (PS), and their product, HVS = CS × PS, given as a value preferred
- * with an envelope. Never a probability: the scores of the hypotheses do not add up to anything, and the protocol emits no class.
+ * Weighs a case's hypotheses against one of its observations as Stéphane Baron's HVS protocol (Hypothesis Validity Score, version 7.0)
+ * does: how much of the observation's elements each covers (CS), how plausible it is apart from the case (PS), and their product,
+ * HVS = CS × PS, given as a value preferred with an envelope. Never a probability: the scores of the hypotheses do not add up to anything,
+ * and the protocol emits no class.
+ *
+ * One observation at a time: an evaluation is an observation's, and two witnesses, who did not see nor say the same, are two evaluations
+ * of the same hypotheses.
  *
  * The coverage is this program's to work out, from the list of elements and from the confrontation of each reading with what the witness
  * said. The plausibility is not: its ratings and the context factor are the analyst's, against the protocol's own grid, and nothing here
@@ -79,30 +103,55 @@ export class Hvs {
   static readonly COLLAPSED = 0.2
   static readonly STRONG = 0.6
 
+  /** The elements of the observation `account`: those that say they are its, or every one that says nothing in a case of one account. */
+  static elementsOf(elements: readonly CaseElementJson[], account: string, single: boolean): CaseElementJson[] {
+    return elements.filter(element => element.of === account || (element.of === undefined && single))
+  }
+
+  /** The elements of a case of several accounts that say of none which they are: they count in no evaluation, and are to be said so. */
+  static unassigned(elements: readonly CaseElementJson[], single: boolean): CaseElementJson[] {
+    return single ? [] : elements.filter(element => element.of === undefined)
+  }
+
   /**
-   * @param elements The case's elements.
-   * @param hvs What the case says for the protocol.
-   * @param outcomes What a reading's confrontation found, by the `id` of the reading's event; undefined for one not confronted.
-   * @param accountOf The `id` of the account event a reading reads, by the `id` of the reading's event.
-   * @param onlyAccount The `id` of the case's account event when it has only one: what an element of no `of` is about.
+   * The readings of the observation that test `hypothesis`: those it chose by hand, else those whose bodies are of the phenomena it names,
+   * all of them and no other (a combined hypothesis is tested by a reading of all its parts, a single one by a reading of it alone).
    */
-  static of(elements: readonly CaseElementJson[], hvs: HvsJson | undefined, outcomes: (readingId: string) => ReadingOutcomes | undefined,
-            accountOf: (readingId: string) => string | undefined, onlyAccount?: string): HvsResult {
-    const counted = elements.filter(element => element.status !== "association")
+  static readingsOf(hypothesis: HvsHypothesisJson, readings: readonly HvsReading[]): { readings: HvsReading[], linkedBy: "phenomenon" | "chosen" } {
+    if (hypothesis.readings !== undefined) return { readings: readings.filter(reading => hypothesis.readings!.includes(reading.id)), linkedBy: "chosen" }
+    const named = new Set([hypothesis.phenomenon ?? []].flat())
+    if (named.size === 0) return { readings: [], linkedBy: "phenomenon" }
+    const same = (reading: HvsReading) => reading.phenomena.size === named.size && [...named].every(phenomenon => reading.phenomena.has(phenomenon))
+    return { readings: readings.filter(same), linkedBy: "phenomenon" }
+  }
+
+  /**
+   * @param elements The case's elements: those of the observation are taken (see elementsOf).
+   * @param hvs What the case says for the protocol.
+   * @param account The `id` of the observation's account event.
+   * @param readings The readings of that observation.
+   * @param single Whether the case has that one account only.
+   */
+  static of(elements: readonly CaseElementJson[], hvs: HvsJson | undefined, account: string, readings: readonly HvsReading[], single: boolean): HvsResult {
+    const counted = Hvs.elementsOf(elements, account, single).filter(element => element.status !== "association")
     const hypotheses = hvs?.hypotheses ?? []
-    const explanations = hypotheses.map(hypothesis => Hvs.explanationsOf(hypothesis, counted, outcomes, accountOf, onlyAccount))
+    const tested = hypotheses.map(hypothesis => Hvs.readingsOf(hypothesis, readings))
+    const explanations = hypotheses.map((hypothesis, index) => Hvs.explanationsOf(hypothesis, counted, tested[index].readings))
     const discriminating = counted.filter(element => {
       const verdicts = new Set(explanations.map(found => found[element.id]?.explained ?? false))
       return verdicts.size > 1
     })
+    const observation = hvs?.observations?.[account]
     const results = hypotheses.map((hypothesis, index): HvsHypothesisResult => {
       const found = explanations[index]
       const csRaw = Hvs.coverage(counted, found)
       const csDiscriminating = discriminating.length > 0 ? Hvs.coverage(discriminating, found) : undefined
-      const plausibility = Hvs.plausibility(hypothesis)
+      const plausibility = Hvs.plausibility(hypothesis, observation?.context?.[hypothesis.id])
       const cs = csDiscriminating ?? csRaw
       return {
         id: hypothesis.id,
+        readings: tested[index].readings.map(reading => reading.id),
+        linkedBy: tested[index].linkedBy,
         explanations: found,
         csRaw,
         ...(csDiscriminating ? { csDiscriminating } : {}),
@@ -128,38 +177,35 @@ export class Hvs {
       // Two hypotheses that cover alike are not told apart by their coverage, and neither dominates: the product says the rest.
       if (leaders.length === 1) leaders[0].dominant = true
     }
-    return { counted: counted.map(element => element.id), discriminating: discriminating.map(element => element.id), hypotheses: results }
+    return { account, counted: counted.map(element => element.id), discriminating: discriminating.map(element => element.id), hypotheses: results }
   }
 
-  /** Element by element, whether `hypothesis` explains it: by its reading of the element's account where that settles it, else as declared. */
-  private static explanationsOf(hypothesis: HvsHypothesisJson, counted: readonly CaseElementJson[], outcomes: (readingId: string) => ReadingOutcomes | undefined,
-                                accountOf: (readingId: string) => string | undefined, onlyAccount?: string): Record<string, HvsExplanation> {
+  /** Element by element, whether `hypothesis` explains it: by the confrontation of its readings where that settles it, else as declared. */
+  private static explanationsOf(hypothesis: HvsHypothesisJson, counted: readonly CaseElementJson[], readings: readonly HvsReading[]): Record<string, HvsExplanation> {
     const declared = new Set(hypothesis.explains ?? [])
     const found: Record<string, HvsExplanation> = {}
     for (const element of counted) {
-      const confronted = element.phenomenon ? Hvs.confronted(element, hypothesis.readings ?? [], outcomes, accountOf, onlyAccount) : undefined
-      found[element.id] = confronted === undefined ? { explained: declared.has(element.id), by: "declared" } : { explained: confronted, by: "confrontation" }
+      const confronted = element.phenomenon ? Hvs.confronted(element, readings) : undefined
+      found[element.id] = confronted === undefined ? { explained: declared.has(element.id), by: "declared" }
+        : { explained: confronted.explained, by: "confrontation", ...(confronted.readings > 1 ? { readings: confronted.readings } : {}) }
     }
     return found
   }
 
   /**
-   * Whether the reading of the element's account reproduces what was said of its phenomenon, at its instant or at every one: undefined
-   * when no reading of the hypothesis reads that account, or its confrontation compared nothing of that phenomenon.
+   * Whether a reading reproduces what was said of the element's phenomenon, at its instant or at every one, and how many readings were
+   * confronted on it: undefined when none of them compared anything of that phenomenon. A reading that reproduces it is enough.
    */
-  private static confronted(element: CaseElementJson, readings: readonly string[], outcomes: (readingId: string) => ReadingOutcomes | undefined,
-                            accountOf: (readingId: string) => string | undefined, onlyAccount?: string): boolean | undefined {
-    const account = element.of ?? onlyAccount
+  private static confronted(element: CaseElementJson, readings: readonly HvsReading[]): { explained: boolean, readings: number } | undefined {
     const { sourceId, t } = element.phenomenon!
-    const verdicts = readings.filter(reading => account === undefined || accountOf(reading) === account).flatMap(reading => {
-      const found = outcomes(reading)
-      if (!found) return []
-      return Object.entries(found).filter(([pair]) => {
+    const verdicts = readings.flatMap(reading => {
+      const pairs = Object.entries(reading.outcomes ?? {}).filter(([pair]) => {
         const slash = pair.indexOf("/")
         return pair.slice(slash + 1) === sourceId && (t === undefined || Number(pair.slice(0, slash)) === t)
-      }).map(([, agrees]) => agrees)
+      })
+      return pairs.length === 0 ? [] : [pairs.every(([, agrees]) => agrees)]
     })
-    return verdicts.length === 0 ? undefined : verdicts.every(Boolean)
+    return verdicts.length === 0 ? undefined : { explained: verdicts.some(Boolean), readings: verdicts.length }
   }
 
   /**
@@ -174,10 +220,13 @@ export class Hvs {
     return { preferred, envelope: [sure.length / elements.length, preferred] }
   }
 
-  /** The plausibility of `hypothesis` from the analyst's ratings, its envelope from their ranges; undefined when none is given. */
-  private static plausibility(hypothesis: HvsHypothesisJson): { score: HvsScore, geometric: boolean, missing: string[] } | undefined {
-    const given = hypothesis.plausibility
-    if (!given) return undefined
+  /**
+   * The plausibility of `hypothesis` from the analyst's ratings, its envelope from their ranges; undefined when none is given.
+   * @param observed The context factor said for the observation, in place of the hypothesis's own.
+   */
+  private static plausibility(hypothesis: HvsHypothesisJson, observed?: HvsRating): { score: HvsScore, geometric: boolean, missing: string[] } | undefined {
+    const given = { ...hypothesis.plausibility, ...(observed === undefined ? {} : { context: observed }) }
+    if (!hypothesis.plausibility && observed === undefined) return undefined
     const names = ["existence", "frequency", "compatibility"] as const
     const ratings = names.map(name => given[name]).filter((rating): rating is HvsRating => rating !== undefined).map(Hvs.rating)
     if (ratings.length === 0) return undefined

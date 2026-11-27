@@ -31,16 +31,24 @@ d'environ 3,6′ à 15°, 0,5° à l'horizon. Un export HVS devra soit retirer l
 
 ## Éléments, hypothèses et scores (dans le `case.json`)
 
+Une évaluation est celle d'une observation : deux témoins font deux évaluations des mêmes hypothèses, chacune sur ses propres éléments.
+Elle s'affiche dans le Résumé de l'observation, à côté des candidats de la matrice de Poher ; sous les lectures comparées du dossier,
+une ligne par observation dit ce qui y domine.
+
 | HVS | UFO@home |
 |---|---|
-| `elements[]` : `id`, `libelle`, `statut` | `elements[]` : `id`, `title`, `status` (`observed`, `inferred`, `association`) ; `elementsSealed` dit la liste arrêtée |
+| `elements[]` : `id`, `libelle`, `statut` | `elements[]` : `id`, `title`, `status` (`observed`, `inferred`, `association`), `of` (l'observation) ; `elementsSealed` dit la liste arrêtée |
 | un élément qui est un angle | `phenomenon: { sourceId, t }` : une lecture de l'hypothèse le tranche par sa confrontation au témoignage, sans déclaration |
-| `iqi` | `hvs.iqi`, mêmes cinq groupes (`complete`, `partial`, `absent`) ; un groupe omis est suggéré d'après le dossier quand c'est possible (date, lieu, enquête) |
-| `hypotheses[].code`, `libelle` | `hvs.hypotheses[].code`, `title` ; `readings` nomme les lectures qui la reconstituent |
+| `iqi` | `hvs.observations.<observation>.iqi`, mêmes cinq groupes (`complete`, `partial`, `absent`) ; un groupe omis est suggéré d'après le compte rendu quand c'est possible (date, lieu, enquête) |
+| `hypotheses[].code`, `libelle` | `hvs.hypotheses[].code`, `title` |
+| (lien vers une reconstitution) | `phenomenon` : le phénomène de la matrice de Poher qu'elle est (`SkyLantern`) ; les lectures de l'observation dont les corps en sont la testent. `readings` les choisit à la main |
 | éléments expliqués | `explains`, pour ceux qu'aucune lecture ne tranche |
-| `ps` | `plausibility` : `existence`, `frequency`, `compatibility`, `context`, chacun avec sa plage ; PS calculée |
+| `ps` | `plausibility` : `existence`, `frequency`, `compatibility`, `context`, chacun avec sa plage ; `hvs.observations.<observation>.context` remplace le contexte pour une observation ; PS calculée |
 | `cs_brute`, `cs_discriminante`, `hvs.prefere`, `hvs.enveloppe` | calculés, jamais saisis |
 | jalons | « dominante » calculée ; `milestone` : `identified`, `proven` |
+
+La lecture [`lecture-lanterne.json`](lecture-lanterne.json) reconstitue l'hypothèse lanterne : elle est trouvée par son phénomène
+(`SkyLantern`), et sa confrontation au témoignage tranche E2 et E3. Son vent est `fitted` : réglé pour reproduire la trajectoire dite.
 
 L'hypothèse « avion » n'est pas dans l'exemple de Baron : elle n'est là que pour qu'un élément sépare deux hypothèses, et ses cotes (0,9, 0,9, 0,8) sont illustratives. Très plausible (PS 0,87) mais sans rien expliquer de ce qui sépare les hypothèses, elle obtient HVS = 0. L'exemple ne
 donne que PS = 0,70 ; sa décomposition en trois cotes de 0,7 est pour l'illustration.
@@ -55,9 +63,18 @@ donne que PS = 0,70 ; sa décomposition en trois cotes de 0,7 est pour l'illustr
 - **Dominante** : la recevable de plus grande CS discriminante ; aucune en cas d'égalité.
 - **IQI** : un niveau complet vaut 1, partiel 0,5 ; la somme est sur les groupes notés.
 
+### Cohérence des lectures
+
+Sous chaque lecture parmi les candidats, la matrice de Poher est interrogée sur ce que montre la lecture elle-même, comme si c'était un
+témoignage (toutes les réponses fermes), et dit à quel rang elle met le phénomène que la lecture dit être. Mesuré sur les 30 lectures des
+démos dont la sorte nomme un phénomène (test `PoherSelfCheck.test.ts`, 2026-11-28) : les lanternes de l'événement de l'ouest américain
+sont en tête dans la version RR0 (ex æquo avec 5), les drones de Montclair 2es, les pélicans du mont Rainier 11es, les oiseaux de Lubbock
+21es sur 54, les leurres pyrotechniques entre le 16e et le 28e rang. La version de 1977 ne connaît ni lanternes, ni drones, ni leurres ;
+elle met les oiseaux 5es ou 7es sur 33. À regarder : les notes de la matrice pour les leurres et les oiseaux de nuit.
+
 ## Ce qui manque encore
 
 - La grille des 20 catégories et leurs plages de PS : à Baron de dire si elles peuvent être publiées.
 - Le réajustement des hypothèses exotiques (barème inspiré de Kass & Raftery).
 - Un export et un import au format de son exemple, s'il le garde.
-- La saisie des éléments et des hypothèses ailleurs que dans l'onglet Fichier du dossier.
+- La saisie des éléments et des hypothèses ailleurs que dans l'onglet Fichier du dossier (seules les lectures d'une hypothèse se choisissent dans le tableau).

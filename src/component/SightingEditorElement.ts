@@ -11,6 +11,8 @@ import { SectionFolds } from "./SectionFolds.js"
 import { ColumnResize } from "./ColumnResize.js"
 import { WitnessErrorView } from "./WitnessErrorView.js"
 import { CandidatesView } from "./CandidatesView.js"
+import { HvsElement, type HvsInput } from "./HvsElement.js"
+import { PoherAccountFacts } from "../engine/witness/PoherSelfCheck.js"
 import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
 import { PoherMatrix } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts } from "../engine/witness/PoherMatrix.js"
@@ -7438,6 +7440,30 @@ export class SightingEditorElement extends HTMLElement {
       keep: variant => this.editVariants(variants => [...variants, variant]),
       remove: index => this.editVariants(variants => variants.filter((_, i) => i !== index))
     }, candidates)
+    // The same hypotheses weighed by Stéphane Baron's HVS protocol, for this observation, beside Poher's (see HvsElement): shown only
+    // in a case that lists elements or hypotheses, which the case editor gives (see hvs).
+    HvsElement.register()
+    this.hvsElement = document.createElement(HvsElement.TAG) as HvsElement
+    this.hvsElement.classList.add("form-section", "hvs-section")
+    this.shadow.getElementById("group-observation")!.append(this.hvsElement)
+    this.hvsElement.show(this.hvsInput)
+  }
+
+  private hvsElement?: HvsElement
+  private hvsInput?: HvsInput
+
+  /**
+   * The case this observation is of, for weighing its hypotheses by the HVS protocol (see HvsElement), in the case editor; undefined for
+   * a recording alone or a reading.
+   */
+  set hvs(input: HvsInput | undefined) {
+    this.hvsInput = input
+    this.hvsElement?.show(input)
+  }
+
+  /** Draws the HVS weighing again, the case having changed in what it says of it (a choice of readings). */
+  redrawHvs(): void {
+    this.hvsElement?.redraw()
   }
 
   /**
@@ -7463,73 +7489,7 @@ export class SightingEditorElement extends HTMLElement {
    * brilliance; how many phenomena and observers; whether anything was heard.
    */
   private poherFacts(): PoherFacts {
-    const sighting = this.ufoElement.sighting
-    const facts: PoherFacts = {}
-    const event = sighting.event
-    const place = event.place?.[0]
-    if (place && event.time?.year !== undefined && event.time.hour !== undefined) {
-      const date = sightingTimeToDate(event.time, place.lng, event.utcOffsetHours)
-      if (date) facts.sunAltitudeDeg = computeBodyPosition("Sun", date, { lat: place.lat, lng: place.lng, elevationM: this.groundElevationM ?? 0 }).altitudeDeg
-    }
-    if (event.durationSeconds !== undefined) facts.durationSeconds = event.durationSeconds
-    // The weather only when it is the record's: the default sky is no statement that the sky was clear.
-    if (sighting.weatherTrack.allKeyframes.length > 0) {
-      const weather = resolveWeatherAt(sighting, 0)
-      facts.cloudCover = weather.cloudCover
-      facts.lightning = weather.storm
-      facts.lowVisibility = weather.precipitationType !== "none" && weather.precipitationIntensity > 0.3
-    }
-    const timeline = sighting.timeline
-    const first = timeline.sourceIds[0]
-    if (first) {
-      const keyframes = timeline.allKeyframes.filter(keyframe => keyframe.shapes.some(state => state.sourceId === first))
-      const aims = keyframes.map(keyframe => ({ t: keyframe.t, shape: timeline.getShapeAt(keyframe.t, first)! })).filter(at => at.shape?.aim)
-      const shape = timeline.getInterpolatedShapeAt(keyframes[0]?.t ?? 0, first)
-      if (shape?.aim) facts.elevationDeg = shape.aim.altitudeDeg
-      if (shape?.angular) {
-        facts.widthDeg = shape.angular.widthDeg
-        const ratio = shape.angular.heightDeg > 0 ? shape.angular.widthDeg / shape.angular.heightDeg : 1
-        facts.round = shape.kind === "oval" && ratio > 0.8 && ratio < 1.25
-      }
-      if (shape?.brightness !== undefined) facts.brightness = shape.brightness
-      if (aims.length > 1) {
-        const separation = (a: { azimuthDeg: number, altitudeDeg: number }, b: { azimuthDeg: number, altitudeDeg: number }) => {
-          const toRad = Math.PI / 180
-          const cos = Math.sin(a.altitudeDeg * toRad) * Math.sin(b.altitudeDeg * toRad) + Math.cos(a.altitudeDeg * toRad) * Math.cos(b.altitudeDeg * toRad) * Math.cos((a.azimuthDeg - b.azimuthDeg) * toRad)
-          return Math.acos(Math.max(-1, Math.min(1, cos))) / toRad
-        }
-        const steps = aims.slice(1).map((at, i) => ({ deg: separation(aims[i].shape.aim!, at.shape.aim!), s: (at.t - aims[i].t) / 1000 }))
-        facts.sweepDeg = separation(aims[0].shape.aim!, aims[aims.length - 1].shape.aim!)
-        const travelled = steps.reduce((sum, step) => sum + step.deg, 0)
-        facts.straysDeg = Math.max(0, travelled - facts.sweepDeg) / 2
-        const span = (aims[aims.length - 1].t - aims[0].t) / 1000
-        if (span > 0) {
-          facts.speedDegPerS = travelled / span
-          const fastest = Math.max(...steps.filter(step => step.s > 0).map(step => step.deg / step.s))
-          facts.speedVariation = facts.speedDegPerS > 0 ? fastest / facts.speedDegPerS : 0
-        }
-      }
-    }
-    // A group of shapes is one phenomenon drawn in parts.
-    const counted = new Set(timeline.sourceIds.map(id => timeline.groupMembers(id)?.[0] ?? id))
-    if (counted.size > 0) facts.count = counted.size
-    // In a row: three or more where they first stand, none further from the line between the two furthest apart than a tenth of it.
-    const aims = [...counted].map(id => timeline.getInterpolatedShapeAt(0, id)?.aim).filter(aim => aim !== undefined)
-    if (aims.length >= 3) {
-      const toRad = Math.PI / 180
-      const points = aims.map(aim => ({ x: (((aim.azimuthDeg - aims[0].azimuthDeg) % 360 + 540) % 360 - 180) * Math.cos(aim.altitudeDeg * toRad), y: aim.altitudeDeg }))
-      let [a, b] = [points[0], points[1]]
-      for (const p of points) for (const q of points) if (Math.hypot(p.x - q.x, p.y - q.y) > Math.hypot(a.x - b.x, a.y - b.y)) [a, b] = [p, q]
-      const span = Math.hypot(a.x - b.x, a.y - b.y)
-      facts.aligned = span > 0 && points.every(p => Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / span <= Math.max(0.5, span * 0.1))
-    }
-    // One colour a phenomenon: the parts of one drawn in several colours are not several lights.
-    const colors = new Set([...counted].map(id => timeline.getInterpolatedShapeAt(0, id)?.color).filter((color): color is string => color !== undefined))
-    if (colors.size > 0) facts.colors = [...colors]
-    facts.observers = sighting.observerCount
-    if (sighting.instrument.category === "eye") facts.nakedEye = true
-    if (sighting.soundTrack.allKeyframes.some(keyframe => keyframe.sound.kind !== "none")) facts.sound = true
-    return facts
+    return PoherAccountFacts.of(this.ufoElement.sighting, this.groundElevationM ?? 0)
   }
 
   private candidatesTimer?: ReturnType<typeof setTimeout>

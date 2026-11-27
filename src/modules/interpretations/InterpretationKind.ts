@@ -162,6 +162,22 @@ export class InterpretationKinds {
     return { interpretation: { ...interpretation, bodies: [...interpretation.bodies, ...computed] }, kindOf, phenomenonOf }
   }
 
+  /**
+   * The known phenomena of Poher's matrix the bodies of `interpretation` are instances of, as their kinds say (see
+   * InterpretationKind.phenomenon): what a hypothesis that names a phenomenon is tested by. Read off what is stated, without the kinds' code:
+   * a body stated plainly, of no kind, is an instance of nothing this can tell.
+   */
+  static phenomena(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[]): Set<string> {
+    const found = new Set<string>()
+    for (const kind of kinds) {
+      for (const item of InterpretationKinds.itemsOf(interpretation, kind.key)) {
+        const phenomenon = kind.phenomenon?.(item)
+        if (phenomenon) found.add(phenomenon)
+      }
+    }
+    return found
+  }
+
   /** What `interpretation` states under the keys of `kinds`, alone: what is computed rather than stated as bodies. */
   static computedPart(interpretation: InterpretationJson | undefined, kinds: readonly InterpretationKind[]): Record<string, unknown[]> {
     const part: Record<string, unknown[]> = {}

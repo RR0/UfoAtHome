@@ -1,3 +1,4 @@
+import { PoherSelfCheck } from "../engine/witness/PoherSelfCheck.js"
 import type { WitnessErrorMessages } from "./messages/WitnessErrorMessages.js"
 import type { Sighting } from "../engine/model/Sighting.js"
 import type { WitnessConditions } from "../engine/model/Account.js"
@@ -240,6 +241,7 @@ export class CandidatesView {
       if (!body) return []
       const phenomenon = phenomenonOf.get(body.id)
       if (phenomenon) this.phenomenonOf.set(`interpretation-${id}`, phenomenon)
+      this.readingBodies.set(`interpretation-${id}`, interpretation.bodies)
       return [{
         id: `interpretation-${id}`,
         label: m.interpretation.replace("{name}", label),
@@ -627,6 +629,8 @@ export class CandidatesView {
     if (variant.verdict === "incompatible") {
       body.append(Object.assign(document.createElement("p"), { className: "candidate-reason", textContent: `${m.reasons[variant.reason ?? "direction"]} ${m.notAgainst}` }))
     }
+    const consistency = this.selfCheck(variant.candidate)
+    if (consistency) body.append(Object.assign(document.createElement("p"), { className: "candidate-reason self-check", textContent: consistency }))
     for (const moved of variant.moved) body.append(this.movedRow(moved))
     for (const used of variant.readings) body.append(this.readingRow(used))
     if (variant.verdict !== "incompatible") {
@@ -648,6 +652,34 @@ export class CandidatesView {
     row.append(head, body)
     return row
   }
+
+  /**
+   * For a candidate that is a reading of the case: where the matrix, asked about what the reading itself shows as though it were a
+   * testimony, puts the phenomenon the reading says it is (see PoherSelfCheck). Undefined for any other candidate, or before the matrix is read.
+   */
+  private selfCheck(candidate: string): string | undefined {
+    const m = this.host.messages().candidates
+    const phenomenon = this.phenomenonOf.get(candidate)
+    const bodies = this.readingBodies.get(candidate)
+    if (!this.poher || !phenomenon || !bodies) return undefined
+    const sighting = this.host.sighting
+    let found: ReturnType<typeof PoherSelfCheck.rank>
+    try {
+      const facts = PoherSelfCheck.facts(sighting, this.host.facts(), bodies, sighting.timeline.allKeyframes.map(keyframe => keyframe.t))
+      found = PoherSelfCheck.rank(this.poher.matrix, facts, new Set([phenomenon]))
+    } catch {
+      // A check beside the candidate, which cannot be made of a recording that places no observer: it says nothing rather than breaking the list.
+      return undefined
+    }
+    const name = this.poher.labels[phenomenon] ?? phenomenon
+    if (found.rank === undefined) return m.selfCheckUnknown.replace("{phenomenon}", name)
+    if (found.excludedBy.length > 0) return m.selfCheckExcluded.replace("{phenomenon}", name).replace("{questions}", found.excludedBy.map(question => this.answerLabel(question)).join(", "))
+    return m.selfCheck.replace("{phenomenon}", name).replace("{rank}", String(found.rank)).replace("{of}", String(found.of))
+      .replace("{tied}", found.tied ? m.selfCheckTied.replace("{n}", String(found.tied)) : "")
+  }
+
+  /** The bodies of each reading among the candidates, its kinds' computed, by the candidate's id: what the matrix is asked about (see selfCheck). */
+  private readonly readingBodies = new Map<string, readonly BodyJson[]>()
 
   /** One structural reading the variant uses: what is read otherwise, and what the studies say of it. */
   private readingRow(used: UsedReading): HTMLElement {

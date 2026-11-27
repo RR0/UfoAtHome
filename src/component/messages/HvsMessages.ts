@@ -4,6 +4,8 @@ export interface HvsMessages {
   heading: string
   /** What the protocol does and what of it is the analyst's, in the (?) beside the heading. */
   hint: string
+  /** The same, for the case's table: one evaluation per observation, detailed in each. */
+  hintCase: string
   /** Whose protocol, which version: `{protocol}`. */
   credit: string
   /** Which version of its taxonomy of hypotheses: `{taxonomy}`. */
@@ -14,6 +16,17 @@ export interface HvsMessages {
   noElements: string
   /** No hypotheses weighed. */
   noHypotheses: string
+  /** Elements of a case of several observations that say of none which they are: `{ids}`. */
+  unassigned: string
+  /** The case's table: one line per observation. */
+  caseLine: {
+    intro: string
+    /** One observation and what dominates there: `{observation}`, `{verdict}`. */
+    item: string
+    /** `{hypothesis}`, its code and title, and `{hvs}`. */
+    dominant: string
+    none: string
+  }
   iqi: {
     heading: string
     /** One group and its level, with the punctuation of the language: `{group}`, `{level}`. */
@@ -40,11 +53,24 @@ export interface HvsMessages {
     notExplainedByReading: string
     explainedDeclared: string
     notExplainedDeclared: string
+    /** Beside an element confronted with several readings of a hypothesis, the best of which counts: `{n}`. */
+    variants: string
   }
   hypotheses: {
     heading: string
     code: string
     hypothesis: string
+    /** The readings of the observation that test it. */
+    readings: string
+    noReading: string
+    /** How they were found: by the phenomenon it names (`{phenomenon}`), chosen by hand, or neither. */
+    byPhenomenon: string
+    chosen: string
+    noPhenomenon: string
+    /** Choosing them by hand, keeping the choice, or going back to the phenomenon. */
+    choose: string
+    keepChoice: string
+    automatic: string
     csRaw: string
     csDiscriminating: string
     ps: string

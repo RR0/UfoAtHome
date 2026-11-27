@@ -22,7 +22,10 @@ export interface CaseElementJson {
   /** What it is, in a few words: "an orange point of light". Translatable. */
   title?: SaidText
   status: CaseElementStatus
-  /** The `id` of the event of the account it comes from. Absent: the case's only account, or the case as a whole. */
+  /**
+   * The `id` of the event of the account it comes from: an evaluation is an observation's, and two witnesses have two lists. Absent only in
+   * a case of one account, which it is then of.
+   */
   of?: string
   /**
    * The phenomenon of that account whose direction or size it is, by its `sourceId`, and the instant it is at (milliseconds, as the
@@ -49,8 +52,16 @@ export interface HvsHypothesisJson {
   /** What it is: "balloon or lantern". Translatable. */
   title?: SaidText
   /**
-   * The `id`s of the case's readings that reconstruct it, one per account it reads. Absent for a hypothesis nothing reconstructs (an
-   * unknown craft, say), which is weighed on what is declared of it alone.
+   * The known phenomenon of Poher's matrix it is (`SkyLantern`, `Airship`, `WeatherBalloonsOrMongolfieres`), or the phenomena of a
+   * combined hypothesis (a stimulus and what it set off): the pivot between the protocol's hypotheses and the readings of the case. A
+   * reading of an observation whose bodies are of these phenomena, all of them and nothing else, tests it there (see
+   * InterpretationKinds.phenomena), unless `readings` says otherwise. The code of the taxonomy cannot stand in for it, the taxonomy being
+   * its author's: the analyst says which phenomenon a code is.
+   */
+  phenomenon?: string | string[]
+  /**
+   * The `id`s of the readings that test it, chosen by hand: in place of those its `phenomenon` finds, for a reading of bodies of no kind
+   * (which no phenomenon finds) or to set a variant aside. Absent, the readings are found; empty, it has none.
    */
   readings?: string[]
   /**
@@ -79,17 +90,27 @@ export type IqiGroup = "dateTime" | "place" | "identification" | "witnesses" | "
 /** How fully the file answers an IQI group. */
 export type IqiLevel = "complete" | "partial" | "absent"
 
+/** What the analyst says of one observation of the case: its IQI, and the context factor of a hypothesis there, where it differs. */
+export interface HvsObservationJson {
+  /** The IQI as the analyst rates it, group by group. A group left out is suggested from the account where it can be (see Iqi). */
+  iqi?: Partial<Record<IqiGroup, IqiLevel>>
+  /** The context factor of a hypothesis for this observation, by the hypothesis's `id`, in place of its `plausibility.context`: two
+   * witnesses may stand at different distances from a base, or decades apart. */
+  context?: Record<string, HvsRating>
+}
+
 /**
  * What a case says of itself for Stéphane Baron's HVS protocol (Hypothesis Validity Score): its hypotheses, what the analyst gives of
- * them, and the rating of its file. The elements they are weighed against are the case's own (see CaseJson.elements), being no more HVS's
- * than the accounts are.
+ * them, and what is said of each observation. The hypotheses are the case's, and weighed against each observation apart, on that
+ * observation's elements (see CaseJson.elements, CaseElementJson.of) and readings: two witnesses are two evaluations.
  */
 export interface HvsJson {
   /** The version of the protocol it was weighed by: "7.0". */
   protocol?: string
   /** The version of its taxonomy of hypotheses: "2.1". */
   taxonomy?: string
-  /** The IQI as the analyst rates it, group by group. A group left out is suggested from the file where it can be (see Iqi). */
-  iqi?: Partial<Record<IqiGroup, IqiLevel>>
+  /** The hypotheses weighed, each against every observation of the case, one by one: an evaluation is an observation's. */
   hypotheses?: HvsHypothesisJson[]
+  /** What is said of each observation, by the `id` of its account's event. */
+  observations?: Record<string, HvsObservationJson>
 }

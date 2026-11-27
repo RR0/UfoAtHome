@@ -2,12 +2,20 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_it = {
   heading: "Ipotesi pesate (HVS)",
-  hint: "Il protocollo HVS di Stéphane Baron pesa ogni ipotesi per la sua copertura (CS), la parte degli elementi del fascicolo che spiega, e per la sua plausibilità (PS), indipendente dal caso: HVS = CS × PS, un valore preferito e il suo inviluppo, mai una probabilità. La CS grezza riguarda tutti gli elementi contati (le inferenze di associazione non lo sono), la CS discriminante solo quelli che separano le ipotesi; è questa a designare l'ipotesi dominante. Un'ipotesi è ammissibile solo se copre almeno la metà degli elementi. Una direzione o una dimensione che una lettura ricostruisce è spiegata o no secondo il suo confronto con la testimonianza; il resto, come lo dichiara l'analista. La plausibilità e il fattore di contesto sono quelli dell'analista: UFO@home non fornisce alcuna probabilità a priori.",
+  hint: "Il protocollo HVS di Stéphane Baron pesa, per questa osservazione, ogni ipotesi per la sua copertura (CS), la parte degli elementi del fascicolo che spiega, e per la sua plausibilità (PS), indipendente dal caso: HVS = CS × PS, un valore preferito e il suo inviluppo, mai una probabilità. La CS grezza riguarda tutti gli elementi contati (le inferenze di associazione non lo sono), la CS discriminante solo quelli che separano le ipotesi; è questa a designare l'ipotesi dominante. Un'ipotesi è ammissibile solo se copre almeno la metà degli elementi. Una direzione o una dimensione che una lettura ricostruisce è spiegata o no secondo il suo confronto con la testimonianza; il resto, come lo dichiara l'analista. La plausibilità e il fattore di contesto sono quelli dell'analista: UFO@home non fornisce alcuna probabilità a priori.",
+  hintCase: "Il protocollo HVS di Stéphane Baron pesa le ipotesi del fascicolo osservazione per osservazione: ogni testimone ha i propri elementi, e dunque la propria valutazione, dettagliata nel riepilogo della sua osservazione. Qui, ciò che domina per ciascuna.",
   credit: "Protocollo HVS {protocol} di Stéphane Baron",
   taxonomy: "tassonomia {taxonomy}",
   notSealed: "L'elenco degli elementi non è chiuso: deve esserlo prima di pesare le ipotesi.",
   noElements: "Nessun elemento: il fascicolo non ne elenca.",
   noHypotheses: "Nessuna ipotesi pesata.",
+  unassigned: "Gli elementi {ids} non dicono di quale osservazione sono: non contano in alcuna valutazione.",
+  caseLine: {
+    intro: "Una valutazione per osservazione, dettagliata in ciascuna:",
+    item: "{observation}: {verdict}",
+    dominant: "dominante {hypothesis} (HVS {hvs})",
+    none: "nessuna ipotesi dominante"
+  },
   iqi: {
     heading: "Qualità dell'informazione (IQI)",
     item: "{group}: {level}",
@@ -27,12 +35,21 @@ export const hvsMessages_it = {
     explainedByReading: "spiegato: la lettura lo riproduce",
     notExplainedByReading: "non spiegato: la lettura non lo riproduce",
     explainedDeclared: "spiegato, secondo l'analista",
-    notExplainedDeclared: "non spiegato, secondo l'analista"
+    notExplainedDeclared: "non spiegato, secondo l'analista",
+    variants: "la migliore di {n} letture confrontate"
   },
   hypotheses: {
     heading: "Ipotesi",
     code: "Codice",
     hypothesis: "Ipotesi",
+    readings: "Letture",
+    noReading: "nessuna",
+    byPhenomenon: "secondo il fenomeno {phenomenon}",
+    chosen: "scelte a mano",
+    noPhenomenon: "nessun fenomeno nominato",
+    choose: "Scegli…",
+    keepChoice: "Tieni questa scelta",
+    automatic: "Secondo il fenomeno",
     csRaw: "CS grezza",
     csDiscriminating: "CS discriminante",
     ps: "PS",

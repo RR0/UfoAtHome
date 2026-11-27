@@ -210,6 +210,10 @@ export const witnessErrorMessages_it: WitnessErrorMessages = {
     "poherTag": "Poher: {state}",
     "poherStatePossible": "possibile, punteggio {x}",
     "poherStateExcluded": "escluso",
+    "selfCheck": "Coerenza della lettura: interrogata su ciò che mostra la lettura stessa, la matrice mette «{phenomenon}» al posto {rank} su {of}{tied}.",
+    "selfCheckTied": " (a pari merito con {n})",
+    "selfCheckExcluded": "Coerenza della lettura: interrogata su ciò che mostra la lettura stessa, la matrice esclude «{phenomenon}» ({questions}): la lettura non somiglia a ciò che dice di essere, oppure la matrice sbaglia.",
+    "selfCheckUnknown": "Coerenza della lettura: questa versione della matrice non conosce «{phenomenon}».",
     "answersTitle": "Risposte dedotte dalla registrazione ({n})",
     "firm": "ferma",
     "soft": "stima, da sola non esclude nulla"

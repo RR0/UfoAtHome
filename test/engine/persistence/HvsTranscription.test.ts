@@ -24,7 +24,7 @@ describe("The fictitious HVS case in the format", () => {
 
   it("weighs its hypotheses from the case's elements: the lantern dominates on the sudden going out, the one element that tells them apart", () => {
     const json = caseJson as unknown as CaseJson
-    const result = Hvs.of(json.elements!, json.hvs, () => undefined, () => undefined, "temoin")
+    const result = Hvs.of(json.elements!, json.hvs, "temoin", [], true)
     expect(result.discriminating).toEqual(["E5"])
     const [lantern, aircraft] = result.hypotheses
     expect(lantern).toMatchObject({ admissible: true, dominant: true, csRaw: { preferred: 1, envelope: [0.8, 1] } })

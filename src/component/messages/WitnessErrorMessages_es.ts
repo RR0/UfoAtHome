@@ -210,6 +210,10 @@ export const witnessErrorMessages_es: WitnessErrorMessages = {
     "poherTag": "Poher: {state}",
     "poherStatePossible": "posible, nota {x}",
     "poherStateExcluded": "excluido",
+    "selfCheck": "Coherencia de la lectura: preguntada por lo que muestra la propia lectura, la matriz pone «{phenomenon}» en el puesto {rank} de {of}{tied}.",
+    "selfCheckTied": " (empatado con {n})",
+    "selfCheckExcluded": "Coherencia de la lectura: preguntada por lo que muestra la propia lectura, la matriz excluye «{phenomenon}» ({questions}): la lectura no se parece a lo que dice ser, o la matriz se equivoca.",
+    "selfCheckUnknown": "Coherencia de la lectura: esta versión de la matriz no conoce «{phenomenon}».",
     "answersTitle": "Respuestas deducidas de la grabación ({n})",
     "firm": "firme",
     "soft": "estimación, no excluye nada por sí sola"

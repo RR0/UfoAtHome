@@ -300,6 +300,8 @@ export class CaseElement extends HTMLElement {
     const json = await SightingFetch.recording(this.url) as CaseJson
     if (!CaseFile.isCase(json)) throw new Error(`${url} is not a case: <${CASE_ELEMENT_NAME}> reads a case.json`)
     this.json = json
+    // Read again from the case as it is now: a case read anew (from its editor, say) may list recordings that changed.
+    this.fetched.clear()
     // A case an editor holds with no address of its own has none to give: nothing to share (see OpenFiles.local).
     this.byId("share").hidden = OpenFiles.local(this.url)
     this.entries = CaseElement.inTime((json.events ?? []).map(event => this.entryOf(event)).filter((entry): entry is CaseEntry => entry !== undefined))
@@ -350,15 +352,7 @@ export class CaseElement extends HTMLElement {
    */
   private compareReadings(): void {
     const table = this.byId("readings-comparison") as ReadingsComparisonElement
-    const fetched = new Map<string, Promise<SightingRecordingJson | undefined>>()
-    const fetch = (url: string) => {
-      let known = fetched.get(url)
-      if (!known) {
-        known = SightingFetch.recording(url).then(json => json as SightingRecordingJson, () => undefined)
-        fetched.set(url, known)
-      }
-      return known
-    }
+    const fetch = (url: string) => this.recordingAt(url)
     const rowsOf = async (load: boolean): Promise<ComparedReading[]> => Promise.all(this.entries.flatMap((entry, at) => {
       if (entry.kind !== "reading") return []
       const account = this.accountOf(entry)
@@ -375,11 +369,30 @@ export class CaseElement extends HTMLElement {
     if (!json) return
     ;(this.byId("hvs") as HvsElement).show({
       caseJson: () => json,
-      recording: async id => {
-        const entry = this.entries.find(candidate => candidate.event.id === id)
-        return entry?.url ? fetch(entry.url) : undefined
+      recording: id => this.recordingOfEvent(id),
+      open: account => {
+        const at = this.entries.findIndex(candidate => candidate.event.id === account)
+        if (at >= 0) void this.only(at).then(() => this.shown.get(at)?.scrollIntoView({ block: "start", behavior: "smooth" }))
       }
     })
+  }
+
+  /** The recordings of the case read so far, by address: each read once, whatever asks for it. */
+  private readonly fetched = new Map<string, Promise<SightingRecordingJson | undefined>>()
+
+  private recordingAt(url: string): Promise<SightingRecordingJson | undefined> {
+    let known = this.fetched.get(url)
+    if (!known) {
+      known = SightingFetch.recording(url).then(json => json as SightingRecordingJson, () => undefined)
+      this.fetched.set(url, known)
+    }
+    return known
+  }
+
+  /** The recording of the event of the case with the `id`. */
+  private recordingOfEvent(id: string): Promise<SightingRecordingJson | undefined> {
+    const entry = this.entries.find(candidate => candidate.event.id === id)
+    return entry?.url ? this.recordingAt(entry.url) : Promise.resolve(undefined)
   }
 
   /** The account a reading reads, among the case's events: what the player has to be pointed at to replay that reading. */
@@ -510,6 +523,14 @@ export class CaseElement extends HTMLElement {
       // Another reading picked in the player is another event of the case open: the share dialog and the page's address have to say it.
       player.addEventListener(INTERPRETATION_CHANGE_EVENT, () => this.follow(block, player))
       block.append(player)
+      // The hypotheses weighed for this observation by the HVS protocol, under it (see HvsElement): an evaluation is an observation's.
+      const json = this.json
+      if (entry.kind === "observation" && entry.event.id !== undefined && json && ((json.elements?.length ?? 0) > 0 || (json.hvs?.hypotheses?.length ?? 0) > 0)) {
+        const weighing = document.createElement(HvsElement.TAG) as HvsElement
+        weighing.className = "open-hvs"
+        block.append(weighing)
+        weighing.show({ caseJson: () => json, recording: id => this.recordingOfEvent(id), account: entry.event.id })
+      }
     }
     this.shown.set(at, block)
     this.order()
