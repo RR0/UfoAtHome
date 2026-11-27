@@ -2,7 +2,7 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_it = {
   heading: "Ipotesi pesate (HVS)",
-  hint: "Il protocollo HVS di Stéphane Baron pesa ogni ipotesi per la sua copertura (CS), la parte degli elementi del fascicolo che spiega, e per la sua plausibilità (PS), indipendente dal caso: HVS = CS × PS, un valore preferito e il suo inviluppo, mai una probabilità. La CS grezza riguarda tutti gli elementi contati (le inferenze di associazione non lo sono), la CS discriminante solo quelli che separano le ipotesi; è questa a designare l'ipotesi dominante. Un'ipotesi è ritenuta solo se copre almeno la metà degli elementi. Una direzione o una dimensione che una lettura ricostruisce è spiegata o no secondo il suo confronto con la testimonianza; il resto, come lo dichiara l'analista. La plausibilità e il fattore di contesto sono quelli dell'analista: UFO@home non fornisce alcuna probabilità a priori.",
+  hint: "Il protocollo HVS di Stéphane Baron pesa ogni ipotesi per la sua copertura (CS), la parte degli elementi del fascicolo che spiega, e per la sua plausibilità (PS), indipendente dal caso: HVS = CS × PS, un valore preferito e il suo inviluppo, mai una probabilità. La CS grezza riguarda tutti gli elementi contati (le inferenze di associazione non lo sono), la CS discriminante solo quelli che separano le ipotesi; è questa a designare l'ipotesi dominante. Un'ipotesi è ammissibile solo se copre almeno la metà degli elementi. Una direzione o una dimensione che una lettura ricostruisce è spiegata o no secondo il suo confronto con la testimonianza; il resto, come lo dichiara l'analista. La plausibilità e il fattore di contesto sono quelli dell'analista: UFO@home non fornisce alcuna probabilità a priori.",
   credit: "Protocollo HVS {protocol} di Stéphane Baron",
   taxonomy: "tassonomia {taxonomy}",
   notSealed: "L'elenco degli elementi non è chiuso: deve esserlo prima di pesare le ipotesi.",
@@ -39,8 +39,9 @@ export const hvsMessages_it = {
     hvs: "HVS",
     standing: "Tappa",
     score: "{preferred} [{low} – {high}]",
-    retained: "ritenuta",
-    notRetained: "non ritenuta",
+    admissible: "ammissibile",
+    notAdmissible: "non ammissibile",
+    admissibleHint: "Ammissibile: copre almeno la metà degli elementi (CS grezza ≥ 0,5). Un filtro prima di separare le ipotesi, non un verdetto.",
     dominant: "dominante",
     identified: "stimolo identificato",
     proven: "prova sigillata",

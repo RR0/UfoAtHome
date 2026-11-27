@@ -51,7 +51,8 @@ donne que PS = 0,70 ; sa décomposition en trois cotes de 0,7 est pour l'illustr
 - **Moyenne géométrique** : quand une cote est ≤ 0,2 alors qu'une autre est ≥ 0,6.
 - **CS discriminante** : sur les éléments que toutes les hypothèses listées n'expliquent pas de la même façon ; HVS la prend quand elle
   existe, sinon la CS brute (son exemple : 0,67 × 0,70 = 0,47).
-- **Dominante** : la retenue de plus grande CS discriminante ; aucune en cas d'égalité.
+- **Recevable** : ce que Baron appelle « retenue » (CS brute ≥ 0,5), nommé d'après son propre mot (« les hypothèses recevables ») pour ne pas se lire comme un verdict à côté d'un HVS de 0.
+- **Dominante** : la recevable de plus grande CS discriminante ; aucune en cas d'égalité.
 - **IQI** : un niveau complet vaut 1, partiel 0,5 ; la somme est sur les groupes notés.
 
 ## Ce qui manque encore

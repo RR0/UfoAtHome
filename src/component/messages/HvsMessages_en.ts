@@ -2,7 +2,7 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_en = {
   heading: "Hypotheses weighed (HVS)",
-  hint: "Stéphane Baron's HVS protocol weighs each hypothesis by its coverage (CS), the share of the file's elements it explains, and by its plausibility (PS), apart from the case: HVS = CS × PS, a value preferred and its envelope, never a probability. The raw CS is over every element counted (inferences of association are not), the discriminating CS over those that tell the hypotheses apart; that one names the dominant hypothesis. A hypothesis is retained only if it covers at least half of the elements. A direction or a size a reading reconstructs is explained or not by its confrontation with the testimony; the rest, as the analyst declares. The plausibility and the context factor are the analyst's: UFO@home supplies no prior probability.",
+  hint: "Stéphane Baron's HVS protocol weighs each hypothesis by its coverage (CS), the share of the file's elements it explains, and by its plausibility (PS), apart from the case: HVS = CS × PS, a value preferred and its envelope, never a probability. The raw CS is over every element counted (inferences of association are not), the discriminating CS over those that tell the hypotheses apart; that one names the dominant hypothesis. A hypothesis is admissible only if it covers at least half of the elements. A direction or a size a reading reconstructs is explained or not by its confrontation with the testimony; the rest, as the analyst declares. The plausibility and the context factor are the analyst's: UFO@home supplies no prior probability.",
   credit: "Stéphane Baron's HVS protocol {protocol}",
   taxonomy: "taxonomy {taxonomy}",
   notSealed: "The list of elements is not frozen: it has to be before the hypotheses are weighed.",
@@ -39,8 +39,9 @@ export const hvsMessages_en = {
     hvs: "HVS",
     standing: "Milestone",
     score: "{preferred} [{low} – {high}]",
-    retained: "retained",
-    notRetained: "not retained",
+    admissible: "admissible",
+    notAdmissible: "not admissible",
+    admissibleHint: "Admissible: covers at least half of the elements (raw CS ≥ 0.5). A filter before the hypotheses are told apart, not a verdict.",
     dominant: "dominant",
     identified: "stimulus identified",
     proven: "proof sealed",

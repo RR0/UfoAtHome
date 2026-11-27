@@ -29,9 +29,13 @@ export interface HvsHypothesisResult {
   missing?: string[]
   /** CS × PS: the discriminating coverage where there is one, else the raw one. Undefined without a plausibility. */
   hvs?: HvsScore
-  /** Whether it covers at least half of the elements (see Hvs.RETAINED). */
-  retained: boolean
-  /** Whether it is the dominant hypothesis: the retained one of greatest discriminating coverage. */
+  /**
+   * Whether it is admissible: it covers at least half of the elements (see Hvs.ADMISSIBLE). A filter before the hypotheses are told apart, not
+   * a verdict: an admissible hypothesis may still score nothing. The protocol says "retained"; "admissible" is its own word for what it
+   * keeps ("the hypotheses that are admissible in the end"), and does not read as a conclusion beside a score of 0.
+   */
+  admissible: boolean
+  /** Whether it is the dominant hypothesis: the admissible one of greatest discriminating coverage. */
   dominant: boolean
   milestone?: HvsMilestone
 }
@@ -65,8 +69,8 @@ export type ReadingOutcomes = Readonly<Record<string, boolean>>
  */
 export class Hvs {
 
-  /** The share of the elements a hypothesis must cover to be retained: half, which the protocol says is arbitrary and to be refined. */
-  static readonly RETAINED = 0.5
+  /** The share of the elements a hypothesis must cover to be admissible: half, which the protocol says is arbitrary and to be refined. */
+  static readonly ADMISSIBLE = 0.5
   /**
    * When the intrinsic plausibility is the geometric mean rather than the arithmetic one: a rating at most COLLAPSED while another is at
    * least STRONG, so that a fatal weakness is not made up for by the other two. The protocol says when without saying how much: these two
@@ -111,16 +115,16 @@ export class Hvs {
             envelope: [cs.envelope[0] * plausibility.score.envelope[0], cs.envelope[1] * plausibility.score.envelope[1]]
           }
         } : {}),
-        retained: counted.length > 0 && csRaw.preferred >= Hvs.RETAINED,
+        admissible: counted.length > 0 && csRaw.preferred >= Hvs.ADMISSIBLE,
         dominant: false,
         ...(hypothesis.milestone ? { milestone: hypothesis.milestone } : {})
       }
     })
     const standing = (result: HvsHypothesisResult) => (result.csDiscriminating ?? result.csRaw).preferred
-    const retained = results.filter(result => result.retained)
-    if (retained.length > 0) {
-      const best = Math.max(...retained.map(standing))
-      const leaders = retained.filter(result => standing(result) === best)
+    const admissible = results.filter(result => result.admissible)
+    if (admissible.length > 0) {
+      const best = Math.max(...admissible.map(standing))
+      const leaders = admissible.filter(result => standing(result) === best)
       // Two hypotheses that cover alike are not told apart by their coverage, and neither dominates: the product says the rest.
       if (leaders.length === 1) leaders[0].dominant = true
     }

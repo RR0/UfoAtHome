@@ -2,7 +2,7 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_es = {
   heading: "Hipótesis ponderadas (HVS)",
-  hint: "El protocolo HVS de Stéphane Baron pondera cada hipótesis por su cobertura (CS), la parte de los elementos del expediente que explica, y por su plausibilidad (PS), independiente del caso: HVS = CS × PS, un valor preferido y su envolvente, nunca una probabilidad. La CS bruta abarca todos los elementos contados (las inferencias de asociación no lo son), la CS discriminante solo los que separan las hipótesis; es esta la que designa la hipótesis dominante. Una hipótesis solo se retiene si cubre al menos la mitad de los elementos. Una dirección o un tamaño que una lectura reconstruye queda explicado o no según su confrontación con el testimonio; el resto, como lo declara el analista. La plausibilidad y el factor de contexto son los del analista: UFO@home no aporta ninguna probabilidad a priori.",
+  hint: "El protocolo HVS de Stéphane Baron pondera cada hipótesis por su cobertura (CS), la parte de los elementos del expediente que explica, y por su plausibilidad (PS), independiente del caso: HVS = CS × PS, un valor preferido y su envolvente, nunca una probabilidad. La CS bruta abarca todos los elementos contados (las inferencias de asociación no lo son), la CS discriminante solo los que separan las hipótesis; es esta la que designa la hipótesis dominante. Una hipótesis solo es admisible si cubre al menos la mitad de los elementos. Una dirección o un tamaño que una lectura reconstruye queda explicado o no según su confrontación con el testimonio; el resto, como lo declara el analista. La plausibilidad y el factor de contexto son los del analista: UFO@home no aporta ninguna probabilidad a priori.",
   credit: "Protocolo HVS {protocol} de Stéphane Baron",
   taxonomy: "taxonomía {taxonomy}",
   notSealed: "La lista de elementos no está cerrada: debe estarlo antes de ponderar las hipótesis.",
@@ -39,8 +39,9 @@ export const hvsMessages_es = {
     hvs: "HVS",
     standing: "Hito",
     score: "{preferred} [{low} – {high}]",
-    retained: "retenida",
-    notRetained: "no retenida",
+    admissible: "admisible",
+    notAdmissible: "no admisible",
+    admissibleHint: "Admisible: cubre al menos la mitad de los elementos (CS bruta ≥ 0,5). Un filtro antes de separar las hipótesis, no un veredicto.",
     dominant: "dominante",
     identified: "estímulo identificado",
     proven: "prueba sellada",

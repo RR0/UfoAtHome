@@ -23,10 +23,10 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
     expect(lantern.csDiscriminating!.preferred).toBeCloseTo(2 / 3)
     expect(lantern.ps!.preferred).toBeCloseTo(0.7)
     expect(lantern.hvs!.preferred).toBeCloseTo(0.467, 3)
-    expect(lantern).toMatchObject({ retained: true, dominant: true })
+    expect(lantern).toMatchObject({ admissible: true, dominant: true })
     // One without ratings has a coverage and no score: nothing here supplies a prior.
     expect(result.hypotheses[1].hvs).toBeUndefined()
-    expect(result.hypotheses[1]).toMatchObject({ retained: true, dominant: false })
+    expect(result.hypotheses[1]).toMatchObject({ admissible: true, dominant: false })
   })
 
   it("counts no inference of association, and counts an inference only in the upper end of a coverage", () => {
@@ -36,9 +36,9 @@ describe("Weighing a case's hypotheses by the HVS protocol", () => {
     expect(result.hypotheses[0].csRaw).toEqual({ preferred: 2 / 3, envelope: [1 / 3, 2 / 3] })
   })
 
-  it("retains no hypothesis that covers less than half the elements, and has it dominate nothing", () => {
+  it("admits no hypothesis that covers less than half the elements, and has it dominate nothing", () => {
     const result = Hvs.of(five, { hypotheses: [{ id: "h", explains: ["E1", "E2"] }] }, none, none)
-    expect(result.hypotheses[0]).toMatchObject({ retained: false, dominant: false })
+    expect(result.hypotheses[0]).toMatchObject({ admissible: false, dominant: false })
     expect(result.hypotheses[0].csDiscriminating).toBeUndefined()
   })
 

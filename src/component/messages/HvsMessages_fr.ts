@@ -2,7 +2,7 @@ import type { HvsMessages } from "./HvsMessages.js"
 
 export const hvsMessages_fr = {
   heading: "Hypothèses pesées (HVS)",
-  hint: "Le protocole HVS de Stéphane Baron pèse chaque hypothèse par sa couverture (CS), la part des éléments du dossier qu'elle explique, et par sa plausibilité (PS), indépendante du cas : HVS = CS × PS, une valeur préférée et son enveloppe, jamais une probabilité. La CS brute porte sur tous les éléments comptés (les inférences d'association ne le sont pas), la CS discriminante sur ceux qui séparent les hypothèses ; c'est elle qui désigne l'hypothèse dominante. Une hypothèse n'est retenue que si elle couvre au moins la moitié des éléments. Une direction ou une taille qu'une lecture reconstitue est expliquée ou non selon sa confrontation au témoignage ; le reste, comme le déclare l'analyste. La plausibilité et le facteur de contexte sont ceux de l'analyste : UFO@home ne fournit aucune probabilité a priori.",
+  hint: "Le protocole HVS de Stéphane Baron pèse chaque hypothèse par sa couverture (CS), la part des éléments du dossier qu'elle explique, et par sa plausibilité (PS), indépendante du cas : HVS = CS × PS, une valeur préférée et son enveloppe, jamais une probabilité. La CS brute porte sur tous les éléments comptés (les inférences d'association ne le sont pas), la CS discriminante sur ceux qui séparent les hypothèses ; c'est elle qui désigne l'hypothèse dominante. Une hypothèse n'est recevable que si elle couvre au moins la moitié des éléments. Une direction ou une taille qu'une lecture reconstitue est expliquée ou non selon sa confrontation au témoignage ; le reste, comme le déclare l'analyste. La plausibilité et le facteur de contexte sont ceux de l'analyste : UFO@home ne fournit aucune probabilité a priori.",
   credit: "Protocole HVS {protocol} de Stéphane Baron",
   taxonomy: "taxonomie {taxonomy}",
   notSealed: "La liste des éléments n'est pas arrêtée : elle doit l'être avant de peser les hypothèses.",
@@ -39,8 +39,9 @@ export const hvsMessages_fr = {
     hvs: "HVS",
     standing: "Jalon",
     score: "{preferred} [{low} – {high}]",
-    retained: "retenue",
-    notRetained: "non retenue",
+    admissible: "recevable",
+    notAdmissible: "non recevable",
+    admissibleHint: "Recevable : couvre au moins la moitié des éléments (CS brute ≥ 0,5). Un filtre avant de départager les hypothèses, pas un verdict.",
     dominant: "dominante",
     identified: "stimulus identifié",
     proven: "preuve scellée",

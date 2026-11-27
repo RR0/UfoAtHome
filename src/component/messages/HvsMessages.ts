@@ -52,8 +52,11 @@ export interface HvsMessages {
     standing: string
     /** A score and its envelope: `{preferred}` [`{low}` – `{high}`]. */
     score: string
-    retained: string
-    notRetained: string
+    /** Covers at least half of the elements: it may be examined, which is no verdict. */
+    admissible: string
+    notAdmissible: string
+    /** What the two say, over the milestone column. */
+    admissibleHint: string
     dominant: string
     identified: string
     proven: string

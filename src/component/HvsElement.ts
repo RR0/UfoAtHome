@@ -259,6 +259,7 @@ ${HintElement.CSS}
       const cell = document.createElement("th")
       cell.scope = "col"
       cell.textContent = label
+      if (label === h.standing) cell.title = h.admissibleHint
       head.append(cell)
     }
     const body = table.createTBody()
@@ -277,7 +278,9 @@ ${HintElement.CSS}
       ]
       if (notes.length) ps.title = notes.join(" · ")
       this.scoreCell(row, found.hvs, m)
-      row.insertCell().textContent = this.standingOf(found, m)
+      const standing = row.insertCell()
+      standing.textContent = this.standingOf(found, m)
+      standing.title = h.admissibleHint
     })
     return this.scrolling(table)
   }
@@ -298,7 +301,7 @@ ${HintElement.CSS}
 
   private standingOf(found: HvsHypothesisResult, m: HvsMessages): string {
     const h = m.hypotheses
-    const words = [found.retained ? h.retained : h.notRetained]
+    const words = [found.admissible ? h.admissible : h.notAdmissible]
     if (found.dominant) words.push(h.dominant)
     if (found.milestone) words.push(h[found.milestone])
     return words.join(", ")
