@@ -16,6 +16,7 @@ import { ReadingCheck } from "../engine/interpretation/ReadingCheck.js"
 import { BestCaseSearch } from "../engine/interpretation/BestCaseSearch.js"
 import { ReadingSensitivityElement } from "./ReadingSensitivityElement.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import { HvsElement } from "./HvsElement.js"
 import { ScenarioSweepElement } from "./ScenarioSweepElement.js"
 import { CaseExportElement } from "./CaseExportElement.js"
 import { Provenance } from "../engine/persistence/Provenance.js"
@@ -368,6 +369,8 @@ const TEMPLATE = `
       <p id="events-none" class="events-none" role="status" hidden></p>
       <ol id="event-list" class="event-list"></ol>
       <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
+      <!-- The case's hypotheses weighed by Stéphane Baron's HVS protocol, for a case that lists elements or hypotheses (see HvsElement). -->
+      <rr0-hvs id="hvs" class="readings-comparison"></rr0-hvs>
       <rr0-scenario-sweep id="scenario-sweep"></rr0-scenario-sweep>
     </div>
     <p id="case-problems" class="recording-id-error" role="status" hidden></p>
@@ -1428,6 +1431,7 @@ export class CaseEditorElement extends HTMLElement {
     const events = this.eventsInTime(session)
     this.renderEvents(session, events)
     this.compareReadings(session)
+    this.weighHypotheses(session)
     this.sweepScenarios(session)
     const open = events.findIndex(({ item }) => item.interview ? item.interview === this.currentInterview : item.track === this.current)
     const current = events[open]
@@ -2037,6 +2041,22 @@ export class CaseEditorElement extends HTMLElement {
         .filter((track): track is CaseTrack => track !== undefined && !track.recording)
       await Promise.all([...new Set(needed)].map(track => this.loadTrack(track).catch(() => undefined)))
       return rowsOf()
+    })
+  }
+
+  /** Weighs the case's hypotheses by the HVS protocol under its readings compared (see HvsElement), as the case's player does. */
+  private weighHypotheses(session: CaseSession): void {
+    HvsElement.register()
+    const panel = this.byId("hvs") as HvsElement
+    panel.toggleAttribute("data-filtered", !this.kindsShown.has("reading"))
+    panel.show({
+      caseJson: () => session.json,
+      recording: async id => {
+        const track = session.tracks.find(candidate => candidate.event.id === id)
+        if (!track) return undefined
+        if (!track.recording) await this.loadTrack(track).catch(() => undefined)
+        return track.recording
+      }
     })
   }
 

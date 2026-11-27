@@ -2,7 +2,9 @@
 
 Stéphane Baron a proposé (novembre 2026) un cas fictif, `FICTIF-2026-001`, pour voir si un dossier analysé selon son protocole HVS 7.0
 (taxonomie 2.1) peut s'écrire dans le format d'UFO@home. [`fictif-2026-001.json`](fictif-2026-001.json) en est la transcription à la
-main : le format la prend entière, et elle se charge sans rien inventer (test `HvsTranscription.test.ts`).
+main : le format la prend entière, et elle se charge sans rien inventer (test `HvsTranscription.test.ts`). Le dossier
+[`case.json`](case.json) y ajoute la liste des éléments et les hypothèses pesées, que l'éditeur de dossier montre sous les lectures
+comparées (« Hypothèses pesées (HVS) »).
 
 ## Ce qui passe tel quel
 
@@ -27,12 +29,34 @@ garde telle quelle. Une élévation géométrique ne vient que d'un calcul (un a
 d'environ 3,6′ à 15°, 0,5° à l'horizon. Un export HVS devra soit retirer la réfraction, soit déclarer `"elevation": "apparente"` dans
 `conventions`.
 
-## Ce qui manque
+## Éléments, hypothèses et scores (dans le `case.json`)
 
-1. **L'IQI** (date et heure, lieu, identification, nombre de témoins, enquête) : rien ne le note aujourd'hui. Les évaluateurs
-   Ballester-Guasp et Poher jouent un rôle voisin.
-2. **La liste arrêtée des éléments**, avec leur statut (fait observé, inférence, inférence d'association) : E1 à E5 sont ici dispersés
-   dans la scène, et E5 n'existe que comme dessin.
-3. **Les hypothèses et leurs scores** : une lecture « lanterne » se reconstitue (`interpretation`), et se confronte au témoignage
-   instant par instant, mais ni la CS (brute, discriminante), ni la PS, ni le HVS et son enveloppe n'ont de place.
-4. **Le code de la taxonomie** (`T1.4`) d'une hypothèse.
+| HVS | UFO@home |
+|---|---|
+| `elements[]` : `id`, `libelle`, `statut` | `elements[]` : `id`, `title`, `status` (`observed`, `inferred`, `association`) ; `elementsSealed` dit la liste arrêtée |
+| un élément qui est un angle | `phenomenon: { sourceId, t }` : une lecture de l'hypothèse le tranche par sa confrontation au témoignage, sans déclaration |
+| `iqi` | `hvs.iqi`, mêmes cinq groupes (`complete`, `partial`, `absent`) ; un groupe omis est suggéré d'après le dossier quand c'est possible (date, lieu, enquête) |
+| `hypotheses[].code`, `libelle` | `hvs.hypotheses[].code`, `title` ; `readings` nomme les lectures qui la reconstituent |
+| éléments expliqués | `explains`, pour ceux qu'aucune lecture ne tranche |
+| `ps` | `plausibility` : `existence`, `frequency`, `compatibility`, `context`, chacun avec sa plage ; PS calculée |
+| `cs_brute`, `cs_discriminante`, `hvs.prefere`, `hvs.enveloppe` | calculés, jamais saisis |
+| jalons | « dominante » calculée ; `milestone` : `identified`, `proven` |
+
+L'hypothèse « avion » n'est pas dans l'exemple de Baron : elle n'est là que pour qu'un élément sépare deux hypothèses. L'exemple ne
+donne que PS = 0,70 ; sa décomposition en trois cotes de 0,7 est pour l'illustration.
+
+### Choix faits ici, à confirmer avec Stéphane Baron
+
+- **Enveloppe de la CS** : de la part expliquée sans compter les inférences, jusqu'à la part préférée (les inférences comptées).
+- **Moyenne géométrique** : quand une cote est ≤ 0,2 alors qu'une autre est ≥ 0,6.
+- **CS discriminante** : sur les éléments que toutes les hypothèses listées n'expliquent pas de la même façon ; HVS la prend quand elle
+  existe, sinon la CS brute (son exemple : 0,67 × 0,70 = 0,47).
+- **Dominante** : la retenue de plus grande CS discriminante ; aucune en cas d'égalité.
+- **IQI** : un niveau complet vaut 1, partiel 0,5 ; la somme est sur les groupes notés.
+
+## Ce qui manque encore
+
+- La grille des 20 catégories et leurs plages de PS : à Baron de dire si elles peuvent être publiées.
+- Le réajustement des hypothèses exotiques (barème inspiré de Kass & Raftery).
+- Un export et un import au format de son exemple, s'il le garde.
+- La saisie des éléments et des hypothèses ailleurs que dans l'onglet Fichier du dossier.

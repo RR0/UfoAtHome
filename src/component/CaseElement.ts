@@ -1,5 +1,6 @@
 import { CaseFile } from "../engine/persistence/caseJson.js"
 import { ReadingsComparisonElement, type ComparedReading } from "./ReadingsComparisonElement.js"
+import { HvsElement } from "./HvsElement.js"
 import { CaseExportElement } from "./CaseExportElement.js"
 import type { SightingRecordingJson } from "../engine/persistence/sightingJson.js"
 import type { CaseEventJson, CaseJson } from "../engine/persistence/caseJson.js"
@@ -128,6 +129,7 @@ export class CaseElement extends HTMLElement {
       this.draw()
     })
     ReadingsComparisonElement.register()
+    HvsElement.register()
     CaseExportElement.register()
     // What a report is made from: the case and every recording it lists, fetched only when a report is asked for.
     ;(this.byId("export") as CaseExportElement).source = async () => {
@@ -368,6 +370,16 @@ export class CaseElement extends HTMLElement {
       return [row()]
     }))
     void rowsOf(false).then(rows => table.show(rows, () => rowsOf(true)))
+    // The hypotheses weighed by the HVS protocol, from the same recordings, fetched as the table is unfolded (see HvsElement).
+    const json = this.json
+    if (!json) return
+    ;(this.byId("hvs") as HvsElement).show({
+      caseJson: () => json,
+      recording: async id => {
+        const entry = this.entries.find(candidate => candidate.event.id === id)
+        return entry?.url ? fetch(entry.url) : undefined
+      }
+    })
   }
 
   /** The account a reading reads, among the case's events: what the player has to be pointed at to replay that reading. */

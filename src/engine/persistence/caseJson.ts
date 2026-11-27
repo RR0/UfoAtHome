@@ -4,6 +4,7 @@ import { Provenance } from "./Provenance.js"
 import type { UncertainConditionsJson } from "../scenario/UncertainConditions.js"
 import { FormatVersion } from "./FormatVersion.js"
 import type { SaidText } from "../model/SaidText.js"
+import type { CaseElementJson, HvsJson } from "../assessment/hvs/HvsJson.js"
 import { InterpretationKinds } from "../../modules/interpretations/InterpretationKind.js"
 import { InterpretationRegistry } from "../../modules/interpretations/interpretationSources.js"
 
@@ -37,6 +38,12 @@ export interface CaseJson {
   /** The dates and places the case leaves open, each candidate with what supports it: what its readings are played over to say how their
    * verdicts depend on them (see UncertainConditionsJson, ScenarioSweep). Absent, every account is played where and when it says. */
   conditions?: UncertainConditionsJson
+  /** What its accounts say happened, each to be explained or not by a hypothesis: drawn up before any is weighed (see CaseElementJson). */
+  elements?: CaseElementJson[]
+  /** Whether the list of elements is frozen: once hypotheses are weighed against it, it is no longer to be cut to fit them. */
+  elementsSealed?: boolean
+  /** Its hypotheses weighed by Stéphane Baron's HVS protocol, and the rating of its file (see HvsJson). */
+  hvs?: HvsJson
 }
 
 /** One event of a case. A `sighting` points at a observer's recording by `url`; an

@@ -1,6 +1,7 @@
 import { Messages } from "../../i18n/MessageCatalog.js"
 import type { CaseExportMessages } from "./CaseExportMessages.js"
 import type { ReadingSensitivityMessages } from "./ReadingSensitivityMessages.js"
+import type { HvsMessages } from "./HvsMessages.js"
 import type { ScenarioSweepMessages } from "./ScenarioSweepMessages.js"
 import type { UfoMessages } from "./UfoMessages.js"
 import type { SightingEditorMessages } from "./SightingEditorMessages.js"
@@ -147,6 +148,16 @@ const readingSensitivityLoaders: Record<UfoLanguage, () => Promise<ReadingSensit
 
 /** The texts of a reading's sensitivity, shown by the case's player and its editor alike (see ReadingSensitivityElement). */
 export const READING_SENSITIVITY_MESSAGES = Messages.catalog<ReadingSensitivityMessages>(readingSensitivityLoaders)
+
+const hvsLoaders: Record<UfoLanguage, () => Promise<HvsMessages>> = {
+  en: () => import("./HvsMessages_en.js").then(m => m.hvsMessages_en),
+  fr: () => import("./HvsMessages_fr.js").then(m => m.hvsMessages_fr),
+  es: () => import("./HvsMessages_es.js").then(m => m.hvsMessages_es),
+  it: () => import("./HvsMessages_it.js").then(m => m.hvsMessages_it)
+}
+
+/** The words of the HVS table (see HvsElement). */
+export const HVS_MESSAGES = Messages.catalog<HvsMessages>(hvsLoaders)
 
 const scenarioSweepLoaders: Record<UfoLanguage, () => Promise<ScenarioSweepMessages>> = {
   en: () => import("./ScenarioSweepMessages_en.js").then(m => m.scenarioSweepMessages_en),

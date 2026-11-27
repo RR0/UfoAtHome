@@ -37,6 +37,7 @@ export const caseHtml = `
   <p id="events-none" class="events-none" role="status" hidden></p>
   <ol id="case-events" class="event-list"></ol>
   <rr0-readings-comparison id="readings-comparison" class="readings-comparison"></rr0-readings-comparison>
+  <rr0-hvs id="hvs" class="readings-comparison"></rr0-hvs>
 </section>
 <!-- The grip between the two, on the history's edge: its width, dragged. -->
 <div id="column-resize" class="column-resize"></div>

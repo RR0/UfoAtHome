@@ -69,6 +69,9 @@ export interface ReadingSensitivityResult {
   agreement: number
   /** How many comparisons that is. */
   compared: number
+  /** Each comparison of the reading as written, by "instant/phenomenon" (the instant in milliseconds): whether it reproduces what was said
+   * of that phenomenon then. What a case's list of elements reads a direction or a size off (see Hvs). */
+  outcomes: Record<string, boolean>
   /**
    * Whether a size it was compared on is the light of a body's lamps rather than its outline, by a law that is contested (see BodyGlare.TYCHO):
    * what the note says beside its verdict.
@@ -211,6 +214,7 @@ export class ReadingSensitivity {
       holds: nominal.outcomes.size > 0 && this.nominalAgreement === 1,
       agreement: this.nominalAgreement,
       compared: nominal.outcomes.size,
+      outcomes: Object.fromEntries(nominal.outcomes),
       instants: nominal.instants,
       ...(nominal.separations.length ? { medianSeparationDeg: ReadingSensitivity.median(nominal.separations) } : {}),
       ...(nominal.lightSized ? { lightSized: true } : {}),
