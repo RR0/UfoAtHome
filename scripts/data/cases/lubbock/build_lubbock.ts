@@ -134,7 +134,8 @@ function timeline() {
     shapes: LIGHT_IDS.map((sourceId, k) => ({
       sourceId,
       shape: {
-        kind: "oval", bounds: { x: 0, y: 0, width: 2, height: 2 }, angle: 0, transparency: 1, haloScale: 0.9, brightness: 0.35, selected: false,
+        kind: "oval", bounds: { x: 0, y: 0, width: 2, height: 2 }, angle: 0, transparency: 1, haloScale: 0.9, selected: false,
+        brightness: k === 0 ? said(0, "stated", "\"soft, glowing\" lights (Ruppelt, ch. 8), \"dull\" ones as everybody in Lubbock told them: lights one could look at, whose colour did not go white", "des lumières « douces, luisantes » (Ruppelt, chap. 8), « ternes » comme tout Lubbock les décrivit : des lumières qu'on pouvait regarder, dont la couleur ne blanchissait pas", RUPPELT) : 0,
         color: k === 0 ? said(BLUISH_GREEN, "stated", "\"The lights were a weird bluish green color\" (Ruppelt, ch. 8)", "« Les lumières étaient d'une étrange couleur bleu-vert » (Ruppelt, chap. 8)", RUPPELT) : BLUISH_GREEN,
         title: { en: `Bluish green light ${k + 1}`, fr: `Lumière bleu-vert ${k + 1}`, es: `Luz verdiazul ${k + 1}`, it: `Luce verde-azzurra ${k + 1}` },
         aim: k === 0 ? said(first[k], "assumed",
@@ -460,7 +461,8 @@ function hartTimeline() {
       shapes: pass > 0 ? shown(first, 1) : HART_IDS.map((sourceId, k) => ({
         sourceId,
         shape: {
-          kind: "oval", bounds: { x: 0, y: 0, width: 2, height: 2 }, angle: 0, transparency: 1, haloScale: 0.9, brightness: 0.25, selected: false,
+          kind: "oval", bounds: { x: 0, y: 0, width: 2, height: 2 }, angle: 0, transparency: 1, haloScale: 0.9, selected: false,
+          brightness: k === 0 ? said(0, "stated", "\"dull, glowing\", and \"so dim that he was sure he didn't have anything on the negatives\" (Ruppelt, ch. 8): lights one could look at, whose colour did not go white", "« ternes, luisantes », et « si faibles qu'il était sûr de n'avoir rien sur ses négatifs » (Ruppelt, chap. 8) : des lumières qu'on pouvait regarder, dont la couleur ne blanchissait pas", HART_SOURCE) : 0,
           color: k === 0 ? said(BLUISH_GREEN, "stated", "\"the same dull, glowing bluish green color as those seen by the professors\" (Ruppelt, ch. 8)", "« la même couleur bleu-vert terne et luisante que celles vues par les professeurs » (Ruppelt, chap. 8)", HART_SOURCE) : BLUISH_GREEN,
           title: { en: `Bluish green light ${k + 1}`, fr: `Lumière bleu-vert ${k + 1}`, es: `Luz verdiazul ${k + 1}`, it: `Luce verde-azzurra ${k + 1}` },
           aim: k === 0 ? said(first[k], "assumed",
@@ -573,6 +575,59 @@ function hart() {
   }
 }
 
+/**
+ * The height that makes `reading`'s birds cross Hart's 120° in four seconds at the speed they fly at the professors' (see flock): 30° up in
+ * the north to 30° up in the south is twice h / tan 30° in four seconds, 0.87 h a second. Lower than over the professors, whose 90° in three
+ * seconds took 0.67 h a second.
+ */
+const hartHeightM = (reading: Reading) => r1((2 * reading.heightM / (CROSSING_MS / 1000)) / (2 / Math.tan(30 * DEG) / (HART_CROSSING_MS / 1000)))
+
+/** One flock for each pass Hart saw: over the yard, north to south, where his lights were at the start and end of each pass. */
+/** What each reading is called over Hart's yard: his nineteen lights, the height his crossing asks, and no boulevard known to light them. */
+function hartTitle(reading: Reading) {
+  const h = hartHeightM(reading), hFr = String(h).replace(".", ",")
+  return reading.key === "ducks" ? {
+    en: `Nineteen ducks in a wide V, ${h} m up, lit from below by the town (the Air Force's conclusion)`,
+    fr: `Dix-neuf canards en V très ouvert, à ${hFr} m, éclairés par en dessous par la ville (conclusion de l'Air Force)`,
+    es: `Diecinueve patos en una V muy abierta, a ${hFr} m, iluminados desde abajo por la ciudad (conclusión de la Air Force)`,
+    it: `Diciannove anatre in una V molto aperta, a ${hFr} m, illuminate dal basso dalla città (conclusione della Air Force)`
+  } : {
+    en: `Nineteen plovers in a ragged front, ${h} m up, their white bellies lit by the town (Ruppelt's lead at Lamesa)`,
+    fr: `Dix-neuf pluviers en front irrégulier, à ${hFr} m, leur ventre blanc éclairé par la ville (la piste de Ruppelt à Lamesa)`,
+    es: `Diecinueve chorlitos en un frente irregular, a ${hFr} m, el vientre blanco iluminado por la ciudad (la pista de Ruppelt en Lamesa)`,
+    it: `Diciannove pivieri in un fronte irregolare, a ${hFr} m, il ventre bianco illuminato dalla città (la pista di Ruppelt a Lamesa)`
+  }
+}
+
+function hartFlocks(reading: Reading) {
+  const heightM = hartHeightM(reading)
+  const reachM = heightM / Math.tan(30 * DEG)
+  const speed = 2 * reachM / (HART_CROSSING_MS / 1000)
+  const altitudeM = r1(heightM + 1.6)
+  return HART_PASSES.map((start, pass) => {
+    const northAt = (t: number) => r1(reachM - speed * (t - start) / 1000)
+    return {
+      id: `${reading.key}-${pass + 1}`, species: reading.species, count: HART_LIGHTS, formation: reading.formation, seed: reading.seed + pass,
+      title: hartTitle(reading), lightFromBelow: { lux: 1, color: "#d4ece6" }, originElevationM: YARD.groundM,
+      explainsEach: HART_IDS, path: [start - 3000, start, start + HART_CROSSING_MS, start + HART_CROSSING_MS + 3000].map(t => ({ t: Math.max(0, t), eastM: 0, northM: northAt(t), altitudeM }))
+    }
+  })
+}
+
+function hartInterpretation(reading: Reading) {
+  const heightM = hartHeightM(reading)
+  const { timeline: _timeline, milestones: _milestones, description: _description, ...seen } = hart()
+  return {
+    ...seen,
+    id: `1951-08-31-Lubbock-HartCarlJr-${reading.key}`,
+    tags: ["NL", "birds", "misidentification"],
+    timeline: { keyframes: [], order: [], groups: [] },
+    interpretation: said({ title: hartTitle(reading), bodies: [], birds: hartFlocks(reading) }, "assumed",
+      `${reading.rationale.en} Over Hart's yard, three flocks, one a pass, ${heightM} m up to cross his 120° in four seconds at the same speed; the light from below is the town's, his street lamps not being known.`,
+      `${reading.rationale.fr} Au-dessus du jardin de Hart, trois vols, un par passage, à ${String(heightM).replace(".", ",")} m pour traverser ses 120° en quatre secondes à la même vitesse ; la lumière d'en dessous est celle de la ville, ses lampadaires n'étant pas connus.`, RUPPELT)
+  }
+}
+
 function main(): void {
   const { decor, takenOn, attribution } = surroundings()
   writeFileSync(path.join(demoData, "lubbock.decor.json"), JSON.stringify({ version: 4, takenOn, attribution, decor }) + "\n")
@@ -584,6 +639,10 @@ function main(): void {
   }
   write("observer-lubbock-hart.json", hart())
   events.push({ type: "event", eventType: "sighting", id: "hart", time: "1951-08-31", title: "Carl Hart Jr.", url: "observer-lubbock-hart.json" })
+  for (const reading of READINGS) {
+    write(`interpretation-lubbock-hart-${reading.key}.json`, hartInterpretation(reading))
+    events.push({ type: "event", eventType: "sighting", interpretationOf: "hart", title: hartTitle(reading), url: `interpretation-lubbock-hart-${reading.key}.json` })
+  }
   for (const p of PROFESSORS) {
     for (const reading of READINGS) {
       write(`interpretation-lubbock-${p.key}-${reading.key}.json`, interpretation(p, reading))

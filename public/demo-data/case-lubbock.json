@@ -52,6 +52,30 @@
   {
    "type": "event",
    "eventType": "sighting",
+   "interpretationOf": "hart",
+   "title": {
+    "en": "Nineteen ducks in a wide V, 30.8 m up, lit from below by the town (the Air Force's conclusion)",
+    "fr": "Dix-neuf canards en V très ouvert, à 30,8 m, éclairés par en dessous par la ville (conclusion de l'Air Force)",
+    "es": "Diecinueve patos en una V muy abierta, a 30,8 m, iluminados desde abajo por la ciudad (conclusión de la Air Force)",
+    "it": "Diciannove anatre in una V molto aperta, a 30,8 m, illuminate dal basso dalla città (conclusione della Air Force)"
+   },
+   "url": "interpretation-lubbock-hart-ducks.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
+   "interpretationOf": "hart",
+   "title": {
+    "en": "Nineteen plovers in a ragged front, 29.3 m up, their white bellies lit by the town (Ruppelt's lead at Lamesa)",
+    "fr": "Dix-neuf pluviers en front irrégulier, à 29,3 m, leur ventre blanc éclairé par la ville (la piste de Ruppelt à Lamesa)",
+    "es": "Diecinueve chorlitos en un frente irregular, a 29,3 m, el vientre blanco iluminado por la ciudad (la pista de Ruppelt en Lamesa)",
+    "it": "Diciannove pivieri in un fronte irregolare, a 29,3 m, il ventre bianco illuminato dalla città (la pista di Ruppelt a Lamesa)"
+   },
+   "url": "interpretation-lubbock-hart-plovers.json"
+  },
+  {
+   "type": "event",
+   "eventType": "sighting",
    "interpretationOf": "robinson",
    "title": {
     "en": "Twenty ducks in a wide V, 40 m up, lit from below by the boulevard's mercury-vapour lamps (the Air Force's conclusion)",
