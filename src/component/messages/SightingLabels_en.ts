@@ -72,6 +72,16 @@ export const sightingLabels_en: SightingLabels = {
     "poher.4": "4/5 · landing with traces",
     "poher.5": "5/5 · landing with occupants"
   },
+  hypothesisGroup: "Hypotheses",
+  hypotheses: {
+    poher: "Poher matrix",
+    hvs: "HVS",
+    tied: "{name} (+{n} tied)",
+    allExcluded: "all ruled out",
+    noDominant: "none dominant",
+    poherDetail: "Mean score {mean}; {possible} of {of} phenomena not ruled out",
+    hvsDetail: "HVS {hvs} = CS {cs} × PS {ps}"
+  },
   timeQualifierApproximate: "Approximate",
   timeQualifierUncertain: "Uncertain",
   timeQualifierBoth: "Uncertain and approximate",

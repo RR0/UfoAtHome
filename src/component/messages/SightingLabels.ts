@@ -17,6 +17,23 @@ export interface SightingLabels {
    * An assessor states ids and never prose, exactly as a tag is stored in English and named here
    * (see AssessmentCriterion). */
   assessmentVerdicts: Record<string, string>
+  /** Names the nest holding what the hypotheses' evaluators make of the observation (see SightingHypotheses): Poher's matrix, the HVS
+   * protocol. Beside the assessment's, not in it: an assessment rates the account, these weigh what could explain it. */
+  hypothesisGroup: string
+  hypotheses: {
+    /** The chips' names, by evaluator. */
+    poher: string
+    hvs: string
+    /** The phenomenon heading the matrix, with how many others score the same. */
+    tied: string
+    /** The matrix ruling out every phenomenon it knows. */
+    allExcluded: string
+    /** The protocol finding no hypothesis dominant. */
+    noDominant: string
+    /** The chips' tooltips: what the value is made of. */
+    poherDetail: string
+    hvsDetail: string
+  }
 
   color: string
   transparency: string

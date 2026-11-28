@@ -72,6 +72,16 @@ export const sightingLabels_fr: SightingLabels = {
     "poher.4": "4/5 · atterrissage avec traces",
     "poher.5": "5/5 · atterrissage avec occupants"
   },
+  hypothesisGroup: "Hypothèses",
+  hypotheses: {
+    poher: "Matrice de Poher",
+    hvs: "HVS",
+    tied: "{name} (+{n} à égalité)",
+    allExcluded: "toutes exclues",
+    noDominant: "aucune dominante",
+    poherDetail: "Score moyen {mean} ; {possible} phénomènes non exclus sur {of}",
+    hvsDetail: "HVS {hvs} = CS {cs} × PS {ps}"
+  },
   timeQualifierApproximate: "Approximative",
   timeQualifierUncertain: "Incertaine",
   timeQualifierBoth: "Incertaine et approximative",

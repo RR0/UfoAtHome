@@ -120,7 +120,6 @@ ${HintElement.CSS}
   private opened = false
   /** The observation's account and readings, once loaded, by the account's event id. */
   private loaded = new Map<string, { account?: SightingRecordingJson, readings: LoadedReading[] }>()
-  private loading = false
 
   static register(): void {
     if (!customElements.get(HvsElement.TAG)) customElements.define(HvsElement.TAG, HvsElement)
@@ -139,6 +138,8 @@ ${HintElement.CSS}
   show(input: HvsInput | undefined): void {
     this.input = input
     this.loaded.clear()
+    // A loading of the input before is left to end on its own, finding the input changed; the next ask starts its own.
+    this.loadingNow = undefined
     this.draw()
     if (this.opened) void this.loadRecordings()
   }
@@ -168,39 +169,61 @@ ${HintElement.CSS}
       && [event.interpretationOf].flat().includes(account))
   }
 
-  /** The account and the readings of each observation shown, each reading with its phenomena and the confrontation it was put to. */
-  private async loadRecordings(): Promise<void> {
+  /**
+   * The weighing of the observation shown, loading what it needs if that is not done yet: what a host states elsewhere (the chips of the
+   * observation, see SightingHypotheses), the table then drawn from the same loading when it is unfolded. Undefined for the case's table, or
+   * a case that gives the protocol no hypothesis.
+   */
+  async weigh(): Promise<{ result: HvsResult, title: (id: string) => string } | undefined> {
     const input = this.input
-    if (!input || this.loading || this.loaded.size > 0) return
-    this.loading = true
-    try {
-      const json = input.caseJson()
-      const accounts = input.account !== undefined ? [input.account] : HvsElement.accounts(json).map(event => event.id!)
-      const kinds = InterpretationRegistry.kinds()
-      for (const id of accounts) {
-        const account = await input.recording(id)
-        const readings: LoadedReading[] = []
-        for (const event of HvsElement.readingEvents(json, id)) {
-          const recording = await input.recording(event.id!)
-          if (!recording) continue
-          // With the bodies its kinds compute (lanterns, balloons, drones…), from its plain values: a reading of them states none of its
-          // own to confront.
-          const interpretation = Provenance.strip(recording).recording.interpretation
-          await InterpretationKinds.load(interpretation, kinds)
-          const expanded = InterpretationKinds.expand(interpretation, kinds)
-          const result = account ? ReadingSensitivityElement.resultOf(account, InterpretationKinds.computes(interpretation, kinds) ? { ...recording, interpretation: expanded } : recording) : undefined
-          readings.push({
-            id: event.id!,
-            label: this.said.read(event.title as SaidText | undefined) ?? event.id!,
-            phenomena: InterpretationKinds.phenomena(interpretation, kinds),
-            ...(result ? { outcomes: result.outcomes } : {})
-          })
-        }
-        if (this.input !== input) return
-        this.loaded.set(id, { ...(account ? { account } : {}), readings })
+    if (!input?.account || (input.caseJson().hvs?.hypotheses ?? []).length === 0) return undefined
+    await this.loadRecordings()
+    if (this.input !== input || !this.loaded.has(input.account)) return undefined
+    const json = input.caseJson()
+    const titles = new Map((json.hvs?.hypotheses ?? []).map(hypothesis => [hypothesis.id, this.titleOf(hypothesis)]))
+    return { result: this.resultOf(json, input.account), title: id => titles.get(id) ?? id }
+  }
+
+  /** The loading under way, which a second ask waits for rather than starting another or returning before it is done. */
+  private loadingNow?: Promise<void>
+
+  /** The account and the readings of each observation shown, each reading with its phenomena and the confrontation it was put to. */
+  private loadRecordings(): Promise<void> {
+    if (this.loadingNow) return this.loadingNow
+    const loading = this.loadOnce().finally(() => {
+      if (this.loadingNow === loading) this.loadingNow = undefined
+    })
+    this.loadingNow = loading
+    return loading
+  }
+
+  private async loadOnce(): Promise<void> {
+    const input = this.input
+    if (!input || this.loaded.size > 0) return
+    const json = input.caseJson()
+    const accounts = input.account !== undefined ? [input.account] : HvsElement.accounts(json).map(event => event.id!)
+    const kinds = InterpretationRegistry.kinds()
+    for (const id of accounts) {
+      const account = await input.recording(id)
+      const readings: LoadedReading[] = []
+      for (const event of HvsElement.readingEvents(json, id)) {
+        const recording = await input.recording(event.id!)
+        if (!recording) continue
+        // With the bodies its kinds compute (lanterns, balloons, drones…), from its plain values: a reading of them states none of its
+        // own to confront.
+        const interpretation = Provenance.strip(recording).recording.interpretation
+        await InterpretationKinds.load(interpretation, kinds)
+        const expanded = InterpretationKinds.expand(interpretation, kinds)
+        const result = account ? ReadingSensitivityElement.resultOf(account, InterpretationKinds.computes(interpretation, kinds) ? { ...recording, interpretation: expanded } : recording) : undefined
+        readings.push({
+          id: event.id!,
+          label: this.said.read(event.title as SaidText | undefined) ?? event.id!,
+          phenomena: InterpretationKinds.phenomena(interpretation, kinds),
+          ...(result ? { outcomes: result.outcomes } : {})
+        })
       }
-    } finally {
-      this.loading = false
+      if (this.input !== input) return
+      this.loaded.set(id, { ...(account ? { account } : {}), readings })
     }
     this.draw()
   }

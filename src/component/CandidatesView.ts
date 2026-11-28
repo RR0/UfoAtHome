@@ -471,7 +471,7 @@ export class CandidatesView {
   }
 
   /** The version stored by the reader's last choice, or the default one: storage may be refused, in a private window. */
-  private static storedVersion(): PoherMatrixVersion {
+  static storedVersion(): PoherMatrixVersion {
     try {
       const stored = localStorage.getItem(CandidatesView.VERSION_STORAGE)
       if (stored && stored in PoherMatrix.VERSIONS) return stored as PoherMatrixVersion

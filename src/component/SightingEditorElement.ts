@@ -14,7 +14,7 @@ import { CandidatesView } from "./CandidatesView.js"
 import { HvsElement, type HvsInput } from "./HvsElement.js"
 import { PoherAccountFacts } from "../engine/witness/PoherSelfCheck.js"
 import type { InterpretationJson } from "../engine/interpretation/Interpretation.js"
-import { PoherMatrix } from "../engine/witness/PoherMatrix.js"
+import { PoherAnswers, PoherMatrix } from "../engine/witness/PoherMatrix.js"
 import type { PoherFacts } from "../engine/witness/PoherMatrix.js"
 import { BodyConfrontation } from "../engine/interpretation/BodyConfrontation.js"
 import { TimelineTracks } from "./TimelineTracks.js"
@@ -58,6 +58,7 @@ import { AppLocation } from "./AppLocation.js"
 import { FormatVersion, FormatVersionError } from "../engine/persistence/FormatVersion.js"
 import { NARRATIVE_SOURCES } from "../modules/providers/narrative/narrativeSources.js"
 import { SightingAssessments } from "./SightingAssessments.js"
+import { SightingHypotheses } from "./SightingHypotheses.js"
 import { NarrativeError } from "../engine/narrative/NarrativeError.js"
 import { DraftPatch } from "../engine/narrative/DraftPatch.js"
 import { DraftRecording } from "../engine/narrative/DraftRecording.js"
@@ -7393,6 +7394,8 @@ export class SightingEditorElement extends HTMLElement {
     this.witnessErrorView.placeObserverSections(perception)
     const candidates = document.createElement("div")
     candidates.className = "form-section candidates-section"
+    // What a chip of the hypotheses leads to (see SightingHypotheses).
+    candidates.id = SightingHypotheses.CANDIDATES_SECTION
     candidates.dataset.icon = "candidates"
     this.shadow.getElementById("group-observation")!.append(candidates)
     const label = (element: Element | null) => element?.closest<HTMLElement>("label") ?? undefined
@@ -7411,12 +7414,7 @@ export class SightingEditorElement extends HTMLElement {
       limitAt: sunAltitudeDeg => visibleMagnitudeLimit(sunAltitudeDeg, this.instrumentGain()),
       fieldLabels: () => ({ time: label(start), heading: label(this.headingInput), size: label(this.apparentWidthInput), duration: label(this.durationInput) }),
       sceneCard: () => this.shadow.querySelector<HTMLElement>(".scene-card")!,
-      poher: version => {
-        // Its labels are the reader's language's: read again when that changes, or when the reader chooses another version.
-        const key = `${version}/${this.language}`
-        if (this.poherMatrix?.key !== key) this.poherMatrix = { key, loaded: PoherMatrix.load(version, this.language, url => SightingFetch.json(url)) }
-        return this.poherMatrix.loaded
-      },
+      poher: version => this.poherLoaded(version),
       facts: () => this.poherFacts(),
       satellites: () => {
         const durationMs = (this.ufoElement.sighting.event.durationSeconds ?? 0) * 1000 || this.ufoElement.seekableDuration
@@ -7446,6 +7444,7 @@ export class SightingEditorElement extends HTMLElement {
     HvsElement.register()
     const hvsSection = document.createElement("div")
     hvsSection.className = "form-section hvs-section"
+    hvsSection.id = SightingHypotheses.HVS_SECTION
     hvsSection.dataset.icon = "candidates"
     hvsSection.hidden = true
     const hvsTitle = document.createElement("h3")
@@ -7467,11 +7466,13 @@ export class SightingEditorElement extends HTMLElement {
   set hvs(input: HvsInput | undefined) {
     this.hvsInput = input
     this.hvsElement?.show(input)
+    if (this.isConnected) void this.runHypotheses()
   }
 
   /** Draws the HVS weighing again, the case having changed in what it says of it (a choice of readings). */
   redrawHvs(): void {
     this.hvsElement?.redraw()
+    if (this.isConnected) void this.runHypotheses()
   }
 
   /**
@@ -7490,6 +7491,13 @@ export class SightingEditorElement extends HTMLElement {
 
   /** The version of Poher's matrix as rr0.org publishes it, read once in a language (see PoherMatrix.load). */
   private poherMatrix?: { key: string, loaded: ReturnType<typeof PoherMatrix.load> }
+
+  /** The matrix of `version` with its labels in the reader's language: read again when that changes, or when the reader chooses another version. */
+  private poherLoaded(version: Parameters<typeof PoherMatrix.load>[0]): ReturnType<typeof PoherMatrix.load> {
+    const key = `${version}/${this.language}`
+    if (this.poherMatrix?.key !== key) this.poherMatrix = { key, loaded: PoherMatrix.load(version, this.language, url => SightingFetch.json(url)) }
+    return this.poherMatrix.loaded
+  }
 
   /**
    * What the recording says that Poher's matrix asks about (see PoherFacts): the Sun at the start, the duration, the weather when it is
@@ -8122,6 +8130,7 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.assessmentsOwed = false
     void this.runAssessments()
+    void this.runHypotheses()
   }
 
   /** The chips of what the recording states, as of the last change — the assessment's own arrive
@@ -8139,7 +8148,7 @@ export class SightingEditorElement extends HTMLElement {
     // its own run and the right place to read them: what is made of the recording, after it.
     const strip: HTMLElement[] = []
     let openNest: { group: SummaryGroup, element: HTMLElement } | undefined
-    for (const chip of [...this.paramChips, ...this.assessmentChips]) {
+    for (const chip of [...this.paramChips, ...this.assessmentChips, ...this.hypothesisChips]) {
       if (openNest && openNest.group !== chip.group) {
         openNest = undefined
       }
@@ -8154,6 +8163,7 @@ export class SightingEditorElement extends HTMLElement {
         // Assessment. An assessment is not a group of fields, so its name is its own message.
         name.textContent = chip.group === "assessment"
           ? this.messages.assessmentGroup
+          : chip.group === "hypothesis" ? this.messages.hypothesisGroup
           : chip.group === "summary" ? this.messages.summaryGroup
           // The tab's LABEL, not the whole button: a tab also carries its count of unanswered
           // questions (see badgeOn), and reading the button whole named a nest "Observer3".
@@ -8191,7 +8201,7 @@ export class SightingEditorElement extends HTMLElement {
   /** Which summary groups describe a sub-element rather than the observation itself, and so read
    * as a chip holding chips: the observer who gave the account, and whichever decor object is
    * being worked on (or, with none selected, the list of them). */
-  private static readonly NESTED_GROUPS: SummaryGroup[] = ["summary", "observation", "observer", "location", "temporal", "weather", "sound", "decor", "phenomenon", "assessment"]
+  private static readonly NESTED_GROUPS: SummaryGroup[] = ["summary", "observation", "observer", "location", "temporal", "weather", "sound", "decor", "phenomenon", "assessment", "hypothesis"]
 
   /** The tab a summary group leads to: by position for the groups that predate the Pictures tab, and by the panel it controls for the Phenomenon. */
   private summaryPanelIndex(group: SummaryGroup): number {
@@ -8266,6 +8276,45 @@ export class SightingEditorElement extends HTMLElement {
     }))
     this.markUnansweredQuestions(reading.unanswered)
     this.openMostLackingGroup()
+    this.renderParamSummary()
+  }
+
+  /** Chips for what the hypotheses' evaluators make of the observation, kept between renders because they arrive after it (see runHypotheses). */
+  private hypothesisChips: (SummaryEntry & { panel: number })[] = []
+
+  /** Drops a weighing that resolved after the recording or the case it weighed was already replaced. */
+  private hypothesisToken = 0
+
+  /**
+   * Asks the hypotheses' evaluators what they make of the observation, and puts each answer on the strip inside the Hypotheses nest,
+   * beside the assessment's: Poher's matrix, from what the recording says, and the HVS protocol, in a case that gives it hypotheses. Each
+   * chip leads to the section that details it, in the Summary.
+   *
+   * Their loading (the matrix's files, the case's readings and their confrontation) is what the sections would load when unfolded: done
+   * once here, they find it done.
+   */
+  private async runHypotheses(): Promise<void> {
+    const token = ++this.hypothesisToken
+    const hypotheses = new SightingHypotheses(this.messages, this.language)
+    const chips: SummaryEntry[] = []
+    try {
+      const { matrix, labels } = await this.poherLoaded(CandidatesView.storedVersion())
+      const answers = new PoherAnswers(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions).of(this.poherFacts())
+        .filter(answer => matrix.has(answer.question))
+      const poher = hypotheses.poher(matrix.rank(answers), answers.length, labels)
+      if (poher) chips.push(poher)
+    } catch {
+      // The matrix out of reach (offline): no chip of it, as no candidate of it.
+    }
+    try {
+      const weighed = await this.hvsElement?.weigh()
+      const hvs = weighed ? hypotheses.hvs(weighed.result, weighed.title) : undefined
+      if (hvs) chips.push(hvs)
+    } catch {
+      // A reading that cannot be confronted says nothing rather than breaking the strip.
+    }
+    if (token !== this.hypothesisToken || !this.isConnected) return
+    this.hypothesisChips = chips.map(entry => ({ ...entry, panel: this.panelIndex(entry.about ?? "") }))
     this.renderParamSummary()
   }
 

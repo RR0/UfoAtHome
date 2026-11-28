@@ -30,6 +30,9 @@ export type SummaryGroup =
    * (see SightingEditorElement.runAssessments). It travels as a group so that it can nest and be
    * rendered by the same code as everything else. */
   | "assessment"
+  /** Like the assessment, made of the recording rather than gathered from it: what the hypotheses' evaluators (Poher's matrix, the HVS
+   * protocol) make of the observation (see SightingHypotheses). */
+  | "hypothesis"
 
 /** One thing a recording states. `field` is the name of the field it came from, which is also the
  * id the editor gives that field's own control — that coincidence is what lets a chip put the
