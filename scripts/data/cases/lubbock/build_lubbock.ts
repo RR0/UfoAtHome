@@ -83,7 +83,7 @@ const CROSSING_MS = 3000
 const T_OUT = T0 + CROSSING_MS
 const DURATION_MS = 8500
 const LIGHTS = 20
-/** Half the formation's width, degrees: Ruppelt's 1,750 feet across at 10,000 feet is ten degrees across. */
+/** Half the semicircle's width, degrees: Ruppelt's 1,750 feet across at 10,000 feet is ten degrees across. */
 const HALF_WIDTH_DEG = 5
 
 type Vec = [number, number, number]
@@ -109,26 +109,14 @@ function centre(t: number): { at: Vec, ahead: Vec } {
   return { at: [0, Math.cos(phi), Math.sin(phi)], ahead: [0, Math.sin(phi), -Math.cos(phi)] }
 }
 
-/**
- * The angle at the apex of the V, degrees, as Carl Hart Jr.'s photos of 31 August show it: two straight arms some 27° off the line across
- * the formation in each of them (the Air Force's lab found "an inverted V formation of lights"), so 125° between them.
- */
-const APEX_DEG = 125
-/** How far the ends of the V trail its apex, degrees: the arms' depth over the ten degrees across. */
-const DEPTH_DEG = HALF_WIDTH_DEG / Math.tan(APEX_DEG / 2 * DEG)
-
-/**
- * Each light of the formation at `t`, in a V with its apex ahead and both arms straight. The professors called this first one "roughly
- * semicircular", which a wide V seen for three seconds overhead is; the shape is drawn as the only one of these flights ever measured, Hart's
- * photos, ASSUMED to hold for this one. The apex ahead is ASSUMED too: which way it pointed is not said.
- */
+/** Each light of the semicircle at `t`: its middle light ahead, the two ends trailing by a half-width (ASSUMED: which way it was open is not said). */
 function lightsAt(t: number) {
   const { at, ahead } = centre(t)
   const side = cross(at, ahead)
   const out = []
   for (let k = 0; k < LIGHTS; k++) {
-    const u = -1 + 2 * k / (LIGHTS - 1)
-    const sideDeg = HALF_WIDTH_DEG * u, aheadDeg = DEPTH_DEG * (0.5 - Math.abs(u))
+    const a = (-90 + 180 * k / (LIGHTS - 1)) * DEG
+    const sideDeg = HALF_WIDTH_DEG * Math.sin(a), aheadDeg = HALF_WIDTH_DEG * (Math.cos(a) - 1) + HALF_WIDTH_DEG / 2
     out.push(aimOf(add(add(at, ahead, Math.tan(aheadDeg * DEG)), side, Math.tan(sideDeg * DEG))))
   }
   return out
@@ -137,7 +125,7 @@ function lightsAt(t: number) {
 const LIGHT_IDS = Array.from({ length: LIGHTS }, (_, k) => `light-${k + 1}`)
 const BLUISH_GREEN = "#86e3c9"
 
-/** The lights as they told them: twenty points of a weird bluish green in a "roughly semicircular" formation, drawn as the V Hart photographed, crossing the sky overhead from north to south in three seconds. */
+/** The lights as they told them: twenty points of a weird bluish green in a semicircle, crossing the sky overhead from north to south in three seconds. */
 function timeline() {
   const keyframes: { t: number, shapes: unknown[] }[] = []
   const first = lightsAt(T0)
@@ -336,8 +324,8 @@ function observer(p: Professor) {
       source: said("interview", "stated", "the four told it to Edward J. Ruppelt and the intelligence officer of Reese AFB at Lubbock, in late September 1951, a month after", "les quatre la racontèrent à Edward J. Ruppelt et à l'officier de renseignement de la base de Reese à Lubbock, fin septembre 1951, un mois après", RUPPELT)
     },
     description: {
-      en: `What the four professors told Ruppelt of their first sighting, as he wrote it: on the evening of 25 August 1951, sitting in Dr Robinson's back yard over tea, at about nine twenty, they saw a formation of lights go over "directly over their heads" so fast that none had a good look. The lights were of "a weird bluish green", fifteen to thirty of them, in a semicircle, going north to south, without a sound. ${p.name}'s view${p.first ? ", taken here as the one who saw them first" : ""}; where each sat, the lights' way in and out of the sky, and their semicircle drawn as the V Carl Hart Jr. photographed six days later, are assumed.`,
-      fr: `Ce que les quatre professeurs racontèrent à Ruppelt de leur première observation, tel qu'il l'écrivit : le soir du 25 août 1951, assis à prendre le thé dans le jardin du Dr Robinson, vers neuf heures vingt, ils virent une formation de lumières passer « juste au-dessus de leurs têtes », si vite qu'aucun ne put bien la voir. Les lumières étaient d'un « étrange bleu-vert », quinze à trente, en demi-cercle, allant du nord au sud, sans un bruit. Le point de vue de ${p.name}${p.first ? ", pris ici pour celui qui les vit le premier" : ""} ; la place de chacun, le chemin des lumières dans le ciel et leur demi-cercle dessiné comme le V que Carl Hart Jr. photographia six jours plus tard sont supposés.`
+      en: `What the four professors told Ruppelt of their first sighting, as he wrote it: on the evening of 25 August 1951, sitting in Dr Robinson's back yard over tea, at about nine twenty, they saw a formation of lights go over "directly over their heads" so fast that none had a good look. The lights were of "a weird bluish green", fifteen to thirty of them, in a semicircle, going north to south, without a sound. ${p.name}'s view${p.first ? ", taken here as the one who saw them first" : ""}; where each sat, and the lights' way in and out of the sky, are assumed.`,
+      fr: `Ce que les quatre professeurs racontèrent à Ruppelt de leur première observation, tel qu'il l'écrivit : le soir du 25 août 1951, assis à prendre le thé dans le jardin du Dr Robinson, vers neuf heures vingt, ils virent une formation de lumières passer « juste au-dessus de leurs têtes », si vite qu'aucun ne put bien la voir. Les lumières étaient d'un « étrange bleu-vert », quinze à trente, en demi-cercle, allant du nord au sud, sans un bruit. Le point de vue de ${p.name}${p.first ? ", pris ici pour celui qui les vit le premier" : ""} ; la place de chacun, et le chemin des lumières dans le ciel, sont supposés.`
     },
     tags: ["NL", "formation", "Blue Book"],
     sources: SOURCES,
