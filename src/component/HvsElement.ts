@@ -255,7 +255,11 @@ ${HintElement.CSS}
     const details = document.createElement("details")
     details.open = this.opened
     details.addEventListener("toggle", () => {
+      if (this.opened === details.open) return
       this.opened = details.open
+      // Drawn at once from what is loaded: the chips of the observation may have loaded it all already (see weigh), and then the loading
+      // asked for below has nothing to draw again; an open table stayed empty under its title.
+      this.draw()
       if (details.open) void this.loadRecordings()
     })
     const summary = document.createElement("summary")
