@@ -230,14 +230,6 @@ export function shapeContains(shape: Shape, x: number, y: number): boolean {
   return x >= bounds.x && x <= bounds.x + bounds.width && y >= bounds.y && y <= bounds.y + bounds.height
 }
 
-/** How far (x, y) is from the shape's bounds: 0 inside them. */
-export function shapeDistance(shape: Shape, x: number, y: number): number {
-  const { bounds } = shape
-  const dx = Math.max(bounds.x - x, 0, x - (bounds.x + bounds.width))
-  const dy = Math.max(bounds.y - y, 0, y - (bounds.y + bounds.height))
-  return Math.hypot(dx, dy)
-}
-
 export function moveShapeTo(shape: Shape, x: number, y: number): Shape {
   const width = shape.bounds.width
   const height = shape.bounds.height

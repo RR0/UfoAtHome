@@ -121,7 +121,7 @@ describe("Timeline", () => {
     expect(timeline.hitTest(0, 10, 10)?.sourceId).toBe("b")
   })
 
-  it("hitNear finds a point of light too small to stand on, the nearest within reach, and nothing beyond", () => {
+  it("hitNear finds a point of light too small to stand on, within reach of its centre, and nothing beyond", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [
       { sourceId: "far", shape: createOval({ x: 100, y: 100, width: 0.3, height: 0.3 }) },
@@ -131,8 +131,9 @@ describe("Timeline", () => {
     expect(timeline.hitTest(0, 303, 202)).toBeUndefined()
     expect(timeline.hitNear(0, 303, 202, 8)?.sourceId).toBe("point")
     expect(timeline.hitNear(0, 320, 220, 8)).toBeUndefined()
-    // Inside a shape, that shape, however near another is.
+    // Inside a shape, that shape; beside a shape larger than the reach, nothing: a click beside it stays beside it.
     expect(timeline.hitNear(0, 10, 10, 8)?.sourceId).toBe("big")
+    expect(timeline.hitNear(0, 25, 10, 8)).toBeUndefined()
     expect(timeline.hitNear(0, 303, 202, 8, new Set(["point"]))).toBeUndefined()
   })
 

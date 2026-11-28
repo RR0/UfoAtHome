@@ -1,6 +1,6 @@
 import type { Keyframe, ShapeState } from "./Keyframe.js"
 import type { Shape } from "../shape/Shape.js"
-import { lerpShape, shapeContains, shapeDistance } from "../shape/Shape.js"
+import { lerpShape, shapeContains } from "../shape/Shape.js"
 import { KeyframeCompletion } from "./KeyframeCompletion.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { SaidText } from "./SaidText.js"
@@ -187,22 +187,27 @@ export class Timeline {
   }
 
   /**
-   * hitTest, or else the shape nearest (x, y) within `reach` of its bounds: a point of light a few hundredths of a degree wide is drawn
-   * smaller than a pixel, and a pointer could never stand on it, so its name could never be asked for (dicté : « il faut toujours que le
-   * phénomène soit repérable par tooltip »).
+   * hitTest, where a shape smaller than `reach` each side of its centre is aimed at from anywhere within `reach` of its centre: a point of
+   * light a few hundredths of a degree wide is drawn smaller than a pixel, and a pointer could never stand on it, so its name could never be
+   * asked for (dicté : « il faut toujours que le phénomène soit repérable par tooltip »). A shape larger than that is aimed at on itself
+   * only, as hitTest does: a click beside it stays a click beside it. The nearest centre wins among the small ones.
    */
   hitNear(t: number, x: number, y: number, reach: number, excludeSourceIds?: ReadonlySet<string>): ShapeState | undefined {
     const exact = this.hitTest(t, x, y, excludeSourceIds)
     if (exact || reach <= 0) return exact
     let nearest: ShapeState | undefined
-    let nearestDistance = reach
+    let nearestDistance = Number.POSITIVE_INFINITY
     const ids = this.sourceIds
     for (let i = ids.length - 1; i >= 0; i--) {
       if (excludeSourceIds?.has(ids[i])) continue
       const shape = this.getInterpolatedShapeAt(t, ids[i])
       if (!shape) continue
-      const distance = shapeDistance(shape, x, y)
-      if (distance <= nearestDistance) {
+      const { bounds } = shape
+      const dx = Math.abs(x - (bounds.x + bounds.width / 2))
+      const dy = Math.abs(y - (bounds.y + bounds.height / 2))
+      if (dx > Math.max(bounds.width / 2, reach) || dy > Math.max(bounds.height / 2, reach)) continue
+      const distance = Math.hypot(dx, dy)
+      if (distance < nearestDistance) {
         nearest = { sourceId: ids[i], shape }
         nearestDistance = distance
       }
