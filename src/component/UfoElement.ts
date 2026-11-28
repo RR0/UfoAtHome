@@ -2229,19 +2229,33 @@ export class UfoElement extends HTMLElement {
   }
 
   /** Whichever shape a pointer at (x, y) is aimed at in the picture now on screen — the object at
-   * any instant of the pose, not only at the playhead. See exposureTimes. */
+   * any instant of the pose, not only at the playhead. See exposureTimes. A shape drawn too small
+   * to stand on (a point of light) is aimed at from within SHAPE_REACH_CSS_PX of it, whatever the
+   * size the picture is shown at: a phenomenon can always be found by its name (see Timeline.hitNear). */
   shapeAt(
     x: number,
     y: number,
     excludeSourceIds?: ReadonlySet<string>
   ): { sourceId: string; shape: Shape } | undefined {
     if (this.accountHidden) return undefined
-    for (const instant of this.exposureTimes()) {
-      const hit = this.currentSighting.timeline.hitTest(instant, x, y, excludeSourceIds)
+    const instants = this.exposureTimes()
+    const timeline = this.currentSighting.timeline
+    for (const instant of instants) {
+      const hit = timeline.hitTest(instant, x, y, excludeSourceIds)
+      if (hit) return hit
+    }
+    const shownWidth = this.canvas.getBoundingClientRect().width
+    if (shownWidth === 0) return undefined
+    const reach = UfoElement.SHAPE_REACH_CSS_PX * this.canvas.width / shownWidth
+    for (const instant of instants) {
+      const hit = timeline.hitNear(instant, x, y, reach, excludeSourceIds)
       if (hit) return hit
     }
     return undefined
   }
+
+  /** How near a shape, in pixels of the screen, a pointer names it: about a fingertip's half-width on a mouse. */
+  private static readonly SHAPE_REACH_CSS_PX = 8
 
   /** Every shape the recording holds at that instant, the way the player resolves them. */
   private shapesAt(t: number): Map<string, Shape> {

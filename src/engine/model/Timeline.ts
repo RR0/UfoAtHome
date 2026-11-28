@@ -1,6 +1,6 @@
 import type { Keyframe, ShapeState } from "./Keyframe.js"
 import type { Shape } from "../shape/Shape.js"
-import { lerpShape, shapeContains } from "../shape/Shape.js"
+import { lerpShape, shapeContains, shapeDistance } from "../shape/Shape.js"
 import { KeyframeCompletion } from "./KeyframeCompletion.js"
 import type { RecordingIssue } from "../persistence/RecordingIssue.js"
 import type { SaidText } from "./SaidText.js"
@@ -184,6 +184,30 @@ export class Timeline {
       }
     }
     return undefined
+  }
+
+  /**
+   * hitTest, or else the shape nearest (x, y) within `reach` of its bounds: a point of light a few hundredths of a degree wide is drawn
+   * smaller than a pixel, and a pointer could never stand on it, so its name could never be asked for (dicté : « il faut toujours que le
+   * phénomène soit repérable par tooltip »).
+   */
+  hitNear(t: number, x: number, y: number, reach: number, excludeSourceIds?: ReadonlySet<string>): ShapeState | undefined {
+    const exact = this.hitTest(t, x, y, excludeSourceIds)
+    if (exact || reach <= 0) return exact
+    let nearest: ShapeState | undefined
+    let nearestDistance = reach
+    const ids = this.sourceIds
+    for (let i = ids.length - 1; i >= 0; i--) {
+      if (excludeSourceIds?.has(ids[i])) continue
+      const shape = this.getInterpolatedShapeAt(t, ids[i])
+      if (!shape) continue
+      const distance = shapeDistance(shape, x, y)
+      if (distance <= nearestDistance) {
+        nearest = { sourceId: ids[i], shape }
+        nearestDistance = distance
+      }
+    }
+    return nearest
   }
 
   /**

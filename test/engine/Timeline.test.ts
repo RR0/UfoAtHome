@@ -121,6 +121,21 @@ describe("Timeline", () => {
     expect(timeline.hitTest(0, 10, 10)?.sourceId).toBe("b")
   })
 
+  it("hitNear finds a point of light too small to stand on, the nearest within reach, and nothing beyond", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [
+      { sourceId: "far", shape: createOval({ x: 100, y: 100, width: 0.3, height: 0.3 }) },
+      { sourceId: "point", shape: createOval({ x: 300, y: 200, width: 0.3, height: 0.3 }) },
+      { sourceId: "big", shape: createOval({ x: 0, y: 0, width: 20, height: 20 }) }
+    ])
+    expect(timeline.hitTest(0, 303, 202)).toBeUndefined()
+    expect(timeline.hitNear(0, 303, 202, 8)?.sourceId).toBe("point")
+    expect(timeline.hitNear(0, 320, 220, 8)).toBeUndefined()
+    // Inside a shape, that shape, however near another is.
+    expect(timeline.hitNear(0, 10, 10, 8)?.sourceId).toBe("big")
+    expect(timeline.hitNear(0, 303, 202, 8, new Set(["point"]))).toBeUndefined()
+  })
+
   it("reports duration and sourceIds", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "a", shape: shapeAt(0) }])
