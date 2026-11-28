@@ -110,11 +110,65 @@ export class SightingHypotheses {
     return this.labels.hypotheses.hvsDetail.replace("{hvs}", format(found.hvs)).replace("{cs}", format(cs)).replace("{ps}", format(found.ps))
   }
 
-  /** With `full`, the chip says there is more ("…") and opens it, as the description's does (see SummaryDescription). */
+  /** With `full`, the chip says there is more ("…") and unfolds to it in place (see fold). */
   private entry(section: string, label: string, value: string, detail: string | undefined, full: string | undefined): SummaryEntry {
     return {
       group: "hypothesis", field: section, label, value: full ? `${value}…` : value, unit: "", fromSource: false, about: "observation",
-      ...(detail ? { detail } : {}), ...(full ? { full } : {})
+      ...(detail ? { detail } : {}), ...(full ? { expandable: full } : {})
     }
   }
+
+  /**
+   * Makes the chip `item` of `entry` unfold to the whole of what it heads, in place, and fold back, on a click: the chip grows to hold the
+   * list, the rest of the strip staying as it is. Whether it is unfolded is kept by its field in `unfolded`, which the host keeps between
+   * redraws of its strip. Does nothing to a chip that heads nothing more.
+   */
+  static fold(item: HTMLElement, value: HTMLElement, entry: SummaryEntry, unfolded: Set<string>): void {
+    const whole = entry.expandable
+    if (whole === undefined) return
+    const draw = () => {
+      const open = unfolded.has(entry.field)
+      item.toggleAttribute("data-expanded", open)
+      item.setAttribute("aria-expanded", String(open))
+      value.textContent = open ? whole : entry.value
+    }
+    const toggle = (event: Event) => {
+      // Its own: not the strip's, which would lead the click to a field.
+      event.stopPropagation()
+      if (!unfolded.delete(entry.field)) unfolded.add(entry.field)
+      draw()
+    }
+    item.classList.add("expandable")
+    if (item.tagName !== "BUTTON") {
+      item.tabIndex = 0
+      item.setAttribute("role", "button")
+      item.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          toggle(event)
+        }
+      })
+    }
+    item.addEventListener("click", toggle)
+    draw()
+  }
+
+  /** The styles of an unfolded chip, which both templates carry: a box holding its list, a line per item. */
+  static readonly CSS = `
+.param-chip.expandable, .param-label.expandable {
+  cursor: pointer;
+}
+.param-chip.expandable[data-expanded], .param-label.expandable[data-expanded] {
+  white-space: normal;
+  text-align: left;
+  border-radius: 12px;
+  padding: 0.3em 0.7em;
+}
+.param-chip.expandable[data-expanded] .param-chip-value, .param-label.expandable[data-expanded] .param-label-value {
+  display: block;
+  white-space: pre-line;
+  font-weight: normal;
+  margin-top: 0.2em;
+}
+`
 }

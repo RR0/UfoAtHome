@@ -8187,14 +8187,11 @@ export class SightingEditorElement extends HTMLElement {
   /** The whole description on show in place of the chips, while one has been opened from its chip. */
   private openDescription: string | undefined
 
-  /** The name of the chip whose text is open (the description's, a list of hypotheses): what the open text is headed with. */
-  private openDescriptionTitle: string | undefined
-
   private syncDescription(): void {
-    if (this.openDescription !== undefined && ![...this.paramChips, ...this.hypothesisChips].some(chip => chip.full === this.openDescription)) {
+    if (this.openDescription !== undefined && !this.paramChips.some(chip => chip.full === this.openDescription)) {
       this.openDescription = undefined
     }
-    SummaryDescription.sync(this.paramSummary, this.openDescription, this.openDescriptionTitle ?? this.messages.summaryDescription,
+    SummaryDescription.sync(this.paramSummary, this.openDescription, this.messages.summaryDescription,
       this.messages.closeDescription, () => {
         this.openDescription = undefined
         this.syncDescription()
@@ -8281,6 +8278,9 @@ export class SightingEditorElement extends HTMLElement {
     this.openMostLackingGroup()
     this.renderParamSummary()
   }
+
+  /** The chips unfolded to the whole of what they head, by field, kept across redraws of the strip (see SightingHypotheses.fold). */
+  private readonly unfoldedChips = new Set<string>()
 
   /** Chips for what the hypotheses' evaluators make of the observation, kept between renders because they arrive after it (see runHypotheses). */
   private hypothesisChips: (SummaryEntry & { panel: number })[] = []
@@ -8501,6 +8501,7 @@ export class SightingEditorElement extends HTMLElement {
     value.className = "param-chip-value"
     value.textContent = chip.unit === "" ? chip.value : `${chip.value} ${chip.unit}`
     button.append(value)
+    SightingHypotheses.fold(button, value, chip, this.unfoldedChips)
     return button
   }
 
@@ -8515,18 +8516,10 @@ export class SightingEditorElement extends HTMLElement {
     // The description's chip opens the whole text rather than a field.
     if (chip.dataset.field === "description") {
       this.openDescription = this.paramChips.find(candidate => candidate.field === "description")?.full
-      this.openDescriptionTitle = undefined
       this.syncDescription()
       return
     }
-    // A chip of the hypotheses opens the whole list it heads, in the same place (see SightingHypotheses).
-    const listed = this.hypothesisChips.find(candidate => candidate.field === chip.dataset.field && candidate.full !== undefined)
-    if (listed) {
-      this.openDescription = listed.full
-      this.openDescriptionTitle = listed.label
-      this.syncDescription()
-      return
-    }
+
     // An assessment chip names no panel: it is what was made OF the fields, not one of them, so
     // there is nowhere for a click to go. It stays a chip for the look of the strip and does
     // nothing (see the cursor rule its nest carries).

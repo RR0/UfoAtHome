@@ -198,6 +198,8 @@ export class SightingElement extends HTMLElement {
 
   /** What the hypotheses' evaluators make of the observation on show (see runHypotheses), kept between renders as the assessment's are. */
   private hypothesisEntries: SummaryEntry[] = []
+  /** The chips unfolded to the whole of what they head, by field, kept across redraws of the strip (see SightingHypotheses.fold). */
+  private readonly unfoldedChips = new Set<string>()
   private hypothesisToken = 0
   private hvsWeighing?: () => Promise<{ result: HvsResult, title: (id: string) => string } | undefined>
 
@@ -1850,6 +1852,7 @@ export class SightingElement extends HTMLElement {
     value.className = "param-label-value"
     value.textContent = entry.unit === "" ? entry.value : `${entry.value} ${entry.unit}`
     item.append(value)
+    SightingHypotheses.fold(item, value, entry, this.unfoldedChips)
     return item
   }
 

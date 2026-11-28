@@ -54,6 +54,8 @@ export interface SummaryEntry {
    * the observer's own account sits in the Assessment box and leads to the Observer panel. Only a
    * host with somewhere to lead uses it (see Assessor.about). */
   about?: string
+  /** The whole of what `value` heads, which the chip unfolds to in place on a click and folds back from (see SightingHypotheses.fold). */
+  expandable?: string
   /** What the value is made of, as its tooltip: an assessment's factors (Ballester-Guasp's "Q 0.90 × Σ 0.43 × Π 0.68"). */
   detail?: string
 }

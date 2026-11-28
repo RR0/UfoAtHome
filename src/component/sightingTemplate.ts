@@ -1,3 +1,4 @@
+import { SightingHypotheses } from "./SightingHypotheses.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 export const html = `
 <div class="toolbar" id="toolbar" hidden>
@@ -393,6 +394,7 @@ export const css = `
   min-width: 0;
 }
 ${SummaryDescription.CSS}
+${SightingHypotheses.CSS}
 .param-nest-label {
   font-weight: 600;
   color: color-mix(in srgb, currentColor 62%, transparent);

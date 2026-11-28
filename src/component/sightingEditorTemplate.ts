@@ -1,3 +1,4 @@
+import { SightingHypotheses } from "./SightingHypotheses.js"
 import { SummaryDescription } from "./SummaryDescription.js"
 import { InputFont } from "./InputFont.js"
 import { MessageStyle } from "./MessageStyle.js"
@@ -1695,8 +1696,9 @@ select.weather-field:disabled {
   border-color: color-mix(in srgb, currentColor 70%, transparent);
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
-.param-nest:hover ${SummaryDescription.CSS}
-.param-nest-label {
+${SummaryDescription.CSS}
+${SightingHypotheses.CSS}
+.param-nest:hover .param-nest-label {
   color: inherit;
 }
 .param-nest-label {

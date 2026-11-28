@@ -18,21 +18,21 @@ describe("SightingHypotheses", () => {
     expect(chip).toMatchObject({ group: "hypothesis", field: SightingHypotheses.CANDIDATES_SECTION, label: "Matrice de Poher étendue", value: "lanterne céleste (+1 à égalité)…" })
     expect(chip?.detail).toContain("3 phénomènes non exclus sur 4")
     // The whole ranking, opened from the chip.
-    expect(chip?.full?.replace(/\s%/g, " %")).toBe("Possibles (3 sur 4) :\nlanterne céleste 90 %\nVenus 90 %\nBirds 50 %\n\nExclues (1) :\nMeteor")
+    expect(chip?.expandable?.replace(/\s%/g, " %")).toBe("Possibles (3 sur 4) :\nlanterne céleste 90 %\nVenus 90 %\nBirds 50 %\n\nExclues (1) :\nMeteor")
   })
 
   it("says nothing of a testimony that answers none of the matrix's questions, and says when it rules everything out", () => {
     expect(hypotheses.poher([row("SkyLantern", 0)], 0, {}, "rr0-2026")).toBeUndefined()
     expect(hypotheses.poher([row("SkyLantern", 0, ["Hour.Day"])], 1, {}, "poher-1977")?.value).toBe("toutes exclues")
     // Alone, nothing more to open.
-    expect(hypotheses.poher([row("SkyLantern", 0.5)], 1, {}, "rr0-2026")).not.toHaveProperty("full")
+    expect(hypotheses.poher([row("SkyLantern", 0.5)], 1, {}, "rr0-2026")).not.toHaveProperty("expandable")
   })
 
   it("states the dominant hypothesis and its score, or that none dominates", () => {
     const result = (hypotheses: HvsHypothesisResult[]): HvsResult => ({ account: "temoin", counted: [], discriminating: [], hypotheses })
     const chip = hypotheses.hvs(result([found("lantern", true), found("plane", false)]), id => (id === "lantern" ? "ballon / lanterne" : id))
     expect(chip).toMatchObject({ label: "HVS", value: "ballon / lanterne 0,70…", field: SightingHypotheses.HVS_SECTION, detail: "HVS 0,70 = CS 1,00 × PS 0,70" })
-    expect(chip?.full).toBe("ballon / lanterne — HVS 0,70 = CS 1,00 × PS 0,70 (recevable, dominante)\nplane — HVS 0,70 = CS 1,00 × PS 0,70 (recevable)")
+    expect(chip?.expandable).toBe("ballon / lanterne — HVS 0,70 = CS 1,00 × PS 0,70 (recevable, dominante)\nplane — HVS 0,70 = CS 1,00 × PS 0,70 (recevable)")
     expect(hypotheses.hvs(result([found("plane", false)]), id => id)?.value).toBe("aucune dominante")
     expect(hypotheses.hvs(result([]), id => id)).toBeUndefined()
   })
