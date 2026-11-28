@@ -85,6 +85,7 @@ export const sightingLabels_fr: SightingLabels = {
     excluded: "Exclues ({n}) :",
     hvsLine: "HVS {hvs} = CS {cs} × PS {ps}",
     hvsLineNoPs: "CS {cs}, plausibilité non cotée",
+    detail: "Détail élément par élément",
     admissible: "recevable",
     notAdmissible: "non recevable",
     dominant: "dominante"

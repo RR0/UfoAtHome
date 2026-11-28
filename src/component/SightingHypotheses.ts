@@ -122,15 +122,32 @@ export class SightingHypotheses {
    * Makes the chip `item` of `entry` unfold to the whole of what it heads, in place, and fold back, on a click: the chip grows to hold the
    * list, the rest of the strip staying as it is. Whether it is unfolded is kept by its field in `unfolded`, which the host keeps between
    * redraws of its strip. Does nothing to a chip that heads nothing more.
+   * @param more Where the unfolded chip leads, at its end: the detail of what it states (the HVS table, element by element).
    */
-  static fold(item: HTMLElement, value: HTMLElement, entry: SummaryEntry, unfolded: Set<string>): void {
+  static fold(item: HTMLElement, value: HTMLElement, entry: SummaryEntry, unfolded: Set<string>, more?: { label: string, open: () => void }): void {
     const whole = entry.expandable
     if (whole === undefined) return
+    const link = more ? document.createElement("button") : undefined
+    if (link && more) {
+      link.type = "button"
+      link.className = "chip-more"
+      link.textContent = more.label
+      link.addEventListener("click", event => {
+        // Its own: the chip stays unfolded.
+        event.stopPropagation()
+        more.open()
+      })
+      link.addEventListener("keydown", event => event.stopPropagation())
+    }
     const draw = () => {
       const open = unfolded.has(entry.field)
       item.toggleAttribute("data-expanded", open)
       item.setAttribute("aria-expanded", String(open))
       value.textContent = open ? whole : entry.value
+      if (link) {
+        if (open) item.append(link)
+        else link.remove()
+      }
     }
     const toggle = (event: Event) => {
       // Its own: not the strip's, which would lead the click to a field.
@@ -169,6 +186,10 @@ export class SightingHypotheses {
   white-space: pre-line;
   font-weight: normal;
   margin-top: 0.2em;
+}
+.param-chip .chip-more, .param-label .chip-more {
+  display: block; margin-top: 0.35em; padding: 0; border: 0; background: none; color: inherit; font: inherit;
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
 }
 `
 }

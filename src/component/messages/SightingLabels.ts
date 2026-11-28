@@ -38,6 +38,8 @@ export interface SightingLabels {
     excluded: string
     hvsLine: string
     hvsLineNoPs: string
+    /** The way from the unfolded HVS chip to the table it heads, element by element. */
+    detail: string
     admissible: string
     notAdmissible: string
     dominant: string

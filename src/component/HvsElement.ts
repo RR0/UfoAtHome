@@ -118,6 +118,21 @@ ${HintElement.CSS}
   private said = new SaidTexts(["en"])
   private input?: HvsInput
   private opened = false
+  /**
+   * Shown only when asked for (see unfold), in the player: the chip of the observation states the weighing, and the table is its detail,
+   * opened from the chip rather than standing under every observation beside it (dicté : « Ouverte par le chip »).
+   */
+  onDemand = false
+  private asked = false
+
+  /** Shows the table unfolded, where it is shown on demand, and brings it into view. */
+  unfold(): void {
+    this.asked = true
+    this.opened = true
+    this.draw()
+    void this.loadRecordings()
+    this.scrollIntoView({ block: "nearest", behavior: "smooth" })
+  }
   /** The observation's account and readings, once loaded, by the account's event id. */
   private loaded = new Map<string, { account?: SightingRecordingJson, readings: LoadedReading[] }>()
 
@@ -233,7 +248,7 @@ ${HintElement.CSS}
     const json = this.input?.caseJson()
     const elements = json?.elements ?? []
     const hypotheses = json?.hvs?.hypotheses ?? []
-    this.hidden = !json || (elements.length === 0 && hypotheses.length === 0)
+    this.hidden = !json || (elements.length === 0 && hypotheses.length === 0) || (this.onDemand && !this.asked)
     if (this.frame) this.frame.section.hidden = this.hidden
     if (!m || !json || this.hidden) {
       this.shadowRoot!.replaceChildren()
@@ -257,6 +272,8 @@ ${HintElement.CSS}
     details.addEventListener("toggle", () => {
       if (this.opened === details.open) return
       this.opened = details.open
+      // Folded, a table shown on demand goes back to its chip.
+      if (!details.open && this.onDemand) this.asked = false
       // Drawn at once from what is loaded: the chips of the observation may have loaded it all already (see weigh), and then the loading
       // asked for below has nothing to draw again; an open table stayed empty under its title.
       this.draw()

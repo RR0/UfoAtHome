@@ -202,6 +202,8 @@ export class SightingElement extends HTMLElement {
   private readonly unfoldedChips = new Set<string>()
   private hypothesisToken = 0
   private hvsWeighing?: () => Promise<{ result: HvsResult, title: (id: string) => string } | undefined>
+  /** Opens the HVS table of the observation, element by element, from its unfolded chip: given by the case reader with `hvs`. */
+  hvsDetail?: () => void
 
   /**
    * How the case this player shows an observation of weighs its hypotheses by the HVS protocol, for that observation (see HvsElement.weigh):
@@ -1852,7 +1854,9 @@ export class SightingElement extends HTMLElement {
     value.className = "param-label-value"
     value.textContent = entry.unit === "" ? entry.value : `${entry.value} ${entry.unit}`
     item.append(value)
-    SightingHypotheses.fold(item, value, entry, this.unfoldedChips)
+    const detail = this.hvsDetail
+    SightingHypotheses.fold(item, value, entry, this.unfoldedChips,
+      entry.field === SightingHypotheses.HVS_SECTION && detail && this.messages ? { label: this.messages.hypotheses.detail, open: detail } : undefined)
     return item
   }
 

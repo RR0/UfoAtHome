@@ -528,8 +528,11 @@ export class CaseElement extends HTMLElement {
       if (entry.kind === "observation" && entry.event.id !== undefined && json && ((json.elements?.length ?? 0) > 0 || (json.hvs?.hypotheses?.length ?? 0) > 0)) {
         const weighing = document.createElement(HvsElement.TAG) as HvsElement
         weighing.className = "open-hvs"
+        weighing.onDemand = true
         block.append(weighing)
         weighing.show({ caseJson: () => json, recording: id => this.recordingOfEvent(id), account: entry.event.id })
+        // Its detail, element by element, opened from its chip (given first: giving `hvs` draws the chips).
+        player.hvsDetail = () => weighing.unfold()
         // Its headline on the player's strip, beside the matrix's (see SightingHypotheses), from the same loading as the table.
         player.hvs = () => weighing.weigh()
       }
