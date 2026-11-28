@@ -139,6 +139,8 @@ export const sightingLabels_fr: SightingLabels = {
   soundPitch: "Hauteur",
   soundSrc: "Enregistrement",
   instrument: "Observé avec",
+  poseInstrument: "À cet instant, à travers",
+  poseInstrumentOwn: "Celui de l'observation",
   filter: "Devant lui",
   filterNone: "rien",
   filterSolarVisual: "un filtre solaire pour l'œil (lunettes d'éclipse, densité 5)",

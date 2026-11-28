@@ -213,6 +213,10 @@ export interface SightingLabels {
   /** What the observation was made THROUGH — see Instrument.ts. Sighting data, unlike the view
    * above: it changes the geometry of every shape, so it belongs in the file. */
   instrument: string
+  /** What was looked through at the playhead, when not the recording's own instrument (see ObserverPose.instrument), and the choice
+   * that says it is. */
+  poseInstrument: string
+  poseInstrumentOwn: string
   /** What stood in front of the instrument — see Filter.ts — and the names of the choices, by Filters id. */
   filter: string
   filterNone: string

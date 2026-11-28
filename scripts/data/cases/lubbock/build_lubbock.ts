@@ -400,6 +400,179 @@ function interpretation(p: Professor, reading: Reading) {
   }
 }
 
+// ---- Carl Hart Jr., six nights later ----
+
+/**
+ * What Hart told Ruppelt and the intelligence officer the day after they met the professors (Ruppelt, ch. 8): on the night of 31 August,
+ * lying in bed by the open window of an upstairs room, he saw a formation of the lights appear in the north, cross an open patch of sky and
+ * disappear over the house; he took his loaded Kodak 35, set at f/3.5 and a tenth of a second, went out to the middle of the back yard,
+ * got two pictures of a second pass and, a few minutes later, three of a third. Re-enacted in the yard with them: the lights came up over
+ * trees in the north and went over the house, about 120° of sky in four seconds; "the same dull, glowing bluish green color" as the
+ * professors', "always flying in a perfect V", so dim that he thought he had nothing on the film. The rr0.org dossier dates it the night of
+ * the 30th. One recording through two instruments: his eyes for the first pass and between the others, the camera for those two.
+ */
+const HART_SOURCE = RUPPELT
+const HART_YARD = { lat: 33.5689, lng: -101.8706 }
+/** Ms of the recording at which each pass comes into sight, 30° up in the north, ASSUMED: "before long" for the second, "a few minutes later" for the third. */
+const HART_PASSES = [4000, 95000, 275000]
+const HART_CROSSING_MS = 4000
+const HART_DURATION_MS = HART_PASSES[2] + HART_CROSSING_MS + 6000
+const HART_LIGHTS = 19
+/** Half the V's width, degrees, ASSUMED: about fifteen degrees across on his prints, taken as uncropped through the 50 mm lens's forty. */
+const HART_HALF_WIDTH_DEG = 7.5
+/** The angle at the V's apex, degrees, as his prints show it: two straight arms some 27° off the line across. */
+const HART_APEX_DEG = 125
+/** The window he lay by, on the north wall of the house, 9 m south of the middle of the yard; his eye 3.6 m up, lying in an upstairs bed. */
+const WINDOW = { northM: -9, elevationM: 2 }
+const KODAK = "kodak-35"
+/** Ms the camera is at his eye in each pass he photographed, and the instants of his pictures, ASSUMED: a Kodak 35 wound by hand, a second
+ * and a half a frame, raised half a second after the lights came in for the second pass, ready for the third. */
+const HART_CAMERA = [
+  { from: HART_PASSES[1] + 500, to: HART_PASSES[1] + HART_CROSSING_MS, shots: [HART_PASSES[1] + 1100, HART_PASSES[1] + 2700] },
+  { from: HART_PASSES[2] - 1500, to: HART_PASSES[2] + HART_CROSSING_MS, shots: [HART_PASSES[2] + 500, HART_PASSES[2] + 1900, HART_PASSES[2] + 3300] }
+]
+
+/** Degrees along the meridian from the northern horizon of the middle of the V, `ms` into a pass: 30 in, 150 out (120° in four seconds). */
+const hartAlong = (ms: number) => 30 + 120 * ms / HART_CROSSING_MS
+
+/** Each light of the V `ms` into a pass: the apex ahead (the Air Force's lab found "an inverted V" on his negatives, the camera pointed up at them coming), both arms straight. */
+function hartLightsAt(ms: number) {
+  const phi = hartAlong(ms) * DEG
+  // Ahead is the way it goes: south over the top of the sky, the derivative of `at` along the meridian.
+  const at: Vec = [0, Math.cos(phi), Math.sin(phi)], ahead: Vec = [0, -Math.sin(phi), Math.cos(phi)]
+  const side = cross(at, ahead)
+  const depth = HART_HALF_WIDTH_DEG / Math.tan(HART_APEX_DEG / 2 * DEG)
+  return Array.from({ length: HART_LIGHTS }, (_, k) => {
+    const u = -1 + 2 * k / (HART_LIGHTS - 1)
+    return aimOf(add(add(at, ahead, Math.tan(depth * (0.5 - Math.abs(u)) * DEG)), side, Math.tan(HART_HALF_WIDTH_DEG * u * DEG)))
+  })
+}
+
+const HART_IDS = Array.from({ length: HART_LIGHTS }, (_, k) => `light-${k + 1}`)
+
+function hartTimeline() {
+  const keyframes: { t: number, shapes: unknown[] }[] = []
+  const shown = (aims: { azimuthDeg: number, altitudeDeg: number }[], transparency: number) => HART_IDS.map((sourceId, k) => ({ sourceId, shape: { aim: aims[k], transparency } }))
+  HART_PASSES.forEach((start, pass) => {
+    const first = hartLightsAt(0)
+    keyframes.push({
+      t: start - 40,
+      shapes: pass > 0 ? shown(first, 1) : HART_IDS.map((sourceId, k) => ({
+        sourceId,
+        shape: {
+          kind: "oval", bounds: { x: 0, y: 0, width: 2, height: 2 }, angle: 0, transparency: 1, haloScale: 0.9, brightness: 0.25, selected: false,
+          color: k === 0 ? said(BLUISH_GREEN, "stated", "\"the same dull, glowing bluish green color as those seen by the professors\" (Ruppelt, ch. 8)", "« la même couleur bleu-vert terne et luisante que celles vues par les professeurs » (Ruppelt, chap. 8)", HART_SOURCE) : BLUISH_GREEN,
+          title: { en: `Bluish green light ${k + 1}`, fr: `Lumière bleu-vert ${k + 1}`, es: `Luz verdiazul ${k + 1}`, it: `Luce verde-azzurra ${k + 1}` },
+          aim: k === 0 ? said(first[k], "assumed",
+            "where they came in: \"over some trees in the north\", 30° up so that 120° of sky crossed ends as far down in the south, over the house (Ruppelt, ch. 8)",
+            "où elles sont apparues : « au-dessus d'arbres au nord », à 30° de hauteur pour que les 120° de ciel traversés finissent aussi bas au sud, au-dessus de la maison (Ruppelt, chap. 8)", HART_SOURCE) : first[k],
+          angular: k === 0 ? said({ widthDeg: 0.2, heightDeg: 0.2 }, "derived", "\"circular, near pinpoint sources of light\", as the Air Force's lab read his negatives", "des « sources de lumière circulaires, presque ponctuelles », comme le laboratoire de l'Air Force lut ses négatifs", HART_SOURCE) : { widthDeg: 0.2, heightDeg: 0.2 }
+        }
+      }))
+    })
+    for (let ms = 0; ms <= HART_CROSSING_MS; ms += 250) keyframes.push({ t: start + ms, shapes: shown(hartLightsAt(ms), 0) })
+    keyframes.push({ t: start + HART_CROSSING_MS + 40, shapes: shown(hartLightsAt(HART_CROSSING_MS), 1) })
+  })
+  return { keyframes, order: HART_IDS, groups: [{ id: "formation", members: HART_IDS }] }
+}
+
+/** Metres north of the yard's middle to latitude and longitude. */
+const hartPlace = (northM: number, eastM = 0) => ({ lat: HART_YARD.lat + northM / 111320, lng: HART_YARD.lng + eastM / (111320 * Math.cos(HART_YARD.lat * DEG)) })
+
+/** Where he is, where he looks and through what, from his bed to the yard and through the three passes. */
+function hartTrack() {
+  const keys: { t: number, pose: Record<string, unknown> }[] = []
+  const eyeFov = FOV, cameraFov = 27
+  const atWindow = (headingDeg: number, pitchDeg: number) => ({ ...hartPlace(WINDOW.northM), elevationM: WINDOW.elevationM, headingDeg, pitchDeg, fovDeg: eyeFov, instrument: "eye" })
+  const inYard = (headingDeg: number, pitchDeg: number, camera = false) => ({ ...hartPlace(0), elevationM: 0, headingDeg, pitchDeg,
+    ...(camera ? { fovDeg: cameraFov, fNumber: 3.5 } : { fovDeg: eyeFov, instrument: "eye" }) })
+  // Following the middle of the V a tenth of a second behind, as eyes and a hand that pursue do; over the top, round to the south.
+  const follow = (start: number, ms: number) => {
+    const along = hartAlong(Math.max(0, ms - 100))
+    return along <= 84 ? { headingDeg: 0, pitchDeg: r1(along) } : along >= 96 ? { headingDeg: 180, pitchDeg: r1(180 - along) } : { headingDeg: 90, pitchDeg: 86 }
+  }
+  keys.push({ t: 0, pose: atWindow(
+    said(0, "assumed", "lying in bed \"looking out at the clear night sky\" through the open window by his bed, which faced the back yard to the north (Ruppelt, ch. 8)", "couché, « regardant le ciel nocturne clair » par la fenêtre ouverte près de son lit, qui donnait au nord sur le jardin (Ruppelt, chap. 8)", HART_SOURCE) as unknown as number,
+    said(20, "assumed", "the sky above the trees, from a bed under the window", "le ciel au-dessus des arbres, depuis un lit sous la fenêtre", HART_SOURCE) as unknown as number) })
+  // The first pass, seen from his bed: lost to the window's top past 60°, "over his house".
+  const p0 = HART_PASSES[0]
+  keys.push({ t: p0 + 300, pose: atWindow(0, 28) })
+  for (let ms = 600; ms <= 1600; ms += 500) keys.push({ t: p0 + ms, pose: atWindow(0, Math.min(60, follow(p0, ms).pitchDeg)) })
+  keys.push({ t: p0 + 2600, pose: atWindow(0, 60) })
+  keys.push({ t: p0 + 4500, pose: atWindow(0, 40) })
+  // Up, the camera, down the stairs, and out to the middle of the yard.
+  keys.push({ t: p0 + 9000, pose: atWindow(180, 0) })
+  keys.push({ t: 45000, pose: inYard(0, 5) })
+  keys.push({ t: 60000, pose: inYard(0, 25) })
+  // The second pass: he sees them come, raises the camera, and follows them through it.
+  const [second, third] = HART_CAMERA
+  const p1 = HART_PASSES[1]
+  keys.push({ t: p1 - 2000, pose: inYard(0, 28) })
+  keys.push({ t: p1 + 200, pose: inYard(0, 30) })
+  for (let t = second.from; t <= second.to; t += 250) keys.push({ t, pose: inYard(follow(p1, t - p1).headingDeg, follow(p1, t - p1).pitchDeg, true) })
+  keys.push({ t: second.to + 500, pose: inYard(180, 30) })
+  keys.push({ t: second.to + 4000, pose: inYard(0, 20) })
+  // The third: ready, the camera already up, pointed north.
+  const p2 = HART_PASSES[2]
+  keys.push({ t: third.from - 1500, pose: inYard(0, 28) })
+  keys.push({ t: third.from, pose: inYard(0, 30, true) })
+  for (let t = p2; t <= third.to; t += 250) keys.push({ t, pose: inYard(follow(p2, t - p2).headingDeg, follow(p2, t - p2).pitchDeg, true) })
+  keys.push({ t: third.to + 600, pose: inYard(180, 28) })
+  keys.push({ t: HART_DURATION_MS, pose: inYard(180, 15) })
+  return { keyframes: keys.sort((a, b) => a.t - b.t) }
+}
+
+const hartMilestones = [
+  { t: HART_PASSES[0], label: "A", note: { en: "From his bed, by the open window: a formation of lights comes up in the north and goes over the house.", fr: "De son lit, par la fenêtre ouverte : une formation de lumières monte au nord et passe au-dessus de la maison.", es: "Desde su cama, por la ventana abierta: una formación de luces sube por el norte y pasa sobre la casa.", it: "Dal letto, dalla finestra aperta: una formazione di luci sale a nord e passa sopra la casa." } },
+  { t: 45000, label: "B", note: { en: "He has taken his Kodak 35, set at f/3.5 and a tenth of a second, and waits in the middle of the back yard.", fr: "Il a pris son Kodak 35, réglé à f/3,5 et un dixième de seconde, et attend au milieu du jardin.", es: "Ha cogido su Kodak 35, a f/3,5 y una décima de segundo, y espera en medio del jardín.", it: "Ha preso la sua Kodak 35, a f/3,5 e un decimo di secondo, e aspetta in mezzo al giardino." } },
+  ...HART_CAMERA.flatMap(pass => pass.shots).map((t, k) => ({ t, label: `${k + 1}`, note: { en: `Picture ${k + 1} of 5.`, fr: `Photo ${k + 1} sur 5.`, es: `Foto ${k + 1} de 5.`, it: `Foto ${k + 1} di 5.` } })),
+  { t: HART_PASSES[1], label: "C", note: { en: "The second pass: two pictures.", fr: "Deuxième passage : deux photos.", es: "Segundo paso: dos fotos.", it: "Secondo passaggio: due foto." } },
+  { t: HART_PASSES[2], label: "D", note: { en: "A few minutes later, the third: three pictures.", fr: "Quelques minutes plus tard, le troisième : trois photos.", es: "Unos minutos después, el tercero: tres fotos.", it: "Qualche minuto dopo, il terzo: tre foto." } }
+].sort((a, b) => a.t - b.t)
+
+/** His house south of the yard, the window he lay by in its north wall, and the trees the lights came up over in the north: what he described, where it stood ASSUMED. */
+function hartDecor() {
+  return [
+    { id: "hart-house", kind: "building", eastM: 0, northM: WINDOW.northM - 5.5, headingDeg: 0, lit: true, sizeM: { widthM: 11, lengthM: 11, heightM: 6 }, floors: 2,
+      roof: { shape: "hip", riseM: 1.8, color: "#5d5650" }, facade: { color: "#cdc4b3" },
+      title: { en: "The Hart house: \"an upstairs room\", the lights \"disappear over his house\"", fr: "La maison des Hart : « une chambre à l'étage », les lumières « disparaissent au-dessus de sa maison »" } },
+    ...[-9, -2, 6].map((eastM, k) => ({ id: `tree-north-${k + 1}`, kind: "tree", eastM, northM: 26 + k * 2, sizeM: { widthM: 7, lengthM: 7, heightM: 11 }, model: { id: "jagobo-tree-maple-a" },
+      title: { en: `Tree in the north ${k + 1}: the lights came \"over some trees in the north\"`, fr: `Arbre au nord ${k + 1} : les lumières vinrent « au-dessus d'arbres au nord »` } }))
+  ]
+}
+
+function hart() {
+  return {
+    version: 4,
+    id: "1951-08-31-Lubbock-HartCarlJr",
+    time: said("1951-08-31T22:30:00", "assumed", "\"on the night of August 31\" (Ruppelt, ch. 8; the rr0.org dossier says the night of the 30th), after \"about a half hour\" in bed: the hour is not given", "« la nuit du 31 août » (Ruppelt, chap. 8 ; le dossier de rr0.org dit la nuit du 30), après « environ une demi-heure » au lit : l'heure n'est pas donnée", HART_SOURCE),
+    utcOffsetHours: said(-6, "derived", "Central Standard Time: Texas kept no summer time in 1951", "heure normale du Centre : le Texas n'avait pas d'heure d'été en 1951"),
+    timeZone: "America/Chicago",
+    durationSeconds: said(HART_DURATION_MS / 1000, "assumed", "three passes of four seconds each; \"before long\" between the first two and \"a few minutes\" before the third", "trois passages de quatre secondes ; « peu après » entre les deux premiers et « quelques minutes » avant le troisième", HART_SOURCE),
+    place: said({ name: "The Hart home, Lubbock, Texas", locations: [hartPlace(0)] }, "assumed", "the back yard of the Hart home, whose address Ruppelt does not give: placed in a residential street of Lubbock", "le jardin de la maison des Hart, dont Ruppelt ne donne pas l'adresse : placé dans une rue résidentielle de Lubbock", HART_SOURCE),
+    lightPollution: said(20, "assumed", "a town of 70,000 in 1951, from a back yard", "une ville de 70 000 habitants en 1951, depuis un jardin"),
+    instrument: said(KODAK, "stated", "\"he grabbed his loaded Kodak 35\" (Ruppelt, ch. 8); his eyes for the first pass and between the others (see each pose)", "« il attrapa son Kodak 35 chargé » (Ruppelt, chap. 8) ; ses yeux pour le premier passage et entre les autres (voir chaque pose)", HART_SOURCE),
+    exposureSeconds: said(0.1, "stated", "\"set the lens and shutter at f 3.5 and one tenth of a second\" (Ruppelt, ch. 8)", "« régla l'objectif et l'obturateur à f 3,5 et un dixième de seconde » (Ruppelt, chap. 8)", HART_SOURCE),
+    observer: { id: "HartCarlJr", title: "Carl Hart Jr." },
+    account: {
+      observerOccupation: { en: "freshman at Texas Technological College, amateur photographer", fr: "étudiant de première année au Texas Technological College, photographe amateur", es: "estudiante de primer año del Texas Technological College, fotógrafo aficionado", it: "matricola del Texas Technological College, fotografo dilettante" },
+      source: said("interview", "stated", "told to Edward J. Ruppelt and the intelligence officer of Reese AFB in Lubbock, in late September 1951, and re-enacted with them in his back yard", "racontée à Edward J. Ruppelt et à l'officier de renseignement de la base de Reese à Lubbock, fin septembre 1951, et rejouée avec eux dans son jardin", HART_SOURCE)
+    },
+    description: {
+      en: "What Carl Hart Jr. told Ruppelt: on the night of 31 August 1951, lying in bed by the open window of an upstairs room, he saw a formation of the lights appear in the north, cross an open patch of sky and disappear over his house. He grabbed his loaded Kodak 35, set it at f/3.5 and a tenth of a second, went out to the middle of the back yard, got two pictures of a second pass and, a few minutes later, three of a third. The lights were the professors' dull, glowing bluish green, \"always flying in a perfect V\", 120° of sky in four seconds, so dim that he thought he had nothing on his film. Where the house stood, the hour, the time between the passes and the instants of his pictures are assumed.",
+      fr: "Ce que Carl Hart Jr. raconta à Ruppelt : la nuit du 31 août 1951, couché près de la fenêtre ouverte d'une chambre à l'étage, il vit une formation de lumières apparaître au nord, traverser un coin de ciel dégagé et disparaître au-dessus de sa maison. Il attrapa son Kodak 35 chargé, le régla à f/3,5 et un dixième de seconde, sortit au milieu du jardin, prit deux photos d'un deuxième passage et, quelques minutes plus tard, trois d'un troisième. Les lumières étaient du bleu-vert terne et luisant des professeurs, « toujours en V parfait », 120° de ciel en quatre secondes, si faibles qu'il crut n'avoir rien sur son film. L'emplacement de la maison, l'heure, le temps entre les passages et les instants de ses photos sont supposés."
+    },
+    tags: ["NL", "formation", "photo", "Blue Book"],
+    sources: SOURCES,
+    observerTrack: hartTrack(),
+    soundTrack,
+    weatherTrack,
+    decor: hartDecor(),
+    timeline: hartTimeline(),
+    milestones: hartMilestones
+  }
+}
+
 function main(): void {
   const { decor, takenOn, attribution } = surroundings()
   writeFileSync(path.join(demoData, "lubbock.decor.json"), JSON.stringify({ version: 4, takenOn, attribution, decor }) + "\n")
@@ -409,6 +582,8 @@ function main(): void {
     write(`observer-lubbock-${p.key}.json`, observer(p))
     events.push({ type: "event", eventType: "sighting", id: p.key, time: "1951-08-25 21:20", title: p.name, url: `observer-lubbock-${p.key}.json` })
   }
+  write("observer-lubbock-hart.json", hart())
+  events.push({ type: "event", eventType: "sighting", id: "hart", time: "1951-08-31", title: "Carl Hart Jr.", url: "observer-lubbock-hart.json" })
   for (const p of PROFESSORS) {
     for (const reading of READINGS) {
       write(`interpretation-lubbock-${p.key}-${reading.key}.json`, interpretation(p, reading))
@@ -419,10 +594,10 @@ function main(): void {
     id: "Lubbock1951",
     title: "Lubbock",
     summary: {
-      en: "25 August 1951, 21:20. Four Texas Tech professors drinking tea in a back yard see a semicircle of bluish green lights cross the sky over their heads from north to south in a few seconds, without a sound. Replayed for each of them, with the two bird readings: the Air Force's ducks and Ruppelt's plovers, lit from below by the mercury-vapour lamps of the boulevard.",
-      fr: "25 août 1951, 21 h 20. Quatre professeurs de Texas Tech prenant le thé dans un jardin voient un demi-cercle de lumières bleu-vert traverser le ciel au-dessus de leurs têtes du nord au sud en quelques secondes, sans un bruit. Rejoué pour chacun d'eux, avec les deux lectures oiseaux : les canards de l'Air Force et les pluviers de Ruppelt, éclairés par en dessous par les lampes à vapeur de mercure du boulevard.",
-      es: "25 de agosto de 1951, 21:20. Cuatro profesores de Texas Tech tomando té en un jardín ven un semicírculo de luces verdiazules cruzar el cielo sobre sus cabezas de norte a sur en pocos segundos, sin un ruido. Reproducido para cada uno, con las dos lecturas de aves: los patos de la Air Force y los chorlitos de Ruppelt, iluminados desde abajo por las lámparas de vapor de mercurio del bulevar.",
-      it: "25 agosto 1951, 21:20. Quattro professori della Texas Tech che prendono il tè in un giardino vedono un semicerchio di luci verde-azzurre attraversare il cielo sopra le loro teste da nord a sud in pochi secondi, senza un rumore. Riprodotto per ciascuno di loro, con le due letture degli uccelli: le anatre della Air Force e i pivieri di Ruppelt, illuminati dal basso dalle lampade a vapori di mercurio del viale."
+      en: "25 August 1951, 21:20. Four Texas Tech professors drinking tea in a back yard see a semicircle of bluish green lights cross the sky over their heads from north to south in a few seconds, without a sound. Replayed for each of them, with the two bird readings: the Air Force's ducks and Ruppelt's plovers, lit from below by the mercury-vapour lamps of the boulevard. Six nights later, Carl Hart Jr. saw three passes from his home, the first by eye and the next two through his Kodak 35, and photographed a perfect V.",
+      fr: "25 août 1951, 21 h 20. Quatre professeurs de Texas Tech prenant le thé dans un jardin voient un demi-cercle de lumières bleu-vert traverser le ciel au-dessus de leurs têtes du nord au sud en quelques secondes, sans un bruit. Rejoué pour chacun d'eux, avec les deux lectures oiseaux : les canards de l'Air Force et les pluviers de Ruppelt, éclairés par en dessous par les lampes à vapeur de mercure du boulevard. Six nuits plus tard, Carl Hart Jr. voit trois passages de chez lui, le premier à l'œil et les deux suivants à travers son Kodak 35, et photographie un V parfait.",
+      es: "25 de agosto de 1951, 21:20. Cuatro profesores de Texas Tech tomando té en un jardín ven un semicírculo de luces verdiazules cruzar el cielo sobre sus cabezas de norte a sur en pocos segundos, sin un ruido. Reproducido para cada uno, con las dos lecturas de aves: los patos de la Air Force y los chorlitos de Ruppelt, iluminados desde abajo por las lámparas de vapor de mercurio del bulevar. Seis noches después, Carl Hart Jr. ve tres pasos desde su casa, el primero a simple vista y los dos siguientes a través de su Kodak 35, y fotografía una V perfecta.",
+      it: "25 agosto 1951, 21:20. Quattro professori della Texas Tech che prendono il tè in un giardino vedono un semicerchio di luci verde-azzurre attraversare il cielo sopra le loro teste da nord a sud in pochi secondi, senza un rumore. Riprodotto per ciascuno di loro, con le due letture degli uccelli: le anatre della Air Force e i pivieri di Ruppelt, illuminati dal basso dalle lampade a vapori di mercurio del viale. Sei notti dopo, Carl Hart Jr. vede tre passaggi da casa sua, il primo a occhio nudo e i due seguenti attraverso la sua Kodak 35, e fotografa una V perfetta."
     },
     time: "1951-08-25 21:20",
     events

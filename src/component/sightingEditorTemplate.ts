@@ -198,6 +198,8 @@ export const html = `
     <div id="instrument-group" class="instrument-group form-section" role="group" aria-labelledby="label-section-vision">
       <h3 class="section-title"><span id="label-section-vision"></span></h3>
       <div class="field"><span id="label-instrument"></span> <rr0-popover-picker id="instrument" aria-labelledby="label-instrument"></rr0-popover-picker></div>
+      <!-- The one looked through at the playhead when it is another (see ObserverPose.instrument): an eye, then a camera run for. -->
+      <label><span id="label-pose-instrument"></span> <select id="poseInstrument"></select></label>
       <!-- Beside the device, and the device's own: a solar filter is for an eye or a telescope, a solar film for a
            camera, so which ones are offered follows the device (see Filter.usableWith). -->
       <label><span id="label-filter"></span> <select id="filter"></select></label>

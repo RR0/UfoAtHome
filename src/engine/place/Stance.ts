@@ -54,13 +54,15 @@ export class Stance {
 
   /** Undefined for an observer who does not move: a sway of 0, or a paralysed observer who states
    * none. */
-  static of(sighting: Sighting): Stance | undefined {
+  static of(sighting: Sighting, tMs = 0): Stance | undefined {
+    // Through the instrument held at `tMs` (see Sighting.instrumentAt): an eye that looked, then a camera in the hand.
+    const instrument = sighting.instrumentAt(tMs)
     // A camera fixed to a windscreen or a wall is held by nobody.
-    if (sighting.instrument.mounted) return undefined
-    const still = sighting.event.tags?.includes("paralysis") || (sighting.exposure ?? 0) > Stance.HAND_HELD_S
+    if (instrument.mounted) return undefined
+    const still = sighting.event.tags?.includes("paralysis") || (sighting.exposureAt(tMs) ?? 0) > Stance.HAND_HELD_S
     const scale = sighting.sway ?? (still ? 0 : 1)
     if (!(scale > 0)) return undefined
-    return new Stance(Math.max(1 - (sighting.instrument.stabilization ?? 0), Stance.GAZE_DRIFT_SHARE), scale)
+    return new Stance(Math.max(1 - (instrument.stabilization ?? 0), Stance.GAZE_DRIFT_SHARE), scale)
   }
 
   offsetAt(tMs: number): GaitOffset {

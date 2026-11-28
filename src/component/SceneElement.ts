@@ -806,7 +806,8 @@ export class SceneElement extends HTMLElement {
     if (this.glassWetting?.sighting !== sighting || this.glassWetting.key !== key) {
       // How many drops land each second: from the rain then, and how square it met the glass then, the way the observer looked.
       const wetting = new GlassWetting(s => {
-        if (!LensGhosts.records(sighting.instrument) || !LensGhosts.falling(sighting.lens)) return 0
+        // Only on the glass of the recording's own instrument, while it is the one looked through (see Sighting.lensAt).
+        if (!LensGhosts.records(sighting.instrumentAt(s * 1000)) || !LensGhosts.falling(sighting.lensAt(s * 1000))) return 0
         // The rain as it falls, starting and stopping as rain does: what the scene draws falling is what lands.
         const weather = resolveActualWeatherAt(sighting, s * 1000)
         const pose = resolveObserverPoseAt(sighting, s * 1000)
@@ -2219,8 +2220,12 @@ export class SceneElement extends HTMLElement {
    * SightingEditorElement's instrument picker) and the frame has to follow at that moment; everything
    * else that changes it goes through this element's own load path.
    */
-  applyFrameFormat(): void {
-    const instrument = this.ufoElement.sighting.instrument
+  /** The instrument whose frame the scene was last given (see applyFrameFormat): the frame changes when the one looked through does. */
+  private framedInstrumentId?: string
+
+  applyFrameFormat(t: number = this.ufoElement.currentTime): void {
+    const instrument = this.ufoElement.sighting.instrumentAt(t)
+    this.framedInstrumentId = instrument.id
     const height = ApparentSize.CANVAS_HEIGHT_PX
     const width = Instruments.frameWidthPx(instrument, height)
     // The ResizeObserver on this very element then resizes the 3D canvas and its camera's aspect,
@@ -2301,11 +2306,13 @@ export class SceneElement extends HTMLElement {
    */
   private instrumentReach(): number {
     const sighting = this.ufoElement.sighting
-    const gain = LimitingMagnitude.gainFor(sighting.instrument, {
-      fNumber: resolveObserverPoseAt(sighting, 0)?.fNumber,
-      fieldOfViewDeg: SightingShapes.fovOf(sighting, 0),
-      exposureSeconds: sighting.exposure
-    })
+    // The farthest any of its instruments reaches, for one that looked and then photographed: each keyframe naming another is one more.
+    const instants = [0, ...sighting.observerTrack.allKeyframes.filter(keyframe => keyframe.pose.instrument !== undefined).map(keyframe => keyframe.t)]
+    const gain = Math.max(...instants.map(t => LimitingMagnitude.gainFor(sighting.instrumentAt(t), {
+      fNumber: resolveObserverPoseAt(sighting, t)?.fNumber,
+      fieldOfViewDeg: SightingShapes.fovOf(sighting, t),
+      exposureSeconds: sighting.exposureAt(t)
+    })))
     return visibleMagnitudeLimit(DARKEST_SKY_SUN_ALTITUDE_DEG, gain)
   }
 
@@ -2429,7 +2436,10 @@ export class SceneElement extends HTMLElement {
     // over from the previous one would render the whole scene through the wrong optics (see
     // Instrument.ts). Cheap — SceneRenderer.setInstrument stores two numbers. At the aperture it is set
     // to now, which decides whether its blades put a star on the Sun (see Instruments.bladesShowing).
-    this.sceneRenderer.setInstrument(sighting.instrument, resolveObserverPoseAt(sighting, t)?.fNumber)
+    // The one looked through at `t`: a witness who looked, then photographed, is seen through his eyes and then through the camera.
+    const instrument = sighting.instrumentAt(t)
+    this.sceneRenderer.setInstrument(instrument, resolveObserverPoseAt(sighting, t)?.fNumber)
+    if (sighting.changesInstrument && instrument.id !== this.framedInstrumentId) this.applyFrameFormat(t)
     // The towns' glow at this place, if the recording states one: the sky it brightens is restated
     // by the setAstronomy below, and the stars with it.
     this.sceneRenderer.setLightPollution(sighting.lightPollution)
@@ -2474,22 +2484,22 @@ export class SceneElement extends HTMLElement {
     // observer holding it, and the same tripod at f/2 for twenty seconds reaches three past them.
     // Pushed every tick like the rest, since the aperture is a pose field and a zoom moves under it.
     this.sceneRenderer.setInstrumentGain(
-      LimitingMagnitude.gainFor(sighting.instrument, {
+      LimitingMagnitude.gainFor(instrument, {
         fNumber: pose?.fNumber,
         fieldOfViewDeg: SightingShapes.fovOf(sighting, t),
-        exposureSeconds: sighting.exposure
+        exposureSeconds: sighting.exposureAt(t)
       }),
       // A film or a sensor — anything with a grain — records the sky; an eye sees it (see
       // ScatteredSky.setInstrument).
-      sighting.instrument.detailUm !== undefined,
+      instrument.detailUm !== undefined,
       Filters.byId(pose?.filter).opticalDensity
     )
     // And how the picture answers it: a film's own curve at the exposure it was given, not an
     // eye's adapting response (see RecordingMedium).
-    this.sceneRenderer.setMedium(FilmStocks.mediumOf(sighting.instrument.medium, FilmStocks.byId(sighting.film)), sighting.exposure, pose?.fNumber ?? sighting.instrument.fNumber, sighting.iso, sighting.metering)
+    this.sceneRenderer.setMedium(FilmStocks.mediumOf(instrument.medium, FilmStocks.byId(sighting.filmAt(t))), sighting.exposureAt(t), pose?.fNumber ?? instrument.fNumber, sighting.isoAt(t), sighting.meteringAt(t))
     // And the ghosts its glass lays over every light of the picture, when it records one, at the aperture it is set to, with those of what
     // it was taken through and the halos of what is on that glass — the drops of the rain falling now among them (see LensGhosts.optics).
-    this.sceneRenderer.setLensGhosts(LensGhosts.optics(sighting.instrument, pose?.fNumber ?? sighting.instrument.fNumber, sighting.lens,
+    this.sceneRenderer.setLensGhosts(LensGhosts.optics(instrument, pose?.fNumber ?? instrument.fNumber, sighting.lensAt(t),
       this.glassWettingOf(sighting).stateAt(t / 1000), t))
     // And how the observer's own vision bends what an eye receives of it (see ObserverProvider).
     this.sceneRenderer.setPerception(ObserverProviders.perceptionOf(sighting.account?.observerPerception))
@@ -3751,7 +3761,7 @@ export class SceneElement extends HTMLElement {
       // Painted at the picture's own resolution, so a shape is as sharp in the scene as the overlay
       // drew it — and no sharper, since the picture is what the reader is looking at.
       scale: Math.max(1, this.sceneCanvas.height / Math.max(1, canvas.height)),
-      starPoints: Instruments.starPointsOf(sighting.instrument, pose?.fNumber),
+      starPoints: Instruments.starPointsOf(sighting.instrumentAt(t), pose?.fNumber),
       rollRad: (rollDeg * Math.PI) / 180
     })
   }
@@ -4246,7 +4256,7 @@ export class SceneElement extends HTMLElement {
     | { focalLengthMm: number; fNumber: number; focusDistance: number; frameHeightMm: number }
     | undefined {
     const sighting = this.ufoElement.sighting
-    const instrument = sighting.instrument
+    const instrument = sighting.instrumentAt(t)
     const frame = instrument.frame
     const pose = resolveObserverPoseAt(sighting, t)
     const fNumber = pose?.fNumber ?? instrument.fNumber
@@ -4267,7 +4277,7 @@ export class SceneElement extends HTMLElement {
    * and a stale projection is a silently wrong size. */
   private projectionAt(t: number): ImageProjection {
     const sighting = this.ufoElement.sighting
-    return ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, SightingShapes.fovOf(sighting, t))
+    return ImageProjection.of(sighting.instrumentAt(t), ApparentSize.CANVAS_HEIGHT_PX, SightingShapes.fovOf(sighting, t))
   }
 
   private sizeEstimateOf(sourceId: string): SizeEstimate {

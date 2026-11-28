@@ -722,6 +722,9 @@ export class SightingEditorElement extends HTMLElement {
    * one control here that changes the geometry of every shape (see Instrument.ts). */
   private readonly instrumentSelect: PopoverPickerElement
   private readonly filterSelect: HTMLSelectElement
+  /** The instrument looked through at the playhead, when it is not the recording's own (see ObserverPose.instrument). */
+  private readonly poseInstrumentSelect: HTMLSelectElement
+  private readonly labelPoseInstrument: HTMLElement
   private readonly labelFilter: HTMLElement
   /** What that instrument was SET to. Each writes the pose at the playhead, exactly as the
    * heading and the pitch do, and each is disabled when the device leaves nothing to set — see
@@ -1530,6 +1533,8 @@ export class SightingEditorElement extends HTMLElement {
     this.buildSoundKindOptions()
     this.instrumentSelect = this.shadow.getElementById("instrument") as PopoverPickerElement
     this.filterSelect = this.shadow.getElementById("filter") as HTMLSelectElement
+    this.poseInstrumentSelect = this.shadow.getElementById("poseInstrument") as HTMLSelectElement
+    this.labelPoseInstrument = this.shadow.getElementById("label-pose-instrument")!
     this.labelFilter = this.shadow.getElementById("label-filter")!
     this.focalLengthInput = this.shadow.getElementById("focalLength") as HTMLInputElement
     this.labelFocalLength = this.shadow.getElementById("label-focal-length")!
@@ -2229,6 +2234,14 @@ export class SightingEditorElement extends HTMLElement {
     // A filter is a pose field like the aperture (see ObserverPose.filter): put on or taken off at
     // the playhead, and held until the next keyframe that says otherwise.
     this.filterSelect.addEventListener("change", () => this.updateObserver())
+    // Another instrument from the playhead on, like the filter a pose field (see ObserverPose.instrument): the frame and the optics
+    // shown follow it.
+    this.poseInstrumentSelect.addEventListener("change", () => {
+      this.updateObserver()
+      this.sceneElement.applyFrameFormat()
+      this.refreshFilterOptions()
+      this.syncOpticsFromInstrument()
+    })
     this.instrumentSelect.addEventListener("change", () => {
       const previous = this.ufoElement.sighting.instrument
       this.ufoElement.sighting.instrumentId = this.instrumentSelect.value
@@ -4321,7 +4334,10 @@ export class SightingEditorElement extends HTMLElement {
     const elevationM = statedAltitudeM !== undefined ? flying!.elevationM : Math.max(0, altitudeM - (this.groundElevationM ?? 0))
 
 
-    const instrument = this.ufoElement.sighting.instrument
+    // The instrument looked through at the playhead, as its picker says: absent, or the recording's own, is the recording's.
+    const ownId = this.ufoElement.sighting.instrumentId
+    const poseInstrument = this.poseInstrumentSelect.value === "" || this.poseInstrumentSelect.value === ownId ? undefined : this.poseInstrumentSelect.value
+    const instrument = poseInstrument === undefined ? this.ufoElement.sighting.instrument : Instruments.byId(poseInstrument)
     // A focal length is only ever another way of writing the field, which is what the pose keeps
     // and what every projection here is anchored on (see Instruments.focalLengthMmFor). For an eye
     // the same input states the field in degrees directly, since an eye has no focal length.
@@ -4341,9 +4357,12 @@ export class SightingEditorElement extends HTMLElement {
     // Not a pose field, and deliberately not keyframed: one observation was photographed one way
     // (see Sighting.exposureSeconds). Written straight onto the recording from here, since this is
     // the method every optics input reports to.
-    const exposureSeconds = this.statedExposureSeconds(instrument)
-    this.ufoElement.sighting.exposureSeconds =
-      exposureSeconds === instrument.exposureSeconds ? undefined : exposureSeconds
+    // Only the recording's own instrument's: another one looked through for a while is seen with its own (see Sighting.exposureAt).
+    if (poseInstrument === undefined) {
+      const exposureSeconds = this.statedExposureSeconds(instrument)
+      this.ufoElement.sighting.exposureSeconds =
+        exposureSeconds === instrument.exposureSeconds ? undefined : exposureSeconds
+    }
     // Empty is not missing here, it is INFINITY — where a camera pointed at the sky is focused.
     const focusDistanceM = this.numberOrUndefined(this.focusDistanceInput.value)
     // Same distinction retuneFieldOfView draws, for the same reason: these fields are PREFILLED
@@ -4354,7 +4373,8 @@ export class SightingEditorElement extends HTMLElement {
       Math.abs(fovDeg - Instruments.fieldOfViewDeg(instrument)) > 0.01 ||
       fNumber !== instrument.fNumber ||
       focusDistanceM !== undefined ||
-      filter !== undefined
+      filter !== undefined ||
+      poseInstrument !== undefined
     const nothingSet =
       lat === undefined && lng === undefined && headingDeg === undefined && pitchDeg === 0 && rollDeg === 0 &&
       elevationM === 0 && !opticsStated
@@ -4376,7 +4396,8 @@ export class SightingEditorElement extends HTMLElement {
         fovDeg,
         fNumber,
         focusDistanceM,
-        filter
+        filter,
+        ...(poseInstrument === undefined ? {} : { instrument: poseInstrument })
       })
     }
     // The recording's place is where it sets off from, not where the playhead has the observer: an edit made
@@ -8914,6 +8935,7 @@ export class SightingEditorElement extends HTMLElement {
   }
 
   private refreshInstrumentOptions(): void {
+    this.refreshPoseInstrumentOptions()
     const sighting = this.ufoElement.sighting
     const year = sighting.event.time?.year
     const current = sighting.instrument
@@ -9008,9 +9030,25 @@ export class SightingEditorElement extends HTMLElement {
    * The focal length is shown in millimetres for anything with a frame and in DEGREES for an eye,
    * which has no focal length — one value underneath (ObserverPose.fovDeg), two ways of writing it.
    */
+  /** The choices of the instrument at the playhead: the recording's own first, then every other one the catalogue has. */
+  private refreshPoseInstrumentOptions(): void {
+    const selected = this.poseInstrumentSelect.value
+    const own = document.createElement("option")
+    own.value = ""
+    own.textContent = this.messages.poseInstrumentOwn
+    this.poseInstrumentSelect.replaceChildren(own, ...INSTRUMENTS.map(instrument => {
+      const option = document.createElement("option")
+      option.value = instrument.id
+      option.textContent = this.naming.instrument(instrument)
+      return option
+    }))
+    this.poseInstrumentSelect.value = selected
+  }
+
   private syncOpticsFromInstrument(): void {
     const sighting = this.ufoElement.sighting
-    const instrument = sighting.instrument
+    // The one looked through at the playhead (see Sighting.instrumentAt): its own settings show while another than the recording's is.
+    const instrument = sighting.instrumentAt(this.ufoElement.currentTime)
     const pose = resolveObserverPoseAt(sighting, this.ufoElement.currentTime)
     const frame = instrument.frame
     const fovDeg = pose?.fovDeg ?? Instruments.fieldOfViewDeg(instrument)
@@ -9047,7 +9085,7 @@ export class SightingEditorElement extends HTMLElement {
     this.fNumberInput.min = String(instrument.fNumberRange?.min ?? 0.7)
     this.fNumberInput.max = String(instrument.fNumberRange?.max ?? 64)
 
-    const exposure = sighting.exposure
+    const exposure = sighting.exposureAt(this.ufoElement.currentTime)
     if (this.exposureInput !== this.shadow.activeElement) {
       // What is shown IS what the recording holds — including a pose brought back inside the
       // device's own range (see statedExposureSeconds).
@@ -9058,7 +9096,12 @@ export class SightingEditorElement extends HTMLElement {
     for (const field of [this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
       this.setRowVisible(field, LensGhosts.records(instrument))
     }
-    this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined
+    // The recording's shutter, film, speed, metering and glass are its own instrument's: read-only while another is looked through.
+    const own = sighting.ownInstrumentAt(this.ufoElement.currentTime)
+    this.exposureInput.disabled = instrument.exposureRangeSeconds === undefined || !own
+    for (const field of [this.isoInput, this.lensGlassSelect, this.lensDropsInput, this.lensCondensationInput, this.lensDirtInput, this.lensShelteredInput]) {
+      field.disabled = !own
+    }
     // A speed and a way of metering are a device's that records: a film or a sensor. Metering is only that of one setting its own exposure.
     const medium = instrument.medium
     if (this.isoInput !== this.shadow.activeElement) this.isoInput.value = sighting.iso === undefined ? "" : String(sighting.iso)
@@ -9078,6 +9121,9 @@ export class SightingEditorElement extends HTMLElement {
     }
     this.setRowVisible(this.focusDistanceInput, frame !== undefined && instrument.fNumber !== undefined)
     if (this.filterSelect !== this.shadow.activeElement) this.filterSelect.value = Filters.byId(pose?.filter).id
+    if (this.poseInstrumentSelect !== this.shadow.activeElement) {
+      this.poseInstrumentSelect.value = pose?.instrument === undefined || pose.instrument === sighting.instrumentId ? "" : pose.instrument
+    }
     // The device decides which of its settings show, and so how many a fold holds back: counted once they are shown or hidden above.
     // Not while playing: the playhead moving changes no setting shown, and measuring every section at every frame forced a layout of
     // the whole form each time (a third of a frame on Silly-le-Long).
@@ -12362,6 +12408,7 @@ export class SightingEditorElement extends HTMLElement {
     for (const [kind, option] of this.soundKindOptions) option.textContent = this.soundKindLabel(kind, messages)
     this.labelInstrument.textContent = messages.instrument
     this.labelFilter.textContent = messages.filter
+    this.labelPoseInstrument.textContent = messages.poseInstrument
     this.refreshFilterOptions()
     this.setRecordButtonLabel(this.isRecording)
     // Refreshes the Play/Pause button's own title/aria-label, which depends on this.messages.

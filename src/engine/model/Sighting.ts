@@ -624,6 +624,61 @@ export class Sighting {
     return Instruments.byId(this.instrumentId)
   }
 
+  /**
+   * The instrument looked through at `t`: the one the pose then names (see ObserverPose.instrument), else the recording's own. A witness
+   * who saw the first pass with his eyes and photographed the next two is one observation through two instruments.
+   */
+  instrumentAt(t: number): Instrument {
+    const id = this.instrumentIdAt(t)
+    return id === undefined || id === this.instrumentId ? this.instrument : Instruments.byId(id)
+  }
+
+  /**
+   * Whether at `t` the observation is made through the recording's own instrument, the one its shutter, film, speed, metering and glass
+   * are those of (see exposureSeconds, iso, film, metering, lens). Through another, those are that instrument's own.
+   */
+  ownInstrumentAt(t: number): boolean {
+    const id = this.instrumentIdAt(t)
+    return id === undefined || id === this.instrumentId
+  }
+
+  /** The shutter at `t` (see exposure): the recording's through its own instrument, else the one looked through then has of its own. */
+  exposureAt(t: number): number | undefined {
+    return this.ownInstrumentAt(t) ? this.exposure : this.instrumentAt(t).exposureSeconds
+  }
+
+  /** The film or sensor speed at `t` (see iso): the recording's through its own instrument only. */
+  isoAt(t: number): number | undefined {
+    return this.ownInstrumentAt(t) ? this.iso : undefined
+  }
+
+  /** The film at `t` (see film): the recording's through its own instrument only. */
+  filmAt(t: number): string | undefined {
+    return this.ownInstrumentAt(t) ? this.film : undefined
+  }
+
+  /** The metering at `t` (see metering): the recording's through its own instrument only. */
+  meteringAt(t: number): MeteringMode | undefined {
+    return this.ownInstrumentAt(t) ? this.metering : undefined
+  }
+
+  /** The glass in front at `t` (see lens): the recording's through its own instrument only. */
+  lensAt(t: number): LensStateJson | undefined {
+    return this.ownInstrumentAt(t) ? this.lens : undefined
+  }
+
+  /** The id a pose names at `t`, held from the keyframe at or before it (the first one's before the track starts): what the interpolated
+   * pose would say, without working out the rest of it. */
+  private instrumentIdAt(t: number): string | undefined {
+    const track = this.observerTrack
+    return (track.getLatestPoseAt(t) ?? track.allKeyframes[0]?.pose)?.instrument
+  }
+
+  /** Whether any pose names an instrument other than the recording's own: the frame, the shutter and the optics then follow the timeline. */
+  get changesInstrument(): boolean {
+    return this.observerTrack.allKeyframes.some(keyframe => keyframe.pose.instrument !== undefined && keyframe.pose.instrument !== this.instrumentId)
+  }
+
   static create(time?: SightingTime, place?: SightingLocation[], observer?: People): Sighting {
     return new Sighting(
       { eventType: "sighting", time, place },

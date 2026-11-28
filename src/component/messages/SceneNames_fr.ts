@@ -121,6 +121,7 @@ export const sceneNames_fr: SceneNames = {
     eye: "Œil nu",
     "rectilinear-lens": "Appareil, modèle inconnu",
     "roamer-1-120": "Roamer 1, film 120",
+    "kodak-35": "Kodak 35, 50 mm f/3,5",
     "instamatic-126": "Instamatic, film 126",
     "cine-35mm-broadcast": "Caméra 35 mm, vue à la télévision",
     "slr-35mm-50": "Reflex 35 mm, objectif 50 mm",

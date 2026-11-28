@@ -173,7 +173,7 @@ export class Gait {
    * a recording's keyframes in place, so anything keyed on the sighting's identity would keep
    * handing out the walk from before the edit. It is a few dozen keyframes of arithmetic.
    */
-  static of(sighting: Sighting): Gait | undefined {
+  static of(sighting: Sighting, tMs = 0): Gait | undefined {
     const path = ObserverPath.of(sighting)
     if (!path || path.points.length < 2) return undefined
     const stretches: GaitStretch[] = []
@@ -212,7 +212,7 @@ export class Gait {
       stretches[index].rampsOut = next === undefined || next.stepHz === 0
     }
     if (!stretches.some(stretch => stretch.stepHz > 0)) return undefined
-    return new Gait(stretches, 1 - (sighting.instrument.stabilization ?? 0))
+    return new Gait(stretches, 1 - (sighting.instrumentAt(tMs).stabilization ?? 0))
   }
 
   /**
@@ -226,8 +226,8 @@ export class Gait {
    * `steady` leaves the sway out: an editor, where an author lines shapes up on the scene.
    */
   static bodyAt(sighting: Sighting, tMs: number, steady = false): GaitOffset {
-    const walk = Gait.of(sighting)?.offsetAt(tMs) ?? Gait.STILL
-    return steady ? walk : Gait.add(walk, Stance.of(sighting)?.offsetAt(tMs))
+    const walk = Gait.of(sighting, tMs)?.offsetAt(tMs) ?? Gait.STILL
+    return steady ? walk : Gait.add(walk, Stance.of(sighting, tMs)?.offsetAt(tMs))
   }
 
   private static stepHzFor(speedMPerS: number): number {

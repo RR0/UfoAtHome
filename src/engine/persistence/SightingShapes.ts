@@ -28,7 +28,7 @@ export class SightingShapes {
    * degrees and for a 50 mm lens is twenty-seven. Only ever reached by a file too old to carry a
    * observerTrack, or one that never stated a pose. */
   static fovOf(sighting: Sighting, t: number): number {
-    return resolveObserverPoseAt(sighting, t)?.fovDeg ?? Instruments.fieldOfViewDeg(sighting.instrument)
+    return resolveObserverPoseAt(sighting, t)?.fovDeg ?? Instruments.fieldOfViewDeg(sighting.instrumentAt(t))
   }
 
   /**
@@ -100,12 +100,12 @@ export class SightingShapes {
    * values did, the moment a player loaded — that was a file corrupted by being looked at.
    */
   static toAim(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, projection, pose) => {
-      const stated = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
+    this.eachKeyframe(sighting, (shape, projection, pose, instrument) => {
+      const stated = shape.aim && this.positionOf(instrument, shape.aim, shape.bounds, projection, pose)
       if (stated && Math.abs(stated.x - shape.bounds.x) < SightingShapes.UNMOVED_PX && Math.abs(stated.y - shape.bounds.y) < SightingShapes.UNMOVED_PX) {
         return shape
       }
-      const aim = this.aimFrom(sighting, projection, pose, shape.bounds)
+      const aim = this.aimFrom(instrument, projection, pose, shape.bounds)
       return aim ? { ...shape, aim } : shape
     })
   }
@@ -121,18 +121,19 @@ export class SightingShapes {
    * saves. Undefined when the pose states no heading, for toAim's own reason.
    */
   static aimOf(sighting: Sighting, t: number, bounds: ShapeBounds): ShapeAim | undefined {
-    const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, t))
-    return this.aimFrom(sighting, projection, resolveObserverPoseAt(sighting, t), bounds)
+    const instrument = sighting.instrumentAt(t)
+    const projection = ImageProjection.of(instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, t))
+    return this.aimFrom(instrument, projection, resolveObserverPoseAt(sighting, t), bounds)
   }
 
   private static aimFrom(
-    sighting: Sighting,
+    instrument: Instrument,
     projection: ImageProjection,
     pose: ObserverPose | undefined,
     bounds: ShapeBounds
   ): ShapeAim | undefined {
     if (pose?.headingDeg === undefined) return undefined
-    const centre = this.frameCentre(sighting)
+    const centre = this.frameCentre(instrument)
     const offAxisX = projection.radiusPxToAngleDeg(bounds.x + bounds.width / 2 - centre.x)
     const offAxisY = projection.radiusPxToAngleDeg(centre.y - (bounds.y + bounds.height / 2))
     return { azimuthDeg: (((pose.headingDeg + offAxisX) % 360) + 360) % 360, altitudeDeg: pose.pitchDeg + offAxisY }
@@ -153,12 +154,12 @@ export class SightingShapes {
    * failure: it is a observer who has looked away, and it is the whole reason this exists.
    */
   static toPosition(sighting: Sighting): void {
-    this.eachKeyframe(sighting, (shape, projection, pose) => this.placedByAim(sighting, shape, projection, pose))
+    this.eachKeyframe(sighting, (shape, projection, pose, instrument) => this.placedByAim(instrument, shape, projection, pose))
   }
 
   /** One shape as toPosition draws it: its box where its direction puts it, when the pose has a heading to put it from. */
-  private static placedByAim(sighting: Sighting, shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined): Shape {
-    const position = shape.aim && this.positionOf(sighting, shape.aim, shape.bounds, projection, pose)
+  private static placedByAim(instrument: Instrument, shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined): Shape {
+    const position = shape.aim && this.positionOf(instrument, shape.aim, shape.bounds, projection, pose)
     return position ? { ...shape, bounds: { ...shape.bounds, ...position } } : shape
   }
 
@@ -175,7 +176,8 @@ export class SightingShapes {
     const previous = new Map<string, Shape>()
     sighting.timeline.allKeyframes.forEach((keyframe, index) => {
       const pose = resolveObserverPoseAt(sighting, keyframe.t)
-      const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, keyframe.t))
+      const instrument = sighting.instrumentAt(keyframe.t)
+      const projection = ImageProjection.of(instrument, ApparentSize.CANVAS_HEIGHT_PX, this.fovOf(sighting, keyframe.t))
       for (const { sourceId, shape } of keyframe.shapes) {
         const was = previous.get(sourceId)
         const before = held.get(sourceId)
@@ -188,7 +190,7 @@ export class SightingShapes {
         const written = Object.fromEntries(Object.entries(shape).filter(([key, value]) =>
           key !== "bounds" && key !== "points" && JSON.stringify(value) !== JSON.stringify((was as unknown as Record<string, unknown>)[key])))
         const read = { ...before, ...written } as Shape
-        const loaded = this.placedByAim(sighting, this.sizedFromAngle(read, projection), projection, pose)
+        const loaded = this.placedByAim(instrument, this.sizedFromAngle(read, projection), projection, pose)
         if (SightingShapes.near(loaded, shape)) {
           leftOut.add(`${index}:${sourceId}`)
           held.set(sourceId, read)
@@ -216,10 +218,10 @@ export class SightingShapes {
 
   /** Where a box of these dimensions is drawn when it states this direction, or undefined when the
    * pose states no heading to draw it from. */
-  private static positionOf(sighting: Sighting, aim: ShapeAim, bounds: ShapeBounds, projection: ImageProjection, pose: ObserverPose | undefined):
+  private static positionOf(instrument: Instrument, aim: ShapeAim, bounds: ShapeBounds, projection: ImageProjection, pose: ObserverPose | undefined):
     { x: number; y: number } | undefined {
     if (pose?.headingDeg === undefined) return undefined
-    const centre = this.frameCentre(sighting)
+    const centre = this.frameCentre(instrument)
     const offAxisX = this.shortestArc(aim.azimuthDeg - pose.headingDeg)
     const offAxisY = aim.altitudeDeg - pose.pitchDeg
     return {
@@ -229,9 +231,9 @@ export class SightingShapes {
   }
 
   /** Where the axis of the image falls, in the pixels every shape's bounds are expressed in. */
-  private static frameCentre(sighting: Sighting): { x: number; y: number } {
+  private static frameCentre(instrument: Instrument): { x: number; y: number } {
     return {
-      x: Instruments.frameWidthPx(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2,
+      x: Instruments.frameWidthPx(instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2,
       y: ApparentSize.CANVAS_HEIGHT_PX / 2
     }
   }
@@ -281,6 +283,9 @@ export class SightingShapes {
     const toHalfWidth = Instruments.frameWidthPx(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX) / 2
     const halfHeight = ApparentSize.CANVAS_HEIGHT_PX / 2
     for (const keyframe of [...sighting.timeline.allKeyframes]) {
+      // A keyframe seen through another instrument than the recording's (see ObserverPose.instrument) was drawn in that one's frame,
+      // which changing the recording's own does not touch.
+      if (!sighting.ownInstrumentAt(keyframe.t)) continue
       // TWO fields, not one, and getting this wrong moved every off-centre shape in the sky. An
       // instrument brings its own field with it (see Instruments.fieldOfViewDeg), so by the time
       // this runs the recording may already state a different one than the pixels were drawn under.
@@ -319,17 +324,19 @@ export class SightingShapes {
    * would be the one write in the codebase that doesn't. */
   private static eachKeyframe(
     sighting: Sighting,
-    transform: (shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined) => Shape
+    transform: (shape: Shape, projection: ImageProjection, pose: ObserverPose | undefined, instrument: Instrument) => Shape
   ): void {
     const { timeline } = sighting
     for (const keyframe of [...timeline.allKeyframes]) {
       const pose = resolveObserverPoseAt(sighting, keyframe.t)
       const fovDeg = this.fovOf(sighting, keyframe.t)
-      const projection = ImageProjection.of(sighting.instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
+      // Through the instrument looked through then (see Sighting.instrumentAt): its frame is the one the shapes were drawn in.
+      const instrument = sighting.instrumentAt(keyframe.t)
+      const projection = ImageProjection.of(instrument, ApparentSize.CANVAS_HEIGHT_PX, fovDeg)
       // A keyframe none of whose shapes changed is left as it is, the very same object: every save used to make them all new.
       let changed = false
       const shapes = keyframe.shapes.map(state => {
-        const shape = transform(state.shape, projection, pose)
+        const shape = transform(state.shape, projection, pose, instrument)
         if (shape === state.shape) return state
         changed = true
         return { ...state, shape }

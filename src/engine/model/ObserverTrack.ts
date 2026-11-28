@@ -97,6 +97,17 @@ export interface ObserverPose {
    * states "none" outright, which is the one case where that id is written down.
    */
   filter?: string
+  /**
+   * The INSTRUMENTS entry the observer was looking through from this pose on, when it is not the recording's own (see
+   * Sighting.instrumentId): an eye that saw the first pass of the lights before its owner ran for a camera and photographed the next two.
+   *
+   * On the POSE, like the filter, because it is a fact about this moment of the observation: the same witness looked, then photographed.
+   * HELD between keyframes, not blended: there is no instant halfway between an eye and a camera. Absent means the recording's own
+   * instrument, which is every recording made before this existed; a pose after one that names another states its own again to go back.
+   * What the recording sets of its own instrument (its shutter, film, speed, metering, glass) is of that one alone: another instrument here
+   * is seen with its own settings (see Sighting.instrumentAt).
+   */
+  instrument?: string
 }
 
 export interface ObserverKeyframe {
@@ -147,7 +158,8 @@ export function lerpObserverPose(a: ObserverPose, b: ObserverPose, t: number): O
     // lens on its way from f/2 to f/16 was never really at f/7.3.
     fNumber: a.fNumber,
     focusDistanceM: a.focusDistanceM,
-    filter: a.filter
+    filter: a.filter,
+    ...(a.instrument === undefined ? {} : { instrument: a.instrument })
   }
 }
 

@@ -2195,7 +2195,7 @@ export class UfoElement extends HTMLElement {
    */
   exposureTimes(t: number = this.currentTime): number[] {
     // The pose BEHIND the instant, ending on it — see ExposureSampling.windowEndingAt.
-    const window = ExposureSampling.windowEndingAt(t, this.currentSighting.exposure ?? 0)
+    const window = ExposureSampling.windowEndingAt(t, this.currentSighting.exposureAt(t) ?? 0)
     if (window.ms < UfoElement.SHORTEST_VISIBLE_EXPOSURE_MS) return [t]
     const byTime = Math.min(
       UfoElement.MAX_EXPOSURE_STEPS,
@@ -2280,8 +2280,9 @@ export class UfoElement extends HTMLElement {
    * ONLY WHEN IT ACTUALLY CHANGES: assigning to canvas.width resets the drawing surface, so doing
    * it unconditionally would clear the canvas on every single frame of playback.
    */
-  private applyFrameFormat(): void {
-    const width = Instruments.frameWidthPx(this.currentSighting.instrument, this.canvas.height)
+  private applyFrameFormat(t: number = this.currentTime): void {
+    // The instrument looked through at `t`: a witness who ran for a camera halfway through is seen in the camera's frame from then on.
+    const width = Instruments.frameWidthPx(this.currentSighting.instrumentAt(t), this.canvas.height)
     if (this.canvas.width === width) return
     this.canvas.width = width
     // The displayed box has to follow, or a 360-wide canvas would be stretched back out to the
@@ -2309,13 +2310,15 @@ export class UfoElement extends HTMLElement {
 
   private onFrame(t: number, shapesBySource: Map<string, Shape>): void {
     this.sayTimeMoved(t)
+    // An observation through two instruments changes its frame where it changes instrument (see ObserverPose.instrument).
+    if (this.currentSighting.changesInstrument) this.applyFrameFormat(t)
     this.canvasRenderer.clear(this.canvas.width, this.canvas.height)
     // Selection handles are an editing affordance — hidden while actively playing.
     const selectedIds = this.playbackState !== "playing" ? this.highlightedSourceIds : EMPTY_SELECTION
     // The instrument's own aperture decides whether a dazzling light wears a star — the same
     // statement SceneRenderer.setInstrument makes about the Sun, made here about the observer's own
     // object, which is painted on this overlay instead of in that scene.
-    this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrument, resolveObserverPoseAt(this.sighting, t)?.fNumber))
+    this.canvasRenderer.setStarPoints(Instruments.starPointsOf(this.sighting.instrumentAt(t), resolveObserverPoseAt(this.sighting, t)?.fNumber))
     // The observer's own walk turns the instrument a little as it carries it — a fraction of a degree
     // through an eye, the whole of it through a camera in a walking hand (see Gait, and
     // Instrument.stabilization). Added to the recorded roll here and to the scene's own camera in
@@ -3140,7 +3143,7 @@ export class UfoElement extends HTMLElement {
       this.observerMapView.keepInView(this.observerMapBounds, { lat: pose.lat, lng: pose.lng }, UfoElement.OBSERVER_MAP_FOLLOW_MARGIN)) {
       this.scheduleObserverMapImagery()
     }
-    const instrument = this.currentSighting.instrument
+    const instrument = this.currentSighting.instrumentAt(t)
     const markers: ObserverMapMarker[] = []
     const current = this.currentSighting.milestones.length > 0 ? resolveMilestoneAt(this.currentSighting.milestones, t) : undefined
     for (const milestone of this.milestonesShown ? sortedMilestones(this.currentSighting.milestones) : []) {
@@ -3306,7 +3309,7 @@ export class UfoElement extends HTMLElement {
     const pitchDeg = this.lookPitchDeg + gait.pitchDeg
     if (yawDeg === 0 && pitchDeg === 0) return { x: 0, y: 0 }
     const pose = resolveObserverPoseAt(this.currentSighting, this.currentTime)
-    const projection = ImageProjection.of(this.currentSighting.instrument, this.canvas.height, pose?.fovDeg ?? 60)
+    const projection = ImageProjection.of(this.currentSighting.instrumentAt(this.currentTime), this.canvas.height, pose?.fovDeg ?? 60)
     return { x: -projection.angleDegToRadiusPx(yawDeg), y: projection.angleDegToRadiusPx(pitchDeg) }
   }
 

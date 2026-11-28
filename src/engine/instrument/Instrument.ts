@@ -334,6 +334,25 @@ export const INSTRUMENTS: Instrument[] = [
     medium: { kind: "negative", iso: 125 }
   },
   {
+    // The camera Carl Hart Jr. photographed the Lubbock lights with on 31 August 1951: a Kodak 35, "set the lens and shutter at f 3.5 and
+    // one tenth of a second" (Ruppelt, The Report on Unidentified Flying Objects, ch. 8), so the model with the 50 mm f/3.5 Kodak
+    // Anastigmat Special, whose Kodamatic shutter went from a tenth to a two-hundredth of a second: Hart's tenth was its slowest. A 35 mm
+    // negative, 36 x 24 mm. The film he was loaded with is not said: a black and white of the time, Plus-X or Super-XX, ASSUMED at ISO 100.
+    id: "kodak-35",
+    filmFormat: "135",
+    category: "camera",
+    name: "Kodak 35, 50 mm f/3.5",
+    projection: "rectilinear",
+    frame: { widthMm: 36, heightMm: 24, focalLengthMm: 50 },
+    fNumber: 3.5,
+    fNumberRange: { min: 3.5, max: 22 },
+    exposureSeconds: 1 / 100,
+    exposureRangeSeconds: { min: 1 / 200, max: 1 / 10 },
+    years: { from: 1938, to: 1951 },
+    detailUm: 20,
+    medium: { kind: "negative", iso: 100 }
+  },
+  {
     // The camera of the snapshot era, and a square one — which is the clearest demonstration that a
     // format is not decoration: the same sighting photographed on 126 film comes back in a frame
     // that is neither the scene's 16:9 nor a phone's tall rectangle. 28 x 28 mm of image behind a
