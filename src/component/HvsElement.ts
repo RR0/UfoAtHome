@@ -49,9 +49,6 @@ interface LoadedReading extends HvsReading {
 export class HvsElement extends HTMLElement {
   static readonly TAG = "rr0-hvs"
 
-  /** Where the protocol can be read: its version deposited on HAL. */
-  static readonly PROTOCOL_URL = "https://hal.science/hal-05662047"
-
   private static readonly CSS = `
 :host { display: block; font-size: 13px; line-height: 1.4; }
 :host([hidden]) { display: none; }
@@ -316,12 +313,9 @@ ${HintElement.CSS}
   private credit(json: CaseJson, m: HvsMessages): HTMLElement {
     const credit = document.createElement("p")
     credit.className = "credit"
-    const link = document.createElement("a")
-    link.href = HvsElement.PROTOCOL_URL
-    link.target = "_blank"
-    link.rel = "noopener"
-    link.textContent = m.credit.replace("{protocol}", json.hvs?.protocol ?? "")
-    credit.append(link, json.hvs?.taxonomy ? ` · ${m.taxonomy.replace("{taxonomy}", json.hvs.taxonomy)}` : "")
+    // Named without a link for now: the reference of the protocol on HAL said in November 2026 (hal-05662047) leads nowhere, and its
+    // author has been asked for the right one.
+    credit.append(m.credit.replace("{protocol}", json.hvs?.protocol ?? ""), json.hvs?.taxonomy ? ` · ${m.taxonomy.replace("{taxonomy}", json.hvs.taxonomy)}` : "")
     return credit
   }
 
