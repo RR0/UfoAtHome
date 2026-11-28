@@ -114,3 +114,27 @@ describe("lerpShape", () => {
     expect((mid as typeof from).points).toEqual(from.points)
   })
 })
+
+describe("a direction between two keyframes", () => {
+  const at = (aim: { azimuthDeg: number; altitudeDeg: number }) => ({ ...createOval({ x: 0, y: 0, width: 2, height: 2 }), aim })
+
+  it("goes over the top of the sky along the great circle, not round it", () => {
+    const middle = lerpShape(at({ azimuthDeg: 0, altitudeDeg: 80 }), at({ azimuthDeg: 180, altitudeDeg: 80 }), 0.5).aim!
+    expect(middle.altitudeDeg).toBeCloseTo(90, 5)
+  })
+
+  it("keeps a light beside the meridian on a straight path as it passes the zenith", () => {
+    // 5° east of the meridian, from 80° along it in the north to 80° in the south: halfway it passes east of the zenith, 85° up or so,
+    // where az/alt separately put it 79° up, 11° off its way.
+    const from = { azimuthDeg: 26.7402, altitudeDeg: 78.831 }, to = { azimuthDeg: 153.2598, altitudeDeg: 78.831 }
+    const middle = lerpShape(at(from), at(to), 0.5).aim!
+    expect(middle.azimuthDeg).toBeCloseTo(90, 3)
+    expect(middle.altitudeDeg).toBeGreaterThan(84)
+  })
+
+  it("is the same as before for a small step low in the sky", () => {
+    const middle = lerpShape(at({ azimuthDeg: 100, altitudeDeg: 10 }), at({ azimuthDeg: 102, altitudeDeg: 11 }), 0.5).aim!
+    expect(middle.azimuthDeg).toBeCloseTo(101, 2)
+    expect(middle.altitudeDeg).toBeCloseTo(10.5, 2)
+  })
+})

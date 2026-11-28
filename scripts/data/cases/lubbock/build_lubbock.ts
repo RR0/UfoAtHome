@@ -427,10 +427,12 @@ const HART_APEX_DEG = 125
 const WINDOW = { northM: -9, elevationM: 2 }
 const KODAK = "kodak-35"
 /** Ms the camera is at his eye in each pass he photographed, and the instants of his pictures, ASSUMED: a Kodak 35 wound by hand, a second
- * and a half a frame, raised half a second after the lights came in for the second pass, ready for the third. */
+ * and a half a frame or so, raised half a second after the lights came in for the second pass, ready for the third. None while the V
+ * goes over the top of the sky (1.7 to 2.5 s into a pass), where following it swings the camera round to the south: a tenth of a second
+ * of that turn draws every light as an arc, and his prints show them only a little drawn out. */
 const HART_CAMERA = [
-  { from: HART_PASSES[1] + 500, to: HART_PASSES[1] + HART_CROSSING_MS, shots: [HART_PASSES[1] + 1100, HART_PASSES[1] + 2700] },
-  { from: HART_PASSES[2] - 1500, to: HART_PASSES[2] + HART_CROSSING_MS, shots: [HART_PASSES[2] + 500, HART_PASSES[2] + 1900, HART_PASSES[2] + 3300] }
+  { from: HART_PASSES[1] + 500, to: HART_PASSES[1] + HART_CROSSING_MS, shots: [HART_PASSES[1] + 1000, HART_PASSES[1] + 2900] },
+  { from: HART_PASSES[2] - 1500, to: HART_PASSES[2] + HART_CROSSING_MS, shots: [HART_PASSES[2] + 300, HART_PASSES[2] + 1500, HART_PASSES[2] + 3300] }
 ]
 
 /** Degrees along the meridian from the northern horizon of the middle of the V, `ms` into a pass: 30 in, 150 out (120° in four seconds). */
@@ -486,13 +488,16 @@ function hartTrack() {
   const keys: { t: number, pose: Record<string, unknown> }[] = []
   const eyeFov = FOV, cameraFov = 27
   const atWindow = (headingDeg: number, pitchDeg: number) => ({ ...hartPlace(WINDOW.northM), elevationM: WINDOW.elevationM, headingDeg, pitchDeg, fovDeg: eyeFov, instrument: "eye" })
-  const inYard = (headingDeg: number, pitchDeg: number, camera = false) => ({ ...hartPlace(0), elevationM: 0, headingDeg, pitchDeg,
-    ...(camera ? { fovDeg: cameraFov, fNumber: 3.5 } : { fovDeg: eyeFov, instrument: "eye" }) })
-  // Following the middle of the V a tenth of a second behind, as eyes and a hand that pursue do; over the top, round to the south.
-  const follow = (start: number, ms: number) => {
-    const along = hartAlong(Math.max(0, ms - 100))
-    return along <= 84 ? { headingDeg: 0, pitchDeg: r1(along) } : along >= 96 ? { headingDeg: 180, pitchDeg: r1(180 - along) } : { headingDeg: 90, pitchDeg: 86 }
-  }
+  const inYard = (headingDeg: number, pitchDeg: number, camera = false, rollDeg = 0) => ({ ...hartPlace(0), elevationM: 0, headingDeg, pitchDeg,
+    ...(rollDeg ? { rollDeg } : {}), ...(camera ? { fovDeg: cameraFov, fNumber: 3.5 } : { fovDeg: eyeFov, instrument: "eye" }) })
+  // Following the middle of the V a tenth of a second behind, as eyes and a hand that pursue do. Over the top of the sky, ASSUMED: he leans
+  // back rather than turning round: still facing north, the camera tipped past the zenith and upside down to the southern sky (a pitch
+  // over 90°), which is what keeps the V inverted on every negative, as the Air Force's lab found it. Turning round to the south would have
+  // shown it upright after the zenith, and swung the camera through half a turn in a tenth of a second.
+  const follow = (start: number, ms: number) => ({ headingDeg: 0, pitchDeg: r1(hartAlong(Math.max(0, ms - 100))) })
+  /** The camera's poses through a pass, every quarter second. */
+  const followed = (start: number, from: number, to: number) =>
+    Array.from({ length: Math.floor((to - from) / 250) + 1 }, (_, k) => from + 250 * k).map(t => ({ t, pose: inYard(0, follow(start, t - start).pitchDeg, true) }))
   keys.push({ t: 0, pose: atWindow(
     said(0, "assumed", "lying in bed \"looking out at the clear night sky\" through the open window by his bed, which faced the back yard to the north (Ruppelt, ch. 8)", "couché, « regardant le ciel nocturne clair » par la fenêtre ouverte près de son lit, qui donnait au nord sur le jardin (Ruppelt, chap. 8)", HART_SOURCE) as unknown as number,
     said(20, "assumed", "the sky above the trees, from a bed under the window", "le ciel au-dessus des arbres, depuis un lit sous la fenêtre", HART_SOURCE) as unknown as number) })
@@ -511,14 +516,14 @@ function hartTrack() {
   const p1 = HART_PASSES[1]
   keys.push({ t: p1 - 2000, pose: inYard(0, 28) })
   keys.push({ t: p1 + 200, pose: inYard(0, 30) })
-  for (let t = second.from; t <= second.to; t += 250) keys.push({ t, pose: inYard(follow(p1, t - p1).headingDeg, follow(p1, t - p1).pitchDeg, true) })
+  keys.push(...followed(p1, second.from, second.to))
   keys.push({ t: second.to + 500, pose: inYard(180, 30) })
   keys.push({ t: second.to + 4000, pose: inYard(0, 20) })
   // The third: ready, the camera already up, pointed north.
   const p2 = HART_PASSES[2]
   keys.push({ t: third.from - 1500, pose: inYard(0, 28) })
   keys.push({ t: third.from, pose: inYard(0, 30, true) })
-  for (let t = p2; t <= third.to; t += 250) keys.push({ t, pose: inYard(follow(p2, t - p2).headingDeg, follow(p2, t - p2).pitchDeg, true) })
+  keys.push(...followed(p2, p2, third.to))
   keys.push({ t: third.to + 600, pose: inYard(180, 28) })
   keys.push({ t: HART_DURATION_MS, pose: inYard(180, 15) })
   return { keyframes: keys.sort((a, b) => a.t - b.t) }

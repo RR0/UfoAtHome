@@ -115,13 +115,40 @@ export interface ShapeAim {
 /** Blends two directions, or gives nothing when either end states none — the same rule
  * ApparentSize.lerpAngular follows, and for the same reason: half of a statement nobody made is
  * still nobody's statement. */
+/**
+ * The direction a fraction of the way between two, along the great circle through them: the shortest way across the sky, which is the
+ * way a light moving steadily between them goes. Not along azimuth and altitude separately: near the zenith, where a light's azimuth
+ * swings through a hundred degrees in a quarter of a second, that bent the arms of the Lubbock V seen overhead into arcs, and a
+ * straight path into a curve.
+ */
 function lerpAim(from: ShapeAim | undefined, to: ShapeAim | undefined, fraction: number): ShapeAim | undefined {
   if (!from || !to) return fraction < 1 ? from : to
-  const turn = ((((to.azimuthDeg - from.azimuthDeg) % 360) + 540) % 360) - 180
-  return {
-    azimuthDeg: (((from.azimuthDeg + turn * fraction) % 360) + 360) % 360,
-    altitudeDeg: from.altitudeDeg + (to.altitudeDeg - from.altitudeDeg) * fraction
+  if (fraction <= 0) return from
+  if (fraction >= 1) return to
+  const a = aimVector(from), b = aimVector(to)
+  const cos = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))
+  const angle = Math.acos(cos)
+  // Opposite directions have no one great circle between them, and the same one needs none: kept as they were.
+  if (angle < 1e-9 || Math.PI - angle < 1e-6) {
+    const turn = ((((to.azimuthDeg - from.azimuthDeg) % 360) + 540) % 360) - 180
+    return {
+      azimuthDeg: (((from.azimuthDeg + turn * fraction) % 360) + 360) % 360,
+      altitudeDeg: from.altitudeDeg + (to.altitudeDeg - from.altitudeDeg) * fraction
+    }
   }
+  const sin = Math.sin(angle)
+  const wa = Math.sin((1 - fraction) * angle) / sin, wb = Math.sin(fraction * angle) / sin
+  const [east, north, up] = [a[0] * wa + b[0] * wb, a[1] * wa + b[1] * wb, a[2] * wa + b[2] * wb]
+  const altitudeDeg = Math.asin(Math.max(-1, Math.min(1, up))) * 180 / Math.PI
+  // Straight up, a direction has no azimuth of its own: the one it was coming from is kept.
+  const azimuthDeg = Math.hypot(east, north) < 1e-12 ? from.azimuthDeg : ((Math.atan2(east, north) * 180 / Math.PI) + 360) % 360
+  return { azimuthDeg, altitudeDeg }
+}
+
+/** East, north and up of a direction. */
+function aimVector(aim: ShapeAim): [number, number, number] {
+  const az = aim.azimuthDeg * Math.PI / 180, alt = aim.altitudeDeg * Math.PI / 180
+  return [Math.cos(alt) * Math.sin(az), Math.cos(alt) * Math.cos(az), Math.sin(alt)]
 }
 
 export interface OvalShape extends BaseShape {
