@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "id": "FICTIF-2026-001",
+  "title": "Cas fictif HVS FICTIF-2026-001",
+  "time": "2026-08-14 22:42",
+  "events": [
+    {
+      "eventType": "sighting",
+      "id": "temoin",
+      "url": "fictif-2026-001.json",
+      "time": "2026-08-14 22:42",
+      "title": {
+        "fr": "Compte rendu du témoin",
+        "en": "The witness's account"
+      }
+    },
+    {
+      "eventType": "sighting",
+      "id": "lecture-lanterne",
+      "url": "lecture-lanterne.json",
+      "interpretationOf": "temoin",
+      "title": {
+        "fr": "Lecture : une lanterne céleste",
+        "en": "Reading: a sky lantern"
+      }
+    }
+  ],
+  "elements": [
+    {
+      "id": "E1",
+      "status": "observed",
+      "title": {
+        "fr": "un point lumineux orangé",
+        "en": "an orange point of light"
+      },
+      "of": "temoin"
+    },
+    {
+      "id": "E2",
+      "status": "observed",
+      "phenomenon": {
+        "sourceId": "lumiere",
+        "t": 0
+      },
+      "title": {
+        "fr": "azimut initial 245° [242, 248]",
+        "en": "first azimuth 245° [242, 248]"
+      },
+      "of": "temoin"
+    },
+    {
+      "id": "E3",
+      "status": "observed",
+      "phenomenon": {
+        "sourceId": "lumiere",
+        "t": 0
+      },
+      "title": {
+        "fr": "élévation initiale déclarée 15° [12, 18]",
+        "en": "first elevation stated 15° [12, 18]"
+      },
+      "of": "temoin"
+    },
+    {
+      "id": "E4",
+      "status": "inferred",
+      "title": {
+        "fr": "distance d'au moins 350 m (premier obstacle)",
+        "en": "at least 350 m away (first obstacle)"
+      },
+      "of": "temoin"
+    },
+    {
+      "id": "E5",
+      "status": "observed",
+      "title": {
+        "fr": "extinction brutale",
+        "en": "sudden going out"
+      },
+      "of": "temoin"
+    }
+  ],
+  "elementsSealed": true,
+  "hvs": {
+    "protocol": "7.0",
+    "taxonomy": "2.1",
+    "hypotheses": [
+      {
+        "id": "lantern",
+        "code": "T1.4",
+        "title": {
+          "fr": "ballon / lanterne",
+          "en": "balloon / lantern"
+        },
+        "phenomenon": "SkyLantern",
+        "explains": [
+          "E1",
+          "E2",
+          "E3",
+          "E4",
+          "E5"
+        ],
+        "plausibility": {
+          "existence": {
+            "value": 0.7,
+            "range": [
+              0.6,
+              0.8
+            ],
+            "rationale": {
+              "fr": "l'exemple ne donne que PS = 0,70 : décomposition pour l'illustration",
+              "en": "the example gives only PS = 0.70: split for the illustration"
+            }
+          },
+          "frequency": {
+            "value": 0.7,
+            "range": [
+              0.6,
+              0.8
+            ]
+          },
+          "compatibility": {
+            "value": 0.7,
+            "range": [
+              0.6,
+              0.8
+            ]
+          },
+          "context": 1
+        }
+      },
+      {
+        "id": "aircraft",
+        "title": {
+          "fr": "feux d'un avion (pour l'illustration)",
+          "en": "an aircraft's lights (for the illustration)"
+        },
+        "phenomenon": "LowAltitudePlanes",
+        "explains": [
+          "E1",
+          "E2",
+          "E3",
+          "E4"
+        ],
+        "plausibility": {
+          "existence": {
+            "value": 0.9,
+            "range": [
+              0.8,
+              1
+            ],
+            "rationale": {
+              "fr": "cotes illustratives, pas celles de la grille de S. Baron",
+              "en": "ratings for the illustration, not those of S. Baron's grid"
+            }
+          },
+          "frequency": {
+            "value": 0.9,
+            "range": [
+              0.8,
+              1
+            ]
+          },
+          "compatibility": {
+            "value": 0.8,
+            "range": [
+              0.7,
+              0.9
+            ]
+          },
+          "context": 1
+        }
+      }
+    ],
+    "observations": {
+      "temoin": {
+        "iqi": {
+          "identification": "partial",
+          "witnesses": "partial",
+          "enquiry": "complete"
+        }
+      }
+    }
+  }
+}
