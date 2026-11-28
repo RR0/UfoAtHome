@@ -106,4 +106,11 @@ describe("kinds of interpretation", () => {
     const written = JSON.parse(JSON.stringify(toSightingJson(fromSightingJson({ version: 4, timeline: { keyframes: [] }, interpretation: { bodies: [], kites: [{ id: "b", lineM: 2 }] } } as never))))
     expect(written.interpretation.kites).toEqual([{ id: "b", lineM: 2 }])
   })
+
+  it("are read from a recording whose interpretation is written with its provenance", async () => {
+    install()
+    const recording = { version: 4, timeline: { keyframes: [] }, interpretation: { value: { bodies: [], kites: [{ id: "b", lineM: 2 }] }, basis: "assumed", rationale: { en: "why", fr: "pourquoi" } } }
+    const read = await CaseFile.interpretationOf({ eventType: "interpretation", url: "reading.json" } as never, "https://example.org/case.json", async () => recording)
+    expect(read.kites).toEqual([{ id: "b", lineM: 2 }])
+  })
 })

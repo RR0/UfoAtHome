@@ -202,8 +202,9 @@ export class CaseFile {
     const fileUrl = new URL(event.url, caseUrl).href
     const file = await fetchJson(fileUrl) as InterpretationJson & { interpretation?: InterpretationJson }
     // A recording keeps its bodies in its own `interpretation`; an older file is the interpretation.
-    const stated = "timeline" in file && file.interpretation ? file.interpretation : file
-    return CaseFile.withModelsFrom(Provenance.strip({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, findings: stated.findings, ...InterpretationKinds.computedPart(stated, InterpretationRegistry.kinds()) }).recording, fileUrl)
+    // Bare before it is read: the interpretation itself may be written with its provenance (said(...)), its bodies then under `value`.
+    const stated = Provenance.strip("timeline" in file && file.interpretation ? file.interpretation : file).recording
+    return CaseFile.withModelsFrom({ title: event.title ?? stated.title, bodies: stated.bodies ?? [], smoke: stated.smoke, findings: stated.findings, ...InterpretationKinds.computedPart(stated, InterpretationRegistry.kinds()) }, fileUrl)
   }
 
   /** An interpretation with its bodies' model addresses made absolute against the file that states
