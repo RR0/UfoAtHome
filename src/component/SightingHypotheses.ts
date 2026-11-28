@@ -1,5 +1,6 @@
 import type { HvsHypothesisResult, HvsResult, HvsScore } from "../engine/assessment/hvs/Hvs.js"
-import type { PoherRanking } from "../engine/witness/PoherMatrix.js"
+import type { PoherMatrixVersion, PoherRanking } from "../engine/witness/PoherMatrix.js"
+import type { Sighting } from "../engine/model/Sighting.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import type { SightingLabels } from "./messages/SightingLabels.js"
 
@@ -16,6 +17,32 @@ export class SightingHypotheses {
   static readonly CANDIDATES_SECTION = "candidates-section"
   static readonly HVS_SECTION = "hvs-section"
 
+  /** The matrices read, by version and language, shared by every player of the page: read once. */
+  private static readonly matrices = new Map<string, Promise<{ matrix: import("../engine/witness/PoherMatrix.js").PoherMatrix, labels: Record<string, string> }>>()
+
+  /**
+   * The chip of Poher's matrix for a recording, where nothing else has read the matrix (the player, which has no candidates): the version the
+   * reader chose, from what the recording says, under the error model by default. Its code and its files arrive when first asked for.
+   */
+  async poherOf(sighting: Sighting, language: string): Promise<SummaryEntry | undefined> {
+    const [{ PoherAnswers, PoherMatrix }, { PoherAccountFacts }, { WitnessError }, { SightingFetch }] = await Promise.all([
+      import("../engine/witness/PoherMatrix.js"), import("../engine/witness/PoherSelfCheck.js"), import("../engine/witness/WitnessError.js"),
+      import("../engine/net/SightingFetch.js")
+    ])
+    const version = PoherMatrix.chosenVersion()
+    const key = `${version}/${language}`
+    let loading = SightingHypotheses.matrices.get(key)
+    if (!loading) {
+      loading = PoherMatrix.load(version, language, url => SightingFetch.json(url))
+      // A failure is not kept: the next ask tries again (back online).
+      loading.catch(() => SightingHypotheses.matrices.delete(key))
+      SightingHypotheses.matrices.set(key, loading)
+    }
+    const { matrix, labels } = await loading
+    const answers = new PoherAnswers(WitnessError.MODELS[0], sighting.account?.conditions).of(PoherAccountFacts.of(sighting)).filter(answer => matrix.has(answer.question))
+    return this.poher(matrix.rank(answers), answers.length, labels, version)
+  }
+
   private readonly number: Intl.NumberFormat
   private readonly percent: Intl.NumberFormat
 
@@ -28,8 +55,9 @@ export class SightingHypotheses {
    * The matrix's ranking as one chip: the phenomenon it ranks first among those it does not rule out, with how many others score the same
    * (a tie is said, never broken: the matrix cannot tell them apart). Undefined when the testimony answers none of its questions.
    * @param names The matrix's names of its phenomena, in the reader's language.
+   * @param version The version of the matrix read, which names the chip: Poher's own, or RR0's that extends it.
    */
-  poher(rows: readonly PoherRanking[], answered: number, names: Readonly<Record<string, string>>): SummaryEntry | undefined {
+  poher(rows: readonly PoherRanking[], answered: number, names: Readonly<Record<string, string>>, version: PoherMatrixVersion): SummaryEntry | undefined {
     if (rows.length === 0 || answered === 0) return undefined
     const h = this.labels.hypotheses
     const possible = rows.filter(row => row.excludedBy.length === 0)
@@ -42,7 +70,7 @@ export class SightingHypotheses {
       value = tied > 0 ? h.tied.replace("{name}", name).replace("{n}", String(tied)) : name
       detail = h.poherDetail.replace("{mean}", this.percent.format(best.mean)).replace("{possible}", String(possible.length)).replace("{of}", String(rows.length))
     }
-    return this.entry(SightingHypotheses.CANDIDATES_SECTION, h.poher, value, detail)
+    return this.entry(SightingHypotheses.CANDIDATES_SECTION, h.poher[version], value, detail)
   }
 
   /**

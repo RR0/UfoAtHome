@@ -8298,10 +8298,11 @@ export class SightingEditorElement extends HTMLElement {
     const hypotheses = new SightingHypotheses(this.messages, this.language)
     const chips: SummaryEntry[] = []
     try {
-      const { matrix, labels } = await this.poherLoaded(CandidatesView.storedVersion())
+      const version = PoherMatrix.chosenVersion()
+      const { matrix, labels } = await this.poherLoaded(version)
       const answers = new PoherAnswers(this.witnessErrorView.errorModel, this.ufoElement.sighting.account?.conditions).of(this.poherFacts())
         .filter(answer => matrix.has(answer.question))
-      const poher = hypotheses.poher(matrix.rank(answers), answers.length, labels)
+      const poher = hypotheses.poher(matrix.rank(answers), answers.length, labels, version)
       if (poher) chips.push(poher)
     } catch {
       // The matrix out of reach (offline): no chip of it, as no candidate of it.

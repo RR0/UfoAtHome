@@ -14,14 +14,14 @@ describe("SightingHypotheses", () => {
   const hypotheses = new SightingHypotheses(sightingLabels_fr, "fr")
 
   it("states the phenomenon the matrix ranks first, and says a tie rather than breaking it", () => {
-    const chip = hypotheses.poher([row("SkyLantern", 0.9), row("Venus", 0.9), row("Birds", 0.5), row("Meteor", 1, ["Duration.AFewMn"])], 3, { SkyLantern: "lanterne céleste" })
-    expect(chip).toMatchObject({ group: "hypothesis", field: SightingHypotheses.CANDIDATES_SECTION, label: "Matrice de Poher", value: "lanterne céleste (+1 à égalité)" })
+    const chip = hypotheses.poher([row("SkyLantern", 0.9), row("Venus", 0.9), row("Birds", 0.5), row("Meteor", 1, ["Duration.AFewMn"])], 3, { SkyLantern: "lanterne céleste" }, "rr0-2026")
+    expect(chip).toMatchObject({ group: "hypothesis", field: SightingHypotheses.CANDIDATES_SECTION, label: "Matrice de Poher étendue", value: "lanterne céleste (+1 à égalité)" })
     expect(chip?.detail).toContain("3 phénomènes non exclus sur 4")
   })
 
   it("says nothing of a testimony that answers none of the matrix's questions, and says when it rules everything out", () => {
-    expect(hypotheses.poher([row("SkyLantern", 0)], 0, {})).toBeUndefined()
-    expect(hypotheses.poher([row("SkyLantern", 0, ["Hour.Day"])], 1, {})?.value).toBe("toutes exclues")
+    expect(hypotheses.poher([row("SkyLantern", 0)], 0, {}, "rr0-2026")).toBeUndefined()
+    expect(hypotheses.poher([row("SkyLantern", 0, ["Hour.Day"])], 1, {}, "poher-1977")?.value).toBe("toutes exclues")
   })
 
   it("states the dominant hypothesis and its score, or that none dominates", () => {

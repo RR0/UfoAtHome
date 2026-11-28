@@ -74,7 +74,7 @@ export const sightingLabels_es: SightingLabels = {
   },
   hypothesisGroup: "Hipótesis",
   hypotheses: {
-    poher: "Matriz de Poher",
+    poher: { "poher-1977": "Matriz de Poher (1977)", "rr0-2026": "Matriz de Poher ampliada" },
     hvs: "HVS",
     tied: "{name} (+{n} empatadas)",
     allExcluded: "todas excluidas",

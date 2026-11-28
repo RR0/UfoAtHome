@@ -530,6 +530,8 @@ export class CaseElement extends HTMLElement {
         weighing.className = "open-hvs"
         block.append(weighing)
         weighing.show({ caseJson: () => json, recording: id => this.recordingOfEvent(id), account: entry.event.id })
+        // Its headline on the player's strip, beside the matrix's (see SightingHypotheses), from the same loading as the table.
+        player.hvs = () => weighing.weigh()
       }
     }
     this.shown.set(at, block)

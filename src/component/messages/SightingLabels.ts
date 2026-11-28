@@ -21,8 +21,8 @@ export interface SightingLabels {
    * protocol. Beside the assessment's, not in it: an assessment rates the account, these weigh what could explain it. */
   hypothesisGroup: string
   hypotheses: {
-    /** The chips' names, by evaluator. */
-    poher: string
+    /** The chips' names, by evaluator: Poher's matrix by the version read (see PoherMatrix.VERSIONS). */
+    poher: Record<"poher-1977" | "rr0-2026", string>
     hvs: string
     /** The phenomenon heading the matrix, with how many others score the same. */
     tied: string

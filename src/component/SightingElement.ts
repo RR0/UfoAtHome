@@ -15,6 +15,8 @@ import type { ConfrontationReading } from "../engine/interpretation/BodyConfront
 import { SightingSummary } from "./SightingSummary.js"
 import { SceneCredits } from "./SceneCredits.js"
 import { SightingAssessments } from "./SightingAssessments.js"
+import { SightingHypotheses } from "./SightingHypotheses.js"
+import type { HvsResult } from "../engine/assessment/hvs/Hvs.js"
 import type { SummaryEntry } from "./SightingSummary.js"
 import { SceneElement, registerScene, SCENE_ELEMENT_NAME, CONFRONTATION_EVENT } from "./SceneElement.js"
 import { OBSERVER_MAP_ATTRIBUTE, MILESTONES_ATTRIBUTE } from "./UfoElement.js"
@@ -193,6 +195,20 @@ export class SightingElement extends HTMLElement {
 
   /** Drops a reading that resolved after the recording it described was already replaced. */
   private assessmentToken = 0
+
+  /** What the hypotheses' evaluators make of the observation on show (see runHypotheses), kept between renders as the assessment's are. */
+  private hypothesisEntries: SummaryEntry[] = []
+  private hypothesisToken = 0
+  private hvsWeighing?: () => Promise<{ result: HvsResult, title: (id: string) => string } | undefined>
+
+  /**
+   * How the case this player shows an observation of weighs its hypotheses by the HVS protocol, for that observation (see HvsElement.weigh):
+   * given by the case reader, which shows the table under the player. Undefined for a recording alone.
+   */
+  set hvs(weigh: (() => Promise<{ result: HvsResult, title: (id: string) => string } | undefined>) | undefined) {
+    this.hvsWeighing = weigh
+    if (this.currentSrc) void this.runHypotheses()
+  }
 
   /** Whether this browser has the popover API — where it does, the info panel lives in the top
    * layer and cannot be clipped by the host page; where it doesn't (anything older than 2024), it
@@ -425,7 +441,10 @@ export class SightingElement extends HTMLElement {
     this.refreshParamSummary()
     // An assessment names ids ("coverage", "ce3") through these same messages, so a reading taken
     // before they arrived is in the wrong language — read it again rather than translating chips.
-    if (changed && this.currentSrc) void this.runAssessments()
+    if (changed && this.currentSrc) {
+      void this.runAssessments()
+      void this.runHypotheses()
+    }
     this.shareButton.title = (this.messages?.share ?? "")
     this.shareButton.setAttribute("aria-label", (this.messages?.share ?? ""))
     this.shareStartLabel.textContent = (this.messages?.shareStartAt ?? "")
@@ -1343,6 +1362,7 @@ export class SightingElement extends HTMLElement {
     // it, both change with it.
     this.refreshParamSummary()
     void this.runAssessments()
+    void this.runHypotheses()
     if (this.infoOpen) this.populateInfoPanel()
     // For the page around the player: whatever it says about the recording on show (its
     // description, its title) has to follow a change of observer, and `sightingData` alone cannot
@@ -1373,6 +1393,34 @@ export class SightingElement extends HTMLElement {
     // The strip redraws only when its signature changes, and that signature is over the entries —
     // so the new readings have to be in place before it is asked to compare (see
     // refreshParamSummary).
+    this.refreshParamSummary()
+  }
+
+  /**
+   * Asks the hypotheses' evaluators what they make of the observation on show, and puts each answer on the strip inside the Hypotheses
+   * nest, as the editor does (see SightingHypotheses): Poher's matrix from what the recording says, and the HVS protocol when a case gives
+   * its weighing. What they need (the matrix's code and files, the case's readings) arrives when first asked for, after the strip.
+   */
+  private async runHypotheses(): Promise<void> {
+    if (!this.messages) return
+    const token = ++this.hypothesisToken
+    const hypotheses = new SightingHypotheses(this.messages, this.language)
+    const entries: SummaryEntry[] = []
+    try {
+      const poher = await hypotheses.poherOf(this.sceneElement.ufoElement.sighting, this.language)
+      if (poher) entries.push(poher)
+    } catch {
+      // The matrix out of reach (offline): no chip of it.
+    }
+    try {
+      const weighed = await this.hvsWeighing?.()
+      const hvs = weighed ? hypotheses.hvs(weighed.result, weighed.title) : undefined
+      if (hvs) entries.push(hvs)
+    } catch {
+      // A reading that cannot be confronted says nothing rather than breaking the strip.
+    }
+    if (token !== this.hypothesisToken) return
+    this.hypothesisEntries = entries
     this.refreshParamSummary()
   }
 
@@ -1700,7 +1748,8 @@ export class SightingElement extends HTMLElement {
       ...stated.slice(0, lastSummary + 1),
       ...reading,
       ...stated.slice(lastSummary + 1),
-      ...this.assessmentEntries
+      ...this.assessmentEntries,
+      ...this.hypothesisEntries
     ]
     const signature = entries.map(entry => `${entry.field}=${entry.label}=${entry.value}${entry.unit}${entry.full ?? ""}${entry.fromSource ? "*" : ""}`).join("|")
     if (signature === this.summarySignature) {
@@ -1726,7 +1775,8 @@ export class SightingElement extends HTMLElement {
         : this.messages && entry.group in this.messages.summaryGroups ? this.messages.summaryGroups[entry.group as keyof SightingMessages["summaryGroups"]]
         // Named by its GROUP and never by what it leads to — an assessment of the observer's own
         // account still belongs in a box saying Assessment.
-        : entry.group === "assessment" ? (this.messages?.assessmentGroup ?? "") : undefined
+        : entry.group === "assessment" ? (this.messages?.assessmentGroup ?? "")
+        : entry.group === "hypothesis" ? (this.messages?.hypothesisGroup ?? "") : undefined
       if (boxName !== undefined && !open) {
         const box = document.createElement("span")
         box.className = "param-nest"

@@ -79,6 +79,19 @@ export class PoherMatrix {
   }
   /** The version read unless the reader chooses Poher's own: RR0's, which knows the mistakes Poher could not (drones, Starlink…). */
   static readonly DEFAULT_VERSION: PoherMatrixVersion = "rr0-2026"
+  /** Where the reader's choice of a version is kept (see chosenVersion). */
+  static readonly VERSION_STORAGE = "ufoathome.poherMatrixVersion"
+
+  /** The version stored by the reader's last choice, or the default one: storage may be refused, in a private window. */
+  static chosenVersion(): PoherMatrixVersion {
+    try {
+      const stored = localStorage.getItem(PoherMatrix.VERSION_STORAGE)
+      if (stored && stored in PoherMatrix.VERSIONS) return stored as PoherMatrixVersion
+    } catch {
+      // No storage: the default.
+    }
+    return PoherMatrix.DEFAULT_VERSION
+  }
 
   private readonly scores = new Map<string, Record<string, number>>()
   readonly phenomena: string[] = []

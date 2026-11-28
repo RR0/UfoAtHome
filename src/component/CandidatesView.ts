@@ -144,7 +144,6 @@ export class CandidatesView {
   private poherState: "idle" | "loading" | "failed" | "ready" = "idle"
   /** Which version of the matrix is read: RR0's unless the reader chose Poher's own, a choice kept for the next visit. */
   private poherVersion = CandidatesView.storedVersion()
-  private static readonly VERSION_STORAGE = "ufoathome.poherMatrixVersion"
   /** The interpretations whose kinds' code was asked for (see interpretationTracks): each searched again once, when it has come. */
   private readonly kindsLoading = new WeakSet<InterpretationJson>()
   /** Which phenomenon of the matrix each variant stands for. */
@@ -470,15 +469,9 @@ export class CandidatesView {
     return block
   }
 
-  /** The version stored by the reader's last choice, or the default one: storage may be refused, in a private window. */
+  /** The version stored by the reader's last choice, or the default one (see PoherMatrix.chosenVersion). */
   static storedVersion(): PoherMatrixVersion {
-    try {
-      const stored = localStorage.getItem(CandidatesView.VERSION_STORAGE)
-      if (stored && stored in PoherMatrix.VERSIONS) return stored as PoherMatrixVersion
-    } catch {
-      // No storage: the default.
-    }
-    return PoherMatrix.DEFAULT_VERSION
+    return PoherMatrix.chosenVersion()
   }
 
   /** The choice of the version of the matrix read: Poher's of 1977, or RR0's that extends it, which reads its files instead. */
@@ -496,7 +489,7 @@ export class CandidatesView {
     select.addEventListener("change", () => {
       this.poherVersion = select.value as PoherMatrixVersion
       try {
-        localStorage.setItem(CandidatesView.VERSION_STORAGE, this.poherVersion)
+        localStorage.setItem(PoherMatrix.VERSION_STORAGE, this.poherVersion)
       } catch {
         // Kept for this visit only.
       }
