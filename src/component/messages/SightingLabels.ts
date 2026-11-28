@@ -33,6 +33,14 @@ export interface SightingLabels {
     /** The chips' tooltips: what the value is made of. */
     poherDetail: string
     hvsDetail: string
+    /** The whole list a chip opens: the matrix's phenomena possible and ruled out, the protocol's hypotheses each with its score. */
+    possible: string
+    excluded: string
+    hvsLine: string
+    hvsLineNoPs: string
+    admissible: string
+    notAdmissible: string
+    dominant: string
   }
 
   color: string

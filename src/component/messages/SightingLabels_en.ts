@@ -80,7 +80,14 @@ export const sightingLabels_en: SightingLabels = {
     allExcluded: "all ruled out",
     noDominant: "none dominant",
     poherDetail: "Mean score {mean}; {possible} of {of} phenomena not ruled out",
-    hvsDetail: "HVS {hvs} = CS {cs} × PS {ps}"
+    hvsDetail: "HVS {hvs} = CS {cs} × PS {ps}",
+    possible: "Possible ({n} of {of}):",
+    excluded: "Ruled out ({n}):",
+    hvsLine: "HVS {hvs} = CS {cs} × PS {ps}",
+    hvsLineNoPs: "CS {cs}, plausibility not rated",
+    admissible: "admissible",
+    notAdmissible: "not admissible",
+    dominant: "dominant"
   },
   timeQualifierApproximate: "Approximate",
   timeQualifierUncertain: "Uncertain",

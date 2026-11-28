@@ -8187,11 +8187,14 @@ export class SightingEditorElement extends HTMLElement {
   /** The whole description on show in place of the chips, while one has been opened from its chip. */
   private openDescription: string | undefined
 
+  /** The name of the chip whose text is open (the description's, a list of hypotheses): what the open text is headed with. */
+  private openDescriptionTitle: string | undefined
+
   private syncDescription(): void {
-    if (this.openDescription !== undefined && !this.paramChips.some(chip => chip.full === this.openDescription)) {
+    if (this.openDescription !== undefined && ![...this.paramChips, ...this.hypothesisChips].some(chip => chip.full === this.openDescription)) {
       this.openDescription = undefined
     }
-    SummaryDescription.sync(this.paramSummary, this.openDescription, this.messages.summaryDescription,
+    SummaryDescription.sync(this.paramSummary, this.openDescription, this.openDescriptionTitle ?? this.messages.summaryDescription,
       this.messages.closeDescription, () => {
         this.openDescription = undefined
         this.syncDescription()
@@ -8483,6 +8486,7 @@ export class SightingEditorElement extends HTMLElement {
     button.dataset.panel = String(chip.panel)
     button.dataset.field = chip.field
     if (chip.detail) button.title = chip.detail
+    if (chip.full !== undefined) button.classList.add("describable")
     const label = document.createElement("span")
     label.className = "param-chip-label"
     label.textContent = `${chip.label} `
@@ -8511,6 +8515,15 @@ export class SightingEditorElement extends HTMLElement {
     // The description's chip opens the whole text rather than a field.
     if (chip.dataset.field === "description") {
       this.openDescription = this.paramChips.find(candidate => candidate.field === "description")?.full
+      this.openDescriptionTitle = undefined
+      this.syncDescription()
+      return
+    }
+    // A chip of the hypotheses opens the whole list it heads, in the same place (see SightingHypotheses).
+    const listed = this.hypothesisChips.find(candidate => candidate.field === chip.dataset.field && candidate.full !== undefined)
+    if (listed) {
+      this.openDescription = listed.full
+      this.openDescriptionTitle = listed.label
       this.syncDescription()
       return
     }

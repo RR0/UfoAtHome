@@ -13,7 +13,7 @@ import type { SightingLabels } from "./messages/SightingLabels.js"
  * An assessment rates the account; these weigh what could explain it: two different questions, hence two nests.
  */
 export class SightingHypotheses {
-  /** The section of the observation's Summary each chip leads to, by its element id (see SightingEditorElement.onParamSummaryClick). */
+  /** The section of the observation's Summary that details each chip, by its element id. */
   static readonly CANDIDATES_SECTION = "candidates-section"
   static readonly HVS_SECTION = "hvs-section"
 
@@ -61,16 +61,23 @@ export class SightingHypotheses {
     if (rows.length === 0 || answered === 0) return undefined
     const h = this.labels.hypotheses
     const possible = rows.filter(row => row.excludedBy.length === 0)
+    const excluded = rows.filter(row => row.excludedBy.length > 0)
+    const name = (row: PoherRanking) => names[row.phenomenon] ?? row.phenomenon
     const best = possible[0]
     let value = h.allExcluded
     let detail: string | undefined
     if (best) {
       const tied = possible.filter(row => Math.abs(row.mean - best.mean) < 1e-9).length - 1
-      const name = names[best.phenomenon] ?? best.phenomenon
-      value = tied > 0 ? h.tied.replace("{name}", name).replace("{n}", String(tied)) : name
+      value = tied > 0 ? h.tied.replace("{name}", name(best)).replace("{n}", String(tied)) : name(best)
       detail = h.poherDetail.replace("{mean}", this.percent.format(best.mean)).replace("{possible}", String(possible.length)).replace("{of}", String(rows.length))
     }
-    return this.entry(SightingHypotheses.CANDIDATES_SECTION, h.poher[version], value, detail)
+    // Every phenomenon, opened from the chip: those still possible with their score, then those ruled out.
+    const full = [
+      ...(possible.length > 0 ? [h.possible.replace("{n}", String(possible.length)).replace("{of}", String(rows.length)),
+        ...possible.map(row => `${name(row)} ${this.percent.format(row.mean)}`)] : []),
+      ...(excluded.length > 0 ? [...(possible.length > 0 ? [""] : []), h.excluded.replace("{n}", String(excluded.length)), excluded.map(name).join(", ")] : [])
+    ].join("\n")
+    return this.entry(SightingHypotheses.CANDIDATES_SECTION, h.poher[version], value, detail, rows.length > 1 ? full : undefined)
   }
 
   /**
@@ -83,7 +90,17 @@ export class SightingHypotheses {
     const h = this.labels.hypotheses
     const dominant = result.hypotheses.find(found => found.dominant)
     const value = dominant ? [title(dominant.id), dominant.hvs ? this.number.format(dominant.hvs.preferred) : undefined].filter(Boolean).join(" ") : h.noDominant
-    return this.entry(SightingHypotheses.HVS_SECTION, h.hvs, value, dominant ? this.hvsDetail(dominant) : undefined)
+    // Every hypothesis, opened from the chip, by decreasing score: its score and what it is made of, and its standing.
+    const scoreOf = (found: HvsHypothesisResult) => found.hvs?.preferred ?? -1
+    const full = [...result.hypotheses].sort((a, b) => scoreOf(b) - scoreOf(a)).map(found => {
+      const cs = this.number.format((found.csDiscriminating ?? found.csRaw).preferred)
+      const score = found.hvs && found.ps
+        ? h.hvsLine.replace("{hvs}", this.number.format(found.hvs.preferred)).replace("{cs}", cs).replace("{ps}", this.number.format(found.ps.preferred))
+        : h.hvsLineNoPs.replace("{cs}", cs)
+      const standing = [found.admissible ? h.admissible : h.notAdmissible, ...(found.dominant ? [h.dominant] : [])].join(", ")
+      return `${title(found.id)} — ${score} (${standing})`
+    }).join("\n")
+    return this.entry(SightingHypotheses.HVS_SECTION, h.hvs, value, dominant ? this.hvsDetail(dominant) : undefined, result.hypotheses.length > 1 ? full : undefined)
   }
 
   private hvsDetail(found: HvsHypothesisResult): string | undefined {
@@ -93,8 +110,11 @@ export class SightingHypotheses {
     return this.labels.hypotheses.hvsDetail.replace("{hvs}", format(found.hvs)).replace("{cs}", format(cs)).replace("{ps}", format(found.ps))
   }
 
-  private entry(section: string, label: string, value: string, detail: string | undefined): SummaryEntry {
-    // The field is the section's id, so that a chip leads to it as any chip leads to its field.
-    return { group: "hypothesis", field: section, label, value, unit: "", fromSource: false, about: "observation", ...(detail ? { detail } : {}) }
+  /** With `full`, the chip says there is more ("…") and opens it, as the description's does (see SummaryDescription). */
+  private entry(section: string, label: string, value: string, detail: string | undefined, full: string | undefined): SummaryEntry {
+    return {
+      group: "hypothesis", field: section, label, value: full ? `${value}…` : value, unit: "", fromSource: false, about: "observation",
+      ...(detail ? { detail } : {}), ...(full ? { full } : {})
+    }
   }
 }
