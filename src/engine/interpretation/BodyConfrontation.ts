@@ -192,7 +192,27 @@ export class BodyConfrontation {
         })
       }
     }
-    return readings
+    return BodyConfrontation.bestOfEach(readings)
+  }
+
+  /**
+   * One reading a phenomenon, where several bodies claim it at an instant: the one that answers it best (fewest disagreements, then the
+   * nearest). A phenomenon is one thing, and a reading that offers a flock for each of three passes of the same lights explains each light
+   * by the flock that is there, not by the two that are kilometres off, which would contradict it at every instant.
+   */
+  private static bestOfEach(readings: ConfrontationReading[]): ConfrontationReading[] {
+    if (readings.length < 2) return readings
+    const best = new Map<string, ConfrontationReading>()
+    for (const reading of readings) {
+      const held = best.get(reading.sourceId)
+      if (!held || BodyConfrontation.answersBetter(reading, held)) best.set(reading.sourceId, reading)
+    }
+    return best.size === readings.length ? readings : readings.filter(reading => best.get(reading.sourceId) === reading)
+  }
+
+  private static answersBetter(a: ConfrontationReading, b: ConfrontationReading): boolean {
+    if (a.disagreements.length !== b.disagreements.length) return a.disagreements.length < b.disagreements.length
+    return (a.separationDeg ?? Infinity) < (b.separationDeg ?? Infinity)
   }
 
   static compare(sourceId: string, bodyId: string, stated: ConfrontationReading["stated"], predicted: Projection, tolerance?: ConfrontationTolerance): ConfrontationReading {

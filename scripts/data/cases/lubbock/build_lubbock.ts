@@ -19,6 +19,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { BirdOnFilm } from "../../../../src/modules/interpretations/birds/BirdOnFilm.js"
+import { BirdSpecies } from "../../../../src/modules/interpretations/birds/BirdSpecies.js"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, "..", "..", "..", "..")
@@ -614,13 +616,45 @@ function hartFlocks(reading: Reading) {
     return {
       id: `${reading.key}-${pass + 1}`, species: reading.species, count: HART_LIGHTS, formation: reading.formation, seed: reading.seed + pass,
       title: hartTitle(reading), lightFromBelow: { lux: 1, color: "#d4ece6" }, originElevationM: YARD.groundM,
-      explainsEach: HART_IDS, path: [start - 3000, start, start + HART_CROSSING_MS, start + HART_CROSSING_MS + 3000].map(t => ({ t: Math.max(0, t), eastM: 0, northM: northAt(t), altitudeM }))
+      // Flying straight on through the whole recording, so that it comes from beyond sight and goes out of it, rather than hanging where
+      // a shorter path would have left it.
+      explainsEach: HART_IDS, path: [0, start, start + HART_CROSSING_MS, HART_DURATION_MS].map(t => ({ t, eastM: 0, northM: northAt(t), altitudeM }))
     }
   })
 }
 
+/** The film speeds swept, ISO: from the slowest black and white film of the time to Tri-X's 400, which was not on sale until 1954. */
+const HART_ISOS = [25, 50, 100, 200, 400]
+/** The most a street lamp gives a bird some thirty metres right over it, lux: a 400 W clear mercury lamp, 21,000 lm over the whole sphere. */
+const LAMP_LUX_AT_30_M = 21000 / (4 * Math.PI) / (30 * 30)
+
+/**
+ * Whether `reading`'s birds could have made Hart's negatives: the light from below their bellies needs to mark his film at f/3.5 and a
+ * tenth of a second, and to burn out as his lights did ("the lights, which were overexposed", Ruppelt, ch. 8), at every film speed of the
+ * sweep (see BirdOnFilm), against what a town and a street lamp give.
+ */
+function hartFilmSweep(reading: Reading) {
+  const species = BirdSpecies.byId(reading.species)!
+  const sweep = BirdOnFilm.sweep(species, 0.1, 3.5, HART_ISOS)
+  const n = (value: number, lang: "en" | "fr") => {
+    const rounded = value < 10 ? Math.round(value * 10) / 10 : Math.round(value)
+    return lang === "fr" ? String(rounded).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f") : rounded.toLocaleString("en")
+  }
+  const marks = (lang: "en" | "fr") => sweep.map(at => `${n(at.luxToMark, lang)} lx${lang === "fr" ? " à" : " at"} ISO ${at.iso}`).join(", ")
+  const burns = (lang: "en" | "fr") => `${n(sweep[sweep.length - 1].luxToBurnOut, lang)} lx${lang === "fr" ? " à" : " at"} ISO 400, ${n(sweep[0].luxToBurnOut, lang)} lx${lang === "fr" ? " à" : " at"} ISO 25`
+  const lamp = n(LAMP_LUX_AT_30_M, "en"), lampFr = n(LAMP_LUX_AT_30_M, "fr")
+  // How many times the brightest lamp it would take to burn out at the fastest film, rounded to ten; how wide its wings are from below.
+  const times = Math.round(sweep[sweep.length - 1].luxToBurnOut / LAMP_LUX_AT_30_M / 10) * 10
+  const acrossDeg = Math.round(2 * Math.atan(species.wingspanM / 2 / hartHeightM(reading)) / DEG * 10) / 10
+  return {
+    en: ` On his film, at f/3.5 and a tenth of a second, the belly facing straight down and the camera following, which is the most a bird gives a film: to mark the negative at all it needs from below ${marks("en")}; to burn out as his lights did, ${burns("en")}. The town gives some 1 lx, a 400 W mercury lamp ${lamp} lx to a bird thirty metres right over it: these birds are not on his pictures under any film of 1951 (up to ISO 200), and would have needed some ${times} times the brightest lamp to show as he photographed them. Seen at the height the crossing asks, they would besides have shown as birds ${acrossDeg}° across, where the Air Force's lab found "circular, near pinpoint" lights. Only the film's speed and the light from below are swept: the albedo of the belly is that of the colour drawn.`,
+    fr: ` Sur son film, à f/3,5 et un dixième de seconde, le ventre tourné droit vers le bas et l'appareil qui suit, soit le plus qu'un oiseau donne à un film : pour marquer seulement le négatif il lui faut par-dessous ${marks("fr")} ; pour être surexposé comme ses lumières, ${burns("fr")}. La ville donne quelque 1 lx, une lampe à vapeur de mercure de 400 W ${lampFr} lx à un oiseau trente mètres juste au-dessus : ces oiseaux ne sont sur ses photos avec aucun film de 1951 (jusqu'à ISO 200), et il aurait fallu quelque ${times} fois la lampe la plus forte pour qu'ils sortent comme il les a photographiés. Vus à la hauteur qu'exige leur traversée, ils seraient du reste sortis comme des oiseaux de ${String(acrossDeg).replace(".", ",")}°, là où le laboratoire de l'Air Force trouva des lumières « circulaires, presque ponctuelles ». Seuls la sensibilité du film et l'éclairage d'en dessous sont balayés : l'albédo du ventre est celui de la couleur dessinée.`
+  }
+}
+
 function hartInterpretation(reading: Reading) {
   const heightM = hartHeightM(reading)
+  const film = hartFilmSweep(reading)
   const { timeline: _timeline, milestones: _milestones, description: _description, ...seen } = hart()
   return {
     ...seen,
@@ -628,8 +662,8 @@ function hartInterpretation(reading: Reading) {
     tags: ["NL", "birds", "misidentification"],
     timeline: { keyframes: [], order: [], groups: [] },
     interpretation: said({ title: hartTitle(reading), bodies: [], birds: hartFlocks(reading) }, "assumed",
-      `${reading.rationale.en} Over Hart's yard, three flocks, one a pass, ${heightM} m up to cross his 120° in four seconds at the same speed; the light from below is the town's, his street lamps not being known.`,
-      `${reading.rationale.fr} Au-dessus du jardin de Hart, trois vols, un par passage, à ${String(heightM).replace(".", ",")} m pour traverser ses 120° en quatre secondes à la même vitesse ; la lumière d'en dessous est celle de la ville, ses lampadaires n'étant pas connus.`, RUPPELT)
+      `${reading.rationale.en} Over Hart's yard, three flocks, one a pass, ${heightM} m up to cross his 120° in four seconds at the same speed; the light from below is the town's, his street lamps not being known.${film.en}`,
+      `${reading.rationale.fr} Au-dessus du jardin de Hart, trois vols, un par passage, à ${String(heightM).replace(".", ",")} m pour traverser ses 120° en quatre secondes à la même vitesse ; la lumière d'en dessous est celle de la ville, ses lampadaires n'étant pas connus.${film.fr}`, RUPPELT)
   }
 }
 

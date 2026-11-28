@@ -51,6 +51,19 @@ describe("BodyConfrontation", () => {
     expect(far.widthRatio).toBeCloseTo(0.1, 1)
   })
 
+  it("answers a phenomenon several bodies claim by the one that is there, not by those kilometres off", () => {
+    const timeline = new Timeline()
+    timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 5.7 } } }])
+    // A flock for each of three passes of the same light: one in front of the eye, one gone south, one not yet come from the north-east.
+    const here = { ...sphereAt(100, 10), id: "here" }
+    const gone = { ...sphereAt(-2000, 10), id: "gone" }
+    const coming = { ...sphereAt(2000, 10), id: "coming", eastM: 2000 }
+    const readings = new BodyConfrontation(timeline).at(0, [gone, here, coming], eye)
+    expect(readings).toHaveLength(1)
+    expect(readings[0].bodyId).toBe("here")
+    expect(readings[0].disagreements).toEqual([])
+  })
+
   it("measures the bodies of one ensemble as one, by all their outlines: a flock taken for one craft", () => {
     const timeline = new Timeline()
     timeline.addKeyframe(0, [{ sourceId: "ufo", shape: { ...createOval({ x: 0, y: 0, width: 10, height: 10 }), aim: { azimuthDeg: 0, altitudeDeg: 0 }, angular: { widthDeg: 5.7, heightDeg: 1 } } }])

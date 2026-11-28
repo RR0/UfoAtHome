@@ -1,4 +1,5 @@
 import { LayeredCloudSystem } from "./LayeredCloudSystem.js"
+import { FilmExposure } from "../engine/instrument/FilmExposure.js"
 import type { CloudRendering } from "./LayeredCloudSystem.js"
 // Named imports (not `import * as THREE`) so Rollup can tree-shake the unused 95% of
 // three.js — a namespace import defeats tree-shaking since property access on it isn't
@@ -3870,7 +3871,8 @@ export class SceneRenderer {
     const sky = medium.autoExposure || this.skyUnknown ? frame?.mean ?? this.scatteredSky?.sceneAdaptation : undefined
     const bodies = sky === undefined ? undefined : this.meteredBodies()
     const metered = sky === undefined ? undefined : sky + bodies!.mean
-    const set = (iso: number) => (0.065 * medium.exposureSeconds * iso * this.filterTransmittance) / (medium.fNumber * medium.fNumber * relativeScale)
+    // The exposure one relative unit of the scene gives the film (see FilmExposure.middleGreys).
+    const set = (iso: number) => FilmExposure.middleGreys(1 / relativeScale, medium.exposureSeconds, iso, medium.fNumber, this.filterTransmittance)
     let exposure = metered !== undefined && metered > 0 ? 1 / (relativeScale * metered) : undefined
     // Kept from burning out the brightest light that takes up a fair part of the frame: that light then at the share of full the sensor
     // keeps it at (see recorded, in EYE_RESPONSE_GLSL: a relative exposure h is shown as 0.18 h, full at 1).
